@@ -1,17 +1,25 @@
 package io.onedev.server.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.onedev.server.rest.annotation.Immutable;
-import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.util.facade.EmailAddressFacade;
-import io.onedev.server.annotation.Editable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.rest.annotation.Immutable;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.util.facade.EmailAddressFacade;
 
 @Editable
 @Entity
@@ -107,5 +115,5 @@ public class EmailAddress extends AbstractEntity {
 		return new EmailAddressFacade(getId(), getOwner().getId(), getValue(), 
 				isPrimary(), isGit(), isOpen(), getVerificationCode());
 	}
-	
+		
 }

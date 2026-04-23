@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.hazelcast.core.HazelcastInstance;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -28,6 +29,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.facade.EmailAddressCache;
 import io.onedev.server.util.facade.EmailAddressFacade;
 
@@ -48,6 +50,9 @@ public class DefaultEmailAddressService extends BaseEntityService<EmailAddress> 
 
 	@Inject
 	private ClusterService clusterService;
+
+	@Inject
+	private UserService userService;
 	
 	private volatile EmailAddressCache cache;
 
@@ -67,10 +72,15 @@ public class DefaultEmailAddressService extends BaseEntityService<EmailAddress> 
     @Override
     public EmailAddress findByValue(String value) {
 		EmailAddressFacade facade = cache.findByValue(value);
-		if (facade != null)
-			return load(facade.getId());
-		else
+		if (facade != null) {
+			if (facade.getId() != null) {
+				return load(facade.getId());
+			} else {
+				return userService.load(facade.getOwnerId()).getServiceOrAiAccountEmailAddress();
+			}
+		} else {
 			return null;
+		}
     }
 
     @Sessional
@@ -82,9 +92,8 @@ public class DefaultEmailAddressService extends BaseEntityService<EmailAddress> 
     @Sessional
     @Override
     public EmailAddress findByPersonIdent(PersonIdent personIdent) {
-		EmailAddressFacade facade = cache.findByPersonIdent(personIdent);
-		if (facade != null)
-			return load(facade.getId());
+		if (StringUtils.isNotBlank(personIdent.getEmailAddress()))
+			return findByValue(personIdent.getEmailAddress());
 		else
 			return null;
     }

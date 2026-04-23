@@ -3,7 +3,6 @@ package io.onedev.server.model;
 import static io.onedev.server.model.User.PROP_FULL_NAME;
 import static io.onedev.server.model.User.PROP_NAME;
 import static io.onedev.server.model.User.Type.AI;
-import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
 import static io.onedev.server.security.SecurityUtils.isAdministrator;
@@ -54,10 +53,10 @@ import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.model.support.build.NamedBuildQuery;
-import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
+import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.service.SettingService;
@@ -82,11 +81,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final Long ROOT_ID = 1L;
 	
+	private static final String SERVICE_ACCOUNT_EMAIL_PREFIX = "sc-";
+
+	private static final String AI_ACCOUNT_EMAIL_PREFIX = "ai-";
+
+	private static final String SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX = "@onedev";
+
 	public static final String SYSTEM_NAME = "OneDev";
 	
 	public static final String SYSTEM_EMAIL_ADDRESS = "system@onedev";
-
-	public static final String AI_EMAIL_ADDRESS = "ai@onedev";
 	
 	public static final String UNKNOWN_NAME = "unknown";
 	
@@ -769,11 +772,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 	
 	public PersonIdent asPerson() {
-		if (getType() == SERVICE) {
-			throw new ExplicitException("Service account does not have git identity");
-		} else if (getType() == AI) {
-			return new PersonIdent(getName(), User.AI_EMAIL_ADDRESS);
-		} else if (isUnknown()) {
+		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
+		if (serviceOrAiAccountEmailAddress != null) 
+			return new PersonIdent(getName(), serviceOrAiAccountEmailAddress.getValue());
+
+		if (isUnknown()) {
 			throw new ExplicitException("Unknown user does not have git identity");
 		} else if (isSystem()) {
 			return new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
@@ -1253,7 +1256,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 	
 	@Nullable
-	public EmailAddress getPrimaryEmailAddress() {
+	public EmailAddress getPrimaryEmailAddress() {		
+		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
+		if (serviceOrAiAccountEmailAddress != null)
+			return serviceOrAiAccountEmailAddress;
+
 		if (primaryEmailAddress == null)
 			primaryEmailAddress = Optional.ofNullable(getEmailAddressService().findPrimary(this));
 		return primaryEmailAddress.orElse(null);
@@ -1261,6 +1268,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	@Nullable
 	public EmailAddress getGitEmailAddress() {
+		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
+		if (serviceOrAiAccountEmailAddress != null)
+			return serviceOrAiAccountEmailAddress;
+
 		if (gitEmailAddress == null)
 			gitEmailAddress = Optional.ofNullable(getEmailAddressService().findGit(this));
 		return gitEmailAddress.orElse(null);
@@ -1268,9 +1279,30 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	@Nullable
 	public EmailAddress getPublicEmailAddress() {
+		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
+		if (serviceOrAiAccountEmailAddress != null)
+			return serviceOrAiAccountEmailAddress;
+
 		if (publicEmailAddress == null)
 			publicEmailAddress = Optional.ofNullable(getEmailAddressService().findPublic(this));
 		return publicEmailAddress.orElse(null);
+	}
+
+	@Nullable
+	public EmailAddress getServiceOrAiAccountEmailAddress() {
+		if (getType() == Type.SERVICE || getType() == Type.AI) {
+			var emailAddress = new EmailAddress();
+			var emailPrefix = getType() == Type.SERVICE ? SERVICE_ACCOUNT_EMAIL_PREFIX : AI_ACCOUNT_EMAIL_PREFIX;
+			emailAddress.setValue(emailPrefix + getId() + SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX);
+			emailAddress.setOwner(this);
+			emailAddress.setPrimary(true);
+			emailAddress.setGit(true);
+			emailAddress.setOpen(true);
+			emailAddress.setVerificationCode(null);
+			return emailAddress;
+		} else {
+			return null;
+		}
 	}
 
 	public void addEmailAddress(EmailAddress emailAddress) {
@@ -1314,6 +1346,21 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			}
 		}
 		return entitledAis;
+	}
+
+	@Nullable
+	public static Long getServiceOrAiAccountId(String value) {
+		if (value.endsWith(SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX)) {
+			value = value.substring(0, value.length() - SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX.length());
+			if (value.startsWith(SERVICE_ACCOUNT_EMAIL_PREFIX)) {
+				var serviceAccountId = value.substring(SERVICE_ACCOUNT_EMAIL_PREFIX.length());
+				return Long.parseLong(serviceAccountId);
+			} else if (value.startsWith(AI_ACCOUNT_EMAIL_PREFIX)) {
+				var aiAccountId = value.substring(AI_ACCOUNT_EMAIL_PREFIX.length());
+				return Long.parseLong(aiAccountId);
+			}
+		}
+		return null;
 	}
 
 	public static String encodeWorkspaceDataKey(String dataKey) {
