@@ -1,8 +1,6 @@
 package io.onedev.server.exception;
 
-import io.onedev.commons.utils.ExplicitException;
-
-public class ServerNotFoundException extends ExplicitException {
+public class ServerNotFoundException extends NotFoundException {
 	
 	private static final long serialVersionUID = 1L;
 	

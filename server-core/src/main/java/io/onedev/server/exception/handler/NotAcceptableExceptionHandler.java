@@ -3,14 +3,14 @@ package io.onedev.server.exception.handler;
 import javax.servlet.http.HttpServletResponse;
 
 import io.onedev.server.exception.HttpResponse;
-import io.onedev.server.exception.OperationRejectedException;
+import io.onedev.server.exception.NotAcceptableException;
 
-public class OperationRejectedExceptionHandler extends AbstractExceptionHandler<OperationRejectedException> {
+public class NotAcceptableExceptionHandler extends AbstractExceptionHandler<NotAcceptableException> {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Override
-    public HttpResponse getResponse(OperationRejectedException exception) {
+    public HttpResponse getResponse(NotAcceptableException exception) {
 		return new HttpResponse(HttpServletResponse.SC_NOT_ACCEPTABLE, exception.getMessage());
     }
     

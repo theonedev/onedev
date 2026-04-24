@@ -5,8 +5,6 @@ import static io.onedev.commons.utils.ExceptionUtils.find;
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 import java.io.File;
@@ -117,7 +115,7 @@ import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.exception.HttpResponseAwareException;
+import io.onedev.server.exception.BadRequestException;
 import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
@@ -312,12 +310,12 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				var errorMessage = String.format(
 						"Job not found (project: %s, commit: %s, job: %s)",
 						project.getPath(), commitId.name(), jobName);
-				throw new HttpResponseAwareException(SC_BAD_REQUEST, errorMessage);
+				throw new BadRequestException(errorMessage);
 			}
 
 			return doSubmit(user, project, commitId, jobName, paramMap, refName, request, issue, reason);
 		} catch (ValidationException e) {
-			throw new HttpResponseAwareException(SC_BAD_REQUEST, e.getMessage());
+			throw new BadRequestException(e.getMessage());
 		} catch (Throwable t) {
 			throw ExceptionUtils.unchecked(t);
 		} finally {
@@ -857,7 +855,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					var errorMessage = String.format(
 							"Job not found (project: %s, commit: %s, job: %s)",
 							build.getProject().getPath(), build.getCommitId().name(), build.getJobName());
-					throw new HttpResponseAwareException(SC_BAD_REQUEST, errorMessage);
+					throw new BadRequestException(errorMessage);
 				}
 
 				build.setStatus(Build.Status.WAITING);
@@ -877,7 +875,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				buildService.update(build);
 				buildSubmitted(build);
 			} catch (ValidationException e) {
-				throw new HttpResponseAwareException(SC_BAD_REQUEST, e.getMessage());
+				throw new BadRequestException(e.getMessage());
 			} finally {
 				JobAuthorizationContext.pop();
 			}
@@ -885,11 +883,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			var systemUser = userService.getSystem();
 			for (var dependence : build.getDependencies()) {
 				var dependency = dependence.getDependency();			
-				if (dependence.isRequireSuccessful() && !dependency.isSuccessful())
-					resubmit(systemUser, dependency, "Resubmitted by dependent build");
+				resubmit(systemUser, dependency, "Resubmitted by dependent build");
 			}
-		} else {
-			throw new HttpResponseAwareException(SC_NOT_ACCEPTABLE, "Build #" + build.getNumber() + " not finished yet");
 		}
 	}
 
@@ -1208,7 +1203,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	@Listen
 	public void on(BuildEvent event) {
-		if (event instanceof BuildSubmitted || event instanceof BuildPending) {
+		if (event instanceof BuildSubmitted || event instanceof BuildPending || event instanceof BuildFinished) {
 			clusterService.submitToServer(clusterService.getLeaderServerAddress(), () -> {
 				checkImmediately = true;
 				return null;
