@@ -575,7 +575,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU 집약적 작업 동시성");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "밀리초 단위의 CPU 성능. 일반적으로 (CPU 코어)*1000입니다");
 		m.put("CPU cores", "CPU 코어");
-		m.put("Cache \"{0} (checksum: {1})\" deleted", "캐시 \"{0} (체크섬: {1})\" 삭제됨");
 		m.put("Cache \"{0}\" deleted", "캐시 \"{0}\" 삭제됨");
 		m.put("Cache Config", "캐시 구성");
 		m.put("Cache Key", "캐시 키");
@@ -912,18 +911,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Create User", "사용자 생성");
 		m.put("Create Workspace", "워크스페이스 생성");
 		m.put("Create Workspace Spec", "워크스페이스 사양 생성");
-		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"서버 셸 환경에서 Claude Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n이 템플릿으로 생성된 사양을 사용하려면 다음을 확인하십시오:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에 셸 프로비저너가 추가되고 '적용 가능한 프로젝트'가 적절히 구성되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"격리 및 보안 목적을 위해 컨테이너 내에서 Claude Code를 실행하는 작업 공간 사양을 만드세요.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>컨테이너 이미지</a>를\n나중에 사용자 정의할 수 있습니다.\n<b class='text-info'>참고: </b> 컨테이너 내에서 작업 공간을 생성하려면 엔터프라이즈 구독이 필요합니다.\n<a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
-		m.put("Create a workspace spec running Codex directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"서버 셸 환경에서 Codex를 직접 실행하는 워크스페이스 사양을 생성합니다.\n이 템플릿으로 생성된 사양을 사용하려면 다음을 확인하십시오:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에 셸 프로비저너가 추가되고 '적용 가능한 프로젝트'가 적절히 구성되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"격리 및 보안 목적을 위해 컨테이너 내에서 Codex를 실행하는 작업 공간 사양을 만드세요.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>컨테이너 이미지</a>를\n나중에 사용자 정의할 수 있습니다.\n<b class='text-info'>참고: </b> 컨테이너 내에서 작업 공간을 생성하려면 엔터프라이즈 구독이 필요합니다.\n<a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
-		m.put("Create a workspace spec running Open Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"서버 셸 환경에서 Open Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n이 템플릿으로 생성된 사양을 사용하려면 다음을 확인하십시오:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에 셸 프로비저너가 추가되고 '적용 가능한 프로젝트'가 적절히 구성되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"격리 및 보안 목적을 위해 컨테이너 내에서 Open Code를 실행하는 작업 공간 사양을 만드세요.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>컨테이너 이미지</a>를\n나중에 사용자 정의할 수 있습니다.\n<b class='text-info'>참고: </b> 컨테이너 내에서 작업 공간을 생성하려면 엔터프라이즈 구독이 필요합니다.\n<a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("Create body", "본문 생성");
 		m.put("Create branch <b>{0}</b> from {1}", "{1}에서 <b>{0}</b> 브랜치 생성");
 		m.put("Create child projects under a project", "프로젝트 아래에 하위 프로젝트 생성");
@@ -4047,7 +4034,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "접미사 패턴");
 		m.put("Suggest changes", "변경 사항 제안");
 		m.put("Suggested change", "제안된 변경 사항");
-		m.put("Suggested issue branch", "제안된 이슈 브랜치");
 		m.put("Suggesting description...", "설명 제안 중...");
 		m.put("Suggesting title...", "제목 제안 중...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "제안이 코드 변경 또는 풀 리퀘스트 종료로 인해 오래됨");
@@ -4358,19 +4344,20 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Two-factor authentication is now configured", "이중 인증이 이제 구성되었습니다");
 		m.put("Two-factor authentication not enabled", "이중 인증이 활성화되지 않음");
 		m.put("Type", "유형");
-		m.put("Type <code>yes</code> below to cancel all queried builds", "아래에 <code>yes</code>를 입력하여 모든 조회된 빌드를 취소하세요");
-		m.put("Type <code>yes</code> below to cancel selected builds", "아래에 <code>yes</code>를 입력하여 선택된 빌드를 취소하세요");
-		m.put("Type <code>delete ALL users</code> below to delete all queried users", "아래에 <code>delete ALL users</code>를 입력하여 모든 조회된 사용자를 삭제하세요");
-		m.put("Type <code>yes</code> below to confirm deleting selected users", "아래에 <code>yes</code>를 입력하여 선택된 사용자를 삭제하는 것을 확인하세요");
-		m.put("Type <code>yes</code> below to copy all queried issues to project \"{0}\"", "아래에 <code>yes</code>를 입력하여 모든 조회된 문제를 프로젝트 \"{0}\"로 복사하세요");
-		m.put("Type <code>yes</code> below to copy selected issues to project \"{0}\"", "아래에 <code>yes</code>를 입력하여 선택된 문제를 프로젝트 \"{0}\"로 복사하세요");
 		m.put("Type <code>delete ALL builds</code> below to delete all queried builds", "아래에 <code>delete ALL builds</code>를 입력하여 모든 조회된 빌드를 삭제하세요");
 		m.put("Type <code>delete ALL comments</code> below to delete all queried comments", "아래에 <code>delete ALL comments</code>를 입력하여 모든 조회된 댓글을 삭제하세요");
 		m.put("Type <code>delete ALL issues</code> below to delete all queried issues", "아래에 <code>delete ALL issues</code>를 입력하여 모든 조회된 문제를 삭제하세요");
 		m.put("Type <code>delete ALL packages</code> below to delete all queried packages", "아래에 <code>delete ALL packages</code>를 입력하여 모든 조회된 패키지를 삭제하세요");
 		m.put("Type <code>delete ALL projects</code> below to delete all queried projects", "아래에 <code>delete ALL projects</code>를 입력하여 모든 조회된 프로젝트를 삭제하세요");
-		m.put("Type <code>delete ALL pull requests</code> below to delete all queried pull requests", "아래에 <code>delete ALL pull requests</code>를 입력하여 모든 조회된 풀 리퀘스트를 삭제하세요");
+		m.put("Type <code>delete ALL pull requests</code> below to delete all queried pull requests", 
+			"아래에 <code>delete ALL pull requests</code>를 입력하여 모든 조회된 풀 리퀘스트를 삭제하세요");
+		m.put("Type <code>delete ALL users</code> below to delete all queried users", "아래에 <code>delete ALL users</code>를 입력하여 모든 조회된 사용자를 삭제하세요");
 		m.put("Type <code>delete ALL workspaces</code> below to delete all queried workspaces", "아래에 <code>delete ALL workspaces</code>를 입력하여 모든 쿼리된 워크스페이스를 삭제하십시오");
+		m.put("Type <code>yes</code> below to cancel all queried builds", "아래에 <code>yes</code>를 입력하여 모든 조회된 빌드를 취소하세요");
+		m.put("Type <code>yes</code> below to cancel selected builds", "아래에 <code>yes</code>를 입력하여 선택된 빌드를 취소하세요");
+		m.put("Type <code>yes</code> below to confirm deleting selected users", "아래에 <code>yes</code>를 입력하여 선택된 사용자를 삭제하는 것을 확인하세요");
+		m.put("Type <code>yes</code> below to copy all queried issues to project \"{0}\"", "아래에 <code>yes</code>를 입력하여 모든 조회된 문제를 프로젝트 \"{0}\"로 복사하세요");
+		m.put("Type <code>yes</code> below to copy selected issues to project \"{0}\"", "아래에 <code>yes</code>를 입력하여 선택된 문제를 프로젝트 \"{0}\"로 복사하세요");
 		m.put("Type <code>yes</code> below to delete selected builds", "아래에 <code>yes</code>를 입력하여 선택된 빌드를 삭제하세요");
 		m.put("Type <code>yes</code> below to delete selected comments", "아래에 <code>yes</code>를 입력하여 선택된 댓글을 삭제하세요");
 		m.put("Type <code>yes</code> below to delete selected issues", "아래에 <code>yes</code>를 입력하여 선택된 문제를 삭제하세요");
@@ -4996,6 +4983,54 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("      Generate branch name based on issue title. It is highly recommended to configure\nAI model in <i>Administration / AI Settings</i> to generate good branch name", 
+			"이슈 제목을 기반으로 브랜치 이름을 생성합니다. 좋은 브랜치 이름을 생성하려면 <i>관리 / AI 설정</i>에서\nAI 모델을 구성하는 것이 강력히 권장됩니다.");
+		m.put("#Node Selector Entries", "#노드 선택기 항목");
+		m.put("#Params", "#매개변수");
+		m.put("Add new service locator", "새 서비스 로케이터 추가");
+		m.put("Applicable Services", "적용 가능한 서비스");
+		m.put("Below content is restored from an unsaved change. <a class=\"discard-unsaved-change\">Discard</a>", 
+			"아래 내용은 저장되지 않은 변경 사항에서 복원되었습니다. <a class=\"discard-unsaved-change\">폐기</a>");
+		m.put("Branch Name Provider", "브랜치 이름 제공자");
+		m.put("Branch Prefix", "브랜치 접두사");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"서버 셸 환경에서 Claude Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하십시오:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a>가 OneDev 서버에 설치되어 있습니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있습니다</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"격리 및 보안 목적으로 컨테이너 내에서 Claude Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"서버 셸 환경에서 Codex를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하십시오:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a>가 OneDev 서버에 설치되어 있습니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있습니다</li>\n</ul>");
+		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"격리 및 보안 목적으로 컨테이너 내에서 Codex를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"서버 셸 환경에서 Open Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하십시오:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>가 OneDev 서버에 설치되어 있습니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있습니다</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"격리 및 보안 목적으로 컨테이너 내에서 Open Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Discard unsaved change and revert to original content", "저장되지 않은 변경 사항을 폐기하고 원래 내용으로 되돌립니다");
+		m.put("Do you really want to delete cache \"{0}\"?", "정말로 캐시 \"{0}\"를 삭제하시겠습니까?");
+		m.put("Environment Variable", "환경 변수");
+		m.put("Generate title and description based on branch name and commit messages.\nIt is highly recommended to configure AI model in <i>Administration / AI Settings</i>\nto generate good title and description", 
+			"브랜치 이름과 커밋 메시지를 기반으로 제목과 설명을 생성합니다.\n좋은 제목과 설명을 생성하려면 <i>관리 / AI 설정</i>에서\nAI 모델을 구성하는 것이 강력히 권장됩니다.");
+		m.put("No prefix", "접두사 없음");
+		m.put("Optionally specify a prefix to be prepended to generated branch name", "생성된 브랜치 이름에 추가할 접두사를 선택적으로 지정합니다");
+		m.put("Parameter Spec", "매개변수 사양");
+		m.put("Pull Request Title And Description Provider", "풀 리퀘스트 제목 및 설명 제공자");
+		m.put("Source Branch", "소스 브랜치");
+		m.put("Specify merge strategy of the pull request. Leave empty to use default merge strategy of the project", 
+			"풀 리퀘스트의 병합 전략을 지정합니다. 프로젝트의 기본 병합 전략을 사용하려면 비워 두십시오");
+		m.put("Specify name of the source branch", "소스 브랜치의 이름을 지정합니다");
+		m.put("Specify name of the target branch", "대상 브랜치의 이름을 지정합니다");
+		m.put("Specify whether to create a work in progress pull request", "작업 진행 중인 풀 리퀘스트를 생성할지 여부를 지정합니다");
+		m.put("Target Branch", "대상 브랜치");
+		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
+			"이 프로비저너는 보안 및 격리 목적으로 OneDev 서버에서 Docker 컨테이너 내에 워크스페이스를 생성합니다.\n현재 OneDev 서버가 Kubernetes 클러스터 내에 설치된 경우 지원되지 않습니다");
+		m.put("Title and Description", "제목 및 설명");
+		m.put("Trigger", "트리거");
+		m.put("Use generated branch name", "생성된 브랜치 이름 사용");
+		m.put("Use generated title and description", "생성된 제목 및 설명 사용");
+		m.put("Use specified branch name", "지정된 브랜치 이름 사용");
+		m.put("Use specified title and description", "지정된 제목 및 설명 사용");
+		m.put("Work In Progress", "작업 진행 중");
+		m.put("type", "유형");
 	}
 		
 	@Override

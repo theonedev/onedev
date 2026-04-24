@@ -575,7 +575,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "Concorrenza dei task intensivi per CPU");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "Capacità della CPU in millis. Normalmente è (core CPU)*1000");
 		m.put("CPU cores", "Core CPU");
-		m.put("Cache \"{0} (checksum: {1})\" deleted", "Cache \"{0} (checksum: {1})\" eliminata");
 		m.put("Cache \"{0}\" deleted", "Cache \"{0}\" eliminata");
 		m.put("Cache Config", "Configurazione Cache");
 		m.put("Cache Key", "Chiave della cache");
@@ -912,18 +911,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Create User", "Crea Utente");
 		m.put("Create Workspace", "Crea Workspace");
 		m.put("Create Workspace Spec", "Crea Specifica Workspace");
-		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Crea una specifica di workspace eseguendo Claude Code direttamente con l'ambiente shell del server.\nPer utilizzare la specifica creata da questo modello, assicurati che:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> sia installato sul server OneDev</li>\n    <li>Un provisioner shell sia aggiunto in 'Amministrazione / Provisioner di Workspace' con 'progetti applicabili' configurati correttamente</li>\n</ul>");
-		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"Crea una specifica di workspace eseguendo Claude Code all'interno di un container per scopi di isolamento e sicurezza.\nPuoi personalizzare l'<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>immagine del container</a>\nsuccessivamente per soddisfare le tue esigenze, se desiderato.\n<b class='text-info'>NOTA: </b> Creare un workspace all'interno di un container richiede un abbonamento enterprise.\n<a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
-		m.put("Create a workspace spec running Codex directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Crea una specifica di workspace eseguendo Codex direttamente con l'ambiente shell del server.\nPer utilizzare la specifica creata da questo modello, assicurati che:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> sia installato sul server OneDev</li>\n    <li>Un provisioner shell sia aggiunto in 'Amministrazione / Provisioner di Workspace' con 'progetti applicabili' configurati correttamente</li>\n</ul>");
-		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"Crea una specifica di workspace eseguendo Codex all'interno di un container per scopi di isolamento e sicurezza.\nPuoi personalizzare l'<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>immagine del container</a>\nsuccessivamente per soddisfare le tue esigenze, se desiderato.\n<b class='text-info'>NOTA: </b> Creare un workspace all'interno di un container richiede un abbonamento enterprise.\n<a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
-		m.put("Create a workspace spec running Open Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Crea una specifica di workspace eseguendo Open Code direttamente con l'ambiente shell del server.\nPer utilizzare la specifica creata da questo modello, assicurati che:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> sia installato sul server OneDev</li>\n    <li>Un provisioner shell sia aggiunto in 'Amministrazione / Provisioner di Workspace' con 'progetti applicabili' configurati correttamente</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"Crea una specifica di workspace eseguendo Open Code all'interno di un container per scopi di isolamento e sicurezza.\nPuoi personalizzare l'<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>immagine del container</a>\nsuccessivamente per soddisfare le tue esigenze, se desiderato.\n<b class='text-info'>NOTA: </b> Creare un workspace all'interno di un container richiede un abbonamento enterprise.\n<a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
 		m.put("Create body", "Crea corpo");
 		m.put("Create branch <b>{0}</b> from {1}", "Crea branch <b>{0}</b> da {1}");
 		m.put("Create child projects under a project", "Crea progetti figli sotto un progetto");
@@ -4047,7 +4034,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "Pattern Suffisso");
 		m.put("Suggest changes", "Suggerisci modifiche");
 		m.put("Suggested change", "Modifica suggerita");
-		m.put("Suggested issue branch", "Branch suggerito per il problema");
 		m.put("Suggesting description...", "Suggerimento descrizione...");
 		m.put("Suggesting title...", "Suggerimento titolo...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "Il suggerimento è obsoleto a causa di modifiche al codice o chiusura della pull request");
@@ -4358,19 +4344,20 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Two-factor authentication is now configured", "L'autenticazione a due fattori è ora configurata");
 		m.put("Two-factor authentication not enabled", "Autenticazione a due fattori non abilitata");
 		m.put("Type", "Tipo");
-		m.put("Type <code>yes</code> below to cancel all queried builds", "Digita <code>yes</code> qui sotto per annullare tutte le build interrogate");
-		m.put("Type <code>yes</code> below to cancel selected builds", "Digita <code>yes</code> qui sotto per annullare le build selezionate");
-		m.put("Type <code>delete ALL users</code> below to delete all queried users", "Digita <code>delete ALL users</code> qui sotto per eliminare tutti gli utenti interrogati");
-		m.put("Type <code>yes</code> below to confirm deleting selected users", "Digita <code>yes</code> qui sotto per confermare l'eliminazione degli utenti selezionati");
-		m.put("Type <code>yes</code> below to copy all queried issues to project \"{0}\"", "Digita <code>yes</code> qui sotto per copiare tutti i problemi interrogati nel progetto \"{0}\"");
-		m.put("Type <code>yes</code> below to copy selected issues to project \"{0}\"", "Digita <code>yes</code> qui sotto per copiare i problemi selezionati nel progetto \"{0}\"");
 		m.put("Type <code>delete ALL builds</code> below to delete all queried builds", "Digita <code>delete ALL builds</code> qui sotto per eliminare tutte le build interrogate");
 		m.put("Type <code>delete ALL comments</code> below to delete all queried comments", "Digita <code>delete ALL comments</code> qui sotto per eliminare tutti i commenti interrogati");
 		m.put("Type <code>delete ALL issues</code> below to delete all queried issues", "Digita <code>delete ALL issues</code> qui sotto per eliminare tutti i problemi interrogati");
 		m.put("Type <code>delete ALL packages</code> below to delete all queried packages", "Digita <code>delete ALL packages</code> qui sotto per eliminare tutti i pacchetti interrogati");
 		m.put("Type <code>delete ALL projects</code> below to delete all queried projects", "Digita <code>delete ALL projects</code> qui sotto per eliminare tutti i progetti interrogati");
-		m.put("Type <code>delete ALL pull requests</code> below to delete all queried pull requests", "Digita <code>delete ALL pull requests</code> qui sotto per eliminare tutte le richieste di pull interrogate");
+		m.put("Type <code>delete ALL pull requests</code> below to delete all queried pull requests", 
+			"Digita <code>delete ALL pull requests</code> qui sotto per eliminare tutte le richieste di pull interrogate");
+		m.put("Type <code>delete ALL users</code> below to delete all queried users", "Digita <code>delete ALL users</code> qui sotto per eliminare tutti gli utenti interrogati");
 		m.put("Type <code>delete ALL workspaces</code> below to delete all queried workspaces", "Digita <code>delete ALL workspaces</code> qui sotto per eliminare tutti i workspace interrogati");
+		m.put("Type <code>yes</code> below to cancel all queried builds", "Digita <code>yes</code> qui sotto per annullare tutte le build interrogate");
+		m.put("Type <code>yes</code> below to cancel selected builds", "Digita <code>yes</code> qui sotto per annullare le build selezionate");
+		m.put("Type <code>yes</code> below to confirm deleting selected users", "Digita <code>yes</code> qui sotto per confermare l'eliminazione degli utenti selezionati");
+		m.put("Type <code>yes</code> below to copy all queried issues to project \"{0}\"", "Digita <code>yes</code> qui sotto per copiare tutti i problemi interrogati nel progetto \"{0}\"");
+		m.put("Type <code>yes</code> below to copy selected issues to project \"{0}\"", "Digita <code>yes</code> qui sotto per copiare i problemi selezionati nel progetto \"{0}\"");
 		m.put("Type <code>yes</code> below to delete selected builds", "Digita <code>yes</code> qui sotto per eliminare le build selezionate");
 		m.put("Type <code>yes</code> below to delete selected comments", "Digita <code>yes</code> qui sotto per eliminare i commenti selezionati");
 		m.put("Type <code>yes</code> below to delete selected issues", "Digita <code>yes</code> qui sotto per eliminare i problemi selezionati");
@@ -4996,6 +4983,54 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("      Generate branch name based on issue title. It is highly recommended to configure\nAI model in <i>Administration / AI Settings</i> to generate good branch name", 
+			"Genera il nome del branch basato sul titolo dell'issue. È altamente raccomandato configurare\nil modello AI in <i>Amministrazione / Impostazioni AI</i> per generare un buon nome del branch");
+		m.put("#Node Selector Entries", "#Voci del Selettore di Nodo");
+		m.put("#Params", "#Parametri");
+		m.put("Add new service locator", "Aggiungi nuovo localizzatore di servizio");
+		m.put("Applicable Services", "Servizi Applicabili");
+		m.put("Below content is restored from an unsaved change. <a class=\"discard-unsaved-change\">Discard</a>", 
+			"Il contenuto sottostante è stato ripristinato da una modifica non salvata. <a class=\"discard-unsaved-change\">Scarta</a>");
+		m.put("Branch Name Provider", "Fornitore Nome Branch");
+		m.put("Branch Prefix", "Prefisso Branch");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Crea una specifica di workspace eseguendo Claude Code direttamente con l'ambiente shell del server.\nI workspace che utilizzano la specifica creata condivideranno gli stessi ambienti e impostazioni.\nPer utilizzare questo modello, assicurati che:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> sia installato sul server OneDev</li>\n    <li>Un provisioner shell sia aggiunto in 'Amministrazione / Provisioner Workspace' con 'progetti applicabili' configurati correttamente</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"Crea una specifica di workspace eseguendo Claude Code all'interno di un container per scopi di isolamento e sicurezza.\nPuoi personalizzare l'<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>immagine del container</a>\nsuccessivamente per adattarla alle tue esigenze se desiderato");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Crea una specifica di workspace eseguendo Codex direttamente con l'ambiente shell del server.\nI workspace che utilizzano la specifica creata condivideranno gli stessi ambienti e impostazioni.\nPer utilizzare questo modello, assicurati che:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> sia installato sul server OneDev</li>\n    <li>Un provisioner shell sia aggiunto in 'Amministrazione / Provisioner Workspace' con 'progetti applicabili' configurati correttamente</li>\n</ul>");
+		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"Crea una specifica di workspace eseguendo Codex all'interno di un container per scopi di isolamento e sicurezza.\nPuoi personalizzare l'<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>immagine del container</a>\nsuccessivamente per adattarla alle tue esigenze se desiderato");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Crea una specifica di workspace eseguendo Open Code direttamente con l'ambiente shell del server.\nI workspace che utilizzano la specifica creata condivideranno gli stessi ambienti e impostazioni.\nPer utilizzare questo modello, assicurati che:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> sia installato sul server OneDev</li>\n    <li>Un provisioner shell sia aggiunto in 'Amministrazione / Provisioner Workspace' con 'progetti applicabili' configurati correttamente</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"Crea una specifica di workspace eseguendo Open Code all'interno di un container per scopi di isolamento e sicurezza.\nPuoi personalizzare l'<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>immagine del container</a>\nsuccessivamente per adattarla alle tue esigenze se desiderato");
+		m.put("Discard unsaved change and revert to original content", "Scarta la modifica non salvata e ripristina il contenuto originale");
+		m.put("Do you really want to delete cache \"{0}\"?", "Vuoi davvero eliminare la cache \"{0}\"?");
+		m.put("Environment Variable", "Variabile d'Ambiente");
+		m.put("Generate title and description based on branch name and commit messages.\nIt is highly recommended to configure AI model in <i>Administration / AI Settings</i>\nto generate good title and description", 
+			"Genera titolo e descrizione basati sul nome del branch e sui messaggi di commit.\nÈ altamente raccomandato configurare il modello AI in <i>Amministrazione / Impostazioni AI</i>\nper generare un buon titolo e descrizione");
+		m.put("No prefix", "Nessun prefisso");
+		m.put("Optionally specify a prefix to be prepended to generated branch name", "Specifica facoltativamente un prefisso da anteporre al nome del branch generato");
+		m.put("Parameter Spec", "Specifica Parametro");
+		m.put("Pull Request Title And Description Provider", "Fornitore Titolo e Descrizione della Pull Request");
+		m.put("Source Branch", "Branch di Origine");
+		m.put("Specify merge strategy of the pull request. Leave empty to use default merge strategy of the project", 
+			"Specifica la strategia di merge della pull request. Lascia vuoto per usare la strategia di merge predefinita del progetto");
+		m.put("Specify name of the source branch", "Specifica il nome del branch di origine");
+		m.put("Specify name of the target branch", "Specifica il nome del branch di destinazione");
+		m.put("Specify whether to create a work in progress pull request", "Specifica se creare una pull request di lavoro in corso");
+		m.put("Target Branch", "Branch di Destinazione");
+		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
+			"Questo provisioner crea workspace all'interno di container Docker sul server OneDev per\nscopi di sicurezza e isolamento. Attualmente non è supportato quando il server OneDev è\ninstallato all'interno di un cluster Kubernetes");
+		m.put("Title and Description", "Titolo e Descrizione");
+		m.put("Trigger", "Trigger");
+		m.put("Use generated branch name", "Usa il nome del branch generato");
+		m.put("Use generated title and description", "Usa il titolo e la descrizione generati");
+		m.put("Use specified branch name", "Usa il nome del branch specificato");
+		m.put("Use specified title and description", "Usa il titolo e la descrizione specificati");
+		m.put("Work In Progress", "Lavoro in Corso");
+		m.put("type", "tipo");
 	}
 		
 	@Override

@@ -601,7 +601,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU 密集型任务并发数");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "CPU 能力（毫秒）。通常为 (CPU 核心数)*1000");
 		m.put("CPU cores", "CPU 核心");
-		m.put("Cache \"{0} (checksum: {1})\" deleted", "缓存 \"{0} (checksum: {1})\" 已删除");
 		m.put("Cache \"{0}\" deleted", "缓存 \"{0}\" 已删除");
 		m.put("Cache Config", "缓存配置");
 		m.put("Cache Key", "缓存键");
@@ -938,18 +937,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Create User", "创建用户");
 		m.put("Create Workspace", "创建工作区");
 		m.put("Create Workspace Spec", "创建工作区规格");
-		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Claude Code 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
-		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"创建一个在容器内运行 Claude Code 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
-		m.put("Create a workspace spec running Codex directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Codex 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
-		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"创建一个在容器内运行 Codex 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
-		m.put("Create a workspace spec running Open Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Open Code 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"创建一个在容器内运行 Open Code 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 		m.put("Create body", "创建正文");
 		m.put("Create branch <b>{0}</b> from {1}", "创建分支 <b>{0}</b>（基于 {1}）");
 		m.put("Create child projects under a project", "在项目下创建子项目");
@@ -4073,7 +4060,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "后缀模式");
 		m.put("Suggest changes", "建议更改");
 		m.put("Suggested change", "建议更改");
-		m.put("Suggested issue branch", "建议的工单分支");
 		m.put("Suggesting description...", "建议描述...");
 		m.put("Suggesting title...", "建议标题...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "建议由于代码更改或合并请求关闭而过时");
@@ -4384,19 +4370,20 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Two-factor authentication is now configured", "两阶段验证现已配置完成");
 		m.put("Two-factor authentication not enabled", "两阶段验证未启用");
 		m.put("Type", "类型");
-		m.put("Type <code>yes</code> below to cancel all queried builds", "在下面输入 <code>yes</code> 以取消所有查询的构建");
-		m.put("Type <code>yes</code> below to cancel selected builds", "在下面输入 <code>yes</code> 以取消选定的构建");
-		m.put("Type <code>delete ALL users</code> below to delete all queried users", "在下方输入 <code>delete ALL users</code> 以删除所有查询的用户");
-		m.put("Type <code>yes</code> below to confirm deleting selected users", "在下方输入 <code>yes</code> 确认删除选定的用户");
-		m.put("Type <code>yes</code> below to copy all queried issues to project \"{0}\"", "在下方输入 <code>yes</code> 以将所有查询的工单复制到项目 \"{0}\"");
-		m.put("Type <code>yes</code> below to copy selected issues to project \"{0}\"", "在下方输入 <code>yes</code> 以将选定的工单复制到项目 \"{0}\"");
 		m.put("Type <code>delete ALL builds</code> below to delete all queried builds", "在下面输入 <code>delete ALL builds</code> 以删除所有查询的构建");
 		m.put("Type <code>delete ALL comments</code> below to delete all queried comments", "在下面输入 <code>delete ALL comments</code> 以删除所有查询的评论");
 		m.put("Type <code>delete ALL issues</code> below to delete all queried issues", "在下方输入 <code>delete ALL issues</code> 以删除所有查询的工单");
 		m.put("Type <code>delete ALL packages</code> below to delete all queried packages", "在下方输入 <code>delete ALL packages</code> 以删除所有查询到的包");
 		m.put("Type <code>delete ALL projects</code> below to delete all queried projects", "在下方输入 <code>delete ALL projects</code> 以删除所有查询到的项目");
-		m.put("Type <code>delete ALL pull requests</code> below to delete all queried pull requests", "在下方输入 <code>delete ALL pull requests</code> 以删除所有查询的合并请求");
+		m.put("Type <code>delete ALL pull requests</code> below to delete all queried pull requests", 
+			"在下方输入 <code>delete ALL pull requests</code> 以删除所有查询的合并请求");
+		m.put("Type <code>delete ALL users</code> below to delete all queried users", "在下方输入 <code>delete ALL users</code> 以删除所有查询的用户");
 		m.put("Type <code>delete ALL workspaces</code> below to delete all queried workspaces", "在下面输入 <code>delete ALL workspaces</code> 以删除所有查询的工作区");
+		m.put("Type <code>yes</code> below to cancel all queried builds", "在下面输入 <code>yes</code> 以取消所有查询的构建");
+		m.put("Type <code>yes</code> below to cancel selected builds", "在下面输入 <code>yes</code> 以取消选定的构建");
+		m.put("Type <code>yes</code> below to confirm deleting selected users", "在下方输入 <code>yes</code> 确认删除选定的用户");
+		m.put("Type <code>yes</code> below to copy all queried issues to project \"{0}\"", "在下方输入 <code>yes</code> 以将所有查询的工单复制到项目 \"{0}\"");
+		m.put("Type <code>yes</code> below to copy selected issues to project \"{0}\"", "在下方输入 <code>yes</code> 以将选定的工单复制到项目 \"{0}\"");
 		m.put("Type <code>yes</code> below to delete selected builds", "在下面输入 <code>yes</code> 以删除选定的构建");
 		m.put("Type <code>yes</code> below to delete selected comments", "在下方输入 <code>yes</code> 以删除选中的评论");
 		m.put("Type <code>yes</code> below to delete selected issues", "在下方输入 <code>yes</code> 以删除选定的工单");
@@ -5022,6 +5009,54 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("      Generate branch name based on issue title. It is highly recommended to configure\nAI model in <i>Administration / AI Settings</i> to generate good branch name", 
+			"基于工单标题生成分支名称。强烈建议在<i>Administration / AI Settings</i>中配置\nAI 模型以生成良好的分支名称");
+		m.put("#Node Selector Entries", "#Node Selector Entries");
+		m.put("#Params", "#Params");
+		m.put("Add new service locator", "添加新的服务定位器");
+		m.put("Applicable Services", "适用服务");
+		m.put("Below content is restored from an unsaved change. <a class=\"discard-unsaved-change\">Discard</a>", 
+			"以下内容是从未保存的更改中恢复的。<a class=\"discard-unsaved-change\">放弃</a>");
+		m.put("Branch Name Provider", "分支名称提供者");
+		m.put("Branch Prefix", "分支前缀");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接在服务器 shell 环境中运行 Claude Code 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"创建一个在容器中运行 Claude Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接在服务器 shell 环境中运行 Codex 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
+		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"创建一个在容器中运行 Codex 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接在服务器 shell 环境中运行 Open Code 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
+			"创建一个在容器中运行 Open Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Discard unsaved change and revert to original content", "放弃未保存的更改并恢复到原始内容");
+		m.put("Do you really want to delete cache \"{0}\"?", "您真的想删除缓存 \"{0}\" 吗？");
+		m.put("Environment Variable", "环境变量");
+		m.put("Generate title and description based on branch name and commit messages.\nIt is highly recommended to configure AI model in <i>Administration / AI Settings</i>\nto generate good title and description", 
+			"基于分支名称和提交消息生成标题和描述。\n强烈建议在<i>Administration / AI Settings</i>中配置 AI 模型\n以生成良好的标题和描述");
+		m.put("No prefix", "无前缀");
+		m.put("Optionally specify a prefix to be prepended to generated branch name", "可选地指定一个前缀以添加到生成的分支名称前");
+		m.put("Parameter Spec", "参数规范");
+		m.put("Pull Request Title And Description Provider", "合并请求标题和描述提供者");
+		m.put("Source Branch", "源分支");
+		m.put("Specify merge strategy of the pull request. Leave empty to use default merge strategy of the project", 
+			"指定合并请求的合并策略。留空以使用项目的默认合并策略");
+		m.put("Specify name of the source branch", "指定源分支的名称");
+		m.put("Specify name of the target branch", "指定目标分支的名称");
+		m.put("Specify whether to create a work in progress pull request", "指定是否创建一个进行中的合并请求");
+		m.put("Target Branch", "目标分支");
+		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
+			"此配置器在 OneDev 服务器上的 Docker 容器中创建工作区，以实现\n安全和隔离目的。当 OneDev 服务器安装在 Kubernetes 集群中时，当前不支持");
+		m.put("Title and Description", "标题和描述");
+		m.put("Trigger", "触发器");
+		m.put("Use generated branch name", "使用生成的分支名称");
+		m.put("Use generated title and description", "使用生成的标题和描述");
+		m.put("Use specified branch name", "使用指定的分支名称");
+		m.put("Use specified title and description", "使用指定的标题和描述");
+		m.put("Work In Progress", "进行中");
+		m.put("type", "类型");
 	}
 		
 	@Override
