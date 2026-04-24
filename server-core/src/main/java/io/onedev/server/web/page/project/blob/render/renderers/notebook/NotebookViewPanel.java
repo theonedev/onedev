@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.javascript.JavaScriptEscape;
 
+import io.onedev.server.web.asset.notebook.NotebookViewResourceReference;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 import io.onedev.server.web.resource.RawBlobResource;
@@ -34,12 +35,10 @@ public class NotebookViewPanel extends BlobViewPanel {
 
 		String notebookUrl = RequestCycle.get().urlFor(new RawBlobResourceReference(),
 				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent())).toString();
-		String directoryUrl = context.getDirectoryUrl();
 
-		String script = String.format("onedev.server.notebookView.render('%s', '%s', '%s');",
+		String script = String.format("onedev.server.notebookView.render('%s', '%s');",
 				get("notebook").getMarkupId(),
-				JavaScriptEscape.escapeJavaScript(notebookUrl),
-				JavaScriptEscape.escapeJavaScript(directoryUrl));
+				JavaScriptEscape.escapeJavaScript(notebookUrl));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

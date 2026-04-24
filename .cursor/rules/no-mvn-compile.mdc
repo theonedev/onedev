@@ -1,0 +1,19 @@
+---
+description: Do not run mvn compile; rely on IDE lint errors
+alwaysApply: true
+---
+
+# Do Not Run `mvn compile`
+
+Running `mvn compile` (or other Maven build goals like `mvn install`,
+`mvn package`, `mvn verify`) in this workspace is very slow and should be
+avoided.
+
+To verify code correctness after edits:
+
+- Use the `ReadLints` tool to check linter/compiler errors for the files you
+  edited.
+- Inspect the IDE console / problems output instead of triggering a Maven
+  build.
+
+Only run Maven goals if the user explicitly asks for it.

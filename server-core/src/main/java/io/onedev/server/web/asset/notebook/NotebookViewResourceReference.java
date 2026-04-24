@@ -1,13 +1,13 @@
-package io.onedev.server.web.page.project.blob.render.renderers.notebook;
+package io.onedev.server.web.asset.notebook;
 
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import io.onedev.server.web.asset.marked.MarkedResourceReference;
-import io.onedev.server.web.asset.notebookjs.NotebookjsResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -22,7 +22,8 @@ public class NotebookViewResourceReference extends BaseDependentResourceReferenc
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
-		dependencies.add(JavaScriptHeaderItem.forReference(new NotebookjsResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+			NotebookViewResourceReference.class, "notebook.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new MarkedResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
 				NotebookViewResourceReference.class, "notebook-view.css")));

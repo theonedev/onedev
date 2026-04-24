@@ -1,5 +1,5 @@
 onedev.server.notebookView = {
-	render: async function(containerId, notebookUrl, directoryUrl) {
+	render: async function(containerId, notebookUrl) {
 		const container = document.getElementById(containerId);
 		if (!container)
 			return;
@@ -22,7 +22,7 @@ onedev.server.notebookView = {
 			container.innerHTML = '';
 			container.appendChild(rendered);
 
-			onedev.server.notebookView.rewriteRelativeUrls(container, directoryUrl);
+			onedev.server.notebookView.rewriteRelativeUrls(container, notebookUrl);
 
 			$(window).resize();
 		} catch (error) {
@@ -31,14 +31,10 @@ onedev.server.notebookView = {
 		}
 	},
 
-	rewriteRelativeUrls: function(container, directoryUrl) {
-		if (!directoryUrl)
-			return;
-
-		const baseHref = directoryUrl.endsWith('/') ? directoryUrl : directoryUrl + '/';
+	rewriteRelativeUrls: function(container, notebookUrl) {
 		let base;
 		try {
-			base = new URL(baseHref, window.location.href);
+			base = new URL(notebookUrl, window.location.href);
 		} catch (e) {
 			return;
 		}
@@ -52,15 +48,12 @@ onedev.server.notebookView = {
 			if (!value || isExternal(value))
 				return;
 			try {
-				const resolved = new URL(value, base);
-				resolved.searchParams.set('raw', 'true');
-				el.setAttribute(attr, resolved.toString());
+				el.setAttribute(attr, new URL(value, base).toString());
 			} catch (e) {
 				console.warn('Failed to rewrite ' + attr, value, e);
 			}
 		};
 
-		container.querySelectorAll('img[src]').forEach(el => rewrite(el, 'src'));
-		container.querySelectorAll('video[src], audio[src], source[src]').forEach(el => rewrite(el, 'src'));
+		container.querySelectorAll('img[src],video[src], audio[src], source[src]').forEach(el => rewrite(el, 'src'));
 	}
 };
