@@ -34,6 +34,7 @@ public class JavascriptTranslations {
               map.put("commit-not-exist-or-access-denied", _T("Commit not exist or access denied"));
               map.put("workspace-not-exist-or-access-denied", _T("Dev session not exist or access denied"));
               map.put("enter-description-here", _T("Enter description here"));
+              map.put("discard-unsaved-change", _T("Discard unsaved change and revert to original content"));
 
               return OneDev.getInstance(ObjectMapper.class).writeValueAsString(map);
       } catch (JsonProcessingException e) {

@@ -129,7 +129,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	protected void onModelChanged() {
 		super.onModelChanged();
 		input.setModelObject(getModelObject());
-		if (getAutosaveKey() != null)
+		if (getAutosaveKey() != null && !getAutosaveKey().contains(":markdown-file:"))
 			((BasePage) getPage()).removeAutosaveKey(getAutosaveKey());			
 	}
 	

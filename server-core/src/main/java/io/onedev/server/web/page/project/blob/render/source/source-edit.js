@@ -1,11 +1,12 @@
 onedev.server.sourceEdit = {
-	onDomReady: function(containerId, filePath, mark, indentType, tabSize, lineWrapMode, autoFocus) {
+	onDomReady: function(containerId, filePath, mark, indentType, tabSize, lineWrapMode, autoFocus, autosaveKey, discardUnsavedTooltip) {
 		var $container = $("#" + containerId);
 		var $sourceEdit = $container.children(".source-edit");
 		var $warning = $sourceEdit.children(".warning");
 		var $code = $sourceEdit.children(".code");
+		var initialValue = $sourceEdit.children(".input").val();
 		var cm = CodeMirror($code[0], {
-			value: $sourceEdit.children(".input").val(),
+			value: initialValue,
 			autofocus: autoFocus,
 			theme: "eclipse",
 			indentWithTabs: indentType == "Tabs",
@@ -22,6 +23,9 @@ onedev.server.sourceEdit = {
 			specialChars: /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u200b\u200e\u200f\u2028\u2029\u202d\u202e\u2066\u2067\u2069\ufff9-\ufffc]/g,
 			highlightIdentifiers: {delay: 500}
 		});
+		
+		$sourceEdit.data("autosaveKey", autosaveKey);
+		$sourceEdit.data("initialValue", initialValue);
 		
 		onedev.server.codemirror.setModeByFileName(cm, filePath);
 		
@@ -40,8 +44,35 @@ onedev.server.sourceEdit = {
 
 		onedev.server.codemirror.bindShortcuts(cm);
 		
+		var autosaveTimeout;
 		cm.on("change", function() {
 			$sourceEdit.closest("form").addClass("dirty");
+			if (autosaveKey) {
+				if (autosaveTimeout)
+					clearTimeout(autosaveTimeout);
+				autosaveTimeout = setTimeout(function() {
+					localStorage.setItem(autosaveKey, cm.getValue());
+				}, 500);
+			}
+		});
+
+		if (discardUnsavedTooltip) {
+			$warning.find(".discard-unsaved-change").each(function() {
+				$(this).attr("data-tippy-content", discardUnsavedTooltip);
+				tippy(this, {
+					delay: [500, 0],
+					placement: "auto"
+				});
+			});
+		}
+		
+		$warning.find(".discard-unsaved-change").click(function() {
+			$warning.hide();
+			if (autosaveKey)
+				localStorage.removeItem(autosaveKey);
+			cm.setValue($sourceEdit.data("initialValue"));
+			onedev.server.form.markClean($sourceEdit.closest("form"));
+			$(window).resize();
 		});
 		
 		$code.on("getViewState", function(e) {
@@ -69,8 +100,20 @@ onedev.server.sourceEdit = {
 	},
 	onWindowLoad: function(containerId, mark) {
 		var $container = $("#" + containerId);
-		var $warning = $container.find(">.source-edit>.warning");
-		var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
+		var $sourceEdit = $container.find(">.source-edit");
+		var $warning = $sourceEdit.children(".warning");
+		var cm = $sourceEdit.find(">.code>.CodeMirror")[0].CodeMirror;
+		
+		var autosaveKey = $sourceEdit.data("autosaveKey");
+		if (autosaveKey) {
+			var autosaveValue = localStorage.getItem(autosaveKey);
+			if (autosaveValue && cm.getValue() != autosaveValue) {
+				cm.setValue(autosaveValue);
+				cm.oldDocValue = autosaveValue;
+				$warning.show();
+				$sourceEdit.closest("form").addClass("dirty");
+			}
+		}
 		
 		if (mark && onedev.server.viewState.getFromHistory() === undefined 
 				&& onedev.server.viewState.carryOver === undefined) {

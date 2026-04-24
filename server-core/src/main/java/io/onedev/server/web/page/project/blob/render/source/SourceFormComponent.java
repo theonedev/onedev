@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.source;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -79,20 +81,32 @@ abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 		} else {
 			jsonOfMark = "undefined";
 		}
+		String autosaveKey = getAutosaveKey();
+		String escapedAutosaveKey;
+		if (autosaveKey != null)
+			escapedAutosaveKey = "'" + JavaScriptEscape.escapeJavaScript(autosaveKey) + "'";
+		else
+			escapedAutosaveKey = "undefined";
 		String script = String.format("onedev.server.sourceEdit.onDomReady("
-				+ "'%s', '%s', %s, '%s', %s, '%s', %b);", 
+				+ "'%s', '%s', %s, '%s', %s, '%s', %b, %s, '%s');", 
 				getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(getContext().getNewPath()), 
 				jsonOfMark,
 				getSourceFormat().getIndentType(), 
 				getSourceFormat().getTabSize(), 
 				getSourceFormat().getLineWrapMode(), 
-				getContext().getMode() == Mode.EDIT || getContext().getInitialNewPath() != null);
+				getContext().getMode() == Mode.EDIT || getContext().getInitialNewPath() != null,
+				escapedAutosaveKey,
+				JavaScriptEscape.escapeJavaScript(_T("Discard unsaved change and revert to original content")));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
 	protected abstract BlobRenderContext getContext();
 	
 	protected abstract SourceFormatPanel getSourceFormat();
+
+	protected String getAutosaveKey() {
+		return null;
+	}
 	
 }

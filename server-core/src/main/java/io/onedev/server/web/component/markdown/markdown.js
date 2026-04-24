@@ -81,6 +81,7 @@ onedev.server.markdown = {
 		var $previewLink = $head.find(".preview");
 		var $splitLink = $head.find(".split");
 		var $edit = $body.children(".edit");
+		var $warning = $head.children(".warning");
 		var $input = $edit.children("textarea");
 		var $preview = $body.children(".preview");
 		var $rendered = $preview.children(".markdown-rendered");
@@ -111,6 +112,17 @@ onedev.server.markdown = {
 				document.execCommand("insertText", false, prefix + "```" + langHint + "\n" + content + "\n```" + suffix);		
 				$input.range(selected.start + prefix.length + 4 + langHint.length + from, selected.start + prefix.length + 4 + langHint.length + to);
 				onedev.server.markdown.fireInputEvent($input);
+			});
+		}
+
+		var discardTip = onedev.server.markdown.translations["discard-unsaved-change"];
+		if (discardTip) {
+			$warning.find(".discard-unsaved-change").each(function() {
+				$(this).attr("data-tippy-content", discardTip);
+				tippy(this, {
+					delay: [500, 0],
+					placement: "auto"
+				});
 			});
 		}
 
@@ -177,13 +189,8 @@ onedev.server.markdown = {
 
 		var previewTimeout = 500;
 		$input.doneEvents("input inserted.atwho", function() {
-			if (autosaveKey) {
-				var content = $input.val();
-				if (content.trim().length != 0)
-					localStorage.setItem(autosaveKey, content);
-				else
-					localStorage.removeItem(autosaveKey);
-			}
+			if (autosaveKey) 
+				localStorage.setItem(autosaveKey, $input.val());
 			preview();
 		}, previewTimeout);
 
@@ -953,9 +960,9 @@ onedev.server.markdown = {
 		var $edit = $body.children(".edit");
 		var $preview = $body.children(".preview");
 		var $input = $edit.children("textarea");
-		$warning.find(".clear-unsaved-change").click(function() {
+		$warning.find(".discard-unsaved-change").click(function() {
 			$warning.hide();
-			$input.val("");
+			$input.val($input.data("initialValue"));
 			$preview.children(".markdown-rendered").html("");
 			localStorage.removeItem(autosaveKey);
 			onedev.server.form.markClean($input.closest("form"));
@@ -986,6 +993,7 @@ onedev.server.markdown = {
 		if (autosaveKey) {
 			var autosaveValue = localStorage.getItem(autosaveKey);
 			if (autosaveValue && $input.val() != autosaveValue) {
+				$input.data("initialValue", $input.val());
 				$input.val(autosaveValue);
 				$warning.show();
 				onedev.server.markdown.fireInputEvent($input);

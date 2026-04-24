@@ -45,6 +45,16 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 			protected SourceFormatPanel getSourceFormat() {
 				return sourceFormat;
 			}
+
+			@Override
+			protected String getAutosaveKey() {
+				String path = context.getNewPath();
+				if (path == null)
+					path = context.getBlobIdent().path;
+				if (path == null)
+					return null;
+				return "project:" + context.getProject().getId() + ":" + path;
+			}
 		};
 	}
 
