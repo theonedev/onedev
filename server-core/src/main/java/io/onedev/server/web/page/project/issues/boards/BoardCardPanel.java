@@ -354,7 +354,11 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 					Hibernate.initialize(issue.getSubmitter());
 					Hibernate.initialize(issue.getComments());
 					Hibernate.initialize(issue.getTargetLinks());
+					for (var link: issue.getTargetLinks())
+						Hibernate.initialize(link.getTarget());
 					Hibernate.initialize(issue.getSourceLinks());
+					for (var link: issue.getSourceLinks())
+						Hibernate.initialize(link.getSource());
 					Hibernate.initialize(issue.getMentions());
 					for (Iteration iteration : issue.getIterations())
 						Hibernate.initialize(iteration);
