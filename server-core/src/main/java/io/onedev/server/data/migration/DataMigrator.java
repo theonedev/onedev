@@ -8546,32 +8546,6 @@ public class DataMigrator {
 		}
 
 		for (File file : dataDir.listFiles()) {
-			if (file.getName().startsWith("JobCaches.xml")) {
-				File renamedFile = new File(dataDir, file.getName().replace("JobCaches.xml", "RunCaches.xml"));
-				try {
-					FileUtils.moveFile(file, renamedFile);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		for (File file : dataDir.listFiles()) {
-			if (file.isFile()) {
-				try {
-					String content = FileUtils.readFileToString(file, UTF_8.name());
-					if (content.contains("io.onedev.server.model.JobCache")) {
-						content = StringUtils.replace(content,
-								"io.onedev.server.model.JobCache",
-								"io.onedev.server.model.RunCache");
-						FileUtils.writeFile(file, content, UTF_8);
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-
-		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element projectElement : dom.getRootElement().elements()) {

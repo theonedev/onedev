@@ -2544,7 +2544,7 @@ public class BuildSpec implements Serializable, Validatable {
 								}
 								pos = end + 1;
 							}
-							keyNode.setValue(sb.toString());
+							keyNode.setValue(StringUtils.stripEnd(sb.toString(), ":-_."));
 						} else if (propName.equals("loadKeys")) {
 							itStepTuple.remove();
 						} else if (propName.equals("uploadStrategy")) {

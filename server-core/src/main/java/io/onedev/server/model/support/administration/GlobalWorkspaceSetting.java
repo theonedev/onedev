@@ -19,10 +19,11 @@ public class GlobalWorkspaceSetting implements Serializable {
 
 	public GlobalWorkspaceSetting() {
 		namedQueries.add(new NamedWorkspaceQuery("All", null));
-		namedQueries.add(new NamedWorkspaceQuery("Queueing", "queueing"));
-		namedQueries.add(new NamedWorkspaceQuery("Started", "started"));
-		namedQueries.add(new NamedWorkspaceQuery("Stopped", "stopped"));
+		namedQueries.add(new NamedWorkspaceQuery("Pending", "pending"));
+		namedQueries.add(new NamedWorkspaceQuery("Active", "active"));
+		namedQueries.add(new NamedWorkspaceQuery("In Error", "error"));
 		namedQueries.add(new NamedWorkspaceQuery("Created by me", "created by me"));
+		namedQueries.add(new NamedWorkspaceQuery("Created recently", "\"Create Date\" is since \"last week\""));		
 	}
 
 	@Valid
