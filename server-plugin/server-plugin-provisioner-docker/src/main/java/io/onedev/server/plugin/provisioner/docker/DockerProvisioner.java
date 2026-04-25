@@ -19,11 +19,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -72,8 +69,6 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 	private static final Logger logger = LoggerFactory.getLogger(DockerProvisioner.class);
 	
 	public static final int ORDER = 100;
-
-	private static final int MAX_PORT_CONFLICT_RETRIES = 5;
 
 	private static final String CONTAINER_WORKSPACE_PATH = "/onedev-workspace";
 
@@ -278,6 +273,40 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 		});
 	}
 
+	private Map<Integer, Integer> getPublishedPorts(String containerName, Collection<Integer> containerPorts) {
+		var docker = newDocker();
+		docker.args("port", containerName);
+
+		var stdoutStream = new ByteArrayOutputStream();
+		var stderrStream = new ByteArrayOutputStream();
+		var result = docker.execute(stdoutStream, stderrStream);
+		if (result.getReturnCode() != 0)
+			throw new ExplicitException(new String(stderrStream.toByteArray(), StandardCharsets.UTF_8).trim());
+
+		var output = new String(stdoutStream.toByteArray(), StandardCharsets.UTF_8).trim();
+		var portMappings = new HashMap<Integer, Integer>();
+		for (var line : output.split("\\R")) {
+			var fields = line.split("\\s+->\\s+", 2);
+			if (fields.length == 2) {
+				var slashIndex = fields[0].indexOf('/');
+				var colonIndex = fields[1].lastIndexOf(':');
+				try {
+					if (slashIndex != -1 && colonIndex != -1 && fields[0].substring(slashIndex + 1).equals("tcp")) {
+						var containerPort = Integer.parseInt(fields[0].substring(0, slashIndex));
+						if (containerPorts.contains(containerPort) && !portMappings.containsKey(containerPort))
+							portMappings.put(containerPort, Integer.parseInt(fields[1].substring(colonIndex + 1)));
+					}
+				} catch (NumberFormatException ignored) {
+				}
+			}
+		}
+		for (int containerPort : containerPorts) {
+			if (!portMappings.containsKey(containerPort))
+				throw new ExplicitException("Unable to determine host port mapped to container port " + containerPort);
+		}
+		return portMappings;
+	}
+
 	private void setCommonDockerRunOptions(Commandline docker, String containerName, 
 				String runAs, TaskLogger logger) {
 		docker.args("run", "--rm", "--name=" + containerName);
@@ -433,80 +462,57 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 		}
 
 		var containerName = "workspace-" + getName() + "-" + context.getProjectId() + "-" + context.getWorkspaceNumber();
-		var portMappings = new ConcurrentHashMap<Integer, Integer>();
 		var future = OneDev.getInstance(ExecutorService.class).submit(() -> {
 			logger.log("Starting docker container...");
 
 			callWithRegistryLogins(docker, allRegistryLogins, () -> {
 				deleteContainerIfExist(docker, containerName, logger);
 
-				int attempt = 1;
-				while (true) {
-					setCommonDockerRunOptions(docker, containerName, runAs, logger);
-			
-					portMappings.clear();
-					for (int containerPort : context.getSpec().getContainerPorts()) {
-						int hostPort = ThreadLocalRandom.current().nextInt(10001, 65536);
-						portMappings.put(containerPort, hostPort);
-						docker.addArgs("-p", hostPort + ":" + containerPort);
-					}
+				setCommonDockerRunOptions(docker, containerName, runAs, logger);
 
-					docker.addArgs("-v", getHostPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
+				if (!context.getSpec().getContainerPorts().isEmpty()) {
+					for (int containerPort : context.getSpec().getContainerPorts())
+						docker.addArgs("--expose", String.valueOf(containerPort));
+					docker.addArgs("-P");
+				}
 
-					for (var allocation: cacheProvisioner.getAllocations()) {
-						for (var entry: allocation.getPathMap().entrySet()) {
-							if (FilenameUtils.getPrefixLength(entry.getKey()) > 0)
-								docker.addArgs("-v", getHostPath(entry.getValue().getAbsolutePath()) + ":" + entry.getKey());
-						}
-					}
+				docker.addArgs("-v", getHostPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
 
-					for (var entry: userDataPathMap.entrySet()) {
-						File mountFrom = entry.getValue();
-						var file = new File(entry.getValue(), UserDataProvisioner.MOUNT_FILE);
-						if (file.exists())
-							mountFrom = file;
-						docker.addArgs("-v", getHostPath(mountFrom.getAbsolutePath()) + "/:" + entry.getKey());
-					}
-
-					for (var entry: configFilePathMap.entrySet())
-						docker.addArgs("-v", getHostPath(entry.getValue().getAbsolutePath()) + ":" + entry.getKey());
-
-					if (isMountDockerSock()) {
-						if (getDockerSockPath() != null)
-							docker.addArgs("-v", getDockerSockPath() + ":/var/run/docker.sock");
-						else
-							docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
-					}
-					if (getRunOptions() != null)
-						docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
-
-					for (var entry : envVars.entrySet())
-						docker.addArgs("-e", entry.getKey() + "=" + entry.getValue());
-
-					docker.addArgs("--entrypoint", "sh", context.getSpec().getImage(), "-c", entrypointArgs.toString());
-
-					AtomicBoolean portConflictDetected = new AtomicBoolean(false);
-
-					var executeResult = docker.execute(infoLogger, new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							if (line.contains("port is already allocated") || line.contains("address already in use")) 
-								portConflictDetected.set(true);
-							else if (!portConflictDetected.get() || !line.startsWith("See 'docker run --help'")) 
-								logger.warning(line);
-						}
-
-					});
-					if (executeResult.getReturnCode() != 0) {
-						if (!portConflictDetected.get() || attempt++ >= MAX_PORT_CONFLICT_RETRIES) 
-							throw new ExplicitException("Docker container exited with code " + executeResult.getReturnCode());
-						else
-							logger.log("Port conflict detected, retrying with different ports...");
-					} else {
-						break;
+				for (var allocation: cacheProvisioner.getAllocations()) {
+					for (var entry: allocation.getPathMap().entrySet()) {
+						if (FilenameUtils.getPrefixLength(entry.getKey()) > 0)
+							docker.addArgs("-v", getHostPath(entry.getValue().getAbsolutePath()) + ":" + entry.getKey());
 					}
 				}
+
+				for (var entry: userDataPathMap.entrySet()) {
+					File mountFrom = entry.getValue();
+					var file = new File(entry.getValue(), UserDataProvisioner.MOUNT_FILE);
+					if (file.exists())
+						mountFrom = file;
+					docker.addArgs("-v", getHostPath(mountFrom.getAbsolutePath()) + "/:" + entry.getKey());
+				}
+
+				for (var entry: configFilePathMap.entrySet())
+					docker.addArgs("-v", getHostPath(entry.getValue().getAbsolutePath()) + ":" + entry.getKey());
+
+				if (isMountDockerSock()) {
+					if (getDockerSockPath() != null)
+						docker.addArgs("-v", getDockerSockPath() + ":/var/run/docker.sock");
+					else
+						docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+				}
+				if (getRunOptions() != null)
+					docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+
+				for (var entry : envVars.entrySet())
+					docker.addArgs("-e", entry.getKey() + "=" + entry.getValue());
+
+				docker.addArgs("--entrypoint", "sh", context.getSpec().getImage(), "-c", entrypointArgs.toString());
+
+				var executeResult = docker.execute(infoLogger, warningLogger);
+				if (executeResult.getReturnCode() != 0)
+					throw new ExplicitException("Docker container exited with code " + executeResult.getReturnCode());
 				return null;
 			});
 		});
@@ -529,6 +535,12 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 				throw new RuntimeException(e);
 			}
 		}
+
+		Map<Integer, Integer> portMappings;
+		if (!context.getSpec().getContainerPorts().isEmpty())
+			portMappings = getPublishedPorts(containerName, context.getSpec().getContainerPorts());
+		else
+			portMappings = new HashMap<>();
 
 		var containerWorkDirPath = containerWorkspacePath + "/work";
 		return new WorkspaceRuntime() {
