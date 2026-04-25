@@ -1,3 +1,10 @@
+# 15.0.0
+
+### CI/CD
+
+1. Windows container support is removed due to maintenance overhead and rare usages. 
+1. The path of the job workspace directory has been changed from /onedev-build/workspace to /onedev-build/work, and the corresponding environment variable has been renamed from ONEDEV_WORKSPACE to ONEDEV_WORKDIR. Commands defined in command steps will be migrated automatically. If you reference these in your own scripts, please update them manually.
+
 # 14.1.0
 
 ### Enterprise Edition

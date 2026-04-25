@@ -1,4 +1,11 @@
 <wicket:panel>
+	<div class="alert alert-light alert-notice mb-4">
+		<wicket:t>
+			Personal workspace data will be saved here after a workspace is deleted.
+			It will be shared to all workspaces created subsequently with same user 
+			key and path
+		</wicket:t>
+	</div>
 	<table wicket:id="keys" class="table table-hover"></table>
 	<wicket:fragment wicket:id="actionFrag">
 		<a wicket:id="delete" t:data-tippy-content="Delete this workspace data" class="btn btn-xs btn-icon btn-light btn-hover-danger"><wicket:svg href="trash" class="icon"></wicket:svg></a>
