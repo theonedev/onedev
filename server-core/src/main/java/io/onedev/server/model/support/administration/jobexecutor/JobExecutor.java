@@ -20,6 +20,7 @@ import io.onedev.server.event.project.build.BuildRunning;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.match.JobMatch;
+import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.service.AgentService;
@@ -37,11 +38,11 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String name;
 	
-	private String jobMatch;
-	
 	private boolean htmlReportPublishEnabled;
 	
 	private boolean sitePublishEnabled;
+
+	protected String jobMatch;
 	
 	public boolean isEnabled() {
 		return enabled;
@@ -87,27 +88,17 @@ public abstract class JobExecutor implements Serializable {
 		return WicketUtils.isSubscriptionActive();
 	}
 
-	@Editable(order=10000, name="Applicable Jobs", placeholder="Any job", description="Optionally specify applicable jobs of this executor")
-	@io.onedev.server.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
-	@Nullable
-	public String getJobMatch() {
-		return jobMatch;
-	}
-
-	public void setJobMatch(String jobMatch) {
-		this.jobMatch = jobMatch;
-	}
-	
 	public abstract boolean execute(JobContext jobContext, TaskLogger jobLogger);
+
+	public abstract boolean isApplicable(JobMatchContext context);
 
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (jobMatch != null && JobMatch.parse(jobMatch, true, true).isUsingProject(projectPath)) {
-			usage.add("applicable jobs" );
-		}
+		if (jobMatch != null && JobMatch.parse(jobMatch, true, true).isUsingProject(projectPath))
+			usage.add("applicable jobs");
 		return usage;
 	}
-	
+
 	public void onMoveProject(String oldPath, String newPath) {
 		if (jobMatch != null) {
 			JobMatch parsedJobMatch = JobMatch.parse(jobMatch, true, true);
@@ -115,7 +106,7 @@ public abstract class JobExecutor implements Serializable {
 			jobMatch = parsedJobMatch.toString();
 		}
 	}
-	
+
 	protected void notifyJobRunning(Long buildId, @Nullable Long agentId) {
 		OneDev.getInstance(TransactionService.class).run(() -> {
 			BuildService buildService = OneDev.getInstance(BuildService.class);

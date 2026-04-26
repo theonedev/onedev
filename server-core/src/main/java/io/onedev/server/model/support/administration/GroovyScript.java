@@ -15,6 +15,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobMatch;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -123,6 +124,8 @@ public class GroovyScript implements Serializable {
 		Usage usage = new Usage();
 		if (jobAuthorization != null && io.onedev.server.job.match.JobMatch.parse(jobAuthorization, true, false).isUsingProject(projectPath))
 			usage.add("authorization");
+		if (Project.containsPath(applicableWorkspaceProjects, projectPath))
+			usage.add("applicable workspace projects");
 		return usage;
 	}
 	
@@ -132,6 +135,7 @@ public class GroovyScript implements Serializable {
 			jobMatch.onMoveProject(oldPath, newPath);
 			jobAuthorization = jobMatch.toString();
 		}
+		applicableWorkspaceProjects = Project.substitutePath(applicableWorkspaceProjects, oldPath, newPath);
 	}
 	
 }

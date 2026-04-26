@@ -205,10 +205,10 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel())) {
-				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-				List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
+			if (criteriaValueExpect != null) {
+				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = PackQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Pack.NAME_PROJECT)) {

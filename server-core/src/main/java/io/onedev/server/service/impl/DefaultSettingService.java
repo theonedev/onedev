@@ -529,6 +529,8 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 	public void onMoveProject(String oldPath, String newPath) {
     	for (JobExecutor jobExecutor: getJobExecutors())
     		jobExecutor.onMoveProject(oldPath, newPath);
+    	for (WorkspaceProvisioner workspaceProvisioner: getWorkspaceProvisioners())
+    		workspaceProvisioner.onMoveProject(oldPath, newPath);
     	for (GroovyScript groovyScript: getGroovyScripts())
     		groovyScript.onMoveProject(oldPath, newPath);
     	if (getServiceDeskSetting() != null)
@@ -536,6 +538,7 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
     	getIssueSetting().onMoveProject(oldPath, newPath);
     	
 		saveSetting(Key.JOB_EXECUTORS, (Serializable) getJobExecutors());
+		saveSetting(Key.WORKSPACE_PROVISIONERS, (Serializable) getWorkspaceProvisioners());
 		saveSetting(Key.GROOVY_SCRIPTS, (Serializable) getGroovyScripts());
 		saveSetting(Key.SERVICE_DESK_SETTING, getServiceDeskSetting());
 		saveSetting(Key.ISSUE, getIssueSetting());
@@ -547,6 +550,8 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 		
     	for (JobExecutor jobExecutor: getJobExecutors()) 
     		usage.add(jobExecutor.onDeleteProject(projectPath).prefix("job executor '" + jobExecutor.getName() + "'"));
+    	for (WorkspaceProvisioner workspaceProvisioner: getWorkspaceProvisioners())
+    		usage.add(workspaceProvisioner.onDeleteProject(projectPath).prefix("workspace provisioner '" + workspaceProvisioner.getName() + "'"));
     	for (GroovyScript groovyScript: getGroovyScripts()) 
     		usage.add(groovyScript.onDeleteProject(projectPath).prefix("groovy script '" + groovyScript.getName() + "'"));
     	if (getServiceDeskSetting() != null)

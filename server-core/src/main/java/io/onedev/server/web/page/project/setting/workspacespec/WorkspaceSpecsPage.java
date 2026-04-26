@@ -157,7 +157,7 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 			public void onClick(AjaxRequestTarget target) {
 				new BeanEditModalPanel<WorkspaceSpecTemplateBean>(target, new WorkspaceSpecTemplateBean()) {
 
-				@Override
+					@Override
 					protected String onSave(AjaxRequestTarget target, WorkspaceSpecTemplateBean bean) {
 						var spec = bean.getTemplate().createWorkspaceSpec();
 						for (WorkspaceSpec existing : getProject().getWorkspaceSpecs()) {
@@ -172,7 +172,12 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 						target.add(container);
 						return null;
 					}
-					
+
+					@Override
+					protected boolean isLeaveConfirm() {
+						return false;
+					}
+
 				};
 			}
 

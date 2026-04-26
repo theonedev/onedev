@@ -504,7 +504,6 @@ public class QueryDescriptions {
                     | '"Spec"' 'is' ('not')? '"'WorkspaceSpecName'"'
                     | '"Create Date"' 'is' ('until'|'since') '"'DateDescription'"'
                     | '"Active Date"' 'is' ('until'|'since') '"'DateDescription'"'
-                    | '"Error Date"' 'is' ('until'|'since') '"'DateDescription'"'
                     | criteria 'and' criteria
                     | criteria 'or' criteria
                     | 'not('criteria')'

@@ -1388,7 +1388,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Excluded", "Ausgeschlossen");
 		m.put("Excluded Fields", "Ausgeschlossene Felder");
 		m.put("Excluded Files for Review", "Ausgeschlossene Dateien zur Überprüfung");
-		m.put("Executable", "Ausführbar");
 		m.put("Execute Commands", "Befehle ausführen");
 		m.put("Execute Commands via SSH", "Befehle über SSH ausführen");
 		m.put("Exit Impersonation", "Impersonation beenden");
@@ -2884,6 +2883,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Permanent link of this selection", "Permanenter Link dieser Auswahl");
 		m.put("Permission denied", "Zugriff verweigert");
 		m.put("Permission will be checked upon actual operation", "Berechtigung wird bei der tatsächlichen Operation überprüft");
+		m.put("Personal workspace data will be saved here after a workspace is deleted. It will be shared to all workspaces created subsequently with same user key and path", 
+			"Persönliche Arbeitsbereichsdaten werden hier gespeichert, nachdem ein Arbeitsbereich gelöscht wurde. Sie werden mit allen Arbeitsbereichen geteilt, die anschließend mit demselben Benutzerschlüssel und Pfad erstellt werden.");
 		m.put("Physical memory in mega bytes", "Physischer Speicher in Megabyte");
 		m.put("Pick Existing", "Vorhandenes auswählen");
 		m.put("Pin this issue", "Dieses Problem anheften");
@@ -2963,7 +2964,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Post URL", "Post-URL");
 		m.put("Post Url", "Post-URL");
 		m.put("PowerShell", "PowerShell");
-		m.put("Powershell", "Powershell");
 		m.put("Prefix Pattern", "Präfix-Muster");
 		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
 			"Präfixieren Sie den Titel mit <code>WIP</code> oder <code>[WIP]</code>, um die Pull-Anfrage als in Bearbeitung zu kennzeichnen");
@@ -3921,7 +3921,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"Geben Sie Shell-Befehle an, die unter dem <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job-Arbeitsbereich</a> ausgeführt werden sollen.");
 		m.put("Specify shell executable to be used", "Geben Sie das Shell-Executable an, das verwendet werden soll");
-		m.put("Specify shell to be used", "Geben Sie die zu verwendende Shell an.");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "Geben Sie die Quellparameter für den SCP-Befehl an, beispielsweise <code>app.tar.gz</code>.");
 		m.put("Specify space separated refs to pull from remote. '*' can be used in ref name for wildcard match<br><b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update branches/tags via this step", 
 			"Geben Sie durch Leerzeichen getrennte Refs an, die vom Remote abgerufen werden sollen. '*' kann im Ref-Namen für Wildcard-Abgleich verwendet werden.<br><b class='text-danger'>HINWEIS:</b> Die Regel zum Schutz von Branches/Tags wird ignoriert, wenn Branches/Tags über diesen Schritt aktualisiert werden.");
@@ -4201,10 +4200,6 @@ public class Translation_de extends TranslationResourceBundle {
 			"Dieser Executor führt Build-Jobs als Docker-Container auf Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agents</a> aus");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"Dieser Executor führt Build-Jobs als Pods in einem Kubernetes-Cluster aus. Es werden keine Agents benötigt.<b class='text-danger'>Hinweis:</b> Stellen Sie sicher, dass die Server-URL in den Systemeinstellungen korrekt angegeben ist, da Job-Pods darauf zugreifen müssen, um Quellcode und Artefakte herunterzuladen");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
-			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität des OneDev-Servers aus.<br><b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Berechtigungen wie der OneDev-Serverprozess. Stellen Sie sicher, dass er nur von vertrauenswürdigen Jobs verwendet werden kann");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
-			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität von Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agents</a> aus.<br><b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Berechtigungen wie der OneDev-Agent-Prozess. Stellen Sie sicher, dass er nur von vertrauenswürdigen Jobs verwendet werden kann");
 		m.put("This field is required", "Dieses Feld ist erforderlich");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"Dieser Filter wird verwendet, um den LDAP-Eintrag für den aktuellen Benutzer zu bestimmen. Zum Beispiel: <i>(&(uid={0})(objectclass=person))</i>. In diesem Beispiel repräsentiert <i>{0}</i> den Anmeldenamen des aktuellen Benutzers.");
@@ -4264,8 +4259,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("This property is imported from {0}", "Diese Eigenschaft wird aus {0} importiert");
 		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
 			"Dieser Provisioner erstellt Workspaces innerhalb von Docker-Containern auf dem OneDev-Server für\nSicherheits- und Isolationszwecke. Es wird derzeit nicht unterstützt, wenn der OneDev-Server\ninnerhalb eines Kubernetes-Clusters installiert ist");
-		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have the same\npermission as the OneDev server process. Make sure it can only be used by trusted projects.\n", 
-			"Dieser Provisioner erstellt Arbeitsbereiche mit der Shell-Funktion des OneDev-Servers und erfordert\ndass tmux auf dem OneDev-Server installiert ist<br>\n<b class='text-danger'>WARNUNG</b>: Arbeitsbereiche, die von diesem Provisioner erstellt werden, haben dieselben\nBerechtigungen wie der OneDev-Serverprozess. Stellen Sie sicher, dass er nur von vertrauenswürdigen Projekten verwendet werden kann.\n");
 		m.put("This pull request has been discarded", "Dieser Pull-Request wurde verworfen");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"Dieser Bericht wird auf der Übersichtsseite des Pull-Requests angezeigt, wenn der Build durch den Pull-Request ausgelöst wird");
@@ -5031,8 +5024,18 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Personal workspace data will be saved here after a workspace is deleted. It will be shared to all workspaces created subsequently with same user key and path", 
-			"Persönliche Arbeitsbereichsdaten werden hier gespeichert, nachdem ein Arbeitsbereich gelöscht wurde. Sie werden mit allen Arbeitsbereichen geteilt, die anschließend mit demselben Benutzerschlüssel und Pfad erstellt werden.");
+		m.put("PowerShell Executable", "PowerShell-Ausführbare Datei");
+		m.put("Shell Executable", "Shell-Ausführbare Datei");
+		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
+			"Geben Sie die anwendbaren Jobs dieses Executors an.\n<b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Privilegien wie der OneDev-Prozess.\nBitte stellen Sie sicher, dass nur vertrauenswürdige Jobs diesen Executor verwenden können");
+		m.put("This executor runs build jobs with OneDev server's shell facility", "Dieser Executor führt Build-Jobs mit der Shell-Funktionalität des OneDev-Servers aus");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität von Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agenten</a> aus");
+		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
+			"Dieser Bereitsteller erstellt Arbeitsbereiche mit der Shell-Funktionalität des OneDev-Servers und erfordert\ndass tmux auf dem OneDev-Server installiert ist");
+		m.put("Use '*' or '?' for wildcard match", "Verwenden Sie '*' oder '?' für Platzhalterabgleich");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"Arbeitsbereiche, die von diesem Bereitsteller erstellt werden, haben dieselben Privilegien wie der OneDev-Server-Prozess.\nVerwenden Sie '**', '*' oder '?' für <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>Pfad-Platzhalterabgleich</a>.\nMehrere Projekte sollten durch Leerzeichen getrennt werden.<br>\n<b class='text-danger'>WARNUNG</b>: Arbeitsbereiche, die von diesem Bereitsteller erstellt werden, haben dieselben Privilegien wie der OneDev-Server-Prozess.\nBitte stellen Sie sicher, dass nur vertrauenswürdige Projekte diesen Bereitsteller verwenden können");
 	}
 			
 	@Override

@@ -34,25 +34,30 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.agent.AgentUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.cache.WorkspaceCacheProvisioner;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.workspaceprovisioner.RegistryLogin;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
+import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.Testable;
 import io.onedev.server.workspace.GitExecutionResult;
 import io.onedev.server.workspace.WorkspaceContext;
@@ -139,6 +144,16 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 		this.mountDockerSock = mountDockerSock;
 	}
 
+	@Editable(order=510, group="More Settings", placeholder="Default", description="Optionally specify docker sock to use. "
+			+ "Defaults to <i>/var/run/docker.sock</i>")
+	public String getDockerSockPath() {
+		return dockerSockPath;
+	}
+
+	public void setDockerSockPath(String dockerSockPath) {
+		this.dockerSockPath = dockerSockPath;
+	}
+
 	@Editable(order=600, group="Security Settings", description = "Whether or not to always pull image when "
 			+ "running container. This option should be enabled to avoid images being replaced by "
 			+ "malicious operations")
@@ -150,14 +165,21 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 		this.alwaysPullImage = alwaysPullImage;
 	}
 
-	@Editable(order=510, group="More Settings", placeholder="Default", description="Optionally specify docker sock to use. "
-			+ "Defaults to <i>/var/run/docker.sock</i>")
-	public String getDockerSockPath() {
-		return dockerSockPath;
+	@Editable(order=10000, placeholder="Any project", description="Optionally specify projects applicable for this provisioner. " +
+			"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
+			"Multiple projects should be separated by space")
+	@Patterns(suggester="suggestProjects", path=true)
+	public String getApplicableProjects() {
+		return applicableProjects;
 	}
 
-	public void setDockerSockPath(String dockerSockPath) {
-		this.dockerSockPath = dockerSockPath;
+	public void setApplicableProjects(String applicableProjects) {
+		this.applicableProjects = applicableProjects;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestProjects(String matchWith) {
+		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 
 	@Editable(order=50050, group="More Settings", description="Optionally specify docker options to run container. " +
@@ -608,6 +630,11 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 	@Override
 	public List<RegistryLoginFacade> getRegistryLogins(String token) {
 		return getRegistryLoginFacades(token);
+	}
+
+	@Override
+	public boolean isApplicable(Project project) {
+		return getApplicableProjects() == null || WildcardUtils.matchPath(getApplicableProjects(), project.getPath());
 	}
 
 }

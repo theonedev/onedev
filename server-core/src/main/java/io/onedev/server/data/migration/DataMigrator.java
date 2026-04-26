@@ -8608,4 +8608,40 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate223(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement : valueElement.elements()) {
+								if (executorElement.getName().contains("ServerShellExecutor")
+										|| executorElement.getName().contains("RemoteShellExecutor")) {
+									Element jobMatchElement = executorElement.element("jobMatch");
+									if (jobMatchElement == null)
+										executorElement.addElement("jobMatch").setText("\"Project\" is \"**\"");
+								}
+							}
+						}
+					} else if (key.equals("WORKSPACE_PROVISIONERS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element provisionerElement : valueElement.elements()) {
+								if (provisionerElement.getName().contains("ShellProvisioner")) {
+									Element applicableProjectsElement = provisionerElement.element("applicableProjects");
+									if (applicableProjectsElement == null)
+										provisionerElement.addElement("applicableProjects").setText("**");
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

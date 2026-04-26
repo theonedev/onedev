@@ -49,6 +49,11 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 			}
 
 			@Override
+			protected boolean isLeaveConfirm() {
+				return BeanEditModalPanel.this.isLeaveConfirm();
+			}
+
+			@Override
 			protected String onSave(AjaxRequestTarget target) {
 				return BeanEditModalPanel.this.onSave(target, bean);
 			}
@@ -83,6 +88,10 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 	}
 	
 	protected boolean isDirtyAware() {
+		return true;
+	}
+
+	protected boolean isLeaveConfirm() {
 		return true;
 	}
 

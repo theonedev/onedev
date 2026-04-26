@@ -1414,7 +1414,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Excluded", "排除");
 		m.put("Excluded Fields", "排除字段");
 		m.put("Excluded Files for Review", "排除的审查文件");
-		m.put("Executable", "可执行文件");
 		m.put("Execute Commands", "执行命令");
 		m.put("Execute Commands via SSH", "通过 SSH 执行命令");
 		m.put("Exit Impersonation", "退出假装");
@@ -2910,6 +2909,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Permanent link of this selection", "此选择的永久链接");
 		m.put("Permission denied", "权限不足");
 		m.put("Permission will be checked upon actual operation", "权限将在实际操作时检查");
+		m.put("Personal workspace data will be saved here after a workspace is deleted. It will be shared to all workspaces created subsequently with same user key and path", 
+			"个人工作区数据将在工作区删除后保存在此处。它将共享给所有后续创建的具有相同用户键和路径的工作区。");
 		m.put("Physical memory in mega bytes", "物理内存（兆字节）");
 		m.put("Pick Existing", "选择现有");
 		m.put("Pin this issue", "置顶此工单");
@@ -2989,7 +2990,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Post URL", "发布 URL");
 		m.put("Post Url", "发布 URL");
 		m.put("PowerShell", "PowerShell");
-		m.put("Powershell", "Powershell");
 		m.put("Prefix Pattern", "前缀模式");
 		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
 			"在标题前加上 <code>WIP</code> 或 <code>[WIP]</code> 以标记拉取请求为进行中的工作");
@@ -3947,7 +3947,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"指定在 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>任务工作区</a> 下执行的 shell 命令");
 		m.put("Specify shell executable to be used", "指定要使用的 shell 可执行文件");
-		m.put("Specify shell to be used", "指定要使用的 shell");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "指定 SCP 命令的源参数，例如 <code>app.tar.gz</code>");
 		m.put("Specify space separated refs to pull from remote. '*' can be used in ref name for wildcard match<br><b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update branches/tags via this step", 
 			"指定从远程拉取的以空格分隔的引用。引用名称中可使用 '*' 进行通配符匹配<br><b class='text-danger'>注意：</b> 通过此步骤更新分支/标签时，将忽略分支/标签保护规则");
@@ -4227,10 +4226,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 在远程机器上以 Docker 容器运行构建任务");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"此执行器在 Kubernetes 集群中以 Pod 形式运行构建任务，无需任何代理。<b class='text-danger'>注意：</b> 确保在系统设置中正确指定服务器 URL，因为任务 Pod 需要访问它以下载源代码和产物");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
-			"此执行器使用 OneDev 服务器的 shell 功能运行构建作业。<br><b class='text-danger'>警告</b>：使用此执行器运行的作业具有与 OneDev 服务器进程相同的权限。请确保它仅能被可信的作业使用");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
-			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a>使用远程机器的 shell 功能运行构建作业<br><b class='text-danger'>警告</b>：使用此执行器运行的作业具有与 OneDev 代理进程相同的权限。请确保它仅能被可信的作业使用");
 		m.put("This field is required", "此字段是必填的");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"此过滤器用于确定当前用户的 LDAP 条目。例如：<i>(&(uid={0})(objectclass=person))</i>。在此示例中，<i>{0}</i> 表示当前用户的登录名");
@@ -4290,8 +4285,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This property is imported from {0}", "此属性是从 {0} 导入的");
 		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
 			"此配置器在 OneDev 服务器上的 Docker 容器中创建工作区，以实现\n安全和隔离目的。当 OneDev 服务器安装在 Kubernetes 集群中时，当前不支持");
-		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have the same\npermission as the OneDev server process. Make sure it can only be used by trusted projects.\n", 
-			"此配置器使用 OneDev 服务器的 shell 功能创建工作区，并要求\n在 OneDev 服务器上安装 tmux<br>\n<b class='text-danger'>警告</b>：此配置器创建的工作区具有与 OneDev 服务器进程相同的\n权限。确保它只能被信任的项目使用。\n");
 		m.put("This pull request has been discarded", "此合并请求已丢弃");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"如果构建由合并请求触发，此报告将显示在合并请求概览页面中");
@@ -5057,8 +5050,18 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Personal workspace data will be saved here after a workspace is deleted. It will be shared to all workspaces created subsequently with same user key and path", 
-			"个人工作区数据将在工作区删除后保存在此处。它将共享给所有后续创建的具有相同用户键和路径的工作区。");
+		m.put("PowerShell Executable", "PowerShell 可执行文件");
+		m.put("Shell Executable", "Shell 可执行文件");
+		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
+			"指定此执行器适用的任务。\n<b class='text-danger'>警告</b>：使用此执行器运行的任务具有与 OneDev 进程相同的权限。\n请确保只有受信任的任务可以使用此执行器");
+		m.put("This executor runs build jobs with OneDev server's shell facility", "此执行器使用 OneDev 服务器的 shell 功能运行构建任务");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"此执行器通过<a href='/~administration/agents' target='_blank'>代理</a>使用远程机器的 shell 功能运行构建任务");
+		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
+			"此配置器使用 OneDev 服务器的 shell 功能创建工作区，并要求在 OneDev 服务器上安装 tmux");
+		m.put("Use '*' or '?' for wildcard match", "使用 '*' 或 '?' 进行通配符匹配");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"此配置器创建的工作区具有与 OneDev 服务器进程相同的权限。\n使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。\n多个项目应以空格分隔。<br>\n<b class='text-danger'>警告</b>：此配置器创建的工作区具有与 OneDev 服务器进程相同的权限。\n请确保只有受信任的项目可以使用此配置器");
 	}
 		
 	@Override

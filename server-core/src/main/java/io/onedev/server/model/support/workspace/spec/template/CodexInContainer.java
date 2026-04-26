@@ -22,7 +22,7 @@ public class CodexInContainer extends WorkspaceSpecTemplate {
 
         workspaceSpec.setName(getName());
         workspaceSpec.setRunInContainer(true);
-        workspaceSpec.setImage("1dev/codex:1.0.0");
+        workspaceSpec.setImage("1dev/codex");
         workspaceSpec.setShell(new CustomLinuxShell());
         workspaceSpec.setRunAs("1001:1001");
 

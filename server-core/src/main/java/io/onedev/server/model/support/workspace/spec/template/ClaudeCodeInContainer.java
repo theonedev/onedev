@@ -22,7 +22,7 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 
         workspaceSpec.setName(getName());
         workspaceSpec.setRunInContainer(true);
-        workspaceSpec.setImage("1dev/claudecode:1.0.0");
+        workspaceSpec.setImage("1dev/claudecode");
         workspaceSpec.setShell(new CustomLinuxShell());
         workspaceSpec.setRunAs("1001:1001");
 

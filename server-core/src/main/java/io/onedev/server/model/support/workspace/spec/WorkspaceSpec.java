@@ -126,7 +126,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	private static List<InputSuggestion> suggestProvisioners(String matchWith) {
 		List<String> provisionerNames = new ArrayList<>();
 		for (WorkspaceProvisioner provisioner: OneDev.getInstance(SettingService.class).getWorkspaceProvisioners()) {
-			if (provisioner.isEnabled())
+			if (provisioner.isEnabled() && provisioner.isApplicable(Project.get()))
 				provisionerNames.add(provisioner.getName());
 		}
 		return SuggestionUtils.suggest(provisionerNames, matchWith);
@@ -180,6 +180,18 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	public void setUserDatas(List<UserData> userDatas) {
 		this.userDatas = userDatas;
+	}
+
+	@Editable(order = 375, name="Exposed Ports", placeholder = "No exposed ports", description = """
+			Optionally specify container ports to expose. These ports will be mapped to random ports on host 
+			which will be displayed on the workspace page""")
+	@DependsOn(property = "runInContainer")
+	public List<Integer> getContainerPorts() {
+		return containerPorts;
+	}
+
+	public void setContainerPorts(List<Integer> containerPorts) {
+		this.containerPorts = containerPorts;
 	}
 
 	@Editable(order = 400, name = "Environment Variables", description = "Optionally specify environment variables")
@@ -262,18 +274,6 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	public void setCacheConfigs(List<CacheConfig> cacheConfigs) {
 		this.cacheConfigs = cacheConfigs;
-	}
-
-	@Editable(order = 1700, group = "More Settings", name="Exposed Ports", placeholder = "No exposed ports", description = """
-			Optionally specify container ports to expose. These ports will be mapped to random ports on host 
-			which will be displayed on the workspace page""")
-	@DependsOn(property = "runInContainer")
-	public List<Integer> getContainerPorts() {
-		return containerPorts;
-	}
-
-	public void setContainerPorts(List<Integer> containerPorts) {
-		this.containerPorts = containerPorts;
 	}
 
 	@Override

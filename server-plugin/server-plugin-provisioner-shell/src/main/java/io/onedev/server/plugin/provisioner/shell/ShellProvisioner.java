@@ -8,36 +8,41 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import io.onedev.server.git.hook.HookUtils;
-import io.onedev.server.workspace.GitExecutionResult;
+import javax.validation.constraints.NotEmpty;
+
 import org.apache.commons.io.FilenameUtils;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.cache.WorkspaceCacheProvisioner;
 import io.onedev.server.git.CommandUtils;
+import io.onedev.server.git.hook.HookUtils;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
+import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.Testable;
+import io.onedev.server.workspace.GitExecutionResult;
 import io.onedev.server.workspace.WorkspaceContext;
 import io.onedev.server.workspace.WorkspaceRuntime;
 
 @Editable(order=ShellProvisioner.ORDER, name="Shell Provisioner", description="""
 		This provisioner creates workspaces with OneDev server's shell facility, and requires 
-		tmux to be installed on OneDev server<br>
-		<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have the same 
-		permission as the OneDev server process. Make sure it can only be used by trusted projects.
-		""")
+		tmux to be installed on OneDev server""")
 public class ShellProvisioner extends WorkspaceProvisioner implements Testable<Testable.None> {
 
 	private static final long serialVersionUID = 1L;
@@ -77,7 +82,28 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 			tmux = "tmux";
 		return new Commandline(tmux);
 	}
+
+	@Editable(order=10000, description="""
+			Workspaces created by this provisioner have same privilege as OneDev server process. 			
+			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.
+			Multiple projects should be separated by space.<br>
+			<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process. 
+			Please make sure that only trusted projects can use this provisioner""")
+	@Patterns(suggester="suggestProjects", path=true)
+	@NotEmpty
+	public String getApplicableProjects() {
+		return applicableProjects;
+	}
+
+	public void setApplicableProjects(String applicableProjects) {
+		this.applicableProjects = applicableProjects;
+	}
 	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestProjects(String matchWith) {
+		return SuggestionUtils.suggestProjectPaths(matchWith);
+	}
+
 	@Override
 	public WorkspaceRuntime provision(WorkspaceContext context, TaskLogger logger) {
 		checkApplicable();
@@ -169,6 +195,11 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 			}
 			
 		};
+	}
+
+	@Override
+	public boolean isApplicable(Project project) {
+		return WildcardUtils.matchPath(getApplicableProjects(), project.getPath());
 	}
 
 }

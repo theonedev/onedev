@@ -15,7 +15,7 @@ public class CustomLinuxShell extends WorkspaceShell {
 	
 	private String shell = "bash";
 
-	@Editable(order=100, description="Specify shell executable to be used")
+	@Editable(order=100, name="Shell Executable", description="Specify shell executable to be used")
 	@Interpolative(variableSuggester = "suggestVariables")
 	@NotEmpty
 	public String getShell() {

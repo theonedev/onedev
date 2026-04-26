@@ -15,7 +15,7 @@ public class PowerShell extends WorkspaceShell {
 	
 	private String powershell = "powershell.exe";
 	
-	@Editable(order=100,  description="Specify powershell executable to be used")
+	@Editable(order=100, name="PowerShell Executable", description="Specify powershell executable to be used")
 	@Interpolative(variableSuggester = "suggestVariables")
 	@NotEmpty
 	public String getPowershell() {

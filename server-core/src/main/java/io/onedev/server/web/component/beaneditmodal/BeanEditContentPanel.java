@@ -41,8 +41,10 @@ abstract class BeanEditContentPanel extends Panel {
 				super.onError();
 				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
 			}
-			
+
 		};
+		if (isLeaveConfirm()) 
+			form.add(AttributeAppender.append("class", "leave-confirm"));
 		form.setOutputMarkupId(true);
 		
 		if (getTitle() != null)
@@ -132,4 +134,8 @@ abstract class BeanEditContentPanel extends Panel {
 		return true;
 	}
 	
+	protected boolean isLeaveConfirm() {
+		return true;
+	}
+
 }

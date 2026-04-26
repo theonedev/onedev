@@ -156,9 +156,9 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel()) && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
-				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
+			if (criteriaValueExpect != null && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(CodeComment.NAME_CONTENT)) {

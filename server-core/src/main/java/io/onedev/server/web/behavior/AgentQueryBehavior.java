@@ -171,21 +171,21 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel()) && AgentQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
-				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
+			if (criteriaValueExpect != null && AgentQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = AgentQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Agent.NAME_NAME) 
-							|| fieldName.equals(Agent.NAME_OS_NAME)
-							|| fieldName.equals(Agent.NAME_OS_ARCH)
+							|| fieldName.equals(Agent.NAME_OS_NAME) 
+							|| fieldName.equals(Agent.NAME_OS_ARCH) 
 							|| fieldName.equals(Agent.NAME_OS_VERSION) 
 							|| fieldName.equals(Agent.NAME_IP_ADDRESS)) {
 						hints.add(_T("Use '*' for wildcard match"));
 					}
 				}
 			}
-		} 
+		}
 		if (getSettingService().getAiSetting().getLiteModelSetting() == null)
 			hints.add(_T("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>"));
 		return hints;

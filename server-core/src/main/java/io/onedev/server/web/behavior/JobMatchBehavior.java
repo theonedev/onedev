@@ -1,8 +1,21 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.commons.codeassist.AntlrUtils.getLexerRule;
+import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
+import static io.onedev.server.job.match.JobMatchLexer.Is;
+import static io.onedev.server.job.match.JobMatchLexer.IsNot;
+import static io.onedev.server.job.match.JobMatchLexer.OnBranch;
+import static io.onedev.server.job.match.JobMatchLexer.ruleNames;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import io.onedev.commons.codeassist.AntlrUtils;
+
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
@@ -14,17 +27,8 @@ import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchParser;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.commons.codeassist.AntlrUtils.getLexerRule;
-import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
-import static io.onedev.server.job.match.JobMatchLexer.*;
 
 public class JobMatchBehavior extends ANTLRAssistBehavior {
 
@@ -80,7 +84,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -92,9 +96,9 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (suggestedLiteral.equals(getLexerRuleName(ruleNames, OnBranch))) 
-			return Optional.of("branch the build commit is merged into");
+			return Optional.of(_T("branch the build commit is merged into"));
 		else if (suggestedLiteral.equals(",")) 
-			return Optional.of("or match another value");
+			return Optional.of(_T("or match another value"));
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
@@ -115,22 +119,22 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel())) {
-				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
+			if (criteriaValueExpect != null) {
+				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = JobMatch.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Build.NAME_PROJECT))
-						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					else if (fieldName.equals(Build.NAME_JOB))
-						hints.add("Use '*' or '?' for wildcard match");						
+						hints.add(_T("Use '*' or '?' for wildcard match"));
 				} else {
-					List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+					List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 					Preconditions.checkState(operatorElements.size() == 1);
 					String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-					int operator = AntlrUtils.getLexerRule(ruleNames, operatorName);
+					int operator = getLexerRule(ruleNames, operatorName);
 					if (operator == OnBranch)
-						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 				}
 			}
 		} 

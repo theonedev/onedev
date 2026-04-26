@@ -199,9 +199,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel())) {
-				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
+			if (criteriaValueExpect != null) {
+				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Project.NAME_NAME)
@@ -215,7 +215,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					}
 				} else {
-					Element operatorElement = terminalExpect.getState()
+					Element operatorElement = criteriaValueExpect.getState()
 							.findMatchedElementsByLabel("operator", true).iterator().next();
 					int type = operatorElement.getMatchedTokens().iterator().next().getType();
 					if (type == ProjectQueryLexer.ForksOf || type == ProjectQueryLexer.ChildrenOf) 

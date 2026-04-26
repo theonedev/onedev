@@ -145,9 +145,9 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel()) && EntityQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
-				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
+			if (criteriaValueExpect != null && EntityQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = EntityQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Build.NAME_PROJECT) || fieldName.equals(Build.NAME_VERSION)

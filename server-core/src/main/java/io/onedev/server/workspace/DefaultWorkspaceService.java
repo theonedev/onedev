@@ -58,7 +58,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.k8shelper.DefaultCloneInfo;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
@@ -622,9 +621,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	private boolean isApplicable(Workspace workspace, WorkspaceSpec spec, WorkspaceProvisioner provisioner) {
 		if (spec.isRunInContainer() != (provisioner instanceof DockerAware))
 			return false;
-		
-		return provisioner.getApplicableProjects() == null 
-			|| WildcardUtils.matchPath(provisioner.getApplicableProjects(), workspace.getProject().getPath());
+		else		
+			return provisioner.isApplicable(workspace.getProject());
 	}
 
 	private WorkspaceProvisioner getProvisioner(Workspace workspace, WorkspaceSpec spec, TaskLogger logger) {

@@ -22,7 +22,7 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
         
         workspaceSpec.setName(getName());
         workspaceSpec.setRunInContainer(true);
-        workspaceSpec.setImage("1dev/opencode:1.0.0");
+        workspaceSpec.setImage("1dev/opencode");
         workspaceSpec.setRunAs("1001:1001");
         workspaceSpec.setShell(new CustomLinuxShell());
 

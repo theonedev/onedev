@@ -37,15 +37,16 @@ import io.onedev.k8shelper.CacheAvailability;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.RunCacheService;
 import io.onedev.server.service.support.CacheFindResult;
 import io.onedev.server.service.support.RunCacheInfo;
-import io.onedev.server.util.PathIndexUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.IOUtils;
+import io.onedev.server.util.PathIndexUtils;
 import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -66,6 +67,9 @@ public class DefaultRunCacheService implements RunCacheService, Serializable, Sc
 
 	@Inject
 	private TaskScheduler taskScheduler;
+
+	@Inject
+	private SessionService sessionService;
 
 	@Inject
 	private BatchWorkExecutionService batchWorkExecutionService;
@@ -342,7 +346,9 @@ public class DefaultRunCacheService implements RunCacheService, Serializable, Sc
 				var now = new DateTime();
 				for (var projectId: projectService.getActiveIds()) {
 					try {
-						var preserveDays = projectService.load(projectId).getHierarchyCachePreserveDays();
+						var preserveDays = sessionService.call(() -> {
+							return projectService.load(projectId).getHierarchyCachePreserveDays();
+						});
 						var thresholdMillis = now.minusDays(preserveDays).getMillis();
 						var cacheDirs = projectService.getCacheDir(projectId);
 						var children = cacheDirs.listFiles();

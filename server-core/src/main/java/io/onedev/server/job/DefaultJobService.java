@@ -119,7 +119,6 @@ import io.onedev.server.exception.BadRequestException;
 import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.logging.LogService;
 import io.onedev.server.logging.ServerLogger;
@@ -505,28 +504,23 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			if (!step.isApplicable(build, executor)) 
 				return false;
 		}
-		if (executor.getJobMatch() != null) {
-			JobMatch jobMatch = JobMatch.parse(executor.getJobMatch(), true, true);
-			PullRequest request = build.getRequest();
-			if (request != null) {
-				if (request.getSource() != null) {
-					JobMatchContext sourceContext = new JobMatchContext(
-							request.getSourceProject(), request.getSourceBranch(),
-							null, build.getJobName());
-					JobMatchContext targetContext = new JobMatchContext(
-							request.getTargetProject(), request.getTargetBranch(),
-							null, build.getJobName());
-					return jobMatch.matches(sourceContext) && jobMatch.matches(targetContext);
-				} else {
-					return false;
-				}
+		PullRequest request = build.getRequest();
+		if (request != null) {
+			if (request.getSource() != null) {
+				JobMatchContext sourceContext = new JobMatchContext(
+						request.getSourceProject(), request.getSourceBranch(),
+						null, build.getJobName());
+				JobMatchContext targetContext = new JobMatchContext(
+						request.getTargetProject(), request.getTargetBranch(),
+						null, build.getJobName());
+				return executor.isApplicable(sourceContext) && executor.isApplicable(targetContext);
 			} else {
-				return jobMatch.matches(new JobMatchContext(
-						build.getProject(), null, build.getCommitId(),
-						build.getJobName()));
+				return false;
 			}
 		} else {
-			return true;
+			return executor.isApplicable(new JobMatchContext(
+					build.getProject(), null, build.getCommitId(),
+					build.getJobName()));
 		}
 	}
 

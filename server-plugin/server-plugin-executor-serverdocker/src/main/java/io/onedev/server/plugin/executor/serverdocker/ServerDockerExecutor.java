@@ -78,6 +78,8 @@ import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.JobService;
 import io.onedev.server.job.JobTerminal;
+import io.onedev.server.job.match.JobMatch;
+import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
@@ -149,6 +151,26 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 	public void setConcurrency(String concurrency) {
 		this.concurrency = concurrency;
+	}
+
+	@Editable(order=10000, name="Applicable Jobs", placeholder="Any job",
+			description="Optionally specify applicable jobs of this executor")
+	@io.onedev.server.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
+	@Nullable
+	public String getJobMatch() {
+		return jobMatch;
+	}
+
+	public void setJobMatch(String jobMatch) {
+		this.jobMatch = jobMatch;
+	}
+
+	@Override
+	public boolean isApplicable(JobMatchContext context) {
+		if (jobMatch != null)
+			return JobMatch.parse(jobMatch, true, true).matches(context);
+		else
+			return true;
 	}
 
 	@Editable(order=510, group="More Settings", placeholder="Default", description="Optionally specify docker sock to use. "

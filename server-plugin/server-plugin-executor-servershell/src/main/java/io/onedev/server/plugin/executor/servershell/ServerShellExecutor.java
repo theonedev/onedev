@@ -55,6 +55,8 @@ import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.JobService;
 import io.onedev.server.job.JobTerminal;
+import io.onedev.server.job.match.JobMatch;
+import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.servershell.ServerShellExecutor.TestData;
 import io.onedev.server.service.ResourceService;
@@ -63,9 +65,7 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="" +
-		"This executor runs build jobs with OneDev server's shell facility.<br>" +
-		"<b class='text-danger'>WARNING</b>: Jobs running with this executor has same " +
-		"permission as OneDev server process. Make sure it can only be used by trusted jobs")
+		"This executor runs build jobs with OneDev server's shell facility")
 public class ServerShellExecutor extends JobExecutor implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
@@ -73,7 +73,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	static final int ORDER = 400;
 	
 	private String concurrency;
-	
+
 	private transient volatile LeafFacade runningStep;
 	
 	private transient volatile File buildDir;
@@ -88,6 +88,28 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 	public void setConcurrency(String concurrency) {
 		this.concurrency = concurrency;
+	}
+
+	@Editable(order=10000, name="Applicable Jobs", description="""
+			Specify applicable jobs of this executor. 
+			<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process. 
+			Please make sure that only trusted jobs can use this executor""")
+	@io.onedev.server.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
+	@NotEmpty
+	public String getJobMatch() {
+		return jobMatch;
+	}
+
+	public void setJobMatch(String jobMatch) {
+		this.jobMatch = jobMatch;
+	}
+
+	@Override
+	public boolean isApplicable(JobMatchContext context) {
+		if (jobMatch != null)
+			return JobMatch.parse(jobMatch, true, true).matches(context);
+		else
+			return false;
 	}
 
 	private ClusterService getClusterService() {

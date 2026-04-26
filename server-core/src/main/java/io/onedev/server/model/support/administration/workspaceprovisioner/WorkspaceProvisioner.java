@@ -10,7 +10,6 @@ import static java.util.stream.Collectors.toMap;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -19,7 +18,6 @@ import javax.validation.constraints.NotEmpty;
 
 import io.onedev.agent.AgentUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -27,16 +25,16 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.DnsName;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.git.location.GitLocation;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.workspace.spec.EnvVar;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.service.ProjectService;
-import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.workspace.WorkspaceContext;
 import io.onedev.server.workspace.WorkspaceRuntime;
 import io.onedev.server.workspace.WorkspaceService;
@@ -52,6 +50,8 @@ public abstract class WorkspaceProvisioner implements Serializable {
 	private String name;
 
 	private Integer concurrency;
+
+	protected String applicableProjects;
 	
 	@Editable(order=1000, placeholder="CPU cores", description = """
 			Specify max number of workspaces this provisioner can handle concurrently.
@@ -64,8 +64,6 @@ public abstract class WorkspaceProvisioner implements Serializable {
 	public void setConcurrency(Integer concurrency) {
 		this.concurrency = concurrency;
 	}
-
-	private String applicableProjects;
 
 	public boolean isEnabled() {
 		return enabled;
@@ -84,23 +82,6 @@ public abstract class WorkspaceProvisioner implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	@Editable(order=10000, placeholder="Any project", description="Optionally specify projects applicable for this provisioner. " +
-			"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
-			"Multiple projects should be separated by space")
-	@Patterns(suggester="suggestProjects", path=true)
-	public String getApplicableProjects() {
-		return applicableProjects;
-	}
-
-	public void setApplicableProjects(String applicableProjects) {
-		this.applicableProjects = applicableProjects;
-	}
-
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 
 	protected ClusterService getClusterService() {
@@ -215,6 +196,19 @@ public abstract class WorkspaceProvisioner implements Serializable {
 		return envVars;
 	}
 
+	public abstract boolean isApplicable(Project project);
+
 	public abstract WorkspaceRuntime provision(WorkspaceContext context, TaskLogger logger);
+
+	public void onMoveProject(String oldPath, String newPath) {
+		applicableProjects = Project.substitutePath(applicableProjects, oldPath, newPath);
+	}
+
+	public Usage onDeleteProject(String projectPath) {
+		Usage usage = new Usage();
+		if (Project.containsPath(applicableProjects, projectPath))
+			usage.add("applicable projects");
+		return usage;
+	}
 
 }

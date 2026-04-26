@@ -1388,7 +1388,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Excluded", "除外済み");
 		m.put("Excluded Fields", "除外されたフィールド");
 		m.put("Excluded Files for Review", "レビュー対象外のファイル");
-		m.put("Executable", "実行可能");
 		m.put("Execute Commands", "コマンドを実行する");
 		m.put("Execute Commands via SSH", "SSH経由でコマンドを実行する");
 		m.put("Exit Impersonation", "なりすましを終了する");
@@ -2884,6 +2883,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Permanent link of this selection", "この選択の永久リンク");
 		m.put("Permission denied", "権限が拒否されました");
 		m.put("Permission will be checked upon actual operation", "実際の操作時に権限が確認されます");
+		m.put("Personal workspace data will be saved here after a workspace is deleted. It will be shared to all workspaces created subsequently with same user key and path", 
+			"個人ワークスペースデータは、ワークスペースが削除された後にここに保存されます。それは、同じユーザーキーとパスで作成されたすべてのワークスペースに共有されます。");
 		m.put("Physical memory in mega bytes", "物理メモリ（メガバイト単位）");
 		m.put("Pick Existing", "既存を選択");
 		m.put("Pin this issue", "この問題をピン留め");
@@ -2963,7 +2964,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Post URL", "ポストURL");
 		m.put("Post Url", "投稿URL");
 		m.put("PowerShell", "PowerShell");
-		m.put("Powershell", "Powershell");
 		m.put("Prefix Pattern", "プレフィックスパターン");
 		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
 			"プルリクエストを作業中としてマークするには、タイトルに <code>WIP</code> または <code>[WIP]</code> を付けてください");
@@ -3921,7 +3921,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>で実行するシェルコマンドを指定してください。");
 		m.put("Specify shell executable to be used", "使用するシェル実行ファイルを指定してください");
-		m.put("Specify shell to be used", "使用するシェルを指定してください。");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "SCPコマンドのソースパラメータを指定してください。例: <code>app.tar.gz</code>");
 		m.put("Specify space separated refs to pull from remote. '*' can be used in ref name for wildcard match<br><b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update branches/tags via this step", 
 			"リモートからプルするスペース区切りのリファレンスを指定してください。リファレンス名にはワイルドカードマッチのために'*'を使用できます。<br><b class='text-danger'>注意:</b> このステップでブランチ/タグを更新する際、ブランチ/タグ保護ルールは無視されます。");
@@ -4201,10 +4200,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このエグゼキュータは、<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシン上でDockerコンテナとしてビルドジョブを実行します");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"このエグゼキュータは、Kubernetesクラスター内のPodとしてビルドジョブを実行します。エージェントは不要です。<b class='text-danger'>注意:</b> ジョブPodがソースやアーティファクトをダウンロードするためにサーバーURLがシステム設定で正しく指定されていることを確認してください");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
-			"このエグゼキュータはOneDevサーバーのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブはOneDevサーバープロセスと同じ権限を持ちます。信頼できるジョブでのみ使用されることを確認してください");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
-			"このエグゼキュータは<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシンのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブはOneDevエージェントプロセスと同じ権限を持ちます。信頼できるジョブでのみ使用されることを確認してください");
 		m.put("This field is required", "このフィールドは必須です");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"このフィルターは現在のユーザーのLDAPエントリを決定するために使用されます。例: <i>(&(uid={0})(objectclass=person))</i>。この例では、<i>{0}</i>は現在のユーザーのログイン名を表します");
@@ -4264,8 +4259,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This property is imported from {0}", "このプロパティは{0}からインポートされます");
 		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
 			"このプロビジョナーは、セキュリティと隔離のためにOneDevサーバー上のDockerコンテナ内にワークスペースを作成します。\nOneDevサーバーがKubernetesクラスター内にインストールされている場合は現在サポートされていません");
-		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have the same\npermission as the OneDev server process. Make sure it can only be used by trusted projects.\n", 
-			"このプロビジョナーはOneDevサーバーのシェル機能を使用してワークスペースを作成し、\nOneDevサーバーにtmuxがインストールされている必要があります<br>\n<b class='text-danger'>警告</b>: このプロビジョナーで作成されたワークスペースは、\nOneDevサーバープロセスと同じ権限を持ちます。信頼できるプロジェクトでのみ使用できるようにしてください。\n");
 		m.put("This pull request has been discarded", "このプルリクエストは破棄されました");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"このレポートは、プルリクエストによってビルドがトリガーされた場合、プルリクエスト概要ページに表示されます");
@@ -5031,8 +5024,18 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Personal workspace data will be saved here after a workspace is deleted. It will be shared to all workspaces created subsequently with same user key and path", 
-			"個人ワークスペースデータは、ワークスペースが削除された後にここに保存されます。それは、同じユーザーキーとパスで作成されたすべてのワークスペースに共有されます。");
+		m.put("PowerShell Executable", "PowerShell 実行可能ファイル");
+		m.put("Shell Executable", "シェル実行可能ファイル");
+		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
+			"このエグゼキュータの適用可能なジョブを指定します。\n<b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブは OneDev プロセスと同じ権限を持ちます。\n信頼できるジョブのみがこのエグゼキュータを使用できるようにしてください");
+		m.put("This executor runs build jobs with OneDev server's shell facility", "このエグゼキュータは OneDev サーバーのシェル機能でビルドジョブを実行します");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"このエグゼキュータは <a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシンのシェル機能でビルドジョブを実行します");
+		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
+			"このプロビジョナーは OneDev サーバーのシェル機能でワークスペースを作成し、\nOneDev サーバーに tmux がインストールされている必要があります");
+		m.put("Use '*' or '?' for wildcard match", "ワイルドカードマッチには '*' または '?' を使用します");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"このプロビジョナーによって作成されたワークスペースは OneDev サーバープロセスと同じ権限を持ちます。\n'**'、'*' または '?' を<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>に使用します。\n複数のプロジェクトはスペースで区切る必要があります。<br>\n<b class='text-danger'>警告</b>: このプロビジョナーによって作成されたワークスペースは OneDev サーバープロセスと同じ権限を持ちます。\n信頼できるプロジェクトのみがこのプロビジョナーを使用できるようにしてください");
 	}
 		
 	@Override
