@@ -148,6 +148,20 @@ query to get notified of interesting events.
 
 ![issue query](./doc/images/issue-query.gif)
 
+## 🤖 Built-in AI for DevOps Intelligence
+
+Query with natural language. Explain code snippets, help understand codebase, review commits and pull requests, assist with CI/CD specs, investigate build failures. 
+[**Tutorial**](https://docs.onedev.io/tutorials/ai/working-with-built-in-ai)
+
+![ai-pr-review](./doc/images/ai-pr-review.png)
+
+## 🧑‍💻 Workspaces for Vibe Coding
+
+Work on any branch with preconfigured dev containers on server. Use OpenCode, Claude Code, Codex, or other terminal agents in browser without setting up local environment.
+[**Tutorial**](https://docs.onedev.io/tutorials/ai/working-with-workspaces)
+
+![workspace](./doc/images/workspace.png)
+
 ## 🤖 MCP server to interact with OneDev via AI agents
 
 MCP server for managing issues, pull requests, and builds. Streamline DevOps workflows, configure CI/CD jobs, 
