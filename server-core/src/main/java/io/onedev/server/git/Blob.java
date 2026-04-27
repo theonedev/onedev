@@ -138,11 +138,19 @@ public class Blob implements Serializable {
 		if (lfsPointer == null) {
 			Text text = getText();
 			if (text != null) {
-				if (!text.getLines().isEmpty() 
+				if (text.getLines().size() >= 3
 						&& text.getLines().get(0).startsWith("version https://git-lfs.github.com/spec/")) {
 					String objectId = StringUtils.substringAfter(text.getLines().get(1), ":");
-					long objectSize = Long.parseLong(StringUtils.substringAfter(text.getLines().get(2), " ")); 
-					lfsPointer = Optional.of(new LfsPointer(objectId, objectSize));
+					if (LfsObject.isValidObjectId(objectId)) {
+						try {
+							long objectSize = Long.parseLong(StringUtils.substringAfter(text.getLines().get(2), " "));
+							lfsPointer = Optional.of(new LfsPointer(objectId, objectSize));
+						} catch (NumberFormatException e) {
+							lfsPointer = Optional.absent();
+						}
+					} else {
+						lfsPointer = Optional.absent();
+					}
 				} else {
 					lfsPointer = Optional.absent();
 				}
