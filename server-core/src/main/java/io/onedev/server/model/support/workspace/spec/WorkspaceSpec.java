@@ -132,8 +132,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		return SuggestionUtils.suggest(provisionerNames, matchWith);
 	}
 
-	@Editable(order = 100, description = """
-		Whether or not to create the workspace inside container. If enabled, you will need a <a href='https://onedev.io/pricing' target='_blank'>enterprise subscription</a>""")
+	@Editable(order = 100, description = "Whether or not to create the workspace inside container")
 	public boolean isRunInContainer() {
 		return runInContainer;
 	}
