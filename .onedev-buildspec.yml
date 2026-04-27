@@ -1,27 +1,36 @@
-version: 39
+version: 47
+imports:
+- projectPath: onedev
+  revision: main
+  accessTokenSecret: onedev-token
 jobs:
 - name: Release
   steps:
-  - !CheckoutStep
+  - type: CheckoutStep
     name: checkout
-    cloneCredential: !HttpCredential
+    cloneCredential:
+      type: HttpCredential
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: set up cache
     templateName: set up cache
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: set build version
     templateName: set build version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: build
     runInContainer: true
     image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         set -e
         set -o pipefail
@@ -63,49 +72,60 @@ jobs:
         cd $projectDir
         echo "$buildVersion" | cut -d. -f1 > buildVersion.major
         echo "$buildVersion" | cut -d. -f1,2 > buildVersion.major.minor
+    runAs: 0:0
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - name: Scan Path
-      valuesProvider: !SpecifiedValues
+    - valuesProvider:
+        type: SpecifiedValues
         values:
         - - server-product/target/docker/app
       secret: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !PublishArtifactStep
+      name: Scan Path
+    condition: SUCCESSFUL
+    optional: false
+  - type: PublishArtifactStep
     name: publish artifacts
     artifacts: '*.zip *.tar.gz *.sha256 *.yaml'
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !PublishMarkdownReportStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: PublishMarkdownReportStep
     name: publish incompatibility report
     reportName: Incompatibilities
     filePatterns: server-product/system/incompatibilities/**
     startPage: server-product/system/incompatibilities/incompatibilities.md
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: BuildImageStep
     name: build server docker image
     buildPath: server-product/target/docker
     dockerfile: server-product/target/docker/Dockerfile.server
-    output: !RegistryOutput
+    output:
+      type: RegistryOutput
       tags: 1dev/server 1dev/server:@build_version@ 1dev/server:@file:buildVersion.major@ 1dev/server:@file:buildVersion.major.minor@
     platforms: linux/amd64,linux/arm64
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: BuildImageStep
     name: build agent docker image
     buildPath: server-product/target/docker
     dockerfile: server-product/target/docker/Dockerfile.agent
-    output: !RegistryOutput
+    output:
+      type: RegistryOutput
       tags: 1dev/agent
     platforms: linux/amd64,linux/arm64
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: publish helm chart
     runInContainer: true
     image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         set -e
 
@@ -117,13 +137,16 @@ jobs:
 
         cd $projectDir/server-product/target/helm-chart
         curl -u @job_token@:@secret:onedev-token@ -X POST --upload-file ./onedev-${buildVersion}.tgz https://code.onedev.io/onedev/~helm
+    runAs: 0:0
     useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: publish GH release
     runInContainer: true
     image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         set -e
         set -o pipefail
@@ -140,8 +163,7 @@ jobs:
 
         git tag v$buildVersion -m "Release tag"
         git push -f origin v$buildVersion:v$buildVersion
-        git config --global --unset http.extraHeader
-        git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev v$buildVersion:v$buildVersion
+        git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev v$buildVersion:v$buildVersion
 
         echo "Creating release in GitHub..."
 
@@ -155,35 +177,43 @@ jobs:
         else
           curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId
         fi
+    runAs: 0:0
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CloseIterationStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CloseIterationStep
     name: close milestone
     iterationName: '@build_version@'
     accessTokenSecret: onedev-token
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+    condition: SUCCESSFUL
+    optional: false
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
 - name: Publish Site
   steps:
-  - !CommandStep
+  - type: CommandStep
     name: build
     runInContainer: true
     image: ubuntu
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: "apt update \napt install -y zip\nbuildVersion=`ls onedev-*.tar.gz | grep -Po 'onedev-\\K.*(?=.tar.gz)'`\ntar zxvf onedev-$buildVersion.tar.gz\nmv onedev-$buildVersion onedev-latest\ntar zcvf onedev-latest.tar.gz onedev-latest\nzip -r onedev-latest.zip onedev-latest\nsha256sum onedev-latest.zip > onedev-latest.zip.sha256\nsha256sum onedev-latest.tar.gz > onedev-latest.tar.gz.sha256\necho $buildVersion > build_version\n"
+    runAs: 0:0
     useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildVersionStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: SetBuildVersionStep
     name: set version
     buildVersion: '@file:build_version@'
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !PublishSiteStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: PublishSiteStep
     name: publish
     artifacts: onedev-latest*
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+    condition: SUCCESSFUL
+    optional: false
   jobDependencies:
   - jobName: Release
     requireSuccessful: true
@@ -194,26 +224,31 @@ jobs:
   timeout: 3600
 - name: Publish Test Images
   steps:
-  - !CheckoutStep
+  - type: CheckoutStep
     name: checkout
-    cloneCredential: !HttpCredential
+    cloneCredential:
+      type: HttpCredential
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: set up cache
     templateName: set up cache
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: set build version
     templateName: set build version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: build
     runInContainer: true
     image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         set -e
 
@@ -226,30 +261,37 @@ jobs:
         unzip onedev-$buildVersion.zip -d docker
         mv docker/onedev-$buildVersion docker/app
         cp -r agent docker/
+    runAs: 0:0
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: BuildImageStep
     name: build server docker image
     buildPath: server-product/target/docker
     dockerfile: server-product/target/docker/Dockerfile.server
-    output: !RegistryOutput
+    output:
+      type: RegistryOutput
       tags: 1dev/server:test
     platforms: '@param:Platforms@'
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: BuildImageStep
     name: build agent docker image
     buildPath: server-product/target/docker
     dockerfile: server-product/target/docker/Dockerfile.agent
-    output: !RegistryOutput
+    output:
+      type: RegistryOutput
       tags: 1dev/agent:test
     platforms: '@param:Platforms@'
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+    condition: SUCCESSFUL
+    optional: false
   paramSpecs:
-  - !ChoiceParam
+  - type: ChoiceParam
     name: Platforms
     allowMultiple: true
     allowEmpty: false
-    choiceProvider: !SpecifiedChoices
+    choiceProvider:
+      type: SpecifiedChoices
       choices:
       - value: linux/amd64
         color: '#0d87e9'
@@ -261,88 +303,106 @@ jobs:
   timeout: 3600
 - name: Scan Vulnerabilities
   steps:
-  - !CheckoutStep
+  - type: CheckoutStep
     name: checkout
-    cloneCredential: !HttpCredential
+    cloneCredential:
+      type: HttpCredential
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
     cloneDepth: 1
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: set up maven cache
     templateName: set up cache
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: build
     runInContainer: true
     image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         mvn clean package
+    runAs: 0:0
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - name: Scan Path
-      valuesProvider: !SpecifiedValues
+    - valuesProvider:
+        type: SpecifiedValues
         values:
         - - server-product/target/sandbox
       secret: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+      name: Scan Path
+    condition: SUCCESSFUL
+    optional: false
   triggers:
-  - !ScheduleTrigger
+  - type: ScheduleTrigger
     cronExpression: 0 0 1 * * ?
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
   postBuildActions:
-  - !SendNotificationAction
+  - type: SendNotificationAction
     condition: failed
     receivers: user(robin)
 - name: CI
   steps:
-  - !CheckoutStep
+  - type: CheckoutStep
     name: checkout
-    cloneCredential: !HttpCredential
+    cloneCredential:
+      type: HttpCredential
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
     cloneDepth: 1
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: set up cache
     templateName: set up cache
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: set build version
     templateName: set build version
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: build
     runInContainer: true
     image: '@property:buildEnvironment@'
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         mvn package
+    runAs: 0:0
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !UseTemplateStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: UseTemplateStep
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - name: Scan Path
-      valuesProvider: !SpecifiedValues
+    - valuesProvider:
+        type: SpecifiedValues
         values:
         - - server-product/target/sandbox
       secret: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+      name: Scan Path
+    condition: SUCCESSFUL
+    optional: false
   triggers:
-  - !BranchUpdateTrigger
+  - type: BranchUpdateTrigger
     branches: main
+    userMatch: anyone
     projects: onedev/server
   retryCondition: never
   maxRetries: 3
@@ -350,51 +410,56 @@ jobs:
   timeout: 3600
 - name: Sync Main (GitHub)
   steps:
-  - !CheckoutStep
+  - type: CheckoutStep
     name: checkout
-    cloneCredential: !DefaultCredential {}
+    cloneCredential:
+      type: DefaultCredential
     withLfs: false
     withSubmodules: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: sync
     runInContainer: true
     image: alpine/git:1.0.7
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         git config --global --unset http.extraHeader
         git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
+    runAs: 0:0
     useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+    condition: SUCCESSFUL
+    optional: false
   triggers:
-  - !BranchUpdateTrigger
+  - type: BranchUpdateTrigger
     branches: main
+    userMatch: anyone
     projects: onedev/server
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
-imports:
-- projectPath: onedev
-  revision: main
-  accessTokenSecret: onedev-token
 stepTemplates:
 - name: scan vulnerabilities
   steps:
-  - !TrivyCacheStep
+  - type: TrivyCacheStep
     name: cache
     key: trivy
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !RootFSScannerStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: RootFSScannerStep
     name: scan
-    detectVulnerabilities: true
+    checkVulnerabilities: true
     scanPath: '@param:Scan Path@'
     failThreshold: HIGH
     reportName: Vulnerabilities
+    publishJSONReportAsArtifact: false
     ignorePath: .trivyignore
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+    condition: SUCCESSFUL
+    optional: false
   paramSpecs:
-  - !TextParam
+  - type: TextParam
     name: Scan Path
     allowEmpty: false
     multiline: false
