@@ -1,5 +1,6 @@
 package io.onedev.server.workspace;
 
+import static io.onedev.k8shelper.KubernetesHelper.installGitLfs;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.util.SiteSyncUtils.readVersion;
 import static io.onedev.server.util.SiteSyncUtils.writeVersion;
@@ -59,7 +60,6 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.DefaultCloneInfo;
-import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
@@ -995,31 +995,35 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		var workspaceVersion = readVersion(workspaceDir);
 		if (workspaceVersion < remoteWorkspaceVersion) {
 			CommandUtils.callWithClusterCredential(new GitTask<Void>() {
+
 				@Override
 				public Void call(Commandline git) throws IOException {
 					var projectPath = projectService.findFacadeById(projectId).getPath();
 					var cloneUrl = clusterService.getServerUrl(activeServer)
 							+ "/" + projectPath + "/" + GIT_PREFIX + workspaceNumber;
 					var debugLogger = new LineConsumer() {
+
 						@Override
 						public void consume(String line) {
 							logger.debug(line);
 						}
+
 					};
 					var errorLogger = new LineConsumer() {
+						
 						@Override
 						public void consume(String line) {
 							logger.error(line);
 						}
+
 					};
 
 					if (clusterService.runOnServer(activeServer, new HasLfsObjectsTask(projectId, workspaceNumber))) 
-						KubernetesHelper.installGitLfs(git, debugLogger, errorLogger);
+						installGitLfs(git, debugLogger, errorLogger);
 
 					if (!gitDir.exists()) {
 						FileUtils.deleteDir(workDir);
-						git.clearArgs();
-						git.addArgs("clone", cloneUrl, workDir.getAbsolutePath());
+						git.args("clone", cloneUrl, workDir.getAbsolutePath());
 						git.execute(debugLogger, new LineConsumer() {
 							@Override
 							public void consume(String line) {
@@ -1030,8 +1034,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							}
 						}).checkReturnCode();
 					} else {
-						git.clearArgs();
-						git.addArgs("ls-remote", "--symref", cloneUrl, "HEAD");
+						git.args("ls-remote", "--symref", cloneUrl, "HEAD");
 						var branchRef = new AtomicReference<String>();
 						git.execute(new LineConsumer() {
 							@Override
@@ -1044,12 +1047,10 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						var branch = branchRef.get();
 						if (branch != null) {
 							git.workingDir(workDir);
-							git.clearArgs();
-							git.addArgs("remote", "set-url", "origin", cloneUrl);
+							git.args("remote", "set-url", "origin", cloneUrl);
 							git.execute(debugLogger, errorLogger).checkReturnCode();
 
-							git.clearArgs();
-							git.addArgs("fetch", "origin", "refs/heads/" + branch);
+							git.args("fetch", "origin", "refs/heads/" + branch);
 							git.execute(debugLogger, new LineConsumer() {
 								@Override
 								public void consume(String line) {
@@ -1060,8 +1061,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 								}
 							}).checkReturnCode();
 
-							git.clearArgs();
-							git.addArgs("checkout", "-f", "-B", branch, "FETCH_HEAD");
+							git.args("checkout", "-f", "-B", branch, "FETCH_HEAD");
 							git.execute(debugLogger, new LineConsumer() {
 								@Override
 								public void consume(String line) {

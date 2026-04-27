@@ -624,6 +624,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			} else {
 				var remoteUrl = clusterService.getServerUrl(fromActiveServer) + "/" + fromPath;
 				callWithClusterCredential(git -> {
+					git.clearArgs();
 					new CloneCommand(toGitDir, remoteUrl) {
 
 						@Override
@@ -639,6 +640,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 
 				if (withLfs) {
 					callWithClusterCredential(git -> {
+						git.clearArgs();
 						new LfsFetchAllCommand(toGitDir, remoteUrl) {
 
 							@Override
@@ -1644,7 +1646,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 						CommandUtils.callWithClusterCredential(new GitTask<>() {
 
 							private void fetch(Commandline git, String fetchUrl) {
-								git.addArgs("fetch", "--force", fetchUrl, "refs/*:refs/*", "-pP");
+								git.args("fetch", "--force", fetchUrl, "refs/*:refs/*", "-pP");
 								git.execute(new LineConsumer() {
 									@Override
 									public void consume(String line) {
@@ -1666,39 +1668,39 @@ public class DefaultProjectService extends BaseEntityService<Project>
 								git.workingDir(repository.getDirectory());
 								var fetchUrl = clusterService.getServerUrl(activeServer) + "/" + cache.get(projectId).getPath();
 								fetch(git, fetchUrl);
-								git.clearArgs();
 
 								if (withLfs) {
 									var lfsDir = storageService.initLfsDir(projectId);
-									if (isSharedDir(lfsDir, activeServer, projectId, "git/lfs")) {
-										fetch(git, fetchUrl);
-									} else {
+									if (!isSharedDir(lfsDir, activeServer, projectId, "git/lfs")) {
 										var sinceCommitIds = readLfsSinceCommits(projectId);
 										var untilCommitIds = new HashSet<ObjectId>();
 										for (Ref ref: repository.getRefDatabase().getRefs())
 											untilCommitIds.add(ref.getObjectId());
 
+										git.clearArgs();
 										if (sinceCommitIds.isEmpty()) {
 											new LfsFetchAllCommand(git.workingDir(), fetchUrl) {
+												
 												@Override
 												protected Commandline newGit() {
 													return git;
 												}
+
 											}.run();
 										} else {
 											var fetchCommitIds = getReachableCommits(repository, sinceCommitIds, untilCommitIds)
 													.stream().map(AnyObjectId::copy).collect(toList());
 											new LfsFetchCommand(git.workingDir(), fetchUrl, fetchCommitIds) {
+
 												@Override
 												protected Commandline newGit() {
 													return git;
 												}
+
 											}.run();
 										}
 										writeLfsSinceCommits(projectId, untilCommitIds);
 									}
-								} else {
-									fetch(git, fetchUrl);
 								}
 								return null;
 							}

@@ -468,7 +468,7 @@ public class DefaultGitService implements GitService, Serializable {
 	
 	private void fetch(Commandline git, Long projectId, String remoteUrl, String... refSpecs) {
 		git.workingDir(getGitDir(projectId));
-		git.addArgs("fetch", "--quiet", remoteUrl);
+		git.args("fetch", "--quiet", remoteUrl);
 		git.addArgs(refSpecs);
 		git.execute(newInfoLogger(), newErrorLogger()).checkReturnCode();
 	}
@@ -488,7 +488,7 @@ public class DefaultGitService implements GitService, Serializable {
 			// environments in git pre/post receive hooks will not be set
 			CommandUtils.callWithClusterCredential(git -> {
 				git.workingDir(getGitDir(sourceProjectId));
-				git.addArgs("push", "--quiet", clusterService.getServerUrl(targetActiveServer) + "/" + targetProjectPath);
+				git.args("push", "--quiet", clusterService.getServerUrl(targetActiveServer) + "/" + targetProjectPath);
 				git.addArgs(sourceRev + ":" + targetRev);
 				git.execute(newInfoLogger(), newErrorLogger()).checkReturnCode();
 				return null;
@@ -514,7 +514,7 @@ public class DefaultGitService implements GitService, Serializable {
 				
 				String remoteUrl = clusterService.getServerUrl(targetActiveServer) + "/" + targetProjectPath;						
 				AtomicReference<String> remoteCommitId = new AtomicReference<>(null);
-				git.addArgs("ls-remote", remoteUrl, "HEAD", targetRef);
+				git.args("ls-remote", remoteUrl, "HEAD", targetRef);
 				git.execute(new LineConsumer() {
 
 					@Override
