@@ -156,6 +156,9 @@ public class RevListOptions implements Serializable {
 		return this;
 	}
 	
+	/**
+	 * This method adds arguments to provided git command line based on current options
+	 */
 	public void configure(Commandline git) {
 		boolean hasRevisions = false;
 		if (!revisions().isEmpty()) {

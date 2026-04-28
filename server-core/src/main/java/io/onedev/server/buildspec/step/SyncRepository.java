@@ -152,6 +152,9 @@ public abstract class SyncRepository extends ServerSideStep {
 		return remoteUrlWithCredentials;
 	}
 	
+	/**
+	 * This method adds proxy arguments to provided git command line
+	 */
 	protected static void configureProxy(Commandline git, @Nullable String proxy) {
 		if (proxy != null)
 			git.addArgs("-c", "http.proxy=" + proxy, "-c", "https.proxy=" + proxy);

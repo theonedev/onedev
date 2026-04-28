@@ -4,7 +4,6 @@ import static io.onedev.agent.AgentUtils.buildImage;
 import static io.onedev.agent.AgentUtils.callWithRegistryLogins;
 import static io.onedev.agent.AgentUtils.changeOwner;
 import static io.onedev.agent.AgentUtils.createNetwork;
-import static io.onedev.agent.AgentUtils.deleteDir;
 import static io.onedev.agent.AgentUtils.deleteNetwork;
 import static io.onedev.agent.AgentUtils.getEntrypointArgs;
 import static io.onedev.agent.AgentUtils.getOsIds;
@@ -548,16 +547,14 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 										initRepository(git, infoLogger, warningLogger);
 
-										var remoteAccessArgs = new ArrayList<String>();
-										remoteAccessArgs.addAll(setupGitCerts(git, Bootstrap.getTrustCertsDir(),
+										git.clearArgs();
+										setupGitCerts(git, Bootstrap.getTrustCertsDir(),
 												new File(hostBuildDir, "trust-certs.pem"), 
-												containerTrustCertsFilePath, infoLogger, warningLogger));
+												containerTrustCertsFilePath, infoLogger, warningLogger);
 
 										CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-										remoteAccessArgs.addAll(cloneInfo.setupGitAuth(git, hostBuildDir, containerBuildDirPath,
-												infoLogger, warningLogger));
-
-										git.args(remoteAccessArgs);
+										cloneInfo.setupGitAuth(git, hostBuildDir, containerBuildDirPath,
+												infoLogger, warningLogger);
 
 										int cloneDepth = checkoutFacade.getCloneDepth();
 
@@ -608,7 +605,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 				} finally {
 					SecretMasker.pop();
 					synchronized (hostBuildDir) {
-						deleteDir(hostBuildDir, newDocker(), Bootstrap.isInDocker(), jobLogger);
+						FileUtils.deleteDir(hostBuildDir);
 					}
 				}
 			}

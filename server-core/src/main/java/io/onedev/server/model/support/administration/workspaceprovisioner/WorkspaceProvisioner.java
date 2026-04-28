@@ -9,7 +9,6 @@ import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -127,13 +126,6 @@ public abstract class WorkspaceProvisioner implements Serializable {
 
 		initRepository(git, infoLogger, warningLogger);
 
-		var remoteAccessArgs = new ArrayList<String>();
-		var trustCertsFile = new File(workspaceDir, "trust-certs.pem");
-		remoteAccessArgs.addAll(setupGitCerts(git, Bootstrap.getTrustCertsDir(), trustCertsFile, 
-				runtimeWorkspaceDirPath + "/" + trustCertsFile.getName(), infoLogger, warningLogger));
-		remoteAccessArgs.addAll(cloneInfo.setupGitAuth(git, workspaceDir, runtimeWorkspaceDirPath, 
-				infoLogger, warningLogger));
-
 		git.args("-c", "safe.directory=*", "config", "user.name", context.getUserName());
 		git.execute(infoLogger, warningLogger).checkReturnCode();
 
@@ -158,10 +150,16 @@ public abstract class WorkspaceProvisioner implements Serializable {
 			
 		}, warningLogger).checkReturnCode();
 
+		git.clearArgs();
+		var trustCertsFile = new File(workspaceDir, "trust-certs.pem");
+		setupGitCerts(git, Bootstrap.getTrustCertsDir(), trustCertsFile, 
+				runtimeWorkspaceDirPath + "/" + trustCertsFile.getName(), infoLogger, warningLogger);
+		cloneInfo.setupGitAuth(git, workspaceDir, runtimeWorkspaceDirPath, 
+				infoLogger, warningLogger);
+
 		if (noCommits.get()) {
 			if (context.getBranch() != null) {
 				logger.log("Cloning repository...");
-				git.args(remoteAccessArgs);				
 				cloneRepository(git, context.getProjectGitDir(), cloneInfo.getCloneUrl(),
 						GitUtils.branch2ref(context.getBranch()), null,
 						context.getSpec().isRetrieveLfs(), false, 0,

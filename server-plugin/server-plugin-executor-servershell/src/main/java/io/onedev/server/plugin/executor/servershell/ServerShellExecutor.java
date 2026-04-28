@@ -230,18 +230,14 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								checkoutFacade.setupWorkingDir(git, workDir);							
 								initRepository(git, infoLogger, warningLogger);
 
-								var remoteAccessArgs = new ArrayList<String>();
-
+								git.clearArgs();
 								var trustCertsFile = new File(buildDir, "trust-certs.pem");
-								remoteAccessArgs.addAll(setupGitCerts(git, Bootstrap.getTrustCertsDir(), trustCertsFile,
-									trustCertsFile.getAbsolutePath(), infoLogger, warningLogger));
+								setupGitCerts(git, Bootstrap.getTrustCertsDir(), trustCertsFile,
+									trustCertsFile.getAbsolutePath(), infoLogger, warningLogger);
 
 								var cloneInfo = checkoutFacade.getCloneInfo();
-								remoteAccessArgs.addAll(cloneInfo.setupGitAuth(git, buildDir, buildDir.getAbsolutePath(), 
-										infoLogger, warningLogger));
+								cloneInfo.setupGitAuth(git, buildDir, buildDir.getAbsolutePath(), infoLogger, warningLogger);
 					
-								git.args(remoteAccessArgs);
-
 								cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
 										jobContext.getRefName(), jobContext.getCommitId().name(),
 										checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
