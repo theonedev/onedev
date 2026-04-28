@@ -128,8 +128,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Pack;
-import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.ProjectLastActivityDate;
 import io.onedev.server.model.PullRequest;
