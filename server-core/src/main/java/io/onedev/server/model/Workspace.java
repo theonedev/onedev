@@ -113,7 +113,7 @@ public class Workspace extends AbstractEntity {
 	}
 
 	public enum Status {
-		PENDING, ACTIVE, ERROR;
+		PENDING, ACTIVE, INACTIVE;
 
 		@Override
 		public String toString() {
@@ -150,7 +150,7 @@ public class Workspace extends AbstractEntity {
 
 	private Date activeDate;
 
-	private Date errorDate;
+	private Date inactiveDate;
 
 	private transient Optional<WorkspaceSpec> specOptional;
 
@@ -232,12 +232,12 @@ public class Workspace extends AbstractEntity {
 	}
 
 	@Nullable
-	public Date getErrorDate() {
-		return errorDate;
+	public Date getInactiveDate() {
+		return inactiveDate;
 	}
 
-	public void setErrorDate(Date errorDate) {
-		this.errorDate = errorDate;
+	public void setInactiveDate(Date inactiveDate) {
+		this.inactiveDate = inactiveDate;
 	}
 	
 	public String getToken() {

@@ -67,7 +67,7 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.workspace.WorkspaceActive;
 import io.onedev.server.event.project.workspace.WorkspaceCreated;
-import io.onedev.server.event.project.workspace.WorkspaceError;
+import io.onedev.server.event.project.workspace.WorkspaceInactive;
 import io.onedev.server.event.project.workspace.WorkspaceEvent;
 import io.onedev.server.event.project.workspace.WorkspacePending;
 import io.onedev.server.event.system.SystemStarted;
@@ -238,7 +238,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Sessional
 	@Listen
-	public void on(WorkspaceError event) {
+	public void on(WorkspaceInactive event) {
 		logService.flush(event.getWorkspace().getLoggingSupport());
 	}
 
@@ -415,9 +415,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Transactional
 	@Override
 	public void requestToReprovision(Workspace workspace) {
-		Preconditions.checkState(workspace.getStatus() == Status.ERROR);
+		Preconditions.checkState(workspace.getStatus() == Status.INACTIVE);
 		workspace.setStatus(Status.PENDING);
-		workspace.setErrorDate(null);
+		workspace.setInactiveDate(null);
 		workspace.setActiveDate(null);
 		var projectId = workspace.getProject().getId();
 		var workspaceNumber = workspace.getNumber();
@@ -551,7 +551,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						var workspace = get(entry.getKey());
 						var future = entry.getValue();
 						if (workspace == null 
-								|| workspace.getStatus() == Status.ERROR 
+								|| workspace.getStatus() == Status.INACTIVE 
 								|| !localServer.equals(projectService.getActiveServer(workspace.getProject().getId(), false))) {
 							future.cancel(true);
 							it.remove();
@@ -738,10 +738,10 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	}
 
 	private void markWorkspaceError(Workspace workspace) {
-		workspace.setStatus(Workspace.Status.ERROR);
-		workspace.setErrorDate(new Date());
+		workspace.setStatus(Workspace.Status.INACTIVE);
+		workspace.setInactiveDate(new Date());
 		update(workspace);
-		listenerRegistry.post(new WorkspaceError(workspace));
+		listenerRegistry.post(new WorkspaceInactive(workspace));
 	}
 
 	private void log(TaskLogger logger, Throwable throwable) {

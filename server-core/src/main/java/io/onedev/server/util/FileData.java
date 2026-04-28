@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import org.apache.commons.io.IOUtils;
+import org.jspecify.annotations.Nullable;
 
 public class FileData implements Serializable {
 
@@ -25,17 +26,22 @@ public class FileData implements Serializable {
 		this.size = size;
 	}
 
+	@Nullable
 	public static FileData from(File file) throws IOException {
-		String name = file.getName();
-		long length = file.length();
-		long toRead = Math.min(length, MAX_READ_SIZE);
-		byte[] content = new byte[(int) toRead];
-		if (toRead > 0) {
-			try (var is = new FileInputStream(file)) {
-				IOUtils.readFully(is, content);
+		if (file.exists()) {
+			String name = file.getName();
+			long length = file.length();
+			long toRead = Math.min(length, MAX_READ_SIZE);
+			byte[] content = new byte[(int) toRead];
+			if (toRead > 0) {
+				try (var is = new FileInputStream(file)) {
+					IOUtils.readFully(is, content);
+				}
 			}
+			return new FileData(name, content, length);
+		} else {
+			return null;
 		}
-		return new FileData(name, content, length);
 	}
 
 	public String getName() {

@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.workspace.WorkspaceActive;
-import io.onedev.server.event.project.workspace.WorkspaceError;
+import io.onedev.server.event.project.workspace.WorkspaceInactive;
 
 @Singleton
 public class WorkspaceEventBroadcaster {
@@ -25,7 +25,7 @@ public class WorkspaceEventBroadcaster {
 	}
 
 	@Listen
-	public void on(WorkspaceError event) {
+	public void on(WorkspaceInactive event) {
 		webSocketService.notifyObservablesChange(Set.of(event.getWorkspace().getStatusChangeObservable()), event.getSourcePage());
 	}
 

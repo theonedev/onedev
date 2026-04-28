@@ -4,8 +4,8 @@
 .workspace-status-active {
 	color: var(--success) !important;
 }
-.workspace-status-error {
-	color: var(--danger) !important;
+.workspace-status-inactive {
+	color: var(--warning) !important;
 }
 .workspace-status-none {
 	color: #CCC !important;

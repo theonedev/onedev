@@ -167,7 +167,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 			@Override
 			public String getObject() {
-				return _T(workspaceModel.getObject().getStatus().toString());
+				return _T(workspaceModel.getObject().getStatus().name());
 			}
 
 		}));
@@ -303,7 +303,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getWorkspace().getStatus() == Status.ERROR
+				setVisible(getWorkspace().getStatus() == Status.INACTIVE
 						&& SecurityUtils.canModifyOrDelete(getWorkspace()));
 			}
 

@@ -31,7 +31,7 @@ import io.onedev.server.search.entity.workspace.ActiveCriteria;
 import io.onedev.server.search.entity.workspace.CreateDateCriteria;
 import io.onedev.server.search.entity.workspace.CreatedByCriteria;
 import io.onedev.server.search.entity.workspace.CreatedByUserCriteria;
-import io.onedev.server.search.entity.workspace.ErrorCriteria;
+import io.onedev.server.search.entity.workspace.InactiveCriteria;
 import io.onedev.server.search.entity.workspace.PendingCriteria;
 import io.onedev.server.search.entity.workspace.SpecCriteria;
 import io.onedev.server.search.entity.workspace.StatusCriteria;
@@ -79,7 +79,7 @@ abstract class WorkspaceFilterPanel extends FilterEditPanel<Workspace> {
 					} else if (status.equals(Workspace.Status.ACTIVE.name())) {
 						criterias.add(new ActiveCriteria());
 					} else {
-						criterias.add(new ErrorCriteria());
+						criterias.add(new InactiveCriteria());
 					}
 				}
 				Criteria<Workspace> rootCriteria = Criteria.orCriterias(criterias);

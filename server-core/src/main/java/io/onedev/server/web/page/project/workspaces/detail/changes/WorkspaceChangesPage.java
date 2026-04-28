@@ -4,10 +4,10 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
@@ -26,6 +26,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -42,6 +44,7 @@ import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 import io.onedev.server.web.component.fileview.FileViewPanel;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
+import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
 import io.onedev.server.workspace.GitExecutionResult;
 
 public class WorkspaceChangesPage extends WorkspaceDetailPage {
@@ -64,6 +67,37 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	private WebMarkupContainer noSelection;
 
+	private final IModel<StatusInfo> statusModel = new LoadableDetachableModel<>() {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected StatusInfo load() {
+			if (getWorkspace().getStatus() != Workspace.Status.ACTIVE) {
+				return StatusInfo.failure(MessageFormat.format(
+						_T("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\""),
+						projectService.getActiveServer(getProject().getId(), true),
+						Workspace.getWorkDir(getProject().getId(), getWorkspace().getNumber())));
+			}
+			GitExecutionResult result = executeGit(
+					"status", "-b", "--porcelain", "--untracked-files=all");
+			if (result.getReturnCode() != 0)
+				return StatusInfo.failure(getErrorMessage(result));
+			boolean mergeInProgress = workspaceService.readFileData(
+					getWorkspace(), ".git/MERGE_HEAD") != null;
+			StatusInfo info = parseStatusOutput(stdoutString(result), mergeInProgress);
+			if (info.ahead == null) {
+				// Branch has no upstream tracking (e.g. workspace was provisioned
+				// from an empty server repository). Fall back to counting local
+				// commits reachable from HEAD so commits made inside the workspace
+				// are reflected by the ahead count and the push button is enabled.
+				info = StatusInfo.success(info.entries, countLocalCommits(), mergeInProgress);
+			}
+			return info;
+		}
+
+	};
+
 	public WorkspaceChangesPage(PageParameters params) {
 		super(params);
 		if (getWorkspace().getStatus() == Workspace.Status.PENDING)
@@ -75,8 +109,6 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		executeGit("fetch");
 
 		sidebar = new WebMarkupContainer("changesSidebar");
 		sidebar.setOutputMarkupId(true);
@@ -109,10 +141,9 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	private void addSyncInfo(WebMarkupContainer container) {
-		int[] counts = getAheadBehind();
+		int aheadCount = getAhead();
 
-		container.add(new Label("behindCount", String.valueOf(counts[0])));
-		container.add(new Label("aheadCount", String.valueOf(counts[1])));
+		container.add(new Label("aheadCount", String.valueOf(aheadCount)));
 
 		AjaxLink<Void> pullLink = new AjaxLink<Void>("pull") {
 
@@ -136,7 +167,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			
 		};
 
-		if (counts[0] == 0 || !SecurityUtils.canModifyOrDelete(getWorkspace())) {
+		if (!SecurityUtils.canModifyOrDelete(getWorkspace())) {
 			pullLink.add(AttributeAppender.append("class", "disabled"));
 			pullLink.setEnabled(false);
 		}
@@ -161,8 +192,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 						return;
 					}
 				}
-				int[] aheadBehind = getAheadBehind();
-				if (aheadBehind[1] > 0) {
+				if (getAhead() > 0) {
 					var result = executeGit("push");
 					if (result.getReturnCode() != 0) {
 						Session.get().error(getErrorMessage(result));
@@ -202,7 +232,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 		};
 		pushLink.add(new AjaxIndicatorAppender());
-		if (counts[0] != 0 || counts[1] == 0 || !SecurityUtils.canModifyOrDelete(getWorkspace())) {
+		if (aheadCount == 0 || !SecurityUtils.canModifyOrDelete(getWorkspace())) {
 			pushLink.add(AttributeAppender.append("class", "disabled"));
 			pushLink.setEnabled(false);
 		}
@@ -294,29 +324,16 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	private void addFileSections(WebMarkupContainer container) {
-		GitExecutionResult statusResult;
-		if (getWorkspace().getStatus() == Workspace.Status.ACTIVE) {
-			statusResult = executeGit("status", "--porcelain");
-		} else {
-			var errorMessage = String.format(
-					"Please reprovision the workspace to show changes, " +
-					"or you may login to server \"%s\" and check changes at \"%s\"",
-					projectService.getActiveServer(getProject().getId(), true),
-					Workspace.getWorkDir(getProject().getId(), getWorkspace().getNumber()));
+		StatusInfo status = statusModel.getObject();
 
-			statusResult = new GitExecutionResult(new byte[0], errorMessage.getBytes(StandardCharsets.UTF_8), 1);
-		}
-
-		Label statusError = new Label("statusError", getErrorMessage(statusResult));
-		statusError.setVisible(statusResult.getReturnCode() != 0);
+		Label statusError = new Label("statusError", status.errorMessage != null ? status.errorMessage : "");
+		statusError.setVisible(status.errorMessage != null);
 		container.add(statusError);
 
-		List<FileEntry> allEntries = statusResult.getReturnCode() == 0
-				? parseGitStatusOutput(stdoutString(statusResult))
-				: new ArrayList<>();
+		List<FileEntry> allEntries = status.entries;
 
 		container.add(new WebMarkupContainer("noChangedFiles")
-				.setVisible(statusResult.getReturnCode() == 0 && allEntries.isEmpty()));
+				.setVisible(status.errorMessage == null && allEntries.isEmpty()));
 
 		List<FileEntry> conflictEntries = new ArrayList<>();
 		List<FileEntry> stagedEntries = new ArrayList<>();
@@ -685,7 +702,12 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	private void showRegularDiff(FileEntry entry) {
 		if (entry.displayStatus == 'U') {
 			FileData fileData = workspaceService.readFileData(getWorkspace(), entry.path);
-			diffContent.replace(new FileViewPanel("diffPanel", Model.of(fileData)));
+			if (fileData != null) {
+				diffContent.replace(new FileViewPanel("diffPanel", Model.of(fileData)));
+			} else {
+				diffContent.replace(new Label("diffPanel", _T("File not found"))
+					.add(AttributeModifier.replace("class", "d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center")));			
+			}
 			return;
 		}
 
@@ -709,18 +731,13 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			return;
 		}
 
-		FileData fileData;
-		try {
-			fileData = workspaceService.readFileData(getWorkspace(), entry.path);
-		} catch (Exception e) {
-			diffContent.replace(new Label("diffPanel",
-					getConflictDescription(entry.indexStatus, entry.workTreeStatus) + ". "
-					+ _T("Unable to read file from the working directory. Please resolve this conflict in the terminal and then mark as resolved."))
+		var fileData = workspaceService.readFileData(getWorkspace(), entry.path);
+		if (fileData != null) {
+			diffContent.replace(new FileViewPanel("diffPanel", Model.of(fileData)));
+		} else {
+			diffContent.replace(new Label("diffPanel", getConflictDescription(entry.indexStatus, entry.workTreeStatus) + ". " + _T("Unable to read file from the working directory. Please resolve this conflict in the terminal and then mark as resolved."))
 					.add(AttributeModifier.replace("class", "d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center")));
-			return;
 		}
-
-		diffContent.replace(new FileViewPanel("diffPanel", Model.of(fileData)));
 	}
 
 	private static String getConflictDescription(char indexStatus, char workTreeStatus) {
@@ -844,8 +861,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	private boolean isMergeInProgress() {
-		GitExecutionResult result = executeGit("rev-parse", "--verify", "MERGE_HEAD");
-		return result.getReturnCode() == 0;
+		return statusModel.getObject().mergeInProgress;
 	}
 
 	private boolean hasStagedFiles() {
@@ -856,43 +872,34 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		return false;
 	}
 
-	private int[] getAheadBehind() {
-		GitExecutionResult result = executeGit("rev-list", "--left-right", "--count",
-				"@{upstream}...HEAD");
-		if (result.getReturnCode() != 0) {
-			result = executeGit("rev-list", "--count", "HEAD");
-			if (result.getReturnCode() == 0) {
-				try {
-					int count = Integer.parseInt(stdoutString(result).trim());
-					return new int[]{0, count};
-				} catch (NumberFormatException e) {
-					// fall through
-				}
-			}
-			return new int[]{0, 0};
+	private int getAhead() {
+		Integer cached = statusModel.getObject().ahead;
+		return cached != null ? cached : 0;
+	}
+
+	private int countLocalCommits() {
+		GitExecutionResult result = executeGit("rev-list", "--count", "HEAD");
+		if (result.getReturnCode() != 0)
+			return 0;
+		try {
+			return Integer.parseInt(stdoutString(result).trim());
+		} catch (NumberFormatException e) {
+			return 0;
 		}
-		String output = stdoutString(result).trim();
-		String[] parts = output.split("\\s+");
-		if (parts.length == 2) {
-			try {
-				return new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])};
-			} catch (NumberFormatException e) {
-				return new int[]{0, 0};
-			}
-		}
-		return new int[]{0, 0};
 	}
 
 	private List<FileEntry> parseGitStatus() {
-		GitExecutionResult result = executeGit("status", "--porcelain");
-		if (result.getReturnCode() != 0)
-			return new ArrayList<>();
-		return parseGitStatusOutput(stdoutString(result));
+		return statusModel.getObject().entries;
 	}
 
-	private List<FileEntry> parseGitStatusOutput(String output) {
+	private StatusInfo parseStatusOutput(String output, boolean mergeInProgress) {
 		List<FileEntry> entries = new ArrayList<>();
+		Integer ahead = null;
 		for (String line : output.split("\n")) {
+			if (line.startsWith("## ")) {
+				ahead = parseAheadFromBranchHeader(line);
+				continue;
+			}
 			if (line.length() < 4)
 				continue;
 			char indexStatus = line.charAt(0);
@@ -900,21 +907,33 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			String path = line.substring(3);
 			if (path.startsWith("\"") && path.endsWith("\""))
 				path = unquoteGitPath(path);
-			if (path.endsWith("/")) {
-				GitExecutionResult lsResult = executeGit(
-						"ls-files", "--others", "--exclude-standard", "--", path);
-				if (lsResult.getReturnCode() == 0) {
-					for (String filePath : stdoutString(lsResult).split("\n")) {
-						filePath = filePath.trim();
-						if (!filePath.isEmpty())
-							entries.add(new FileEntry(indexStatus, workTreeStatus, filePath));
-					}
-				}
-			} else {
-				entries.add(new FileEntry(indexStatus, workTreeStatus, path));
-			}
+			entries.add(new FileEntry(indexStatus, workTreeStatus, path));
 		}
-		return entries;
+		return StatusInfo.success(entries, ahead, mergeInProgress);
+	}
+
+	/**
+	 * Parses the ahead count from the {@code ## branch...upstream [ahead N, behind M]}
+	 * header produced by {@code git status -b --porcelain}. Returns {@code null}
+	 * when the branch has no upstream (or for unborn / detached HEAD), in which
+	 * case the caller falls back to {@link #countLocalCommits()}.
+	 */
+	private Integer parseAheadFromBranchHeader(String line) {
+		String header = line.substring(3);
+		if (header.indexOf("...") < 0)
+			return null;
+		int aheadIdx = header.indexOf("[ahead ");
+		if (aheadIdx < 0)
+			return 0;
+		int start = aheadIdx + "[ahead ".length();
+		int end = start;
+		while (end < header.length() && Character.isDigit(header.charAt(end)))
+			end++;
+		try {
+			return Integer.parseInt(header.substring(start, end));
+		} catch (NumberFormatException e) {
+			return 0;
+		}
 	}
 
 	private String unquoteGitPath(String quoted) {
@@ -990,6 +1009,12 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		result.add(oldLines);
 		result.add(newLines);
 		return result;
+	}
+
+	@Override
+	protected void onDetach() {
+		statusModel.detach();
+		super.onDetach();
 	}
 
 	@Override
@@ -1091,6 +1116,34 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			this.displayStatus = 'C';
 			this.staged = false;
 			this.conflicted = true;
+		}
+	}
+
+	private static class StatusInfo implements Serializable {
+		private static final long serialVersionUID = 1L;
+
+		final List<FileEntry> entries;
+		final String errorMessage;
+		// Number of commits to push. Parsed from the branch header when the
+		// branch has an upstream; otherwise filled in with the count of local
+		// commits reachable from HEAD. null only when status loading failed.
+		final Integer ahead;
+		final boolean mergeInProgress;
+
+		private StatusInfo(List<FileEntry> entries, String errorMessage,
+				Integer ahead, boolean mergeInProgress) {
+			this.entries = entries;
+			this.errorMessage = errorMessage;
+			this.ahead = ahead;
+			this.mergeInProgress = mergeInProgress;
+		}
+
+		static StatusInfo success(List<FileEntry> entries, Integer ahead, boolean mergeInProgress) {
+			return new StatusInfo(entries, null, ahead, mergeInProgress);
+		}
+
+		static StatusInfo failure(String errorMessage) {
+			return new StatusInfo(new ArrayList<>(), errorMessage, null, false);
 		}
 	}
 

@@ -1,13 +1,12 @@
 <wicket:extend>
 	<div class="workspace-changes d-flex flex-grow-1 position-relative">
 		<div wicket:id="changesSidebar" class="changes-sidebar autofit d-flex flex-column flex-grow-1 border-right">
-			<div wicket:id="statusError" class="alert alert-light-danger text-break m-3"></div>
+			<div wicket:id="statusError" class="alert alert-light-warning text-break m-3"></div>
 			<div class="sync-info d-flex align-items-center p-3">
 				<div class="pull-info flex-grow-1 d-flex align-items-center">
-					<span wicket:id="behindCount" class="mr-1"></span>
 					<a wicket:id="pull" t:data-tippy-content="Pull"><wicket:svg href="arrow3" class="icon rotate-90"/></a>
 				</div>
-				<a wicket:id="sync" t:data-tippy-content="Sync" class="mx-2">
+				<a wicket:id="sync" t:data-tippy-content="Sync (pull & push)" class="mx-2">
 					<wicket:svg href="refresh" class="icon"/>
 				</a>
 				<div class="push-info flex-grow-1 d-flex align-items-center justify-content-end">

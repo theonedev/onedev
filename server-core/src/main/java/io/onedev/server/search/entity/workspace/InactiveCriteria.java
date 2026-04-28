@@ -2,18 +2,18 @@ package io.onedev.server.search.entity.workspace;
 
 import io.onedev.server.model.Workspace;
 
-public class ErrorCriteria extends StatusCriteria {
+public class InactiveCriteria extends StatusCriteria {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Workspace.Status getStatus() {
-		return Workspace.Status.ERROR;
+		return Workspace.Status.INACTIVE;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return WorkspaceQuery.getRuleName(WorkspaceQueryLexer.Error);
+		return WorkspaceQuery.getRuleName(WorkspaceQueryLexer.Inactive);
 	}
 
 }

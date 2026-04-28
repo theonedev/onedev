@@ -21,7 +21,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Workspace.Status;
 import io.onedev.server.search.entity.workspace.ActiveCriteria;
-import io.onedev.server.search.entity.workspace.ErrorCriteria;
+import io.onedev.server.search.entity.workspace.InactiveCriteria;
 import io.onedev.server.search.entity.workspace.PendingCriteria;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
 import io.onedev.server.util.criteria.Criteria;
@@ -79,7 +79,7 @@ public class WorkspaceStatsPanel extends Panel {
 				} else if (entry.getKey() == Status.ACTIVE) {
 					criteria = new ActiveCriteria();
 				} else {
-					criteria = new ErrorCriteria();
+					criteria = new InactiveCriteria();
 				}
 				WorkspaceQuery query = new WorkspaceQuery(criteria);
 				PageParameters params = ProjectWorkspacesPage.paramsOf(getProject(), query.toString(), 0);
@@ -92,7 +92,7 @@ public class WorkspaceStatsPanel extends Panel {
 				case ACTIVE:
 					cssClass = "link-success";
 					break;
-				case ERROR:
+				case INACTIVE:
 					cssClass = "link-danger";
 					break;
 				default:

@@ -70,6 +70,7 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	GitExecutionResult executeGitCommand(Workspace workspace, String[] gitArgs);
 
+	@Nullable
 	FileData readFileData(Workspace workspace, String path);
 
 }

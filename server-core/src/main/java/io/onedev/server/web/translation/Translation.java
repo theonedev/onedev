@@ -90,11 +90,13 @@ public class Translation extends TranslationResourceBundle {
 		extraKeys.add("PENDING");
 		extraKeys.add("FAILED");
 		extraKeys.add("CANCELLED");
-		extraKeys.add("TIMED_OUT");
+		extraKeys.add("TIMED_OUT");		
 		extraKeys.add("SUCCESSFUL");		
 		extraKeys.add("OPEN");
 		extraKeys.add("MERGED");
 		extraKeys.add("DISCARDED");
+		extraKeys.add("ACTIVE");
+		extraKeys.add("INACTIVE");
 		extraKeys.add("Container Image(s)");
 		extraKeys.add("Container Image");
 		extraKeys.add("RubyGems(s)");

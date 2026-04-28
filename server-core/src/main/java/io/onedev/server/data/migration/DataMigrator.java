@@ -8644,4 +8644,21 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate224(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Workspaces.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element workspaceElement : dom.getRootElement().elements()) {
+					Element statusElement = workspaceElement.element("status");
+					if (statusElement.getTextTrim().equals("ERROR"))
+						statusElement.setText("INACTIVE");
+					Element errorDateElement = workspaceElement.element("errorDate");
+					if (errorDateElement != null)
+						errorDateElement.setName("inactiveDate");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

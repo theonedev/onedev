@@ -83,8 +83,8 @@ public class WorkspaceStatusIcon extends SpriteImage {
 				return "target";
 			case ACTIVE:
 				return "tick-circle-o";
-			case ERROR:
-				return "times-circle-o";
+			case INACTIVE:
+				return "warning-o";
 			default:
 				throw new RuntimeException("Unexpected workspace status: " + status);
 		}

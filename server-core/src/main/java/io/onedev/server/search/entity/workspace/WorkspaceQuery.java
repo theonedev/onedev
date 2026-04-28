@@ -11,7 +11,7 @@ import static io.onedev.server.model.Workspace.SORT_FIELDS;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Active;
-import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Error;
+import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Inactive;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Is;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsGreaterThan;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsLessThan;
@@ -110,8 +110,8 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 							return new PendingCriteria();
 						case Active:
 							return new ActiveCriteria();
-						case Error:
-							return new ErrorCriteria();
+						case Inactive:
+							return new InactiveCriteria();
 						case WorkspaceQueryLexer.CreatedByMe:
 							if (!withCurrentUserCriteria)
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
