@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -25,8 +24,10 @@ import java.util.concurrent.ExecutorService;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -329,8 +330,7 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 		return portMappings;
 	}
 
-	private void setCommonDockerRunOptions(Commandline docker, String containerName, 
-				String runAs, TaskLogger logger) {
+	private void setCommonDockerRunOptions(Commandline docker, String containerName, String runAs) {
 		docker.args("run", "--rm", "--name=" + containerName);
 		if (isAlwaysPullImage())
 			docker.addArgs("--pull=always");
@@ -341,8 +341,6 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 			docker.addArgs("--cpus", getCpuLimit());
 		if (getMemoryLimit() != null)
 			docker.addArgs("--memory", getMemoryLimit());
-
-		docker.processKiller(newDockerKiller(docker, containerName, logger));
 	}
 
 	@Override
@@ -360,11 +358,6 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 		if (SystemUtils.IS_OS_LINUX && !osIds.equals("0:0")) {
 			logger.log("Changing owner of workspace directory to host user...");		
 			changeOwner(newDocker(), osIds, workspaceDir, osIds, logger);
-		}
-
-		if (!Bootstrap.isInDocker()) {
-			var dockerExecutableFile = new File(workspaceDir, "docker-executable");
-			FileUtils.writeFile(dockerExecutableFile, AgentUtils.getDockerExecutable(getDockerExecutable()));
 		}
 
 		var provisionerRegistryLogins = getRegistryLoginFacades(context.getToken());
@@ -460,7 +453,8 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 						+ "-" + context.getWorkspaceNumber() + "-user-data-init";
 				deleteContainerIfExist(docker, containerName, logger);
 
-				setCommonDockerRunOptions(docker, containerName, runAs, logger);
+				setCommonDockerRunOptions(docker, containerName, runAs);
+				docker.processKiller(newDockerKiller(newDocker(), containerName, logger));
 
 				var initEntrypointArgs = new StringBuilder("set -e");
 				for (var entry : emptyUserDataMounts.entrySet()) {
@@ -490,7 +484,8 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 			callWithRegistryLogins(docker, allRegistryLogins, () -> {
 				deleteContainerIfExist(docker, containerName, logger);
 
-				setCommonDockerRunOptions(docker, containerName, runAs, logger);
+				setCommonDockerRunOptions(docker, containerName, runAs);
+				docker.processKiller(newDockerKiller(newDocker(), containerName, logger));
 
 				if (!context.getSpec().getContainerPorts().isEmpty()) {
 					for (int containerPort : context.getSpec().getContainerPorts())
@@ -598,24 +593,16 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 					throw new RuntimeException(e);
 				} finally {
 					if (SystemUtils.IS_OS_LINUX && !osIds.equals("0:0")) {
-						var dirs = new HashSet<File>();
-						cacheProvisioner.getAllocations().stream()
-							.map(it->it.getPathMap().values())
-							.flatMap(Collection::stream)
-							.forEach(dirs::add);
-						userDataPathMap.values().forEach(dirs::add);
-						changeOwner(docker, osIds, dirs, osIds, logger);
+						changeOwner(newDocker(), osIds, workspaceDir, osIds, new TaskLogger() {
+							@Override
+							public void log(String message, @Nullable String sessionId) {
+								DockerProvisioner.logger.info(message);
+							}
+
+						});
 					}
-					try {
-						cacheProvisioner.uploadCaches();
-					} catch (Throwable t) {
-						DockerProvisioner.logger.error("Error uploading caches", t);
-					}
-					try {
-						userDataProvisioner.store(userDataCheckDate, userDataPathMap);
-					} catch (Throwable t) {
-						DockerProvisioner.logger.error("Error storing user data", t);
-					}
+					userDataProvisioner.store(userDataCheckDate, userDataPathMap);
+					cacheProvisioner.uploadCaches();
 				}
 			}
 

@@ -250,6 +250,41 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			Project project = (Project) event.getEntity();
 	    	if (project.getForkRoot().equals(project))
 	    		getNumberGenerator().removeNextSequence(project);
+		} else if (event.getEntity() instanceof Workspace) {
+			var workspace = (Workspace) event.getEntity();
+			var loggingSupport = workspace.getLoggingSupport();
+			var projectId = workspace.getProject().getId();
+			var workspaceNumber = workspace.getNumber();
+			var workspaceId = workspace.getId();
+
+			// record project server since workspace deletion can be called while
+			// deleting a project
+			var projectServer = projectService.getActiveServer(projectId, true);
+
+			if (projectServer != null) {
+				transactionService.runAfterCommit(() -> {
+					clusterService.submitToServer(projectServer, (ClusterTask<Void>) () -> {
+						try {
+							checkImmediately = true;
+
+							// Delete workspace directory after workspace runtime is removed to
+							// give a chance for cache to be uploaded
+							while (workspaceRuntimes.containsKey(workspaceId))
+								Thread.sleep(1000);
+							logService.flush(loggingSupport);
+
+							var workspaceDir = getWorkspaceDir(projectId, workspaceNumber);
+							FileUtils.deleteDir(workspaceDir);
+							projectService.directoryModified(projectId, workspaceDir.getParentFile());
+						} catch (Throwable t) {
+							var message = "Error deleting workspace storage directory (project id: %d, workspace number: %d)"
+									.formatted(projectId, workspaceNumber);
+							logger.error(message, t);
+						}
+						return null;
+					});
+				});
+			}
 		}
 	}
 
@@ -398,51 +433,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		});
 		update(workspace);
 		listenerRegistry.post(new WorkspacePending(workspace));
-	}
-
-	@Transactional
-	@Override
-	public void delete(Workspace workspace) {
-		dao.remove(workspace);
-
-		var loggingSupport = workspace.getLoggingSupport();
-		var projectId = workspace.getProject().getId();
-		var workspaceNumber = workspace.getNumber();
-		var workspaceId = workspace.getId();
-
-		transactionService.runAfterCommit(() -> {
-			projectService.submitToActiveServer(projectId, new ClusterTask<Void>() {
-
-				@Override
-				public Void call() throws Exception {
-					checkImmediately = true;
-					
-					// Delete workspace directory after workspace runtime is removed to 
-					// give a chance for cache to be uploaded
-					while (workspaceRuntimes.containsKey(workspaceId)) 
-						Thread.sleep(1000);
-					logService.flush(loggingSupport);	
-
-					var workspaceDir = getWorkspaceDir(projectId, workspaceNumber);
-					var dockerExecutableFile = new File(workspaceDir, "docker-executable");
-					if (!Bootstrap.isInDocker() && dockerExecutableFile.exists()) {
-						var dockerExecutable = FileUtils.readFileToString(dockerExecutableFile, UTF_8);
-						AgentUtils.deleteDirWithDocker(workspaceDir, new Commandline(dockerExecutable), new TaskLogger() {
-
-							@Override
-							public void log(String message, @Nullable String sessionId) {
-								logger.info(message);
-							}
-				
-						});				
-					} else {
-						FileUtils.deleteDir(workspaceDir);
-					}
-					return null;
-				}
-	
-			});
-		});
 	}
 
 	private void applyOrders(Root<Workspace> root, CriteriaQuery<?> criteriaQuery,
@@ -729,7 +719,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						logger.success("Workspace provisioned and is active now");
 
 						runtime.await();
-						return null;
+					} catch (Throwable t) {
+						if (ExceptionUtils.find(t, InterruptedException.class) == null)
+							DefaultWorkspaceService.logger.error("Error awaiting workspace runtime", t);
 					} finally {
 						for (var shellId : runtime.getShellLabels().keySet())
 							terminateShell(workspaceId, shellId);
@@ -739,6 +731,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 					semaphore.release();
 					workspaceContexts.remove(token);
 				}
+				return null;
 			});
 		} finally {
 			Workspace.pop();

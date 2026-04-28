@@ -489,13 +489,16 @@ public class DefaultProjectService extends BaseEntityService<Project>
 		query.setParameter("sourceProject", project);
 		query.executeUpdate();
 
-		for (Build build : project.getBuilds())
+		for (var workspace: project.getWorkspaces())
+			workspaceService.delete(workspace);
+
+		for (var build : project.getBuilds())
 			buildService.delete(build);
 
-		for (Pack pack : project.getPacks())
+		for (var pack : project.getPacks())
 			packService.delete(pack);
 
-		for (PackBlob packBlob : project.getPackBlobs())
+		for (var packBlob : project.getPackBlobs())
 			packBlobService.delete(packBlob);
 
 		dao.remove(project);

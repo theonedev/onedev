@@ -254,18 +254,20 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 			Long buildId = build.getProject().getId();
 			Long buildNumber = build.getNumber();
 
-			String activeServer = projectService.getActiveServer(projectId, false);
+			String projectServer = projectService.getActiveServer(projectId, false);
 			
 			transactionService.runAfterCommit(() -> {
 				cache.remove(buildId);
-				if (activeServer != null) {
-					clusterService.submitToServer(activeServer, () -> {
+				if (projectServer != null) {
+					clusterService.submitToServer(projectServer, () -> {
 						try {
 							var buildDir = getBuildDir(projectId, buildNumber);
 							FileUtils.deleteDir(buildDir);
 							projectService.directoryModified(projectId, buildDir.getParentFile());
 						} catch (Throwable e) {
-							logger.error("Error deleting storage directory of build id '" + buildId + "'", e);
+							var message = "Error deleting build storage directory (project id: %d, build number: %d)"
+									.formatted(projectId, buildNumber);
+							logger.error(message, e);
 						}
 						return null;
 					});
