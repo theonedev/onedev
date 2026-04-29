@@ -1081,7 +1081,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			if (runtime != null) {
 				return runtime.executeGitCommand(gitArgs);
 			} else {
-				return new GitExecutionResult(new byte[0], "Workspace no longer active".getBytes(UTF_8), 1);
+				return new GitExecutionResult(new byte[0], "Workspace is not active".getBytes(UTF_8), 1);
 			}
 		});
 	}

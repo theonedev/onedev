@@ -1344,7 +1344,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Environment variable <code>serverUrl</code> in above command is taken from OneDev server url specified in <i>Administration / System Setting</i>. Change it if necessary", 
 			"위 명령에서 <code>serverUrl</code> 환경 변수는 <i>관리 / 시스템 설정</i>에 지정된 OneDev 서버 URL에서 가져옵니다. 필요하면 변경하세요");
 		m.put("Equal", "동일");
-		m.put("Error", "오류");
 		m.put("Error authenticating user", "사용자 인증 오류");
 		m.put("Error calculating commits: check log for details", "커밋 계산 오류: 세부 사항은 로그를 확인하세요");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "{0}로 체리픽킹 오류: 병합 충돌이 감지되었습니다");
@@ -2964,6 +2963,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Post URL", "포스트 URL");
 		m.put("Post Url", "게시 URL");
 		m.put("PowerShell", "PowerShell");
+		m.put("PowerShell Executable", "PowerShell 실행 파일");
 		m.put("Prefix Pattern", "접두사 패턴");
 		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
 			"제목에 <code>WIP</code> 또는 <code>[WIP]</code>를 접두사로 추가하여 풀 리퀘스트를 진행 중인 작업으로 표시하십시오");
@@ -3513,6 +3513,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Share with Groups", "그룹과 공유");
 		m.put("Share with Users", "사용자와 공유");
 		m.put("Shell", "셸");
+		m.put("Shell Executable", "셸 실행 파일");
 		m.put("Shell Provisioner", "셸 프로비저너");
 		m.put("Shortcut Config", "바로가기 구성");
 		m.put("Shortcuts", "바로가기");
@@ -3734,6 +3735,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"쉼표로 구분된 허용된 <a href='https://spdx.org/licenses/'>SPDX 라이선스 식별자</a>를 지정하세요.");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
 			"메일 설정 정의에서 시스템 이메일 주소와 동일한 받은 편지함을 공유하는 이메일 주소를 지정합니다. 이 주소로 전송된 이메일은 이 프로젝트에서 이슈로 생성됩니다. 기본값은 <tt>&lt;시스템 이메일 주소 이름&gt;+&lt;프로젝트 경로&gt;@&lt;시스템 이메일 주소 도메인&gt;</tt> 형식을 따릅니다");
+		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
+			"이 실행기에 적용 가능한 작업을 지정하십시오.\n<b class='text-danger'>경고</b>: 이 실행기로 실행되는 작업은 OneDev 프로세스와 동일한 권한을 가집니다.\n신뢰할 수 있는 작업만 이 실행기를 사용할 수 있도록 하십시오");
 		m.put("Specify applicable projects for above option. Multiple projects should be separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
 			"위 옵션에 적용 가능한 프로젝트를 지정합니다. 여러 프로젝트는 공백으로 구분해야 합니다. '**', '*' 또는 '?'를 사용하여 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 수행합니다. '-'로 시작하여 제외합니다. 비워두면 모든 프로젝트에 적용됩니다");
 		m.put("Specify applicable projects separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
@@ -4200,6 +4203,9 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신에서 Docker 컨테이너로 빌드 작업을 실행합니다");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"이 실행자는 Kubernetes 클러스터에서 Pod로 빌드 작업을 실행합니다. 에이전트가 필요하지 않습니다.<b class='text-danger'>참고:</b> 작업 Pod가 소스 및 아티팩트를 다운로드하기 위해 시스템 설정에서 서버 URL이 올바르게 지정되었는지 확인하세요");
+		m.put("This executor runs build jobs with OneDev server's shell facility", "이 실행기는 OneDev 서버의 셸 기능으로 빌드 작업을 실행합니다");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"이 실행기는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 셸 기능으로 빌드 작업을 실행합니다");
 		m.put("This field is required", "이 필드는 필수입니다");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"이 필터는 현재 사용자의 LDAP 항목을 결정하는 데 사용됩니다. 예: <i>(&(uid={0})(objectclass=person))</i>. 이 예에서 <i>{0}</i>는 현재 사용자의 로그인 이름을 나타냅니다.");
@@ -4259,6 +4265,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This property is imported from {0}", "이 속성은 {0}에서 가져왔습니다");
 		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
 			"이 프로비저너는 보안 및 격리 목적으로 OneDev 서버에서 Docker 컨테이너 내에 워크스페이스를 생성합니다.\n현재 OneDev 서버가 Kubernetes 클러스터 내에 설치된 경우 지원되지 않습니다");
+		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
+			"이 프로비저너는 OneDev 서버의 셸 기능으로 작업 공간을 생성하며,\nOneDev 서버에 tmux가 설치되어 있어야 합니다");
 		m.put("This pull request has been discarded", "이 풀 리퀘스트는 폐기되었습니다");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"이 보고서는 빌드가 풀 리퀘스트에 의해 트리거된 경우 풀 리퀘스트 개요 페이지에 표시됩니다");
@@ -4507,6 +4515,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Uploading file", "파일 업로드 중");
 		m.put("Url", "URL");
 		m.put("Use '*' for wildcard match", "와일드카드 매칭에 '*' 사용");
+		m.put("Use '*' or '?' for wildcard match", "와일드카드 매칭에 '*' 또는 '?'를 사용하십시오");
 		m.put("Use '*' or '?' for wildcard match. Prefix with '-' to exclude", "와일드카드 매칭에 '*' 또는 '?' 사용. 제외하려면 '-'로 시작");
 		m.put("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>", 
 			"<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>에 '**', '*' 또는 '?' 사용");
@@ -4665,8 +4674,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"컨테이너 실행 시 항상 이미지를 풀할지 여부. 악의적인 작업에 의해 이미지가 교체되는 것을 방지하기 위해 이 옵션을 활성화해야 합니다");
 		m.put("Whether or not to be able to access time tracking info of issues", "문제의 시간 추적 정보를 액세스할 수 있는지 여부");
-		m.put("Whether or not to create the workspace inside container. If enabled, you will need a <a href='https://onedev.io/pricing' target='_blank'>enterprise subscription</a>", 
-			"컨테이너 내에서 작업 공간을 생성할지 여부입니다. 활성화하면 <a href='https://onedev.io/pricing' target='_blank'>엔터프라이즈 구독</a>이 필요합니다.");
 		m.put("Whether or not to enable code management for the project", "프로젝트에 대한 코드 관리를 활성화할지 여부");
 		m.put("Whether or not to enable issue management for the project", "프로젝트에 대한 문제 관리를 활성화할지 여부");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4741,6 +4748,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Workspace token", "워크스페이스 토큰");
 		m.put("Workspace {0} deleted", "워크스페이스 {0} 삭제됨");
 		m.put("Workspaces", "워크스페이스들");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"이 프로비저너에 의해 생성된 작업 공간은 OneDev 서버 프로세스와 동일한 권한을 가집니다.\n<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>에 '**', '*' 또는 '?'를 사용하십시오.\n여러 프로젝트는 공백으로 구분해야 합니다.<br>\n<b class='text-danger'>경고</b>: 이 프로비저너에 의해 생성된 작업 공간은 OneDev 서버 프로세스와 동일한 권한을 가집니다.\n신뢰할 수 있는 프로젝트만 이 프로비저너를 사용할 수 있도록 하십시오");
 		m.put("Workspaces on this branch", "이 브랜치의 워크스페이스들");
 		m.put("Write", "쓰기");
 		m.put("YAML", "YAML");
@@ -5024,18 +5033,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("PowerShell Executable", "PowerShell 실행 파일");
-		m.put("Shell Executable", "셸 실행 파일");
-		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
-			"이 실행기에 적용 가능한 작업을 지정하십시오.\n<b class='text-danger'>경고</b>: 이 실행기로 실행되는 작업은 OneDev 프로세스와 동일한 권한을 가집니다.\n신뢰할 수 있는 작업만 이 실행기를 사용할 수 있도록 하십시오");
-		m.put("This executor runs build jobs with OneDev server's shell facility", "이 실행기는 OneDev 서버의 셸 기능으로 빌드 작업을 실행합니다");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
-			"이 실행기는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 셸 기능으로 빌드 작업을 실행합니다");
-		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
-			"이 프로비저너는 OneDev 서버의 셸 기능으로 작업 공간을 생성하며,\nOneDev 서버에 tmux가 설치되어 있어야 합니다");
-		m.put("Use '*' or '?' for wildcard match", "와일드카드 매칭에 '*' 또는 '?'를 사용하십시오");
-		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
-			"이 프로비저너에 의해 생성된 작업 공간은 OneDev 서버 프로세스와 동일한 권한을 가집니다.\n<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>에 '**', '*' 또는 '?'를 사용하십시오.\n여러 프로젝트는 공백으로 구분해야 합니다.<br>\n<b class='text-danger'>경고</b>: 이 프로비저너에 의해 생성된 작업 공간은 OneDev 서버 프로세스와 동일한 권한을 가집니다.\n신뢰할 수 있는 프로젝트만 이 프로비저너를 사용할 수 있도록 하십시오");
+		m.put("ACTIVE", "활성화됨");
+		m.put("File not found", "파일을 찾을 수 없음");
+		m.put("INACTIVE", "비활성화됨");
+		m.put("Inactive", "비활성화됨");
+		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
+			"변경 사항을 표시하려면 워크스페이스를 다시 프로비저닝하거나 서버 \"{0}\"에 로그인하여 \"{1}\"에서 변경 사항을 확인하십시오");
+		m.put("Sync (pull & push)", "동기화 (풀 & 푸시)");
+		m.put("Whether or not to create the workspace inside container", "컨테이너 내부에 워크스페이스를 생성할지 여부");
 	}
 		
 	@Override

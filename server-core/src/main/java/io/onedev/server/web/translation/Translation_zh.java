@@ -1370,7 +1370,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Environment variable <code>serverUrl</code> in above command is taken from OneDev server url specified in <i>Administration / System Setting</i>. Change it if necessary", 
 			"上面的命令中的环境变量 <code>serverUrl</code> 取自 <i>管理 / 系统设置</i> 中指定的 OneDev 服务器 URL。如果需要，请更改它");
 		m.put("Equal", "等于");
-		m.put("Error", "错误");
 		m.put("Error authenticating user", "用户认证错误");
 		m.put("Error calculating commits: check log for details", "计算提交时出错：请检查日志");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "cherry-pick 到 {0} 时出错：合并冲突检测到");
@@ -2990,6 +2989,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Post URL", "发布 URL");
 		m.put("Post Url", "发布 URL");
 		m.put("PowerShell", "PowerShell");
+		m.put("PowerShell Executable", "PowerShell 可执行文件");
 		m.put("Prefix Pattern", "前缀模式");
 		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
 			"在标题前加上 <code>WIP</code> 或 <code>[WIP]</code> 以标记拉取请求为进行中的工作");
@@ -3539,6 +3539,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Share with Groups", "与组共享");
 		m.put("Share with Users", "与用户共享");
 		m.put("Shell", "Shell");
+		m.put("Shell Executable", "Shell 可执行文件");
 		m.put("Shell Provisioner", "Shell 配置器");
 		m.put("Shortcut Config", "快捷方式配置");
 		m.put("Shortcuts", "快捷方式");
@@ -3760,6 +3761,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定允许的逗号分隔的 <a href='https://spdx.org/licenses/'>SPDX 许可证标识符</a>");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
 			"指定一个与邮件设置定义中的系统电子邮件地址共享同一收件箱的电子邮件地址。发送到此地址的电子邮件将在此项目中创建为工单。默认值采用以下形式：<tt>&lt;系统电子邮件地址名称&gt;+&lt;项目路径&gt;@&lt;系统电子邮件地址域名&gt;</tt>");
+		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
+			"指定此执行器适用的任务。\n<b class='text-danger'>警告</b>：使用此执行器运行的任务具有与 OneDev 进程相同的权限。\n请确保只有受信任的任务可以使用此执行器");
 		m.put("Specify applicable projects for above option. Multiple projects should be separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
 			"指定上述选项适用的项目。多个项目应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空表示所有项目");
 		m.put("Specify applicable projects separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
@@ -4226,6 +4229,9 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 在远程机器上以 Docker 容器运行构建任务");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"此执行器在 Kubernetes 集群中以 Pod 形式运行构建任务，无需任何代理。<b class='text-danger'>注意：</b> 确保在系统设置中正确指定服务器 URL，因为任务 Pod 需要访问它以下载源代码和产物");
+		m.put("This executor runs build jobs with OneDev server's shell facility", "此执行器使用 OneDev 服务器的 shell 功能运行构建任务");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"此执行器通过<a href='/~administration/agents' target='_blank'>代理</a>使用远程机器的 shell 功能运行构建任务");
 		m.put("This field is required", "此字段是必填的");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"此过滤器用于确定当前用户的 LDAP 条目。例如：<i>(&(uid={0})(objectclass=person))</i>。在此示例中，<i>{0}</i> 表示当前用户的登录名");
@@ -4285,6 +4291,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This property is imported from {0}", "此属性是从 {0} 导入的");
 		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
 			"此配置器在 OneDev 服务器上的 Docker 容器中创建工作区，以实现\n安全和隔离目的。当 OneDev 服务器安装在 Kubernetes 集群中时，当前不支持");
+		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
+			"此配置器使用 OneDev 服务器的 shell 功能创建工作区，并要求在 OneDev 服务器上安装 tmux");
 		m.put("This pull request has been discarded", "此合并请求已丢弃");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"如果构建由合并请求触发，此报告将显示在合并请求概览页面中");
@@ -4533,6 +4541,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Uploading file", "上传文件");
 		m.put("Url", "URL");
 		m.put("Use '*' for wildcard match", "使用 '*' 进行通配符匹配");
+		m.put("Use '*' or '?' for wildcard match", "使用 '*' 或 '?' 进行通配符匹配");
 		m.put("Use '*' or '?' for wildcard match. Prefix with '-' to exclude", "使用 '*' 或 '?' 进行通配符匹配。前缀 '-' 排除");
 		m.put("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>", 
 			"使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>");
@@ -4691,8 +4700,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"运行容器时是否总是拉取镜像。应启用此选项以避免镜像被恶意操作替换");
 		m.put("Whether or not to be able to access time tracking info of issues", "是否能够访问工单的时间跟踪信息");
-		m.put("Whether or not to create the workspace inside container. If enabled, you will need a <a href='https://onedev.io/pricing' target='_blank'>enterprise subscription</a>", 
-			"是否在容器内创建工作区。如果启用，您将需要一个 <a href='https://onedev.io/pricing' target='_blank'>企业订阅</a>。");
 		m.put("Whether or not to enable code management for the project", "是否为项目启用代码管理");
 		m.put("Whether or not to enable issue management for the project", "是否为项目启用工单管理");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4767,6 +4774,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Workspace token", "工作区令牌");
 		m.put("Workspace {0} deleted", "工作区 {0} 已删除");
 		m.put("Workspaces", "工作区");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"此配置器创建的工作区具有与 OneDev 服务器进程相同的权限。\n使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。\n多个项目应以空格分隔。<br>\n<b class='text-danger'>警告</b>：此配置器创建的工作区具有与 OneDev 服务器进程相同的权限。\n请确保只有受信任的项目可以使用此配置器");
 		m.put("Workspaces on this branch", "此分支上的工作区");
 		m.put("Write", "写入");
 		m.put("YAML", "YAML");
@@ -5050,18 +5059,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("PowerShell Executable", "PowerShell 可执行文件");
-		m.put("Shell Executable", "Shell 可执行文件");
-		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
-			"指定此执行器适用的任务。\n<b class='text-danger'>警告</b>：使用此执行器运行的任务具有与 OneDev 进程相同的权限。\n请确保只有受信任的任务可以使用此执行器");
-		m.put("This executor runs build jobs with OneDev server's shell facility", "此执行器使用 OneDev 服务器的 shell 功能运行构建任务");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
-			"此执行器通过<a href='/~administration/agents' target='_blank'>代理</a>使用远程机器的 shell 功能运行构建任务");
-		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
-			"此配置器使用 OneDev 服务器的 shell 功能创建工作区，并要求在 OneDev 服务器上安装 tmux");
-		m.put("Use '*' or '?' for wildcard match", "使用 '*' 或 '?' 进行通配符匹配");
-		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
-			"此配置器创建的工作区具有与 OneDev 服务器进程相同的权限。\n使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。\n多个项目应以空格分隔。<br>\n<b class='text-danger'>警告</b>：此配置器创建的工作区具有与 OneDev 服务器进程相同的权限。\n请确保只有受信任的项目可以使用此配置器");
+		m.put("ACTIVE", "有效");
+		m.put("File not found", "文件未找到");
+		m.put("INACTIVE", "无效");
+		m.put("Inactive", "无效");
+		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
+			"请重新配置工作区以显示更改，或者您可以登录到服务器 \"{0}\" 并在 \"{1}\" 检查更改");
+		m.put("Sync (pull & push)", "同步 (pull & push)");
+		m.put("Whether or not to create the workspace inside container", "是否在容器内创建工作区");
 	}
 		
 	@Override

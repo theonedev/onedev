@@ -1344,7 +1344,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Environment variable <code>serverUrl</code> in above command is taken from OneDev server url specified in <i>Administration / System Setting</i>. Change it if necessary", 
 			"Die Umgebungsvariable <code>serverUrl</code> im obigen Befehl wird aus der OneDev-Server-URL übernommen, die in <i>Administration / System Setting</i> angegeben ist. Ändern Sie sie bei Bedarf");
 		m.put("Equal", "Gleich");
-		m.put("Error", "Fehler");
 		m.put("Error authenticating user", "Fehler bei der Authentifizierung des Benutzers");
 		m.put("Error calculating commits: check log for details", "Fehler beim Berechnen der Commits: Überprüfen Sie das Protokoll für Details");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "Fehler beim Cherry-Picking nach {0}: Merge-Konflikte erkannt");
@@ -2964,6 +2963,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Post URL", "Post-URL");
 		m.put("Post Url", "Post-URL");
 		m.put("PowerShell", "PowerShell");
+		m.put("PowerShell Executable", "PowerShell-Ausführbare Datei");
 		m.put("Prefix Pattern", "Präfix-Muster");
 		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
 			"Präfixieren Sie den Titel mit <code>WIP</code> oder <code>[WIP]</code>, um die Pull-Anfrage als in Bearbeitung zu kennzeichnen");
@@ -3513,6 +3513,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Share with Groups", "Mit Gruppen teilen");
 		m.put("Share with Users", "Mit Benutzern teilen");
 		m.put("Shell", "Shell");
+		m.put("Shell Executable", "Shell-Ausführbare Datei");
 		m.put("Shell Provisioner", "Shell-Provisionierer");
 		m.put("Shortcut Config", "Shortcut-Konfiguration");
 		m.put("Shortcuts", "Shortcuts");
@@ -3734,6 +3735,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Zulässige <a href='https://spdx.org/licenses/'>SPDX-Lizenzkennungen</a> durch Komma getrennt angeben");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
 			"Gibt eine E-Mail-Adresse an, die denselben Posteingang wie die System-E-Mail-Adresse in der Mail-Einstellung-Definition teilt. E-Mails, die an diese Adresse gesendet werden, werden als Issues in diesem Projekt erstellt. Der Standardwert hat die Form <tt>&lt;System-E-Mail-Adresse-Name&gt;+&lt;Projektpfad&gt;@&lt;System-E-Mail-Adresse-Domain&gt;</tt>");
+		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
+			"Geben Sie die anwendbaren Jobs dieses Executors an.\n<b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Privilegien wie der OneDev-Prozess.\nBitte stellen Sie sicher, dass nur vertrauenswürdige Jobs diesen Executor verwenden können");
 		m.put("Specify applicable projects for above option. Multiple projects should be separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
 			"Gibt anwendbare Projekte für die oben genannte Option an. Mehrere Projekte sollten durch Leerzeichen getrennt werden. Verwenden Sie '**', '*' oder '?' für <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>Pfad-Wildcard-Abgleich</a>. Mit '-' vorangestellt, um auszuschließen. Lassen Sie das Feld leer für alle Projekte");
 		m.put("Specify applicable projects separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
@@ -4200,6 +4203,9 @@ public class Translation_de extends TranslationResourceBundle {
 			"Dieser Executor führt Build-Jobs als Docker-Container auf Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agents</a> aus");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"Dieser Executor führt Build-Jobs als Pods in einem Kubernetes-Cluster aus. Es werden keine Agents benötigt.<b class='text-danger'>Hinweis:</b> Stellen Sie sicher, dass die Server-URL in den Systemeinstellungen korrekt angegeben ist, da Job-Pods darauf zugreifen müssen, um Quellcode und Artefakte herunterzuladen");
+		m.put("This executor runs build jobs with OneDev server's shell facility", "Dieser Executor führt Build-Jobs mit der Shell-Funktionalität des OneDev-Servers aus");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität von Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agenten</a> aus");
 		m.put("This field is required", "Dieses Feld ist erforderlich");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"Dieser Filter wird verwendet, um den LDAP-Eintrag für den aktuellen Benutzer zu bestimmen. Zum Beispiel: <i>(&(uid={0})(objectclass=person))</i>. In diesem Beispiel repräsentiert <i>{0}</i> den Anmeldenamen des aktuellen Benutzers.");
@@ -4259,6 +4265,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("This property is imported from {0}", "Diese Eigenschaft wird aus {0} importiert");
 		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
 			"Dieser Provisioner erstellt Workspaces innerhalb von Docker-Containern auf dem OneDev-Server für\nSicherheits- und Isolationszwecke. Es wird derzeit nicht unterstützt, wenn der OneDev-Server\ninnerhalb eines Kubernetes-Clusters installiert ist");
+		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
+			"Dieser Bereitsteller erstellt Arbeitsbereiche mit der Shell-Funktionalität des OneDev-Servers und erfordert\ndass tmux auf dem OneDev-Server installiert ist");
 		m.put("This pull request has been discarded", "Dieser Pull-Request wurde verworfen");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"Dieser Bericht wird auf der Übersichtsseite des Pull-Requests angezeigt, wenn der Build durch den Pull-Request ausgelöst wird");
@@ -4507,6 +4515,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Uploading file", "Datei wird hochgeladen");
 		m.put("Url", "URL");
 		m.put("Use '*' for wildcard match", "Verwenden Sie '*' für Wildcard-Matching");
+		m.put("Use '*' or '?' for wildcard match", "Verwenden Sie '*' oder '?' für Platzhalterabgleich");
 		m.put("Use '*' or '?' for wildcard match. Prefix with '-' to exclude", "Verwenden Sie '*' oder '?' für Wildcard-Matching. Mit '-' voranstellen, um auszuschließen");
 		m.put("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>", 
 			"Verwenden Sie '**', '*' oder '?' für <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>Pfad-Wildcard-Matching</a>");
@@ -4665,8 +4674,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"Ob das Bild beim Ausführen des Containers immer gezogen werden soll oder nicht. Diese Option sollte aktiviert werden, um zu vermeiden, dass Bilder durch bösartige Operationen ersetzt werden");
 		m.put("Whether or not to be able to access time tracking info of issues", "Ob auf Zeitverfolgungsinformationen von Problemen zugegriffen werden kann oder nicht");
-		m.put("Whether or not to create the workspace inside container. If enabled, you will need a <a href='https://onedev.io/pricing' target='_blank'>enterprise subscription</a>", 
-			"Ob der Arbeitsbereich innerhalb eines Containers erstellt werden soll oder nicht. Wenn aktiviert, benötigen Sie ein <a href='https://onedev.io/pricing' target='_blank'>Unternehmensabonnement</a>");
 		m.put("Whether or not to enable code management for the project", "Ob die Codeverwaltung für das Projekt aktiviert werden soll oder nicht");
 		m.put("Whether or not to enable issue management for the project", "Ob die Problemverwaltung für das Projekt aktiviert werden soll oder nicht");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4741,6 +4748,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Workspace token", "Arbeitsbereichs-Token");
 		m.put("Workspace {0} deleted", "Arbeitsbereich {0} gelöscht");
 		m.put("Workspaces", "Arbeitsbereiche");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"Arbeitsbereiche, die von diesem Bereitsteller erstellt werden, haben dieselben Privilegien wie der OneDev-Server-Prozess.\nVerwenden Sie '**', '*' oder '?' für <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>Pfad-Platzhalterabgleich</a>.\nMehrere Projekte sollten durch Leerzeichen getrennt werden.<br>\n<b class='text-danger'>WARNUNG</b>: Arbeitsbereiche, die von diesem Bereitsteller erstellt werden, haben dieselben Privilegien wie der OneDev-Server-Prozess.\nBitte stellen Sie sicher, dass nur vertrauenswürdige Projekte diesen Bereitsteller verwenden können");
 		m.put("Workspaces on this branch", "Arbeitsbereiche auf diesem Branch");
 		m.put("Write", "Schreiben");
 		m.put("YAML", "YAML");
@@ -5024,18 +5033,14 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("PowerShell Executable", "PowerShell-Ausführbare Datei");
-		m.put("Shell Executable", "Shell-Ausführbare Datei");
-		m.put("Specify applicable jobs of this executor.\n<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process.\nPlease make sure that only trusted jobs can use this executor", 
-			"Geben Sie die anwendbaren Jobs dieses Executors an.\n<b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Privilegien wie der OneDev-Prozess.\nBitte stellen Sie sicher, dass nur vertrauenswürdige Jobs diesen Executor verwenden können");
-		m.put("This executor runs build jobs with OneDev server's shell facility", "Dieser Executor führt Build-Jobs mit der Shell-Funktionalität des OneDev-Servers aus");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>", 
-			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität von Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agenten</a> aus");
-		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
-			"Dieser Bereitsteller erstellt Arbeitsbereiche mit der Shell-Funktionalität des OneDev-Servers und erfordert\ndass tmux auf dem OneDev-Server installiert ist");
-		m.put("Use '*' or '?' for wildcard match", "Verwenden Sie '*' oder '?' für Platzhalterabgleich");
-		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
-			"Arbeitsbereiche, die von diesem Bereitsteller erstellt werden, haben dieselben Privilegien wie der OneDev-Server-Prozess.\nVerwenden Sie '**', '*' oder '?' für <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>Pfad-Platzhalterabgleich</a>.\nMehrere Projekte sollten durch Leerzeichen getrennt werden.<br>\n<b class='text-danger'>WARNUNG</b>: Arbeitsbereiche, die von diesem Bereitsteller erstellt werden, haben dieselben Privilegien wie der OneDev-Server-Prozess.\nBitte stellen Sie sicher, dass nur vertrauenswürdige Projekte diesen Bereitsteller verwenden können");
+		m.put("ACTIVE", "AKTIV");
+		m.put("File not found", "Datei nicht gefunden");
+		m.put("INACTIVE", "INAKTIV");
+		m.put("Inactive", "Inaktiv");
+		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
+			"Bitte stellen Sie den Arbeitsbereich erneut bereit, um Änderungen anzuzeigen, oder Sie können sich beim Server \"{0}\" anmelden und Änderungen unter \"{1}\" überprüfen");
+		m.put("Sync (pull & push)", "Synchronisieren (ziehen & schieben)");
+		m.put("Whether or not to create the workspace inside container", "Ob der Arbeitsbereich im Container erstellt werden soll oder nicht");
 	}
 			
 	@Override

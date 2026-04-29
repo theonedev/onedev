@@ -167,7 +167,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			
 		};
 
-		if (!SecurityUtils.canModifyOrDelete(getWorkspace())) {
+		if (getWorkspace().getStatus() != Workspace.Status.ACTIVE || !SecurityUtils.canModifyOrDelete(getWorkspace())) {
 			pullLink.add(AttributeAppender.append("class", "disabled"));
 			pullLink.setEnabled(false);
 		}
@@ -206,7 +206,10 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			}
 
 		};
-		syncLink.setVisible(SecurityUtils.canModifyOrDelete(getWorkspace()));
+		if (getWorkspace().getStatus() != Workspace.Status.ACTIVE || !SecurityUtils.canModifyOrDelete(getWorkspace())) {
+			syncLink.add(AttributeAppender.append("class", "disabled"));
+			syncLink.setEnabled(false);
+		}
 		container.add(syncLink);
 
 		AjaxLink<Void> pushLink = new AjaxLink<Void>("push") {
@@ -232,7 +235,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 		};
 		pushLink.add(new AjaxIndicatorAppender());
-		if (aheadCount == 0 || !SecurityUtils.canModifyOrDelete(getWorkspace())) {
+		if (aheadCount == 0 || getWorkspace().getStatus() != Workspace.Status.ACTIVE || !SecurityUtils.canModifyOrDelete(getWorkspace())) {
 			pushLink.add(AttributeAppender.append("class", "disabled"));
 			pushLink.setEnabled(false);
 		}
