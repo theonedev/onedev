@@ -1,13 +1,27 @@
 onedev.server.log = {
-    appendLogEntries: function(containerId, logEntries) {
+    appendLogEntries: function(containerId, logEntries) {		
         var $log = $("#" + containerId + ">.log");
 		// parent scrollbar jumps as we remove/add log entries in chrome. Let's restore it afterwards
 		$log.parents().each(function() {
 			$(this).data("logScrollLeft", $(this).scrollLeft());
 			$(this).data("logScrollTop", $(this).scrollTop());
 		});
-        for (var i=0; i<logEntries.length; i++)
-			$log.append(onedev.server.jobLogEntry.render(logEntries[i], true));
+        for (var i=0; i<logEntries.length; i++) {
+			var logEntry = logEntries[i];
+			var replacing = logEntry.messages.length != 0 && logEntry.messages[0].text.charAt(0) == "\r";
+			if (replacing)
+				logEntry.messages[0].text = logEntry.messages[0].text.substring(1);
+			var $logEntry = onedev.server.jobLogEntry.render(logEntry, true);
+			if (replacing) {
+				var $lastEntry = $log.children(".log-entry:last");
+				if ($lastEntry.length != 0)
+					$lastEntry.replaceWith($logEntry);
+				else
+					$log.append($logEntry);
+			} else {
+				$log.append($logEntry);
+			}
+		}
         
         var $entries = $log.children(".log-entry");
         
