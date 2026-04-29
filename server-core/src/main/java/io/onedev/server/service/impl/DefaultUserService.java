@@ -663,7 +663,8 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 							var finishError = taskChecker.preTaskFinish(toolCallCounts);
 							if (finishError != null
 									&& taskFinishCheckRetryCount.incrementAndGet() <= TASK_FINISH_CHECK_MAX_RETRIES) {
-								messages.add(aiMessage);
+								if (StringUtils.isNotBlank(aiMessage.text()))
+									messages.add(aiMessage);
 								messages.add(new UserMessage(finishError));
 								continue;
 							}
