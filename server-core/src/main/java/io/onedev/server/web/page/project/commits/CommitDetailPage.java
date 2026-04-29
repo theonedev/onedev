@@ -8,6 +8,7 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.tools.CommitDetailTool;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.codequality.CodeProblem;
@@ -1083,7 +1084,22 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		var projectId = getProject().getId();
 		var oldCommitId = getCompareWith().copy();
 		var newCommitId = getCommit().copy();
-		return wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null));
+		var tools = new ArrayList<ChatTool>();
+		tools.add(wrapForChat(new CommitDetailTool() {
+
+			@Override
+			protected Long getProjectId() {
+				return projectId;
+			}
+
+			@Override
+			protected ObjectId getCommitId() {
+				return newCommitId;
+			}
+
+		}));
+		tools.addAll(wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null)));
+		return tools;
 	}
 
 }
