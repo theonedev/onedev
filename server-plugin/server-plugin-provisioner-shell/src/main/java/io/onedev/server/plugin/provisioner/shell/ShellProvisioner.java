@@ -14,7 +14,6 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.model.support.workspace.spec.EnvVar;
 import org.apache.commons.io.FilenameUtils;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -29,10 +28,10 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.cache.WorkspaceCacheProvisioner;
 import io.onedev.server.git.CommandUtils;
-import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
+import io.onedev.server.model.support.workspace.spec.EnvVar;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;

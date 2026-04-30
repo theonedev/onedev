@@ -84,7 +84,7 @@ public class GeneralErrorPage extends SimplePage {
 				
 			}.setBody(Model.of(_T("Sync Replica Status and Back to Home"))));
 		} else {
-			container.add(new ViewStateAwarePageLink<Void>("home", HomePage.class));
+			container.add(new ViewStateAwarePageLink<Void>("home", HomePage.class).setBody(Model.of(_T("Back To Home"))));
 		}
 
 		container.add(new AjaxLink<Void>("showDetail") {

@@ -5,9 +5,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,8 +65,8 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.workspace.WorkspaceActive;
 import io.onedev.server.event.project.workspace.WorkspaceCreated;
-import io.onedev.server.event.project.workspace.WorkspaceInactive;
 import io.onedev.server.event.project.workspace.WorkspaceEvent;
+import io.onedev.server.event.project.workspace.WorkspaceInactive;
 import io.onedev.server.event.project.workspace.WorkspacePending;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -196,18 +199,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		workspace.setNumberScope(workspace.getProject().getForkRoot());
 		workspace.setNumber(getNumberGenerator().getNextSequence(workspace.getNumberScope()));
 		dao.persist(workspace);
-
-		var projectId = workspace.getProject().getId();
-		var workspaceNumber = workspace.getNumber();
-		projectService.runOnActiveServer(projectId, new ClusterTask<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				FileUtils.cleanDir(getWorkspaceDir(projectId, workspaceNumber));
-				return null;
-			}
-
-		});
 		listenerRegistry.post(new WorkspaceCreated(workspace));
 	}
 
@@ -1119,24 +1110,4 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	}
 
-	private static class HasLfsObjectsTask implements ClusterTask<Boolean> {
-
-		private static final long serialVersionUID = 1L;
-
-		private final Long projectId;
-
-		private final Long workspaceNumber;
-		
-		public HasLfsObjectsTask(Long projectId, Long workspaceNumber) {
-			this.projectId = projectId;
-			this.workspaceNumber = workspaceNumber;
-		}
-		
-		@Override
-		public Boolean call() throws Exception {
-			var workspaceService = OneDev.getInstance(DefaultWorkspaceService.class);
-			return workspaceService.projectService.runOnActiveServer(projectId, () -> workspaceService.hasLfsObjects(projectId, workspaceNumber));
-		}
-		
-	}
 }

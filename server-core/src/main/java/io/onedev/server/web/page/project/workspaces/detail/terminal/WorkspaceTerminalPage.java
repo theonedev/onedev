@@ -71,14 +71,18 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 
 			@Override
 			protected void writeToStdin(IWebSocketConnection connection, String data) {
-				if (SecurityUtils.canModifyOrDelete(getWorkspace()))
-					workspaceService.onMessage(connection, getWorkspace(), shellId, "SHELL_INPUT:" + data);
+				workspaceService.onMessage(connection, getWorkspace(), shellId, "SHELL_INPUT:" + data);
 			}
 
 			@Override
 			protected void onResized(IWebSocketConnection connection, int rows, int cols) {
 				workspaceService.onMessage(connection, getWorkspace(), shellId,
 						"TERMINAL_RESIZE:" + rows + "," + cols);
+			}
+
+			@Override
+			protected boolean canWriteToStdin() {
+				return SecurityUtils.canModifyOrDelete(getWorkspace());
 			}
 
 			@Override

@@ -19,8 +19,6 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 import static org.apache.tika.mime.MimeTypes.OCTET_STREAM;
 import static org.glassfish.jersey.client.ClientProperties.REQUEST_ENTITY_PROCESSING;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

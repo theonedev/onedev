@@ -35,6 +35,7 @@ public abstract class TerminalPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		var canWriteToStdin = canWriteToStdin();
 		add(new WebSocketBehavior() {
 
 			@Override
@@ -60,7 +61,8 @@ public abstract class TerminalPanel extends Panel {
 				if (connection != null) {
 					if (message.getText().startsWith("SHELL_INPUT:")) {
 						String data = message.getText().substring("SHELL_INPUT:".length());
-						writeToStdin(connection, data);
+						if (canWriteToStdin)
+							writeToStdin(connection, data);
 					} else if (message.getText().startsWith("TERMINAL_RESIZE:")) {
 						String size = message.getText().substring("TERMINAL_RESIZE:".length());
 						int rows = Integer.parseInt(StringUtils.substringBefore(size, ","));
@@ -111,5 +113,9 @@ public abstract class TerminalPanel extends Panel {
 	protected abstract void onResized(IWebSocketConnection connection, int rows, int cols);
 
 	protected abstract void onShellExit(IPartialPageRequestHandler handler);
+
+	protected boolean canWriteToStdin() {
+		return true;
+	}
 
 }

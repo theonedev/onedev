@@ -5,11 +5,9 @@ import static io.onedev.k8shelper.KubernetesHelper.initRepository;
 import static io.onedev.k8shelper.KubernetesHelper.installGitLfs;
 import static io.onedev.k8shelper.KubernetesHelper.setupGitCerts;
 import static io.onedev.k8shelper.KubernetesHelper.setupOriginUrl;
-import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.validation.constraints.Min;
@@ -27,11 +25,9 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
-import io.onedev.server.model.support.workspace.spec.EnvVar;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.usage.Usage;
