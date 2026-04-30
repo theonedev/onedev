@@ -2,7 +2,6 @@ package io.onedev.server.git;
 
 import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static io.onedev.server.workspace.WorkspaceService.GIT_PREFIX;
 import static org.apache.commons.lang3.StringUtils.strip;
 
 import java.io.File;
@@ -10,7 +9,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -41,7 +39,6 @@ import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.eclipse.jgit.http.server.ServletUtils;
 import org.eclipse.jgit.transport.PacketLineOut;
 import org.glassfish.jersey.client.ClientProperties;
-import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
@@ -52,7 +49,6 @@ import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.Workspace;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.CodePushAuthorizationSource;
@@ -128,25 +124,6 @@ public class GitFilter implements Filter {
 		response.setHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
 	}
 
-	@Nullable
-	private File getWorkspaceGitDir(String projectInfo) {
-		projectInfo = strip(projectInfo, "/");
-		int idx = projectInfo.indexOf(GIT_PREFIX);
-		if (idx < 0)
-			return null;
-		String projectPath = strip(projectInfo.substring(0, idx), "/");
-		String numberStr = projectInfo.substring(idx + GIT_PREFIX.length());
-		numberStr = strip(numberStr, "/");
-		var facade = projectService.findFacadeByPath(projectPath);
-		if (facade == null)
-			throw new EntityNotFoundException("Project not found: " + projectPath);
-		long workspaceNumber = Long.parseLong(numberStr);
-		File gitDir = new File(Workspace.getWorkDir(facade.getId(), workspaceNumber), ".git");
-		if (!gitDir.exists())
-			throw new ExplicitException("Workspace git directory not found");
-		return gitDir;
-	}
-
 	protected void processPack(final HttpServletRequest request, final HttpServletResponse response) 
 			throws IOException, InterruptedException, ExecutionException {
 		boolean upload = GitSmartHttpTools.isUploadPack(request);
@@ -158,31 +135,6 @@ public class GitFilter implements Filter {
 		String principal = (String) SecurityUtils.getSubject().getPrincipal();
 		boolean clusterAccess = SecurityUtils.isSystem(principal);
 
-		File workspaceGitDir = getWorkspaceGitDir(projectInfo);
-		if (workspaceGitDir != null) {
-			if (!clusterAccess)
-				throw new UnauthorizedException("Cluster credential required to access workspace git");
-			if (!upload)
-				throw new ExplicitException("Push to workspace git is not supported");
-
-			doNotCache(response);
-			response.setHeader("Content-Type", "application/x-" + service + "-result");
-
-			InputStream stdin = new FilterInputStream(ServletUtils.getInputStream(request)) {
-				@Override
-				public void close() {
-				}
-			};
-			OutputStream stdout = new OutputStreamWrapper(response.getOutputStream()) {
-				@Override
-				public void close() {
-				}
-			};
-
-			String protocol = request.getHeader("Git-Protocol");
-			CommandUtils.uploadPack(workspaceGitDir, Collections.emptyMap(), protocol, stdin, stdout);
-			return;
-		}
 		var projectPath = decodeFullRepoNameAsPath(strip(projectInfo, "/"));
 		Long projectId = getProjectId(projectPath, clusterAccess, upload);
 		
@@ -363,25 +315,6 @@ public class GitFilter implements Filter {
 		String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
 
 		boolean clusterAccess = SecurityUtils.isSystem();
-		File workspaceGitDir = getWorkspaceGitDir(projectInfo);
-		if (workspaceGitDir != null) {
-			if (!clusterAccess)
-				throw new UnauthorizedException("Cluster credential required to access workspace git");
-			if (!upload)
-				throw new ExplicitException("Push to workspace git is not supported");
-
-			writeInitial(response, service);
-
-			OutputStream output = new OutputStreamWrapper(response.getOutputStream()) {
-				@Override
-				public void close() throws IOException {
-				}
-			};
-
-			String protocol = request.getHeader("Git-Protocol");
-			new AdvertiseUploadRefsCommand(workspaceGitDir, output).protocol(protocol).run();
-			return;
-		} 
 		var projectPath = decodeFullRepoNameAsPath(strip(projectInfo, "/"));
 		Long projectId = getProjectId(projectPath, clusterAccess, upload);
 				

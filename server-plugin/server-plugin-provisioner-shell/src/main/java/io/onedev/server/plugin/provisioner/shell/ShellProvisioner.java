@@ -2,6 +2,7 @@ package io.onedev.server.plugin.provisioner.shell;
 
 import static io.onedev.agent.AgentUtils.newErrorLogger;
 import static io.onedev.agent.AgentUtils.newInfoLogger;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.validation.constraints.NotEmpty;
 
+import io.onedev.server.model.support.workspace.spec.EnvVar;
 import org.apache.commons.io.FilenameUtils;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -119,12 +121,14 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 		}
 		
 		var workspaceDir = getWorkspaceDir(context);
+		setupRepository(context, workspaceDir.getAbsolutePath(), logger);
 
-		var envVars = setupRepository(context, workspaceDir.getAbsolutePath(), logger);
+		var envVars = context.getSpec().getEnvVars().stream()
+				.collect(toMap(EnvVar::getName, it -> it.isSecret() ? it.getSecretValue() : it.getValue()));
 
 		envVars.put("TERM", "xterm-256color");
 		envVars.put("LANG", "C.UTF-8");
-		var workDir = new File(workspaceDir, "work");
+		var workDir = Workspace.getWorkDir(context.getProjectId(), context.getWorkspaceNumber());
 		envVars.put("ONEDEV_WORKDIR", workDir.getAbsolutePath());
 
 		logger.log("Setting up cache...");
@@ -162,7 +166,6 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 			public GitExecutionResult executeGitCommand(String[] gitArgs) {
 				var git = CommandUtils.newGit();
 				git.workingDir(workDir);
-				git.envs().putAll(HookUtils.getWorkspacePostCommitHookEnvs(context.getToken()));
 				git.args(Arrays.asList(gitArgs));
 
 				var stdoutStream = new ByteArrayOutputStream();
@@ -174,7 +177,6 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 			@Override
 			public Shell doOpenShell(Terminal terminal) {
 				var workDir = Workspace.getWorkDir(context.getProjectId(), context.getWorkspaceNumber());
-				FileUtils.createDir(workDir);
 				var tmux = newTmux();
 				tmux.addArgs("new-session")
 					.addArgs(context.getSpec().getShell().getFacility().getExecutable())

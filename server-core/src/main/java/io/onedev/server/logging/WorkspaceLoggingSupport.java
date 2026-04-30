@@ -63,7 +63,6 @@ public class WorkspaceLoggingSupport implements LoggingSupport {
 
 	@Override
 	public void fileModified() {
-		getProjectService().directoryModified(identity.getProjectId(), identity.getFile().getParentFile());
 	}
 
 	@Override

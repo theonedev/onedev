@@ -93,7 +93,7 @@ public class WorkspaceStatsPanel extends Panel {
 					cssClass = "link-success";
 					break;
 				case INACTIVE:
-					cssClass = "link-danger";
+					cssClass = "link-warning";
 					break;
 				default:
 					cssClass = "link-warning";

@@ -5,7 +5,6 @@ import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static io.onedev.server.workspace.WorkspaceService.GIT_PREFIX;
 import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static javax.servlet.http.HttpServletResponse.SC_CREATED;
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
@@ -16,7 +15,6 @@ import static javax.servlet.http.HttpServletResponse.SC_NOT_IMPLEMENTED;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
-import static org.apache.commons.lang3.StringUtils.strip;
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 import static org.apache.tika.mime.MimeTypes.OCTET_STREAM;
 import static org.glassfish.jersey.client.ClientProperties.REQUEST_ENTITY_PROCESSING;
@@ -69,7 +67,6 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.model.GitLfsLock;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.Workspace;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.CodePullAuthorizationSource;
@@ -167,46 +164,6 @@ public class GitLfsFilter implements Filter {
 		}
 	}
 
-	private boolean isWorkspacePath(String pathInfo) {
-		return pathInfo.contains(GIT_PREFIX);
-	}
-
-	@Nullable
-	private long[] parseWorkspaceInfo(String pathInfo) {
-		int idx = pathInfo.indexOf(GIT_PREFIX);
-		if (idx < 0)
-			return null;
-		String projectPath = strip(pathInfo.substring(0, idx), "/");
-		String afterWorkspaces = pathInfo.substring(idx + GIT_PREFIX.length());
-		String numberStr;
-		int dotGitIdx = afterWorkspaces.indexOf(".git/");
-		if (dotGitIdx >= 0) {
-			numberStr = afterWorkspaces.substring(0, dotGitIdx);
-		} else {
-			int slashIdx = afterWorkspaces.indexOf('/');
-			numberStr = slashIdx >= 0 ? afterWorkspaces.substring(0, slashIdx) : afterWorkspaces;
-		}
-		var facade = projectService.findFacadeByPath(projectPath);
-		if (facade == null)
-			throw new ExplicitException("Project not found: " + projectPath);
-		long workspaceNumber = Long.parseLong(numberStr);
-		return new long[]{facade.getId(), workspaceNumber};
-	}
-
-	private File getWorkspaceLfsFile(long projectId, long workspaceNumber, String objectId) {
-		File workDir = Workspace.getWorkDir(projectId, workspaceNumber);
-		return new File(workDir, ".git/lfs/objects/"
-				+ objectId.substring(0, 2) + "/"
-				+ objectId.substring(2, 4) + "/" + objectId);
-	}
-
-	private String getWorkspaceObjectUrl(long projectId, long workspaceNumber, String objectId) {
-		var serverUrl = clusterService.getServerUrl(clusterService.getLocalServerAddress());
-		var projectPath = projectService.findFacadeById(projectId).getPath();
-		return String.format("%s/%s/%s%d.git/lfs/objects/%s?lfs-objects=true",
-				serverUrl, projectPath, GIT_PREFIX, workspaceNumber, objectId);
-	}
-
 	private String getObjectUrl(HttpServletRequest request, String projectPath, 
 			String objectId, boolean clusterAccess) {
 		var serverUrl = clusterAccess ? clusterService.getServerUrl(clusterService.getLocalServerAddress()) : settingService.getSystemSetting().getServerUrl();
@@ -241,32 +198,6 @@ public class GitLfsFilter implements Filter {
 		boolean clusterAccess = SecurityUtils.isSystem();
 		
 		if ("true".equals(httpRequest.getParameter("lfs-objects"))) {
-			if (isWorkspacePath(pathInfo)) {
-				if (!clusterAccess) {
-					sendBatchError(httpResponse, SC_UNAUTHORIZED, 
-							"Cluster credential required to access workspace LFS");
-					return;
-				}
-				if (!httpRequest.getMethod().equals("GET")) {
-					sendBatchError(httpResponse, SC_FORBIDDEN, 
-							"Upload to workspace LFS is not supported");
-					return;
-				}
-				long[] workspaceInfo = parseWorkspaceInfo(pathInfo);
-				String objectId = StringUtils.substringAfterLast(pathInfo, "/");
-				File lfsFile = getWorkspaceLfsFile(workspaceInfo[0], workspaceInfo[1], objectId);
-				if (lfsFile.exists()) {
-					httpResponse.setContentType(OCTET_STREAM);
-					try (InputStream is = new FileInputStream(lfsFile);
-						 OutputStream os = httpResponse.getOutputStream()) {
-						IOUtils.copy(is, os, BUFFER_SIZE);
-					}
-				} else {
-					httpResponse.setStatus(SC_NOT_FOUND);
-				}
-				return;
-			}
-
 			String projectPath = getProjectPath(pathInfo);
 			String objectId = StringUtils.substringAfterLast(pathInfo, "/");
 			
@@ -394,23 +325,7 @@ public class GitLfsFilter implements Filter {
 					&& httpRequest.getContentType().startsWith(CONTENT_TYPE)
 				|| httpRequest.getHeader("Accept") != null 
 					&& httpRequest.getHeader("Accept").startsWith(CONTENT_TYPE)) {
-			if (isWorkspacePath(pathInfo)) {
-				if (!clusterAccess) {
-					sendBatchError(httpResponse, SC_UNAUTHORIZED, 
-							"Cluster credential required to access workspace LFS");
-					return;
-				}
-				httpResponse.setContentType(CONTENT_TYPE);
-				if (pathInfo.endsWith("/batch")) {
-					long[] workspaceInfo = parseWorkspaceInfo(pathInfo);
-					processWorkspaceBatch(httpRequest, httpResponse, workspaceInfo[0], workspaceInfo[1]);
-				} else {
-					sendBatchError(httpResponse, SC_NOT_IMPLEMENTED, 
-							"Locks are not supported for workspace LFS");
-				}
-				return;
-			}
-			String projectPath = getProjectPath(pathInfo);			
+			String projectPath = getProjectPath(pathInfo);
 			if (clusterAccess) {
 				ProjectFacade project = projectService.findFacadeByPath(projectPath);
 				if (project == null) {
@@ -676,46 +591,6 @@ public class GitLfsFilter implements Filter {
 			batchResponse.put("objects", objectsResponse);
 			writeTo(httpResponse, batchResponse);
 		}
-	}
-	
-	private void processWorkspaceBatch(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
-									   long projectId, long workspaceNumber) {
-		JsonNode batchRequestNode = parseAndValidateBatchRequest(httpRequest, httpResponse);
-		if (batchRequestNode == null)
-			return;
-
-		boolean upload = batchRequestNode.get("operation").asText().equals("upload");
-		if (upload) {
-			sendBatchError(httpResponse, SC_FORBIDDEN,
-					"Upload to workspace LFS is not supported");
-			return;
-		}
-
-		List<Map<String, Object>> objectsResponse = new ArrayList<>();
-		for (JsonNode objectNode : batchRequestNode.get("objects")) {
-			String objectId = objectNode.get("oid").asText();
-			long objectSize = objectNode.get("size").asLong();
-			Map<String, Object> objectResponse = new HashMap<>();
-			objectResponse.put("oid", objectId);
-			objectResponse.put("size", objectSize);
-			File lfsFile = getWorkspaceLfsFile(projectId, workspaceNumber, objectId);
-			if (lfsFile.exists()) {
-				Map<Object, Object> actionResponse = newHashMap(
-						"href", getWorkspaceObjectUrl(projectId, workspaceNumber, objectId));
-				actionResponse.put("header", newHashMap(
-						"Authorization", BEARER + " " + clusterService.getCredential()));
-				objectResponse.put("actions", newHashMap("download", actionResponse));
-			} else {
-				objectResponse.put("error", newHashMap(
-						"code", SC_NOT_FOUND,
-						"message", "Object not found"));
-			}
-			objectsResponse.add(objectResponse);
-		}
-
-		Map<String, Object> batchResponse = new HashMap<>();
-		batchResponse.put("objects", objectsResponse);
-		writeTo(httpResponse, batchResponse);
 	}
 
 	private void sendAuthorizationError(HttpServletResponse response) {

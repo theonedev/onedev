@@ -422,7 +422,6 @@ import io.onedev.server.web.websocket.WebSocketService;
 import io.onedev.server.web.websocket.WorkspaceEventBroadcaster;
 import io.onedev.server.workspace.DefaultWorkspaceQueryPersonalizationService;
 import io.onedev.server.workspace.DefaultWorkspaceService;
-import io.onedev.server.workspace.WorkspacePostCommitCallback;
 import io.onedev.server.workspace.WorkspaceQueryPersonalizationService;
 import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.CommitInfoService;
@@ -580,7 +579,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(DashboardGroupShareService.class).to(DefaultDashboardGroupShareService.class);
 		bind(DashboardVisitService.class).to(DefaultDashboardVisitService.class);
 		bind(WorkspaceService.class).to(DefaultWorkspaceService.class);
-		bind(WorkspacePostCommitCallback.class);
 		bind(LabelSpecService.class).to(DefaultLabelSpecService.class);
 		bind(ProjectLabelService.class).to(DefaultProjectLabelService.class);
 		bind(BuildLabelService.class).to(DefaultBuildLabelService.class);

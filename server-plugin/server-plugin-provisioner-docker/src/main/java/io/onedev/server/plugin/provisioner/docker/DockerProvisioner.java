@@ -6,6 +6,7 @@ import static io.onedev.agent.AgentUtils.getOsIds;
 import static io.onedev.agent.AgentUtils.newDockerKiller;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,6 +25,10 @@ import java.util.concurrent.ExecutorService;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
+import io.onedev.server.ServerConfig;
+import io.onedev.server.model.Workspace;
+import io.onedev.server.model.support.workspace.spec.EnvVar;
+import io.onedev.server.util.SiteSyncUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.Nullable;
@@ -350,8 +355,6 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 			throw new ExplicitException("This workspace can only be provisioned by shell provisioner");
 
 		var workspaceDir = getWorkspaceDir(context);
-		var workDir = new File(workspaceDir, "work");
-		FileUtils.createDir(workDir);
 
 		var osIds = getOsIds(logger);
 		if (SystemUtils.IS_OS_LINUX && !osIds.equals("0:0")) {
@@ -368,8 +371,10 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 		var infoLogger = AgentUtils.newInfoLogger(logger);
 		var warningLogger = AgentUtils.newWarningLogger(logger);
 
-		var envVars = setupRepository(context, CONTAINER_WORKSPACE_PATH, logger);
+		setupRepository(context, CONTAINER_WORKSPACE_PATH, logger);
 
+		var envVars = context.getSpec().getEnvVars().stream()
+				.collect(toMap(EnvVar::getName, it -> it.isSecret() ? it.getSecretValue() : it.getValue()));
 		envVars.put("TERM", "xterm-256color");
 		envVars.put("LANG", "C.UTF-8");
 		envVars.put("ONEDEV_WORKDIR", CONTAINER_WORKSPACE_PATH + "/work");
@@ -441,7 +446,12 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 
 		if (SystemUtils.IS_OS_LINUX && !runAs.equals("0:0")) {
 			logger.log("Changing owner of workspace directory to container user...");
+
+			var logFile = new File(workspaceDir, Workspace.LOG_FILE);
+			if (!logFile.exists())
+				FileUtils.touchFile(logFile);
 			changeOwner(docker, runAs, workspaceDir, osIds, logger);
+			changeOwner(docker, osIds, logFile, osIds, logger);
 		}
 
 		if (!emptyUserDataMounts.isEmpty()) {
@@ -491,7 +501,6 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 						docker.addArgs("--expose", String.valueOf(containerPort));
 					docker.addArgs("-P");
 				}
-
 				docker.addArgs("-v", getHostPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
 
 				for (var allocation: cacheProvisioner.getAllocations()) {

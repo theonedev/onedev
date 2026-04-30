@@ -42,7 +42,7 @@ public class SiteSyncUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(SiteSyncUtils.class);
 
-	public static String FILE_VERSION = ".onedev-directory-version";
+	public static final String FILE_VERSION = ".onedev-directory-version";
 
 	private static <T> T callWithVersionLock(java.nio.file.Path path, Callable<T> callable) {
 		Lock lock = getLock("directory-version: " + path.normalize().toString());
@@ -78,7 +78,7 @@ public class SiteSyncUtils {
 			return null;
 		});
 	}
-	
+
 	public static void increaseVersion(File directory) {
 		callWithVersionLock(directory.toPath(), () -> {
 			writeVersion(directory, readVersion(directory)+1);

@@ -1,16 +1,13 @@
 package io.onedev.server.workspace;
 
-import static io.onedev.k8shelper.KubernetesHelper.installGitLfs;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.util.SiteSyncUtils.readVersion;
-import static io.onedev.server.util.SiteSyncUtils.writeVersion;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.io.UncheckedIOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,8 +53,6 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.DefaultCloneInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
@@ -73,8 +68,6 @@ import io.onedev.server.event.project.workspace.WorkspacePending;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotFoundException;
-import io.onedev.server.git.CommandUtils;
-import io.onedev.server.git.GitTask;
 import io.onedev.server.logging.LogService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
@@ -234,12 +227,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				return null;
 			});
 		}
-	}
-
-	@Sessional
-	@Listen
-	public void on(WorkspaceInactive event) {
-		logService.flush(event.getWorkspace().getLoggingSupport());
 	}
 
 	@Transactional
@@ -421,14 +408,13 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		workspace.setActiveDate(null);
 		var projectId = workspace.getProject().getId();
 		var workspaceNumber = workspace.getNumber();
-		projectService.runOnActiveServer(projectId, new ClusterTask<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				FileUtils.deleteFile(Workspace.getLogFile(projectId, workspaceNumber));
-				return null;
-			}
-
+		projectService.runOnActiveServer(projectId, (ClusterTask<Void>) () -> {
+			// Clear log file instead of delete as we may not have permission over the
+			// workspace directory upon an abnormal shutdown
+			var logFile = Workspace.getLogFile(projectId, workspaceNumber);
+			if (logFile.exists())
+				Files.newByteChannel(logFile.toPath(), WRITE, TRUNCATE_EXISTING).close();
+			return null;
 		});
 		update(workspace);
 		listenerRegistry.post(new WorkspacePending(workspace));
@@ -522,8 +508,13 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 												try {
 													workspaceFutures.put(workspace.getId(), provision(workspace));
 												} catch (Throwable t) {
-													log(logService.newLogger(workspace.getLoggingSupport()), t);
-													markWorkspaceError(workspace);
+													var logger = logService.newLogger(workspace.getLoggingSupport());
+													var explicitException = ExceptionUtils.find(t, ExplicitException.class);
+													if (explicitException != null)
+														logger.error("Error provisioning workspace: " + explicitException.getMessage());
+													else
+														logger.error("Error provisioning workspace", t);
+													markWorkspaceInactive(workspace);
 												}
 											}
 										} else if (workspace.getStatus() == Status.ACTIVE) {
@@ -559,15 +550,20 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							var logger = logService.newLogger(workspace.getLoggingSupport());
 							try {
 								future.get();
-								logger.error("Workspace runtime stopped for unknown reason");
+								logger.error("Workspace stopped for unknown reason");
 							} catch (Throwable t) {
-								if (ExceptionUtils.find(t, CancellationException.class) != null)
-									logger.error("Workspace runtime stopped due to server restart. You may reprovision the workspace to continue your work");
-								else
-									log(logger, t);
+								if (ExceptionUtils.find(t, CancellationException.class) != null) {
+									logger.error("Workspace stopped due to server restart. You may reprovision the workspace to continue your work");
+								} else if (ExceptionUtils.find(t, InterruptedException.class) == null) {
+									var explicitException = ExceptionUtils.find(t, ExplicitException.class);
+									if (explicitException != null)
+										logger.error("Workspace stopped: " + explicitException.getMessage());
+									else
+										logger.error("Workspace stopped", t);
+								}
 							} finally {
 								it.remove();
-								markWorkspaceError(workspace);
+								markWorkspaceInactive(workspace);
 							}
 						}
 					}
@@ -671,16 +667,18 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			spec = interpolator.interpolateProperties(spec);
 
 			String token = workspace.getToken();
-
-			var logger = logService.newLogger(workspace.getLoggingSupport());
-			var provisioner = getProvisioner(workspace, spec, logger);
-
 			var project = workspace.getProject();
 			var projectId = project.getId();
 			var projectPath = project.getPath();
 			var projectGitDir = projectService.getGitDir(project.getId()).getAbsolutePath();
 			var workspaceId = workspace.getId();
 			var workspaceNumber = workspace.getNumber();
+
+			var workspaceDir = getWorkspaceDir(projectId, workspaceNumber);
+			FileUtils.createDir(workspaceDir);
+
+			var logger = logService.newLogger(workspace.getLoggingSupport());
+			var provisioner = getProvisioner(workspace, spec, logger);
 
 			var gitEmail = workspace.getUser().getGitEmailAddress();
 			if (gitEmail == null)
@@ -718,9 +716,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						logger.success("Workspace provisioned and is active now");
 
 						runtime.await();
-					} catch (Throwable t) {
-						if (ExceptionUtils.find(t, InterruptedException.class) == null)
-							DefaultWorkspaceService.logger.error("Error awaiting workspace runtime", t);
 					} finally {
 						for (var shellId : runtime.getShellLabels().keySet())
 							terminateShell(workspaceId, shellId);
@@ -737,19 +732,12 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		}
 	}
 
-	private void markWorkspaceError(Workspace workspace) {
+	private void markWorkspaceInactive(Workspace workspace) {
 		workspace.setStatus(Workspace.Status.INACTIVE);
 		workspace.setInactiveDate(new Date());
 		update(workspace);
+		logService.flush(workspace.getLoggingSupport());
 		listenerRegistry.post(new WorkspaceInactive(workspace));
-	}
-
-	private void log(TaskLogger logger, Throwable throwable) {
-		var explicitException = ExceptionUtils.find(throwable, ExplicitException.class);
-		if (explicitException != null)
-			logger.error(explicitException.getMessage());
-		else
-			logger.error("Error processing workspace", throwable);
 	}
 
 	@Override
@@ -958,117 +946,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Override
 	public boolean canPushCode(HttpServletRequest request, Project project) {
 		return isAuthorized(request, project);
-	}
-
-	@Override
-	public void onPostCommit(WorkspaceContext context) {
-		var workspaceDir = getWorkspaceDir(context.getProjectId(), context.getWorkspaceNumber());
-		projectService.directoryModified(context.getProjectId(), workspaceDir);
-	}
-
-	@Override
-	public void syncWorkspaces(Long projectId, String activeServer) {
-		projectService.syncDirectory(projectId, Workspace.WORKSPACES_DIR, (suffix) -> {
-			projectService.syncDirectory(projectId, Workspace.WORKSPACES_DIR + "/" + suffix, (workspaceNumberStr) -> {
-				syncWorkspace(projectId, Long.valueOf(workspaceNumberStr), activeServer);
-			}, activeServer);
-		}, activeServer);
-	}
-
-	private void syncWorkspace(Long projectId, Long workspaceNumber, String activeServer) {
-		var workDir = Workspace.getWorkDir(projectId, workspaceNumber);
-		var workspaceDir = workDir.getParentFile();
-		var gitDir = new File(workDir, ".git");
-
-		var remoteWorkspaceVersion = clusterService.runOnServer(activeServer, () -> {
-			var remoteWorkspaceDir = getWorkspaceDir(projectId, workspaceNumber);
-			return readVersion(remoteWorkspaceDir);
-		});
-		var workspaceVersion = readVersion(workspaceDir);
-		if (workspaceVersion < remoteWorkspaceVersion) {
-			CommandUtils.callWithClusterCredential(new GitTask<Void>() {
-
-				@Override
-				public Void call(Commandline git) throws IOException {
-					var projectPath = projectService.findFacadeById(projectId).getPath();
-					var cloneUrl = clusterService.getServerUrl(activeServer)
-							+ "/" + projectPath + "/" + GIT_PREFIX + workspaceNumber;
-					var debugLogger = new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							logger.debug(line);
-						}
-
-					};
-					var errorLogger = new LineConsumer() {
-						
-						@Override
-						public void consume(String line) {
-							logger.error(line);
-						}
-
-					};
-
-					if (clusterService.runOnServer(activeServer, new HasLfsObjectsTask(projectId, workspaceNumber))) 
-						installGitLfs(git, debugLogger, errorLogger);
-
-					if (!gitDir.exists()) {
-						FileUtils.deleteDir(workDir);
-						git.args("clone", cloneUrl, workDir.getAbsolutePath());
-						git.execute(debugLogger, new LineConsumer() {
-							@Override
-							public void consume(String line) {
-								if (!line.startsWith("Cloning into"))
-									logger.error(line);
-								else
-									logger.debug(line);
-							}
-						}).checkReturnCode();
-					} else {
-						git.args("ls-remote", "--symref", cloneUrl, "HEAD");
-						var branchRef = new AtomicReference<String>();
-						git.execute(new LineConsumer() {
-							@Override
-							public void consume(String line) {
-								if (line.startsWith("ref: refs/heads/"))
-									branchRef.set(line.substring("ref: refs/heads/".length()).split("\\t")[0]);
-							}
-						}, errorLogger).checkReturnCode();
-
-						var branch = branchRef.get();
-						if (branch != null) {
-							git.workingDir(workDir);
-							git.args("remote", "set-url", "origin", cloneUrl);
-							git.execute(debugLogger, errorLogger).checkReturnCode();
-
-							git.args("fetch", "origin", "refs/heads/" + branch);
-							git.execute(debugLogger, new LineConsumer() {
-								@Override
-								public void consume(String line) {
-									if (!line.startsWith("From") && !line.contains("->"))
-										logger.error(line);
-									else
-										logger.debug(line);
-								}
-							}).checkReturnCode();
-
-							git.args("checkout", "-f", "-B", branch, "FETCH_HEAD");
-							git.execute(debugLogger, new LineConsumer() {
-								@Override
-								public void consume(String line) {
-									if (!line.startsWith("Reset branch") && !line.startsWith("Switched to"))
-										logger.error(line);
-								}
-							}).checkReturnCode();
-						}
-					}
-					return null;
-				}
-			});
-
-			writeVersion(workspaceDir, remoteWorkspaceVersion);
-		}
 	}
 
 	@Sessional

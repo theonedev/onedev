@@ -30,6 +30,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.workspace.spec.EnvVar;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.service.ProjectService;
@@ -107,13 +108,13 @@ public abstract class WorkspaceProvisioner implements Serializable {
 		return getWorkspaceService().getWorkspaceDir(context.getProjectId(), context.getWorkspaceNumber());
 	}
 
-	protected Map<String, String> setupRepository(WorkspaceContext context, String runtimeWorkspaceDirPath, TaskLogger logger) {
+	protected void setupRepository(WorkspaceContext context, String runtimeWorkspaceDirPath, TaskLogger logger) {
 		var localServer = getClusterService().getLocalServerAddress();
 		logger.log(String.format("Provisioning workspace (provisioner: %s, server: %s)...",
 				getName(), localServer));
 
 		var workspaceDir = getWorkspaceDir(context);
-		var workDir = new File(workspaceDir, "work");
+		var workDir = Workspace.getWorkDir(context.getProjectId(), context.getWorkspaceNumber());
 		FileUtils.createDir(workDir);
 
 		var cloneInfo = context.getCloneInfo();
@@ -174,7 +175,6 @@ public abstract class WorkspaceProvisioner implements Serializable {
 					installGitLfs(git, infoLogger, warningLogger);
 			}
 		} else {
-			// need to reset origin url as the workspace may get active from a backup replica
 			setupOriginUrl(git, cloneInfo.getCloneUrl(), infoLogger, warningLogger);
 
 			if (context.getSpec().isRetrieveLfs())
@@ -182,16 +182,6 @@ public abstract class WorkspaceProvisioner implements Serializable {
 
 			logger.log("Repository already exists, skipping clone");
 		}
-
-		HookUtils.setupWorkspacePostCommitHook(
-				new File(workDir, ".git"), 
-				context.getSpec().isRetrieveLfs());
-
-		var envVars = context.getSpec().getEnvVars().stream()
-			.collect(toMap(EnvVar::getName, it -> it.isSecret() ? it.getSecretValue() : it.getValue()));
-		envVars.putAll(HookUtils.getWorkspacePostCommitHookEnvs(context.getToken()));
-
-		return envVars;
 	}
 
 	public abstract boolean isApplicable(Project project);

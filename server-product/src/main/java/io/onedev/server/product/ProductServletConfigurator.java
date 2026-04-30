@@ -28,7 +28,6 @@ import io.onedev.server.git.GitLfsFilter;
 import io.onedev.server.git.GoGetFilter;
 import io.onedev.server.git.hook.GitPostReceiveCallback;
 import io.onedev.server.git.hook.GitPreReceiveCallback;
-import io.onedev.server.workspace.WorkspacePostCommitCallback;
 import io.onedev.server.jetty.ServletConfigurator;
 import io.onedev.server.security.CorsFilter;
 import io.onedev.server.security.DefaultWebEnvironment;
@@ -62,9 +61,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
     private GitPostReceiveCallback postReceiveServlet;
 
 	@Inject
-	private WorkspacePostCommitCallback workspacePostCommitServlet;
-	
-	@Inject
 	private WicketServlet wicketServlet;
 
 	@Inject
@@ -93,8 +89,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.addServlet(new ServletHolder(preReceiveServlet), GitPreReceiveCallback.PATH + "/*");
         context.addServlet(new ServletHolder(postReceiveServlet), GitPostReceiveCallback.PATH + "/*");
-		context.addServlet(new ServletHolder(workspacePostCommitServlet), WorkspacePostCommitCallback.PATH + "/*");
-        
+
 		/*
 		 * Add wicket servlet as the default servlet which will serve all requests failed to 
 		 * match a path pattern

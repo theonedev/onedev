@@ -119,7 +119,7 @@ public class DefaultLogService implements LogService, Serializable {
 					LogSnippet snippet = recentSnippets.get(logKey);
 					if (snippet == null) {
 						File logFile = loggingSupport.getIdentity().getFile();
-						if (!logFile.exists())	{
+						if (!logFile.exists() || logFile.length() == 0)	{
 							snippet = new LogSnippet();
 							recentSnippets.put(logKey, snippet);
 						}
@@ -229,7 +229,7 @@ public class DefaultLogService implements LogService, Serializable {
 			
 			File logFile = loggingSupport.getIdentity().getFile();
 			
-			if (logFile.exists()) {
+			if (logFile.exists() && logFile.length() != 0) {
 				try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
 					while (true) {
 						JobLogEntry entry  = (JobLogEntry) ois.readObject();
@@ -249,7 +249,7 @@ public class DefaultLogService implements LogService, Serializable {
 	
 	private List<JobLogEntryEx> readLogEntries(File logFile, int from, int count) {
 		List<JobLogEntryEx> entries = new ArrayList<>();
-		if (logFile.exists()) {
+		if (logFile.exists() && logFile.length() != 0) {
 			try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
 				int numOfReadEntries = 0;
 				while (numOfReadEntries < from) {
@@ -286,7 +286,7 @@ public class DefaultLogService implements LogService, Serializable {
 	
 	private LogSnippet readLogSnippetReversely(File logFile, int count) {
 		var snippet = new LogSnippet();
-		if (logFile.exists()) {
+		if (logFile.exists() && logFile.length() != 0) {
 			try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
 				while (true) {
 					snippet.entries.add(readLogEntry(ois));
@@ -378,7 +378,7 @@ public class DefaultLogService implements LogService, Serializable {
 	
 	private ObjectOutputStream newOutputStream(File logFile) {
 		try {
-			if (logFile.exists()) {
+			if (logFile.exists() && logFile.length() != 0) {
 				return new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(logFile, true), BUFFER_SIZE)) {
 
 					@Override
@@ -437,7 +437,7 @@ public class DefaultLogService implements LogService, Serializable {
 			try {
 				File logFile = loggingIdentity.getFile();
 				
-				if (logFile.exists())
+				if (logFile.exists() && logFile.length() != 0)
 					ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)));
 				
 				LogSnippet snippet = recentSnippets.get(loggingIdentity.getCacheKey());

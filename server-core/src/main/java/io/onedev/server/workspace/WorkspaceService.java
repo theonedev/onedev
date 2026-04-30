@@ -19,8 +19,6 @@ import io.onedev.server.util.criteria.Criteria;
 
 public interface WorkspaceService extends EntityService<Workspace> {
 
-	public static final String GIT_PREFIX = "~workspaces/";
-
 	@Nullable Workspace find(Project project, long number);
 
 	void create(Workspace workspace);
@@ -61,12 +59,8 @@ public interface WorkspaceService extends EntityService<Workspace> {
 	
 	@Nullable
 	WorkspaceContext getWorkspaceContext(String token, boolean mustExist);
-	
-	void onPostCommit(WorkspaceContext context);
 
 	boolean hasLfsObjects(Long projectId, Long workspaceNumber);
-
-	void syncWorkspaces(Long projectId, String activeServer);
 
 	GitExecutionResult executeGitCommand(Workspace workspace, String[] gitArgs);
 

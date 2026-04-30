@@ -1579,21 +1579,21 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	@Override
 	public void syncDirectory(Long projectId, String path, Consumer<String> childSyncer, String activeServer) {
 		var directory = new File(getProjectDir(projectId), path);
-		var sitePath = Bootstrap.getSiteDir().toPath().resolve(directory.toPath()).toString();
+		var sitePath = Bootstrap.getSiteDir().toPath().relativize(directory.toPath()).toString();
 		SiteSyncUtils.syncDirectory(activeServer, sitePath, childSyncer, true);
 	}
 
 	@Override
 	public void syncDirectory(Long projectId, String path, String readLock, String activeServer) {
 		var directory = new File(getProjectDir(projectId), path);
-		var sitePath = Bootstrap.getSiteDir().toPath().resolve(directory.toPath()).toString();
+		var sitePath = Bootstrap.getSiteDir().toPath().relativize(directory.toPath()).toString();
 		SiteSyncUtils.syncDirectory(activeServer, sitePath, true, readLock, null);
 	}
 
 	@Override
 	public void syncFile(Long projectId, String path, String readLock, String activeServer) {
 		var file = new File(getProjectDir(projectId), path);
-		var sitePath = Bootstrap.getSiteDir().toPath().resolve(file.toPath()).toString();
+		var sitePath = Bootstrap.getSiteDir().toPath().relativize(file.toPath()).toString();
 		SiteSyncUtils.syncFile(activeServer, sitePath, true, readLock, null);
 	}
 	
@@ -1615,7 +1615,6 @@ public class DefaultProjectService extends BaseEntityService<Project>
 						if (version < remoteVersion) {
 							logger.debug("Syncing project (project: {}, server: {})...", project.getPath(), syncWithServer);
 							syncGit(projectId, syncWithServer);
-							workspaceService.syncWorkspaces(projectId, syncWithServer);
 							attachmentService.syncAttachments(projectId, syncWithServer);
 							buildService.syncBuilds(projectId, syncWithServer);
 							visitInfoService.syncVisitInfo(projectId, syncWithServer);
