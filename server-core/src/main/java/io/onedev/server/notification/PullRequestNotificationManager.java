@@ -302,11 +302,10 @@ public class PullRequestNotificationManager {
 							MessageFormat.format("""
 								Review current pull request for major issues (ignore styling/format/documentation issues) \
 								introduced in the change. Check full content of relevant files to understand the change \
-								if necessary. Check existing comments for conversation context. \
-								
-								Record your final decision by calling one of these tools, and call it \
-								only once: `{0}` if you are satisfied with the change, or `{1}` if you think it needs more work. \
-								If you are unsure, explain what is unclear via final response""", 
+								if necessary. Check existing comments for conversation context. Record your final \
+								decision by calling one of these tools, and call it only once: `{0}` if you are satisfied \
+								with the change, or `{1}` if you think it needs more work. If you are unsure, explain \
+								what is unclear via final response""", 
 								PullRequest.APPROVE_TOOL_NAME, PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME),
 							request.getTools(true), 
 							new PullRequestReviewTaskChecker(),
@@ -342,7 +341,7 @@ public class PullRequestNotificationManager {
 											replyAddress, senderName, threadingReferences);
 								}
 							} else if (isAiEntitled(user, request, mentionedUser)) {
-								if (event instanceof PullRequestOpened || event instanceof PullRequestCommentCreated) {
+								if (event instanceof PullRequestOpened) {									
 									var systemPrompt = """
 										You are mentioned in a pull request. The content mentioning you is presented as user \
 										prompt. Use existing comments as conversation context. Call relevant tools to get \
@@ -352,6 +351,35 @@ public class PullRequestNotificationManager {
 										event.getTextBody(), 
 										request.getTools(false), 
 										new NoopTaskChecker(),
+										new AddPullRequestComment(request.getId()));
+									userService.execute(mentionedUser, task);
+								} else if (event instanceof PullRequestCommentCreated) {									
+									var review = request.getReview(mentionedUser);
+									var pendingReview = review != null && review.getStatus() == PullRequestReview.Status.PENDING;
+									String systemPrompt;
+									if (pendingReview) {
+										systemPrompt = MessageFormat.format("""
+											You are mentioned in a pull request. The content mentioning you is presented as user \
+											prompt. Use existing comments as conversation context. Call relevant tools to get \
+											information about the pull request if necessary. 
+
+											If you are requested to review the pull request, check full content of relevant \
+											files to understand the change if necessary. Record your final decision by calling \
+											one of these tools, and call it only once: `{0}` if you are satisfied with the \
+											change, or `{1}` if you think it needs more work. If you are unsure, explain what \
+											is unclear via final response""", 
+											PullRequest.APPROVE_TOOL_NAME, PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME);	
+									} else {
+										systemPrompt = """
+											You are mentioned in a pull request. The content mentioning you is presented as user \
+											prompt. Use existing comments as conversation context. Call relevant tools to get \
+											information about the pull request if necessary""";	
+									}
+									var task = new AiTask(
+										systemPrompt.formatted(mentionedUser.getName()), 
+										event.getTextBody(), 
+										request.getTools(pendingReview), 
+										new PullRequestReviewTaskChecker(),
 										new AddPullRequestComment(request.getId()));
 									userService.execute(mentionedUser, task);
 								} else if (event instanceof PullRequestCodeCommentCreated || event instanceof PullRequestCodeCommentReplyCreated) {
