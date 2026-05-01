@@ -9,7 +9,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -89,8 +89,6 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	private static final int TIMEOUT_SECONDS = 600;
 
 	private static final int EMPTY_RESPONSE_MAX_RETRIES = 3;
-
-	private static final int TASK_FINISH_CHECK_MAX_RETRIES = 3;
 
 	private static final String EMPTY_RESPONSE_PROMPT =
 			"Your previous turn was empty. Please reply with your answer.";
@@ -645,10 +643,9 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 					ToolUtils.filterDuplications(toolSpecifications);
 
-					var toolCallCounts = new HashMap<String, Integer>();
+					var calledTools = new HashSet<String>();
 					var taskChecker = task.getTaskChecker();
 					var emptyResponseRetryCount = new AtomicInteger(0);
-					var taskFinishCheckRetryCount = new AtomicInteger(0);
 					while (true) {
 						if (Thread.interrupted())
 							throw new InterruptedException();								
@@ -660,31 +657,27 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 						var aiMessage = response.aiMessage();
 						
 						if (!aiMessage.hasToolExecutionRequests()) {
-							var finishError = taskChecker.preTaskFinish(toolCallCounts);
-							if (finishError != null
-									&& taskFinishCheckRetryCount.incrementAndGet() <= TASK_FINISH_CHECK_MAX_RETRIES) {
-								if (StringUtils.isNotBlank(aiMessage.text()))
-									messages.add(aiMessage);
-								messages.add(new UserMessage(finishError));
-								continue;
-							}
-							var text = aiMessage.text();
-							if (StringUtils.isNotBlank(text)) {
-								sessionService.run(() -> {
-									task.getResponseHandler().onResponse(
-										Preconditions.checkNotNull(SecurityUtils.getUser(subject)),
-										text);
-								});
-								break;
-							} else if (emptyResponseRetryCount.incrementAndGet() <= EMPTY_RESPONSE_MAX_RETRIES) {
-								messages.add(new UserMessage(EMPTY_RESPONSE_PROMPT));
-								continue;
+							if (taskChecker.isResponseRequired(calledTools)) {
+								var responseText = aiMessage.text();
+								if (StringUtils.isNotBlank(responseText)) {
+									sessionService.run(() -> {
+										task.getResponseHandler().onResponse(
+											Preconditions.checkNotNull(SecurityUtils.getUser(subject)),
+											responseText);
+									});
+									break;
+								} else if (emptyResponseRetryCount.incrementAndGet() <= EMPTY_RESPONSE_MAX_RETRIES) {
+									messages.add(new UserMessage(EMPTY_RESPONSE_PROMPT));
+									continue;
+								} else {
+									sessionService.run(() -> {
+										task.getResponseHandler().onResponse(
+											Preconditions.checkNotNull(SecurityUtils.getUser(subject)),
+											"Empty response received");
+									});
+									break;
+								}	
 							} else {
-								sessionService.run(() -> {
-									task.getResponseHandler().onResponse(
-										Preconditions.checkNotNull(SecurityUtils.getUser(subject)),
-										"Empty response received");
-								});
 								break;
 							}
 						}
@@ -696,7 +689,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 									throw new RuntimeException(new InterruptedException());
 
 								var toolName = toolRequest.name();
-								var errorMessage = taskChecker.preToolCall(toolName, toolCallCounts);
+								var errorMessage = taskChecker.preToolCall(toolName, calledTools);
 								if (errorMessage != null) {
 									messages.add(ToolExecutionResultMessage.from(toolRequest.id(), toolName, errorMessage));
 									continue;
@@ -707,7 +700,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 										.findFirst()
 										.orElseThrow(() -> new ExplicitException("Tool not found: " + toolName));     
 									tool.execute(subject, getToolArguments(toolRequest)).addToMessages(messages, toolRequest);
-									toolCallCounts.put(toolName, toolCallCounts.getOrDefault(toolName, 0) + 1);
+									calledTools.add(toolName);
 								} catch (Throwable t) {
 									ToolUtils.handleCallException(toolName, t);
 								}

@@ -81,6 +81,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.PullRequestHelper;
 import io.onedev.server.ai.TaskTool;
@@ -1562,6 +1563,10 @@ public class PullRequest extends ProjectBelonging
 						.name(APPROVE_TOOL_NAME)
 						.description("Record an approval for current OneDev pull request. " 
 							+ "Call this exactly once after you have finished reviewing and decided to approve.")
+						.parameters(JsonObjectSchema.builder()
+							.addStringProperty("reason").description("Reason explaining why you are approving this pull request. Make sure to quote relevant code snippets if applicable")
+							.required("reason")
+							.build())
 						.build();
 				}
 
@@ -1572,8 +1577,12 @@ public class PullRequest extends ProjectBelonging
 					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
 						throw new UnauthorizedException();
 
+					if (arguments.get("reason") == null)
+						return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'reason' is required")), false);
+					var reason = arguments.get("reason").asText();
+
 					try {
-						getPullRequestReviewService().review(user, request, true, null);
+						getPullRequestReviewService().review(user, request, true, reason);
 						return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
 					} catch (NotAcceptableException e) {
 						var data = Map.of(
@@ -1592,6 +1601,10 @@ public class PullRequest extends ProjectBelonging
 						.name(REQUEST_FOR_CHANGES_TOOL_NAME)
 						.description("Record a request for changes for current OneDev pull request. " 
 							+ "Call this exactly once after you have finished reviewing and decided changes are needed.")
+						.parameters(JsonObjectSchema.builder()
+							.addStringProperty("reason").description("Reason explaining why you are requesting changes for this pull request. Make sure to quote relevant code snippets if applicable")
+							.required("reason")
+							.build())
 						.build();
 				}
 
@@ -1602,8 +1615,12 @@ public class PullRequest extends ProjectBelonging
 					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
 						throw new UnauthorizedException();
 
+					if (arguments.get("reason") == null)
+						return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'reason' is required")), false);
+					var reason = arguments.get("reason").asText();
+
 					try {
-						getPullRequestReviewService().review(user, request, false, null);
+						getPullRequestReviewService().review(user, request, false, reason);
 						return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
 					} catch (NotAcceptableException e) {
 						var data = Map.of(

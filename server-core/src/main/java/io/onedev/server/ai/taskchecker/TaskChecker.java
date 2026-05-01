@@ -1,15 +1,14 @@
 package io.onedev.server.ai.taskchecker;
 
-import java.util.Map;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
 public interface TaskChecker {
 
     @Nullable
-    String preToolCall(String toolName, Map<String, Integer> toolCallCounts);
+    String preToolCall(String toolName, Set<String> calledTools);
 
-    @Nullable
-    String preTaskFinish(Map<String, Integer> toolCallCounts);
+    boolean isResponseRequired(Set<String> calledTools);
     
 }

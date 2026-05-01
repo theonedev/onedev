@@ -3,6 +3,7 @@ package io.onedev.server.notification;
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static io.onedev.server.notification.NotificationUtils.isNotified;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -298,19 +299,15 @@ public class PullRequestNotificationManager {
 					} else if (isAiEntitled(null, request, reviewer)) {
 						var task = new AiTask(
 							null,
-							"""
+							MessageFormat.format("""
 								Review current pull request for major issues (ignore styling/format/documentation issues) \
 								introduced in the change. Check full content of relevant files to understand the change \
 								if necessary. Check existing comments for conversation context. \
 								
-								You MUST record your final decision by calling exactly one of these tools, and call it \
-								only once: `approvePullRequest` if you are satisfied with the change, or \
-								`requestChangesForPullRequest` if you think it needs more work. If you are unsure, \
-								call `requestChangesForPullRequest` and explain what is unclear. Do not call either \
-								tool more than once. \
-								
-								After calling the decision tool, summarize found issues in your final response and for \
-								each issue, make sure to quote relevant code snippets if applicable""",
+								Record your final decision by calling one of these tools, and call it \
+								only once: `{0}` if you are satisfied with the change, or `{1}` if you think it needs more work. \
+								If you are unsure, explain what is unclear via final response""", 
+								PullRequest.APPROVE_TOOL_NAME, PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME),
 							request.getTools(true), 
 							new PullRequestReviewTaskChecker(),
 							new AddPullRequestComment(request.getId()));

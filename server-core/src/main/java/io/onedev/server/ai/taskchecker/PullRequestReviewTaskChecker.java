@@ -1,29 +1,29 @@
 package io.onedev.server.ai.taskchecker;
 
-import java.util.Map;
+import static io.onedev.server.model.PullRequest.APPROVE_TOOL_NAME;
+import static io.onedev.server.model.PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME;
 
-import io.onedev.server.model.PullRequest;
+import java.util.Set;
 
 public class PullRequestReviewTaskChecker implements TaskChecker {
 
     @Override
-    public String preToolCall(String toolName, Map<String, Integer> toolCallCounts) {
-        if ((toolName.equals(PullRequest.APPROVE_TOOL_NAME) || toolName.equals(PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME)) 
-                && toolCallCounts.getOrDefault(toolName, 0) >= 1) {
-            return "Tool '%s' should only be called once".formatted(toolName);
+    public String preToolCall(String toolName, Set<String> calledTools) {
+        if (toolName.equals(APPROVE_TOOL_NAME) || toolName.equals(REQUEST_FOR_CHANGES_TOOL_NAME)) {
+            if (calledTools.contains(APPROVE_TOOL_NAME)) 
+                return "You've already approved the pull request";
+            else if (calledTools.contains(REQUEST_FOR_CHANGES_TOOL_NAME))
+                return "You've already requested changes for the pull request";
+            else
+                return null;
         } else {
             return null;
         }
     }
 
     @Override
-    public String preTaskFinish(Map<String, Integer> toolCallCounts) {
-        if (toolCallCounts.getOrDefault(PullRequest.APPROVE_TOOL_NAME, 0) == 0 
-                && toolCallCounts.getOrDefault(PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME, 0) == 0) {
-            return "You must call exactly one of the following tools: '%s' or '%s'".formatted(PullRequest.APPROVE_TOOL_NAME, PullRequest.REQUEST_FOR_CHANGES_TOOL_NAME);
-        } else {
-            return null;
-        }
+    public boolean isResponseRequired(Set<String> calledTools) {
+        return !calledTools.contains(APPROVE_TOOL_NAME) && !calledTools.contains(REQUEST_FOR_CHANGES_TOOL_NAME);
     }
 
 }

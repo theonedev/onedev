@@ -1,17 +1,17 @@
 package io.onedev.server.ai.taskchecker;
 
-import java.util.Map;
+import java.util.Set;
 
 public class NoopTaskChecker implements TaskChecker {
 
     @Override
-    public String preToolCall(String toolName, Map<String, Integer> toolCallCounts) {
+    public String preToolCall(String toolName, Set<String> calledTools) {
         return null;
     }
 
     @Override
-    public String preTaskFinish(Map<String, Integer> toolCallCounts) {
-        return null;
+    public boolean isResponseRequired(Set<String> calledTools) {
+        return true;
     }
 
 }
