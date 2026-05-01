@@ -156,6 +156,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("A {0} used as body of various issue notification emails", "用作各种工单通知邮件正文的 {0}");
 		m.put("A {0} used as body of various pull request notification emails", "用作各种合并请求通知邮件正文的 {0}");
 		m.put("A {0} used as body of workspace notification email", "用作工作区通知电子邮件正文的 {0}");
+		m.put("ACTIVE", "有效");
 		m.put("AI", "AI");
 		m.put("AI Model Settings", "AI 模型设置");
 		m.put("AI Settings", "AI 设置");
@@ -1164,6 +1165,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Do you really want to cancel invitation to \"{0}\"?", "您真的要取消邀请 \"{0}\" 吗？");
 		m.put("Do you really want to cancel this build?", "您确定要取消此构建吗？");
 		m.put("Do you really want to change target branch to {0}?", "确定要将目标分支更改为 {0} 吗？");
+		m.put("Do you really want to close this terminal?", "您确定要关闭此终端吗？");
 		m.put("Do you really want to delete \"{0}\"?", "您真的要删除 \"{0}\" 吗？");
 		m.put("Do you really want to delete SSO provider \"{0}\"?", "您真的想删除 SSO 提供方 \"{0}\" 吗？");
 		m.put("Do you really want to delete board \"{0}\"?", "您确定要删除看板 \"{0}\" 吗？");
@@ -1479,6 +1481,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("File is too large to edit here", "文件太大，无法在此编辑");
 		m.put("File name", "文件名");
 		m.put("File name patterns such as *.java, *.c", "文件名模式，如 *.java, *.c");
+		m.put("File not found", "文件未找到");
 		m.put("Files", "文件");
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
@@ -1706,6 +1709,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("IMAP Password", "IMAP 密码");
 		m.put("IMAP User", "IMAP 用户");
 		m.put("IMPORTANT:", "重要：");
+		m.put("INACTIVE", "无效");
 		m.put("IP Address", "IP 地址");
 		m.put("Id", "ID");
 		m.put("Identify Field", "区分字段");
@@ -1794,6 +1798,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"如果您使用外部工单跟踪器，您可以定义转换器，将外部工单引用转换为外部工单链接，例如在提交消息和合并请求描述中");
 		m.put("In rare cases, your issues might be out of sync with workflow settings (undefined state/field etc.). Run integrity check below to find problems and get them fixed.", 
 			"在极少数情况下，您的工单可能与工作流设置不同步（未定义状态/字段等）。运行完整性检查以查找问题并修复它们");
+		m.put("Inactive", "无效");
 		m.put("Inbox Poll Setting", "Inbox 轮询设置");
 		m.put("Include Child Projects", "包含子项目");
 		m.put("Include Disabled", "包含禁用");
@@ -2934,6 +2939,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"请输入在启用两阶段验证时保存的恢复代码");
 		m.put("Please login to perform this operation", "请登录才能执行此操作");
 		m.put("Please login to perform this query", "请登录以执行此查询");
+		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
+			"请重新配置工作区以显示更改，或者您可以登录到服务器 \"{0}\" 并在 \"{1}\" 检查更改");
 		m.put("Please resolve undefined field values below", "请解决以下未定义的字段值");
 		m.put("Please resolve undefined fields below", "请解决以下未定义的字段");
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
@@ -4114,6 +4121,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Symbol name", "符号名称");
 		m.put("Symbols", "符号");
 		m.put("Sync", "同步");
+		m.put("Sync (pull & push)", "同步 (pull & push)");
 		m.put("Sync Replica Status and Back to Home", "同步副本状态并返回主页");
 		m.put("Sync Repository", "同步仓库");
 		m.put("Sync Timing of All Queried Issues", "同步所有查询的工单的时间");
@@ -4700,6 +4708,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"运行容器时是否总是拉取镜像。应启用此选项以避免镜像被恶意操作替换");
 		m.put("Whether or not to be able to access time tracking info of issues", "是否能够访问工单的时间跟踪信息");
+		m.put("Whether or not to create the workspace inside container", "是否在容器内创建工作区");
 		m.put("Whether or not to enable code management for the project", "是否为项目启用代码管理");
 		m.put("Whether or not to enable issue management for the project", "是否为项目启用工单管理");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -5059,14 +5068,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("ACTIVE", "有效");
-		m.put("File not found", "文件未找到");
-		m.put("INACTIVE", "无效");
-		m.put("Inactive", "无效");
-		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
-			"请重新配置工作区以显示更改，或者您可以登录到服务器 \"{0}\" 并在 \"{1}\" 检查更改");
-		m.put("Sync (pull & push)", "同步 (pull & push)");
-		m.put("Whether or not to create the workspace inside container", "是否在容器内创建工作区");
 	}
 		
 	@Override

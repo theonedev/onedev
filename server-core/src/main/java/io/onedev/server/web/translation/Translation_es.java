@@ -130,6 +130,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("A {0} used as body of various issue notification emails", "Un {0} usado como cuerpo de varios correos de notificación de problemas");
 		m.put("A {0} used as body of various pull request notification emails", "Un {0} usado como cuerpo de varios correos de notificación de solicitudes de extracción");
 		m.put("A {0} used as body of workspace notification email", "Un {0} usado como cuerpo del correo electrónico de notificación del espacio de trabajo");
+		m.put("ACTIVE", "ACTIVO");
 		m.put("AI", "IA");
 		m.put("AI Model Settings", "Configuración del Modelo de IA");
 		m.put("AI Settings", "Configuraciones de IA");
@@ -1138,6 +1139,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Do you really want to cancel invitation to \"{0}\"?", "¿Realmente desea cancelar la invitación a \"{0}\"?");
 		m.put("Do you really want to cancel this build?", "¿Realmente desea cancelar esta compilación?");
 		m.put("Do you really want to change target branch to {0}?", "¿Realmente desea cambiar la rama de destino a {0}?");
+		m.put("Do you really want to close this terminal?", "¿Realmente deseas cerrar este terminal?");
 		m.put("Do you really want to delete \"{0}\"?", "¿Realmente desea eliminar \"{0}\"?");
 		m.put("Do you really want to delete SSO provider \"{0}\"?", "¿Realmente deseas eliminar el proveedor SSO \"{0}\"?");
 		m.put("Do you really want to delete board \"{0}\"?", "¿Realmente desea eliminar el tablero \"{0}\"?");
@@ -1453,6 +1455,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("File is too large to edit here", "El archivo es demasiado grande para editar aquí");
 		m.put("File name", "Nombre del archivo");
 		m.put("File name patterns such as *.java, *.c", "Patrones de nombre de archivo como *.java, *.c");
+		m.put("File not found", "Archivo no encontrado");
 		m.put("Files", "Archivos");
 		m.put("Files to Be Analyzed", "Archivos a Analizar");
 		m.put("Filter", "Filtro");
@@ -1680,6 +1683,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("IMAP Password", "Contraseña IMAP");
 		m.put("IMAP User", "Usuario IMAP");
 		m.put("IMPORTANT:", "IMPORTANTE:");
+		m.put("INACTIVE", "INACTIVO");
 		m.put("IP Address", "Dirección IP");
 		m.put("Id", "ID");
 		m.put("Identify Field", "Campo de identificación");
@@ -1768,6 +1772,7 @@ public class Translation_es extends TranslationResourceBundle {
 			"En caso de que esté utilizando un rastreador de problemas externo, puede definir transformadores para transformar referencias de problemas externos en enlaces de problemas externos en varios lugares, como mensajes de confirmación y descripciones de solicitudes de extracción");
 		m.put("In rare cases, your issues might be out of sync with workflow settings (undefined state/field etc.). Run integrity check below to find problems and get them fixed.", 
 			"En casos raros, sus problemas pueden estar desincronizados con la configuración del flujo de trabajo (estado/campo indefinido, etc.). Ejecute la verificación de integridad a continuación para encontrar problemas y solucionarlos");
+		m.put("Inactive", "Inactivo");
 		m.put("Inbox Poll Setting", "Configuración de sondeo de bandeja de entrada");
 		m.put("Include Child Projects", "Incluir proyectos secundarios");
 		m.put("Include Disabled", "Incluir deshabilitados");
@@ -2908,6 +2913,8 @@ public class Translation_es extends TranslationResourceBundle {
 			"Por favor ingrese uno de sus códigos de recuperación guardados al habilitar la autenticación de dos factores");
 		m.put("Please login to perform this operation", "Por favor inicie sesión para realizar esta operación");
 		m.put("Please login to perform this query", "Por favor inicie sesión para realizar esta consulta");
+		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
+			"Por favor, reprovisione el espacio de trabajo para mostrar los cambios, o puede iniciar sesión en el servidor \"{0}\" y verificar los cambios en \"{1}\"");
 		m.put("Please resolve undefined field values below", "Por favor resuelva los valores de campos indefinidos a continuación");
 		m.put("Please resolve undefined fields below", "Por favor resuelva los campos indefinidos a continuación");
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
@@ -4088,6 +4095,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Symbol name", "Nombre del símbolo");
 		m.put("Symbols", "Símbolos");
 		m.put("Sync", "Sincronizar");
+		m.put("Sync (pull & push)", "Sincronizar (pull & push)");
 		m.put("Sync Replica Status and Back to Home", "Sincronizar estado de réplica y volver a inicio");
 		m.put("Sync Repository", "Sincronizar Repositorio");
 		m.put("Sync Timing of All Queried Issues", "Sincronizar el Tiempo de Todas las Incidencias Consultadas");
@@ -4674,6 +4682,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"Si siempre se debe extraer la imagen al ejecutar el contenedor o no. Esta opción debe estar habilitada para evitar que las imágenes sean reemplazadas por operaciones maliciosas");
 		m.put("Whether or not to be able to access time tracking info of issues", "Si se puede acceder o no a la información de seguimiento de tiempo de los problemas");
+		m.put("Whether or not to create the workspace inside container", "Si crear o no el espacio de trabajo dentro del contenedor");
 		m.put("Whether or not to enable code management for the project", "Si se habilita o no la gestión de código para el proyecto");
 		m.put("Whether or not to enable issue management for the project", "Si se habilita o no la gestión de problemas para el proyecto");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -5033,14 +5042,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("ACTIVE", "ACTIVO");
-		m.put("File not found", "Archivo no encontrado");
-		m.put("INACTIVE", "INACTIVO");
-		m.put("Inactive", "Inactivo");
-		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
-			"Por favor, reprovisione el espacio de trabajo para mostrar los cambios, o puede iniciar sesión en el servidor \"{0}\" y verificar los cambios en \"{1}\"");
-		m.put("Sync (pull & push)", "Sincronizar (pull & push)");
-		m.put("Whether or not to create the workspace inside container", "Si crear o no el espacio de trabajo dentro del contenedor");
 	}
 		
 	@Override

@@ -1,8 +1,11 @@
 package io.onedev.server.web.page.project.workspaces.detail.terminal;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.inject.Inject;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -10,6 +13,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
@@ -64,6 +68,13 @@ public class TerminalTabHead extends Panel {
 				super.onConfigure();
 				var workspace = ((WorkspaceDetailPage) getPage()).getWorkspace();
 				setVisible(SecurityUtils.canModifyOrDelete(workspace));
+			}
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(
+						_T("Do you really want to close this terminal?")));
 			}
 
 		});

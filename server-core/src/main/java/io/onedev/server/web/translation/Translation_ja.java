@@ -130,6 +130,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("A {0} used as body of various issue notification emails", "さまざまな問題通知メールの本文として使用される {0}");
 		m.put("A {0} used as body of various pull request notification emails", "さまざまなプルリクエスト通知メールの本文として使用される {0}");
 		m.put("A {0} used as body of workspace notification email", "ワークスペース通知メールの本文として使用される{0}");
+		m.put("ACTIVE", "アクティブ");
 		m.put("AI", "AI");
 		m.put("AI Model Settings", "AIモデル設定");
 		m.put("AI Settings", "AI設定");
@@ -1138,6 +1139,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do you really want to cancel invitation to \"{0}\"?", "\"{0}\"への招待を本当にキャンセルしますか？");
 		m.put("Do you really want to cancel this build?", "このビルドを本当にキャンセルしますか？");
 		m.put("Do you really want to change target branch to {0}?", "ターゲットブランチを{0}に変更してもよろしいですか？");
+		m.put("Do you really want to close this terminal?", "このターミナルを本当に閉じますか？");
 		m.put("Do you really want to delete \"{0}\"?", "\"{0}\"を本当に削除しますか？");
 		m.put("Do you really want to delete SSO provider \"{0}\"?", "本当にSSOプロバイダー\"{0}\"を削除しますか？");
 		m.put("Do you really want to delete board \"{0}\"?", "ボード\"{0}\"を本当に削除しますか？");
@@ -1453,6 +1455,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("File is too large to edit here", "ファイルが大きすぎてここでは編集できません");
 		m.put("File name", "ファイル名");
 		m.put("File name patterns such as *.java, *.c", "ファイル名パターン（例: *.java, *.c）");
+		m.put("File not found", "ファイルが見つかりません");
 		m.put("Files", "ファイル一覧");
 		m.put("Files to Be Analyzed", "分析対象のファイル");
 		m.put("Filter", "フィルター");
@@ -1680,6 +1683,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("IMAP Password", "IMAPパスワード");
 		m.put("IMAP User", "IMAPユーザー");
 		m.put("IMPORTANT:", "重要:");
+		m.put("INACTIVE", "非アクティブ");
 		m.put("IP Address", "IPアドレス");
 		m.put("Id", "ID");
 		m.put("Identify Field", "フィールドを識別");
@@ -1768,6 +1772,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"外部課題トラッカーを使用している場合、外部課題参照をコミットメッセージやプルリクエストの説明などのさまざまな場所で外部課題リンクに変換するトランスフォーマーを定義できます");
 		m.put("In rare cases, your issues might be out of sync with workflow settings (undefined state/field etc.). Run integrity check below to find problems and get them fixed.", 
 			"まれに、課題がワークフロー設定（未定義の状態/フィールドなど）と同期していない場合があります。以下の整合性チェックを実行して問題を見つけ、修正してください。");
+		m.put("Inactive", "非アクティブ");
 		m.put("Inbox Poll Setting", "受信トレイポーリング設定");
 		m.put("Include Child Projects", "子プロジェクトを含む");
 		m.put("Include Disabled", "無効化されたものを含む");
@@ -2908,6 +2913,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"二要素認証を有効にした際に保存したリカバリーコードのいずれかを入力してください");
 		m.put("Please login to perform this operation", "この操作を実行するにはログインしてください");
 		m.put("Please login to perform this query", "このクエリを実行するにはログインしてください");
+		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
+			"変更を表示するにはワークスペースを再プロビジョニングしてください。またはサーバー \"{0}\" にログインして \"{1}\" で変更を確認してください");
 		m.put("Please resolve undefined field values below", "以下の未定義フィールド値を解決してください");
 		m.put("Please resolve undefined fields below", "以下の未定義フィールドを解決してください");
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
@@ -4088,6 +4095,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Symbol name", "シンボル名");
 		m.put("Symbols", "シンボル");
 		m.put("Sync", "同期");
+		m.put("Sync (pull & push)", "同期 (プル & プッシュ)");
 		m.put("Sync Replica Status and Back to Home", "レプリカステータスを同期してホームに戻る");
 		m.put("Sync Repository", "リポジトリを同期");
 		m.put("Sync Timing of All Queried Issues", "すべてのクエリされた課題の同期タイミング");
@@ -4674,6 +4682,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"コンテナを実行する際に常にイメージをプルするかどうか。このオプションは、悪意のある操作によってイメージが置き換えられるのを避けるために有効にする必要があります");
 		m.put("Whether or not to be able to access time tracking info of issues", "課題のタイムトラッキング情報にアクセスできるかどうか");
+		m.put("Whether or not to create the workspace inside container", "コンテナ内にワークスペースを作成するかどうか");
 		m.put("Whether or not to enable code management for the project", "プロジェクトのコード管理を有効にするかどうか");
 		m.put("Whether or not to enable issue management for the project", "プロジェクトの課題管理を有効にするかどうか");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -5033,14 +5042,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("ACTIVE", "アクティブ");
-		m.put("File not found", "ファイルが見つかりません");
-		m.put("INACTIVE", "非アクティブ");
-		m.put("Inactive", "非アクティブ");
-		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
-			"変更を表示するにはワークスペースを再プロビジョニングしてください。またはサーバー \"{0}\" にログインして \"{1}\" で変更を確認してください");
-		m.put("Sync (pull & push)", "同期 (プル & プッシュ)");
-		m.put("Whether or not to create the workspace inside container", "コンテナ内にワークスペースを作成するかどうか");
 	}
 		
 	@Override

@@ -998,7 +998,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			for (var entry : connections.entrySet()) {
 				var connection = entry.getKey();
 				var state = entry.getValue();
-				if (state.matches(workspaceId, shellId) && !state.queueIfReplaying(base64Data))
+				if (state.matches(workspaceId, shellId) && !state.queueIfReplaying(base64Data) && connection.isOpen()) 
 					connection.sendMessage("SHELL_OUTPUT:" + base64Data);
 			}
 			return null;

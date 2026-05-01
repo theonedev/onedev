@@ -130,6 +130,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("A {0} used as body of various issue notification emails", "다양한 문제 알림 이메일 본문으로 사용된 {0}");
 		m.put("A {0} used as body of various pull request notification emails", "다양한 풀 리퀘스트 알림 이메일 본문으로 사용된 {0}");
 		m.put("A {0} used as body of workspace notification email", "워크스페이스 알림 이메일의 본문으로 사용된 {0}");
+		m.put("ACTIVE", "활성화됨");
 		m.put("AI", "AI");
 		m.put("AI Model Settings", "AI 모델 설정");
 		m.put("AI Settings", "AI 설정");
@@ -1138,6 +1139,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Do you really want to cancel invitation to \"{0}\"?", "\"{0}\"에 대한 초대를 정말 취소하시겠습니까?");
 		m.put("Do you really want to cancel this build?", "이 빌드를 정말 취소하시겠습니까?");
 		m.put("Do you really want to change target branch to {0}?", "대상 브랜치를 {0}(으)로 변경하시겠습니까?");
+		m.put("Do you really want to close this terminal?", "이 터미널을 정말로 닫으시겠습니까?");
 		m.put("Do you really want to delete \"{0}\"?", "\"{0}\"을(를) 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete SSO provider \"{0}\"?", "SSO 제공자 \"{0}\"를 정말로 삭제하시겠습니까?");
 		m.put("Do you really want to delete board \"{0}\"?", "보드 \"{0}\"을(를) 정말 삭제하시겠습니까?");
@@ -1453,6 +1455,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("File is too large to edit here", "파일이 너무 커서 여기서 편집할 수 없습니다");
 		m.put("File name", "파일 이름");
 		m.put("File name patterns such as *.java, *.c", "파일 이름 패턴 예: *.java, *.c");
+		m.put("File not found", "파일을 찾을 수 없음");
 		m.put("Files", "파일들");
 		m.put("Files to Be Analyzed", "분석할 파일들");
 		m.put("Filter", "필터");
@@ -1680,6 +1683,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("IMAP Password", "IMAP 비밀번호");
 		m.put("IMAP User", "IMAP 사용자");
 		m.put("IMPORTANT:", "중요:");
+		m.put("INACTIVE", "비활성화됨");
 		m.put("IP Address", "IP 주소");
 		m.put("Id", "ID");
 		m.put("Identify Field", "식별 필드");
@@ -1768,6 +1772,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"외부 문제 추적기를 사용하는 경우, 커밋 메시지 및 풀 리퀘스트 설명과 같은 다양한 위치에서 외부 문제 참조를 외부 문제 링크로 변환하기 위한 변환기를 정의할 수 있습니다");
 		m.put("In rare cases, your issues might be out of sync with workflow settings (undefined state/field etc.). Run integrity check below to find problems and get them fixed.", 
 			"드문 경우, 문제 상태/필드 등이 워크플로 설정과 동기화되지 않을 수 있습니다. 아래 무결성 검사를 실행하여 문제를 찾아 수정하십시오");
+		m.put("Inactive", "비활성화됨");
 		m.put("Inbox Poll Setting", "받은 편지함 폴링 설정");
 		m.put("Include Child Projects", "하위 프로젝트 포함");
 		m.put("Include Disabled", "비활성 포함");
@@ -2908,6 +2913,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이중 인증을 활성화할 때 저장한 복구 코드 중 하나를 입력해주세요");
 		m.put("Please login to perform this operation", "이 작업을 수행하려면 로그인해주세요");
 		m.put("Please login to perform this query", "이 쿼리를 수행하려면 로그인해주세요");
+		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
+			"변경 사항을 표시하려면 워크스페이스를 다시 프로비저닝하거나 서버 \"{0}\"에 로그인하여 \"{1}\"에서 변경 사항을 확인하십시오");
 		m.put("Please resolve undefined field values below", "아래 정의되지 않은 필드 값을 해결해주세요");
 		m.put("Please resolve undefined fields below", "아래 정의되지 않은 필드를 해결해주세요");
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
@@ -4088,6 +4095,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Symbol name", "심볼 이름");
 		m.put("Symbols", "심볼");
 		m.put("Sync", "동기화");
+		m.put("Sync (pull & push)", "동기화 (풀 & 푸시)");
 		m.put("Sync Replica Status and Back to Home", "복제본 상태 동기화 및 홈으로 돌아가기");
 		m.put("Sync Repository", "저장소 동기화");
 		m.put("Sync Timing of All Queried Issues", "조회된 모든 이슈의 동기화 타이밍");
@@ -4674,6 +4682,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"컨테이너 실행 시 항상 이미지를 풀할지 여부. 악의적인 작업에 의해 이미지가 교체되는 것을 방지하기 위해 이 옵션을 활성화해야 합니다");
 		m.put("Whether or not to be able to access time tracking info of issues", "문제의 시간 추적 정보를 액세스할 수 있는지 여부");
+		m.put("Whether or not to create the workspace inside container", "컨테이너 내부에 워크스페이스를 생성할지 여부");
 		m.put("Whether or not to enable code management for the project", "프로젝트에 대한 코드 관리를 활성화할지 여부");
 		m.put("Whether or not to enable issue management for the project", "프로젝트에 대한 문제 관리를 활성화할지 여부");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -5033,14 +5042,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("ACTIVE", "활성화됨");
-		m.put("File not found", "파일을 찾을 수 없음");
-		m.put("INACTIVE", "비활성화됨");
-		m.put("Inactive", "비활성화됨");
-		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
-			"변경 사항을 표시하려면 워크스페이스를 다시 프로비저닝하거나 서버 \"{0}\"에 로그인하여 \"{1}\"에서 변경 사항을 확인하십시오");
-		m.put("Sync (pull & push)", "동기화 (풀 & 푸시)");
-		m.put("Whether or not to create the workspace inside container", "컨테이너 내부에 워크스페이스를 생성할지 여부");
 	}
 		
 	@Override
