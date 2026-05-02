@@ -69,7 +69,7 @@ public abstract class CommandPalettePanel extends Panel {
 			"~administration/cluster ~administration/audits ~administration/settings/time-tracking ${project}/~timesheets " +
 			"${project}/~stats/pull-request/duration ${project}/~stats/pull-request/frequency ${project}/~stats/build/duration " + 
 			"${project}/~stats/build/frequency ${project}/~stats/issue/state-frequency ${project}/~stats/issue/state-duration " + 
-			"${project}/~stats/issue/state-trend ${project}/~audits");
+			"${project}/~stats/issue/state-trend ${project}/~audits ${project}/~settings/issue/state-transitions");
 	
 	static {
 		for (IRequestMapper mapper: OneDev.getInstance(WebApplication.class).getRequestMappers())

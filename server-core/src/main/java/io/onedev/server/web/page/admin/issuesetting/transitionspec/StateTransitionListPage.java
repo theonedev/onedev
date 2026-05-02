@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -16,6 +17,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.component.issue.transitionspec.StateTransitionListPanel;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
+import io.onedev.server.web.util.WicketUtils;
 
 public class StateTransitionListPage extends IssueSettingPage {
 
@@ -67,6 +69,9 @@ public class StateTransitionListPage extends IssueSettingPage {
 			}
 			
 		});
+
+		add(new WebMarkupContainer("ceNote").setVisible(!WicketUtils.isSubscriptionActive()));
+		add(new WebMarkupContainer("eeNote").setVisible(WicketUtils.isSubscriptionActive()));
 	}
 	
 	@Override

@@ -11,15 +11,21 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.exception.NoSubscriptionException;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.component.issue.transitionspec.StateTransitionListPanel;
+import io.onedev.server.web.util.WicketUtils;
 
 public class ProjectStateTransitionListPage extends ProjectIssueSettingPage {
 
 	public ProjectStateTransitionListPage(PageParameters params) {
 		super(params);
+
+		if (!WicketUtils.isSubscriptionActive()) {
+			throw new NoSubscriptionException("Project level issue state transition rule definition");
+		}
 	}
 
 	@Override

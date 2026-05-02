@@ -1,8 +1,17 @@
 <wicket:extend>
 	<div class="text-muted mb-4">
-		<wicket:svg href="bulb" class="icon"/> <wicket:t>Define how issue states should be transited from one to another, either manually 
-		or automatically when some events happen. And the rule can be configured to apply to certain projects and issues 
-		via the applicable issues setting</wicket:t>
+		<wicket:svg href="bulb" class="icon"/> 
+		<wicket:t>
+			Define how issues move between states: manually by users, or automatically in response to events.
+			The first matching rule applies.
+		</wicket:t>
+		
+		<span wicket:id="ceNote"><wicket:t>
+			<b>NOTE: </b> Transition rules can also be configured and overridden at project level in enterprise edition
+		</wicket:t></span>
+		<span wicket:id="eeNote"><wicket:t>
+			<b>NOTE: </b> Transition rules can also be configured and overridden at project level 
+		</wicket:t></span>
 	</div>
 	<div wicket:id="transitions"></div>
 </wicket:extend>

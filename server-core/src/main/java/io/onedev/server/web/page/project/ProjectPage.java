@@ -105,7 +105,6 @@ import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
 import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
-import io.onedev.server.web.page.project.setting.issuesetting.ProjectStateTransitionListPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
@@ -309,7 +308,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Code"), codeSettingMenuItems));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Pull Request"),
 					PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject())));
-			
+
+			if (getProject().isIssueManagement() && WicketUtils.isSubscriptionActive()) 
+				settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Issue"), new ArrayList<>()));
+					
 			List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
 			
 			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Job Secrets"), 
@@ -327,13 +329,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Cache Management"),
 					CacheManagementPage.class, CacheManagementPage.paramsOf(getProject())));
-
-			if (getProject().isIssueManagement()) {
-				List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
-				issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("State Transitions"),
-						ProjectStateTransitionListPage.class, ProjectStateTransitionListPage.paramsOf(getProject())));
-				settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Issue"), issueSettingMenuItems));
-			}
 
 			if (getSettingService().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
 				settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Service Desk"), 
