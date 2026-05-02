@@ -453,7 +453,7 @@ public class IssueResource {
 		Issue issue = issueService.load(issueId);
 		var subject = SecurityUtils.getSubject();
 		var user = SecurityUtils.getUser(subject);
-		ManualSpec transition = settingService.getIssueSetting().getManualSpec(subject, issue, data.getState());
+		ManualSpec transition = issue.getProject().getManualSpec(subject, issue, data.getState());
 		if (transition == null) {
 			var message = MessageFormat.format(
 				"No applicable manual transition spec found for current user (issue: {0}, from state: {1}, to state: {2})",

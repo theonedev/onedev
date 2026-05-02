@@ -46,6 +46,7 @@ import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrengt
 import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.subject.Subject;
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.util.encoding.UrlEncoder;
 import org.eclipse.jgit.lib.Constants;
@@ -113,6 +114,8 @@ import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.issue.TimesheetSetting;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -1953,6 +1956,29 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} while (current != null); 
 		
 		return getSettingService().getPullRequestSetting().getNamedQueries();
+	}
+	
+	public List<TransitionSpec> getHierarchyTransitionSpecs() {
+		List<TransitionSpec> transitionSpecs = new ArrayList<>();
+		Project current = this;
+		do {
+			transitionSpecs.addAll(current.getIssueSetting().getTransitionSpecs());
+			current = current.getParent();
+		} while (current != null);
+		transitionSpecs.addAll(getSettingService().getIssueSetting().getTransitionSpecs());
+		return transitionSpecs;
+	}
+	
+	@Nullable
+	public ManualSpec getManualSpec(Subject subject, Issue issue, @Nullable String state) {
+		for (var transition: getHierarchyTransitionSpecs()) {
+			if (transition instanceof ManualSpec) {
+				var manualSpec = (ManualSpec) transition;
+				if (manualSpec.canTransit(subject, issue, state) && manualSpec.isAuthorized(subject, issue)) 
+					return manualSpec;
+			}
+		}
+		return null;
 	}
 	
 	public Map<String, TimesheetSetting> getHierarchyTimesheetSettings() {

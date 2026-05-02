@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -394,17 +393,7 @@ public class McpHelperResource {
 
         inputSchemas.put("editIssue", editIssueInputSchema);            
 
-        var toStates = new HashSet<String>();
-        for (var transition: settingService.getIssueSetting().getTransitionSpecs()) {
-            if (transition instanceof ManualSpec) {
-                if (transition.getToStates().isEmpty()) {
-                    toStates.addAll(settingService.getIssueSetting().getStateSpecMap().keySet());
-                    break;
-                } else {
-                    toStates.addAll(transition.getToStates());
-                }
-            }
-        }
+        var toStates = settingService.getIssueSetting().getStateSpecMap().keySet();
         if (toStates.size() > 0) {
             var changeIssueStateInputSchema = new HashMap<String, Object>();
             changeIssueStateInputSchema.put("Type", "object");
@@ -932,7 +921,7 @@ public class McpHelperResource {
         if (state == null)
             throw new NotAcceptableException("State is required");
         var comment = (String) data.remove("comment");
-        ManualSpec transition = settingService.getIssueSetting().getManualSpec(subject, issue, state);
+        ManualSpec transition = issue.getProject().getManualSpec(subject, issue, state);
         if (transition == null) {
             var message = MessageFormat.format(
                 "No applicable manual transition spec found for current user (issue: {0}, from state: {1}, to state: {2})",

@@ -81,8 +81,6 @@ import io.onedev.server.web.page.project.issues.iteration.IterationEditPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationListPage;
 import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
-import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -92,9 +90,9 @@ import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPa
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import io.onedev.server.web.page.project.setting.ai.ProjectAiSettingPage;
 import io.onedev.server.web.page.project.setting.authorization.GroupAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage;
-import io.onedev.server.web.page.project.setting.ai.ProjectAiSettingPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
@@ -107,6 +105,7 @@ import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
 import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
+import io.onedev.server.web.page.project.setting.issuesetting.ProjectStateTransitionListPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
@@ -114,8 +113,11 @@ import io.onedev.server.web.page.project.setting.workspacespec.WorkspaceSpecsPag
 import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
 import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
+import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ProjectAware;
+import io.onedev.server.web.util.WicketUtils;
 
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
@@ -325,6 +327,13 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Cache Management"),
 					CacheManagementPage.class, CacheManagementPage.paramsOf(getProject())));
+
+			if (getProject().isIssueManagement()) {
+				List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
+				issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("State Transitions"),
+						ProjectStateTransitionListPage.class, ProjectStateTransitionListPage.paramsOf(getProject())));
+				settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Issue"), issueSettingMenuItems));
+			}
 
 			if (getSettingService().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
 				settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Service Desk"), 

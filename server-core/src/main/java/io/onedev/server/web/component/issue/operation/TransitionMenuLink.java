@@ -38,7 +38,7 @@ public abstract class TransitionMenuLink extends MenuLink {
 				protected List<ManualSpec> load() {
 					var subject = SecurityUtils.getSubject();
 					var manualSpecs = new ArrayList<ManualSpec>();
-					for (var transitionSpec: OneDev.getInstance(SettingService.class).getIssueSetting().getTransitionSpecs()) {
+					for (var transitionSpec: getIssue().getProject().getHierarchyTransitionSpecs()) {
 						if (transitionSpec instanceof ManualSpec) {
 							ManualSpec manualSpec = (ManualSpec) transitionSpec;
 							if (manualSpec.canTransit(subject, getIssue(), null)) 

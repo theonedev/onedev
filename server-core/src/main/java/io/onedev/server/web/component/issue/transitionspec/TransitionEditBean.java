@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.issuesetting.transitionspec;
+package io.onedev.server.web.component.issue.transitionspec;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;

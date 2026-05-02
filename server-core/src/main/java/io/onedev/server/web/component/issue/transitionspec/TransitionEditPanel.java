@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.issuesetting.transitionspec;
+package io.onedev.server.web.component.issue.transitionspec;
 
 import java.util.List;
 
@@ -15,20 +15,18 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
-abstract class TransitionEditPanel extends Panel implements InputContext {
+public abstract class TransitionEditPanel extends Panel implements InputContext {
 
 	private final int transitionIndex;
 
-	private TransitionSpec transition;
+	private final TransitionSpec transition;
 	
 	public TransitionEditPanel(String id, int transitionIndex, @Nullable TransitionSpec transition) {
 		super(id);
@@ -76,20 +74,7 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-
-				var transition = bean.getTransitionSpec();
-				String oldAuditContent = null;
-				if (transitionIndex != -1) {
-					var oldTransition = getSetting().getTransitionSpecs().set(transitionIndex, transition);
-					oldAuditContent = VersionedXmlDoc.fromBean(oldTransition).toXML();
-				} else {
-					getSetting().getTransitionSpecs().add(transition);
-				}
-				var newAuditContent = VersionedXmlDoc.fromBean(transition).toXML();
-				OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
-				var verb = transitionIndex != -1 ? "changed" : "added";
-				OneDev.getInstance(AuditService.class).audit(null, verb + " issue transition", oldAuditContent, newAuditContent);
-				onSave(target);
+				onSave(target, transitionIndex, bean.getTransitionSpec());
 			}
 			
 		});
@@ -127,9 +112,7 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 		return getIssueSetting().getFieldSpec(inputName);
 	}
 	
-	protected abstract GlobalIssueSetting getSetting();
-	
-	protected abstract void onSave(AjaxRequestTarget target);
+	protected abstract void onSave(AjaxRequestTarget target, int transitionIndex, TransitionSpec transition);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 

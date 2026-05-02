@@ -153,6 +153,7 @@ import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
 import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
+import io.onedev.server.web.page.project.setting.issuesetting.ProjectStateTransitionListPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
@@ -497,6 +498,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/build/build-preserve-rules", BuildPreservationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/cache-management", CacheManagementPage.class));
+		add(new ProjectPageMapper("${project}/~settings/issue/state-transitions", ProjectStateTransitionListPage.class));
 		add(new ProjectPageMapper("${project}/~settings/service-desk", ServiceDeskSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/web-hooks", WebHooksPage.class));
 		add(new ProjectPageMapper("${project}/~settings/ai", ProjectAiSettingPage.class));

@@ -147,7 +147,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(Issue.NAME_STATE)) {
 									var subject = SecurityUtils.getSubject();
-									for (TransitionSpec transition: getIssueSetting().getTransitionSpecs()) {
+									for (TransitionSpec transition: issue.getProject().getHierarchyTransitionSpecs()) {
 										if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(subject, issue, getColumn())) {
 											issue = SerializationUtils.clone(issue);
 											issue.setState(getColumn());
@@ -368,7 +368,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 					} else if (fieldName.equals(Issue.NAME_STATE)) {
 						AtomicReference<ManualSpec> transitionRef = new AtomicReference<>(null);
-						for (TransitionSpec transition : getIssueSetting().getTransitionSpecs()) {
+						for (TransitionSpec transition : issue.getProject().getHierarchyTransitionSpecs()) {
 							if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(subject, issue, getColumn())) {
 								transitionRef.set((ManualSpec) transition);
 								break;

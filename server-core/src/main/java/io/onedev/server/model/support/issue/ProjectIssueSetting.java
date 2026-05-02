@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
@@ -19,6 +20,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
@@ -39,6 +41,8 @@ public class ProjectIssueSetting implements Serializable {
 	private List<BoardSpec> boardSpecs;
 
 	private List<NamedIssueQuery> namedQueries;
+	
+	private List<TransitionSpec> transitionSpecs = new ArrayList<>();
 	
 	private Map<String, TimesheetSetting> timesheetSettings = new LinkedHashMap<>();
 	
@@ -95,6 +99,16 @@ public class ProjectIssueSetting implements Serializable {
 
 	public void setTimesheetSettings(Map<String, TimesheetSetting> timesheetSettings) {
 		this.timesheetSettings = timesheetSettings;
+	}
+
+	@NotNull
+	@Valid
+	public List<TransitionSpec> getTransitionSpecs() {
+		return transitionSpecs;
+	}
+
+	public void setTransitionSpecs(List<TransitionSpec> transitionSpecs) {
+		this.transitionSpecs = transitionSpecs;
 	}
 
 	public void onRenameUser(String oldName, String newName) {
@@ -158,6 +172,9 @@ public class ProjectIssueSetting implements Serializable {
 				undefinedStates.addAll(board.getUndefinedStates());
 		}
 		
+		for (TransitionSpec transition: transitionSpecs)
+			undefinedStates.addAll(transition.getUndefinedStates());
+		
 		return undefinedStates;
 	}
 
@@ -178,6 +195,8 @@ public class ProjectIssueSetting implements Serializable {
 			for (BoardSpec board: boardSpecs) 
 				undefinedFields.addAll(board.getUndefinedFields());
 		}
+		for (TransitionSpec transition: transitionSpecs)
+			undefinedFields.addAll(transition.getUndefinedFields());
 		return undefinedFields;
 	}
 
@@ -189,6 +208,8 @@ public class ProjectIssueSetting implements Serializable {
 			for (BoardSpec board: boardSpecs)
 				undefinedFieldValues.addAll(board.getUndefinedFieldValues());
 		}
+		for (TransitionSpec transition: transitionSpecs)
+			undefinedFieldValues.addAll(transition.getUndefinedFieldValues());
 		return undefinedFieldValues;
 	}
 	
@@ -199,6 +220,11 @@ public class ProjectIssueSetting implements Serializable {
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
 				board.fixUndefinedStates(resolutions);
+		}
+		
+		for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
+			if (!it.next().fixUndefinedStates(resolutions))
+				it.remove();
 		}
 	}
 	
@@ -216,6 +242,11 @@ public class ProjectIssueSetting implements Serializable {
 		
 		if (boardSpecs != null) 
 			boardSpecs.removeIf(boardSpec -> !boardSpec.fixUndefinedFields(resolutions));		
+		
+		for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
+			if (!it.next().fixUndefinedFields(resolutions))
+				it.remove();
+		}
 	}	
 	
 	public void fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
@@ -229,6 +260,11 @@ public class ProjectIssueSetting implements Serializable {
 					break;
 				}
 			}
+		}
+		
+		for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
+			if (!it.next().fixUndefinedFieldValues(resolutions))
+				it.remove();
 		}
 	}
 	
