@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -450,7 +451,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 	private List<TransitionSpec> getTransitionSpecs() {
 		return OneDev.getInstance(SettingService.class).getIssueSetting().getTransitionSpecs();
 	}
-	
+		
 	@Transactional
 	@Listen
 	public void on(IssueChanged event) {
@@ -461,6 +462,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 				Issue issue = event.getIssue();
 				
 				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentIssueCriteria(true);
+				Set<Long> transitedIssueIds = new HashSet<>();
 				for (TransitionSpec transition: getTransitionSpecs()) {
 					if (transition instanceof IssueStateTransitedSpec) {
 						Project project = issue.getProject();
@@ -484,8 +486,10 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 									subject, projectScope, query, true, 0, MAX_VALUE)) {
 								String message = "State changed as issue " + issue.getReference().toString(each.getProject()) 
 										+ " transited to '" + issue.getState() + "'";
-								changeState(SecurityUtils.getUser(subject), each, issueStateTransitedSpec.getToState(), 
+								if (transitedIssueIds.add(each.getId())) {
+									changeState(SecurityUtils.getUser(subject), each, issueStateTransitedSpec.getToState(), 
 										new HashMap<>(), new ArrayList<>(), transition.getRemoveFields(), message);
+								}
 							}
 						} finally {
 							Issue.pop();
@@ -508,6 +512,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 			Build build = event.getBuild();
 
 			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentBuildCriteria(true);
+			Set<Long> transitedIssueIds = new HashSet<>();
 			for (TransitionSpec transition: getTransitionSpecs()) {
 				if (transition instanceof BuildSuccessfulSpec) {
 					Project project = build.getProject();
@@ -534,8 +539,10 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 						try {
 							for (Issue issue: issueService.query(subject, projectScope, query, true, 0, MAX_VALUE)) {
 								String message = "State changed as build " + build.getReference().toString(issue.getProject()) + " is successful";
-								changeState(user, issue, buildSuccessfulSpec.getToState(), 
+								if (transitedIssueIds.add(issue.getId())) {
+									changeState(user, issue, buildSuccessfulSpec.getToState(), 
 										new HashMap<>(), new ArrayList<>(), transition.getRemoveFields(), message);
+								}
 							}
 						} finally {
 							Build.pop();
@@ -557,6 +564,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 			Project project = request.getTargetProject();
 			ProjectScope projectScope = new ProjectScope(project, true, true);
 			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentPullRequestCriteria(true);
+			Set<Long> transitedIssueIds = new HashSet<>();
 			for (TransitionSpec transition: getTransitionSpecs()) {
 				if (transition.getClass() == specClass) {
 					PullRequestSpec pullRequestSpec = (PullRequestSpec) transition;
@@ -577,9 +585,11 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 						try {
 							for (Issue issue: issueService.query(subject, projectScope, query, true, 0, MAX_VALUE)) {
 								String statusName = request.getStatus().toString().toLowerCase();
-								changeState(user, issue, pullRequestSpec.getToState(), 
+								if (transitedIssueIds.add(issue.getId())) {
+									changeState(user, issue, pullRequestSpec.getToState(), 
 										new HashMap<>(), new ArrayList<>(), transition.getRemoveFields(), 
 										"State changed as pull request " + request.getReference().toString(issue.getProject()) + " is " + statusName);
+								}
 							}
 						} finally {
 							PullRequest.pop();
@@ -661,6 +671,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 				} 
 				
 				var option = new IssueQueryParseOption().withCurrentCommitCriteria(true);
+				Set<Long> transitedIssueIds = new HashSet<>();
 				for (var transition: getTransitionSpecs()) {
 					if (transition instanceof BranchUpdatedSpec) {
 						var branchUpdatedSpec = (BranchUpdatedSpec) transition;
@@ -697,9 +708,11 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 										String commitFQN = commit.name();
 										if (!project.equals(issue.getProject()))
 											commitFQN = project.getPath() + ":" + commitFQN;
-										changeState(user, issue, branchUpdatedSpec.getToState(), 
-												new HashMap<>(), new ArrayList<>(), transition.getRemoveFields(),
-												"State changed as code fixing the issue is committed (" + commitFQN + ")");
+										if (transitedIssueIds.add(issue.getId())) {
+											changeState(user, issue, branchUpdatedSpec.getToState(), 
+													new HashMap<>(), new ArrayList<>(), transition.getRemoveFields(),
+													"State changed as code fixing the issue is committed (" + commitFQN + ")");
+										}
 									}
 								}
 							} finally {
@@ -725,6 +738,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 						var subject = SecurityUtils.getSubject();
 						var user = SecurityUtils.getUser(subject);
 						IssueQueryParseOption option = new IssueQueryParseOption();
+						Set<Long> transitedIssueIds = new HashSet<>();
 						for (TransitionSpec transition: getTransitionSpecs()) {
 							if (transition instanceof NoActivitySpec) {
 								NoActivitySpec noActivitySpec = (NoActivitySpec) transition;
@@ -747,8 +761,10 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 								query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 								
 								for (Issue issue: issueService.query(subject, null, query, true, 0, MAX_VALUE)) {
-									changeState(user, issue, noActivitySpec.getToState(), new HashMap<>(), new ArrayList<>(), 
-											transition.getRemoveFields(), null);
+									if (transitedIssueIds.add(issue.getId())) {
+										changeState(user, issue, noActivitySpec.getToState(), new HashMap<>(), new ArrayList<>(), 
+												transition.getRemoveFields(), null);
+									}
 								}
 							}
 						}
@@ -757,7 +773,6 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 			}
 			
 		}, new Prioritized(NO_ACTIVITY_TRANSITION_PRIORITY));
-
 	}
 	
 	@Sessional
