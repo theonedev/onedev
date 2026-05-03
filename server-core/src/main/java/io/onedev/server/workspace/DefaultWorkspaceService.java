@@ -36,7 +36,6 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
@@ -88,8 +87,6 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
-import io.onedev.server.security.CodePullAuthorizationSource;
-import io.onedev.server.security.CodePushAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.service.ProjectService;
@@ -110,7 +107,7 @@ import oshi.SystemInfo;
 
 @Singleton
 public class DefaultWorkspaceService extends BaseEntityService<Workspace> 
-		implements WorkspaceService, Runnable, SchedulableTask, CodePullAuthorizationSource, CodePushAuthorizationSource, Serializable {
+		implements WorkspaceService, Runnable, SchedulableTask, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -910,18 +907,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		return context;
 	}
 
-	private boolean isAuthorized(HttpServletRequest request, Project project) {
-		String token = SecurityUtils.getBearerToken(request);
-		if (token != null) {
-			var context = projectService.runOnActiveServer(project.getId(), () -> {
-				return workspaceContexts.get(token);
-			});
-			if (context != null)
-				return context.getProjectId().equals(project.getId());
-		}
-		return false;
-	}
-
 	@Override
 	public boolean hasLfsObjects(Long projectId, Long workspaceNumber) {
 		var workDir = Workspace.getWorkDir(projectId, workspaceNumber);
@@ -929,16 +914,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		return new File(gitDir, "lfs/objects").exists();
 	}
 	
-	@Override
-	public boolean canPullCode(HttpServletRequest request, Project project) {
-		return isAuthorized(request, project);
-	}
-
-	@Override
-	public boolean canPushCode(HttpServletRequest request, Project project) {
-		return isAuthorized(request, project);
-	}
-
 	@Sessional
 	@Override
 	public GitExecutionResult executeGitCommand(Workspace workspace, String[] gitArgs) {

@@ -173,7 +173,6 @@ import io.onedev.server.security.AuthorizingService;
 import io.onedev.server.security.BasicAuthenticationFilter;
 import io.onedev.server.security.BearerAuthenticationFilter;
 import io.onedev.server.security.CodePullAuthorizationSource;
-import io.onedev.server.security.CodePushAuthorizationSource;
 import io.onedev.server.security.DefaultAuthenticatingService;
 import io.onedev.server.security.DefaultAuthorizingService;
 import io.onedev.server.security.DefaultFilterChainResolver;
@@ -611,8 +610,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebHookManager.class);
 		
 		contribute(CodePullAuthorizationSource.class, DefaultJobService.class);
-		contribute(CodePullAuthorizationSource.class, DefaultWorkspaceService.class);
-		contribute(CodePushAuthorizationSource.class, DefaultWorkspaceService.class);
         
 		bind(CodeIndexService.class).to(DefaultCodeIndexService.class);
 		bind(CodeSearchService.class).to(DefaultCodeSearchService.class);

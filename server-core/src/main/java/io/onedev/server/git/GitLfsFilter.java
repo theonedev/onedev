@@ -68,7 +68,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.CodePullAuthorizationSource;
-import io.onedev.server.security.CodePushAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.GitLfsLockService;
 import io.onedev.server.service.ProjectService;
@@ -100,14 +99,11 @@ public class GitLfsFilter implements Filter {
 	private final ClusterService clusterService;
 	
 	private final Set<CodePullAuthorizationSource> codePullAuthorizationSources;
-
-	private final Set<CodePushAuthorizationSource> codePushAuthorizationSources;
 	
 	@Inject
 	public GitLfsFilter(ProjectService projectService, ObjectMapper objectMapper, SessionService sessionService,
                         SettingService settingService, GitLfsLockService lockService, ClusterService clusterService,
-                        Set<CodePullAuthorizationSource> codePullAuthorizationSources,
-                        Set<CodePushAuthorizationSource> codePushAuthorizationSources) {
+                        Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
 		this.projectService = projectService;
 		this.objectMapper = objectMapper;
 		this.sessionService = sessionService;
@@ -115,7 +111,6 @@ public class GitLfsFilter implements Filter {
 		this.lockService = lockService;
 		this.clusterService = clusterService;
 		this.codePullAuthorizationSources = codePullAuthorizationSources;
-		this.codePushAuthorizationSources = codePushAuthorizationSources;
 	}
 	
 	@Override
@@ -130,18 +125,6 @@ public class GitLfsFilter implements Filter {
 		if (!SecurityUtils.canReadCode(project)) {
 			for (CodePullAuthorizationSource source: codePullAuthorizationSources) {
 				if (source.canPullCode(request, project)) 
-					return true;
-			}
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	private boolean canWriteCode(HttpServletRequest request, Project project) {
-		if (!SecurityUtils.canWriteCode(project)) {
-			for (CodePushAuthorizationSource source: codePushAuthorizationSources) {
-				if (source.canPushCode(request, project)) 
 					return true;
 			}
 			return false;
@@ -260,7 +243,7 @@ public class GitLfsFilter implements Filter {
 						Project project = projectService.findByPath(getProjectPath(pathInfo));
 						if (project == null || !canAccessProject(httpRequest, project))
 							reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
-						else if (canWriteCode(httpRequest, project))  
+						else if (SecurityUtils.canWriteCode(project))  
 							lfsObject = new LfsObject(project.getId(), objectId);
 						else 
 							sendAuthorizationError(httpResponse);
@@ -347,11 +330,11 @@ public class GitLfsFilter implements Filter {
 							String accessToken = SecurityUtils.createTemporalAccessTokenIfUserPrincipal(300);
 							processBatch(httpRequest, httpResponse, project.getFacade(), 
 									() -> canReadCode(httpRequest, project), 
-									() -> canWriteCode(httpRequest, project), 
+									() -> SecurityUtils.canWriteCode(project), 
 									accessToken);
 						} else if (pathInfo.endsWith("/locks")) {
 							if (httpRequest.getMethod().equals("POST")) {
-								if (canWriteCode(httpRequest, project)) {
+								if (SecurityUtils.canWriteCode(project)) {
 									JsonNode lockRequestNode;
 									try (InputStream is = httpRequest.getInputStream()) {
 										lockRequestNode = objectMapper.readTree(is);
@@ -413,7 +396,7 @@ public class GitLfsFilter implements Filter {
 								}
 							}
 						} else if (pathInfo.endsWith("/locks/verify")) {
-							if (canWriteCode(httpRequest, project)) {
+							if (SecurityUtils.canWriteCode(project)) {
 								JsonNode lockVerifyNode;
 								try (InputStream is = httpRequest.getInputStream()) {
 									lockVerifyNode = objectMapper.readTree(is);
@@ -466,7 +449,7 @@ public class GitLfsFilter implements Filter {
 								sendAuthorizationError(httpResponse);
 							}
 						} else if (pathInfo.endsWith("/unlock")) {
-							if (canWriteCode(httpRequest, project)) {
+							if (SecurityUtils.canWriteCode(project)) {
 								Long id = Long.valueOf(StringUtils.substringAfterLast(
 										substringBeforeLast(pathInfo, "/"), "/"));
 								

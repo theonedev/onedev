@@ -51,7 +51,6 @@ import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.CodePullAuthorizationSource;
-import io.onedev.server.security.CodePushAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.IOUtils;
@@ -76,21 +75,17 @@ public class GitFilter implements Filter {
 	private final ClusterService clusterService;
 	
 	private final Set<CodePullAuthorizationSource> codePullAuthorizationSources;
-	
-	private final Set<CodePushAuthorizationSource> codePushAuthorizationSources;
-	
+		
 	@Inject
 	public GitFilter(OneDev oneDev, ProjectService projectService, WorkExecutionService workExecutionService,
                      SessionService sessionService, ClusterService clusterService,
-                     Set<CodePullAuthorizationSource> codePullAuthorizationSources,
-                     Set<CodePushAuthorizationSource> codePushAuthorizationSources) {
+                     Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
 		this.onedev = oneDev;
 		this.projectService = projectService;
 		this.workExecutionService = workExecutionService;
 		this.sessionService = sessionService;
 		this.clusterService = clusterService;
 		this.codePullAuthorizationSources = codePullAuthorizationSources;
-		this.codePushAuthorizationSources = codePushAuthorizationSources;
 	}
 	
 	private String getPathInfo(HttpServletRequest request) {
@@ -280,17 +275,8 @@ public class GitFilter implements Filter {
 	}
 
 	private void checkPushPermission(HttpServletRequest request, Project project) {
-		if (!SecurityUtils.canWriteCode(project)) {
-			boolean isAuthorized = false;
-			for (CodePushAuthorizationSource source: codePushAuthorizationSources) {
-				if (source.canPushCode(request, project)) {
-					isAuthorized = true;
-					break;
-				}
-			}
-			if (!isAuthorized)
-				throw new UnauthorizedException("You do not have permission to push to this project.");
-		}
+		if (!SecurityUtils.canWriteCode(project)) 
+			throw new UnauthorizedException("You do not have permission to push to this project.");
 	}
 
 	private boolean canAccessProject(HttpServletRequest request, Project project) {
