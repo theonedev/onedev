@@ -57,6 +57,7 @@ import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.workspaceprovisioner.RegistryLogin;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.model.support.workspace.spec.EnvVar;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
@@ -375,6 +376,9 @@ public class DockerProvisioner extends WorkspaceProvisioner implements DockerAwa
 				.collect(toMap(EnvVar::getName, it -> it.isSecret() ? it.getSecretValue() : it.getValue()));
 		envVars.put("TERM", "xterm-256color");
 		envVars.put("LANG", "C.UTF-8");
+		envVars.put("ONEDEV_SERVER_URL", OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl());
+		envVars.put("ONEDEV_WORKSPACE_TOKEN", context.getToken());
+
 		envVars.put("ONEDEV_WORKDIR", CONTAINER_WORKSPACE_PATH + "/work");
 
 		logger.log("Setting up cache...");

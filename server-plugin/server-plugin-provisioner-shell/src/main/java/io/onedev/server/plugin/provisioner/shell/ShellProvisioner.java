@@ -32,6 +32,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.model.support.workspace.spec.EnvVar;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
@@ -129,6 +130,8 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 		envVars.put("LANG", "C.UTF-8");
 		var workDir = Workspace.getWorkDir(context.getProjectId(), context.getWorkspaceNumber());
 		envVars.put("ONEDEV_WORKDIR", workDir.getAbsolutePath());
+		envVars.put("ONEDEV_SERVER_URL", OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl());
+		envVars.put("ONEDEV_WORKSPACE_TOKEN", context.getToken());
 
 		logger.log("Setting up cache...");
 
