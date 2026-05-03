@@ -3,6 +3,7 @@ package io.onedev.server.model.support.administration;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,7 +18,6 @@ import javax.validation.constraints.NotNull;
 
 import com.google.common.collect.Lists;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
@@ -177,23 +177,11 @@ public class GlobalIssueSetting implements Serializable {
 		StateSpec inProgress = new StateSpec();
 		inProgress.setName("In Progress");
 		inProgress.setColor("#FFA700");		
-		inProgress.setDescription(
-			"The AI assistant should switch the working directory to the branch corresponding to the issue by running below command:\n\n" + 
-			"git fetch <onedev remote> main && git checkout -b <branch-name> <onedev remote>/main && git push -u <onedev remote> <branch-name>\n\n" +
-			"Here <branch name> should be derived from user instruction or issue title, and <onedev remote> should be retrieved by calling tool getCurrentRemote"
-		);
 		stateSpecs.add(inProgress);
 
 		StateSpec inReview = new StateSpec();
 		inReview.setName("In Review");
 		inReview.setColor("#9C26B0");		
-		inReview.setDescription(
-			"AI assistant should do the following:\n\n" +
-			"1. Add files to git index, and create conventional commit for current work if there are uncommitted changes. Subject line of the commit message should include the issue number at the end in form of (<issue reference>)\n" +
-			"2. Push the branch to remote by running \"git push <onedev remote>\"\n" +
-			"3. Create a pull request for current branch, with other params derived from current issue, and user instruction\n\n" +
-			"Here <issue reference> should be replaced with reference of the issue whose state is being changed, and <onedev remote> should be retrieved via tool getCurrentRemote"
-		);
 		stateSpecs.add(inReview);
 
 		StateSpec closed = new StateSpec();
