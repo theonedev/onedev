@@ -1,5 +1,5 @@
 onedev.server.terminal = {
-	onDomReady: function(containerId, command) {
+	onDomReady: function(containerId) {
 		var $terminal = $("#" + containerId).children(".terminal");
 		var xterm = new Terminal({
 			fontSize: 14,
@@ -66,10 +66,6 @@ onedev.server.terminal = {
 					sendResize(xterm.rows-1, xterm.cols-1);
 					sendResize(xterm.rows, xterm.cols);
 					firstLiveOutput = false;
-					if (command) {
-						Wicket.WebSocket.send("SHELL_INPUT:" + command + "\r");
-						command = null;
-					}
 				}
 				var base64 = message.substring("SHELL_OUTPUT:".length);
 				var bytes = Uint8Array.from(atob(base64), function(c) { return c.charCodeAt(0); });

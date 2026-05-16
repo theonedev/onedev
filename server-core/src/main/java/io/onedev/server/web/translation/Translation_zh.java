@@ -950,20 +950,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Create User", "创建用户");
 		m.put("Create Workspace", "创建工作区");
 		m.put("Create Workspace Spec", "创建工作区规格");
-		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Claude Code 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
 		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Claude Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>容器镜像</a>\n以满足您的需求");
-		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Codex 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
 		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Codex 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>容器镜像</a>\n以满足您的需求");
-		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接运行 Cursor CLI 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> 已安装在 OneDev 服务器上</li>\n    <li>在 '管理 / 工作区配置器' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
 		m.put("Create a workspace spec running Cursor CLI inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器内运行 Cursor CLI 的工作区规范，以实现隔离和安全目的。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>容器镜像</a>\n以满足您的需求");
-		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Open Code 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Open Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>容器镜像</a>\n以满足您的需求");
 		m.put("Create body", "创建正文");
@@ -1236,7 +1228,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Docker Executable", "Docker 可执行文件");
 		m.put("Docker Hub", "Docker Hub");
 		m.put("Docker Image", "Docker 镜像");
-		m.put("Docker Provisioner", "Docker 配置器");
 		m.put("Docker Sock Path", "Docker Sock 路径");
 		m.put("Dockerfile", "Dockerfile");
 		m.put("Documentation", "文档");
@@ -2782,8 +2773,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify the minimum value allowed.", "可选择指定允许的最小值");
 		m.put("Optionally specify the project to publish site files to. Leave empty to publish to current project", 
 			"可选择指定要发布站点文件的项目。留空则发布到当前项目");
-		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping", 
-			"可选择指定要作为容器运行的 uid:gid。<b class='text-warning'>注意：</b>如果容器运行时是 rootless 或使用用户命名空间重新映射，则应留空此设置");
 		m.put("Optionally specify user name to access remote repository", "可选择指定用于访问远程仓库的用户名");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"可选择指定有效的常规提交范围（按 ENTER 添加值）。留空则允许任意范围");
@@ -2950,8 +2939,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"请输入在启用两阶段验证时保存的恢复代码");
 		m.put("Please login to perform this operation", "请登录才能执行此操作");
 		m.put("Please login to perform this query", "请登录以执行此查询");
-		m.put("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\"", 
-			"请重新配置工作区以显示更改，或者您可以登录到服务器 \"{0}\" 并在 \"{1}\" 检查更改");
 		m.put("Please resolve undefined field values below", "请解决以下未定义的字段值");
 		m.put("Please resolve undefined fields below", "请解决以下未定义的字段");
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
@@ -3556,7 +3543,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Share with Users", "与用户共享");
 		m.put("Shell", "Shell");
 		m.put("Shell Executable", "Shell 可执行文件");
-		m.put("Shell Provisioner", "Shell 配置器");
 		m.put("Shortcut Config", "快捷方式配置");
 		m.put("Shortcuts", "快捷方式");
 		m.put("Show Archived", "显示已归档");
@@ -4793,8 +4779,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Workspace token", "工作区令牌");
 		m.put("Workspace {0} deleted", "工作区 {0} 已删除");
 		m.put("Workspaces", "工作区");
-		m.put("Workspaces created by this provisioner have same privilege as OneDev server process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev server process.\nPlease make sure that only trusted projects can use this provisioner", 
-			"此配置器创建的工作区具有与 OneDev 服务器进程相同的权限。\n使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。\n多个项目应以空格分隔。<br>\n<b class='text-danger'>警告</b>：此配置器创建的工作区具有与 OneDev 服务器进程相同的权限。\n请确保只有受信任的项目可以使用此配置器");
 		m.put("Workspaces on source branch", "源分支上的工作区");
 		m.put("Workspaces on this branch", "此分支上的工作区");
 		m.put("Workspaces on this issue", "此工单上的工作区");
@@ -5082,6 +5066,56 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("CPU request for the workspace container.", "工作区容器的 CPU 请求。");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Claude Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接运行 Claude Code 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Claude Code 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Codex</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接运行 Codex 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Codex 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
+		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Cursor CLI</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接运行 Cursor CLI 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Cursor CLI 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Open Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接运行 Open Code 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Open Code 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
+		m.put("Kubernetes Provisioner", "Kubernetes 配置器");
+		m.put("Memory request for the workspace container.", "工作区容器的内存请求。");
+		m.put("Namespace", "命名空间");
+		m.put("Optionally specify CPU limit for the workspace container.", "可选地为工作区容器指定 CPU 限制。");
+		m.put("Optionally specify a storage class to allocate the workspace PVC. Leave empty to use the cluster default storage class.", 
+			"可选地指定用于分配工作区 PVC 的存储类。留空以使用集群默认存储类。");
+		m.put("Optionally specify absolute path to the kubeconfig file used by kubectl to access the cluster. Leave empty to have kubectl determine cluster access automatically (works when OneDev itself runs in the cluster).", 
+			"可选地指定由 kubectl 用于访问集群的 kubeconfig 文件的绝对路径。留空以让 kubectl 自动确定集群访问（当 OneDev 本身运行在集群中时有效）。");
+		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
+			"可选地指定 kubectl 可执行文件的绝对路径。留空以使用系统 PATH 中的 kubectl。");
+		m.put("Optionally specify memory limit for the workspace container.", "可选地为工作区容器指定内存限制。");
+		m.put("Please reprovision the workspace to show changes", "请重新配置工作区以显示更改");
+		m.put("Remote Docker Provisioner", "远程 Docker 配置器");
+		m.put("Remote Shell Provisioner", "远程 Shell 配置器");
+		m.put("Server Docker Provisioner", "服务器 Docker 配置器");
+		m.put("Server Shell Provisioner", "服务器 Shell 配置器");
+		m.put("Specify a Container Image to Test Against", "指定一个用于测试的容器镜像");
+		m.put("Specify agents applicable for this provisioner", "指定适用于此配置器的代理");
+		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
+			"指定此配置器在每个匹配代理上可以同时运行的最大工作区数量。留空以设置为代理的 CPU 核心数");
+		m.put("Specify max number of workspaces this provisioner can run on each matched agent. Leave empty to set as agent CPU cores", 
+			"指定此配置器在每个匹配代理上可以运行的最大工作区数量。留空以设置为代理的 CPU 核心数");
+		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@workspace_token@</code> for user name, and access token for password.", 
+			"如有必要，指定注册表登录信息。对于内置注册表，使用 <code>@server_url@</code> 作为注册表 URL，<code>@workspace_token@</code> 作为用户名，并使用访问令牌作为密码。");
+		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. OneDev creates the namespace if it does not yet exist.", 
+			"指定用于托管此配置器工作区的 Kubernetes 命名空间。如果命名空间尚不存在，OneDev 将创建它。");
+		m.put("Storage Class", "存储类");
+		m.put("Storage Size", "存储大小");
+		m.put("Storage size requested for each workspace PVC. The value should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
+			"为每个工作区 PVC 请求的存储大小。该值应符合 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 资源容量格式</a>，例如 <i>10Gi</i>");
+		m.put("This provisioner creates workspaces as pods inside a Kubernetes cluster. Workspace files are persisted in a PersistentVolumeClaim (one per workspace) so that the workspace pod may be restarted/re-provisioned without losing user changes.", 
+			"此配置器在 Kubernetes 集群内以 pod 的形式创建工作区。工作区文件保存在 PersistentVolumeClaim（每个工作区一个）中，因此工作区 pod 可以在不丢失用户更改的情况下重新启动/重新配置。");
+		m.put("This provisioner creates workspaces inside Docker containers on remote agents via\n<a href='/~administration/agents' target='_blank'>agents</a> for security and isolation purpose", 
+			"此配置器通过\n<a href='/~administration/agents' target='_blank'>代理</a>在远程代理上的 Docker 容器中创建工作区，以实现安全性和隔离目的");
+		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires\ntmux to be installed on matched agents", 
+			"此配置器使用远程代理的 shell 功能创建工作区，并要求\n在匹配代理上安装 tmux");
+		m.put("Use cluster default storage class", "使用集群默认存储类");
+		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
+			"运行容器时是否总是拉取镜像。启用此选项可以避免镜像被运行在同一节点上的恶意工作负载替换。");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"由此配置器创建的工作区具有与 OneDev 进程相同的权限。\n使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。\n多个项目应以空格分隔。<br>\n<b class='text-danger'>警告</b>：由此配置器创建的工作区具有与 OneDev 进程相同的权限。\n请确保只有受信任的项目可以使用此配置器");
 	}
 		
 	@Override

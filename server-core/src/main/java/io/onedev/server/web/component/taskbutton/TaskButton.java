@@ -222,8 +222,7 @@ public abstract class TaskButton extends AjaxButton {
 						TaskFuture future = taskFutureService.getTaskFutures().get(taskId);
 						if (future != null && future.isDone() && !future.isCancelled()) { 
 							try {
-								result = future.get();
-								return result;
+								return future.get();
 							} catch (InterruptedException | ExecutionException e) {
 								throw new RuntimeException(e);
 							}

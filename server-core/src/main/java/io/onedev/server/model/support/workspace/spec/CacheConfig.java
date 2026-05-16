@@ -144,8 +144,8 @@ public class CacheConfig implements Serializable {
 			var patterns = PatternSet.parse(checksumFiles);
 			parsedChecksumFiles = Pair.of(patterns.getIncludes(), patterns.getExcludes());
 		}
-		return new CacheConfigFacade(key, parsedChecksumFiles, getPaths(), uploadStrategy, changeDetectionExcludes,
-				uploadProjectPath, uploadAccessToken);
+		return new CacheConfigFacade(key, parsedChecksumFiles, getPaths(), uploadStrategy, 
+				changeDetectionExcludes, uploadProjectPath, uploadAccessToken);
 	}
 
 	@SuppressWarnings("unused")

@@ -1,14 +1,11 @@
 package io.onedev.server.web.component.workspace;
 
-import java.util.UUID;
-
 import javax.inject.Inject;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
@@ -32,13 +29,7 @@ public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		var workspace = new Workspace();
-		workspace.setProject(getProject());
-		workspace.setUser(SecurityUtils.getUser());
-		workspace.setBranch(branch);
-		workspace.setSpecName(getSpec().getName());
-		workspace.setToken(UUID.randomUUID().toString());
-		workspaceService.create(workspace);
+		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), branch, getSpec().getName());
 		setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
 	}
 

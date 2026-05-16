@@ -38,7 +38,7 @@ public class RunContainerStep extends Step {
 	
 	private String args;
 	
-	private String runAs;
+	private String runAs = "0:0";
 	
 	private List<EnvVar> envVars = new ArrayList<>();
 
@@ -73,10 +73,9 @@ public class RunContainerStep extends Step {
 		this.args = args;
 	}
 
-	@Editable(order=250, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
-			"<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or " +
-			"using user namespace remapping")
+	@Editable(order=250, name="Run As", group = "More Settings", placeholder = "root", description = "Specify uid:gid to run container as")
 	@Pattern(regexp="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	@NotEmpty
 	public String getRunAs() {
 		return runAs;
 	}

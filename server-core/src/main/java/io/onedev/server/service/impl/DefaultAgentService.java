@@ -452,7 +452,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 				Session session = agentSessions.get(agentId);
 				if (session != null) {
 					try {
-						return WebsocketUtils.call(session, new LogRequest(), 60000);
+						return WebsocketUtils.call(session, new LogRequest());
 					} catch (InterruptedException | TimeoutException e) {
 						throw new RuntimeException(e);
 					}

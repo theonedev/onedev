@@ -10,12 +10,12 @@ public class AgentQueryValidator implements ConstraintValidator<AgentQuery, Stri
 
 	private String message;
 	
-	private boolean forExecutor;
+	private boolean forRunner;
 	
 	@Override
 	public void initialize(AgentQuery constaintAnnotation) {
 		message = constaintAnnotation.message();
-		forExecutor = constaintAnnotation.forExecutor();
+		forRunner = constaintAnnotation.forRunner();
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class AgentQueryValidator implements ConstraintValidator<AgentQuery, Stri
 			return true;
 		} else {
 			try {
-				io.onedev.server.search.entity.agent.AgentQuery.parse(value, forExecutor);
+				io.onedev.server.search.entity.agent.AgentQuery.parse(value, forRunner);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

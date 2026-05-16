@@ -4,7 +4,6 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.FileData;
+import io.onedev.agent.workspace.FileData;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
@@ -45,7 +44,7 @@ import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 import io.onedev.server.web.component.fileview.FileViewPanel;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
-import io.onedev.server.workspace.GitExecutionResult;
+import io.onedev.agent.workspace.GitExecutionResult;
 
 public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
@@ -74,10 +73,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		@Override
 		protected StatusInfo load() {
 			if (getWorkspace().getStatus() != Workspace.Status.ACTIVE) {
-				return StatusInfo.failure(MessageFormat.format(
-						_T("Please reprovision the workspace to show changes, or you may login to server \"{0}\" and check changes at \"{1}\""),
-						projectService.getActiveServer(getProject().getId(), true),
-						Workspace.getWorkDir(getProject().getId(), getWorkspace().getNumber())));
+				return StatusInfo.failure(_T("Please reprovision the workspace to show changes"));
 			}
 			GitExecutionResult result = executeGit(
 					"status", "-b", "--porcelain", "--untracked-files=all");

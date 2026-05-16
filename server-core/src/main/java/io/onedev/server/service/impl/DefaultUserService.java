@@ -1,11 +1,18 @@
 package io.onedev.server.service.impl;
 
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.ai.ToolUtils.getToolArguments;
 import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.util.SiteSyncUtils.syncDirectory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectStreamException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -48,6 +56,7 @@ import io.onedev.server.ai.AiTask;
 import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.cluster.NodeStarted;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -73,6 +82,7 @@ import io.onedev.server.service.ManagedFutureService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
+import io.onedev.server.util.PathIndexUtils;
 import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
@@ -759,6 +769,75 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 		if (createIfNotExist)
 			FileUtils.createDir(dataDir);
 		return dataDir;
+	}
+
+	@Override
+	public boolean downloadWorkspaceData(Long userId, String dataKey, String path,
+										 Consumer<InputStream> dataStreamHandler) {
+		var dataDir = getWorkspaceDataDir(userId, dataKey, false);
+		return read(User.getWorkspaceDataLockName(userId, dataKey), () -> {
+			var pathIndexes = PathIndexUtils.read(dataDir);
+			var pathIndex = pathIndexes.get(path);
+			var pathFile = pathIndex != null ? new File(dataDir, String.valueOf(pathIndex)) : null;
+			if (pathFile != null && pathFile.isFile()) {
+				try (var is = new FileInputStream(pathFile)) {
+					dataStreamHandler.accept(is);
+					return true;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				return false;
+			}
+		});
+	}
+
+	@Override
+	public void uploadWorkspaceData(Long userId, String dataKey, String path,
+									Consumer<OutputStream> dataStreamHandler) {
+		write(User.getWorkspaceDataLockName(userId, dataKey), () -> {
+			var dataDir = getWorkspaceDataDir(userId, dataKey, true);
+			var pathIndexes = PathIndexUtils.read(dataDir);
+			boolean isNew = !pathIndexes.containsKey(path);
+			var pathIndex = PathIndexUtils.allocate(pathIndexes, path);
+			var pathFile = new File(dataDir, String.valueOf(pathIndex));
+			try (var os = new FileOutputStream(pathFile)) {
+				dataStreamHandler.accept(os);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			if (isNew)
+				PathIndexUtils.write(dataDir, pathIndexes);
+		});
+	}
+
+	@Override
+	public void notifyWorkspaceDataUploaded(Long userId, String dataKey) {
+		var usersDir = getUsersDir();
+		var dataDir = getWorkspaceDataDir(userId, dataKey, true);
+
+		SiteSyncUtils.bumpVersions(usersDir, dataDir);
+
+		var remoteServer = clusterService.getLocalServerAddress();
+		clusterService.submitToAllServers(new ClusterTask<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				var localServer = clusterService.getLocalServerAddress();
+				if (!localServer.equals(remoteServer)) {
+					var usersDir = getUsersDir();
+					var dataDir = getWorkspaceDataDir(userId, dataKey, true);
+					var syncPath = Bootstrap.getSiteDir().toPath()
+							.relativize(dataDir.toPath()).toString();
+					var lockName = User.getWorkspaceDataLockName(userId, dataKey);
+					SiteSyncUtils.syncDirectory(remoteServer, syncPath,
+							false, lockName, lockName);
+					SiteSyncUtils.bumpVersions(usersDir, dataDir.getParentFile());
+				}
+				return null;	
+			}
+
+		});		
 	}
 
 	@Override

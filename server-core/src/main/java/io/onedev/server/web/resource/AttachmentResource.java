@@ -1,16 +1,23 @@
 package io.onedev.server.web.resource;
 
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentService;
-import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.*;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.util.IOUtils;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
@@ -20,18 +27,21 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.io.*;
-import java.net.URLEncoder;
-
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentService;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.util.IOUtils;
 
 public class AttachmentResource extends AbstractResource {
 

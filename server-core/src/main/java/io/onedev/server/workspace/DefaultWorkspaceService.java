@@ -2,24 +2,22 @@ package io.onedev.server.workspace;
 
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.nio.file.StandardOpenOption.WRITE;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -48,8 +46,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.hazelcast.map.IMap;
 
 import io.onedev.agent.AgentUtils;
+import io.onedev.agent.workspace.FileData;
+import io.onedev.agent.workspace.GitExecutionResult;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -61,6 +62,7 @@ import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.cluster.NodeStopping;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.workspace.WorkspaceActive;
 import io.onedev.server.event.project.workspace.WorkspaceCreated;
@@ -68,11 +70,15 @@ import io.onedev.server.event.project.workspace.WorkspaceEvent;
 import io.onedev.server.event.project.workspace.WorkspaceInactive;
 import io.onedev.server.event.project.workspace.WorkspacePending;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.logging.LogService;
+import io.onedev.server.logging.ServerLogger;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Agent;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Workspace.Status;
 import io.onedev.server.model.support.administration.DockerAware;
@@ -96,14 +102,11 @@ import io.onedev.server.service.impl.BaseEntityService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.terminal.Terminal;
-import io.onedev.server.util.FileData;
 import io.onedev.server.util.ProjectWorkspaceStatusStat;
-import io.onedev.server.util.concurrent.DynamicSemaphore;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.interpolative.WorkspaceVariableInterpolator;
 import io.onedev.server.web.component.terminal.ShellExit;
 import io.onedev.server.web.editable.EditableUtils;
-import oshi.SystemInfo;
 
 @Singleton
 public class DefaultWorkspaceService extends BaseEntityService<Workspace> 
@@ -114,6 +117,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWorkspaceService.class);
 
 	private static final int CHECK_INTERVAL = 5;
+
+	private static final String WORKSPACE_LOGS_DIR = "workspace-logs";
 
 	@Inject
 	private ProjectService projectService;
@@ -149,9 +154,13 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private final Map<String, WorkspaceContext> workspaceContexts = new ConcurrentHashMap<>();
 
+	private volatile IMap<Long, String> workspaceServers;
+
 	private final Map<Long, Future<Void>> workspaceFutures = new ConcurrentHashMap<>();
 
 	private final Map<Long, WorkspaceRuntime> workspaceRuntimes = new ConcurrentHashMap<>();
+
+	private final Map<Long, Future<Void>> workspaceTaskFutures = new ConcurrentHashMap<>();
 
 	private final Map<IWebSocketConnection, OutputState> workspaceConnections = new ConcurrentHashMap<>();
 	
@@ -160,8 +169,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	// output to ensure the error messages are displayed when websocket connection is 
 	// established after shell reports error
 	private final Map<String, ReplayBuffer> terminalReplayBuffers = new ConcurrentHashMap<>();
-
-	private final Map<String, DynamicSemaphore> workspaceSemaphores = new ConcurrentHashMap<>();
 
 	private volatile Thread thread;
 
@@ -191,12 +198,18 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public void create(Workspace workspace) {
-		Preconditions.checkArgument(workspace.isNew());
+	public Workspace create(User user, Project project, String branch, String specName) {
+		var workspace = new Workspace();
+		workspace.setUser(user);
+		workspace.setProject(project);
+		workspace.setBranch(branch);
+		workspace.setSpecName(specName);
+		workspace.setToken(UUID.randomUUID().toString());
 		workspace.setNumberScope(workspace.getProject().getForkRoot());
 		workspace.setNumber(getNumberGenerator().getNextSequence(workspace.getNumberScope()));
 		dao.persist(workspace);
 		listenerRegistry.post(new WorkspaceCreated(workspace));
+		return workspace;
 	}
 
 	@Transactional
@@ -230,28 +243,53 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var projectId = workspace.getProject().getId();
 			var workspaceNumber = workspace.getNumber();
 			var workspaceId = workspace.getId();
+			var provisionerName = workspace.getProvisionerName();
+			var pinnedServerAddress = workspace.getServerAddress();
+			var pinnedAgentId = Agent.idOf(workspace.getAgent());
 
 			// record project server since workspace deletion can be called while
 			// deleting a project
 			var projectServer = projectService.getActiveServer(projectId, true);
-
+			
 			if (projectServer != null) {
 				transactionService.runAfterCommit(() -> {
 					clusterService.submitToServer(projectServer, (ClusterTask<Void>) () -> {
 						try {
 							checkImmediately = true;
 
-							// Delete workspace directory after workspace runtime is removed to
+							// Delete workspace storage after workspace server is removed to
 							// give a chance for cache to be uploaded
-							while (workspaceRuntimes.containsKey(workspaceId))
+							while (workspaceServers.containsKey(workspaceId))
 								Thread.sleep(1000);
+
+							if (provisionerName != null) {
+								var provisioner = settingService.getWorkspaceProvisioners().stream()
+										.filter(it -> provisionerName.equals(it.getName()))
+										.findFirst()
+										.orElse(null);
+								if (provisioner != null) {
+									try {
+										provisioner.deleteWorkspace(projectId, workspaceNumber, pinnedServerAddress, pinnedAgentId);
+									} catch (Throwable t) {
+										var message = "Error cleanup workspace via provisioner '%s' (project id: %d, workspace number: %d)"
+												.formatted(provisionerName, projectId, workspaceNumber);
+										logger.error(message, t);
+									}	
+								} else {
+									logger.warn("Provisioner '{}' not found, skipping deleting workspace storage (project id: {}, workspace number: {})",
+											provisionerName, projectId, workspaceNumber);
+								}
+							} else {
+								logger.warn("Provisioner unknown. Skipping deleting workspace storage (project id: {}, workspace number: {})", projectId, workspaceNumber);
+							}
+
 							logService.flush(loggingSupport);
 
-							var workspaceDir = getWorkspaceDir(projectId, workspaceNumber);
-							FileUtils.deleteDir(workspaceDir);
-							projectService.directoryModified(projectId, workspaceDir.getParentFile());
+							var logFile = getLogFile(projectId, workspaceNumber);
+							if (logFile.exists()) 
+								FileUtils.deleteFile(logFile);							
 						} catch (Throwable t) {
-							var message = "Error deleting workspace storage directory (project id: %d, workspace number: %d)"
+							var message = "Error deleting workspace storage (project id: %d, workspace number: %d)"
 									.formatted(projectId, workspaceNumber);
 							logger.error(message, t);
 						}
@@ -389,21 +427,19 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public void requestToReprovision(Workspace workspace) {
+	public void reset(Workspace workspace) {
 		Preconditions.checkState(workspace.getStatus() == Status.INACTIVE);
 		workspace.setStatus(Status.PENDING);
 		workspace.setInactiveDate(null);
 		workspace.setActiveDate(null);
 		var projectId = workspace.getProject().getId();
 		var workspaceNumber = workspace.getNumber();
+		
 		projectService.runOnActiveServer(projectId, (ClusterTask<Void>) () -> {
-			// Clear log file instead of delete as we may not have permission over the
-			// workspace directory upon an abnormal shutdown
-			var logFile = Workspace.getLogFile(projectId, workspaceNumber);
-			if (logFile.exists())
-				Files.newByteChannel(logFile.toPath(), WRITE, TRUNCATE_EXISTING).close();
+			FileUtils.deleteFile(getLogFile(projectId, workspaceNumber));
 			return null;
 		});
+		
 		update(workspace);
 		listenerRegistry.post(new WorkspacePending(workspace));
 	}
@@ -423,6 +459,12 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	}
 
 	@Listen
+	public void on(SystemStarting event) {
+		var hazelcastInstance = clusterService.getHazelcastInstance();
+		workspaceServers = hazelcastInstance.getMap("workspaceServers");
+	}
+
+	@Listen
 	public void on(SystemStarted event) {				
 		taskId = taskScheduler.schedule(this);
 		thread = new Thread(this);
@@ -432,15 +474,38 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Listen
 	public void on(SystemStopping event) {
 		if (taskId != null)
-			taskScheduler.unschedule(taskId);
+			taskScheduler.unschedule(taskId);		
 		Thread copy = thread;
 		thread = null;
+
+		logger.info("Stopping workspaces...");
+		for (var taskFuture: workspaceTaskFutures.values()) 
+			taskFuture.cancel(true);
+
+		while (!workspaceContexts.isEmpty()) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException ignored) {
+			}
+		}
+		
 		if (copy != null) {
 			try {
 				copy.join();
 			} catch (InterruptedException ignored) {
 			}
 		}
+	}
+
+	@Listen
+	public void on(NodeStopping event) {
+		workspaceServers.entrySet().stream()
+				.filter(it -> it.getValue().equals(event.getServer()))
+				.forEach(it -> {
+					var future = workspaceFutures.get(it.getKey());
+					if (future != null)
+						future.cancel(true);
+				});
 	}
 
 	@SuppressWarnings("unchecked")
@@ -485,8 +550,11 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						var workspaceIdsOfServer = entry.getValue();
 						futures.add(clusterService.submitToServer(server, () -> {
 							try {						
-								while (thread == null)
+								while (thread == null) {
+									if (OneDev.getInstance().isStopping())
+										return null;
 									Thread.sleep(1000);	
+								}
 								transactionService.run(() -> {
 									for (var workspaceId : workspaceIdsOfServer) {
 										var workspace = load(workspaceId);
@@ -494,14 +562,14 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 											var future = workspaceFutures.get(workspace.getId());
 											if (future == null && thread != null) {
 												try {
-													workspaceFutures.put(workspace.getId(), provision(workspace));
+													workspaceFutures.put(workspace.getId(), run(workspace));
 												} catch (Throwable t) {
-													var logger = logService.newLogger(workspace.getLoggingSupport());
+													var workspaceLogger = logService.newLogger(workspace.getLoggingSupport());
 													var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 													if (explicitException != null)
-														logger.error("Error provisioning workspace: " + explicitException.getMessage());
+														workspaceLogger.error("Error provisioning workspace: " + explicitException.getMessage());
 													else
-														logger.error("Error provisioning workspace", t);
+														workspaceLogger.error("Error provisioning workspace", t);
 													markWorkspaceInactive(workspace);
 												}
 											}
@@ -535,19 +603,20 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							future.cancel(true);
 							it.remove();
 						} else if (future.isDone()) {
-							var logger = logService.newLogger(workspace.getLoggingSupport());
+							var workspaceLogger = logService.newLogger(workspace.getLoggingSupport());
 							try {
 								future.get();
-								logger.error("Workspace stopped for unknown reason");
+								workspaceLogger.error("Workspace stopped for unknown reason");
 							} catch (Throwable t) {
-								if (ExceptionUtils.find(t, CancellationException.class) != null) {
-									logger.error("Workspace stopped due to server restart. You may reprovision the workspace to continue your work");
-								} else if (ExceptionUtils.find(t, InterruptedException.class) == null) {
+								if (ExceptionUtils.find(t, CancellationException.class) != null
+										|| ExceptionUtils.find(t, InterruptedException.class) != null) {
+									workspaceLogger.error("Workspace stopped as the server or agent running it shutted down");
+								} else {
 									var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 									if (explicitException != null)
-										logger.error("Workspace stopped: " + explicitException.getMessage());
+										workspaceLogger.error("Workspace stopped: " + explicitException.getMessage());
 									else
-										logger.error("Workspace stopped", t);
+										workspaceLogger.error("Workspace stopped", t);
 								}
 							} finally {
 								it.remove();
@@ -583,6 +652,11 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var runtime = workspaceRuntimes.get(workspaceId);
 			if (runtime == null || !runtime.getShellLabels().containsKey(shellId)) 
 				it.remove();
+		}
+
+		if (clusterService.isLeaderServer()) {
+			var activeWorkspaceIds = getActiveWorkspaceIds();
+			workspaceServers.removeAll(it -> !activeWorkspaceIds.contains(it.getKey()));
 		}
 	}
 
@@ -634,7 +708,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			if (spec.isRunInContainer()) {
 				throw new ExplicitException("""
 					No applicable provisioner discovered for current workspace. \
-					Please check if docker is installed on OneDev server""");
+					Please check if docker is installed on OneDev server, or configure \
+					a kubernetes provisioner if you would like workspaces to run as pods""");
 			} else {
 				throw new ExplicitException("""
 					No applicable provisioner discovered for current workspace. \
@@ -644,7 +719,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		}
 	}
 
-	private Future<Void> provision(Workspace workspace) {
+	private Future<Void> run(Workspace workspace) {
 		Workspace.push(workspace);
 		try {
 			var spec = workspace.getSpec();
@@ -662,11 +737,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var workspaceId = workspace.getId();
 			var workspaceNumber = workspace.getNumber();
 
-			var workspaceDir = getWorkspaceDir(projectId, workspaceNumber);
-			FileUtils.createDir(workspaceDir);
-
-			var logger = logService.newLogger(workspace.getLoggingSupport());
-			var provisioner = getProvisioner(workspace, spec, logger);
+			var workspaceLogger = logService.newLogger(workspace.getLoggingSupport());
+			var provisioner = getProvisioner(workspace, spec, workspaceLogger);
 
 			var gitEmail = workspace.getUser().getGitEmailAddress();
 			if (gitEmail == null)
@@ -675,43 +747,25 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var cloneInfo = new DefaultCloneInfo(urlService.cloneUrlFor(workspace.getProject(), false), token);		
 			var branch = project.getDefaultBranch() != null? workspace.getBranch(): null;
 
-			var context = new WorkspaceContext(spec, token, projectId, projectPath, projectGitDir, 
+			var context = new WorkspaceContext(spec, provisioner, token, projectId, projectPath, projectGitDir, 
 					workspaceId, workspaceNumber, workspace.getUser().getId(), workspace.getUser().getDisplayName(), 
 					gitEmail.getValue(), cloneInfo, branch);
-					
-			var concurrency = provisioner.getConcurrency();
-			if (concurrency == null)
-				concurrency = Math.max(1, new SystemInfo().getHardware().getProcessor().getLogicalProcessorCount());
-			var semaphore = workspaceSemaphores.computeIfAbsent(provisioner.getName(), k -> new DynamicSemaphore());
-			semaphore.setMaxPermits(concurrency);
 
-			logger.log("Waiting for resource allocation...");
+			var pinnedServerAddress = workspace.getServerAddress();
+			var pinnedAgentId = workspace.getAgent() != null ? workspace.getAgent().getId() : null;
 
 			return executorService.submit(() -> {
-				workspaceContexts.put(token, context);
-				semaphore.acquire();
+				logService.addLogger(token, workspaceLogger);
 				try {
-					var runtime = provisioner.provision(context, logger);
-					workspaceRuntimes.put(context.getWorkspaceId(), runtime);
+					var taskFuture = provisioner.submitTask(pinnedServerAddress, pinnedAgentId, newRunWorkspaceTask(context), workspaceLogger);
+					workspaceTaskFutures.put(workspaceId, taskFuture);
 					try {
-						transactionService.run(() -> {
-							var innerWorkspace = load(workspaceId);
-							innerWorkspace.setStatus(Workspace.Status.ACTIVE);
-							innerWorkspace.setActiveDate(new Date());
-							update(innerWorkspace);
-							listenerRegistry.post(new WorkspaceActive(innerWorkspace));
-						});
-						logger.success("Workspace provisioned and is active now");
-
-						runtime.await();
+						taskFuture.get();
 					} finally {
-						for (var shellId : runtime.getShellLabels().keySet())
-							terminateShell(workspaceId, shellId);
-						workspaceRuntimes.remove(workspaceId);
+						workspaceTaskFutures.remove(workspaceId);
 					}
 				} finally {
-					semaphore.release();
-					workspaceContexts.remove(token);
+					logService.removeLogger(token);
 				}
 				return null;
 			});
@@ -729,17 +783,19 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	}
 
 	@Override
-	public File getWorkspaceDir(Long projectId, Long workspaceNumber) {
-		return projectService.getSubDir(projectId, Workspace.getProjectRelativeDirPath(workspaceNumber));
+	public File getLogFile(Long projectId, Long workspaceNumber) {
+		var logDir = projectService.getSubDir(projectId, WORKSPACE_LOGS_DIR);
+		return new File(logDir, workspaceNumber.toString());
 	}
 
 	@Sessional
 	@Override
-	public String openShell(Workspace workspace, String label) {
-		var projectId = workspace.getProject().getId();
+	public String openShell(Workspace workspace, String label, String command) {
 		var workspaceId = workspace.getId();
-
-		return projectService.runOnActiveServer(projectId, new ClusterTask<String>() {
+		var server = workspaceServers.get(workspaceId);
+		if (server == null)
+			throw new ExplicitException("Workspace server not found");
+		return clusterService.runOnServer(server, new ClusterTask<String>() {
 
 			@Override
 			public String call() throws Exception {
@@ -748,20 +804,26 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 					throw new ExplicitException("Workspace runtime not found");
 				var shellIdRef = new AtomicReference<String>(null);
 				shellIdRef.set(runtime.openShell(new Terminal() {
-		
+
+					private boolean firstOutput = true;
+
 					@Override
 					public void onShellOutput(String base64Data) {
 						var shellId = shellIdRef.get();
-						if (shellId != null) 
+						if (shellId != null) {
 							// Use runOnAllServers instead of submitToAllServers to preserve output order
-							clusterService.runOnAllServers(new HandleShellOutputTask(workspaceId, shellId, base64Data));
+							clusterService.runOnAllServers(newHandleShellOutputTask(workspaceId, shellId, base64Data));
+						}
+						if (command != null && firstOutput) 
+							runtime.writeShellStdin(shellId, command + "\n");
+						firstOutput = false;
 					}
 		
 					@Override
 					public void onShellExit() {
 						var shellId = shellIdRef.get();
 						if (shellId != null)
-							clusterService.submitToAllServers(new HandleShellStopTask(workspaceId, shellId, false));
+							clusterService.submitToAllServers(newHandleShellStopTask(workspaceId, shellId, false));
 					}
 		
 				}, label));
@@ -813,9 +875,12 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	public void onMessage(IWebSocketConnection connection, Workspace workspace, 
 					String shellId, String message) {
 		if (message.startsWith("SHELL_INPUT:") || message.startsWith("TERMINAL_RESIZE:")) {
-			var workspaceId = workspace.getId();
-			var projectId = workspace.getProject().getId();
-			projectService.runOnActiveServer(projectId, () -> {
+			var workspaceId = workspace.getId();			
+			var server = workspaceServers.get(workspaceId);
+			if (server == null)
+				return;
+
+			clusterService.runOnServer(server, () -> {
 				try {
 					var runtime = workspaceRuntimes.get(workspaceId);
 					if (runtime != null) {			
@@ -837,10 +902,12 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Sessional
 	@Override
 	public Map<String, String> getShellLabels(Workspace workspace) {
-		var projectId = workspace.getProject().getId();
 		var workspaceId = workspace.getId();
+		var server = workspaceServers.get(workspaceId);
+		if (server == null)
+			return Collections.emptyMap();
 
-		return projectService.runOnActiveServer(projectId, new ClusterTask<Map<String, String>>() {
+		return clusterService.runOnServer(server, new ClusterTask<Map<String, String>>() {
 
 			@Override
 			public Map<String, String> call() throws Exception {
@@ -848,16 +915,17 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				return runtime != null ? runtime.getShellLabels() : new HashMap<>();
 			}
 		});
-
 	}
 
 	@Sessional
 	@Override
 	public Map<Integer, Integer> getPortMappings(Workspace workspace) {
-		var projectId = workspace.getProject().getId();
 		var workspaceId = workspace.getId();
+		var server = workspaceServers.get(workspaceId);
+		if (server == null)
+			return Collections.emptyMap();
 
-		return projectService.runOnActiveServer(projectId, new ClusterTask<Map<Integer, Integer>>() {
+		return clusterService.runOnServer(server, new ClusterTask<Map<Integer, Integer>>() {
 
 			@Override
 			public Map<Integer, Integer> call() throws Exception {
@@ -867,20 +935,42 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		});
 	}
 
+	@Sessional
+	@Override
+	public String getPortHost(Workspace workspace) {
+		var workspaceId = workspace.getId();
+		var server = workspaceServers.get(workspaceId);
+		if (server == null)
+			throw new ExplicitException("Workspace server not found");
+
+		return clusterService.runOnServer(server, new ClusterTask<String>() {
+
+			@Override
+			public String call() throws Exception {
+				var runtime = workspaceRuntimes.get(workspaceId);
+				if (runtime == null)
+					throw new ExplicitException("Workspace runtime not found");
+				return runtime.getPortHost();
+			}
+		});
+	}
+
 	private void terminateShell(Long workspaceId, String shellId) {
 		var runtime = workspaceRuntimes.get(workspaceId);
 		if (runtime != null)
 			runtime.terminateShell(shellId);
-		clusterService.submitToAllServers(new HandleShellStopTask(workspaceId, shellId, true));		
+		clusterService.submitToAllServers(newHandleShellStopTask(workspaceId, shellId, true));		
 	}
 
 	@Sessional
 	@Override
 	public void terminateShell(Workspace workspace, String shellId) {
 		var workspaceId = workspace.getId();
-		var projectId = workspace.getProject().getId();
+		var server = workspaceServers.get(workspaceId);
+		if (server == null)
+			return;
 
-		projectService.runOnActiveServer(projectId, new ClusterTask<Void>() {
+		clusterService.runOnServer(server, new ClusterTask<Void>() {
 
 			@Override
 			public Void call() throws Exception {
@@ -907,19 +997,15 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		return context;
 	}
 
-	@Override
-	public boolean hasLfsObjects(Long projectId, Long workspaceNumber) {
-		var workDir = Workspace.getWorkDir(projectId, workspaceNumber);
-		var gitDir = new File(workDir, ".git");
-		return new File(gitDir, "lfs/objects").exists();
-	}
-	
 	@Sessional
 	@Override
 	public GitExecutionResult executeGitCommand(Workspace workspace, String[] gitArgs) {
-		var projectId = workspace.getProject().getId();
 		var workspaceId = workspace.getId();
-		return projectService.runOnActiveServer(projectId, () -> {
+		var server = workspaceServers.get(workspaceId);
+		if (server == null)
+			throw new ExplicitException("Workspace server not found");
+
+		return clusterService.runOnServer(server, () -> {
 			var runtime = workspaceRuntimes.get(workspaceId);
 			if (runtime != null) {
 				return runtime.executeGitCommand(gitArgs);
@@ -932,98 +1018,151 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Sessional
 	@Override
 	public FileData readFileData(Workspace workspace, String path) {
-		var projectId = workspace.getProject().getId();
-		var workspaceNumber = workspace.getNumber();
-		return projectService.runOnActiveServer(projectId, () -> {
-			var workDir = Workspace.getWorkDir(projectId, workspaceNumber);
-			try {
-				return FileData.from(new File(workDir, path));
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
+		var workspaceId = workspace.getId();
+		var server = workspaceServers.get(workspaceId);
+		if (server == null)
+			return null;
+		
+		return clusterService.runOnServer(server, () -> {
+			var runtime = workspaceRuntimes.get(workspaceId);
+			if (runtime != null)
+				return runtime.readFileData(path);
+			else
+				return null;
 		});
 	}
 
-	private static class HandleShellOutputTask implements ClusterTask<Void> {
-
-		private static final long serialVersionUID = 1L;
-
-		private final Long workspaceId;
-
-		private final String shellId;
-
-		private final String base64Data;
-
-		public HandleShellOutputTask(Long workspaceId, String shellId, String base64Data) {
-			this.workspaceId = workspaceId;
-			this.shellId = shellId;
-			this.base64Data = base64Data;
+	private Collection<Long> getActiveWorkspaceIds() {
+		var activeWorkspaceIds = new HashSet<Long>();
+		for (var value: clusterService.runOnAllServers(() -> workspaceContexts.values().stream().map(WorkspaceContext::getWorkspaceId).collect(Collectors.toSet())).values()) {
+			activeWorkspaceIds.addAll(value);
 		}
-
-		@Override
-		public Void call() throws Exception {
-			var workspaceService = OneDev.getInstance(DefaultWorkspaceService.class);
-
-			workspaceService.terminalReplayBuffers
-				.computeIfAbsent(workspaceService.getTerminalKey(workspaceId, shellId), key -> new ReplayBuffer())
-				.append(base64Data);
-
-			var connections = workspaceService.workspaceConnections;
-
-			for (var entry : connections.entrySet()) {
-				var connection = entry.getKey();
-				var state = entry.getValue();
-				if (state.matches(workspaceId, shellId) && !state.queueIfReplaying(base64Data) && connection.isOpen()) 
-					connection.sendMessage("SHELL_OUTPUT:" + base64Data);
-			}
-			return null;
-		}
-
+		return activeWorkspaceIds;
 	}
 
-	private static class HandleShellStopTask implements ClusterTask<Void> {
-
-		private static final long serialVersionUID = 1L;
-
-		private final Long workspaceId;
-
-		private final String shellId;
-
-		private final boolean terminated;
-
-		/**
-		 * @param workspaceId
-		 * @param shellId
-		 * @param terminated whether or not the shell is terminated by closing terminal tab
-		 */
-		public HandleShellStopTask(Long workspaceId, String shellId, boolean terminated) {
-			this.workspaceId = workspaceId;
-			this.shellId = shellId;
-			this.terminated = terminated;
-		}
-
-		@Override
-		public Void call() throws Exception {
-			var workspaceService = OneDev.getInstance(DefaultWorkspaceService.class);
-
-			var connections = workspaceService.workspaceConnections;
-			for (var entry : connections.entrySet()) {
-				var connection = entry.getKey();
-				var shellKey = entry.getValue();
-				if (shellKey.matches(workspaceId, shellId)) {
-					if (terminated) {
-						connection.sendMessage("SHELL_OUTPUT:" + AgentUtils.encodeBase64Error("Shell terminated"));
-					} else {
-						workspaceService.sessionService.run(() -> {
-							connection.sendMessage(new ShellExit());
-						});
+	private ClusterTask<Void> newRunWorkspaceTask(WorkspaceContext context) {
+		return new ClusterTask<Void>() {
+		
+			private void run(WorkspaceContext context, TaskLogger workspaceLogger) {
+				var workspaceId = context.getWorkspaceId();
+				transactionService.run(() -> {
+					var workspace = load(workspaceId);
+					if (!Objects.equals(workspace.getProvisionerName(), context.getProvisioner().getName())) {
+						workspace.setProvisionerName(context.getProvisioner().getName());
+						update(workspace);
 					}
+				});
+	
+				var runtime = context.getProvisioner().provision(context, workspaceLogger);
+				workspaceRuntimes.put(workspaceId, runtime);
+				try {
+					transactionService.run(() -> {
+						var workspace = load(workspaceId);
+						workspace.setStatus(Workspace.Status.ACTIVE);
+						workspace.setActiveDate(new Date());
+						var firstShortcut = context.getSpec().getShortcutConfigs().stream().findFirst().orElse(null);
+						if (firstShortcut != null) 
+							openShell(workspace, firstShortcut.getName(), firstShortcut.getCommand());
+						else 
+							openShell(workspace, "Terminal", null);
+						update(workspace);
+						listenerRegistry.post(new WorkspaceActive(workspace));
+					});
+					workspaceLogger.success("Workspace provisioned and is active now");
+	
+					runtime.await();
+				} finally {
+					for (var shellId : runtime.getShellLabels().keySet())
+						terminateShell(workspaceId, shellId);
+					workspaceRuntimes.remove(workspaceId);
 				}
 			}
-			workspaceService.terminalReplayBuffers.remove(workspaceService.getTerminalKey(workspaceId, shellId));
-			return null;
-		}
+	
+			@Override
+			public Void call() throws Exception {
+				String workspaceToken = context.getToken();
+				while (thread == null) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+				}
+	
+				workspaceContexts.put(workspaceToken, context);
+				var workspaceId = context.getWorkspaceId();
+				workspaceServers.put(workspaceId, clusterService.getLocalServerAddress());
+				try {
+					TaskLogger workspaceLogger = logService.getLogger(workspaceToken);
+					if (workspaceLogger == null) {
+						var activeServer = projectService.getActiveServer(context.getProjectId(), true);
+						workspaceLogger = new ServerLogger(activeServer, workspaceToken);
+						logService.addLogger(workspaceToken, workspaceLogger);
+						try {
+							run(context, workspaceLogger);
+						} finally {
+							logService.removeLogger(workspaceToken);
+						}
+					} else {
+						run(context, workspaceLogger);
+					}
+				} finally {
+					workspaceServers.remove(workspaceId);
+					workspaceContexts.remove(workspaceToken);
+				}
+	
+				return null;
+			}
+	
+		};
+	}
 
+	private ClusterTask<Void> newHandleShellOutputTask(Long workspaceId, String shellId, String base64Data) {
+		return new ClusterTask<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				terminalReplayBuffers
+					.computeIfAbsent(getTerminalKey(workspaceId, shellId), key -> new ReplayBuffer())
+					.append(base64Data);
+	
+				var connections = workspaceConnections;
+	
+				for (var entry : connections.entrySet()) {
+					var connection = entry.getKey();
+					var state = entry.getValue();
+					if (state.matches(workspaceId, shellId) && !state.queueIfReplaying(base64Data) && connection.isOpen()) 
+						connection.sendMessage("SHELL_OUTPUT:" + base64Data);
+				}
+				return null;
+			}
+	
+		};
+	}
+
+	private ClusterTask<Void> newHandleShellStopTask(Long workspaceId, String shellId, boolean terminated) {
+		return new ClusterTask<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				var connections = workspaceConnections;
+				for (var entry : connections.entrySet()) {
+					var connection = entry.getKey();
+					var shellKey = entry.getValue();
+					if (shellKey.matches(workspaceId, shellId)) {
+						if (terminated) {
+							connection.sendMessage("SHELL_OUTPUT:" + AgentUtils.encodeBase64Error("Shell terminated"));
+						} else {
+							sessionService.run(() -> {
+								connection.sendMessage(new ShellExit());
+							});
+						}
+					}
+				}
+				terminalReplayBuffers.remove(getTerminalKey(workspaceId, shellId));
+				return null;
+			}
+		};
 	}
 
 	private static class OutputState {

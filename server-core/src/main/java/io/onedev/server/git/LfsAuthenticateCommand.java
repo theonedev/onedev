@@ -18,17 +18,12 @@
  */
 package io.onedev.server.git;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UrlService;
-import io.onedev.server.persistence.SessionService;
-import io.onedev.server.ssh.SshAuthenticator;
-import io.onedev.server.util.CollectionUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
@@ -39,12 +34,18 @@ import org.apache.sshd.server.session.ServerSessionAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.ssh.SshAuthenticator;
+import io.onedev.server.util.CollectionUtils;
 
 public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 

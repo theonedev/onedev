@@ -17,7 +17,6 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 
 public abstract class LogCommand {
@@ -79,7 +78,7 @@ public abstract class LogCommand {
 	}
 	
 	protected Commandline newGit() {
-		return CommandUtils.newGit();
+		return GitUtils.newGit();
 	}
 	
     public void run() {
@@ -189,7 +188,7 @@ public abstract class LogCommand {
             	} else if (line.trim().length() != 0 && line.contains("\t")) {
             		FileChange change;
             		if (fields.contains(Field.LINE_CHANGES)) {
-            			change = CommandUtils.parseNumStats(line);
+            			change = GitUtils.parseNumStats(line);
             		} else {
                 		StringTokenizer tokenizer = new StringTokenizer(line, "\t");
                 		String statusCode = tokenizer.nextToken();

@@ -68,7 +68,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 		this(null);
 	}
 	
-	public static AgentQuery parse(@Nullable String queryString, boolean forExecutor) {
+	public static AgentQuery parse(@Nullable String queryString, boolean forRunner) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			AgentQueryLexer lexer = new AgentQueryLexer(is);
@@ -99,7 +99,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 					
 					@Override
 					public Criteria<Agent> visitOperatorCriteria(OperatorCriteriaContext ctx) {
-						if (forExecutor)
+						if (forRunner)
 							throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 						
 						switch (ctx.operator.getType()) {
@@ -118,7 +118,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 					
 					@Override
 					public Criteria<Agent> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
-						if (forExecutor && ctx.HasAttribute() == null)
+						if (forRunner && ctx.HasAttribute() == null)
 							throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 						
 						var criterias = new ArrayList<Criteria<Agent>>();

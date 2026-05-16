@@ -3,7 +3,6 @@ package io.onedev.server.model;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -36,13 +35,13 @@ import io.onedev.server.logging.WorkspaceLoggingSupport;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.web.util.TextUtils;
-import io.onedev.server.workspace.WorkspaceService;
 
 @Entity
 @Table(
 		indexes={
 				@Index(columnList="o_user_id"),
 				@Index(columnList="o_project_id"),
+				@Index(columnList="o_agent_id"),
 				@Index(columnList=Workspace.PROP_SPEC),
 				@Index(columnList= Workspace.PROP_STATUS),
 				@Index(columnList= Workspace.PROP_BRANCH),
@@ -59,14 +58,6 @@ public class Workspace extends AbstractEntity {
 
 	private static ThreadLocal<Stack<Workspace>> stack = ThreadLocal.withInitial(Stack::new);
 
-	public static final String WORKSPACES_DIR = "workspaces";
-
-	public static final String LOG_FILE = "workspace.log";
-
-	public static final String WORK_DIR = "work";
-
-	public static final int MAX_BRANCH_LEN = 255;
-
 	public static final int MAX_ERROR_MESSAGE_LEN = 2048;
 
 	public static final String PROP_USER = "user";
@@ -78,6 +69,14 @@ public class Workspace extends AbstractEntity {
 	public static final String PROP_BRANCH = "branch";
 
 	public static final String PROP_STATUS = "status";
+
+	public static final String PROP_PROVISIONER_NAME = "provisionerName";
+
+	public static final String PROP_K8S_PVC_NAME = "k8sPvcName";
+
+	public static final String PROP_SERVER_ADDRESS = "serverAddress";
+
+	public static final String PROP_AGENT = "agent";
 
 	public static final String NAME_USER = "User";
 
@@ -139,7 +138,7 @@ public class Workspace extends AbstractEntity {
 	@Column(nullable=false)
 	private String specName;
 
-	@Column(nullable=false, length=MAX_BRANCH_LEN)
+	@Column(nullable=false, length=255)
 	private String branch;
 
 	@Column(nullable=false)
@@ -151,6 +150,19 @@ public class Workspace extends AbstractEntity {
 	private Date activeDate;
 
 	private Date inactiveDate;
+
+	@Column(length=255)
+	private String provisionerName;
+
+	@Column(length=255)
+	private String k8sPvcName;
+
+	@Column(length=255)
+	private String serverAddress;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn
+	private Agent agent;
 
 	private transient Optional<WorkspaceSpec> specOptional;
 
@@ -247,27 +259,41 @@ public class Workspace extends AbstractEntity {
 	public void setToken(String token) {
 		this.token = token;
 	}
-	
-	public static String getProjectRelativeDirPath(Long workspaceNumber) {
-		return WORKSPACES_DIR + "/s" + String.format("%03d", workspaceNumber % 1000) + "/" + workspaceNumber;
+
+	@Nullable
+	public String getProvisionerName() {
+		return provisionerName;
 	}
 
-	public File getDir() {
-		return getWorkspaceService().getWorkspaceDir(getProject().getId(), getNumber());
+	public void setProvisionerName(String provisionerName) {
+		this.provisionerName = provisionerName;
 	}
 
-	public static File getLogFile(Long projectId, Long workspaceNumber) {
-		File workspaceDir = getWorkspaceService().getWorkspaceDir(projectId, workspaceNumber);
-		return new File(workspaceDir, LOG_FILE);
+	@Nullable
+	public String getK8sPvcName() {
+		return k8sPvcName;
 	}
 
-	public static File getWorkDir(Long projectId, Long workspaceNumber) {
-		File workspaceDir = getWorkspaceService().getWorkspaceDir(projectId, workspaceNumber);
-		return new File(workspaceDir, WORK_DIR);
+	public void setK8sPvcName(String k8sPvcName) {
+		this.k8sPvcName = k8sPvcName;
 	}
 
-	private static WorkspaceService getWorkspaceService() {
-		return OneDev.getInstance(WorkspaceService.class);
+	@Nullable
+	public String getServerAddress() {
+		return serverAddress;
+	}
+
+	public void setServerAddress(String serverAddress) {
+		this.serverAddress = serverAddress;
+	}
+
+	@Nullable
+	public Agent getAgent() {
+		return agent;
+	}
+
+	public void setAgent(@Nullable Agent agent) {
+		this.agent = agent;
 	}
 
 	public static String getLogLockName(Long projectId, Long workspaceNumber) {

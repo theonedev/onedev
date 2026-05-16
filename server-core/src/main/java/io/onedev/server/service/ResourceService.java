@@ -1,17 +1,19 @@
 package io.onedev.server.service;
 
+import java.util.concurrent.Future;
+
+import org.jspecify.annotations.Nullable;
+
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.service.support.AgentRunnable;
+import io.onedev.server.service.support.AgentCallable;
 
 public interface ResourceService {
 
-	<T> T runServerJob(String resourceName, int totalConcurrency, 
-						int requiredConcurrency, ClusterTask<T> runnable);
+	<T> Future<T> submitServerTask(@Nullable String pinnedServerAddress, String resourceName, 
+			int totalConcurrency, int requiredConcurrency, ClusterTask<T> task);
 
-	<T> T runAgentJob(AgentQuery agentQuery, String resourceName, int totalConcurrency,
-						int requiredConcurrency, AgentRunnable<T> runnable);
+	<T> Future<T> submitAgentTask(@Nullable Long pinnedAgentId, AgentQuery agentQuery, String resourceName,
+			int totalConcurrency, int requiredConcurrency, AgentCallable<T> task);
 	
-	void agentDisconnecting(Long agentId);
-
 }

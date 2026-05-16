@@ -2,7 +2,9 @@ package io.onedev.server.logging;
 
 import java.io.File;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.model.Workspace;
+import io.onedev.server.workspace.WorkspaceService;
 
 public class WorkspaceLoggingIdentity implements LoggingIdentity {
 
@@ -27,7 +29,7 @@ public class WorkspaceLoggingIdentity implements LoggingIdentity {
 
 	@Override
 	public File getFile() {
-		return Workspace.getLogFile(projectId, workspaceNumber);
+		return OneDev.getInstance(WorkspaceService.class).getLogFile(projectId, workspaceNumber);
 	}
 
 	@Override

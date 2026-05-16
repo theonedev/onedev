@@ -9,11 +9,13 @@ import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.agent.workspace.FileData;
+import io.onedev.agent.workspace.GitExecutionResult;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
 import io.onedev.server.service.EntityService;
-import io.onedev.server.util.FileData;
 import io.onedev.server.util.ProjectWorkspaceStatusStat;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -21,7 +23,7 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	@Nullable Workspace find(Project project, long number);
 
-	void create(Workspace workspace);
+	Workspace create(User user, Project project, String branch, String specName);
 
 	void update(Workspace workspace);
 
@@ -38,15 +40,23 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	void delete(Collection<Workspace> workspaces);
 
-	void requestToReprovision(Workspace workspace);
+	void reset(Workspace workspace);
 
-	File getWorkspaceDir(Long projectId, Long workspaceNumber);
+	/**
+	 * Get the workspace log file. The file is stored on the project's active
+	 * server in a dedicated log location independent of the provisioner so that
+	 * it stays available regardless of where the provisioner places its
+	 * runtime workspace data (server file system, PVC, remote agent, etc.).
+	 */
+	File getLogFile(Long projectId, Long workspaceNumber);
 
-	String openShell(Workspace workspace, String label);
+	String openShell(Workspace workspace, String label, @Nullable String command);
 
-	Map<String, String> getShellLabels(Workspace workspace);
+	Map<String, String> getShellLabels(Workspace workspace);	
 
 	Map<Integer, Integer> getPortMappings(Workspace workspace);
+
+	String getPortHost(Workspace workspace);
 
 	void terminateShell(Workspace workspace, String shellId);
 
@@ -59,8 +69,6 @@ public interface WorkspaceService extends EntityService<Workspace> {
 	
 	@Nullable
 	WorkspaceContext getWorkspaceContext(String token, boolean mustExist);
-
-	boolean hasLfsObjects(Long projectId, Long workspaceNumber);
 
 	GitExecutionResult executeGitCommand(Workspace workspace, String[] gitArgs);
 

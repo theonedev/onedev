@@ -519,18 +519,18 @@ public class DefaultLogService implements LogService, Serializable {
 	}
 
 	@Override
-	public TaskLogger getLogger(String token) {
-		return loggers.get(token);
+	public TaskLogger getLogger(String id) {
+		return loggers.get(id);
 	}
 
 	@Override
-	public void addLogger(String token, TaskLogger logger) {
-		loggers.put(token, logger);
+	public void addLogger(String id, TaskLogger logger) {
+		loggers.put(id, logger);
 	}
 
 	@Override
-	public void removeLogger(String token) {
-		loggers.remove(token);
+	public void removeLogger(String id) {
+		loggers.remove(id);
 	}
 
 }

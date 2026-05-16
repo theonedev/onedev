@@ -15,7 +15,7 @@ import io.onedev.server.validation.validator.AgentQueryValidator;
 @Constraint(validatedBy=AgentQueryValidator.class) 
 public @interface AgentQuery {
 	
-	boolean forExecutor() default true;
+	boolean forRunner() default true;
 	
     String message() default "";
 

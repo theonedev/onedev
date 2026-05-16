@@ -32,7 +32,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.match.PatternApplied;
 import io.onedev.commons.utils.match.WildcardUtils;
-import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.k8shelper.JobHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobVariable;
@@ -330,7 +330,7 @@ public class SuggestionUtils {
 		}
 		
 		if (withPauseCommand)
-			variables.put(KubernetesHelper.PAUSE, "Pause execution of the script");
+			variables.put(JobHelper.PAUSE, "Pause execution of the script");
 		
 		for (Map.Entry<String, String> entry: variables.entrySet()) {
 			int index = entry.getKey().toLowerCase().indexOf(lowerCaseMatchWith);

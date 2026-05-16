@@ -1,21 +1,22 @@
 package io.onedev.server.security;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.persistence.annotation.Sessional;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.codec.Base64;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
-import org.apache.shiro.web.util.WebUtils;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
+
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.codec.Base64;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
+import org.apache.shiro.web.util.WebUtils;
+
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.service.AccessTokenService;
 
 @Singleton
 public class BasicAuthenticationFilter extends ExceptionHandleFilter {

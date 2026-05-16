@@ -8,7 +8,6 @@ import io.onedev.agent.AgentUtils;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
@@ -45,7 +44,7 @@ public class ServerDockerModule extends AbstractPluginModule {
 
 				@Override
 				public JobExecutor discover() {
-					var docker = new Commandline(AgentUtils.getDockerExecutable(null));
+					var docker = AgentUtils.newDocker(null, null);
 					
 					docker.addArgs("version");
 					try {

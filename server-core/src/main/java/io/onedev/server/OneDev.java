@@ -104,7 +104,6 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 
 	private volatile Thread thread;
 
-	@Inject
 	public OneDev() {
 		try {
 			wrapperManagerClass = Class.forName("org.tanukisoftware.wrapper.WrapperManager");
@@ -231,6 +230,10 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			sessionService.run(() -> listenerRegistry.post(new SystemStopping()));
 		} catch (ServerNotReadyException ignore) {
 		}
+	}
+
+	public boolean isStopping() {
+		return thread == null;
 	}
 
 	private List<ManualConfig> checkData() {

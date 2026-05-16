@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.util.ContentDetector;
-import io.onedev.server.util.FileData;
+import io.onedev.agent.workspace.FileData;
 
 public class FileViewPanel extends GenericPanel<FileData> {
 

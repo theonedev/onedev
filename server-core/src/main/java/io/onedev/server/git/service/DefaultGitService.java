@@ -87,7 +87,6 @@ import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
-import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitTask;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.Submodule;
@@ -454,10 +453,10 @@ public class DefaultGitService implements GitService, Serializable {
 			String sourceProjectPath, String... refSpecs) {
 		String sourceActiveServer = projectService.getActiveServer(sourceProjectId, true);
 		if (sourceActiveServer.equals(clusterService.getLocalServerAddress())) {
-			Commandline git = CommandUtils.newGit();
+			Commandline git = GitUtils.newGit();
 			fetch(git, targetProjectId, getGitDir(sourceProjectId).getAbsolutePath(), refSpecs);
 		} else {
-			CommandUtils.callWithClusterCredential(git -> {
+			GitUtils.callWithClusterCredential(git -> {
 				String remoteUrl = clusterService.getServerUrl(sourceActiveServer) 
 						+ "/" + sourceProjectPath;
 				fetch(git, targetProjectId, remoteUrl, refSpecs);
@@ -486,7 +485,7 @@ public class DefaultGitService implements GitService, Serializable {
 			
 			// Do not optimize to push to local directory when source and target are on same host, as otherwise
 			// environments in git pre/post receive hooks will not be set
-			CommandUtils.callWithClusterCredential(git -> {
+			GitUtils.callWithClusterCredential(git -> {
 				git.workingDir(getGitDir(sourceProjectId));
 				git.args("push", "--quiet", clusterService.getServerUrl(targetActiveServer) + "/" + targetProjectPath);
 				git.addArgs(sourceRev + ":" + targetRev);
@@ -509,7 +508,7 @@ public class DefaultGitService implements GitService, Serializable {
 		runOnProjectServer(sourceProjectId, () -> {
 			String targetActiveServer = projectService.getActiveServer(targetProjectId, true);
 
-			CommandUtils.callWithClusterCredential((GitTask<Void>) git -> {
+			GitUtils.callWithClusterCredential((GitTask<Void>) git -> {
 				git.workingDir(getGitDir(sourceProjectId));
 				
 				String remoteUrl = clusterService.getServerUrl(targetActiveServer) + "/" + targetProjectPath;						

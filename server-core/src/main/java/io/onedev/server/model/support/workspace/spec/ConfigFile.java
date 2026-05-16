@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.ConfigFileFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -50,4 +51,8 @@ public class ConfigFile implements Serializable {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}
 
+    public ConfigFileFacade getFacade() {
+        return new ConfigFileFacade(path, content);
+    }
+    
 }

@@ -2,7 +2,7 @@ package io.onedev.server.service.impl;
 
 import static io.onedev.commons.utils.FileUtils.cleanDir;
 import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.git.CommandUtils.callWithClusterCredential;
+import static io.onedev.server.git.GitUtils.callWithClusterCredential;
 import static io.onedev.server.git.GitUtils.getDefaultBranch;
 import static io.onedev.server.git.GitUtils.getReachableCommits;
 import static io.onedev.server.git.GitUtils.isValid;
@@ -117,7 +117,6 @@ import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.NotAcceptableException;
-import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitTask;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.CloneCommand;
@@ -1646,7 +1645,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 					var withLfs = clusterService.runOnServer(activeServer, () -> hasLfsObjects(projectId));
 
 					if (remoteDefaultBranch != null) {
-						CommandUtils.callWithClusterCredential(new GitTask<>() {
+						GitUtils.callWithClusterCredential(new GitTask<>() {
 
 							private void fetch(Commandline git, String fetchUrl) {
 								git.args("fetch", "--force", fetchUrl, "refs/*:refs/*", "-pP");

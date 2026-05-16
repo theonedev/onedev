@@ -10,18 +10,23 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.util.visit.IVisitor;
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
+import io.onedev.server.web.behavior.DisableAwareBehavior;
 import io.onedev.server.web.component.taskbutton.TestButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.util.Testable;
+import io.onedev.server.web.util.WicketUtils;
 
 abstract class WorkspaceProvisionerEditPanel extends Panel {
 
@@ -57,6 +62,19 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 		AjaxButton saveButton = new AjaxButton("save") {
 
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(isProvisionerLicensed(editor));
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (!isEnabled())
+					tag.put("disabled", "disabled");
+			}
+
+			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
@@ -90,6 +108,7 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 			}
 
 		};
+		saveButton.add(new DisableAwareBehavior());
 
 		AjaxLink<Void> cancelButton = new AjaxLink<Void>("cancel") {
 
@@ -101,6 +120,19 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 		};
 
 		TestButton testButton = new TestButton("testingProvisioner", editor, "Workspace provisioner tested successfully") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (!isEnabled())
+					tag.put("disabled", "disabled");
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(isProvisionerLicensed(editor));
+			}
 
 			@Override
 			protected Testable<?> getTestable() {
@@ -117,6 +149,7 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 
 				if (event.getPayload() instanceof BeanUpdating) {
 					BeanUpdating beanUpdating = (BeanUpdating) event.getPayload();
+					beanUpdating.getHandler().add(saveButton);
 					beanUpdating.getHandler().add(testButton);
 				}
 
@@ -137,5 +170,14 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 	protected abstract void onSave(AjaxRequestTarget target);
 
 	protected abstract void onCancel(AjaxRequestTarget target);
+
+	private static boolean isProvisionerLicensed(BeanEditor editor) {
+		BeanEditor beanEditor = editor.visitChildren(
+				BeanEditor.class,
+				(IVisitor<BeanEditor, BeanEditor>) (component, visit) -> visit.stop(component));
+		return beanEditor == null
+				|| beanEditor.getDescriptor().getBeanClass().getAnnotation(SubscriptionRequired.class) == null
+				|| WicketUtils.isSubscriptionActive();
+	}
 
 }

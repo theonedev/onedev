@@ -79,7 +79,7 @@ import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.workspace.invalidspec.InvalidWorkspaceSpecIcon;
-import io.onedev.server.web.component.workspace.specselector.WorkspaceSpecSelector;
+import io.onedev.server.web.component.workspace.specrunselector.WorkspaceSpecRunSelector;
 import io.onedev.server.web.component.workspace.status.WorkspaceStatusIcon;
 import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
 import io.onedev.server.web.util.Cursor;
@@ -759,7 +759,7 @@ public abstract class WorkspaceListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id) {
-								return new WorkspaceSpecSelector(id, branch) {
+								return new WorkspaceSpecRunSelector(id, branch) {
 									@Override
 									protected void onSelect(AjaxRequestTarget target, WorkspaceSpec spec) {
 										close();

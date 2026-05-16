@@ -39,7 +39,7 @@ public class AgentQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new AgentQueryEditPanel(componentId, descriptor, model, agentQuery.forExecutor());
+		        	return new AgentQueryEditPanel(componentId, descriptor, model, agentQuery.forRunner());
 				}
     			
     		};

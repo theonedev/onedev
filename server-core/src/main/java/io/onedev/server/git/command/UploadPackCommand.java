@@ -9,7 +9,7 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
-import io.onedev.server.git.CommandUtils;
+import io.onedev.server.git.GitUtils;
 
 public class UploadPackCommand {
 
@@ -47,7 +47,7 @@ public class UploadPackCommand {
 	}
 	
 	protected Commandline newGit() {
-		return CommandUtils.newGit();
+		return GitUtils.newGit();
 	}
 	
 	public ExecutionResult run() {

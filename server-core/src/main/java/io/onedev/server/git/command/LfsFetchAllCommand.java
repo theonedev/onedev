@@ -2,7 +2,7 @@ package io.onedev.server.git.command;
 
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.server.git.CommandUtils;
+import io.onedev.server.git.GitUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ public class LfsFetchAllCommand {
 		this.remoteUrl = remoteUrl;
 	}
 	protected Commandline newGit() {
-		return CommandUtils.newGit();
+		return GitUtils.newGit();
 	}
 	
 	public void run() {

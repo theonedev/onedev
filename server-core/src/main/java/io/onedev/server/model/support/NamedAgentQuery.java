@@ -34,7 +34,7 @@ public class NamedAgentQuery implements NamedQuery {
 	}
 
 	@Editable(placeholder="All")
-	@AgentQuery(forExecutor=false)
+	@AgentQuery(forRunner=false)
 	@Override
 	public String getQuery() {
 		return query;

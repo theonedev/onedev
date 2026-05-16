@@ -5,10 +5,7 @@ import java.util.Date;
 
 import javax.validation.constraints.NotEmpty;
 
-import org.eclipse.jetty.http.HttpStatus;
 import org.jspecify.annotations.Nullable;
-
-import com.google.common.base.Throwables;
 
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.TaskLogger;
@@ -17,7 +14,6 @@ import io.onedev.server.annotation.DnsName;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildRunning;
-import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
@@ -120,12 +116,4 @@ public abstract class JobExecutor implements Serializable {
 		});
 	}
 	
-	protected String getErrorMessage(Exception exception) {
-		var response = ExceptionUtils.buildResponse(exception);
-		if (response != null) 
-			return response.getBody() != null? response.getBody().getText() : HttpStatus.getMessage(response.getStatus());
-		else
-			return Throwables.getStackTraceAsString(exception);
-	}
-
 }

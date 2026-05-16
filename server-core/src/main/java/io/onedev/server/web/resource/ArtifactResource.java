@@ -1,25 +1,19 @@
 package io.onedev.server.web.resource;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.IOUtils;
-import io.onedev.server.util.artifact.FileInfo;
-import io.onedev.server.web.util.MimeUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.tika.mime.MimeTypes;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.AbstractResource;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.model.Build.getArtifactsLockName;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.client.Client;
@@ -28,15 +22,29 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import java.io.*;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getArtifactsLockName;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.tika.mime.MimeTypes;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.util.IOUtils;
+import io.onedev.server.util.artifact.FileInfo;
+import io.onedev.server.web.util.MimeUtils;
 
 public class ArtifactResource extends AbstractResource {
 

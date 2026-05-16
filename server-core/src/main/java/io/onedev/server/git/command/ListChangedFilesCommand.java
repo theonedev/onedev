@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.server.git.CommandUtils;
+import io.onedev.server.git.GitUtils;
 
 public class ListChangedFilesCommand {
 
@@ -35,7 +35,7 @@ public class ListChangedFilesCommand {
 	}
 	
 	protected Commandline newGit() {
-		return CommandUtils.newGit();
+		return GitUtils.newGit();
 	}
 	
 	public Collection<String> run() {

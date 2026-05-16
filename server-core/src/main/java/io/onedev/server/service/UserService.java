@@ -1,8 +1,11 @@
 package io.onedev.server.service;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -107,11 +110,23 @@ public interface UserService extends EntityService<User> {
 	File getWorkspaceDataDir(Long userId, String dataKey, boolean createIfNotExist);
 
 	@NoDBAccess
+	boolean downloadWorkspaceData(Long userId, String dataKey, String path,
+								  Consumer<InputStream> dataStreamHandler);
+
+	@NoDBAccess
+	void uploadWorkspaceData(Long userId, String dataKey, String path,
+							 Consumer<OutputStream> dataStreamHandler);
+
+	@NoDBAccess
+	void notifyWorkspaceDataUploaded(Long userId, String dataKey);
+
+	@NoDBAccess
 	File getUsersDir();
 
 	@NoDBAccess
 	File getUserDir(Long userId);
 
 	UserCache cloneCache();
+
 
 }

@@ -19,22 +19,21 @@ import io.onedev.agent.AgentData;
 import io.onedev.agent.CallData;
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
-import io.onedev.agent.WaitingForAgentResourceToBeReleased;
-import io.onedev.agent.WantToDisconnectAgent;
 import io.onedev.agent.WebsocketUtils;
-import io.onedev.agent.shell.ShellOutputRequest;
+import io.onedev.agent.shell.JobShellOutputRequest;
+import io.onedev.agent.shell.WorkspaceShellOutputRequest;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.job.AgentShell;
+import io.onedev.server.job.JobAgentShell;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobService;
 import io.onedev.server.logging.LogService;
 import io.onedev.server.service.AgentService;
-import io.onedev.server.service.ResourceService;
+import io.onedev.server.workspace.WorkspaceAgentShell;
 
 @WebSocket
 public class ServerSocket {
@@ -48,6 +47,8 @@ public class ServerSocket {
 	@OnWebSocketClose
 	public void onClose(int statusCode, String reason) {
 		try {
+			WebsocketUtils.onClose(session);
+
 			if (agentId != null)
 				getAgentService().agentDisconnected(agentId);
 
@@ -130,16 +131,16 @@ public class ServerSocket {
 				case RESPONSE:
 					WebsocketUtils.onResponse(SerializationUtils.deserialize(messageData));
 					break;
-				case JOB_LOG:
+				case LOG:
 					try {
 						String dataString = new String(messageData, StandardCharsets.UTF_8);
-						String jobToken = StringUtils.substringBefore(dataString, ":");
+						String token = StringUtils.substringBefore(dataString, ":");
 						String remaining = StringUtils.substringAfter(dataString, ":");
 						String sessionId = StringUtils.substringBefore(remaining, ":");
 						if (sessionId.length() == 0)
 							sessionId = null;
 						String logMessage = StringUtils.substringAfter(remaining, ":");
-						TaskLogger logger = OneDev.getInstance(LogService.class).getLogger(jobToken);
+						TaskLogger logger = OneDev.getInstance(LogService.class).getLogger(token);
 						if (logger != null)
 							logger.log(logMessage, sessionId);
 					} catch (Exception e) {
@@ -154,12 +155,34 @@ public class ServerSocket {
 					if (jobContext != null)
 						getJobService().reportJobWorkDir(jobContext, jobWorkDir);
 					break;
-				case SHELL_EXIT:
+				case JOB_SHELL_EXIT: {
 					String sessionId = new String(messageData, StandardCharsets.UTF_8);
-					AgentShell shell = (AgentShell) getJobService().getShell(sessionId);
-					if (shell != null)
-						shell.getTerminal().onShellExit();
+					JobAgentShell jobShell = (JobAgentShell) getJobService().getShell(sessionId);
+					if (jobShell != null)
+						jobShell.getTerminal().onShellExit();
 					break;
+				}
+				case JOB_SHELL_OUTPUT: {
+					JobShellOutputRequest jobShellOutputRequest = SerializationUtils.deserialize(messageData);
+					JobAgentShell jobShell = (JobAgentShell) getJobService().getShell(jobShellOutputRequest.getSessionId());
+					if (jobShell != null)
+						jobShell.getTerminal().onShellOutput(jobShellOutputRequest.getBase64Data());
+					break;
+				}
+				case WORKSPACE_SHELL_EXIT: {
+					String sessionId = new String(messageData, StandardCharsets.UTF_8);
+					WorkspaceAgentShell workspaceShell = WorkspaceAgentShell.get(sessionId);
+					if (workspaceShell != null)
+						workspaceShell.getTerminal().onShellExit();
+					break;
+				}
+				case WORKSPACE_SHELL_OUTPUT: {
+					WorkspaceShellOutputRequest workspaceShellOutputRequest = SerializationUtils.deserialize(messageData);
+					WorkspaceAgentShell workspaceShell = WorkspaceAgentShell.get(workspaceShellOutputRequest.getSessionId());
+					if (workspaceShell != null)
+						workspaceShell.getTerminal().onShellOutput(workspaceShellOutputRequest.getBase64Data());
+					break;
+				}
 				default:
 			}
 		} catch (Exception e) {
@@ -176,23 +199,7 @@ public class ServerSocket {
 	}
 
 	private Serializable service(Serializable request) {
-		try {
-			if (request instanceof WantToDisconnectAgent || request instanceof WaitingForAgentResourceToBeReleased) {
-				if (agentId != null)
-					OneDev.getInstance(ResourceService.class).agentDisconnecting(agentId);
-				return null;
-			} else if (request instanceof ShellOutputRequest shellOutputRequest) {
-				AgentShell shell = (AgentShell) getJobService().getShell(shellOutputRequest.getSessionId());
-				if (shell != null)
-					shell.getTerminal().onShellOutput(shellOutputRequest.getBase64Data());
-				return null;
-			} else {
-				throw new ExplicitException("Unknown request: " + request.getClass());
-			}
-		} catch (Exception e) {
-			logger.error("Error servicing websocket request", e);
-			return e;
-		}
+		throw new UnsupportedOperationException();
 	}
 
 }

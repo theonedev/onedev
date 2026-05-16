@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +45,8 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.LfsFetchAllCommand;
 import io.onedev.server.git.command.LfsFetchCommand;
@@ -59,6 +55,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 
 @Editable(order=1070, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
 		+ "This step pulls specified refs from remote")
@@ -247,7 +246,7 @@ public class PullRepository extends SyncRepository {
 				String defaultBranch = GitUtils.getDefaultBranch(repository);
 				Map<String, ObjectId> oldCommitIds = getRefCommits(repository);
 
-				Commandline git = CommandUtils.newGit();
+				Commandline git = GitUtils.newGit();
 				configureProxy(git, proxy);
 				configureCertificate(git, certificateFile);
 				git.workingDir(repository.getDirectory());

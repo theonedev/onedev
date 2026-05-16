@@ -2,10 +2,6 @@ package io.onedev.server.web.page.project.workspaces.detail;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -192,9 +188,8 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 							return new Link<Void>(id) {
 								@Override
 								public void onClick() {
-									var shellId = workspaceService.openShell(getWorkspace(), name);
-									setResponsePage(WorkspaceTerminalPage.class,
-											WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId, command));
+									var shellId = workspaceService.openShell(getWorkspace(), name, command);
+									setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId));
 								}
 							};
 						
@@ -219,7 +214,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 			@Override
 			public void onClick() {
-				var shellId = workspaceService.openShell(getWorkspace(), _T("Terminal"));
+				var shellId = workspaceService.openShell(getWorkspace(), _T("Terminal"), null);
 				setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId));
 			}
 
@@ -236,28 +231,14 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				Long projectId = getProject().getId();
-				var serverHost = projectService.runOnActiveServer(projectId, () -> {
-					return clusterService.getServerHost(clusterService.getLocalServerAddress());
-				});
-				try {
-					if (InetAddress.getByName(serverHost).isLoopbackAddress()) {
-						try {
-							serverHost = new URL(settingService.getSystemSetting().getServerUrl()).getHost();
-						} catch (MalformedURLException e) {
-							throw new RuntimeException(e);
-						}	
-					}
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
+				var portHost = workspaceService.getPortHost(getWorkspace());
 
 				var menuItems = new ArrayList<MenuItem>();
 				var mappings = workspaceService.getPortMappings(getWorkspace());
 				for (var entry : mappings.entrySet()) {
 					var containerPort = entry.getKey();
 					var hostPort = entry.getValue();
-					var url = "http://" + serverHost + ":" + hostPort;
+					var url = "http://" + portHost + ":" + hostPort;
 					menuItems.add(new MenuItem() {
 						@Override
 						public String getLabel() {
@@ -294,7 +275,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 			@Override
 			public void onClick() {
-				workspaceService.requestToReprovision(getWorkspace());
+				workspaceService.reset(getWorkspace());
 				setResponsePage(WorkspaceLogPage.class, getPageParameters());
 				Session.get().success(MessageFormat.format(_T("Workspace reprovisioning requested"),
 						getWorkspace().getReference().toString(getWorkspace().getProject())));
@@ -413,15 +394,8 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-				if (workspaceStatus != Workspace.Status.ACTIVE && getWorkspace().getStatus() == Workspace.Status.ACTIVE) {
-					var firstShortcut = getShortcutConfigs().stream().findFirst().orElse(null);
-					var command = firstShortcut != null ? firstShortcut.getCommand() : null;
-					var label = firstShortcut != null ? firstShortcut.getName() : _T("Terminal");
-					var shellId = workspaceService.openShell(getWorkspace(), label);
-					setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId, command));
-				} else if (workspaceStatus == Workspace.Status.ACTIVE && getWorkspace().getStatus() != Workspace.Status.ACTIVE) {
+				if ((workspaceStatus == Workspace.Status.ACTIVE) != (getWorkspace().getStatus() == Workspace.Status.ACTIVE))
 					setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(getWorkspace()));
-				}
 			}
 
 			@Override

@@ -51,7 +51,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 import org.jspecify.annotations.Nullable;
 import org.quartz.CronExpression;
-import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
@@ -72,6 +71,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.JobHelper;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafVisitor;
@@ -154,9 +154,6 @@ import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ProjectScopedCommitAware;
-import io.onedev.server.util.concurrent.BatchWorkExecutionService;
-import io.onedev.server.util.concurrent.BatchWorker;
-import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.concurrent.WorkExecutionService;
 import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
@@ -170,8 +167,6 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	private static final int CHECK_INTERVAL = 5; 
 
 	private static final int CACHE_SCHEDULE_PRIORITY = 10;
-
-	private static final int MAINTENANCE_PRIORITY = 50;
 	
 	private static final String TIMEOUT_MESSAGE = "Job execution timed out";
 
@@ -240,9 +235,6 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	@Inject
 	private SSLFactory sslFactory;
-
-	@Inject
-	private BatchWorkExecutionService batchWorkExecutionService;
 
 	@Inject
 	private WorkExecutionService workExecutionService;
@@ -1089,22 +1081,15 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			
 			@Override
 			public void execute() {
-				batchWorkExecutionService.submit(new BatchWorker("job-service-maintenance") {
-
-					@Override
-					public void doWorks(List<Prioritized> works) {
-						if (clusterService.isLeaderServer()) {
-							var activeJobTokens = getActiveJobTokens();
-							jobServers.removeAll(it -> !activeJobTokens.contains(it.getKey()));
-						}
-					}
-					
-				}, new Prioritized(MAINTENANCE_PRIORITY));
+				if (clusterService.isLeaderServer()) {
+					var activeJobTokens = getActiveJobTokens();
+					jobServers.removeAll(it -> !activeJobTokens.contains(it.getKey()));
+				}
 			}
 
 			@Override
 			public ScheduleBuilder<?> getScheduleBuilder() {
-				return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
+				return SimpleScheduleBuilder.repeatHourlyForever();
 			}
 			
 		});
@@ -1205,14 +1190,12 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	@Override
 	public void run() {
+		var localServer = clusterService.getLocalServerAddress();
+
 		while (!jobFutures.isEmpty() || thread != null) {
 			if (thread == null) {
-				if (!jobFutures.isEmpty())
-					logger.info("Callelling running builds...");
-				for (var execution: jobFutures.values()) {
-					if (!execution.isDone())
-						execution.cancel(true);
-				}
+				for (var execution: jobFutures.values()) 
+					execution.cancel(true);
 			}
 			try {
 				if (clusterService.isLeaderServer()) {
@@ -1288,7 +1271,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						Map.Entry<Long, Future<Boolean>> entry = it.next();
 						Build build = buildService.get(entry.getKey());
 						var future = entry.getValue();
-						if (build == null || build.isFinished()) {
+						if (build == null || build.isFinished() 
+								|| !localServer.equals(projectService.getActiveServer(build.getProject().getId(), false))) {
 							it.remove();
 							future.cancel(true);
 						} else if (future.isDone()) {
@@ -1519,7 +1503,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			}
 		} else {
 			String serverUrl = clusterService.getServerUrl(activeServer);
-			return KubernetesHelper.runServerStep(sslFactory, serverUrl, jobContext.getJobToken(), 
+			return JobHelper.runServerStep(sslFactory, serverUrl, jobContext.getJobToken(), 
 					stepPosition, inputDir, Lists.newArrayList("**"), Lists.newArrayList(), 
 					placeholderValues, logger);
 		}

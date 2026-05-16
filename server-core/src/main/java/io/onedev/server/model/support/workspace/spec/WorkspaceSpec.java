@@ -2,7 +2,9 @@ package io.onedev.server.model.support.workspace.spec;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
@@ -279,19 +281,54 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
 
+		Set<String> seenCachePaths = new HashSet<>();
 		for (int i = 0; i < cacheConfigs.size(); i++) {
 			var cacheConfig = cacheConfigs.get(i);
 			for (int j = 0; j < cacheConfig.getPaths().size(); j++) {
-				var entry = cacheConfig.getPaths().get(j);
-				if (!entry.contains("@")) {
-					if (!isRunInContainer() && FilenameUtils.getPrefixLength(entry) > 0) {
+				var path = cacheConfig.getPaths().get(j);
+				if (path == null || path.isEmpty())
+					continue;
+				if (!path.contains("@")) {
+					if (!isRunInContainer() && FilenameUtils.getPrefixLength(path) > 0) {
 						context.buildConstraintViolationWithTemplate(""
 									+ "Item #" + (i + 1) + ": absolute path '" 
-									+ entry + "' is not allowed when not running in container")
+									+ path + "' is not allowed when not running in container")
 								.addPropertyNode(PROP_CACHE_CONFIGS).addConstraintViolation();
 						isValid = false;
 					}
 				}
+				if (!seenCachePaths.add(path)) {
+					context.buildConstraintViolationWithTemplate(
+							"Item #" + (i + 1) + ": duplicate path '" + path + "'")
+							.addPropertyNode(PROP_CACHE_CONFIGS).addConstraintViolation();
+					isValid = false;
+				}
+			}
+		}
+
+		Set<String> seenUserDataPaths = new HashSet<>();
+		for (int i = 0; i < userDatas.size(); i++) {
+			var userData = userDatas.get(i);
+			for (int j = 0; j < userData.getPaths().size(); j++) {
+				String path = userData.getPaths().get(j);
+				if (path != null && !path.isEmpty() && !seenUserDataPaths.add(path)) {
+					context.buildConstraintViolationWithTemplate(
+							"Item #" + (i + 1) + ": duplicate path '" + path + "'")
+							.addPropertyNode(PROP_USER_DATAS).addConstraintViolation();
+					isValid = false;
+				}
+			}
+		}
+
+		Set<String> seenConfigFilePaths = new HashSet<>();
+		for (int i = 0; i < configFiles.size(); i++) {
+			var configFile = configFiles.get(i);
+			String path = configFile.getPath();
+			if (path != null && !path.isEmpty() && !seenConfigFilePaths.add(path)) {
+				context.buildConstraintViolationWithTemplate(
+						"Item #" + (i + 1) + ": duplicate path '" + path + "'")
+						.addPropertyNode(PROP_CONFIG_FILES).addConstraintViolation();
+				isValid = false;
 			}
 		}
 

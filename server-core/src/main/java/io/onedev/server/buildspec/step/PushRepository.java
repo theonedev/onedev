@@ -16,12 +16,11 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 
 @Editable(order=1080, name="Push to Remote", group=StepGroup.REPOSITORY_SYNC, 
 		description="This step pushes current commit to same ref on remote")
@@ -38,7 +37,7 @@ public class PushRepository extends SyncRepository {
 			try {
 				if (OneDev.getInstance(ProjectService.class).hasLfsObjects(build.getProject().getId())) {
 					Project project = build.getProject();
-					Commandline git = CommandUtils.newGit();
+					Commandline git = GitUtils.newGit();
 					git.workingDir(OneDev.getInstance(ProjectService.class).getGitDir(project.getId()));
 					configureProxy(git, getProxy());
 					configureCertificate(git, certificateFile);
@@ -140,7 +139,7 @@ public class PushRepository extends SyncRepository {
 					}
 				}
 
-				Commandline git = CommandUtils.newGit();
+				Commandline git = GitUtils.newGit();
 				configureProxy(git, getProxy());
 				configureCertificate(git, certificateFile);
 				git.workingDir(OneDev.getInstance(ProjectService.class).getGitDir(build.getProject().getId()));

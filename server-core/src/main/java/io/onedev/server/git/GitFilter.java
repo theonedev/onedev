@@ -177,7 +177,7 @@ public class GitFilter implements Filter {
 						
 						@Override
 						public void run() {
-							CommandUtils.uploadPack(gitDir, hookEnvs, protocol, stdin, stdout);
+							GitUtils.uploadPack(gitDir, hookEnvs, protocol, stdin, stdout);
 						}
 						
 					}).get();
@@ -186,7 +186,7 @@ public class GitFilter implements Filter {
 						
 						@Override
 						public void run() {
-							CommandUtils.receivePack(gitDir, hookEnvs, protocol, stdin, stdout);
+							GitUtils.receivePack(gitDir, hookEnvs, protocol, stdin, stdout);
 						}
 						
 					}).get();
@@ -242,10 +242,10 @@ public class GitFilter implements Filter {
 				// Run immediately if accessed with cluster credential to avoid 
 				// possible deadlock as caller itself might also hold some 
 				// resources (db connections, work executors etc) 
-				CommandUtils.uploadPack(gitDir, hookEnvs, protocol, stdin, stdout);
+				GitUtils.uploadPack(gitDir, hookEnvs, protocol, stdin, stdout);
 			} else {
 				// Run immediately. See above for reason
-				CommandUtils.receivePack(gitDir, hookEnvs, protocol, stdin, stdout);
+				GitUtils.receivePack(gitDir, hookEnvs, protocol, stdin, stdout);
 			}			
 		}	
 	}

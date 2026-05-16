@@ -10,12 +10,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,6 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
-import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 
 public class BlameCommand {
@@ -63,7 +61,7 @@ public class BlameCommand {
 	}
 	
 	protected Commandline newGit() {
-		return CommandUtils.newGit();
+		return GitUtils.newGit();
 	}
 	
 	public Collection<BlameBlock> run() {

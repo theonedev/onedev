@@ -1,5 +1,6 @@
 package io.onedev.server.git;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
 import static org.eclipse.jgit.lib.Constants.R_TAGS;
 
@@ -16,6 +17,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
@@ -62,9 +65,12 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
+import org.eclipse.jgit.util.QuotedString;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -72,14 +78,27 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
+import io.onedev.agent.Agent;
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.ExecutionResult;
+import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.IsAncestorCommand;
+import io.onedev.server.git.command.ReceivePackCommand;
+import io.onedev.server.git.command.UploadPackCommand;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.git.exception.RefUpdateException;
+import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.git.service.DiffEntryFacade;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.util.GpgUtils;
@@ -89,6 +108,10 @@ public class GitUtils {
 
 	public static final int SHORT_SHA_LENGTH = 8;
 	
+	private static final String MIN_VERSION = "2.11.1";
+
+	private static final Logger logger = LoggerFactory.getLogger(GitUtils.class);
+
 	public static String abbreviateSHA(String sha, int length) {
 		Preconditions.checkArgument(ObjectId.isId(sha));
 		return sha.substring(0, length);
@@ -749,5 +772,134 @@ public class GitUtils {
 				.toLowerCase();
 		return StringUtils.trimToNull(branch);
 	}
+	
+	public static Commandline newGit() {
+		return new Commandline(OneDev.getInstance(GitLocation.class).getExecutable());
+	}
+	
+	public static <T> T callWithClusterCredential(GitTask<T> task) {
+		File homeDir = FileUtils.createTempDir("githome"); 
+		
+		ClusterService clusterService = OneDev.getInstance(ClusterService.class);
+		SecretMasker.push(text -> StringUtils.replace(text, clusterService.getCredential(), "******"));
+		try {
+			Commandline git = newGit();
+			git.envs().put("HOME", homeDir.getAbsolutePath());
+			String extraHeader = KubernetesHelper.AUTHORIZATION + ": " 
+					+ KubernetesHelper.BEARER + " " + clusterService.getCredential();
+			git.addArgs("config", "--global", "http.extraHeader", extraHeader);
+			git.execute(new LineConsumer() {
 
+				@Override
+				public void consume(String line) {
+					logger.info(line);
+				}
+				
+			}, new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					logger.warn(line);
+				}
+				
+			}).checkReturnCode();
+			
+			return task.call(git);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			SecretMasker.pop();
+			FileUtils.deleteDir(homeDir);
+		}
+	}
+	
+	/**
+	 * Check if there are any errors with git command line. 
+	 *
+	 * @return
+	 * 			error message if failed to check git command line, 
+	 * 			or <tt>null</tt> otherwise
+	 * 			
+	 */
+	public static String checkError(String gitExe) {
+		return Agent.checkGitError(gitExe, MIN_VERSION);
+	}
+	
+	public static FileChange parseNumStats(String line) {
+		FileChange change;
+		StringTokenizer tokenizer = new StringTokenizer(line, "\t");
+		String additionsToken = tokenizer.nextToken();
+		int additions = additionsToken.equals("-")?-1:Integer.parseInt(additionsToken);
+		String deletionsToken = tokenizer.nextToken();
+		int deletions = deletionsToken.equals("-")?-1:Integer.parseInt(deletionsToken);
+		
+		String path = tokenizer.nextToken();
+		int renameSignIndex = path.indexOf(" => ");
+		if (renameSignIndex != -1) {
+			int leftBraceIndex = path.indexOf("{");
+			int rightBraceIndex = path.indexOf("}");
+			if (leftBraceIndex != -1 && rightBraceIndex != -1 && leftBraceIndex<renameSignIndex
+					&& rightBraceIndex>renameSignIndex) {
+				String leftCommon = path.substring(0, leftBraceIndex);
+				String rightCommon = path.substring(rightBraceIndex+1);
+				String oldPath = leftCommon + path.substring(leftBraceIndex+1, renameSignIndex) 
+						+ rightCommon;
+				String newPath = leftCommon + path.substring(renameSignIndex+4, rightBraceIndex) 
+						+ rightCommon;
+    			change = new FileChange(oldPath, newPath, additions, deletions);
+			} else {
+				String oldPath = QuotedString.GIT_PATH.dequote(path.substring(0, renameSignIndex));
+				String newPath = QuotedString.GIT_PATH.dequote(path.substring(renameSignIndex+4));
+    			change = new FileChange(oldPath, newPath, additions, deletions);
+			}
+		} else {
+			path = QuotedString.GIT_PATH.dequote(path);
+			change = new FileChange(null, path, additions, deletions);
+		}            			
+		return change;
+	}
+	
+	public static void uploadPack(File gitDir, Map<String, String> environments, String protocol, 
+			InputStream stdin, OutputStream stdout) {
+		AtomicBoolean toleratedErrors = new AtomicBoolean(false);
+		var stderr = new LineConsumer(UTF_8.name()) {
+
+			@Override
+			public void consume(String line) {
+				// This error may happen during a normal shallow fetch/clone 
+				if (line.contains("remote end hung up unexpectedly")) {
+					toleratedErrors.set(true);
+					logger.debug(line);
+				} else {
+					logger.error(line);
+				}
+			}
+			
+		};
+
+		ExecutionResult result;
+		var upload = new UploadPackCommand(gitDir, stdin, stdout, stderr, environments);
+		upload.statelessRpc(true).protocol(protocol);
+		result = upload.run();
+		if (result.getReturnCode() != 0 && !toleratedErrors.get())
+			throw result.buildException();
+	}
+	
+	public static void receivePack(File gitDir, Map<String, String> environments, String protocol, 
+			InputStream stdin, OutputStream stdout) {
+		var stderr = new LineConsumer(UTF_8.name()) {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		};
+		
+		var receive = new ReceivePackCommand(gitDir, stdin, stdout, stderr, environments);
+		receive.statelessRpc(true).protocol(protocol);
+		ExecutionResult result = receive.run();
+		result.checkReturnCode();
+	}
+		
 }

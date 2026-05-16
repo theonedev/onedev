@@ -11,7 +11,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
@@ -30,7 +34,7 @@ import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.ResourceService;
-import io.onedev.server.service.support.AgentRunnable;
+import io.onedev.server.service.support.AgentCallable;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.agent.AgentConnected;
 import io.onedev.server.event.agent.AgentDisconnected;
@@ -65,9 +69,7 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 	private final Map<String, Integer> concurrencyUsages = new HashMap<>();
 	
 	private volatile Map<String, Integer> concurrencyUsagesCache;
-	
-	private volatile Map<Long, Long> disconnectingAgents;
-	
+		
 	private volatile String taskId;
 	
 	@Inject
@@ -98,7 +100,6 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 			cpuCounts.put(localServer, 4);
 		}
 		concurrencyUsagesCache = hazelcastInstance.getReplicatedMap("concurrencyUsagesCache");
-		disconnectingAgents = hazelcastInstance.getReplicatedMap("disconnectingAgents");
 		removeNodeFromConcurrencyUsagesCache(localServer);		
 	}
 
@@ -163,7 +164,6 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 						concurrencyUsagesCache.put(entry.getKey(), entry.getValue());
 				}
 			}
-			disconnectingAgents.remove(agentId);
 		});
 	}
 
@@ -186,31 +186,6 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 	@Transactional
 	protected void updateLastUsedDate(Long agentId) {
 		agentService.load(agentId).getLastUsedDate().setValue(new Date());
-	}
-
-	@Override
-	public void agentDisconnecting(Long agentId) {
-		disconnectingAgents.put(agentId, agentId);
-		while (true) {
-			boolean idle = true;
-			synchronized (concurrencyUsages) {
-				for (var entry : concurrencyUsages.entrySet()) {
-					if (entry.getKey().startsWith(agentId + ":") && entry.getValue() > 0) {
-						idle = false;
-						break;
-					}
-				}
-			}
-			if (idle) {
-				break;
-			} else {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
 	}
 
 	private int getEffectiveTotalConcurrency(String node, int totalConcurrency) {
@@ -278,19 +253,20 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 	}
 
 	@Override
-	public <T> T runServerJob(String resourceName, int totalConcurrency, 
-								int requiredConcurrency, ClusterTask<T> runnable) {
+	public <T> Future<T> submitServerTask(@Nullable String pinnedServerAddress, String resourceName,
+				int totalConcurrency, int requiredConcurrency, ClusterTask<T> runnable) {
 		while (true) {
-			var servers = clusterService.getServerAddresses();
-			servers.retainAll(clusterService.getOnlineServers());
-			var allocatedServer = allocateNode(servers, resourceName, totalConcurrency, requiredConcurrency);
+			var candidateServers = new ArrayList<>(clusterService.getOnlineServers());			
+			if (pinnedServerAddress != null) 
+				candidateServers.retainAll(List.of(pinnedServerAddress));
+			var allocatedServer = allocateNode(candidateServers, resourceName, totalConcurrency, requiredConcurrency);
 			if (allocatedServer != null) {
-				return clusterService.runOnServer(allocatedServer, () -> {
+				return clusterService.submitToServer(allocatedServer, () -> {
 					int effectiveTotalConcurrency = getEffectiveTotalConcurrency(allocatedServer, totalConcurrency);
 					var concurrencyKey = allocatedServer + ":" + resourceName;
 					acquireConcurrency(concurrencyKey, effectiveTotalConcurrency, requiredConcurrency);
 					try {
-						return clusterService.runOnServer(allocatedServer, runnable);
+						return runnable.call();
 					} finally {
 						releaseConcurrency(concurrencyKey, requiredConcurrency);
 					}
@@ -305,15 +281,22 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 	}
 
 	@Override
-	public <T> T runAgentJob(AgentQuery agentQuery, String resourceName,
-							int totalConcurrency, int requiredConcurrency, 
-							AgentRunnable<T> runnable) {
+	public <T> Future<T> submitAgentTask(@Nullable Long pinnedAgentId, AgentQuery agentQuery, 
+				String resourceName, int totalConcurrency, int requiredConcurrency, 
+				AgentCallable<T> task) {
 		while (true) {
-			var agentIds = agentService.query(agentQuery, 0, MAX_VALUE)
-					.stream().filter(it -> it.isOnline() && !it.isPaused())
-					.map(AbstractEntity::getId)
-					.collect(toSet());
-			agentIds.removeAll(disconnectingAgents.keySet());
+			Set<Long> agentIds;
+			if (pinnedAgentId != null) {
+				agentIds = new HashSet<>();
+				var agent = agentService.get(pinnedAgentId);
+				if (agent != null && agent.isOnline() && !agent.isPaused())
+					agentIds.add(pinnedAgentId);
+			} else {
+				agentIds = agentService.query(agentQuery, 0, MAX_VALUE)
+						.stream().filter(it -> it.isOnline() && !it.isPaused())
+						.map(AbstractEntity::getId)
+						.collect(toSet());
+			}
 			var agentIdString = allocateNode(
 					agentIds.stream().map(Object::toString).collect(toList()),
 					resourceName, totalConcurrency, requiredConcurrency);
@@ -323,13 +306,13 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 				if (server == null)
 					throw new ExplicitException("Cannot find server managing allocated agent, please retry later");
 
-				return clusterService.runOnServer(server, () -> {
+				return clusterService.submitToServer(server, () -> {
 					var effectiveTotalConcurrency = getEffectiveTotalConcurrency(agentIdString, totalConcurrency);
 					var concurrencyKey = agentId + ":" + resourceName;
 					acquireConcurrency(concurrencyKey, effectiveTotalConcurrency, requiredConcurrency);
 					try {
 						updateLastUsedDate(agentId);
-						return runnable.run(agentId);
+						return task.call(agentId);
 					} finally {
 						releaseConcurrency(concurrencyKey, requiredConcurrency);
 					}

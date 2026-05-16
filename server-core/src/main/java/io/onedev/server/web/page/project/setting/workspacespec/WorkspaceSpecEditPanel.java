@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.setting.workspacespec;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -9,6 +10,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 
 abstract class WorkspaceSpecEditPanel extends Panel {
@@ -51,6 +53,12 @@ abstract class WorkspaceSpecEditPanel extends Panel {
 
 		});
 		form.add(new AjaxLink<Void>("cancel") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(WorkspaceSpecEditPanel.this));
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {

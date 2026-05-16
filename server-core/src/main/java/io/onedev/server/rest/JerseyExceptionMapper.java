@@ -29,7 +29,7 @@ public class JerseyExceptionMapper implements ExceptionMapper<Throwable> {
 						.type(httpResponse.getBody().getContentType())
 						.entity(httpResponse.getBody().getText());
 			}
-			return jerseyResponseBuilder.build();
+			jerseyResponse = jerseyResponseBuilder.build();
 		} else {
 			int statusCode = SC_INTERNAL_SERVER_ERROR;
 			jerseyResponse = Response.status(statusCode)

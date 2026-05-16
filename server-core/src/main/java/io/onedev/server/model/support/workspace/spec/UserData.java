@@ -9,6 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.UserDataFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Path;
@@ -69,4 +70,8 @@ public class UserData implements Serializable {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}
 		
+	public UserDataFacade getFacade() {
+		return new UserDataFacade(key, paths, changeDetectionExcludes);
+	}
+	
 }

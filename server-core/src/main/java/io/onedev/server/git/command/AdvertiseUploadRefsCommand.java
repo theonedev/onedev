@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.server.git.CommandUtils;
+import io.onedev.server.git.GitUtils;
 
 public class AdvertiseUploadRefsCommand {
 
@@ -31,7 +31,7 @@ public class AdvertiseUploadRefsCommand {
 	}
 	
 	protected Commandline newGit() {
-		return CommandUtils.newGit();
+		return GitUtils.newGit();
 	}
 	
 	public void run() {

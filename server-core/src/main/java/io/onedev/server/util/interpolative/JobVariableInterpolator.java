@@ -1,7 +1,6 @@
 package io.onedev.server.util.interpolative;
 
 import static io.onedev.k8shelper.KubernetesHelper.ATTRIBUTES;
-import static io.onedev.k8shelper.KubernetesHelper.PAUSE;
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
 import static io.onedev.k8shelper.KubernetesHelper.WORKDIR;
@@ -16,6 +15,7 @@ import java.util.function.Function;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.k8shelper.JobHelper;
 import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
@@ -110,8 +110,8 @@ public class JobVariableInterpolator extends VariableInterpolator {
 				return PLACEHOLDER_PREFIX + WORKDIR + "/" + t.substring(PREFIX_FILE.length()) + PLACEHOLDER_SUFFIX;
 			} else if (t.startsWith(PREFIX_ATTRIBUTE)) {
 				return PLACEHOLDER_PREFIX + ATTRIBUTES + "/" + t.substring(PREFIX_ATTRIBUTE.length()) + PLACEHOLDER_SUFFIX;
-			} else if (t.equals(PAUSE)) {
-				return PLACEHOLDER_PREFIX + PAUSE + PLACEHOLDER_SUFFIX;
+			} else if (t.equals(JobHelper.PAUSE)) {
+				return PLACEHOLDER_PREFIX + JobHelper.PAUSE + PLACEHOLDER_SUFFIX;
 			} else {
 				throw new ExplicitException("Unrecognized interpolation variable: " + t);
 			}

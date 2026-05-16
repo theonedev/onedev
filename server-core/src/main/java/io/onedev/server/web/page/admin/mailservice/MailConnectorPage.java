@@ -27,12 +27,12 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ParsedEmailAddress;
-import io.onedev.server.web.component.DisableAwareButton;
+import io.onedev.server.web.behavior.DisableAwareBehavior;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
@@ -65,7 +65,7 @@ public class MailConnectorPage extends AdministrationPage {
 		
 		PropertyEditor<Serializable> editor = 
 				PropertyContext.edit("editor", bean, "mailConnector");
-		Button saveButton = new DisableAwareButton("save") {
+		Button saveButton = new Button("save") {
 
 			@Override
 			public void onSubmit() {
@@ -89,7 +89,8 @@ public class MailConnectorPage extends AdministrationPage {
 						|| WicketUtils.isSubscriptionActive());
 			}
 		};
-		
+		saveButton.add(new DisableAwareBehavior());
+
 		var sendingMailText = _T("Sending test mail to {0}...");
 		var waitingMailText = _T("Waiting for test mail to come back...");
 		var receivedMailText = _T("Received test mail");

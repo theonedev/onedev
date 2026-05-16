@@ -44,7 +44,6 @@ import io.onedev.commons.utils.TarUtils;
 import io.onedev.server.StorageService;
 import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.attachment.AttachmentService;
-import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.LfsObject;
@@ -297,7 +296,7 @@ public class ClusterResource {
 							
 							@Override
 							public void run() {
-								CommandUtils.uploadPack(gitDir, hookEnvs, protocol, is, output);
+								GitUtils.uploadPack(gitDir, hookEnvs, protocol, is, output);
 							}
 							
 						}).get();
@@ -306,7 +305,7 @@ public class ClusterResource {
 							
 							@Override
 							public void run() {
-								CommandUtils.receivePack(gitDir, hookEnvs, protocol, is, output);
+								GitUtils.receivePack(gitDir, hookEnvs, protocol, is, output);
 							}
 							
 						}).get();

@@ -1,8 +1,6 @@
 package io.onedev.server.cache;
 
-import java.io.File;
-
-import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.CacheConfigFacade;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.model.Project;
 
@@ -10,8 +8,8 @@ public class ServerJobCacheProvisioner extends ServerCacheProvisioner {
 		
 	private final JobContext jobContext;
 
-	public ServerJobCacheProvisioner(File baseDir, JobContext jobContext, TaskLogger logger) {
-		super(baseDir, logger);
+	public ServerJobCacheProvisioner(CacheConfigFacade config, int configIndex, JobContext jobContext) {
+		super(config, configIndex);
 		this.jobContext = jobContext;
 	}
 
