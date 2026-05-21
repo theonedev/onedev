@@ -232,9 +232,9 @@ public class DefaultLogService implements LogService, Serializable {
 			if (logFile.exists() && logFile.length() != 0) {
 				try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
 					while (true) {
-						JobLogEntry entry  = (JobLogEntry) ois.readObject();
+						JobLogEntryEx entry = readLogEntry(ois);
 						if ((loggingSupport.getEffectiveDate() == null || !entry.getDate().before(loggingSupport.getEffectiveDate())) 
-								&& pattern.matcher(entry.getMessage()).find()) {
+								&& pattern.matcher(entry.getMessageText()).find()) {
 							return true;
 						}
 					}
