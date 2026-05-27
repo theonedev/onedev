@@ -110,7 +110,7 @@ public abstract class CraneStep extends CommandStep {
 			commandsBuilder.append("cat <<EOF>> /root/trust-certs.crt\n");
 			commandsBuilder.append(getTrustCertificates().replace("\r\n", "\n")).append("\n");
 			commandsBuilder.append("EOF\n");
-			commandsBuilder.append("export SSL_CERT_FILE=/root/trust-certs.crt");
+			commandsBuilder.append("export SSL_CERT_FILE=/root/trust-certs.crt\n");
 		}
 		commandsBuilder.append(getCommand());
 		return new CommandFacade(getEffectiveImage(), getRunAs(), registryLogins,
