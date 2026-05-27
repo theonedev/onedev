@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.client.Client;
@@ -29,10 +28,12 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 import org.joda.time.format.ISODateTimeFormat;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -52,13 +53,6 @@ import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.attachment.AttachmentTooLargeException;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.BaseAuthorizationService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IterationService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssuesImported;
@@ -76,6 +70,13 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
@@ -320,7 +321,7 @@ public class ImportServer implements Serializable, Validatable {
 
 								@Override
 								public String mask(String text) {
-									return StringUtils.replace(text, getAccessToken(), "******");
+									return Strings.CS.replace(text, getAccessToken(), "******");
 								}
 
 							});

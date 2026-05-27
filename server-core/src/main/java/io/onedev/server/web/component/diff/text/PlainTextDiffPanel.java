@@ -8,6 +8,7 @@ import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -18,7 +19,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
@@ -81,7 +81,7 @@ public class PlainTextDiffPanel extends Panel {
                     expandSupport.appendEquals(builder, index, lastContextSize, contextSize, 
                             block, diffBlocks.size(), new ExpandCallbackImpl());
                     
-                    String expanded = StringUtils.replace(builder.toString(), "\n", "");
+                    String expanded = Strings.CS.replace(builder.toString(), "\n", "");
                     String script = String.format("onedev.server.plainTextDiff.expand('%s', %d, \"%s\");",
                             getMarkupId(), index, escapeJavaScript(expanded));
                     target.appendJavaScript(script);

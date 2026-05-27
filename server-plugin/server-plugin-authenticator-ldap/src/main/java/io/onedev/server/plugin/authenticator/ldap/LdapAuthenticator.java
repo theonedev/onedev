@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
 import javax.naming.AuthenticationException;
 import javax.naming.CompositeName;
 import javax.naming.Context;
@@ -24,8 +23,10 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,9 +193,9 @@ public class LdapAuthenticator extends Authenticator {
 		Collection<String> groupNames = null;
         Collection<String> sshKeys = null;
 
-        String userSearchFilter = StringUtils.replace(getUserSearchFilter(), "{0}", 
+        String userSearchFilter = Strings.CS.replace(getUserSearchFilter(), "{0}", 
         		escape(token.getUsername()));
-        userSearchFilter = StringUtils.replace(userSearchFilter, "\\", "\\\\");
+        userSearchFilter = Strings.CS.replace(userSearchFilter, "\\", "\\\\");
         logger.debug("Evaluated user search filter: " + userSearchFilter);
         
         SearchControls searchControls = new SearchControls();
@@ -387,8 +388,8 @@ public class LdapAuthenticator extends Authenticator {
 	    	SearchGroupsUsingFilter groupRetrieval = (SearchGroupsUsingFilter) getGroupRetrieval();
 	    	String groupNameAttribute = groupRetrieval.getGroupNameAttribute();
 	        Name groupSearchBase = new CompositeName().add(groupRetrieval.getGroupSearchBase());
-	        String groupSearchFilter = StringUtils.replace(groupRetrieval.getGroupSearchFilter(), "{0}", userDN);
-	        groupSearchFilter = StringUtils.replace(groupSearchFilter, "\\", "\\\\");
+	        String groupSearchFilter = Strings.CS.replace(groupRetrieval.getGroupSearchFilter(), "{0}", userDN);
+	        groupSearchFilter = Strings.CS.replace(groupSearchFilter, "\\", "\\\\");
 	
 	        logger.debug("Evaluated group search filter: " + groupSearchFilter);
 	        SearchControls searchControls = new SearchControls();

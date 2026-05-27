@@ -14,6 +14,7 @@ import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
 import static io.onedev.server.util.KubernetesUtils.collectContainerLog;
 import static io.onedev.server.util.KubernetesUtils.createResource;
+import static io.onedev.server.util.KubernetesUtils.createTrustCertsConfigMap;
 import static io.onedev.server.util.KubernetesUtils.deleteResource;
 import static io.onedev.server.util.KubernetesUtils.getContainerErrors;
 import static io.onedev.server.util.KubernetesUtils.getPrivilegedNamespaceDefinition;
@@ -29,23 +30,22 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jspecify.annotations.Nullable;
@@ -59,9 +59,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
@@ -77,9 +75,9 @@ import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.cache.ServerJobCacheProvisioner;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobRunnable;
@@ -97,6 +95,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.util.KubernetesUtils;
+import io.onedev.server.util.KubernetesUtils.CollectLogExitCondition.SeenMessage;
 import io.onedev.server.util.KubernetesUtils.PodWatchAbort;
 import io.onedev.server.util.KubernetesUtils.PodWatchAbortChecker;
 import io.onedev.server.web.util.Testable;
@@ -120,12 +119,10 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	private String clusterRole;
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
-	
-	private boolean buildWithPV;
-	
+		
 	private String storageClass;
 	
-	private String storageSize;
+	private String storageSize = "10Gi";
 	
 	private List<ServiceLocator> serviceLocators = new ArrayList<>();
 
@@ -156,22 +153,11 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
 		this.registryLogins = registryLogins;
 	}
-
-	@Editable(order=300, name="Build with Persistent Volume", description="Enable this to place intermediate " +
-			"files required by job execution on dynamically allocated persistent volume instead of emptyDir")
-	public boolean isBuildWithPV() {
-		return buildWithPV;
-	}
-
-	public void setBuildWithPV(boolean buildWithPV) {
-		this.buildWithPV = buildWithPV;
-	}
 	
 	@Editable(order=400, name="Build Volume Storage Class", placeholder = "Use default storage class", description = "" +
 			"Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. " +
 			"<b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, " +
 			"as the volume is only used to hold temporary build files")
-	@DependsOn(property="buildWithPV")
 	public String getStorageClass() {
 		return storageClass;
 	}
@@ -183,7 +169,6 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	@Editable(order=500, name="Build Volume Storage Size", description = "Specify storage size to request " +
 			"for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, " +
 			"for instance <i>10Gi</i>")
-	@DependsOn(property="buildWithPV")
 	@NotEmpty
 	public String getStorageSize() {
 		return storageSize;
@@ -409,7 +394,8 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		String namespace = getTestNamespace();
 		try {
 			testCluster(this::newKubectl, namespace, testData.getDockerImage(),
-					isAlwaysPullImage(), jobLogger);
+					IMAGE_REPO + ":" + getVersion(), getServerUrl(), UUID.randomUUID().toString(),
+					getStorageClass(), getStorageSize(), isAlwaysPullImage(), jobLogger);
 		} finally {
 			deleteNamespace(namespace, jobLogger);
 		}
@@ -509,37 +495,6 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		createResource(this::newKubectl, clusterRoleBindingDef, new HashSet<>(), jobLogger);
 	}	
 	
-	@Nullable
-	private String createTrustCertsConfigMap(String namespace, TaskLogger jobLogger) {
-		Map<String, String> configMapData = new LinkedHashMap<>();
-		File trustCertsDir = new File(Bootstrap.getConfDir(), "trust-certs");
-		if (trustCertsDir.exists()) {
-			int index = 1;
-			for (File file: trustCertsDir.listFiles()) {
-				if (file.isFile() && !file.isHidden()) {
-					try {
-						byte[] fileContent = FileUtils.readFileToByteArray(file);
-						configMapData.put((index++) + ".pem", encodeBase64String(fileContent));
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		}
-		if (!configMapData.isEmpty()) {
-			Map<Object, Object> configMapDef = newLinkedHashMap(
-					"apiVersion", "v1", 
-					"kind", "ConfigMap",
-					"metadata", newLinkedHashMap(
-							"name", "trust-certs", 
-							"namespace", namespace), 
-					"binaryData", configMapData);
-			return createResource(this::newKubectl, configMapDef, new HashSet<>(), jobLogger);			
-		} else {
-			return null;
-		}
-	}
-
 	private void startService(String namespace, JobContext jobContext, ServiceFacade jobService, 
 			@Nullable String imagePullSecretName, TaskLogger jobLogger) {
 		jobLogger.log("Creating service pod from image " + jobService.getImage() + "...");
@@ -746,25 +701,24 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 					startService(namespace, jobContext, jobService, imagePullSecretName, jobLogger);
 				}
 				
-				var trustCertsConfigMapName = createTrustCertsConfigMap(namespace, jobLogger);
+				var trustCertsConfigMapCreated = createTrustCertsConfigMap(this::newKubectl,
+						"trust-certs", namespace, jobLogger);
 				
-				if (isBuildWithPV()) {
-					Map<Object, Object> pvcDef = newLinkedHashMap(
-							"apiVersion", "v1",
-							"kind", "PersistentVolumeClaim",
-							"metadata", newLinkedHashMap(
-									"name", "build-dir",
-									"namespace", namespace));
-					Map<Object, Object> pvcSpecDef = newLinkedHashMap(
-							"accessModes", newArrayList("ReadWriteOnce"),
-							"resources", newLinkedHashMap(
-									"requests", newLinkedHashMap(
-												"storage", getStorageSize())));
-					if (getStorageClass() != null)
-						pvcSpecDef.put("storageClassName", getStorageClass());
-					pvcDef.put("spec", pvcSpecDef);
-					createResource(this::newKubectl, pvcDef, Sets.newHashSet(), jobLogger);
-				}
+				Map<Object, Object> pvcDef = newLinkedHashMap(
+						"apiVersion", "v1",
+						"kind", "PersistentVolumeClaim",
+						"metadata", newLinkedHashMap(
+								"name", "build-dir",
+								"namespace", namespace));
+				Map<Object, Object> pvcSpecDef = newLinkedHashMap(
+						"accessModes", newArrayList("ReadWriteOnce"),
+						"resources", newLinkedHashMap(
+								"requests", newLinkedHashMap(
+											"storage", getStorageSize())));
+				if (getStorageClass() != null)
+					pvcSpecDef.put("storageClassName", getStorageClass());
+				pvcDef.put("spec", pvcSpecDef);
+				createResource(this::newKubectl, pvcDef, Sets.newHashSet(), jobLogger);
 				
 				Map<String, Object> podSpec = new LinkedHashMap<>();
 
@@ -783,7 +737,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						"mountPath", containerTrustCertsDirPath);
 				
 				var commonVolumeMounts = newArrayList(buildDirMount);
-				if (trustCertsConfigMapName != null)
+				if (trustCertsConfigMapCreated)
 					commonVolumeMounts.add(trustCertsMount);
 				
 				CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
@@ -804,7 +758,8 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						"value", containerWorkDirPath
 						));
 	
-				Collection<String> cachePaths = new LinkedHashSet<>();
+				Map<String, String> cacheMounts = new LinkedHashMap<>();
+				var cacheConfigIndex = new AtomicInteger(1);
 				entryFacade.traverse((facade, position) -> {
 					String containerName = getContainerName(position);
 					containerNames.add(containerName);
@@ -824,7 +779,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 							stepContainerSpec.put("imagePullPolicy", "Always");
 						if (commandFacade.isUseTTY())
 							stepContainerSpec.put("tty", true);						
-						var volumeMounts = buildVolumeMounts(cachePaths);
+						var volumeMounts = buildVolumeMounts(cacheMounts);
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
 						stepContainerSpec.put("env", SerializationUtils.clone(commonEnvs));
@@ -838,17 +793,26 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor");
 					} else {
-						if (facade instanceof SetupCacheFacade) 
-							cachePaths.addAll(((SetupCacheFacade) facade).getCacheConfig().getPaths());
+						if (facade instanceof SetupCacheFacade) {
+							var setupCacheFacade = (SetupCacheFacade) facade;
+							var cacheProvisioner = new ServerJobCacheProvisioner(
+									setupCacheFacade.getCacheConfig(), cacheConfigIndex.getAndIncrement(), jobContext);
+							for (var path: setupCacheFacade.getCacheConfig().getPaths()) {
+								var absolutePathIndex = cacheProvisioner.getAbsolutePathIndexes().get(path);
+								if (absolutePathIndex != null)
+									cacheMounts.put(path, cacheProvisioner.getSubPath(absolutePathIndex));
+							}
+						}
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
 								"image", helperImage);
 						if (isAlwaysPullImage())
 							stepContainerSpec.put("imagePullPolicy", "Always");
-						var volumeMounts = buildVolumeMounts(cachePaths);
+						var volumeMounts = buildVolumeMounts(cacheMounts);
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
 						stepContainerSpec.put("env", SerializationUtils.clone(commonEnvs));
+						setupSecurityContext(stepContainerSpec, "0:0");
 					}
 					
 					if (stepContainerSpec != null) {
@@ -885,7 +849,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						"-classpath", k8sHelperClassPath, 
 						"io.onedev.k8shelper.JobInit");
 
-				ArrayList<Object> volumeMounts = buildVolumeMounts(cachePaths);
+				ArrayList<Object> volumeMounts = buildVolumeMounts(cacheMounts);
 				volumeMounts.addAll(commonVolumeMounts);
 				
 				Map<Object, Object> initContainerSpec = newHashMap(
@@ -897,6 +861,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						"volumeMounts", SerializationUtils.clone(volumeMounts));
 				if (isAlwaysPullImage())
 					initContainerSpec.put("imagePullPolicy", "Always");
+				setupSecurityContext(initContainerSpec, "0:0");
 				
 				Map<Object, Object> sidecarContainerSpec = newLinkedHashMap(
 						"name", "sidecar", 
@@ -911,6 +876,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				sidecarContainerSpec.put("resources", newLinkedHashMap("requests", newLinkedHashMap(
 						"cpu", getCpuRequest(), 
 						"memory", getMemoryRequest())));
+				setupSecurityContext(sidecarContainerSpec, "0:0");
 				
 				containerSpecs.add(sidecarContainerSpec);
 				containerNames.add("sidecar");
@@ -925,23 +891,16 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				if (!getNodeSelector().isEmpty())
 					podSpec.put("nodeSelector", toMap(getNodeSelector()));
 				
-				Map<Object, Object> buildDirVolume;
-				if (isBuildWithPV()) {
-					buildDirVolume = newLinkedHashMap(
+				Map<Object, Object> buildDirVolume = newLinkedHashMap(
 							"name", "build-dir", 
 							"persistentVolumeClaim", newLinkedHashMap(
 									"claimName", "build-dir"));
-				} else {
-					buildDirVolume = newLinkedHashMap(
-							"name", "build-dir",
-							"emptyDir", newLinkedHashMap());
-				}
 				List<Object> volumes = newArrayList(buildDirVolume);
-				if (trustCertsConfigMapName != null) {
+				if (trustCertsConfigMapCreated) {
 					volumes.add(newLinkedHashMap(
 							"name", "trust-certs", 
 							"configMap", newLinkedHashMap(
-									"name", trustCertsConfigMapName)));
+									"name", "trust-certs")));
 				}
 				podSpec.put("volumes", volumes);
 
@@ -1022,7 +981,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						logger.debug("Collecting log of container (pod: {}, container: {})...", 
 								podFQN, containerName);
 						
-						collectContainerLog(this::newKubectl, namespace, POD_NAME, containerName, LOG_END_MESSAGE, jobLogger);
+						collectContainerLog(this::newKubectl, namespace, POD_NAME, containerName, new SeenMessage(LOG_END_MESSAGE), jobLogger);
 						
 						logger.debug("Waiting for stop of container (pod: {}, container: {})...", 
 								podFQN, containerName);
@@ -1084,17 +1043,14 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		}
 	}
 	
-	private ArrayList<Object> buildVolumeMounts(Collection<String> cachePaths) {
+	private ArrayList<Object> buildVolumeMounts(Map<String, String> cacheMounts) {
 		var volumeMounts = new ArrayList<>();
-		int index = 1;
-		for (var path: cachePaths) {
-			if (FilenameUtils.getPrefixLength(path) > 0) {
-				var volumeMount = newLinkedHashMap(
-						"name", "build-dir",
-						"mountPath", path,
-						"subPath", "cache/" + (index++));
-				volumeMounts.add(volumeMount);
-			}
+		for (var entry: cacheMounts.entrySet()) {
+			var volumeMount = newLinkedHashMap(
+					"name", "build-dir",
+					"mountPath", entry.getKey(),
+					"subPath", entry.getValue());
+			volumeMounts.add(volumeMount);
 		}
 		return volumeMounts;
 	}

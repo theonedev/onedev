@@ -16,6 +16,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
@@ -223,7 +224,7 @@ public class ImportServer implements Serializable, Validatable {
 							URIBuilder builder = new URIBuilder(cloneUrl);
 							builder.setUserInfo(getUserName(), getAppPassword());
 
-							SecretMasker.push(text -> StringUtils.replace(text, getAppPassword(), "******"));
+							SecretMasker.push(text -> Strings.CS.replace(text, getAppPassword(), "******"));
 							try {
 								if (dryRun) {
 									new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();

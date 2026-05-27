@@ -1,17 +1,24 @@
 package io.onedev.server.persistence;
 
+import static io.onedev.commons.utils.FileUtils.loadProperties;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hibernate.cfg.AvailableSettings.DIALECT;
+import static org.hibernate.cfg.AvailableSettings.DRIVER;
+import static org.hibernate.cfg.AvailableSettings.PASS;
+import static org.hibernate.cfg.AvailableSettings.URL;
+import static org.hibernate.cfg.AvailableSettings.USER;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.google.common.hash.Hashing;
-import io.onedev.commons.utils.StringUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.Strings;
 import org.hibernate.cfg.Environment;
 
-import static io.onedev.commons.utils.FileUtils.loadProperties;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hibernate.cfg.AvailableSettings.*;
+import com.google.common.hash.Hashing;
+
+import io.onedev.commons.utils.StringUtils;
 
 public class HibernateConfig extends Properties {
 
@@ -49,7 +56,7 @@ public class HibernateConfig extends Properties {
 		}
 		
 		String url = getProperty(URL);
-		url = StringUtils.replace(url, "${installDir}", installDir.getAbsolutePath());
+		url = Strings.CS.replace(url, "${installDir}", installDir.getAbsolutePath());
 		if (url.contains(":sqlserver:") && !url.toLowerCase().contains("selectMethod=cursor".toLowerCase()))
 			url = StringUtils.stripEnd(url, ";") + ";selectMethod=cursor";
 		setProperty(URL, url);

@@ -5,6 +5,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
@@ -16,7 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
@@ -60,7 +60,7 @@ abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 			 */
 			String initialContent = input.getModelObject();
 			if (initialContent == null || !initialContent.contains("\r\n"))
-				content = StringUtils.replace(content, "\r\n", "\n");
+				content = Strings.CS.replace(content, "\r\n", "\n");
 			setConvertedInput(content.getBytes(StandardCharsets.UTF_8));
 		} else {
 			setConvertedInput(new byte[0]);

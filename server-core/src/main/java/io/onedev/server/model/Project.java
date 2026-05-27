@@ -5,7 +5,6 @@ import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.model.Project.PROP_PATH;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.web.translation.Translation._T;
-import static org.apache.commons.lang3.StringUtils.replace;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -45,6 +44,7 @@ import javax.validation.constraints.Pattern;
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.subject.Subject;
 import org.apache.tika.mime.MediaType;
@@ -104,10 +104,7 @@ import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
-import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
-import io.onedev.server.model.support.workspace.ProjectWorkspaceSetting;
 import io.onedev.server.model.support.code.BranchProtection;
-import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -121,6 +118,9 @@ import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
+import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
+import io.onedev.server.model.support.workspace.ProjectWorkspaceSetting;
+import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildQueryPersonalizationService;
@@ -2187,7 +2187,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public static String decodeFullRepoNameAsPath(String text) {
-		return decodeRepoNameAsPath(replace(text, FAKED_GITHUB_REPO_OWNER + "/", ""));
+		return decodeRepoNameAsPath(Strings.CS.replace(text, FAKED_GITHUB_REPO_OWNER + "/", ""));
 	}
 	
 	public static Collection<Project> getIndependents(Collection<Project> projects) {

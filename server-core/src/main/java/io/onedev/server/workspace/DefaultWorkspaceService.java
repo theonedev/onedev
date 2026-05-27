@@ -527,10 +527,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		var localServer = clusterService.getLocalServerAddress();
 		
 		while (!workspaceFutures.isEmpty() || thread != null) {
-			if (thread == null) {
-				for (var future: workspaceFutures.values()) 
-					future.cancel(true);
-			}
 			try {
 				if (clusterService.isLeaderServer()) {
 					Map<String, Collection<Long>> workspaceIds = new HashMap<>();

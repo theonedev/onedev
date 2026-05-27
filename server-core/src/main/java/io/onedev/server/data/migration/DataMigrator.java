@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
@@ -69,9 +70,9 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ParsedEmailAddress;
+import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
@@ -108,24 +109,24 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"com.gitplex.commons.hibernate.migration.VersionTable",
 						"com.gitplex.server.model.ModelVersion");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"com.gitplex.server.core.entity.support.IntegrationPolicy",
 						"com.gitplex.server.model.support.IntegrationPolicy");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"com.gitplex.server.core.entity.PullRequest_-IntegrationStrategy",
 						"com.gitplex.server.model.PullRequest_-IntegrationStrategy");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"com.gitplex.server.core.entity.", "com.gitplex.server.model.");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"com.gitplex.server.core.setting.SpecifiedGit", "com.gitplex.server.git.config.SpecifiedGit");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"com.gitplex.server.core.setting.SystemGit", "com.gitplex.server.git.config.SystemGit");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"com.gitplex.server.core.setting.", "com.gitplex.server.model.support.setting.");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"com.gitplex.server.core.gatekeeper.", "com.gitplex.server.gatekeeper.");
 				FileUtils.writeStringToFile(file, content, UTF_8);
 
@@ -238,7 +239,7 @@ public class DataMigrator {
 					File renamedFile = new File(dataDir, file.getName().replace("Accounts.xml", "Users.xml"));
 					FileUtils.moveFile(file, renamedFile);
 					String content = FileUtils.readFileToString(renamedFile, UTF_8);
-					content = StringUtils.replace(content, "com.gitplex.server.model.Account",
+					content = Strings.CS.replace(content, "com.gitplex.server.model.Account",
 							"com.gitplex.server.model.User");
 					VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
 					for (Element element : dom.getRootElement().elements()) {
@@ -267,7 +268,7 @@ public class DataMigrator {
 					File renamedFile = new File(dataDir, file.getName().replace("Depots.xml", "Projects.xml"));
 					FileUtils.moveFile(file, renamedFile);
 					String content = FileUtils.readFileToString(renamedFile, UTF_8);
-					content = StringUtils.replace(content, "com.gitplex.server.model.Depot",
+					content = Strings.CS.replace(content, "com.gitplex.server.model.Depot",
 							"com.gitplex.server.model.Project");
 					VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
 					for (Element element : dom.getRootElement().elements()) {
@@ -422,8 +423,8 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content, "gitplex", "turbodev");
-				content = StringUtils.replace(content, "GitPlex", "TurboDev");
+				content = Strings.CS.replace(content, "gitplex", "turbodev");
+				content = Strings.CS.replace(content, "GitPlex", "TurboDev");
 				FileUtils.writeFile(file, content, UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -454,11 +455,11 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content, "com.turbodev", "io.onedev");
-				content = StringUtils.replace(content, "com/turbodev", "io/onedev");
-				content = StringUtils.replace(content, "turbodev.com", "onedev.io");
-				content = StringUtils.replace(content, "turbodev", "onedev");
-				content = StringUtils.replace(content, "TurboDev", "OneDev");
+				content = Strings.CS.replace(content, "com.turbodev", "io.onedev");
+				content = Strings.CS.replace(content, "com/turbodev", "io/onedev");
+				content = Strings.CS.replace(content, "turbodev.com", "onedev.io");
+				content = Strings.CS.replace(content, "turbodev", "onedev");
+				content = Strings.CS.replace(content, "TurboDev", "OneDev");
 				FileUtils.writeFile(file, content, UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -604,9 +605,9 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("UserAuthorizations.xml") || file.getName().startsWith("GroupAuthorizations.xml")) {
 				try {
 					String content = FileUtils.readFileToString(file, UTF_8);
-					content = StringUtils.replace(content, "ADMIN", "ADMINISTRATION");
-					content = StringUtils.replace(content, "WRITE", "CODE_WRITE");
-					content = StringUtils.replace(content, "READ", "CODE_READ");
+					content = Strings.CS.replace(content, "ADMIN", "ADMINISTRATION");
+					content = Strings.CS.replace(content, "WRITE", "CODE_WRITE");
+					content = Strings.CS.replace(content, "READ", "CODE_READ");
 					FileUtils.writeFile(file, content, UTF_8);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -680,7 +681,7 @@ public class DataMigrator {
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-				content = StringUtils.replace(content, "io.onedev.server.security.authenticator.",
+				content = Strings.CS.replace(content, "io.onedev.server.security.authenticator.",
 						"io.onedev.server.model.support.authenticator.");
 				VersionedXmlDoc dom = VersionedXmlDoc.fromXML(content);
 				for (Element element : dom.getRootElement().elements()) {
@@ -1784,9 +1785,9 @@ public class DataMigrator {
 			if (file.getName().contains(".xml")) {
 				try {
 					String content = FileUtils.readFileToString(file, UTF_8);
-					content = StringUtils.replace(content, "io.onedev.server.issue.",
+					content = Strings.CS.replace(content, "io.onedev.server.issue.",
 							"io.onedev.server.model.support.issue.");
-					content = StringUtils.replace(content, "io.onedev.server.util.inputspec.",
+					content = Strings.CS.replace(content, "io.onedev.server.util.inputspec.",
 							"io.onedev.server.model.support.inputspec.");
 					FileUtils.writeFile(file, content, UTF_8);
 				} catch (IOException e) {
@@ -2038,16 +2039,16 @@ public class DataMigrator {
 			if (file.getName().startsWith("Settings.xml")) {
 				try {
 					String content = FileUtils.readFileToString(file, UTF_8.name());
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.administration.authenticator.ldap.",
 							"io.onedev.server.plugin.authenticator.ldap.");
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.issue.transitiontrigger.DiscardPullRequest",
 							"io.onedev.server.model.support.issue.transitiontrigger.DiscardPullRequestTrigger");
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.issue.transitiontrigger.MergePullRequest",
 							"io.onedev.server.model.support.issue.transitiontrigger.MergePullRequestTrigger");
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequest",
 							"io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequestTrigger");
 					FileUtils.writeFile(file, content, UTF_8);
@@ -2102,9 +2103,9 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("PullRequestBuilds.xml")) {
 				try {
 					String content = FileUtils.readFileToString(file, UTF_8.name());
-					content = StringUtils.replace(content, "PullRequestBuild", "PullRequestVerification");
+					content = Strings.CS.replace(content, "PullRequestBuild", "PullRequestVerification");
 					FileUtils.deleteFile(file);
-					String newFileName = StringUtils.replace(file.getName(), "PullRequestBuild", "PullRequestVerification");
+					String newFileName = Strings.CS.replace(file.getName(), "PullRequestBuild", "PullRequestVerification");
 					FileUtils.writeFile(new File(dataDir, newFileName), content, UTF_8);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -2291,9 +2292,9 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"\" is before \"", "\" is until \"");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"\" is after \"", "\" is since \"");
 				FileUtils.writeStringToFile(file, content, UTF_8);
 			} catch (IOException e) {
@@ -2356,16 +2357,16 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"io.onedev.server.model.support.issue.fieldspec.",
 						"io.onedev.server.model.support.issue.field.spec.");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"io.onedev.server.model.support.issue.fieldsupply.",
 						"io.onedev.server.model.support.issue.field.supply.");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"org.server.plugin.report.checkstyle.",
 						"io.onedev.server.plugin.report.checkstyle.");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"org.server.plugin.report.clover.",
 						"io.onedev.server.plugin.report.clover.");
 
@@ -2470,7 +2471,7 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"io.onedev.server.model.support.inputspec.numberinput.",
 						"io.onedev.server.model.support.inputspec.integerinput.");
 				FileUtils.writeStringToFile(file, content, UTF_8);
@@ -4964,7 +4965,7 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"io.onedev.server.model.support.inputspec.",
 						"io.onedev.server.buildspecmodel.inputspec.");
 				FileUtils.writeStringToFile(file, content, UTF_8);
@@ -5783,7 +5784,7 @@ public class DataMigrator {
 				String content;
 				try {
 					content = FileUtils.readFileToString(file, UTF_8);
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.util.channelnotification.",
 							"io.onedev.server.model.support.channelnotification.");
 				} catch (IOException e) {
@@ -5817,16 +5818,16 @@ public class DataMigrator {
 				String content;
 				try {
 					content = FileUtils.readFileToString(file, UTF_8);
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.administration.mailsetting.Office365Setting",
 							"io.onedev.server.plugin.mailservice.office365.Office365MailService");
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.administration.mailsetting.GmailSetting",
 							"io.onedev.server.plugin.mailservice.gmail.GmailMailService");
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.administration.mailsetting.OtherMailSetting",
 							"io.onedev.server.plugin.mailservice.smtpimap.SmtpImapMailService");
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.administration.mailsetting.",
 							"io.onedev.server.model.support.administration.mailservice.");
 				} catch (IOException e) {
@@ -6045,16 +6046,16 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				var content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"io.onedev.server.model.support.issue.field.supply.FieldSupply",
 						"io.onedev.server.model.support.issue.field.instance.FieldInstance");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"io.onedev.server.model.support.issue.field.supply.Ignore",
 						"io.onedev.server.model.support.issue.field.instance.IgnoreValue");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"io.onedev.server.model.support.issue.field.supply.ScriptingValue",
 						"io.onedev.server.model.support.issue.field.instance.ScriptingValue");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"io.onedev.server.model.support.issue.field.supply.SpecifiedValue",
 						"io.onedev.server.model.support.issue.field.instance.SpecifiedValue");
 				FileUtils.writeStringToFile(file, content, UTF_8.name());
@@ -6112,7 +6113,7 @@ public class DataMigrator {
 			if (file.getName().startsWith("Packs.xml")) {
 				try {
 					var content = FileUtils.readFileToString(file, UTF_8);
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.ee.pack.",
 							"io.onedev.server.plugin.pack.");
 					FileUtils.writeStringToFile(file, content, UTF_8.name());
@@ -6578,15 +6579,15 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			try {
 				String content = FileUtils.readFileToString(file, UTF_8);
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"\"Milestone\" is", "\"Iteration\" is");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"\"Milestone\"  is", "\"Iteration\" is");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"\"Milestone\"   is", "\"Iteration\" is");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"\"Milestone\"    is", "\"Iteration\" is");
-				content = StringUtils.replace(content,
+				content = Strings.CS.replace(content,
 						"non-pull-request commits", "on branch(\"**\")");
 				FileUtils.writeStringToFile(file, content, UTF_8);
 			} catch (IOException e) {
@@ -6598,7 +6599,7 @@ public class DataMigrator {
 	private void migrate168(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			try {
-				var content = StringUtils.replace(
+				var content = Strings.CS.replace(
 						FileUtils.readFileToString(file, UTF_8),
 						"on branch(\"**\")",
 						"on branch \"**\"");
@@ -6682,39 +6683,39 @@ public class DataMigrator {
 	private void migrate171(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			try {
-				var content = StringUtils.replace(
+				var content = Strings.CS.replace(
 						FileUtils.readFileToString(file, UTF_8),
 						"io.onedev.server.ee.dashboard.widgets.BuildListWidget",
 						"io.onedev.server.ee.dashboard.widgets.build.BuildListWidget");
-				content = StringUtils.replace(
+				content = Strings.CS.replace(
 						content,
 						"io.onedev.server.ee.dashboard.widgets.BurnDownChartWidget",
 						"io.onedev.server.ee.dashboard.widgets.iteration.BurnDownChartWidget");
-				content = StringUtils.replace(
+				content = Strings.CS.replace(
 						content,
 						"io.onedev.server.ee.dashboard.widgets.IssueListWidget",
 						"io.onedev.server.ee.dashboard.widgets.issue.IssueListWidget");
-				content = StringUtils.replace(
+				content = Strings.CS.replace(
 						content,
 						"io.onedev.server.ee.dashboard.widgets.IterationListWidget",
 						"io.onedev.server.ee.dashboard.widgets.iteration.IterationListWidget");
-				content = StringUtils.replace(
+				content = Strings.CS.replace(
 						content,
 						"io.onedev.server.ee.dashboard.widgets.MarkdownBlobWidget",
 						"io.onedev.server.ee.dashboard.widgets.markdown.MarkdownBlobWidget");
-				content = StringUtils.replace(
+				content = Strings.CS.replace(
 						content,
 						"io.onedev.server.ee.dashboard.widgets.MarkdownWidget",
 						"io.onedev.server.ee.dashboard.widgets.markdown.MarkdownWidget");
-				content = StringUtils.replace(
+				content = Strings.CS.replace(
 						content,
 						"io.onedev.server.ee.dashboard.widgets.ProjectListWidget",
 						"io.onedev.server.ee.dashboard.widgets.project.ProjectListWidget");
-				content = StringUtils.replace(
+				content = Strings.CS.replace(
 						content,
 						"io.onedev.server.ee.dashboard.widgets.PullRequestListWidget",
 						"io.onedev.server.ee.dashboard.widgets.pullrequest.PullRequestListWidget");
-				content = StringUtils.replace(
+				content = Strings.CS.replace(
 						content,
 						"io.onedev.server.ee.dashboard.widgets.projectoverview.ProjectOverviewWidget",
 						"io.onedev.server.ee.dashboard.widgets.project.ProjectOverviewWidget");
@@ -7780,10 +7781,10 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Settings.xml")) {
 				try {
 					String content = FileUtils.readFileToString(file, UTF_8);
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.model.support.issue.field.spec.WorkingPeriodField",
 							"io.onedev.server.model.support.issue.field.spec.IntegerField");
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.buildspecmodel.inputspec.workingperiodinput",
 							"io.onedev.server.buildspecmodel.inputspec.integerinput");
 					FileUtils.writeFile(file, content, UTF_8);
@@ -8202,7 +8203,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
 				try {
 					var content = FileUtils.readFileToString(file, UTF_8);
-					content = StringUtils.replace(content,
+					content = Strings.CS.replace(content,
 							"io.onedev.server.util.Input",
 							"io.onedev.server.buildspecmodel.inputspec.Input");
 					FileUtils.writeStringToFile(file, content, UTF_8.name());

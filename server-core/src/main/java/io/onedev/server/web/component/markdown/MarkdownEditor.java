@@ -14,14 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import io.onedev.server.validation.validator.ProjectKeyValidator;
-import io.onedev.server.web.page.base.BasePage;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -45,8 +43,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,16 +56,17 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.Workspace;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.FilenameUtils;
+import io.onedev.server.validation.validator.ProjectKeyValidator;
 import io.onedev.server.validation.validator.ProjectPathValidator;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.avatar.AvatarService;
@@ -74,9 +75,9 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.markdown.SuggestionSupport.Selection;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import org.unbescape.javascript.JavaScriptEscape;
 
 public class MarkdownEditor extends FormComponentPanel<String> {
 	
@@ -142,7 +143,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		if (StringUtils.isNotBlank(input)) {
 			// Normalize line breaks to make source position tracking information comparable 
 			// to textarea caret position when sync edit/preview scroll bar
-			input = StringUtils.replace(input, "\r\n", "\n");
+			input = Strings.CS.replace(input, "\r\n", "\n");
 			return renderMarkdown(input);
 		} else {
 			return "<div class='message'>" + _T("Nothing to preview") + "</div>";

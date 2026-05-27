@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -14,22 +15,21 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.Similarities;
@@ -174,7 +174,7 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			 */
 			String initialContent = input.getModelObject();
 			if (initialContent == null || !initialContent.contains("\r\n"))
-				content = StringUtils.replace(content, "\r\n", "\n");
+				content = Strings.CS.replace(content, "\r\n", "\n");
 			setConvertedInput(content.getBytes(StandardCharsets.UTF_8));
 		} else {
 			setConvertedInput(new byte[0]);

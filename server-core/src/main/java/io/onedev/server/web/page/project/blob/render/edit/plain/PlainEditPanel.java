@@ -2,14 +2,13 @@ package io.onedev.server.web.page.project.blob.render.edit.plain;
 
 import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.Model;
-
-import io.onedev.commons.utils.StringUtils;
 
 public class PlainEditPanel extends FormComponentPanel<byte[]> {
 	
@@ -40,7 +39,7 @@ public class PlainEditPanel extends FormComponentPanel<byte[]> {
 	public void convertInput() {
 		String value = input.getConvertedInput();
 		if (value != null) {
-			value = StringUtils.replace(value, "\r\n", "\n");
+			value = Strings.CS.replace(value, "\r\n", "\n");
 			setConvertedInput(value.getBytes(StandardCharsets.UTF_8));
 		} else {
 			setConvertedInput(new byte[0]);

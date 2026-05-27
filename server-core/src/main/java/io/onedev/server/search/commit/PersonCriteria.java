@@ -1,21 +1,24 @@
 package io.onedev.server.search.commit;
 
-import com.google.common.base.Preconditions;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.service.UserService;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.commons.utils.match.WildcardUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.PersonIdent;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+import org.eclipse.jgit.lib.PersonIdent;
+
+import com.google.common.base.Preconditions;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.match.WildcardUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.UserService;
 
 public abstract class PersonCriteria extends CommitCriteria {
 
@@ -61,10 +64,10 @@ public abstract class PersonCriteria extends CommitCriteria {
 							persons.add("<" + emailAddress.getValue() + ">");
 					}
 				} else {
-					persons.add(StringUtils.replace(value, "*", ".*"));
+					persons.add(Strings.CS.replace(value, "*", ".*"));
 				}
 			} else {
-				persons.add(StringUtils.replace(value, "*", ".*"));
+				persons.add(Strings.CS.replace(value, "*", ".*"));
 			}
 		}
 	}

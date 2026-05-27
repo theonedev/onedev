@@ -1,7 +1,37 @@
 package io.onedev.server.commandhandler;
 
+import static io.onedev.server.persistence.PersistenceUtils.callWithLock;
+import static io.onedev.server.persistence.PersistenceUtils.newSiteLibClassLoader;
+import static io.onedev.server.persistence.PersistenceUtils.openConnection;
+import static java.lang.Integer.parseInt;
+import static java.lang.String.valueOf;
+import static java.lang.System.lineSeparator;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
+import static org.hibernate.cfg.AvailableSettings.DIALECT;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+
+import javax.inject.Singleton;
+
+import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.ExplicitException;
@@ -12,33 +42,9 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.DataMigrator;
 import io.onedev.server.data.migration.MigrationHelper;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.exception.ExceptionUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.Callable;
-
-import static io.onedev.server.persistence.PersistenceUtils.*;
-import static java.lang.Integer.parseInt;
-import static java.lang.String.valueOf;
-import static java.lang.System.lineSeparator;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.commons.io.FileUtils.writeStringToFile;
-import static org.hibernate.cfg.AvailableSettings.DIALECT;
 
 @Singleton
 public class Upgrade extends AbstractPlugin {
@@ -276,7 +282,7 @@ public class Upgrade extends AbstractPlugin {
 					File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
 					String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, UTF_8);
 					if (hibernateProps.contains("sampledb")) {
-						hibernateProps = StringUtils.replace(hibernateProps, "sampledb", "internaldb");
+						hibernateProps = Strings.CS.replace(hibernateProps, "sampledb", "internaldb");
 						writeStringToFile(hibernatePropsFile, hibernateProps, UTF_8);
 					}
 				} catch (IOException e) {
@@ -629,7 +635,7 @@ public class Upgrade extends AbstractPlugin {
 								}
 							}
 							if (runAsUserLine != null) 
-								serverScript = StringUtils.replace(serverScript, runAsUserLine, siteRunAsUserLine);
+								serverScript = Strings.CS.replace(serverScript, runAsUserLine, siteRunAsUserLine);
 						}
 						
 						String siteFilesToSourceLine = null;
@@ -648,7 +654,7 @@ public class Upgrade extends AbstractPlugin {
 								}
 							}
 							if (filesToSourceLine != null) 
-								serverScript = StringUtils.replace(serverScript, filesToSourceLine, siteFilesToSourceLine);
+								serverScript = Strings.CS.replace(serverScript, filesToSourceLine, siteFilesToSourceLine);
 						}
 					}
 					if (serverScript != null)
@@ -923,18 +929,18 @@ public class Upgrade extends AbstractPlugin {
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
 			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, UTF_8);
-			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
+			wrapperConf = Strings.CS.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
-			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.launcher.bootstrap.Bootstrap", 
+			wrapperConf = Strings.CS.replace(wrapperConf, "com.gitplex.launcher.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
-			wrapperConf = StringUtils.replace(wrapperConf, "com.turbodev.launcher.bootstrap.Bootstrap", 
+			wrapperConf = Strings.CS.replace(wrapperConf, "com.turbodev.launcher.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
-			wrapperConf = StringUtils.replace(wrapperConf, "io.onedev.launcher.bootstrap.Bootstrap", 
+			wrapperConf = Strings.CS.replace(wrapperConf, "io.onedev.launcher.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
-			wrapperConf = StringUtils.replace(wrapperConf, "io.onedev.commons.launcher.bootstrap.Bootstrap", 
+			wrapperConf = Strings.CS.replace(wrapperConf, "io.onedev.commons.launcher.bootstrap.Bootstrap", 
 					"io.onedev.commons.bootstrap.Bootstrap");
-			wrapperConf = StringUtils.replace(wrapperConf, "wrapper.pidfile=../status/onedev.pid", "");
-			wrapperConf = StringUtils.replace(wrapperConf, "-XX:+IgnoreUnrecognizedVMOptions", 
+			wrapperConf = Strings.CS.replace(wrapperConf, "wrapper.pidfile=../status/onedev.pid", "");
+			wrapperConf = Strings.CS.replace(wrapperConf, "-XX:+IgnoreUnrecognizedVMOptions", 
 					"--add-opens=java.base/sun.nio.ch=ALL-UNNAMED");
 			if (!wrapperConf.contains("java.base/jdk.internal.ref=ALL-UNNAMED")) {
 				wrapperConf += ""
@@ -985,46 +991,46 @@ public class Upgrade extends AbstractPlugin {
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
 			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, UTF_8);
-			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
+			hibernateProps = Strings.CS.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
 					"hibernate.hikari.autoCommit=true");
-			hibernateProps = StringUtils.replace(hibernateProps, "GitPlex", "OneDev");
-			hibernateProps = StringUtils.replace(hibernateProps, "TurboDev", "OneDev");
+			hibernateProps = Strings.CS.replace(hibernateProps, "GitPlex", "OneDev");
+			hibernateProps = Strings.CS.replace(hibernateProps, "TurboDev", "OneDev");
 
 			if (!hibernateProps.contains("hsqldb.lob_file_scale")) {
-				hibernateProps = StringUtils.replace(hibernateProps, "internaldb/onedev;", 
+				hibernateProps = Strings.CS.replace(hibernateProps, "internaldb/onedev;", 
 						"internaldb/onedev;hsqldb.lob_file_scale=4;");
 			}
 			if (!hibernateProps.contains("hsqldb.lob_compressed")) {
-				hibernateProps = StringUtils.replace(hibernateProps, "internaldb/onedev;",
+				hibernateProps = Strings.CS.replace(hibernateProps, "internaldb/onedev;",
 						"internaldb/onedev;hsqldb.lob_compressed=true;");
 			}
 			if (!hibernateProps.contains("hsqldb.tx")) {
-				hibernateProps = StringUtils.replace(hibernateProps, "internaldb/onedev;",
+				hibernateProps = Strings.CS.replace(hibernateProps, "internaldb/onedev;",
 						"internaldb/onedev;hsqldb.tx=mvcc;");
 			}
 			
 			if (!hibernateProps.contains("hibernate.connection.autocommit=true")) {
-				hibernateProps = StringUtils.replace(hibernateProps, 
+				hibernateProps = Strings.CS.replace(hibernateProps, 
 						"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider", 
 						"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider\r\n"
 						+ "hibernate.connection.autocommit=true");
 			}
 			
-			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.connection.autocommit=true", "");
-			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.hikari.leakDetectionThreshold=1800000", "");
-			hibernateProps = StringUtils.replace(hibernateProps, "org.hibernate.cache.ehcache.EhCacheRegionFactory", 
+			hibernateProps = Strings.CS.replace(hibernateProps, "hibernate.connection.autocommit=true", "");
+			hibernateProps = Strings.CS.replace(hibernateProps, "hibernate.hikari.leakDetectionThreshold=1800000", "");
+			hibernateProps = Strings.CS.replace(hibernateProps, "org.hibernate.cache.ehcache.EhCacheRegionFactory", 
 					"com.hazelcast.hibernate.HazelcastLocalCacheRegionFactory");
-			hibernateProps = StringUtils.replace(hibernateProps, "org.hibernate.cache.jcache.JCacheRegionFactory", 
+			hibernateProps = Strings.CS.replace(hibernateProps, "org.hibernate.cache.jcache.JCacheRegionFactory", 
 					"com.hazelcast.hibernate.HazelcastLocalCacheRegionFactory");
 			if (!hibernateProps.contains("hibernate.cache.auto_evict_collection_cache=true")) {
 				hibernateProps += "hibernate.cache.auto_evict_collection_cache=true\r\n";
 				hibernateProps += "hibernate.javax.cache.provider=org.ehcache.jsr107.EhcacheCachingProvider\r\n"; 
 				hibernateProps += "hibernate.javax.cache.missing_cache_strategy=create\r\n";
 			}
-			hibernateProps = StringUtils.replace(hibernateProps, 
+			hibernateProps = Strings.CS.replace(hibernateProps, 
 					"hibernate.javax.cache.provider=org.ehcache.jsr107.EhcacheCachingProvider", 
 					"");
-			hibernateProps = StringUtils.replace(hibernateProps, 
+			hibernateProps = Strings.CS.replace(hibernateProps, 
 					"hibernate.javax.cache.missing_cache_strategy=create", 
 					"");
 			
@@ -1055,21 +1061,21 @@ public class Upgrade extends AbstractPlugin {
 			
 			logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
 			logbackConfig = FileUtils.readFileToString(logbackConfigFile, UTF_8);
-			logbackConfig = StringUtils.replace(logbackConfig, 
+			logbackConfig = Strings.CS.replace(logbackConfig, 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"><maxFileSize>1MB</maxFileSize></triggeringPolicy>");
-			logbackConfig = StringUtils.replace(logbackConfig, "gitplex", "turbodev");
-			logbackConfig = StringUtils.replace(logbackConfig, "com.turbodev", "io.onedev");
-			logbackConfig = StringUtils.replace(logbackConfig, "turbodev", "onedev");
+			logbackConfig = Strings.CS.replace(logbackConfig, "gitplex", "turbodev");
+			logbackConfig = Strings.CS.replace(logbackConfig, "com.turbodev", "io.onedev");
+			logbackConfig = Strings.CS.replace(logbackConfig, "turbodev", "onedev");
 			
 			if (!logbackConfig.contains("MaskingPatternLayout")) {
-				logbackConfig = StringUtils.replace(logbackConfig, 
+				logbackConfig = Strings.CS.replace(logbackConfig, 
 						"ch.qos.logback.classic.encoder.PatternLayoutEncoder",
 						"ch.qos.logback.core.encoder.LayoutWrappingEncoder");
-				logbackConfig = StringUtils.replace(logbackConfig, 
+				logbackConfig = Strings.CS.replace(logbackConfig, 
 						"<pattern>", 
 						"<layout class=\"io.onedev.commons.bootstrap.MaskingPatternLayout\">\n				<pattern>");
-				logbackConfig = StringUtils.replace(logbackConfig, 
+				logbackConfig = Strings.CS.replace(logbackConfig, 
 						"</pattern>", 
 						"</pattern>\n			</layout>");
 			}

@@ -1,9 +1,13 @@
 package io.onedev.server.util;
 
+import static io.onedev.k8shelper.KubernetesHelper.ENV_SERVER_URL;
+import static io.onedev.k8shelper.Test.TEST_PATH;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -19,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -31,6 +36,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
@@ -38,8 +44,12 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.k8shelper.Test;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.util.KubernetesUtils.CollectLogExitCondition.CommandCompleted;
+import io.onedev.server.util.KubernetesUtils.CollectLogExitCondition.SeenMessage;
+import io.onedev.server.util.KubernetesUtils.CollectLogExitCondition.SeenMessageOrCommandCompleted;
 
 /**
  * Shared helpers for running {@code kubectl} and interpreting pod/container status from the API.
@@ -49,6 +59,12 @@ public final class KubernetesUtils {
 	private static final Logger logger = LoggerFactory.getLogger(KubernetesUtils.class);
 
 	private static final int POD_WATCH_TIMEOUT_SECONDS = 60;
+
+	private static final String TEST_INIT_CONTAINER_NAME = "k8s-test";
+
+	private static final String TEST_MAIN_CONTAINER_NAME = "main";
+
+	private static final String K8S_HELPER_CLASSPATH = "/k8s-helper/*";
 
 	public static Commandline newKubectl(@Nullable String kubeCtlPath, @Nullable String configFile) {
 		String kubectl = kubeCtlPath;
@@ -83,9 +99,6 @@ public final class KubernetesUtils {
 		return def;
 	}
 
-	/**
-	 * Logs a warning when the pod is unschedulable (resource pressure, affinity, etc.).
-	 */
 	public static void logPodUnschedulableWarnings(@Nullable JsonNode statusNode, TaskLogger taskLogger) {
 		if (statusNode == null || !statusNode.isObject())
 			return;
@@ -170,11 +183,11 @@ public final class KubernetesUtils {
 	}
 
 	public static void collectContainerLog(Supplier<Commandline> kubectlFactory, String namespace,
-			String podName, String containerName, @Nullable String logEndMessage, TaskLogger taskLogger) {
+			String podName, String containerName, CollectLogExitCondition exitCondition, TaskLogger taskLogger) {
 		Thread thread = Thread.currentThread();
 		AtomicBoolean abortError = new AtomicBoolean(false);
 		AtomicReference<Instant> lastInstantRef = new AtomicReference<>(null);
-		AtomicBoolean endOfLogSeenRef = new AtomicBoolean(false);
+		AtomicBoolean seenMessageRef = new AtomicBoolean(false);
 
 		while (true) {
 			Commandline kubectl = kubectlFactory.get();
@@ -192,12 +205,12 @@ public final class KubernetesUtils {
 					if (line.contains("rpc error:") && line.contains("No such container:")
 							|| line.contains("Unable to retrieve container logs for")) {
 						logger.debug(line);
-					} else if (logEndMessage != null && line.contains(logEndMessage)) {
-						String lastLogMessage = StringUtils.substringBefore(line, logEndMessage);
+					} else if (exitCondition instanceof SeenMessage seenMessage && line.contains(seenMessage.getMessage())) {
+						String lastLogMessage = StringUtils.substringBefore(line, seenMessage.getMessage());
 						if (StringUtils.substringAfter(lastLogMessage, " ").length() != 0)
 							consume(lastLogMessage);
-						if (!endOfLogSeenRef.get()) {
-							endOfLogSeenRef.set(true);
+						if (!seenMessageRef.get()) {
+							seenMessageRef.set(true);
 							thread.interrupt();
 						}
 					} else if (line.startsWith("Error from server") || line.startsWith("error:")) {
@@ -226,13 +239,13 @@ public final class KubernetesUtils {
 			try {
 				kubectl.execute(new Logger(), new Logger()).checkReturnCode();
 			} catch (Throwable e) {
-				if (!endOfLogSeenRef.get() && !abortError.get())
+				if (!seenMessageRef.get() && !abortError.get())
 					throw ExceptionUtils.unchecked(e);
 			}			
-			if (endOfLogSeenRef.get() || abortError.get()) {
+			if (seenMessageRef.get() || abortError.get()) {
 				Thread.interrupted();
 				break;
-			} else if (logEndMessage == null) {
+			} else if (exitCondition instanceof CommandCompleted || exitCondition instanceof SeenMessageOrCommandCompleted) {
 				break;
 			} else {
 				try {
@@ -306,7 +319,7 @@ public final class KubernetesUtils {
 
 							abortRef.set(abortChecker.check(nodeName, containerStatusNodes));
 
-							if (abortRef.get() != null)
+							if (abortRef.get() != null) 
 								thread.interrupt();
 						}
 					}
@@ -423,22 +436,123 @@ public final class KubernetesUtils {
 		createResource(kubectlFactory, namespaceDef, new HashSet<>(), taskLogger);
 	}
 
+	public static boolean createTrustCertsConfigMap(Supplier<Commandline> kubectlFactory,
+			String name, String namespace, TaskLogger taskLogger) {
+		Map<String, String> configMapData = new LinkedHashMap<>();
+		File trustCertsDir = new File(Bootstrap.getConfDir(), "trust-certs");
+		if (trustCertsDir.exists()) {
+			int index = 1;
+			for (File file : trustCertsDir.listFiles()) {
+				if (file.isFile() && !file.isHidden()) {
+					try {
+						byte[] fileContent = FileUtils.readFileToByteArray(file);
+						configMapData.put((index++) + ".pem", encodeBase64String(fileContent));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		}
+		if (!configMapData.isEmpty()) {
+			Map<Object, Object> configMapDef = newLinkedHashMap(
+					"apiVersion", "v1",
+					"kind", "ConfigMap",
+					"metadata", newLinkedHashMap(
+							"name", name,
+							"namespace", namespace),
+					"binaryData", configMapData);
+			createResource(kubectlFactory, configMapDef, new HashSet<>(), taskLogger);
+			return true;
+		}
+		return false;
+	}
+
 	public static void testCluster(Supplier<Commandline> kubectlFactory, String namespace,
-			String image, boolean alwaysPullImage, TaskLogger taskLogger) {
+				String image, String helperImage, String serverUrl, String testToken,
+				@Nullable String storageClass, String storageSize, boolean alwaysPullImage,
+				TaskLogger taskLogger) {
 		checkClusterAccess(kubectlFactory, taskLogger);
 		ensureNamespace(kubectlFactory, namespace, taskLogger);
 
 		String podName = "test-" + System.currentTimeMillis();
+		String pvcName = podName + "-pvc";
+		String volumeName = podName + "-vol";
+		String trustCertsConfigMapName = podName + "-trust-certs";
+		boolean trustCertsConfigMapCreated = false;
 		try {
-			var podSpec = new LinkedHashMap<String, Object>();
-			Map<Object, Object> containerSpec = newLinkedHashMap(
-					"name", "default",
+			trustCertsConfigMapCreated = createTrustCertsConfigMap(kubectlFactory,
+					trustCertsConfigMapName, namespace, taskLogger);
+
+			taskLogger.log("Creating test PVC...");
+			Map<Object, Object> pvcSpecDef = newLinkedHashMap(
+					"accessModes", Lists.newArrayList("ReadWriteOnce"),
+					"resources", newLinkedHashMap(
+							"requests", newLinkedHashMap("storage", storageSize)));
+			if (StringUtils.isNotBlank(storageClass))
+				pvcSpecDef.put("storageClassName", storageClass);
+				Map<Object, Object> pvcDef = newLinkedHashMap(
+					"apiVersion", "v1",
+					"kind", "PersistentVolumeClaim",
+					"metadata", newLinkedHashMap(
+							"name", pvcName,
+							"namespace", namespace),
+					"spec", pvcSpecDef);
+			createResource(kubectlFactory, pvcDef, new HashSet<>(), taskLogger);
+
+			var containerTestDirPath = TEST_PATH;
+			var containerTrustCertsDirPath = containerTestDirPath + "/trust-certs";
+
+			var volumeMounts = new ArrayList<Object>();
+			volumeMounts.add(newLinkedHashMap(
+					"name", volumeName,
+					"mountPath", containerTestDirPath));
+			if (trustCertsConfigMapCreated) {
+				volumeMounts.add(newLinkedHashMap(
+						"name", "trust-certs",
+						"mountPath", containerTrustCertsDirPath));
+			}
+
+			var initEnvs = new ArrayList<Object>();
+			initEnvs.add(newLinkedHashMap("name", ENV_SERVER_URL, "value", serverUrl));
+			initEnvs.add(newLinkedHashMap("name", Test.ENV_TEST_TOKEN, "value", testToken));
+
+			Map<Object, Object> initContainerSpec = newLinkedHashMap(
+					"name", TEST_INIT_CONTAINER_NAME,
+					"image", helperImage,
+					"command", Lists.newArrayList("java"),
+					"args", Lists.newArrayList("-classpath", K8S_HELPER_CLASSPATH,
+							"io.onedev.k8shelper.Test"),
+					"env", initEnvs,
+					"volumeMounts", volumeMounts);
+			if (alwaysPullImage)
+				initContainerSpec.put("imagePullPolicy", "Always");
+			setupSecurityContext(initContainerSpec, "0:0");
+
+			Map<Object, Object> mainContainerSpec = newLinkedHashMap(
+					"name", TEST_MAIN_CONTAINER_NAME,
 					"image", image,
 					"command", Lists.newArrayList("sh", "-c"),
-					"args", Lists.newArrayList("echo hello from container"));
+					"args", Lists.newArrayList("echo hello from container"),
+					"volumeMounts", Lists.newArrayList(newLinkedHashMap(
+							"name", volumeName,
+							"mountPath", containerTestDirPath)));
 			if (alwaysPullImage)
-				containerSpec.put("imagePullPolicy", "Always");
-			podSpec.put("containers", Lists.<Object>newArrayList(containerSpec));
+				mainContainerSpec.put("imagePullPolicy", "Always");
+
+			var volumes = new ArrayList<Object>();
+			volumes.add(newLinkedHashMap(
+					"name", volumeName,
+					"persistentVolumeClaim", newLinkedHashMap("claimName", pvcName)));
+			if (trustCertsConfigMapCreated) {
+				volumes.add(newLinkedHashMap(
+						"name", "trust-certs",
+						"configMap", newLinkedHashMap("name", trustCertsConfigMapName)));
+			}
+
+			var podSpec = new LinkedHashMap<String, Object>();
+			podSpec.put("initContainers", Lists.<Object>newArrayList(initContainerSpec));
+			podSpec.put("containers", Lists.<Object>newArrayList(mainContainerSpec));
+			podSpec.put("volumes", volumes);
 			podSpec.put("restartPolicy", "Never");
 
 			Map<Object, Object> podDef = newLinkedHashMap(
@@ -450,26 +564,69 @@ public final class KubernetesUtils {
 					"spec", podSpec);
 			createResource(kubectlFactory, podDef, new HashSet<>(), taskLogger);
 
-			watchPod(kubectlFactory, namespace, podName, (nodeName, containerStatusNodes) -> {
-				var errors = getContainerErrors(containerStatusNodes);
-				if (!errors.isEmpty()) {
-					var error = errors.values().iterator().next();
-					String msg;
-					if (error instanceof Integer)
-						msg = "Exited with code " + error;
-					else
-						msg = String.valueOf(error);
-					return new PodWatchAbort(msg);
-				}
-				if (getStoppedContainers(containerStatusNodes).contains("default"))
-					return new PodWatchAbort(null);
-				return null;
-			}, taskLogger);
+			try {
+				waitForContainerStart(kubectlFactory, namespace, podName, TEST_INIT_CONTAINER_NAME, taskLogger);			
+			} catch (Throwable t) {
+				collectContainerLog(kubectlFactory, namespace, podName, TEST_INIT_CONTAINER_NAME,
+						new CommandCompleted(), taskLogger);
+				throw t;
+			}
+			collectContainerLog(kubectlFactory, namespace, podName, TEST_INIT_CONTAINER_NAME,
+					new CommandCompleted(), taskLogger);
+			waitForContainerStop(kubectlFactory, namespace, podName, TEST_INIT_CONTAINER_NAME, taskLogger);
 
-			collectContainerLog(kubectlFactory, namespace, podName, "default", null, taskLogger);
+			try {
+				waitForContainerStart(kubectlFactory, namespace, podName, TEST_MAIN_CONTAINER_NAME, taskLogger);
+			} catch (Throwable t) {
+				collectContainerLog(kubectlFactory, namespace, podName, TEST_MAIN_CONTAINER_NAME,
+						new CommandCompleted(), taskLogger);
+				throw t;
+			}
+			collectContainerLog(kubectlFactory, namespace, podName, TEST_MAIN_CONTAINER_NAME,
+					new CommandCompleted(), taskLogger);
+			waitForContainerStop(kubectlFactory, namespace, podName, TEST_MAIN_CONTAINER_NAME, taskLogger);
 		} finally {
 			deleteResource(kubectlFactory, "pod", podName, namespace, true, taskLogger);
+			deleteResource(kubectlFactory, "pvc", pvcName, namespace, true, taskLogger);
+			if (trustCertsConfigMapCreated)
+				deleteResource(kubectlFactory, "configmap", trustCertsConfigMapName, namespace, true, taskLogger);
 		}
+	}
+
+	public static void waitForContainerStart(Supplier<Commandline> kubectlFactory, String namespace,
+			String podName, String containerName, TaskLogger taskLogger) {
+		watchPod(kubectlFactory, namespace, podName, (nodeName, containerStatusNodes) -> {
+			var error = getContainerErrors(containerStatusNodes).get(containerName);
+			if (error != null) {
+				String msg;
+				if (error instanceof Integer)
+					msg = "Container '" + containerName + "' exited with code " + error;
+				else
+					msg = "Container '" + containerName + "': " + error;
+				return new PodWatchAbort(msg);
+			}
+			if (getStartedContainers(containerStatusNodes).contains(containerName))
+				return new PodWatchAbort(null);
+			return null;
+		}, taskLogger);
+	}
+
+	public static void waitForContainerStop(Supplier<Commandline> kubectlFactory, String namespace,
+			String podName, String containerName, TaskLogger taskLogger) {
+		watchPod(kubectlFactory, namespace, podName, (nodeName, containerStatusNodes) -> {
+			var error = getContainerErrors(containerStatusNodes).get(containerName);
+			if (error != null) {
+				String msg;
+				if (error instanceof Integer)
+					msg = "Container '" + containerName + "' exited with code " + error;
+				else
+					msg = "Container '" + containerName + "': " + error;
+				return new PodWatchAbort(msg);
+			}
+			if (getStoppedContainers(containerStatusNodes).contains(containerName))
+				return new PodWatchAbort(null);
+			return null;
+		}, taskLogger);
 	}
 
 	public static String createResource(Supplier<Commandline> kubectlFactory,
@@ -482,7 +639,7 @@ public final class KubernetesUtils {
 
 			String maskedYaml = resourceYaml;
 			for (String secret : secretsToMask)
-				maskedYaml = StringUtils.replace(maskedYaml, secret, SecretInput.MASK);
+				maskedYaml = Strings.CS.replace(maskedYaml, secret, SecretInput.MASK);
 			logger.trace("Creating resource:\n{}", maskedYaml);
 
 			FileUtils.writeFile(file, resourceYaml, UTF_8);
@@ -616,4 +773,32 @@ public final class KubernetesUtils {
 
 	}
 
+	public static interface CollectLogExitCondition {
+
+		public static class CommandCompleted implements CollectLogExitCondition {
+		}
+		
+		public static class SeenMessage implements CollectLogExitCondition {
+		 
+			private final String message;
+	
+			public SeenMessage(String message) {
+				this.message = message;
+			}        
+			
+			public String getMessage() {
+				return message;
+			}
+	
+		}
+	
+		public static class SeenMessageOrCommandCompleted extends SeenMessage {
+	
+			public SeenMessageOrCommandCompleted(String message) {
+				super(message);
+			}
+			
+		}
+	}
+		
 }

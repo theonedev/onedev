@@ -21,6 +21,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.Strings;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -779,9 +780,9 @@ public class GitUtils {
 	
 	public static <T> T callWithClusterCredential(GitTask<T> task) {
 		File homeDir = FileUtils.createTempDir("githome"); 
-		
+
 		ClusterService clusterService = OneDev.getInstance(ClusterService.class);
-		SecretMasker.push(text -> StringUtils.replace(text, clusterService.getCredential(), "******"));
+		SecretMasker.push(text -> Strings.CS.replace(text, clusterService.getCredential(), "******"));
 		try {
 			Commandline git = newGit();
 			git.envs().put("HOME", homeDir.getAbsolutePath());

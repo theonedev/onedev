@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.client.Client;
@@ -28,11 +27,13 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.joda.time.format.ISODateTimeFormat;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -50,13 +51,6 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.BaseAuthorizationService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IterationService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssuesImported;
@@ -74,6 +68,13 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
@@ -536,7 +537,7 @@ public class ImportServer implements Serializable, Validatable {
 							URIBuilder builder = new URIBuilder(repoNode.get("clone_url").asText());
 							builder.setUserInfo("git", getAccessToken());
 
-							SecretMasker.push(text -> StringUtils.replace(text, getAccessToken(), "******"));
+							SecretMasker.push(text -> Strings.CS.replace(text, getAccessToken(), "******"));
 							try {
 								if (dryRun) {
 									new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();

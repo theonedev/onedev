@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -40,7 +41,6 @@ import com.ibm.icu.text.SpoofChecker;
 
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
@@ -272,7 +272,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 					expandSupport.appendEquals(builder, index, lastContextSize, contextSize,
 							block, change.getDiffBlocks().size(), new ExpandCallbackImpl());
 					
-					String expanded = StringUtils.replace(builder.toString(), "\n", "");
+					String expanded = Strings.CS.replace(builder.toString(), "\n", "");
 					String script = String.format("onedev.server.blobTextDiff.expand('%s', %d, \"%s\");",
 							getMarkupId(), index, escapeJavaScript(expanded));
 					target.appendJavaScript(script);

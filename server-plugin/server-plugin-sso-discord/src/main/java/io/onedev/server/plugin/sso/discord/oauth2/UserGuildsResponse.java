@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.sso.discord.oauth2;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +19,7 @@ public class UserGuildsResponse extends Response {
 			JSONObject guildInfo = (JSONObject) guildsArray.get(idx);
 			
 			String guildId = (String) guildInfo.get("id");
-			if (StringUtils.equals(guildId, serverId)) {
+			if (Strings.CS.equals(guildId, serverId)) {
 				return guildInfo;
 			}
 		}

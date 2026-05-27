@@ -23,7 +23,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.eclipse.jetty.websocket.api.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -105,7 +105,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 			Properties props = new Properties();
 			props.load(is);
 			for (String dependency: Splitter.on(';').omitEmptyStrings().split(props.getProperty("dependencies")))  
-				agentLibs.add(StringUtils.replace(dependency, ":", "-") + ".jar");
+				agentLibs.add(Strings.CS.replace(dependency, ":", "-") + ".jar");
 			agentVersion = props.getProperty("version");
 			agentLibs.add(props.getProperty("id") + "-" + agentVersion + ".jar");
 		} catch (IOException e) {

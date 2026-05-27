@@ -1,6 +1,6 @@
 package io.onedev.server.util.xstream;
 
-import io.onedev.commons.utils.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public class StringConverter extends com.thoughtworks.xstream.converters.basic.StringConverter {
 
@@ -13,7 +13,7 @@ public class StringConverter extends com.thoughtworks.xstream.converters.basic.S
 	public String toString(Object obj) {
 		String string = (String) obj;
 		if (string != null && string.indexOf('\0') != -1)
-			string = StringUtils.replace(string, "\0", "");
+			string = Strings.CS.replace(string, "\0", "");
 		return super.toString(string);
 	}
 	

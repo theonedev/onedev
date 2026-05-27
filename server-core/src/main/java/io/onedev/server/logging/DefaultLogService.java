@@ -33,7 +33,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +111,7 @@ public class DefaultLogService implements LogService, Serializable {
 			private void doLog(String message, StyleBuilder styleBuilder) {
 				message = Project.decodeFullRepoNameAsPath(message);
 				for (String maskSecret: loggingSupport.getMaskSecrets())
-					message = StringUtils.replace(message, maskSecret, SecretInput.MASK);
+					message = Strings.CS.replace(message, maskSecret, SecretInput.MASK);
 				
 				String maskedMessage = message;
 				write(loggingSupport.getIdentity().getLockName(), () -> {
