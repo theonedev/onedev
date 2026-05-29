@@ -95,7 +95,7 @@ public abstract class WorkspaceListPanel extends Panel {
 	private final IModel<WorkspaceQuery> queryModel = new LoadableDetachableModel<>() {
 		@Override
 		protected WorkspaceQuery load() {
-			return parse(queryStringModel.getObject());
+			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
 	};
 
@@ -131,7 +131,7 @@ public abstract class WorkspaceListPanel extends Panel {
 	}
 
 	@Nullable
-	private WorkspaceQuery parse(@Nullable String queryString) {
+	private WorkspaceQuery parse(@Nullable String queryString, WorkspaceQuery baseQuery) {
 		WorkspaceQuery parsedQuery;
 		try {
 			parsedQuery = WorkspaceQuery.parse(getProject(), queryString, true);
@@ -145,7 +145,11 @@ public abstract class WorkspaceListPanel extends Panel {
 				parsedQuery = new WorkspaceQuery(new FuzzyCriteria(queryString));
 			}
 		}
-		return parsedQuery;
+		return WorkspaceQuery.merge(baseQuery, parsedQuery);
+	}
+
+	protected WorkspaceQuery getBaseQuery() {
+		return new WorkspaceQuery();
 	}
 
 	@Override
@@ -390,7 +394,7 @@ public abstract class WorkspaceListPanel extends Panel {
 
 					@Override
 					public WorkspaceQuery getObject() {
-						var query = parse(queryStringModel.getObject());
+						var query = parse(queryStringModel.getObject(), new WorkspaceQuery());
 						return query != null ? query : new WorkspaceQuery();
 					}
 
@@ -433,13 +437,13 @@ public abstract class WorkspaceListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						var query = parse(queryStringModel.getObject());
+						var query = parse(queryStringModel.getObject(), new WorkspaceQuery());
 						return query != null ? query.getSorts() : new ArrayList<>();
 					}
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						WorkspaceQuery query = parse(queryStringModel.getObject());
+						WorkspaceQuery query = parse(queryStringModel.getObject(), new WorkspaceQuery());
 						WorkspaceListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new WorkspaceQuery();

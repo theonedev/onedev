@@ -2,6 +2,7 @@ package io.onedev.server.web.page.admin.buildsetting.agent;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,7 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -22,23 +29,29 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.model.AgentAttribute;
+import io.onedev.server.search.entity.workspace.RanOnCriteria;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AgentAttributeService;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.AgentTokenService;
-import io.onedev.server.model.AgentAttribute;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.AgentStatusBadge;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.util.ConfirmClickModifier;
+import io.onedev.server.workspace.WorkspaceService;
 
 public class AgentOverviewPage extends AgentDetailPage {
 
+	@Inject
+	private AgentService agentService;
+
+	@Inject
+	private WorkspaceService workspaceService;
+
 	public AgentOverviewPage(PageParameters params) {
 		super(params);
-	}
-
-	private AgentService getAgentService() {
-		return OneDev.getInstance(AgentService.class);
 	}
 	
 	@Override
@@ -49,7 +62,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 
 			@Override
 			public void onClick() {
-				getAgentService().restart(getAgent());
+				agentService.restart(getAgent());
 				auditService.audit(null, "restarted agent \"" + getAgent().getName() + "\"", null, null);
 				setResponsePage(AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent()));
 				Session.get().success(_T("Restart command issued"));
@@ -57,17 +70,41 @@ public class AgentOverviewPage extends AgentDetailPage {
 			
 		}.add(new ConfirmClickModifier(_T("Do you really want to restart this agent?"))));
 		
-		add(new Link<Void>("remove") {
+		add(new AjaxLink<Void>("remove") {
 
 			@Override
-			public void onClick() {
-				getAgentService().delete(getAgent());
+			protected void disableLink(ComponentTag tag) {
+				super.disableLink(tag);
+				tag.append("class", "disabled", " ");
+				tag.put("data-tippy-content", _T("Cannot remove agent as it has workspaces"));
+			}
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				configure();
+				if (isEnabled()) {
+					attributes.getAjaxCallListeners().add(new ConfirmClickListener(
+							MessageFormat.format(_T("Do you really want to remove agent \"{0}\"?"), getAgent().getName())));
+				}
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(workspaceService.count(SecurityUtils.getSubject(), null, 
+						new RanOnCriteria(getAgent().getName())) == 0);
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				agentService.delete(getAgent());
 				auditService.audit(null, "removed agent \"" + getAgent().getName() + "\"", null, null);
 				setResponsePage(AgentListPage.class);
 				Session.get().success(_T("Agent removed"));
 			}
 
-		}.add(new ConfirmClickModifier(_T("Do you really want to remove this agent?"))));
+		});
 		
 		add(new Link<Void>("pauseOrResume") {
 
@@ -87,10 +124,10 @@ public class AgentOverviewPage extends AgentDetailPage {
 			@Override
 			public void onClick() {
 				if (getAgent().isPaused()) {
-					getAgentService().resume(getAgent());
+					agentService.resume(getAgent());
 					auditService.audit(null, "resumed agent \"" + getAgent().getName() + "\"", null, null);
 				} else {
-					getAgentService().pause(getAgent());
+					agentService.pause(getAgent());
 					auditService.audit(null, "paused agent \"" + getAgent().getName() + "\"", null, null);
 				}
 				setResponsePage(AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent()));
@@ -126,11 +163,11 @@ public class AgentOverviewPage extends AgentDetailPage {
 				token.setValue(UUID.randomUUID().toString());
 				OneDev.getInstance(AgentTokenService.class).createOrUpdate(token);
 				auditService.audit(null, "regenerated access token for agent \"" + getAgent().getName() + "\"", null, null);
-				OneDev.getInstance(AgentService.class).disconnect(getAgent().getId());
+				agentService.disconnect(getAgent().getId());
 				Session.get().success(_T("Access token regenerated, make sure to update the token at agent side"));
 				setResponsePage(AgentOverviewPage.class, paramsOf(getAgent()));
 			}
-		});
+		}.add(new ConfirmClickModifier(_T("You will need to update token at agent side after regeneration. Do you really want to continue?"))));
 		
 		if (getAgent().isOnline()) {
 			Fragment fragment = new Fragment("attributes", "onlineAttributesFrag", this);
@@ -150,7 +187,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 					OneDev.getInstance(AgentAttributeService.class).syncAttributes(getAgent(), attributeMap);
 					var newAuditContent = VersionedXmlDoc.fromBean(getAgent().getAttributeMap()).toXML();
 					auditService.audit(null, "changed attributes of agent \"" + getAgent().getName() + "\"", oldAuditContent, newAuditContent);
-					getAgentService().attributesUpdated(getAgent());
+					agentService.attributesUpdated(getAgent());
 					Session.get().success(_T("Attributes saved"));
 				}
 				

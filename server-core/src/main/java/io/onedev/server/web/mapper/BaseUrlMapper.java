@@ -14,6 +14,7 @@ import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentBuildsPage;
+import io.onedev.server.web.page.admin.buildsetting.agent.AgentWorkspacesPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
@@ -393,6 +394,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/agents", AgentListPage.class));
 		add(new BasePageMapper("~administration/agents/${agent}", AgentOverviewPage.class));
 		add(new BasePageMapper("~administration/agents/${agent}/builds", AgentBuildsPage.class));
+		add(new BasePageMapper("~administration/agents/${agent}/workspaces", AgentWorkspacesPage.class));
 		add(new BasePageMapper("~administration/agents/${agent}/log", AgentLogPage.class));
 		add(new BasePageMapper("~administration/settings/job-executors", JobExecutorsPage.class));
 		add(new BasePageMapper("~administration/settings/workspace-provisioners", WorkspaceProvisionersPage.class));

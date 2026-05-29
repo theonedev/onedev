@@ -63,6 +63,7 @@ public abstract class AgentDetailPage extends AdministrationPage {
 		
 		tabs.add(new PageTab(Model.of(_T("Overview")), AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent())));
 		tabs.add(new PageTab(Model.of(_T("Builds")), AgentBuildsPage.class, AgentBuildsPage.paramsOf(getAgent())));
+		tabs.add(new PageTab(Model.of(_T("Workspaces")), AgentWorkspacesPage.class, AgentWorkspacesPage.paramsOf(getAgent())));
 		tabs.add(new PageTab(Model.of(_T("Log")), AgentLogPage.class, AgentLogPage.paramsOf(getAgent())));
 		
 		add(new Tabbable("agentTabs", tabs).setOutputMarkupId(true));
