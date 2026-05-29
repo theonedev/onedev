@@ -498,6 +498,7 @@ public class QueryDescriptions {
                     | 'error'
                     | 'created by me'
                     | 'created by' '"'LoginNameOfUser'"'
+                    | 'ran on' '"'AgentName'"'
                     | '"Number"' 'is' ('not')? '"'EntityReference'"'
                     | '"Number"' 'is' ('greater'|'less') 'than' '"'EntityReference'"'
                     | '"Project"' 'is' ('not')? '"'ProjectPathOrPattern'"'

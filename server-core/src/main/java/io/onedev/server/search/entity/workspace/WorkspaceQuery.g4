@@ -8,7 +8,7 @@ query
 
 criteria
 	: operator=(Pending|Active|Inactive|CreatedByMe) #OperatorCriteria
-	| operator=CreatedBy WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+	| operator=(CreatedBy|RanOn) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(IsSince|IsUntil) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | Reference #ReferenceCriteria
@@ -45,6 +45,10 @@ CreatedByMe
 
 CreatedBy
 	: 'created' WS+ 'by'
+	;
+
+RanOn
+	: 'ran' WS+ 'on'
 	;
 
 OrderBy

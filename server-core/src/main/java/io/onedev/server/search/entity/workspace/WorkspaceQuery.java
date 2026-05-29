@@ -128,6 +128,8 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 							String value = getValue(quoted.getText());
 							if (ctx.CreatedBy() != null)
 								criterias.add(new CreatedByUserCriteria(getUser(value)));
+							else if (ctx.RanOn() != null)
+								criterias.add(new RanOnCriteria(value));
 							else
 								throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 						}

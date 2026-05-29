@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +23,8 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.model.Agent;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.Workspace;
@@ -33,8 +36,10 @@ import io.onedev.server.search.entity.workspace.CreatedByCriteria;
 import io.onedev.server.search.entity.workspace.CreatedByUserCriteria;
 import io.onedev.server.search.entity.workspace.InactiveCriteria;
 import io.onedev.server.search.entity.workspace.PendingCriteria;
+import io.onedev.server.search.entity.workspace.RanOnCriteria;
 import io.onedev.server.search.entity.workspace.SpecCriteria;
 import io.onedev.server.search.entity.workspace.StatusCriteria;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
@@ -47,6 +52,10 @@ abstract class WorkspaceFilterPanel extends FilterEditPanel<Workspace> {
 
 	@Inject
 	private UserService userService;
+
+	private AgentService getAgentService() {
+		return OneDev.getInstance(AgentService.class);
+	}
 		
 	public WorkspaceFilterPanel(String id, IModel<EntityQuery<Workspace>> queryModel) {
 		super(id, queryModel);
@@ -152,6 +161,45 @@ abstract class WorkspaceFilterPanel extends FilterEditPanel<Workspace> {
 
 		});
 		add(createdByChoice);
+
+		var ranAgentChoice = new StringMultiChoice("ranAgent", new IModel<Collection<String>>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Collection<String> getObject() {
+				var criterias = getMatchingCriterias(getModelObject().getCriteria(), RanOnCriteria.class, null);
+				return criterias.stream().map(it -> it.getValue()).collect(toList());
+			}
+
+			@Override
+			public void setObject(Collection<String> object) {
+				var criterias = Criteria.orCriterias(object.stream().map(it -> new RanOnCriteria(it)).collect(toList()));
+				var query = getModelObject();
+				query.setCriteria(setMatchingCriteria(query.getCriteria(), RanOnCriteria.class, criterias, null));
+				getModel().setObject(query);
+			}
+
+		}, new LoadableDetachableModel<List<String>>() {
+
+			@Override
+			protected List<String> load() {
+				var agents = new ArrayList<>(getAgentService().query());
+				agents.sort(Comparator.comparing(Agent::getName));
+				return agents.stream().map(it -> it.getName()).collect(toList());
+			}
+
+		}, false);
+		ranAgentChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+			}
+
+		});
+		add(ranAgentChoice);
 
 		var specChoice = new StringMultiChoice("spec", new IModel<Collection<String>>() {
 

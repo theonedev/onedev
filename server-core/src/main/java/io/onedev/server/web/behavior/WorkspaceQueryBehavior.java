@@ -92,6 +92,8 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 								int operator = WorkspaceQuery.getOperator(operatorName);
 								if (operator == WorkspaceQueryLexer.CreatedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
+								else if (operator == WorkspaceQueryLexer.RanOn)
+									return SuggestionUtils.suggestAgents(matchWith);
 							} else if (!fieldElements.isEmpty() && operatorElements.size() == 1) {
 								String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 								int operator = WorkspaceQuery.getOperator(operatorName);
