@@ -1,6 +1,7 @@
 package io.onedev.server.util;
 
 import static io.onedev.k8shelper.KubernetesHelper.ENV_SERVER_URL;
+import static io.onedev.k8shelper.KubernetesHelper.unescapeStartCR;
 import static io.onedev.k8shelper.Test.TEST_PATH;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -220,17 +221,17 @@ public final class KubernetesUtils {
 							thread.interrupt();
 						}
 					} else if (line.contains(" ")) {
-						String timestamp = StringUtils.substringBefore(line, " ");
+						var timestamp = StringUtils.substringBefore(line, " ");
 						try {
 							Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestamp));
 							if (lastInstantRef.get() == null || lastInstantRef.get().isBefore(instant))
 								lastInstantRef.set(instant);
-							taskLogger.log(StringUtils.substringAfter(line, " "), sessionId);
+							taskLogger.log(unescapeStartCR(StringUtils.substringAfter(line, " ")), sessionId);
 						} catch (DateTimeParseException e) {
-							taskLogger.log(line, sessionId);
+							taskLogger.log(unescapeStartCR(line), sessionId);
 						}
 					} else {
-						taskLogger.log(line, sessionId);
+						taskLogger.log(unescapeStartCR(line), sessionId);
 					}
 				}
 
