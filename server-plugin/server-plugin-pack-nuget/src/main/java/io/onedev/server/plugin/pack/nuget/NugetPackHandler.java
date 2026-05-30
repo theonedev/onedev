@@ -378,7 +378,7 @@ public class NugetPackHandler implements PackHandler {
 				var names = packService.queryNames(project, TYPE, nameQuery, includePrerelease, offset, count);
 				Map<String, List<Pack>> packs;
 				if (!names.isEmpty()) 
-					packs = packService.loadPacks(names, includePrerelease, VERSION_COMPARATOR);
+					packs = packService.loadPacks(project, TYPE, names, includePrerelease, VERSION_COMPARATOR);
 				else 
 					packs = new LinkedHashMap<>();
 

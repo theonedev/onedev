@@ -40,17 +40,17 @@ public interface PackService extends EntityService<Pack> {
 	List<Pack> queryByName(Project project, String type, String name, 
 						   @Nullable Comparator<Pack> sortComparator);
 	
-	List<Pack> queryLatests(Project project, String type, @Nullable String nameQuery, 
+	List<Pack> queryLatests(Project project, String type, @Nullable String nameTerm, 
 							boolean includePrerelease, int firstResult, int maxResults);
 
-	int countNames(Project project, String type, @Nullable String nameQuery, 
+	int countNames(Project project, String type, @Nullable String nameTerm, 
 				   boolean includePrerelease);
 
-	List<String> queryNames(Project project, String type, @Nullable String nameQuery, 
+	List<String> queryNames(Project project, String type, @Nullable String nameTerm, 
 							boolean includePrerelease, int firstResult, int maxResults);
 	
-	Map<String, List<Pack>> loadPacks(List<String> names, boolean includePrerelease, 
-									  @Nullable Comparator<Pack> sortComparator);
+	Map<String, List<Pack>> loadPacks(Project project, String type, List<String> names, 
+									  boolean includePrerelease, @Nullable Comparator<Pack> sortComparator);
 	
 	void deleteByNameAndVersion(Project project, String type, String name, String version);
 

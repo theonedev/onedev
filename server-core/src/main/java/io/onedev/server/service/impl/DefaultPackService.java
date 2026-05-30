@@ -313,17 +313,17 @@ public class DefaultPackService extends BaseEntityService<Pack>
 	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
-	public List<Pack> queryLatests(Project project, String type, String nameQuery,
+	public List<Pack> queryLatests(Project project, String type, String nameTerm,
 								   boolean includePrerelease, int firstResult, int maxResults) {
 		var queryString = "" +
 				"select p1 from Pack p1 " +
 				"left outer join Pack p2 " +
-				"	on p1.name = p2.name and p1.id < p2.id";
+				"	on p1.name = p2.name and p1.project = p2.project and p1.type = p2.type and p1.id < p2.id";
 		if (!includePrerelease)
 			queryString += " and p2.prerelease = false";
-		queryString += " where p2.id is null";
+		queryString += " where p2.id is null and p1.project = :project and p1.type = :type";
 		
-		if (nameQuery != null) 
+		if (nameTerm != null) 
 			queryString += " and lower(p1.name) like :name";		
 		if (!includePrerelease)
 			queryString += " and p1.prerelease = false";
@@ -331,8 +331,10 @@ public class DefaultPackService extends BaseEntityService<Pack>
 		queryString += " order by p1.name";
 
 		Query<Pack> query = getSession().createQuery(queryString);
-		if (nameQuery != null)
-			query.setParameter("name", "%" + nameQuery + "%");
+		query.setParameter("project", project);
+		query.setParameter("type", type);
+		if (nameTerm != null)
+			query.setParameter("name", "%" + nameTerm + "%");
 		
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -348,13 +350,14 @@ public class DefaultPackService extends BaseEntityService<Pack>
 		criteriaQuery.select(builder.countDistinct(root.get(PROP_NAME)));
 
 		var predicates = new ArrayList<Predicate>();
+		predicates.add(builder.equal(root.get(PROP_PROJECT), project));
+		predicates.add(builder.equal(root.get(PROP_TYPE), type));
 		if (nameQuery != null)
 			predicates.add(builder.like(builder.lower(root.get(PROP_NAME)), "%" + nameQuery.toLowerCase() + "%"));
 		if (!includePrerelease)
 			predicates.add(builder.equal(root.get(PROP_PRERELEASE), false));
 		
-		if (!predicates.isEmpty())
-			criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
@@ -369,13 +372,14 @@ public class DefaultPackService extends BaseEntityService<Pack>
 		criteriaQuery.select(root.get(PROP_NAME)).distinct(true);
 
 		var predicates = new ArrayList<Predicate>();
+		predicates.add(builder.equal(root.get(PROP_PROJECT), project));
+		predicates.add(builder.equal(root.get(PROP_TYPE), type));
 		if (nameQuery != null)
 			predicates.add(builder.like(builder.lower(root.get(PROP_NAME)), "%" + nameQuery.toLowerCase() + "%"));
 		if (!includePrerelease)
 			predicates.add(builder.equal(root.get(PROP_PRERELEASE), false));
 
-		if (!predicates.isEmpty())
-			criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 
 		var query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
@@ -385,14 +389,17 @@ public class DefaultPackService extends BaseEntityService<Pack>
 	
 	@Sessional
 	@Override
-	public Map<String, List<Pack>> loadPacks(List<String> names, boolean includePrerelease, 
-											 Comparator<Pack> sortComparator) {
+	public Map<String, List<Pack>> loadPacks(Project project, String type, List<String> names, 
+											 boolean includePrerelease, Comparator<Pack> sortComparator) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Pack> criteriaQuery = builder.createQuery(Pack.class);
 		Root<Pack> root = criteriaQuery.from(Pack.class);
 		criteriaQuery.select(root);
 
-		var predicates = Lists.newArrayList(root.get(PROP_NAME).in(names));
+		var predicates = Lists.newArrayList(
+				builder.equal(root.get(PROP_PROJECT), project),
+				builder.equal(root.get(PROP_TYPE), type),
+				root.get(PROP_NAME).in(names));
 		if (!includePrerelease)
 			predicates.add(builder.equal(root.get(PROP_PRERELEASE), false));
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
