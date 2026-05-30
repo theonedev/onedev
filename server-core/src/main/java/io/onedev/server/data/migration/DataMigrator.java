@@ -8673,6 +8673,13 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate226TransitionSpecsElement(Element transitionSpecsElement) {
+		for (Element transitionSpecElement : transitionSpecsElement.elements()) {
+			if (transitionSpecElement.getName().equals("io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedSpec"))
+				transitionSpecElement.setName("io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedOrUpdatedSpec");
+		}
+	}
+
 	private void migrate226(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
@@ -8712,6 +8719,24 @@ public class DataMigrator {
 									provisionerElement.setName("io.onedev.server.plugin.provisioner.servershell.ServerShellProvisioner");
 							}
 						}
+					} else if (key.equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element transitionSpecsElement = valueElement.element("transitionSpecs");
+							if (transitionSpecsElement != null)
+								migrate226TransitionSpecsElement(transitionSpecsElement);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element projectElement : dom.getRootElement().elements()) {
+					Element issueSettingElement = projectElement.element("issueSetting");
+					if (issueSettingElement != null) {
+						Element transitionSpecsElement = issueSettingElement.element("transitionSpecs");
+						if (transitionSpecsElement != null)
+							migrate226TransitionSpecsElement(transitionSpecsElement);
 					}
 				}
 				dom.writeToFile(file, false);

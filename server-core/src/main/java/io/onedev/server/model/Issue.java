@@ -1207,13 +1207,17 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		if (pullRequests == null) {
 			pullRequests = new ArrayList<>();
 
-			PullRequestInfoService infoManager = OneDev.getInstance(PullRequestInfoService.class);
+			PullRequestInfoService infoService = OneDev.getInstance(PullRequestInfoService.class);
 			Collection<Long> pullRequestIds = new HashSet<>();
 			for (ProjectScopedCommit commit: getFixCommits(false)) 
-				pullRequestIds.addAll(infoManager.getPullRequestIds(commit.getProject(), commit.getCommitId()));		
+				pullRequestIds.addAll(infoService.getPullRequestIds(commit.getProject(), commit.getCommitId()));
+			pullRequestIds.addAll(infoService.getPullRequestIds(getProject(), getId()));
+			getProject().getTree().stream().filter(Project::isCodeManagement).forEach(it ->
+					pullRequestIds.addAll(infoService.getPullRequestIds(it, getId())));
 			
+			var pullRequestService = OneDev.getInstance(PullRequestService.class);
 			for (Long requestId: pullRequestIds) {
-				PullRequest request = OneDev.getInstance(PullRequestService.class).get(requestId);
+				PullRequest request = pullRequestService.get(requestId);
 				if (request != null && !pullRequests.contains(request))
 					pullRequests.add(request);
 			}

@@ -17,6 +17,14 @@ public class PullRequestTitleChangeData extends PullRequestChangeData {
 		this.oldTitle = oldTitle;
 		this.newTitle = newTitle;
 	}
+
+	public String getOldTitle() {
+		return oldTitle;
+	}
+
+	public String getNewTitle() {
+		return newTitle;
+	}
 	
 	@Override
 	public String getActivity() {

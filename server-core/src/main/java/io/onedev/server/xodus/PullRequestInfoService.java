@@ -12,6 +12,8 @@ import io.onedev.server.model.PullRequest;
 public interface PullRequestInfoService {
 
 	Collection<Long> getPullRequestIds(Project project, ObjectId commitId);
+
+	Collection<Long> getPullRequestIds(Project project, Long issueId);
 	
 	@Nullable
 	ObjectId getComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2);

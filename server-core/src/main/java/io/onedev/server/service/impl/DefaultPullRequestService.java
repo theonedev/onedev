@@ -1299,6 +1299,16 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		return getSession().createQuery(criteriaQuery).getResultList();
 	}
 
+	@Sessional
+	@Override
+	public List<PullRequest> queryAfter(Long projectId, Long afterRequestId, int count) {
+		EntityCriteria<PullRequest> criteria = newCriteria();
+		criteria.add(org.hibernate.criterion.Restrictions.eq(PullRequest.PROP_TARGET_PROJECT + ".id", projectId));
+		criteria.add(org.hibernate.criterion.Restrictions.gt("id", afterRequestId));
+		criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+		return query(criteria, 0, count);
+	}
+
 	@Override
 	public Pair<String, String> suggestTitleAndDescription(PullRequest pullRequest, ChatModel chatModel, boolean suggestTitle, boolean suggestDescription) {
 		if (!suggestTitle && !suggestDescription)

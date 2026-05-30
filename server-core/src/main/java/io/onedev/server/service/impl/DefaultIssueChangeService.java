@@ -53,6 +53,7 @@ import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.event.project.issue.IssueChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
@@ -89,7 +90,7 @@ import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSp
 import io.onedev.server.model.support.issue.transitionspec.NoActivitySpec;
 import io.onedev.server.model.support.issue.transitionspec.PullRequestDiscardedSpec;
 import io.onedev.server.model.support.issue.transitionspec.PullRequestMergedSpec;
-import io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedSpec;
+import io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedOrUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.PullRequestSpec;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
@@ -592,13 +593,19 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 		else if (event.getChange().getData() instanceof PullRequestDiscardData) 
 			on(event.getRequest(), PullRequestDiscardedSpec.class);
 		else if (event.getChange().getData() instanceof PullRequestReopenData) 
-			on(event.getRequest(), PullRequestOpenedSpec.class);
+			on(event.getRequest(), PullRequestOpenedOrUpdatedSpec.class);
 	}
 	
 	@Transactional
 	@Listen
 	public void on(io.onedev.server.event.project.pullrequest.PullRequestOpened event) {
-		on(event.getRequest(), PullRequestOpenedSpec.class);
+		on(event.getRequest(), PullRequestOpenedOrUpdatedSpec.class);
+	}
+
+	@Transactional
+	@Listen
+	public void on(PullRequestUpdated event) {
+		on(event.getRequest(), PullRequestOpenedOrUpdatedSpec.class);
 	}
 	
 	@Transactional

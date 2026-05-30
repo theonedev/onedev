@@ -42,7 +42,7 @@ import io.onedev.server.model.support.issue.transitionspec.BranchCreatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
-import io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedSpec;
+import io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedOrUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -202,7 +202,7 @@ public class GlobalIssueSetting implements Serializable {
 		branchCreatedSpec.setIssueQuery("referenced in current branch");		
 		transitionSpecs.add(branchCreatedSpec);
 		
-		var pullRequestOpenedSpec = new PullRequestOpenedSpec();
+		var pullRequestOpenedSpec = new PullRequestOpenedOrUpdatedSpec();
 		pullRequestOpenedSpec.setToState("In Review");
 		pullRequestOpenedSpec.setBranches("main master");
 		pullRequestOpenedSpec.setIssueQuery("fixed in current pull request");		

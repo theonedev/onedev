@@ -20,19 +20,25 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -40,12 +46,13 @@ import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.Transaction;
 
 @Singleton
 public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 		implements PullRequestInfoService, Serializable {
 
-	private static final int INFO_VERSION = 7;
+	private static final int INFO_VERSION = 8;
 	
 	private static final int BATCH_SIZE = 5000;
 	
@@ -54,10 +61,16 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 	private static final String DEFAULT_STORE = "default";
 	
 	private static final String COMMIT_TO_IDS_STORE = "commitToIds";
+
+	private static final String ISSUE_TO_ID_STORE = "issueToIds";
 	
 	private static final String COMPARISON_BASES_STORE = "comparisonBases";
 	
 	private static final ByteIterable LAST_PULL_REQUEST_UPDATE_KEY = new StringByteIterable("lastPullRequestUpdate");
+
+	private static final ByteIterable LAST_PULL_REQUEST_KEY = new StringByteIterable("lastPullRequest");
+
+	private static final ByteIterable LAST_PULL_REQUEST_CHANGE_KEY = new StringByteIterable("lastPullRequestChange");
 
 	private static final int UPDATE_PRIORITY = 100;
 
@@ -71,13 +84,17 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 	
 	private final PullRequestUpdateService pullRequestUpdateService;
 	
+	private final PullRequestChangeService pullRequestChangeService;
+	
 	@Inject
 	public DefaultPullRequestInfoService(ProjectService projectService, PullRequestService pullRequestService,
 										 PullRequestUpdateService pullRequestUpdateService,
+										 PullRequestChangeService pullRequestChangeService,
 										 BatchWorkExecutionService batchWorkExecutionService) {
 		this.projectService = projectService;
 		this.pullRequestService = pullRequestService;
 		this.pullRequestUpdateService = pullRequestUpdateService;
+		this.pullRequestChangeService = pullRequestChangeService;
 		this.batchWorkExecutionService = batchWorkExecutionService;
 	}
 	
@@ -110,6 +127,7 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 		Environment env = getEnv(projectId.toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store commitToIdsStore = getStore(env, COMMIT_TO_IDS_STORE);
+		Store issueToIdsStore = getStore(env, ISSUE_TO_ID_STORE);
 
 		Long lastPullRequestUpdateId = env.computeInTransaction(txn -> readLong(defaultStore, txn, LAST_PULL_REQUEST_UPDATE_KEY, 0));
 		
@@ -132,11 +150,63 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 			if (lastUpdate != null)
 				defaultStore.put(txn, LAST_PULL_REQUEST_UPDATE_KEY, new LongByteIterable(lastUpdate.getId()));
 		});
+		
+		Long lastPullRequestId = env.computeInTransaction(txn -> readLong(defaultStore, txn, LAST_PULL_REQUEST_KEY, 0));
+		
+		List<PullRequest> unprocessedPullRequests = pullRequestService.queryAfter(projectId, lastPullRequestId, BATCH_SIZE);
+		env.executeInTransaction(txn -> {
+			PullRequest lastRequest = null;
+			for (PullRequest request: unprocessedPullRequests) {
+				Project project = request.getTargetProject();
+				Long pullRequestId = request.getId();
+				addFixedIssues(issueToIdsStore, txn, project, pullRequestId, request.getTitle());
+				if (request.getDescription() != null)
+					addFixedIssues(issueToIdsStore, txn, project, pullRequestId, request.getDescription());		
+				lastRequest = request;
+			}
+			if (lastRequest != null)
+				defaultStore.put(txn, LAST_PULL_REQUEST_KEY, new LongByteIterable(lastRequest.getId()));
+		});
+		
+		Long lastChangeId = env.computeInTransaction(txn -> readLong(defaultStore, txn, LAST_PULL_REQUEST_CHANGE_KEY, 0));
+		
+		List<PullRequestChange> unprocessedChanges = pullRequestChangeService.queryAfter(projectId, lastChangeId, BATCH_SIZE);
+		env.executeInTransaction(txn -> {
+			PullRequestChange lastChange = null;
+			for (PullRequestChange change: unprocessedChanges) {
+				PullRequestChangeData data = change.getData();
+				PullRequest request = change.getRequest();
+				Project project = request.getTargetProject();
+				Long pullRequestId = request.getId();
+				if (data instanceof PullRequestTitleChangeData) {
+					PullRequestTitleChangeData changeData = (PullRequestTitleChangeData) data;
+					addFixedIssues(issueToIdsStore, txn, project, pullRequestId, changeData.getNewTitle());
+				} else if (data instanceof PullRequestDescriptionChangeData) {
+					PullRequestDescriptionChangeData changeData = (PullRequestDescriptionChangeData) data;
+					addFixedIssues(issueToIdsStore, txn, project, pullRequestId, changeData.getNewDescription());
+				}		
+				lastChange = change;
+			}
+			if (lastChange != null)
+				defaultStore.put(txn, LAST_PULL_REQUEST_CHANGE_KEY, new LongByteIterable(lastChange.getId()));
+		});
+		
 		logger.debug("Collected pull request info (project: {})", projectPath);
 		
-		return unprocessedPullRequestUpdates.size() == BATCH_SIZE;
+		return unprocessedPullRequestUpdates.size() == BATCH_SIZE 
+				|| unprocessedPullRequests.size() == BATCH_SIZE
+				|| unprocessedChanges.size() == BATCH_SIZE;
 	}
-	
+			
+	private void addFixedIssues(Store issueToIdsStore, Transaction txn, Project project, Long pullRequestId, String text) {
+		for (Long issueId: project.parseFixedIssueIds(text)) {
+			ByteIterable issueKey = new LongByteIterable(issueId);
+			Collection<Long> pullRequestIds = readLongs(issueToIdsStore, txn, issueKey);
+			pullRequestIds.add(pullRequestId);
+			writeLongs(issueToIdsStore, txn, issueKey, pullRequestIds);
+		}
+	}
+		
 	@Override
 	public Collection<Long> getPullRequestIds(Project project, ObjectId commitId) {
 		Long projectId = project.getId();
@@ -156,6 +226,25 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 		});
 	}
 
+	@Override
+	public Collection<Long> getPullRequestIds(Project project, Long issueId) {
+		Long projectId = project.getId();
+		
+		return projectService.runOnActiveServer(projectId, new ClusterTask<Collection<Long>>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Collection<Long> call() throws Exception {
+				Environment env = getEnv(projectId.toString());
+				Store store = getStore(env, ISSUE_TO_ID_STORE);
+				
+				return env.computeInTransaction(txn -> readLongs(store, txn, new LongByteIterable(issueId)));
+			}
+			
+		});
+	}
+
 	@Sessional
 	@Listen
 	public void on(PullRequestOpened event) {
@@ -165,6 +254,12 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 	@Sessional
 	@Listen
 	public void on(PullRequestUpdated event) {
+		batchWorkExecutionService.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
+	}
+
+	@Sessional
+	@Listen
+	public void on(PullRequestChanged event) {
 		batchWorkExecutionService.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 

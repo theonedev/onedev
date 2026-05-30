@@ -219,26 +219,27 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 							}
 
 						});
-						if (!getIssue().getPullRequests().isEmpty()) {
-							tabs.add(new PageTab(Model.of(_T("Pull Requests")), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())) {
-
-								@Override
-								public Component render(String componentId) {
-									return new PageTabHead(componentId, this) {
-					
-										@Override
-										protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
-											return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
-										}
-					
-									};
-								}
-	
-							});
-						}
 					}
 					// Do not calculate fix builds now as it might be slow
 					tabs.add(new PageTab(Model.of(_T("Fixing Builds")), IssueBuildsPage.class, IssueBuildsPage.paramsOf(getIssue())) {
+
+						@Override
+						public Component render(String componentId) {
+							return new PageTabHead(componentId, this) {
+			
+								@Override
+								protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+									return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+								}
+			
+							};
+						}
+
+					});
+				}
+
+				if (!getIssue().getPullRequests().isEmpty()) {
+					tabs.add(new PageTab(Model.of(_T("Pull Requests")), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())) {
 
 						@Override
 						public Component render(String componentId) {

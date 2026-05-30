@@ -7,10 +7,16 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
+
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.dao.EntityCriteria;
 
 import org.joda.time.DateTime;
 import org.jspecify.annotations.Nullable;
@@ -171,6 +177,16 @@ public class DefaultPullRequestChangeService extends BaseEntityService<PullReque
 		query.where(predicates.toArray(new Predicate[0]));
 		
 		return getSession().createQuery(query).getResultList();
+	}
+
+	@Sessional
+	@Override
+	public List<PullRequestChange> queryAfter(Long projectId, Long afterChangeId, int count) {
+		EntityCriteria<PullRequestChange> criteria = newCriteria();
+		criteria.createCriteria("request").add(Restrictions.eq("targetProject.id", projectId));
+		criteria.add(Restrictions.gt("id", afterChangeId));
+		criteria.addOrder(Order.asc("id"));
+		return query(criteria, 0, count);
 	}
 
 }

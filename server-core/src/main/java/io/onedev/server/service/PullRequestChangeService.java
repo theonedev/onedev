@@ -27,4 +27,6 @@ public interface PullRequestChangeService extends EntityService<PullRequestChang
 	
 	List<PullRequestChange> query(User submitter, Date fromDate, Date toDate);
 
+	List<PullRequestChange> queryAfter(Long projectId, Long afterChangeId, int count);
+
 }

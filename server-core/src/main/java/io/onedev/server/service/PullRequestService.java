@@ -97,6 +97,8 @@ public interface PullRequestService extends EntityService<PullRequest> {
 
     Collection<Long> getTargetProjectIds();
 
+	List<PullRequest> queryAfter(Long projectId, Long afterRequestId, int count);
+
     Pair<String, String> suggestTitleAndDescription(PullRequest request, ChatModel chatModel, 
             boolean suggestTitle, boolean suggestDescription);
 

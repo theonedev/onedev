@@ -22,6 +22,14 @@ public class PullRequestDescriptionChangeData extends PullRequestChangeData {
 			newDescription = "";
 		this.newDescription = newDescription;
 	}
+
+	public String getOldDescription() {
+		return oldDescription;
+	}
+
+	public String getNewDescription() {
+		return newDescription;
+	}
 	
 	@Override
 	public String getActivity() {

@@ -54,8 +54,11 @@ public class IncludesIssueCriteria extends Criteria<PullRequest> {
 	
 	private Collection<Long> getPullRequestIds(Project project) {
 		Collection<Long> pullRequestIds = new HashSet<>();
-		for (ObjectId commit: OneDev.getInstance(CommitInfoService.class).getFixCommits(project.getId(), issue.getId(), false))
-			pullRequestIds.addAll(OneDev.getInstance(PullRequestInfoService.class).getPullRequestIds(project, commit));
+		var commitInfoService = OneDev.getInstance(CommitInfoService.class);
+		var pullRequestInfoService = OneDev.getInstance(PullRequestInfoService.class);
+		for (ObjectId commit: commitInfoService.getFixCommits(project.getId(), issue.getId(), false))
+			pullRequestIds.addAll(pullRequestInfoService.getPullRequestIds(project, commit));
+		pullRequestIds.addAll(pullRequestInfoService.getPullRequestIds(project, issue.getId()));
 		return pullRequestIds;
 	}
 	
