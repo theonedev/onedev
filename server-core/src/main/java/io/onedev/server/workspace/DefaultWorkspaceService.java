@@ -482,6 +482,12 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		for (var taskFuture: workspaceTaskFutures.values()) 
 			taskFuture.cancel(true);
 
+		/*
+		 * Wait till all workspaces running on this server are stopped and finished uploading user data 
+		 * and caches. For workspaces initiated from current server, they will be cancelled above; for
+		 * workspaces initiated from other servers, they will be cancelled via NodeStopping event sent 
+		 * to other servers
+		 */
 		while (!workspaceContexts.isEmpty()) {
 			try {
 				Thread.sleep(1000);
