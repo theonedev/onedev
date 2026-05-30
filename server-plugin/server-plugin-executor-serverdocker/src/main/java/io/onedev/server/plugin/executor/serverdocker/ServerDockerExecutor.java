@@ -350,6 +350,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 						getJobService().reportJobWorkDir(jobContext, containerWorkDirPath);
 						CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 						var cacheConfigIndex = new AtomicInteger(1);
+						var pulledImages = new HashSet<String>();
 						var successful = entryFacade.execute(new LeafHandler() {
 
 							private int runStepContainer(Commandline docker, String image, String runAs, 
@@ -359,7 +360,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								containerName = network + "-step-" + stringifyStepPosition(position);
 								try {
 									docker.args("run", "--name=" + containerName, "--network=" + network);
-									if (isAlwaysPullImage())
+									if (isAlwaysPullImage() && pulledImages.add(image))
 										docker.addArgs("--pull=always");
 									
 									docker.addArgs("--user", runAs);

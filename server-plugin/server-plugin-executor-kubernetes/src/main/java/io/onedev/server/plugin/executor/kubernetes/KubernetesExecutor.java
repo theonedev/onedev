@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -746,6 +747,10 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				
 				String helperImage = IMAGE_REPO + ":" + getVersion();
 				
+				var pulledImages = new HashSet<String>();
+				if (isAlwaysPullImage())
+					pulledImages.add(helperImage);
+				
 				ArrayList<Map<Object, Object>> commonEnvs = new ArrayList<>();
 				commonEnvs.add(newLinkedHashMap(
 						"name", ENV_SERVER_URL, 
@@ -775,8 +780,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 								"name", containerName, 
 								"image", commandFacade.getImage(), 
 								"workingDir", containerWorkDirPath);
-						if (isAlwaysPullImage())
-							stepContainerSpec.put("imagePullPolicy", "Always");
+						setImagePullPolicy(stepContainerSpec, commandFacade.getImage(), pulledImages);
 						if (commandFacade.isUseTTY())
 							stepContainerSpec.put("tty", true);						
 						var volumeMounts = buildVolumeMounts(cacheMounts);
@@ -806,8 +810,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
 								"image", helperImage);
-						if (isAlwaysPullImage())
-							stepContainerSpec.put("imagePullPolicy", "Always");
+						setImagePullPolicy(stepContainerSpec, helperImage, pulledImages);
 						var volumeMounts = buildVolumeMounts(cacheMounts);
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
@@ -870,8 +873,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						"args", sidecarArgs, 
 						"env", SerializationUtils.clone(commonEnvs), 
 						"volumeMounts", SerializationUtils.clone(volumeMounts));
-				if (isAlwaysPullImage())
-					sidecarContainerSpec.put("imagePullPolicy", "Always");
+				setImagePullPolicy(sidecarContainerSpec, helperImage, pulledImages);
 				
 				sidecarContainerSpec.put("resources", newLinkedHashMap("requests", newLinkedHashMap(
 						"cpu", getCpuRequest(), 
@@ -1053,6 +1055,15 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 			volumeMounts.add(volumeMount);
 		}
 		return volumeMounts;
+	}
+	
+	private void setImagePullPolicy(Map<Object, Object> containerSpec, String image, Set<String> pulledImages) {
+		if (isAlwaysPullImage()) {
+			if (pulledImages.add(image))
+				containerSpec.put("imagePullPolicy", "Always");
+			else
+				containerSpec.put("imagePullPolicy", "IfNotPresent");
+		}
 	}
 	
 	private String getContainerName(List<Integer> stepPosition) {

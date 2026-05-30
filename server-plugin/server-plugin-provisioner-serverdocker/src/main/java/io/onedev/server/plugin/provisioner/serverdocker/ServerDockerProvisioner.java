@@ -383,7 +383,8 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 				callWithRegistryLogins(docker, allRegistryLogins, () -> {
 					WorkspaceUtils.deleteContainerIfExist(docker, containerName, workspaceLogger);
 
-					WorkspaceUtils.setCommonDockerRunOptions(docker, containerName, runAs, isAlwaysPullImage(),
+					WorkspaceUtils.setCommonDockerRunOptions(docker, containerName, runAs, 
+							isAlwaysPullImage() && userDataInitEntrypointArgs == null,
 							getCpuLimit(), getMemoryLimit());
 					docker.processKiller(newDockerKiller(newDocker(), containerName, workspaceLogger));
 
