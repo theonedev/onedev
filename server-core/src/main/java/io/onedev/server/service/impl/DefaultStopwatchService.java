@@ -19,7 +19,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.IssueWorkService;
 import io.onedev.server.service.StopwatchService;
-import io.onedev.server.util.DateUtils;
 
 @Singleton
 public class DefaultStopwatchService extends BaseEntityService<Stopwatch> implements StopwatchService {
@@ -57,26 +56,12 @@ public class DefaultStopwatchService extends BaseEntityService<Stopwatch> implem
 	public void stopWork(Stopwatch stopwatch) {
 		int spentMinutes = (int) ((System.currentTimeMillis() - stopwatch.getDate().getTime()) / 60000);
 		if (spentMinutes > 0) {
-			var localDate = DateUtils.toLocalDate(stopwatch.getDate());
-			Date startOfDay = DateUtils.toDate(localDate.atStartOfDay());
-			Date endOfDay = DateUtils.toDate(localDate.atTime(23, 59, 59));
-			var works = workService.query(stopwatch.getUser(), stopwatch.getIssue(), startOfDay, endOfDay);
-			works.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-			IssueWork workWithoutNote = null;
-			for (var work: works) {
-				if (work.getNote() == null) {
-					workWithoutNote = work;
-					break;
-				}
-			}
-			if (workWithoutNote == null) {
-				workWithoutNote = new IssueWork();
-				workWithoutNote.setUser(stopwatch.getUser());
-				workWithoutNote.setIssue(stopwatch.getIssue());
-				workWithoutNote.setDate(new Date());
-			}
-			workWithoutNote.setMinutes(workWithoutNote.getMinutes() + spentMinutes);
-			workService.createOrUpdate(workWithoutNote);
+			var work = new IssueWork();
+			work.setUser(stopwatch.getUser());
+			work.setIssue(stopwatch.getIssue());
+			work.setDate(stopwatch.getDate());
+			work.setMinutes(spentMinutes);
+			workService.createOrUpdate(work);
 		}
 		dao.remove(stopwatch);
 	}
