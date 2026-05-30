@@ -2658,4 +2658,15 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
+	private void migrate49(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (Node stepsNodeItem : stepsNode.getValue()) {
+				MappingNode stepNode = (MappingNode) stepsNodeItem;
+				if ("RunContainerStep".equals(getStepType(stepNode)))
+					migrate47_setDefaultRunAs(stepNode);
+			}
+		});
+	}
+
 }

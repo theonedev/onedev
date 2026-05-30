@@ -925,6 +925,20 @@ public class Upgrade extends AbstractPlugin {
 				throw new RuntimeException(e);
 			}
 		}
+
+		if (oldAppDataVersion < 226) {
+			logger.info("Removing obsolete workspace user data...");
+			var usersDir = new File(upgradeDir, "site/users");
+			if (usersDir.exists()) {
+				for (var userDir : usersDir.listFiles()) {
+					if (userDir.isDirectory()) {
+						var workspaceDataDir = new File(userDir, "workspace-data");
+						if (workspaceDataDir.exists())
+							FileUtils.deleteDir(workspaceDataDir);
+					}
+				}
+			}
+		}
 		
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");

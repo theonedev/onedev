@@ -4366,9 +4366,6 @@ public class DataMigrator {
 		}
 	}
 
-	private void migrate102(File dataDir, Stack<Integer> versions) {
-	}
-
 	private void migrate103(File dataDir, Stack<Integer> versions) {
 		VersionedXmlDoc projectUpdatesDom;
 		File projectUpdatesFile = new File(dataDir, "ProjectUpdates.xml");
@@ -8670,6 +8667,52 @@ public class DataMigrator {
 					Element issueSettingElement = projectElement.element("issueSetting");
 					if (issueSettingElement != null)
 						issueSettingElement.addElement("transitionSpecs");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate226(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement : valueElement.elements()) {
+								if (executorElement.getName().contains("KubernetesExecutor")) {
+									Element kubeCtlPathElement = executorElement.element("kubeCtlPath");
+									if (kubeCtlPathElement != null)
+										kubeCtlPathElement.setName("kubectlPath");
+									Element buildWithPVElement = executorElement.element("buildWithPV");
+									boolean buildWithPV = Boolean.parseBoolean(buildWithPVElement.getTextTrim());
+									buildWithPVElement.detach();
+									if (!buildWithPV) {
+										var storageClassElement = executorElement.element("storageClass");
+										if (storageClassElement != null)
+											storageClassElement.detach();
+										var storageSizeElement = executorElement.element("storageSize");
+										if (storageSizeElement != null)
+											storageSizeElement.detach();
+										executorElement.addElement("storageSize").setText("10Gi");
+									}
+								}
+							}
+						}
+					} else if (key.equals("WORKSPACE_PROVISIONERS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element provisionerElement : valueElement.elements()) {
+								if (provisionerElement.getName().equals("io.onedev.server.plugin.provisioner.docker.DockerProvisioner"))
+									provisionerElement.setName("io.onedev.server.plugin.provisioner.serverdocker.ServerDockerProvisioner");
+								else if (provisionerElement.getName().equals("io.onedev.server.plugin.provisioner.shell.ShellProvisioner"))
+									provisionerElement.setName("io.onedev.server.plugin.provisioner.servershell.ServerShellProvisioner");
+							}
+						}
+					}
 				}
 				dom.writeToFile(file, false);
 			}
