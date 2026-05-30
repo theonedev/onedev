@@ -359,7 +359,7 @@ public class BlobNavigator extends Panel {
 				return null;
 			}
 		} else {
-			throw new IllegalStateException();
+			return null;
 		}
 	}
 	

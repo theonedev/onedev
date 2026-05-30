@@ -71,12 +71,7 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			@Nullable
 			@Override
 			protected String getAutosaveKey() {
-				String path = context.getNewPath();
-				if (path == null)
-					path = context.getBlobIdent().path;
-				if (path == null)
-					return null;
-				return "project:" + context.getProject().getId() + ":" + path;
+				return context.getEditorAutosaveKey();
 			}
 			
 			@Override

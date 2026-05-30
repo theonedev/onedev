@@ -59,6 +59,7 @@ import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.RevisionResolved;
 import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -394,6 +395,7 @@ public class CommitOptionPanel extends Panel {
 				}
 			}
 			if (newCommitId != null) {
+				removeBlobAutosaveKeys();
 				context.onCommitted(target, newCommitId);
 				target.appendJavaScript("$(window).resize();");
 				return true;
@@ -465,6 +467,17 @@ public class CommitOptionPanel extends Panel {
 		String script = String.format("onedev.server.commitOption.onBlobChange('%s', %b);", 
 				getMarkupId(), isBlobModified());
 		partialPageRequestHandler.appendJavaScript(script);
+	}
+
+	private void removeBlobAutosaveKeys() {
+		if (!(getPage() instanceof BasePage))
+			return;
+		BasePage page = (BasePage) getPage();
+		for (String path : oldPaths)
+			page.removeAutosaveKey(BlobRenderContext.getAutosaveKey(context.getProject(), path));
+		String newPath = context.getNewPath();
+		if (newPath != null)
+			page.removeAutosaveKey(BlobRenderContext.getAutosaveKey(context.getProject(), newPath));
 	}
 	
 }
