@@ -19,6 +19,8 @@ import io.onedev.agent.AgentData;
 import io.onedev.agent.CallData;
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
+import io.onedev.agent.WaitingForAgentResourceToBeReleased;
+import io.onedev.agent.WantToDisconnectAgent;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.agent.shell.JobShellOutputRequest;
 import io.onedev.agent.shell.WorkspaceShellOutputRequest;
@@ -199,7 +201,14 @@ public class ServerSocket {
 	}
 
 	private Serializable service(Serializable request) {
-		throw new UnsupportedOperationException();
+		if (request instanceof WantToDisconnectAgent || request instanceof WaitingForAgentResourceToBeReleased) {
+			// No longer being used. But keep it here so that old agents can be upgraded to new version.
+			return null;
+		} else {
+			var errorMessage = "Unknown request: " + request.getClass();
+			logger.error(errorMessage);
+			return new ExplicitException(errorMessage);
+		}
 	}
 
 }

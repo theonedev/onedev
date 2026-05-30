@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
 
 import javax.inject.Singleton;
 
@@ -1092,6 +1093,11 @@ public class Upgrade extends AbstractPlugin {
 				logbackConfig = Strings.CS.replace(logbackConfig, 
 						"</pattern>", 
 						"</pattern>\n			</layout>");
+			}
+			if (!logbackConfig.contains("<charset>UTF-8</charset>")) {
+				logbackConfig = logbackConfig.replaceFirst(
+						"<file>\\$\\{logback\\.logFile\\}</file>\\s*<encoder class=\"ch\\.qos\\.logback\\.core\\.encoder\\.LayoutWrappingEncoder\">",
+						Matcher.quoteReplacement("<file>${logback.logFile}</file>\n\t\t<encoder class=\"ch.qos.logback.core.encoder.LayoutWrappingEncoder\">\n\t\t\t<charset>UTF-8</charset>"));
 			}
 			
 			writeStringToFile(logbackConfigFile, logbackConfig, UTF_8);

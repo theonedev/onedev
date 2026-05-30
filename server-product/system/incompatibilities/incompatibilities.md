@@ -8,7 +8,7 @@ If your previous configuration did not use a PVC for the build volume, OneDev wi
 
 ### Workspace
 
-Due to changes in the workspace storage format, all existing workspace user data will be removed during the upgrade.
+Due to changes in the workspace user data storage format, all existing workspace user data will be removed during the upgrade.
 
 The new storage format is designed to be stable and will be preserved across future upgrades starting from this release.
 

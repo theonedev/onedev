@@ -12,6 +12,7 @@
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${logback.logFile}</file>
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<charset>UTF-8</charset>
 			<layout class="io.onedev.commons.bootstrap.MaskingPatternLayout">
 				<pattern>${logback.fileLogPattern}</pattern>
 			</layout>
