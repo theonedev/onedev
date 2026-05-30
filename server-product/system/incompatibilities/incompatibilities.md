@@ -1,3 +1,17 @@
+# 15.1.0
+
+### CI/CD
+
+The Kubernetes job executor now requires build working directory to be backed by PVC. Using hostPath volumes is no longer supported, as it is not considered a recommended Kubernetes practice.
+
+If your previous configuration did not use a PVC for the build volume, OneDev will automatically provision a PVC using the cluster's default StorageClass. The initial storage size is set to 10 GiB. Adjust this value as needed to meet your workload requirements.
+
+### Workspace
+
+Due to changes in the workspace storage format, all existing workspace user data will be removed during the upgrade.
+
+The new storage format is designed to be stable and will be preserved across future upgrades starting from this release.
+
 # 15.0.0
 
 ### CI/CD
