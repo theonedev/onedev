@@ -8715,6 +8715,20 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Issues.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("rocketCount").detach();
+					element.addElement("tickCount").setText("0");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("rocketCount").detach();
+					element.addElement("tickCount").setText("0");
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

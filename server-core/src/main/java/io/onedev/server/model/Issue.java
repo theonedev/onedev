@@ -6,8 +6,8 @@ import static io.onedev.server.model.Issue.PROP_BOARD_POSITION;
 import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
 import static io.onedev.server.model.Issue.PROP_CONFUSED_COUNT;
 import static io.onedev.server.model.Issue.PROP_EYES_COUNT;
+import static io.onedev.server.model.Issue.PROP_TICK_COUNT;
 import static io.onedev.server.model.Issue.PROP_HEART_COUNT;
-import static io.onedev.server.model.Issue.PROP_ROCKET_COUNT;
 import static io.onedev.server.model.Issue.PROP_SMILE_COUNT;
 import static io.onedev.server.model.Issue.PROP_STATE;
 import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
@@ -119,7 +119,7 @@ import io.onedev.server.xodus.VisitInfoService;
 				@Index(columnList=PROP_THUMBS_UP_COUNT), @Index(columnList=PROP_THUMBS_DOWN_COUNT),
 				@Index(columnList=PROP_SMILE_COUNT), @Index(columnList=PROP_TADA_COUNT),
 				@Index(columnList=PROP_CONFUSED_COUNT), @Index(columnList=PROP_HEART_COUNT),
-				@Index(columnList=PROP_ROCKET_COUNT), @Index(columnList=PROP_EYES_COUNT),
+				@Index(columnList=PROP_EYES_COUNT), @Index(columnList=PROP_TICK_COUNT),
 				@Index(columnList= LastActivity.COLUMN_DATE), @Index(columnList="o_numberScope_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
@@ -193,13 +193,13 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	
 	public static final String PROP_HEART_COUNT = "heartCount";
 	
-	public static final String NAME_ROCKET_COUNT = "Reaction: Rocket Count";
-	
-	public static final String PROP_ROCKET_COUNT = "rocketCount";
-	
 	public static final String NAME_EYES_COUNT = "Reaction: Eyes Count";
 	
 	public static final String PROP_EYES_COUNT = "eyesCount";
+
+	public static final String NAME_TICK_COUNT = "Reaction: Tick Count";
+	
+	public static final String PROP_TICK_COUNT = "tickCount";
 
 	public static final String NAME_LAST_ACTIVITY_DATE = "Last Activity Date";
 	
@@ -240,7 +240,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, 
 			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_ITERATION,
 			NAME_THUMBS_UP_COUNT, NAME_THUMBS_DOWN_COUNT, NAME_SMILE_COUNT, NAME_TADA_COUNT, 
-			NAME_CONFUSED_COUNT, NAME_HEART_COUNT, NAME_ROCKET_COUNT, NAME_EYES_COUNT,
+			NAME_CONFUSED_COUNT, NAME_HEART_COUNT, NAME_EYES_COUNT,
+			NAME_TICK_COUNT,
 			NAME_ESTIMATED_TIME, NAME_SPENT_TIME, NAME_PROGRESS,
 			BurndownIndicators.ISSUE_COUNT, BurndownIndicators.REMAINING_TIME);
 	
@@ -250,7 +251,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_VOTE_COUNT, 
 			NAME_COMMENT_COUNT, NAME_ITERATION,
 			NAME_THUMBS_UP_COUNT, NAME_THUMBS_DOWN_COUNT, NAME_SMILE_COUNT, NAME_TADA_COUNT, 
-			NAME_CONFUSED_COUNT, NAME_HEART_COUNT, NAME_ROCKET_COUNT, NAME_EYES_COUNT);
+			NAME_CONFUSED_COUNT, NAME_HEART_COUNT, NAME_EYES_COUNT,
+			NAME_TICK_COUNT);
 
 	public static final Map<String, IssueSortField> SORT_FIELDS = new LinkedHashMap<>();
 	static {
@@ -271,8 +273,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		SORT_FIELDS.put(NAME_TADA_COUNT, new IssueSortField(PROP_TADA_COUNT, DESCENDING, comparingInt(Issue::getTadaCount)));
 		SORT_FIELDS.put(NAME_CONFUSED_COUNT, new IssueSortField(PROP_CONFUSED_COUNT, DESCENDING, comparingInt(Issue::getConfusedCount)));
 		SORT_FIELDS.put(NAME_HEART_COUNT, new IssueSortField(PROP_HEART_COUNT, DESCENDING, comparingInt(Issue::getHeartCount)));
-		SORT_FIELDS.put(NAME_ROCKET_COUNT, new IssueSortField(PROP_ROCKET_COUNT, DESCENDING, comparingInt(Issue::getRocketCount)));
 		SORT_FIELDS.put(NAME_EYES_COUNT, new IssueSortField(PROP_EYES_COUNT, DESCENDING, comparingInt(Issue::getEyesCount)));
+		SORT_FIELDS.put(NAME_TICK_COUNT, new IssueSortField(PROP_TICK_COUNT, DESCENDING, comparingInt(Issue::getTickCount)));
 	}
 	
 	private static ThreadLocal<Stack<Issue>> stack = ThreadLocal.withInitial(() -> new Stack<>());
@@ -332,10 +334,10 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	private int confusedCount;
 	
 	private int heartCount;
-	
-	private int rocketCount;
 
 	private int eyesCount;
+
+	private int tickCount;
 	
 	private int totalEstimatedTime;
 	
@@ -751,20 +753,20 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		this.heartCount = heartCount;
 	}
 
-	public int getRocketCount() {
-		return rocketCount;
-	}
-
-	public void setRocketCount(int rocketCount) {
-		this.rocketCount = rocketCount;
-	}
-
 	public int getEyesCount() {
 		return eyesCount;
 	}
 
 	public void setEyesCount(int eyesCount) {
 		this.eyesCount = eyesCount;
+	}
+
+	public int getTickCount() {
+		return tickCount;
+	}
+
+	public void setTickCount(int tickCount) {
+		this.tickCount = tickCount;
 	}
 
 	public int getTotalEstimatedTime() {

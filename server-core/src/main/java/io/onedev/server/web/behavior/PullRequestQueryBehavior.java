@@ -170,8 +170,8 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 										case PullRequest.NAME_TADA_COUNT:
 										case PullRequest.NAME_CONFUSED_COUNT:
 										case PullRequest.NAME_HEART_COUNT:
-										case PullRequest.NAME_ROCKET_COUNT:
 										case PullRequest.NAME_EYES_COUNT:
+										case PullRequest.NAME_TICK_COUNT:
 											return null;
 									}
 								} catch (ExplicitException ignored) {

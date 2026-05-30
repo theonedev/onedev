@@ -2,6 +2,10 @@ package io.onedev.server.web.component.issue.activities.activity;
 
 import static io.onedev.server.util.DateUtils.formatDateTime;
 
+import java.util.Collection;
+
+import javax.inject.Inject;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -19,10 +23,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.service.IssueWorkService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.model.IssueWork;
+import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueWorkReactionService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.reaction.ReactionListPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.BeanContext;
@@ -30,6 +37,9 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.editbean.IssueWorkBean;
 
 class IssueWorkPanel extends Panel {
+
+	@Inject
+	private IssueWorkReactionService issueWorkReactionService;
 		
 	public IssueWorkPanel(String id) {
 		super(id);
@@ -94,6 +104,23 @@ class IssueWorkPanel extends Panel {
 				super.onConfigure();
 				setVisible(SecurityUtils.canModifyOrDelete(getWork()));
 			}
+		});
+
+		fragment.add(new ReactionListPanel("reactions") {
+
+			@Override
+			protected Collection<? extends EntityReaction> getReactions() {
+				return getWork().getReactions();
+			}
+
+			@Override
+			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+				issueWorkReactionService.toggleEmoji(
+						SecurityUtils.getUser(),
+						getWork(),
+						emoji);
+			}
+
 		});
 
 		fragment.setOutputMarkupId(true);

@@ -48,11 +48,11 @@ public class DefaultPullRequestReactionService extends BaseEntityService<PullReq
             case "❤️":
                 request.setHeartCount(request.getHeartCount() + (reaction == null ? 1 : -1));
                 break;
-            case "🚀":
-                request.setRocketCount(request.getRocketCount() + (reaction == null ? 1 : -1));
-                break;
             case "👀":
                 request.setEyesCount(request.getEyesCount() + (reaction == null ? 1 : -1));
+                break;
+            case "✅":
+                request.setTickCount(request.getTickCount() + (reaction == null ? 1 : -1));
                 break;
         }
         

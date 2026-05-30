@@ -35,10 +35,10 @@ public abstract class ReactionListPanel extends Panel {
         put("thumbs_up", "👍");
         put("thumbs_down", "👎");
         put("smile", "😄");
-        put("tada", "🎉");
         put("confused", "😕");
         put("heart", "❤️");
-        put("rocket", "🚀");
+        put("tick", "✅");
+        put("tada", "🎉");
         put("eyes", "👀");
     }};
 

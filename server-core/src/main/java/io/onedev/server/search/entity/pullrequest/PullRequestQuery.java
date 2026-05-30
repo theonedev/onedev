@@ -357,11 +357,11 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 										case PullRequest.NAME_HEART_COUNT:
 											criterias.add(new HeartCountCriteria(getIntValue(value), operator));
 											break;
-										case PullRequest.NAME_ROCKET_COUNT:
-											criterias.add(new RocketCountCriteria(getIntValue(value), operator));
-											break;
 										case PullRequest.NAME_EYES_COUNT:
 											criterias.add(new EyesCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_TICK_COUNT:
+											criterias.add(new TickCountCriteria(getIntValue(value), operator));
 											break;
 										default:
 											throw new IllegalStateException();
@@ -394,11 +394,11 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 										case PullRequest.NAME_HEART_COUNT:
 											criterias.add(new HeartCountCriteria(getIntValue(value), operator));
 											break;
-										case PullRequest.NAME_ROCKET_COUNT:
-											criterias.add(new RocketCountCriteria(getIntValue(value), operator));
-											break;
 										case PullRequest.NAME_EYES_COUNT:
 											criterias.add(new EyesCountCriteria(getIntValue(value), operator));
+											break;
+										case PullRequest.NAME_TICK_COUNT:
+											criterias.add(new TickCountCriteria(getIntValue(value), operator));
 											break;
 									}
 									break;
@@ -497,8 +497,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						&& !fieldName.equals(PullRequest.NAME_TADA_COUNT)
 						&& !fieldName.equals(PullRequest.NAME_CONFUSED_COUNT)
 						&& !fieldName.equals(PullRequest.NAME_HEART_COUNT)
-						&& !fieldName.equals(PullRequest.NAME_ROCKET_COUNT)
-						&& !fieldName.equals(PullRequest.NAME_EYES_COUNT)) {
+						&& !fieldName.equals(PullRequest.NAME_EYES_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_TICK_COUNT)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
@@ -512,8 +512,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						&& !fieldName.equals(PullRequest.NAME_TADA_COUNT)
 						&& !fieldName.equals(PullRequest.NAME_CONFUSED_COUNT)
 						&& !fieldName.equals(PullRequest.NAME_HEART_COUNT)
-						&& !fieldName.equals(PullRequest.NAME_ROCKET_COUNT)
-						&& !fieldName.equals(PullRequest.NAME_EYES_COUNT)) {
+						&& !fieldName.equals(PullRequest.NAME_EYES_COUNT)
+						&& !fieldName.equals(PullRequest.NAME_TICK_COUNT)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;

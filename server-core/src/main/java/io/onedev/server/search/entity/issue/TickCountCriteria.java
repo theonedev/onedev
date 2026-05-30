@@ -11,7 +11,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
-public class RocketCountCriteria extends Criteria<Issue> {
+public class TickCountCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -19,14 +19,14 @@ public class RocketCountCriteria extends Criteria<Issue> {
 	
 	private final int value;
 	
-	public RocketCountCriteria(int value, int operator) {
+	public TickCountCriteria(int value, int operator) {
 		this.operator = operator;
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		Path<Integer> attribute = from.get(Issue.PROP_ROCKET_COUNT);
+		Path<Integer> attribute = from.get(Issue.PROP_TICK_COUNT);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsNot)
@@ -40,20 +40,20 @@ public class RocketCountCriteria extends Criteria<Issue> {
 	@Override
 	public boolean matches(Issue issue) {
 		if (operator == IssueQueryLexer.Is)
-			return issue.getRocketCount() == value;
+			return issue.getTickCount() == value;
 		else if (operator == IssueQueryLexer.IsNot)
-			return issue.getRocketCount() != value;
+			return issue.getTickCount() != value;
 		else if (operator == IssueQueryLexer.IsGreaterThan)
-			return issue.getRocketCount() > value;
+			return issue.getTickCount() > value;
 		else
-			return issue.getRocketCount() < value;
+			return issue.getTickCount() < value;
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Issue.NAME_ROCKET_COUNT) + " " 
+		return quote(Issue.NAME_TICK_COUNT) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));
 	}
 
-} 
+}

@@ -47,11 +47,11 @@ public class DefaultIssueReactionService extends BaseEntityService<IssueReaction
             case "❤️":
                 issue.setHeartCount(issue.getHeartCount() + (reaction == null ? 1 : -1));
                 break;
-            case "🚀":
-                issue.setRocketCount(issue.getRocketCount() + (reaction == null ? 1 : -1));
-                break;
             case "👀":
                 issue.setEyesCount(issue.getEyesCount() + (reaction == null ? 1 : -1));
+                break;
+            case "✅":
+                issue.setTickCount(issue.getTickCount() + (reaction == null ? 1 : -1));
                 break;
         }
                 

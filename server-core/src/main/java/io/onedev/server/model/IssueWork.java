@@ -2,15 +2,19 @@ package io.onedev.server.model;
 
 import static io.onedev.server.model.IssueWork.PROP_DATE;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +59,9 @@ public class IssueWork extends AbstractEntity {
 	@Column(length=MAX_CONTENT_LEN)
 	private String note;
 
+	@OneToMany(mappedBy="work", cascade=CascadeType.REMOVE)
+	private Collection<IssueWorkReaction> reactions = new ArrayList<>();
+
 	public Issue getIssue() {
 		return issue;
 	}
@@ -98,6 +105,14 @@ public class IssueWork extends AbstractEntity {
 
 	public String getAnchor() {
 		return getClass().getSimpleName() + "-" + getId();
+	}
+
+	public Collection<IssueWorkReaction> getReactions() {
+		return reactions;
+	}
+
+	public void setReactions(Collection<IssueWorkReaction> reactions) {
+		this.reactions = reactions;
 	}
 
 }

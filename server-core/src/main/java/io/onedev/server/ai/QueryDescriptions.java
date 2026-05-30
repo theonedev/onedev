@@ -53,8 +53,8 @@ public class QueryDescriptions {
             | '"Reaction: Confused Count"' 'is' ('greater'|'less') 'than' '"'Number'"'
             | '"Reaction: Heart Count"' 'is' ('not')? '"'Number'"'
             | '"Reaction: Heart Count"' 'is' ('greater'|'less') 'than' '"'Number'"'
-            | '"Reaction: Rocket Count"' 'is' ('not')? '"'Number'"'
-            | '"Reaction: Rocket Count"' 'is' ('greater'|'less') 'than' '"'Number'"'
+            | '"Reaction: Tick Count"' 'is' ('not')? '"'Number'"'
+            | '"Reaction: Tick Count"' 'is' ('greater'|'less') 'than' '"'Number'"'
             | '"Reaction: Eyes Count"' 'is' ('not')? '"'Number'"'
             | '"Reaction: Eyes Count"' 'is' ('greater'|'less') 'than' '"'Number'"'
         """.trim();

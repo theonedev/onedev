@@ -8,8 +8,8 @@ import static io.onedev.server.model.PullRequest.PROP_CLOSE_WEEK;
 import static io.onedev.server.model.PullRequest.PROP_COMMENT_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_CONFUSED_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_EYES_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_TICK_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_HEART_COUNT;
-import static io.onedev.server.model.PullRequest.PROP_ROCKET_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_SMILE_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_STATUS;
 import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
@@ -120,7 +120,8 @@ import io.onedev.server.xodus.VisitInfoService;
 				@Index(columnList=PROP_THUMBS_UP_COUNT), @Index(columnList=PROP_THUMBS_DOWN_COUNT),
 				@Index(columnList=PROP_SMILE_COUNT), @Index(columnList=PROP_TADA_COUNT),
 				@Index(columnList=PROP_CONFUSED_COUNT), @Index(columnList=PROP_HEART_COUNT),
-				@Index(columnList=PROP_ROCKET_COUNT), @Index(columnList=PROP_EYES_COUNT),
+				@Index(columnList=PROP_EYES_COUNT),
+				@Index(columnList=PROP_TICK_COUNT),
 				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_numberScope_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
@@ -194,13 +195,13 @@ public class PullRequest extends ProjectBelonging
 
 	public static final String PROP_HEART_COUNT = "heartCount";
 
-	public static final String NAME_ROCKET_COUNT = "Reaction: Rocket Count";
-
-	public static final String PROP_ROCKET_COUNT = "rocketCount";
-
 	public static final String NAME_EYES_COUNT = "Reaction: Eyes Count";
 	
 	public static final String PROP_EYES_COUNT = "eyesCount";
+
+	public static final String NAME_TICK_COUNT = "Reaction: Tick Count";
+	
+	public static final String PROP_TICK_COUNT = "tickCount";
 
 	public static final String PROP_SUBMITTER = "submitter";
 	
@@ -256,8 +257,8 @@ public class PullRequest extends ProjectBelonging
 			NAME_SOURCE_PROJECT, NAME_SOURCE_BRANCH, NAME_LABEL, NAME_DESCRIPTION, 
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_CLOSE_DATE, 
 			NAME_MERGE_STRATEGY, NAME_COMMENT_COUNT, NAME_THUMBS_UP_COUNT, NAME_THUMBS_DOWN_COUNT, 
-			NAME_SMILE_COUNT, NAME_TADA_COUNT, NAME_CONFUSED_COUNT, NAME_HEART_COUNT, 
-			NAME_ROCKET_COUNT, NAME_EYES_COUNT);
+			NAME_SMILE_COUNT, NAME_TADA_COUNT, 			NAME_CONFUSED_COUNT, NAME_HEART_COUNT, 
+			NAME_EYES_COUNT, NAME_TICK_COUNT);
 
 	public static final Map<String, SortField<PullRequest>> SORT_FIELDS = new LinkedHashMap<>();
 	static {
@@ -277,8 +278,8 @@ public class PullRequest extends ProjectBelonging
 		SORT_FIELDS.put(NAME_TADA_COUNT, new SortField<>(PROP_TADA_COUNT, DESCENDING));
 		SORT_FIELDS.put(NAME_CONFUSED_COUNT, new SortField<>(PROP_CONFUSED_COUNT, DESCENDING));
 		SORT_FIELDS.put(NAME_HEART_COUNT, new SortField<>(PROP_HEART_COUNT, DESCENDING));
-		SORT_FIELDS.put(NAME_ROCKET_COUNT, new SortField<>(PROP_ROCKET_COUNT, DESCENDING));
 		SORT_FIELDS.put(NAME_EYES_COUNT, new SortField<>(PROP_EYES_COUNT, DESCENDING));
+		SORT_FIELDS.put(NAME_TICK_COUNT, new SortField<>(PROP_TICK_COUNT, DESCENDING));
 	}
 	
 	private static ThreadLocal<Stack<PullRequest>> stack = withInitial(Stack::new);
@@ -378,10 +379,10 @@ public class PullRequest extends ProjectBelonging
 	private int confusedCount;
 	
 	private int heartCount;
-	
-	private int rocketCount;
-	
+
 	private int eyesCount;
+
+	private int tickCount;
 
 	@JsonProperty(access = READ_ONLY)
 	private int descriptionRevisionCount;
@@ -1384,20 +1385,20 @@ public class PullRequest extends ProjectBelonging
 		this.heartCount = heartCount;
 	}
 
-	public int getRocketCount() {
-		return rocketCount;
-	}
-
-	public void setRocketCount(int rocketCount) {
-		this.rocketCount = rocketCount;
-	}
-
 	public int getEyesCount() {
 		return eyesCount;
 	}
 
 	public void setEyesCount(int eyesCount) {
 		this.eyesCount = eyesCount;
+	}
+
+	public int getTickCount() {
+		return tickCount;
+	}
+
+	public void setTickCount(int tickCount) {
+		this.tickCount = tickCount;
 	}
 	
 	public boolean isWorkInProgress() {

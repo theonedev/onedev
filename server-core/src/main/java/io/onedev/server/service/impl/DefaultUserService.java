@@ -329,6 +329,11 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 
+    	query = getSession().createQuery("update IssueWorkReaction set user=:unknown where user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("unknown", getUnknown());
+    	query.executeUpdate();
+
     	query = getSession().createQuery("update IssueChange set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());

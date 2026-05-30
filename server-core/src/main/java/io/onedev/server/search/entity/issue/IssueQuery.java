@@ -7,11 +7,11 @@ import static io.onedev.server.model.Issue.NAME_CONFUSED_COUNT;
 import static io.onedev.server.model.Issue.NAME_DESCRIPTION;
 import static io.onedev.server.model.Issue.NAME_ESTIMATED_TIME;
 import static io.onedev.server.model.Issue.NAME_EYES_COUNT;
+import static io.onedev.server.model.Issue.NAME_TICK_COUNT;
 import static io.onedev.server.model.Issue.NAME_HEART_COUNT;
 import static io.onedev.server.model.Issue.NAME_LAST_ACTIVITY_DATE;
 import static io.onedev.server.model.Issue.NAME_PROGRESS;
 import static io.onedev.server.model.Issue.NAME_PROJECT;
-import static io.onedev.server.model.Issue.NAME_ROCKET_COUNT;
 import static io.onedev.server.model.Issue.NAME_SMILE_COUNT;
 import static io.onedev.server.model.Issue.NAME_SPENT_TIME;
 import static io.onedev.server.model.Issue.NAME_STATE;
@@ -365,10 +365,10 @@ public class IssueQuery extends EntityQuery<Issue> {
 										criterias.add(new ConfusedCountCriteria(getIntValue(value), operator));
 									} else if (fieldName.equals(NAME_HEART_COUNT)) {
 										criterias.add(new HeartCountCriteria(getIntValue(value), operator));
-									} else if (fieldName.equals(NAME_ROCKET_COUNT)) {
-										criterias.add(new RocketCountCriteria(getIntValue(value), operator));
 									} else if (fieldName.equals(NAME_EYES_COUNT)) {
 										criterias.add(new EyesCountCriteria(getIntValue(value), operator));
+									} else if (fieldName.equals(NAME_TICK_COUNT)) {
+										criterias.add(new TickCountCriteria(getIntValue(value), operator));
 									} else if (fieldName.equals(NAME_NUMBER)) {
 										criterias.add(new ReferenceCriteria(project, value, operator));
 									} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
@@ -434,11 +434,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 										case NAME_HEART_COUNT:
 											criterias.add(new HeartCountCriteria(getIntValue(value), operator));
 											break;
-										case NAME_ROCKET_COUNT:
-											criterias.add(new RocketCountCriteria(getIntValue(value), operator));
-											break;
 										case NAME_EYES_COUNT:
 											criterias.add(new EyesCountCriteria(getIntValue(value), operator));
+											break;
+										case NAME_TICK_COUNT:
+											criterias.add(new TickCountCriteria(getIntValue(value), operator));
 											break;
 										case NAME_ESTIMATED_TIME: 
 											int intValue = value.equals(NAME_SPENT_TIME) ? -1 : timeTrackingSetting.parseWorkingPeriod(value);
@@ -612,8 +612,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 						&& !fieldName.equals(Issue.NAME_TADA_COUNT)
 						&& !fieldName.equals(Issue.NAME_CONFUSED_COUNT)
 						&& !fieldName.equals(Issue.NAME_HEART_COUNT)
-						&& !fieldName.equals(Issue.NAME_ROCKET_COUNT)
 						&& !fieldName.equals(Issue.NAME_EYES_COUNT)
+						&& !fieldName.equals(Issue.NAME_TICK_COUNT)
 						&& !fieldName.equals(NAME_NUMBER)
 						&& !fieldName.equals(IssueSchedule.NAME_ITERATION)
 						&& !(fieldSpec instanceof IssueChoiceField)
@@ -648,8 +648,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 						&& !fieldName.equals(Issue.NAME_TADA_COUNT)
 						&& !fieldName.equals(Issue.NAME_CONFUSED_COUNT)
 						&& !fieldName.equals(Issue.NAME_HEART_COUNT)
-						&& !fieldName.equals(Issue.NAME_ROCKET_COUNT)
 						&& !fieldName.equals(Issue.NAME_EYES_COUNT)
+						&& !fieldName.equals(Issue.NAME_TICK_COUNT)
 						&& !fieldName.equals(NAME_NUMBER)
 						&& !(fieldSpec instanceof IntegerField)
 						&& !(fieldSpec instanceof FloatField)
