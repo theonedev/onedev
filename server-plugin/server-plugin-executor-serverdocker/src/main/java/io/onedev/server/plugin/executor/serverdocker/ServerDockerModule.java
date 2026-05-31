@@ -2,6 +2,8 @@ package io.onedev.server.plugin.executor.serverdocker;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import com.google.common.collect.Sets;
 
 import io.onedev.agent.AgentUtils;
@@ -25,7 +27,7 @@ public class ServerDockerModule extends AbstractPluginModule {
 		
 		// put your guice bindings here
 
-		if (OneDev.getK8sService() == null) {
+		if (OneDev.getK8sService() == null && !SystemUtils.IS_OS_WINDOWS) {
 			contribute(ImplementationProvider.class, new ImplementationProvider() {
 
 				@Override
