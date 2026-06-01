@@ -124,9 +124,15 @@
 	color: white !important;
 	/* Paint past the inline line box without changing text layout. Padding
 	   clips wrapped fragments in Safari, while shadow keeps glyph metrics intact. */
-	box-shadow: 0 -0.25rem 0 #8950FC, 0 0.25rem 0 #8950FC;
+	box-shadow: 0 -0.26rem 0 #8950FC, 0 0.26rem 0 #8950FC;
 	-webkit-box-decoration-break: clone;
 	box-decoration-break: clone;
+}
+@supports not (-webkit-hyphens: none) {
+	.blob-text-diff>.text-diff>tbody>tr>td.content>span.content-mark {
+		/* Non-Safari browsers need extra paint to cover the transparent cell border. */
+		box-shadow: 0 -0.33rem 0 #8950FC, 0 0.33rem 0 #8950FC;
+	}
 }
 
 .blob-text-diff>.text-diff>tbody>tr>td.number>.comment-indicator,

@@ -3,9 +3,9 @@
 set -e 
 
 _sigterm() {
-  kill -TERM "$child"
-  wait "$child"
-  exit 1
+  kill -TERM "$child" 2>/dev/null || true
+  wait "$child" 2>/dev/null || true
+  exit 143
 }
 
 trap _sigterm SIGTERM
@@ -24,6 +24,5 @@ child=$!
 wait "$child"
 
 touch /opt/onedev/IN_DOCKER
-/opt/onedev/boot/wrapper-linux-$CPUARCH /opt/onedev/conf/wrapper.conf &
-child=$!
-wait "$child"
+trap - SIGTERM SIGINT
+exec /opt/onedev/boot/wrapper-linux-$CPUARCH /opt/onedev/conf/wrapper.conf
