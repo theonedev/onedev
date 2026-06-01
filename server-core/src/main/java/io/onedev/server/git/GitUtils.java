@@ -92,11 +92,11 @@ import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.IsAncestorCommand;
 import io.onedev.server.git.command.ReceivePackCommand;
 import io.onedev.server.git.command.UploadPackCommand;
-import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.git.exception.RefUpdateException;
 import io.onedev.server.git.location.GitLocation;
@@ -232,7 +232,7 @@ public class GitUtils {
 				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
 				return objectLoader.openStream();
 			} else {
-				throw new ObjectNotFoundException("Unable to find blob path '" + path + "' in revision '" + revId + "'");
+				throw new NotFoundException("Unable to find blob path '" + path + "' in revision '" + revId + "'");
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

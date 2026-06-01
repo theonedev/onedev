@@ -568,8 +568,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (user == null)
 			return false;
 
-		if (canWriteCode(subject, comment.getProject()) || comment.getUser().equals(user))
+		if (canWriteCode(subject, comment.getProject()) 
+				|| comment.getUser().equals(user) 
+				|| canManageCodeComments(comment.getProject())) {
 			return true;
+		}
 		
 		var request = comment.getCompareContext().getPullRequest();
 		return request != null && (request.isReviewer(user) || request.getSubmitter().equals(user));

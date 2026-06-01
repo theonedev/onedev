@@ -14,6 +14,9 @@
 }
 .CodeMirror-mark {
 	background: #8950FC;
+	padding: 0.25em 0;
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
 }
 .cm-identifierhighlight.CodeMirror-mark {
 	background: var(--dark);	

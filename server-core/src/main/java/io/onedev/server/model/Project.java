@@ -79,13 +79,13 @@ import io.onedev.server.annotation.ProjectKey;
 import io.onedev.server.annotation.ProjectName;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.LfsObject;
-import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
@@ -817,7 +817,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			getBlobCache().put(blobIdent, blobOptional);
 		}
 		if (mustExist && !blobOptional.isPresent())
-			throw new ObjectNotFoundException("Unable to find blob ident: " + blobIdent);
+			throw new NotFoundException("Unable to find blob ident: " + blobIdent);
 		else 
 			return blobOptional.orNull();
 	}
@@ -849,7 +849,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			objectIdCache.put(revision, optional);
 		}
 		if (mustExist && !optional.isPresent())
-			throw new ObjectNotFoundException("Unable to find revision '" + revision + "'");
+			throw new NotFoundException("Unable to find revision '" + revision + "'");
 		return optional.orNull();
 	}
 	
@@ -1019,7 +1019,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			commitCache.put(revId, commit);
 		}
 		if (mustExist && !commit.isPresent())
-			throw new ObjectNotFoundException("Unable to find commit associated with object id: " + revId);
+			throw new NotFoundException("Unable to find commit associated with object id: " + revId);
 		else
 			return commit.orNull();
 	}

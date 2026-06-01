@@ -3,15 +3,14 @@ package io.onedev.server.git;
 import java.io.Serializable;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.FileMode;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.MoreObjects;
 
-import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.RevisionAndPath;
 
@@ -57,7 +56,7 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		if (path != null) {
 			mode = project.getMode(revision, path);
 			if (mode == 0) {
-				throw new ObjectNotFoundException("Unable to find blob path '" + path
+				throw new NotFoundException("Unable to find blob path '" + path
 						+ "' in revision '" + revision + "'");
 			}
 		} else {

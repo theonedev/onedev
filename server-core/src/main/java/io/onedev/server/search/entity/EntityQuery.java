@@ -15,12 +15,13 @@ import org.jspecify.annotations.Nullable;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.codeassist.FenceAware;
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
+import io.onedev.server.exception.NotAcceptableException;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
@@ -99,7 +100,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		try {
 			return Integer.parseInt(value);
 		} catch (NumberFormatException e) {
-			throw new ExplicitException("Invalid number: " + value);
+			throw new NotAcceptableException("Invalid number: " + value);
 		}
 	}
 
@@ -107,7 +108,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		try {
 			return Float.parseFloat(value);
 		} catch (NumberFormatException e) {
-			throw new ExplicitException("Invalid decimal: " + value);
+			throw new NotAcceptableException("Invalid decimal: " + value);
 		}
 	}
 	
@@ -116,7 +117,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (labelSpec != null) 
 			return labelSpec;
 		else
-			throw new ExplicitException("Undefined label: " + labelName);
+			throw new NotFoundException("Undefined label: " + labelName);
 	}
 	
 	public static int getWorkingPeriodValue(String value) {
@@ -124,7 +125,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 			return timeTrackingSetting.parseWorkingPeriod(value);
 		} catch (ValidationException e) {
-			throw new ExplicitException("Invalid working period: " + value);
+			throw new NotAcceptableException("Invalid working period: " + value);
 		}
 	}
 	
@@ -132,28 +133,28 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		try {
 			return Long.parseLong(value);
 		} catch (NumberFormatException e) {
-			throw new ExplicitException("Invalid number: " + value);
+			throw new NotAcceptableException("Invalid number: " + value);
 		}
 	}
 	
 	public static User getUser(String loginName) {
 		User user = OneDev.getInstance(UserService.class).findByName(loginName);
 		if (user == null)
-			throw new ExplicitException("Unable to find user with login: " + loginName);
+			throw new NotFoundException("Unable to find user with login: " + loginName);
 		return user;
 	}
 
 	public static Group getGroup(String groupName) {
 		Group group = OneDev.getInstance(GroupService.class).find(groupName);
 		if (group == null)
-			throw new ExplicitException("Unable to find group: " + groupName);
+			throw new NotFoundException("Unable to find group: " + groupName);
 		return group;
 	}
 	
 	public static Project getProject(String projectPath) {
 		Project project = OneDev.getInstance(ProjectService.class).findByPath(projectPath);
 		if (project == null)
-			throw new ExplicitException("Unable to find project '" + projectPath + "'");
+			throw new NotFoundException("Unable to find project '" + projectPath + "'");
 		return project;
 	}
 	
@@ -163,13 +164,13 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		else if (value.equals("false"))
 			return false;
 		else
-			throw new ExplicitException("Invalid boolean: " + value);
+			throw new NotAcceptableException("Invalid boolean: " + value);
 	}
 	
 	public static Date getDateValue(String value) {
 		Date dateValue = DateUtils.parseRelaxed(value);
 		if (dateValue == null)
-			throw new ExplicitException("Unrecognized date: " + value);
+			throw new NotAcceptableException("Unrecognized date: " + value);
 		return dateValue;
 	}
 
@@ -180,7 +181,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (commitId != null && commitId.getCommitId() != null)
 			return commitId;
 		else
-			throw new ExplicitException("Unable to find revision: " + value);
+			throw new NotFoundException("Unable to find revision: " + value);
 	}
 
 	public static ProjectScopedRevision getRevision(@Nullable Project project, String value) {
@@ -190,7 +191,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (revision != null)
 			return revision;
 		else
-			throw new ExplicitException("Unable to find revision: " + value);
+			throw new NotFoundException("Unable to find revision: " + value);
 	}
 	
 	public static Issue getIssue(@Nullable Project project, String value) {
@@ -199,7 +200,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (issue != null)
 			return issue;
 		else
-			throw new ExplicitException("Unable to find issue: " + value);
+			throw new NotFoundException("Unable to find issue: " + value);
 	}
 	
 	public static PullRequest getPullRequest(@Nullable Project project, String value) {
@@ -208,7 +209,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (pullRequest != null)
 			return pullRequest;
 		else
-			throw new ExplicitException("Unable to find pull request: " + value);
+			throw new NotFoundException("Unable to find pull request: " + value);
 	}
 	
 	public static Build getBuild(@Nullable Project project, String value) {
@@ -217,7 +218,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (build != null)
 			return build;
 		else
-			throw new ExplicitException("Unable to find build: " + value);
+			throw new NotFoundException("Unable to find build: " + value);
 	}
 	
 	public static Iteration getIteration(@Nullable Project project, String value) {
@@ -227,7 +228,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (iteration != null)
 			return iteration;
 		else
-			throw new ExplicitException("Unable to find iteration: " + value);
+			throw new NotFoundException("Unable to find iteration: " + value);
 	}
 	
 	public boolean matches(T entity) {

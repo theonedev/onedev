@@ -40,6 +40,7 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -49,7 +50,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.LogCommit;
 import io.onedev.server.git.command.RevListOptions;
-import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
@@ -136,7 +136,7 @@ public class RepositoryResource {
 
 		RefFacade ref = project.getBranchRef(branchName);
 		if (ref == null)
-			throw new ObjectNotFoundException("Branch not found: " + branchName);
+			throw new NotFoundException("Branch not found: " + branchName);
 
 		RefResponse response = new RefResponse();
 		
@@ -213,7 +213,7 @@ public class RepositoryResource {
 
 		RefFacade ref = project.getTagRef(tagName);
 		if (ref == null)
-			throw new ObjectNotFoundException("Tag not found: " + tagName);
+			throw new NotFoundException("Tag not found: " + tagName);
 
 		RefResponse response = new RefResponse();
 		
@@ -304,7 +304,7 @@ public class RepositoryResource {
 		if (!commits.isEmpty())
 			return commits.iterator().next();
 		else
-			throw new ObjectNotFoundException("Commit not found");
+			throw new NotFoundException("Commit not found");
     }
 
 	@SuppressWarnings("unused")

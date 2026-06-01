@@ -1,6 +1,7 @@
 package io.onedev.server.ai;
 
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.io.Serializable;
@@ -239,7 +240,6 @@ public class TodResource {
     }
 
     private ProjectContext getProjectContext(String projectPath, String currentProjectPath) {
-        projectPath = StringUtils.trimToNull(projectPath);
         if (projectPath == null) 
             projectPath = currentProjectPath;
 
@@ -305,10 +305,13 @@ public class TodResource {
             "description", description);
     }
 
-    @Api(description = "Get commit message requirement for non-merge commits")
+    @Api(description = "Get commit message requirement")
     @Path("/get-commit-message-requirement")
     @GET
-    public String getCommitMessageRequirement(@QueryParam("project") @NotNull String projectPath) {
+    @Nullable
+    public String getCommitMessageRequirement(
+                @QueryParam("project") @NotNull String projectPath, 
+                @QueryParam("branch") @NotNull String branch) {
         var user = SecurityUtils.getUser();
         if (user == null)
             throw new UnauthenticatedException();
@@ -317,10 +320,15 @@ public class TodResource {
         if (!SecurityUtils.canWriteCode(project))
             throw new UnauthorizedException();
             
+        return getCommitMessageRequirement(user, project, branch);
+    }
+
+    @Nullable
+    private String getCommitMessageRequirement(User user, Project project, String branch) {            
         var requirementBuilder = new StringBuilder();
-        var branchProtection = project.getBranchProtection(project.getDefaultBranch(), user);
+        var branchProtection = project.getBranchProtection(branch, user);
         if (branchProtection.getCommitMessageChecker() instanceof ConventionalCommitChecker checker) {
-            requirementBuilder.append("Non-merge commit messages should use Conventional Commits format: ")
+            requirementBuilder.append("Commit messages should use Conventional Commits format: ")
                     .append("<type>[optional (scope)][!]: <description>. Git revert messages are also allowed.");
             if (!checker.getCommitTypes().isEmpty()) {
                 requirementBuilder.append("\nAllowed commit types: ")
@@ -342,7 +350,7 @@ public class TodResource {
                         .append(checker.getCommitMessageFooterPattern());
             }
         } else if (branchProtection.getCommitMessageChecker() instanceof RegexpCommitChecker checker) {
-            requirementBuilder.append("Non-merge commit messages should match Java regex: ")
+            requirementBuilder.append("Commit messages should match Java regex: ")
                     .append(checker.getPattern());
             if (checker.getExplanation() != null)
                 requirementBuilder.append("\nExplanation: ").append(checker.getExplanation());
@@ -359,7 +367,7 @@ public class TodResource {
                 var suffix = entry.getSuffix();
                 requirementBuilder.append("\n- prefix pattern: ")
                         .append(prefix != null? prefix: "")
-                        .append("; suffix pattern: ")
+                        .append("\n  suffix pattern: ")
                         .append(suffix != null? suffix: "");
             }
         }
@@ -367,7 +375,7 @@ public class TodResource {
         if (requirementBuilder.length() != 0)
             return requirementBuilder.toString();
         else
-            return "No commit message requirement for non-merge commits";
+            return null;
     }
 
     @Path("/get-issue-query-description")
@@ -440,7 +448,6 @@ public class TodResource {
             throw new UnauthenticatedException();
 
         User user;                
-        userName = StringUtils.trimToNull(userName);
         if (userName != null) {
             user = userService.findByName(userName);
             if (user == null)
@@ -573,6 +580,7 @@ public class TodResource {
             projectDetail.put("issueManagement", project.isIssueManagement());
             projectDetail.put("timeTracking", project.isTimeTracking());
         }
+        projectDetail.put("effectiveDefaultPullRequestMergeStrategy", project.findDefaultPullRequestMergeStrategy());
         projectDetail.put("defaultBranch", project.getDefaultBranch());
         projectDetail.put("link", urlService.urlFor(project, true));
         return projectDetail;
@@ -882,7 +890,7 @@ public class TodResource {
         work.setIssue(issue);
         work.setUser(SecurityUtils.getUser());
         work.setMinutes(spentHours * 60);
-        work.setNote(StringUtils.trimToNull(comment));
+        work.setNote(trimToNull(comment));
         issueWorkService.createOrUpdate(work);
 
         var workMap = new HashMap<String, Object>();
@@ -896,7 +904,7 @@ public class TodResource {
     private void normalizeIssueData(Map<String, Serializable> data) {
         for (var entry: data.entrySet()) {
             if (entry.getValue() instanceof String) 
-                entry.setValue(StringUtils.trimToNull((String) entry.getValue()));
+                entry.setValue(trimToNull((String) entry.getValue()));
         }
         for (var field: settingService.getIssueSetting().getFieldSpecs()) {
             var paramName = getParamName(field.getName());
@@ -1060,6 +1068,19 @@ public class TodResource {
         return PullRequestHelper.getCodeComments(pullRequest);
     }
 
+    @Path("/get-pull-request-builds")
+    @GET
+    public List<Map<String, Object>> getPullRequestBuilds(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference) {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+        return PullRequestHelper.getBuilds(currentProject, pullRequest);
+    }
+
     @Path("/get-pull-request-patch-info")
     @GET
     public Map<String, String> getPullRequestPatchInfo(
@@ -1084,6 +1105,18 @@ public class TodResource {
         return patchInfo;
     }
 
+    private MergeStrategy getMergeStrategy(Project project, @Nullable String mergeStrategyName) {
+        if (mergeStrategyName != null) {
+            try {
+                return MergeStrategy.valueOf(mergeStrategyName);
+            } catch (IllegalArgumentException e) {
+                throw new NotAcceptableException("Invalid merge strategy: " + mergeStrategyName);
+            }
+        } else {
+            return project.findDefaultPullRequestMergeStrategy();
+        }
+    }
+
     @Path("/create-pull-request")
     @POST
     public Map<String, Object> createPullRequest(
@@ -1091,47 +1124,25 @@ public class TodResource {
                 @QueryParam("targetProject") String targetProjectPath,
                 @QueryParam("sourceProject") String sourceProjectPath,
                 @NotNull Map<String, Serializable> data) {
-        if (SecurityUtils.getUser() == null)
-            throw new UnauthenticatedException();
-        
-        var currentProject = getProject(currentProjectPath);
-
-        Project sourceProject;
-        sourceProjectPath = StringUtils.trimToNull(sourceProjectPath);
-        if (sourceProjectPath == null)
-            sourceProject = currentProject;
-        else
-            sourceProject = getProject(sourceProjectPath);
-
-        if (!SecurityUtils.canReadCode(sourceProject))
-            throw new UnauthorizedException("No permission to read code of source project: " + sourceProjectPath);
-
-        targetProjectPath = StringUtils.trimToNull(targetProjectPath);
-        Project targetProject;
-        if (targetProjectPath != null) {
-            targetProject = getProject(targetProjectPath);
-        } else {
-            targetProject = sourceProject.getForkedFrom();
-            if (targetProject == null)
-                targetProject = sourceProject;
-        }
-        if (!SecurityUtils.canReadCode(targetProject))
-            throw new UnauthorizedException("No permission to read code of target project: " + targetProjectPath);
-
         normalizePullRequestData(data);
 
         var targetBranch = (String) data.remove("targetBranch");
-        if (targetBranch == null)
-            targetBranch = targetProject.getDefaultBranch();
-        if (targetBranch == null)
-            throw new NotAcceptableException("No code in target project: " + targetProject.getPath());
 
         var sourceBranch = (String) data.remove("sourceBranch");
         if (sourceBranch == null)
             throw new NotAcceptableException("Source branch is required");
 
-        var target = new ProjectAndBranch(targetProject, targetBranch);
-        var source = new ProjectAndBranch(sourceProject, sourceBranch);
+        var createPullRequestEssentialInfo = getCreatePullRequestEssentialInfo(
+            currentProjectPath, targetProjectPath, sourceProjectPath, 
+            targetBranch, sourceBranch);
+
+        var currentProject = createPullRequestEssentialInfo.currentProject;
+        var target = createPullRequestEssentialInfo.target;
+        var source = createPullRequestEssentialInfo.source;
+        var submitter = createPullRequestEssentialInfo.submitter;
+
+        var mergeStrategyName = (String) data.remove("mergeStrategy");            
+        var mergeStrategy = getMergeStrategy(target.getProject(), mergeStrategyName);
 
         var request = pullRequestService.findOpen(target, source);
         if (request != null)
@@ -1140,11 +1151,8 @@ public class TodResource {
         request = new PullRequest();
         request.setTarget(target);
         request.setSource(source);
-        request.setSubmitter(SecurityUtils.getUser());
-
-        var mergeStrategyName = (String) data.remove("mergeStrategy");
-        if (mergeStrategyName != null)
-            request.setMergeStrategy(MergeStrategy.valueOf(mergeStrategyName));
+        request.setSubmitter(submitter);
+        request.setMergeStrategy(mergeStrategy);
 
         // Pre-populate baseCommitHash + initial update so title/description can
         // be generated from commits below; openNew(...) will keep them as-is.
@@ -1208,6 +1216,114 @@ public class TodResource {
 
         return PullRequestHelper.getDetail(currentProject, request);        
     }
+
+    @Api(description = "Get pull request title and description requirement")
+    @Path("/get-pull-request-title-and-description-requirement")
+    @GET
+    @Nullable
+    public String getPullRequestTitleAndDescriptionRequirement(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("targetProject") String targetProjectPath,
+                @QueryParam("sourceProject") String sourceProjectPath,
+                @QueryParam("targetBranch") String targetBranch,
+                @QueryParam("sourceBranch") @NotNull String sourceBranch,
+                @QueryParam("mergeStrategy") String mergeStrategyName) {
+        var createPullRequestEssentialInfo = getCreatePullRequestEssentialInfo(
+            currentProjectPath, targetProjectPath, sourceProjectPath, 
+            targetBranch, sourceBranch);
+        var target = createPullRequestEssentialInfo.target;
+        var submitter = createPullRequestEssentialInfo.submitter;
+        var mergeStrategy = getMergeStrategy(target.getProject(), mergeStrategyName);
+
+        if (mergeStrategy == MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS) {
+            var commitMessageRequirement = getCommitMessageRequirement(
+                    submitter, target.getProject(), target.getBranch());
+            if (commitMessageRequirement != null) {
+                return String.format("""
+                        This pull request will squash source branch commits into a single commit. \
+                        And the single commit message will be constructed as:
+
+                        <pull request title>
+                        <blank line>
+                        <pull request description, if any>
+
+                        Write the title and description so the full commit message conforms to the \
+                        commit message requirement below:
+
+                        %s
+                        """, commitMessageRequirement);
+            }
+        }
+        return null;
+    }
+
+    @Api(description = "Get pull request commit message requirement")
+    @Path("/get-pull-request-commit-message-requirement")
+    @GET
+    @Nullable
+    public String getPullRequestCommitMessageRequirement(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("targetProject") String targetProjectPath,
+                @QueryParam("sourceProject") String sourceProjectPath,
+                @QueryParam("targetBranch") String targetBranch,
+                @QueryParam("sourceBranch") @NotNull String sourceBranch) {
+        var createPullRequestEssentialInfo = getCreatePullRequestEssentialInfo(
+            currentProjectPath, targetProjectPath, sourceProjectPath, 
+            targetBranch, sourceBranch);
+        var target = createPullRequestEssentialInfo.target;
+        var submitter = createPullRequestEssentialInfo.submitter;
+
+        return getCommitMessageRequirement(submitter, target.getProject(), target.getBranch());
+    }
+
+    private CreatePullRequestEssentialInfo getCreatePullRequestEssentialInfo(
+                String currentProjectPath, 
+                @Nullable String targetProjectPath, 
+                @Nullable String sourceProjectPath,
+                @Nullable String targetBranch, 
+                String sourceBranch) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+        
+        var currentProject = getProject(currentProjectPath);
+
+        Project sourceProject;
+        if (sourceProjectPath == null)
+            sourceProject = currentProject;
+        else
+            sourceProject = getProject(sourceProjectPath);
+
+        if (!SecurityUtils.canReadCode(sourceProject))
+            throw new UnauthorizedException("No permission to read code of source project: " + sourceProjectPath);
+
+        Project targetProject;
+        if (targetProjectPath != null) {
+            targetProject = getProject(targetProjectPath);
+        } else {
+            targetProject = sourceProject.getForkedFrom();
+            if (targetProject == null)
+                targetProject = sourceProject;
+        }
+        if (!SecurityUtils.canReadCode(targetProject))
+            throw new UnauthorizedException("No permission to read code of target project: " + targetProjectPath);
+
+        if (targetBranch == null)
+            targetBranch = targetProject.getDefaultBranch();
+        if (targetBranch == null)
+            throw new NotAcceptableException("No code in target project: " + targetProject.getPath());
+
+        var target = new ProjectAndBranch(targetProject, targetBranch);
+        var source = new ProjectAndBranch(sourceProject, sourceBranch);
+
+        var info = new CreatePullRequestEssentialInfo();
+        info.currentProject = currentProject;
+        info.target = target;
+        info.source = source;
+        info.submitter = user;
+
+        return info;
+    }    
 
     private PullRequest getPullRequest(Project currentProject, String referenceString) {
         var requestReference = PullRequestReference.of(referenceString, currentProject);
@@ -1345,7 +1461,7 @@ public class TodResource {
 
             var autoMerge = new AutoMerge();
             autoMerge.setEnabled(autoMergeEnabled);
-            autoMerge.setCommitMessage(StringUtils.trimToNull((String) data.remove("autoMergeCommitMessage")));
+            autoMerge.setCommitMessage(trimToNull((String) data.remove("autoMergeCommitMessage")));
             var errorMessage = request.checkMergeCommitMessage(user, autoMerge.getCommitMessage());
             if (errorMessage != null) 
                 throw new NotAcceptableException("Error validating param auto merge commit message: " + errorMessage);
@@ -1370,7 +1486,7 @@ public class TodResource {
         var currentProject = getProject(currentProjectPath);
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
-        pullRequestReviewService.review(user, pullRequest, true, StringUtils.trimToNull(comment));
+        pullRequestReviewService.review(user, pullRequest, true, trimToNull(comment));
         return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
@@ -1388,7 +1504,7 @@ public class TodResource {
         var currentProject = getProject(currentProjectPath);
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
-        pullRequestReviewService.review(user, pullRequest, false, StringUtils.trimToNull(comment));
+        pullRequestReviewService.review(user, pullRequest, false, trimToNull(comment));
         return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
@@ -1409,7 +1525,7 @@ public class TodResource {
         if (!SecurityUtils.canWriteCode(user.asSubject(), pullRequest.getProject()))
             throw new UnauthorizedException();
 
-        commitMessage = StringUtils.trimToNull(commitMessage);
+        commitMessage = trimToNull(commitMessage);
 
         pullRequestService.merge(user, pullRequest, commitMessage);
 
@@ -1433,7 +1549,7 @@ public class TodResource {
         if (!SecurityUtils.canModifyPullRequest(pullRequest))
             throw new UnauthorizedException();
 
-        pullRequestService.discard(user, pullRequest, StringUtils.trimToNull(comment));
+        pullRequestService.discard(user, pullRequest, trimToNull(comment));
         return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
@@ -1454,7 +1570,7 @@ public class TodResource {
         if (!SecurityUtils.canModifyPullRequest(pullRequest))
             throw new UnauthorizedException();
 
-        pullRequestService.reopen(user, pullRequest, StringUtils.trimToNull(comment));
+        pullRequestService.reopen(user, pullRequest, trimToNull(comment));
         return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
@@ -1477,7 +1593,7 @@ public class TodResource {
             throw new UnauthorizedException();
         }
 
-        pullRequestService.deleteSourceBranch(user, pullRequest, StringUtils.trimToNull(comment));
+        pullRequestService.deleteSourceBranch(user, pullRequest, trimToNull(comment));
         return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
@@ -1500,7 +1616,7 @@ public class TodResource {
             throw new UnauthorizedException();
         }
 
-        pullRequestService.restoreSourceBranch(user, pullRequest, StringUtils.trimToNull(comment));
+        pullRequestService.restoreSourceBranch(user, pullRequest, trimToNull(comment));
         return PullRequestHelper.getDetail(currentProject, pullRequest);        
     }
 
@@ -1592,7 +1708,7 @@ public class TodResource {
 
         var project = getProject(currentProjectPath);
 
-        var jobName = StringUtils.trimToNull((String)data.get("jobName"));
+        var jobName = trimToNull((String)data.get("jobName"));
         if (jobName == null)
             throw new NotAcceptableException("Job name is required");
 
@@ -1600,11 +1716,11 @@ public class TodResource {
             throw new UnauthorizedException();
 
         String refName;
-        var branch = StringUtils.trimToNull((String)data.get("branch"));
-        var tag = StringUtils.trimToNull((String)data.get("tag"));
-        var commitHash = StringUtils.trimToNull((String)data.get("commitHash"));
+        var branch = trimToNull((String)data.get("branch"));
+        var tag = trimToNull((String)data.get("tag"));
+        var commitHash = trimToNull((String)data.get("commitHash"));
         if (commitHash != null) {
-            refName = StringUtils.trimToNull((String)data.get("refName"));
+            refName = trimToNull((String)data.get("refName"));
             if (refName == null) {
                 throw new NotAcceptableException("Ref name is required when commit hash is specified");
             }
@@ -1625,8 +1741,8 @@ public class TodResource {
             List<String> paramPairs = (List<String>) paramData;
             if (paramPairs != null) {
                 for (var paramPair: paramPairs) {
-                    var paramName = StringUtils.trimToNull(StringUtils.substringBefore(paramPair, "="));
-                    var paramValue = StringUtils.trimToNull(StringUtils.substringAfter(paramPair, "="));
+                    var paramName = trimToNull(StringUtils.substringBefore(paramPair, "="));
+                    var paramValue = trimToNull(StringUtils.substringAfter(paramPair, "="));
                     if (paramName != null && paramValue != null)
                         params.computeIfAbsent(paramName, k -> new ArrayList<>()).add(paramValue);
                 }
@@ -1637,7 +1753,7 @@ public class TodResource {
             params = new HashMap<String, List<String>>();
         }
 
-        var reason = StringUtils.trimToNull((String)data.get("reason"));
+        var reason = trimToNull((String)data.get("reason"));
         if (reason == null)
             throw new NotAcceptableException("Reason is required");
             
@@ -1718,7 +1834,7 @@ public class TodResource {
     private void normalizePullRequestData(Map<String, Serializable> data) {
         for (var entry : data.entrySet()) {
             if (entry.getValue() instanceof String)
-                entry.setValue(StringUtils.trimToNull((String) entry.getValue()));
+                entry.setValue(trimToNull((String) entry.getValue()));
         }
     }    
 
@@ -1739,4 +1855,16 @@ public class TodResource {
 
     }
 
- }
+    private static class CreatePullRequestEssentialInfo {
+
+        Project currentProject;
+
+        ProjectAndBranch target;
+
+        ProjectAndBranch source;
+
+        User submitter;
+
+    }
+
+}

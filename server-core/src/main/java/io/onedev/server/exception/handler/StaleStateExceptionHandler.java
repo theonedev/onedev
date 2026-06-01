@@ -1,7 +1,7 @@
-package io.onedev.server.persistence.exception;
+package io.onedev.server.exception.handler;
 
 import io.onedev.server.exception.HttpResponse;
-import io.onedev.server.exception.handler.AbstractExceptionHandler;
+
 import org.hibernate.StaleStateException;
 
 import javax.servlet.http.HttpServletResponse;

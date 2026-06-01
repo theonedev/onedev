@@ -1,17 +1,17 @@
-package io.onedev.server.persistence.exception;
+package io.onedev.server.exception.handler;
 
-import javax.persistence.EntityNotFoundException;
+import java.io.FileNotFoundException;
+
 import javax.servlet.http.HttpServletResponse;
 
 import io.onedev.server.exception.HttpResponse;
-import io.onedev.server.exception.handler.AbstractExceptionHandler;
 
-public class EntityNotFoundExceptionHandler extends AbstractExceptionHandler<EntityNotFoundException> {
+public class FileNotFoundExceptionHandler extends AbstractExceptionHandler<FileNotFoundException> {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Override
-    public HttpResponse getResponse(EntityNotFoundException exception) {
+    public HttpResponse getResponse(FileNotFoundException exception) {
 		var errorMessage = exception.getMessage();
 		if (errorMessage == null)
 			errorMessage = "Not found";

@@ -1209,12 +1209,12 @@ public class PullRequest extends ProjectBelonging
 	
 	public String getDefaultMergeCommitMessage() {
 		if (getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS) {
-			return _T("Merges pull request") + " #" + getNumber() + "\n\n" + getTitle();
+			return "Merges pull request #" + getNumber() + "\n\n" + getTitle();
 		} else {
 			var commitMessage = getTitle();
 			if (getDescription() != null)
 				commitMessage += "\n\n" + getDescription();
-			commitMessage += "\n\n" + _T("Merges pull request") + " #" + getNumber();
+			commitMessage += "\n\n" + "Merges pull request #" + getNumber();
 			return commitMessage;
 		}
 	}

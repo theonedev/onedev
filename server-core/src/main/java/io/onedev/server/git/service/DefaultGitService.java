@@ -81,6 +81,8 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.DefaultBranchChanged;
 import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.exception.BadRequestException;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
@@ -98,10 +100,8 @@ import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.LogCommit;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.command.RevListOptions;
-import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
-import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.persistence.SessionService;
@@ -748,7 +748,7 @@ public class DefaultGitService implements GitService, Serializable {
 						String nonExistPath = currentOldPaths.iterator().next();
 						if (parentPath != null)
 							nonExistPath = parentPath + "/" + nonExistPath;
-						throw new ObjectNotFoundException("Unable to find path " + nonExistPath);
+						throw new NotFoundException("Unable to find path " + nonExistPath);
 					}
 
 					if (!currentNewBlobs.isEmpty()) {
@@ -945,7 +945,7 @@ public class DefaultGitService implements GitService, Serializable {
 									blob = new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes());
 								}
 							} else if (blobIdent.isTree()) {
-								throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
+								throw new BadRequestException("Path '" + blobIdent.path + "' is a tree");
 							} else {
 								blob = new Blob(blobIdent, blobId, treeWalk.getObjectReader());
 							}

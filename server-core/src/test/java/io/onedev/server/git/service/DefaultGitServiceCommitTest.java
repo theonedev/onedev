@@ -29,19 +29,19 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.AbstractGitTest;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
-import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.persistence.SessionService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 
 public class DefaultGitServiceCommitTest extends AbstractGitTest {
 
@@ -122,7 +122,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 					user, "test delete", false);
 			assertTrue("An ObjectNotExistException should be thrown", false);
 		} catch (Exception e) {
-			if (ExceptionUtils.find(e, ObjectNotFoundException.class) == null)
+			if (ExceptionUtils.find(e, NotFoundException.class) == null)
 				throw ExceptionUtils.unchecked(e);
 		}
 	}

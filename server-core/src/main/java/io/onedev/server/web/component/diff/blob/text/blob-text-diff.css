@@ -6,6 +6,9 @@
 .blob-text-diff>.text-diff>tbody>tr>td {
 	position: relative;
 }
+.blob-text-diff>.text-diff {
+	border-spacing: 0;
+}
 .blob-text-diff>.text-diff>tbody>tr>td.number>.coverage {
 	display: block;
 	position: absolute;
@@ -119,6 +122,11 @@
 .blob-text-diff>.text-diff>tbody>tr>td.content>span.content-mark {
 	background: #8950FC;
 	color: white !important;
+	/* Paint past the inline line box without changing text layout. Padding
+	   clips wrapped fragments in Safari, while shadow keeps glyph metrics intact. */
+	box-shadow: 0 -0.25rem 0 #8950FC, 0 0.25rem 0 #8950FC;
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
 }
 
 .blob-text-diff>.text-diff>tbody>tr>td.number>.comment-indicator,
