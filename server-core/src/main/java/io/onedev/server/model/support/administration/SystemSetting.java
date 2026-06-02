@@ -201,7 +201,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.avatarServiceUrl = avatarServiceUrl;
 	}
 
-	@Editable(order=700, name="Default Fork Root", placeholder="No fork root", description="""
+	@Editable(order=700, name="Default Fork Root", placeholder="No default fork root", description="""
 			When forking from the UI, the default target project will be created as 
 			&lt;default fork root&gt;/&lt;account name&gt;/&lt;project name&gt; if specified 
 			(users forking need permission to create child projects under the fork 

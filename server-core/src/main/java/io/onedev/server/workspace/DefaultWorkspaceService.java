@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -120,6 +121,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private static final String WORKSPACE_LOGS_DIR = "workspace-logs";
 
+	private static final String AUTO_DISCOVERED_PROVISIONER_NAME = "auto-discovered";
+
 	@Inject
 	private ProjectService projectService;
 
@@ -149,6 +152,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Inject
 	private TaskScheduler taskScheduler;
+
+	@Inject
+	private Set<WorkspaceProvisionerDiscoverer> workspaceProvisionerDiscoverers;
 
 	private SequenceGenerator numberGenerator;
 
@@ -246,6 +252,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var provisionerName = workspace.getProvisionerName();
 			var pinnedServerAddress = workspace.getServerAddress();
 			var pinnedAgentId = Agent.idOf(workspace.getAgent());
+			var provisioner = resolveProvisionerForCleanup(workspace);
 
 			// record project server since workspace deletion can be called while
 			// deleting a project
@@ -262,23 +269,22 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							while (workspaceServers.containsKey(workspaceId))
 								Thread.sleep(1000);
 
-							if (provisionerName != null) {
-								var provisioner = settingService.getWorkspaceProvisioners().stream()
-										.filter(it -> provisionerName.equals(it.getName()))
-										.findFirst()
-										.orElse(null);
-								if (provisioner != null) {
-									try {
-										provisioner.deleteWorkspace(projectId, workspaceNumber, pinnedServerAddress, pinnedAgentId);
-									} catch (Throwable t) {
-										var message = "Error cleanup workspace via provisioner '%s' (project id: %d, workspace number: %d)"
-												.formatted(provisionerName, projectId, workspaceNumber);
-										logger.error(message, t);
-									}	
-								} else {
-									logger.warn("Provisioner '{}' not found, skipping deleting workspace storage (project id: {}, workspace number: {})",
-											provisionerName, projectId, workspaceNumber);
-								}
+							if (provisioner != null) {
+								try {
+									provisioner.deleteWorkspace(projectId, workspaceNumber, pinnedServerAddress, pinnedAgentId);
+								} catch (Throwable t) {
+									var message = "Error cleanup workspace via provisioner '%s' (project id: %d, workspace number: %d)"
+											.formatted(provisionerName, projectId, workspaceNumber);
+									logger.error(message, t);
+								}	
+							} else if (AUTO_DISCOVERED_PROVISIONER_NAME.equals(provisionerName)) {
+								if (pinnedAgentId != null)
+									AgentProvisionerUtils.deleteWorkspace(projectId, workspaceNumber, pinnedAgentId);
+								else
+									ServerProvisionerUtils.deleteWorkspace(projectId, workspaceNumber, pinnedServerAddress);
+							} else if (provisionerName != null) {
+								logger.warn("Provisioner '{}' not found, skipping deleting workspace storage (project id: {}, workspace number: {})",
+										provisionerName, projectId, workspaceNumber);
 							} else {
 								logger.warn("Provisioner unknown. Skipping deleting workspace storage (project id: {}, workspace number: {})", projectId, workspaceNumber);
 							}
@@ -674,6 +680,41 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			return provisioner.isApplicable(workspace.getProject());
 	}
 
+	@Nullable
+	private WorkspaceProvisioner resolveProvisionerForCleanup(Workspace workspace) {
+		var provisionerName = workspace.getProvisionerName();
+		if (provisionerName == null)
+			return null;
+		var provisioner = settingService.getWorkspaceProvisioners().stream()
+				.filter(it -> provisionerName.equals(it.getName()))
+				.findFirst()
+				.orElse(null);
+		if (provisioner != null)
+			return provisioner;
+		if (!AUTO_DISCOVERED_PROVISIONER_NAME.equals(provisionerName))
+			return null;
+		var spec = workspace.getSpec();
+		if (spec == null)
+			return null;
+		spec = new WorkspaceVariableInterpolator(workspace).interpolateProperties(spec);
+		return discoverProvisioner(workspace, spec);
+	}
+
+	@Nullable
+	private WorkspaceProvisioner discoverProvisioner(Workspace workspace, WorkspaceSpec spec) {
+		List<WorkspaceProvisionerDiscoverer> discoverers = new ArrayList<>(workspaceProvisionerDiscoverers);
+		discoverers.sort(Comparator.comparing(WorkspaceProvisionerDiscoverer::getOrder));
+		for (var discoverer : discoverers) {
+			WorkspaceProvisioner provisioner = discoverer.discover();
+			if (provisioner != null) {
+				provisioner.setName(AUTO_DISCOVERED_PROVISIONER_NAME);
+				if (isApplicable(workspace, spec, provisioner))
+					return provisioner;
+			}
+		}
+		return null;
+	}
+
 	private WorkspaceProvisioner getProvisioner(Workspace workspace, WorkspaceSpec spec, TaskLogger logger) {
 		if (spec.getProvisioner() != null) {
 			var provisioner = settingService.getWorkspaceProvisioners().stream()
@@ -693,18 +734,10 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				.orElseThrow(() -> new ExplicitException("No applicable workspace provisioner"));
 		} else {
 			logger.log("No workspace provisioner defined, auto-discovering...");
-			List<WorkspaceProvisionerDiscoverer> discoverers = new ArrayList<>(
-					OneDev.getExtensions(WorkspaceProvisionerDiscoverer.class));
-			discoverers.sort(Comparator.comparing(WorkspaceProvisionerDiscoverer::getOrder));
-			for (var discoverer : discoverers) {
-				WorkspaceProvisioner provisioner = discoverer.discover();
-				if (provisioner != null) {
-					provisioner.setName("auto-discovered");
-					if (isApplicable(workspace, spec, provisioner)) {
-						logger.log("Discovered " + EditableUtils.getDisplayName(provisioner.getClass()).toLowerCase());
-						return provisioner;
-					}
-				}
+			var provisioner = discoverProvisioner(workspace, spec);
+			if (provisioner != null) {
+				logger.log("Discovered " + EditableUtils.getDisplayName(provisioner.getClass()).toLowerCase());
+				return provisioner;
 			}
 
 			if (spec.isRunInContainer()) {

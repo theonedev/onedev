@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -31,20 +33,21 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
-import io.onedev.server.service.IssueLinkService;
-import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
@@ -52,15 +55,23 @@ import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 
 public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	
+	@Inject
+	private IssueService issueService;
+
+	@Inject
+	private IssueLinkService issueLinkService;
+
 	private final Long issueId;
 	
 	private AbstractPostAjaxBehavior ajaxBehavior;
@@ -71,7 +82,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		setModel(new LoadableDetachableModel<>() {
 			@Override
 			protected Issue load() {
-				return OneDev.getInstance(IssueService.class).load(issueId);
+				return issueService.load(issueId);
 			}
 		});
 	}
@@ -215,7 +226,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 									@Override
 									protected Issue load() {
-										return OneDev.getInstance(IssueService.class).load(issueId);
+										return issueService.load(issueId);
 									}
 
 								}, cursor);
@@ -270,6 +281,36 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		fragment.add(new CopyToClipboardLink("copy", 
 				Model.of(issue.getTitle() + " (" + issue.getReference().toString(getProject()) + ")")));
 
+		fragment.add(new DropdownLink("workspaces") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new WorkspaceSpecListPanel(id) {
+
+					@Override
+					protected Project getProject() {
+						return getIssue().getProject();
+					}
+
+					@Override
+					protected String getBranch(boolean createIfNotExist) {
+						if (createIfNotExist)
+							return issueService.ensureBranch(SecurityUtils.getSubject(), getIssue());
+						else
+							return getIssue().getBranch();
+					}
+
+				};
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(canCreateWorkspace(getIssue().getProject()));
+			}
+
+		});
+
 		var linksPanel = new IssueLinksPanel("links") {
 
 			@Override
@@ -298,7 +339,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			@Override
 			protected List<Issue> load() {
 				Issue issue = issueModel.getObject();
-				OneDev.getInstance(IssueLinkService.class).loadDeepLinks(issue);
+				issueLinkService.loadDeepLinks(issue);
 				LinkDescriptor descriptor = new LinkDescriptor(linksPanel.getExpandedLink());
 				return issue.findLinkedIssues(descriptor.getSpec(), descriptor.isOpposite()).stream().filter(it->canAccessIssue(it)).collect(toList());
 			}
@@ -343,7 +384,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 				if (canManageIssues(getProject())) {
 					Long issueId = RequestCycle.get().getRequest().getPostParameters()
 							.getParameterValue("issue").toLong();
-					Issue issue = OneDev.getInstance(IssueService.class).load(issueId);
+					Issue issue = issueService.load(issueId);
 					Hibernate.initialize(issue.getProject());
 					Project parent = issue.getProject().getParent();
 					while (parent != null) {
@@ -394,5 +435,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	protected abstract Project getProject();
 	
 	protected abstract void onDeleteIssue(AjaxRequestTarget target);
+	
+	protected abstract boolean canCreateWorkspace(Project project);
 	
 }

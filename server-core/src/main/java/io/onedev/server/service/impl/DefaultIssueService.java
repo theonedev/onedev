@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -29,9 +30,11 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -66,7 +69,9 @@ import io.onedev.server.event.project.issue.IssuesCopied;
 import io.onedev.server.event.project.issue.IssuesDeleted;
 import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAuthorization;
@@ -169,6 +174,9 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	
 	@Inject
 	private IssueTouchService touchService;
+
+	@Inject
+	private GitService gitService;
 	
 	private SequenceGenerator numberGenerator;
 	
@@ -1381,4 +1389,32 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		}
 	}
 
+	@Override
+	public String ensureBranch(Subject subject, Issue issue) {
+		if (issue.getBranch() != null)
+			return issue.getBranch();
+
+		Project project = issue.getProject();
+		String suggestedBranch = suggestBranch(issue);
+
+		if (!SecurityUtils.canCreateBranch(project, suggestedBranch))
+			throw new UnauthorizedException("No permission to create branch: " + suggestedBranch);
+
+		if (project.getBranchRef(suggestedBranch) != null) {
+			throw new NotAcceptableException(MessageFormat.format("Branch \"{0}\" already exists", suggestedBranch));
+		} else {
+			String defaultBranch = project.getDefaultBranch();
+			if (defaultBranch == null) {
+				throw new NotAcceptableException("Default branch is not available");
+			} else {
+				RevCommit commit = project.getRevCommit(defaultBranch, true);
+				if (!project.isCommitSignatureRequirementSatisfied(SecurityUtils.getUser(subject), suggestedBranch, commit)) {
+					throw new NotAcceptableException("Valid signature required for head commit of this branch per branch protection rule");
+				} else {
+					gitService.createBranch(project, suggestedBranch, defaultBranch);
+					return suggestedBranch;
+				}
+			}
+		}
+	}
 }

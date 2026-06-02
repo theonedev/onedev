@@ -1667,11 +1667,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new WorkspaceSpecListPanel(id, getPullRequest().getSourceBranch()) {
+				return new WorkspaceSpecListPanel(id) {
 
 					@Override
 					protected Project getProject() {
 						return getPullRequest().getSourceProject();
+					}
+
+					@Override
+					protected String getBranch(boolean createIfNotExist) {
+						return getPullRequest().getSourceBranch();
 					}
 
 				};

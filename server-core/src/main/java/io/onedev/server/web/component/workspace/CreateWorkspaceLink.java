@@ -16,20 +16,19 @@ public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 	@Inject
 	private WorkspaceService workspaceService;
 
-	private final String branch;
-
-	public CreateWorkspaceLink(String componentId, String branch) {
+	public CreateWorkspaceLink(String componentId) {
 		super(componentId);
-		this.branch = branch;
 	}
 
 	protected abstract Project getProject();
+
+	protected abstract String getBranch();
 
 	protected abstract WorkspaceSpec getSpec();
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), branch, getSpec().getName());
+		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), getBranch(), getSpec().getName());
 		setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
 	}
 

@@ -482,11 +482,16 @@ public class ProjectBranchesPage extends ProjectPage {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new WorkspaceSpecListPanel(id, branch) {
+						return new WorkspaceSpecListPanel(id) {
 
 							@Override
 							protected Project getProject() {
 								return ProjectBranchesPage.this.getProject();
+							}
+
+							@Override
+							protected String getBranch(boolean createIfNotExist) {
+								return branch;
 							}
 
 						};

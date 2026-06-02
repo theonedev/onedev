@@ -492,7 +492,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Both sides deleted this file", "양쪽 모두 이 파일을 삭제했습니다");
 		m.put("Bottom", "아래쪽");
 		m.put("Branch", "브랜치");
-		m.put("Branch \"{0}\" already exists", "브랜치 \"{0}\"가 이미 존재합니다.");
 		m.put("Branch \"{0}\" already exists, please choose a different name", "브랜치 \"{0}\"는 이미 존재합니다. 다른 이름을 선택하세요.");
 		m.put("Branch \"{0}\" created", "브랜치 \"{0}\"가 생성되었습니다");
 		m.put("Branch \"{0}\" deleted", "브랜치 \"{0}\"가 삭제되었습니다");
@@ -561,7 +560,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Build statistics is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"빌드 통계는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>을 해보세요");
 		m.put("Build version", "빌드 버전");
-		m.put("Build with Persistent Volume", "Persistent Volume을 사용하는 빌드");
 		m.put("Build {0} deleted", "빌드 {0} 삭제됨");
 		m.put("Builds", "빌드들");
 		m.put("Builds are {0}", "빌드는 {0} 상태입니다");
@@ -588,6 +586,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU 집약적 작업 동시성");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "밀리초 단위의 CPU 성능. 일반적으로 (CPU 코어)*1000입니다");
 		m.put("CPU cores", "CPU 코어");
+		m.put("CPU request for the workspace container.", "워크스페이스 컨테이너의 CPU 요청.");
 		m.put("Cache \"{0}\" deleted", "캐시 \"{0}\" 삭제됨");
 		m.put("Cache Config", "캐시 구성");
 		m.put("Cache Key", "캐시 키");
@@ -924,12 +923,20 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Create User", "사용자 생성");
 		m.put("Create Workspace", "워크스페이스 생성");
 		m.put("Create Workspace Spec", "워크스페이스 사양 생성");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Claude Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"서버 셸 환경에서 Claude Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Claude Code에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
 		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적으로 컨테이너 내에서 Claude Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Codex</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"서버 셸 환경에서 Codex를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Codex에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
 		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적으로 컨테이너 내에서 Codex를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Cursor CLI</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"서버 셸 환경에서 Cursor CLI를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Cursor CLI에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
 		m.put("Create a workspace spec running Cursor CLI inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적으로 컨테이너 내부에서 Cursor CLI를 실행하여 작업공간 사양을 생성합니다.\n필요한 경우 나중에 <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>컨테이너 이미지</a>를\n사용자 요구에 맞게 커스터마이징할 수 있습니다.");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Open Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"서버 셸 환경에서 Open Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Open Code에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적으로 컨테이너 내에서 Open Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
 		m.put("Create body", "본문 생성");
@@ -999,7 +1006,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Default Value Provider", "기본값 제공자");
 		m.put("Default Values", "기본값들");
 		m.put("Default branch", "기본 브랜치");
-		m.put("Default branch is not available", "기본 브랜치가 사용 가능하지 않습니다.");
 		m.put("Default branding settings restored", "기본 브랜딩 설정 복원됨");
 		m.put("Default fixed issue filters saved", "기본 고정 이슈 필터 저장됨");
 		m.put("Default merge strategy", "기본 병합 전략");
@@ -1193,7 +1199,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Do you really want to remove password of this user?", "정말로 이 사용자의 비밀번호를 제거하시겠습니까?");
 		m.put("Do you really want to remove the issue from iteration \"{0}\"?", "정말로 이슈를 반복 작업 \"{0}\"에서 제거하시겠습니까?");
 		m.put("Do you really want to remove this account?", "정말로 이 계정을 제거하시겠습니까?");
-		m.put("Do you really want to remove this agent?", "정말로 이 에이전트를 제거하시겠습니까?");
 		m.put("Do you really want to remove this link?", "정말로 이 링크를 제거하시겠습니까?");
 		m.put("Do you really want to restart this agent?", "정말로 이 에이전트를 재시작하시겠습니까?");
 		m.put("Do you really want to unauthorize user \"{0}\"?", "정말로 사용자 \"{0}\"의 권한을 해제하시겠습니까?");
@@ -1303,8 +1308,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"HTML 보고서 게시 단계를 실행할 수 있도록 활성화합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"사이트 게시 단계를 실행할 수 있도록 허용하려면 이를 활성화합니다. OneDev는 프로젝트 사이트 파일을 그대로 제공합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
-		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
-			"emptyDir 대신 동적으로 할당된 영구 볼륨에 작업 실행에 필요한 중간 파일을 배치하려면 이를 활성화합니다");
 		m.put("Enable this to process issue or pull request comments posted via email", "이메일을 통해 게시된 이슈 또는 풀 리퀘스트 댓글을 처리하려면 이를 활성화합니다");
 		m.put("Enable this to process issue or pull request comments posted via email. <b class='text-danger'>NOTE:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub addressing</a> needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts", 
 			"이메일을 통해 게시된 이슈 또는 풀 리퀘스트 댓글을 처리하려면 이를 활성화합니다. <b class='text-danger'>참고:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>서브 어드레싱</a>이 위 시스템 이메일 주소에 대해 활성화되어야 합니다. OneDev는 이를 사용하여 이슈 및 풀 리퀘스트 컨텍스트를 추적합니다");
@@ -1994,6 +1997,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Kubectl Config File", "Kubectl 구성 파일");
 		m.put("Kubernetes", "쿠버네티스");
 		m.put("Kubernetes Executor", "쿠버네티스 실행기");
+		m.put("Kubernetes Provisioner", "Kubernetes 프로비저너");
 		m.put("LDAP URL", "LDAP URL");
 		m.put("Label", "레이블");
 		m.put("Label Management", "레이블 관리");
@@ -2147,6 +2151,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Memory", "메모리");
 		m.put("Memory Limit", "메모리 제한");
 		m.put("Memory Request", "메모리 요청");
+		m.put("Memory request for the workspace container.", "워크스페이스 컨테이너의 메모리 요청.");
 		m.put("Mention Someone", "누군가를 언급하기");
 		m.put("Mention someone", "누군가를 언급하기");
 		m.put("Merge", "병합");
@@ -2158,7 +2163,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Merge preview not calculated yet", "병합 미리보기가 아직 계산되지 않음");
 		m.put("Merged", "병합됨");
 		m.put("Merged pull request \"{0}\" ({1})", "병합된 풀 리퀘스트 \"{0}\" ({1})");
-		m.put("Merges pull request", "풀 리퀘스트 병합");
 		m.put("Message is too long. Max {0} characters", "메시지가 너무 깁니다. 최대 {0}자");
 		m.put("Meta", "메타");
 		m.put("Meta Info", "메타 정보");
@@ -2240,6 +2244,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Named Query", "Named Query");
 		m.put("Named Workspace Queries Bean", "이름이 지정된 작업 공간 쿼리 빈");
 		m.put("Named Workspace Query", "이름이 지정된 작업 공간 쿼리");
+		m.put("Namespace", "네임스페이스");
 		m.put("Natural language query via AI", "AI를 통한 자연어 질의");
 		m.put("Network Options", "네트워크 옵션");
 		m.put("Never", "절대 없음");
@@ -2318,7 +2323,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No fields to prompt", "프롬프트할 필드 없음");
 		m.put("No fields to remove", "제거할 필드 없음");
 		m.put("No file attachments", "파일 첨부 없음");
-		m.put("No fork root", "포크 루트 없음");
 		m.put("No group by", "그룹화 없음");
 		m.put("No groups claim returned", "반환된 그룹 클레임 없음");
 		m.put("No groups to remove from", "제거할 그룹이 없습니다");
@@ -2530,6 +2534,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"선택적으로 <span class='text-info'>쉼표로 구분된</span> 스캔 플랫폼을 지정하세요. 예를 들어 <tt>linux/amd64,linux/arm64</tt>. OCI 레이아웃의 모든 플랫폼을 스캔하려면 비워 두세요.");
 		m.put("Optionally specify API key for authentication", "인증을 위해 API 키를 선택적으로 지정");
+		m.put("Optionally specify CPU limit for the workspace container.", "워크스페이스 컨테이너의 CPU 제한을 선택적으로 지정하세요.");
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>에 상대적인 Dockerfile을 지정하세요. 위에서 지정한 빌드 경로 아래의 <tt>Dockerfile</tt> 파일을 사용하려면 비워 두세요.");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "선택적으로 Renovate CLI에서 사용할 JavaScript 구성을 지정하세요.");
@@ -2565,6 +2570,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 시간 추정을 보유할 작업 기간 필드를 지정하세요.<br><b>참고: </b> 적절한 옵션이 없는 경우 OneDev 문제 필드를 사용자 정의할 수 있습니다.");
 		m.put("Optionally specify a working period field to hold time spent infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"선택적으로 소요 시간을 보유할 작업 기간 필드를 지정하세요.<br><b>참고: </b> 적절한 옵션이 없는 경우 OneDev 문제 필드를 사용자 정의할 수 있습니다.");
+		m.put("Optionally specify absolute path to the kubeconfig file used by kubectl to access the cluster. Leave empty to have kubectl determine cluster access automatically (works when OneDev itself runs in the cluster).", 
+			"kubectl이 클러스터에 액세스하는 데 사용하는 kubeconfig 파일의 절대 경로를 선택적으로 지정하세요. 비워 두면 kubectl이 클러스터 액세스를 자동으로 결정합니다 (OneDev 자체가 클러스터에서 실행되는 경우 작동).");
+		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
+			"kubectl 실행 파일의 절대 경로를 선택적으로 지정하세요. 시스템 PATH에서 kubectl을 사용하려면 비워 두세요.");
 		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint", 
 			"웹훅 POST 요청에 포함할 추가 HTTP 헤더를 선택적으로 지정하세요. 예를 들어 수신 엔드포인트에서 요구하는 Authorization 헤더");
 		m.put("Optionally specify additional options for buildx build command", "선택적으로 buildx 빌드 명령의 추가 옵션을 지정하세요.");
@@ -2653,6 +2662,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"워크스페이스 상단에 바로가기를 선택적으로 지정합니다. 워크스페이스가 생성되면\n첫 번째 바로가기가 자동으로 열립니다");
 		m.put("Optionally specify memory limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"선택적으로 이 실행자를 사용하는 각 작업/서비스에 대한 메모리 제한을 지정하세요. 자세한 내용은 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 리소스 관리</a>를 참조하세요.");
+		m.put("Optionally specify memory limit for the workspace container.", "워크스페이스 컨테이너의 메모리 제한을 선택적으로 지정하세요.");
 		m.put("Optionally specify memory limit for workspace containers. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> of the container", 
 			"작업 공간 컨테이너의 메모리 제한을 선택적으로 지정하세요. 이는 컨테이너의 <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> 옵션으로 사용됩니다");
 		m.put("Optionally specify memory limit of each job/service using this executor. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> of relevant containers", 
@@ -2913,6 +2923,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이중 인증을 활성화할 때 저장한 복구 코드 중 하나를 입력해주세요");
 		m.put("Please login to perform this operation", "이 작업을 수행하려면 로그인해주세요");
 		m.put("Please login to perform this query", "이 쿼리를 수행하려면 로그인해주세요");
+		m.put("Please reprovision the workspace to show changes", "변경 사항을 표시하려면 워크스페이스를 다시 프로비저닝하세요.");
 		m.put("Please resolve undefined field values below", "아래 정의되지 않은 필드 값을 해결해주세요");
 		m.put("Please resolve undefined fields below", "아래 정의되지 않은 필드를 해결해주세요");
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
@@ -3112,7 +3123,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pull request is discarded", "풀 리퀘스트가 폐기됨");
 		m.put("Pull request is in error: {0}", "풀 리퀘스트 오류 발생: {0}");
 		m.put("Pull request is merged", "풀 리퀘스트가 병합됨");
-		m.put("Pull request is opened", "풀 리퀘스트가 열림");
 		m.put("Pull request is still a work in progress", "풀 리퀘스트가 아직 진행 중입니다");
 		m.put("Pull request is work in progress", "풀 리퀘스트가 진행 중입니다");
 		m.put("Pull request list", "풀 리퀘스트 목록");
@@ -3211,8 +3221,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Remaining time", "남은 시간");
 		m.put("Remember Me", "날 기억해줘");
 		m.put("Remote Docker Executor", "원격 도커 실행기");
+		m.put("Remote Docker Provisioner", "원격 Docker 프로비저너");
 		m.put("Remote Machine", "원격 머신");
 		m.put("Remote Shell Executor", "원격 셸 실행기");
+		m.put("Remote Shell Provisioner", "원격 셸 프로비저너");
 		m.put("Remote URL", "원격 URL");
 		m.put("Remote Url", "원격 URL");
 		m.put("Remove", "제거");
@@ -3231,8 +3243,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Remove this file", "이 파일 제거");
 		m.put("Remove this image", "이 이미지를 제거하십시오");
 		m.put("Remove this reviewer", "이 리뷰어를 제거하십시오");
-		m.put("Removed all queried agents. Type <code>yes</code> below to confirm", "모든 조회된 에이전트를 제거했습니다. 아래에 <code>yes</code>를 입력하여 확인하십시오");
-		m.put("Removed selected agents. Type <code>yes</code> below to confirm", "선택된 에이전트를 제거했습니다. 아래에 <code>yes</code>를 입력하여 확인하십시오");
 		m.put("Rename {0}", "{0} 이름 변경");
 		m.put("Renew Subscription", "구독 갱신");
 		m.put("Renovate CLI Options", "Renovate CLI 옵션");
@@ -3442,11 +3452,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Sequential Group", "순차 그룹");
 		m.put("Server", "서버");
 		m.put("Server Docker Executor", "서버 Docker 실행자");
+		m.put("Server Docker Provisioner", "서버 Docker 프로비저너");
 		m.put("Server Id", "서버 ID");
 		m.put("Server Information", "서버 정보");
 		m.put("Server Log", "서버 로그");
 		m.put("Server Setup", "서버 설정");
 		m.put("Server Shell Executor", "서버 쉘 실행자");
+		m.put("Server Shell Provisioner", "서버 셸 프로비저너");
 		m.put("Server URL", "서버 URL");
 		m.put("Server fingerprint", "서버 지문");
 		m.put("Server host", "서버 호스트");
@@ -3702,6 +3714,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"전체 커밋 메시지를 검증하기 위한 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 정규 표현식</a> 패턴을 지정하세요. 다중 라인 매칭을 위해 <code>(?s)</code> 플래그를 시작 부분에 사용하세요.");
 		m.put("Specify a <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron schedule</a> to fire the job automatically. <b class='text-info'>Note:</b> To save resource, seconds in cron expression will be ignored, and the minimum schedule interval is one minute", 
 			"작업을 자동으로 실행하기 위한 <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron 일정</a>을 지정합니다. <b class='text-info'>참고:</b> 리소스를 절약하기 위해 cron 표현식의 초는 무시되며 최소 일정 간격은 1분입니다");
+		m.put("Specify a Container Image to Test Against", "테스트할 컨테이너 이미지를 지정하세요.");
 		m.put("Specify a Docker Image to Test Against", "테스트할 Docker 이미지를 지정합니다");
 		m.put("Specify a custom field of Enum type", "Enum 유형의 사용자 정의 필드를 지정합니다");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "지정된 작업의 고정된 이슈를 필터링/정렬하기 위한 기본 쿼리를 지정합니다");
@@ -3732,6 +3745,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"역할을 통해 권한이 부여된 사용자 외에 이 기밀 이슈에 접근할 수 있는 추가 사용자를 지정합니다. 이슈에 언급된 사용자는 자동으로 권한이 부여됩니다");
 		m.put("Specify agents applicable for this executor", "이 실행기에 적용 가능한 에이전트를 지정합니다");
+		m.put("Specify agents applicable for this provisioner", "이 프로비저너에 적용 가능한 에이전트를 지정하세요.");
 		m.put("Specify allowed <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> separated by comma", 
 			"쉼표로 구분된 허용된 <a href='https://spdx.org/licenses/'>SPDX 라이선스 식별자</a>를 지정하세요.");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
@@ -3871,6 +3885,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 실행자가 동시에 실행할 수 있는 작업/서비스의 최대 수를 지정하세요. CPU 코어로 설정하려면 비워 두세요.");
 		m.put("Specify max number of workspaces this provisioner can handle concurrently.\nLeave empty to set as CPU cores", 
 			"이 프로비저너가 동시에 처리할 수 있는 최대 워크스페이스 수를 지정하십시오.\n비워 두면 CPU 코어로 설정됩니다");
+		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
+			"이 프로비저너가 각 매칭된 에이전트에서 동시에 실행할 수 있는 최대 워크스페이스 수를 지정하세요. 비워 두면 에이전트 CPU 코어로 설정됩니다.");
+		m.put("Specify max number of workspaces this provisioner can run on each matched agent. Leave empty to set as agent CPU cores", 
+			"이 프로비저너가 각 매칭된 에이전트에서 실행할 수 있는 최대 워크스페이스 수를 지정하세요. 비워 두면 에이전트 CPU 코어로 설정됩니다.");
 		m.put("Specify max size of uploaded file in mega bytes via web interface. This applies to file uploaded to repository, markdown content (issue comment etc), and build artifacts", 
 			"웹 인터페이스를 통해 업로드된 파일의 최대 크기(메가바이트)를 지정하세요. 이는 저장소에 업로드된 파일, 마크다운 콘텐츠(문제 댓글 등), 빌드 아티팩트에 적용됩니다.");
 		m.put("Specify memory request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
@@ -3911,6 +3929,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 pylint JSON 결과 파일을 지정하세요. 이 파일은 pylint JSON 출력 형식 옵션으로 생성할 수 있습니다. 예: <code>--exit-zero --output-format=json:pylint-result.json</code>. 이 단계는 구성된 임계값에 따라 빌드를 실패시키므로 위반 시 pylint 명령을 실패시키지 않습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
 		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password", 
 			"필요한 경우 레지스트리 로그인을 지정하세요. 내장 레지스트리의 경우 레지스트리 URL에 <code>@server_url@</code>, 사용자 이름에 <code>@job_token@</code>, 비밀번호에 액세스 토큰을 사용하세요.");
+		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@workspace_token@</code> for user name, and access token for password.", 
+			"필요한 경우 레지스트리 로그인을 지정하세요. 내장 레지스트리의 경우, 레지스트리 URL에 <code>@server_url@</code>, 사용자 이름에 <code>@workspace_token@</code>, 비밀번호에 액세스 토큰을 사용하세요.");
 		m.put("Specify registry url. Leave empty for official registry", "레지스트리 URL을 지정하세요. 공식 레지스트리의 경우 비워 두세요.");
 		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 기준으로 OCI 레이아웃을 저장할 상대 경로를 지정하세요.");
@@ -3958,6 +3978,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"일치하는 이슈 참조를 대체할 텍스트를 지정하십시오. 예를 들어: &lt;br&gt;&lt;em&gt;$1&amp;lt;a href='http://track.example.com/issues/$2'&amp;gt;$2&amp;lt;/a&amp;gt;&lt;/em&gt; &lt;br&gt;여기서 $1과 $2는 예제 이슈 패턴의 캡처 그룹을 나타냅니다(이슈 패턴 도움말 참조).");
 		m.put("Specify the condition current build must satisfy to execute this action", "현재 빌드가 이 작업을 실행하기 위해 충족해야 하는 조건을 지정하십시오.");
 		m.put("Specify the condition preserved builds must match", "보존된 빌드가 일치해야 하는 조건을 지정하십시오.");
+		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. OneDev creates the namespace if it does not yet exist.", 
+			"이 프로비저너의 워크스페이스를 호스팅할 Kubernetes 네임스페이스를 지정하세요. 네임스페이스가 아직 존재하지 않는 경우 OneDev가 생성합니다.");
 		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
 			"사용할 모델 이름을 지정하십시오. <b class='text-danger'>참고:</b> 현재 OneDev는\n채팅 완료 API가 있는 모델만 지원합니다. OpenAI의 새로운 응답 API가 있는 모델은 아직 지원되지 않습니다");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
@@ -4263,8 +4285,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "이 권한은 기밀 이슈에 액세스할 수 있도록 합니다");
 		m.put("This permission enables one to schedule issues into iterations", "이 권한은 이슈를 반복 작업에 일정으로 추가할 수 있도록 합니다");
 		m.put("This property is imported from {0}", "이 속성은 {0}에서 가져왔습니다");
-		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
-			"이 프로비저너는 보안 및 격리 목적으로 OneDev 서버에서 Docker 컨테이너 내에 워크스페이스를 생성합니다.\n현재 OneDev 서버가 Kubernetes 클러스터 내에 설치된 경우 지원되지 않습니다");
 		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
 			"이 프로비저너는 OneDev 서버의 셸 기능으로 작업 공간을 생성하며,\nOneDev 서버에 tmux가 설치되어 있어야 합니다");
 		m.put("This pull request has been discarded", "이 풀 리퀘스트는 폐기되었습니다");
@@ -4677,6 +4697,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"컨테이너를 실행하거나 이미지를 빌드할 때 항상 이미지를 가져올지 여부. 이 옵션을 활성화하면 동일한 노드에서 실행되는 악성 작업이 이미지를 교체하는 것을 방지할 수 있습니다");
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"컨테이너 실행 시 항상 이미지를 풀할지 여부. 악의적인 작업에 의해 이미지가 교체되는 것을 방지하기 위해 이 옵션을 활성화해야 합니다");
+		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
+			"컨테이너를 실행할 때 항상 이미지를 가져올지 여부. 활성화하면 동일한 노드에서 실행 중인 악성 워크로드에 의해 이미지가 대체되는 것을 방지합니다.");
 		m.put("Whether or not to be able to access time tracking info of issues", "문제의 시간 추적 정보를 액세스할 수 있는지 여부");
 		m.put("Whether or not to create the workspace inside container", "컨테이너 내부에 워크스페이스를 생성할지 여부");
 		m.put("Whether or not to enable code management for the project", "프로젝트에 대한 코드 관리를 활성화할지 여부");
@@ -4753,6 +4775,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Workspace token", "워크스페이스 토큰");
 		m.put("Workspace {0} deleted", "워크스페이스 {0} 삭제됨");
 		m.put("Workspaces", "워크스페이스들");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"이 프로비저너로 생성된 워크스페이스는 OneDev 프로세스와 동일한 권한을 가집니다.\n'**', '*' 또는 '?'를 사용하여 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매치</a>를 수행하세요.\n여러 프로젝트는 공백으로 구분해야 합니다.<br>\n<b class='text-danger'>경고</b>: 이 프로비저너로 생성된 워크스페이스는 OneDev 프로세스와 동일한 권한을 가집니다.\n이 프로비저너를 사용할 수 있는 프로젝트가 신뢰할 수 있는 프로젝트인지 확인하세요.");
 		m.put("Workspaces on source branch", "소스 브랜치의 작업공간");
 		m.put("Workspaces on this branch", "이 브랜치의 워크스페이스들");
 		m.put("Workspaces on this issue", "이 이슈의 작업공간");
@@ -4935,10 +4959,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("pull request and code review", "풀 리퀘스트 및 코드 리뷰");
 		m.put("pull request to any branch is discarded", "모든 브랜치에 대한 풀 리퀘스트가 폐기됨");
 		m.put("pull request to any branch is merged", "모든 브랜치에 대한 풀 리퀘스트가 병합됨");
-		m.put("pull request to any branch is opened", "모든 브랜치에 대한 풀 리퀘스트가 열림");
 		m.put("pull request to branches \"{0}\" is discarded", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 폐기됨");
 		m.put("pull request to branches \"{0}\" is merged", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 병합됨");
-		m.put("pull request to branches \"{0}\" is opened", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 열림");
 		m.put("pull request {0}", "풀 리퀘스트 {0}");
 		m.put("pull requests", "풀 리퀘스트들");
 		m.put("reconciliation (need administrator permission)", "조정 (관리자 권한 필요)");
@@ -5040,56 +5062,37 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("CPU request for the workspace container.", "워크스페이스 컨테이너의 CPU 요청.");
-		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Claude Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"서버 셸 환경에서 Claude Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Claude Code에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Codex</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"서버 셸 환경에서 Codex를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Codex에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Cursor CLI</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"서버 셸 환경에서 Cursor CLI를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Cursor CLI에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Open Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"서버 셸 환경에서 Open Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Open Code에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
-		m.put("Kubernetes Provisioner", "Kubernetes 프로비저너");
-		m.put("Memory request for the workspace container.", "워크스페이스 컨테이너의 메모리 요청.");
-		m.put("Namespace", "네임스페이스");
-		m.put("Optionally specify CPU limit for the workspace container.", "워크스페이스 컨테이너의 CPU 제한을 선택적으로 지정하세요.");
-		m.put("Optionally specify a storage class to allocate the workspace PVC. Leave empty to use the cluster default storage class.", 
-			"워크스페이스 PVC를 할당할 스토리지 클래스를 선택적으로 지정하세요. 클러스터 기본 스토리지 클래스를 사용하려면 비워 두세요.");
-		m.put("Optionally specify absolute path to the kubeconfig file used by kubectl to access the cluster. Leave empty to have kubectl determine cluster access automatically (works when OneDev itself runs in the cluster).", 
-			"kubectl이 클러스터에 액세스하는 데 사용하는 kubeconfig 파일의 절대 경로를 선택적으로 지정하세요. 비워 두면 kubectl이 클러스터 액세스를 자동으로 결정합니다 (OneDev 자체가 클러스터에서 실행되는 경우 작동).");
-		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
-			"kubectl 실행 파일의 절대 경로를 선택적으로 지정하세요. 시스템 PATH에서 kubectl을 사용하려면 비워 두세요.");
-		m.put("Optionally specify memory limit for the workspace container.", "워크스페이스 컨테이너의 메모리 제한을 선택적으로 지정하세요.");
-		m.put("Please reprovision the workspace to show changes", "변경 사항을 표시하려면 워크스페이스를 다시 프로비저닝하세요.");
-		m.put("Remote Docker Provisioner", "원격 Docker 프로비저너");
-		m.put("Remote Shell Provisioner", "원격 셸 프로비저너");
-		m.put("Server Docker Provisioner", "서버 Docker 프로비저너");
-		m.put("Server Shell Provisioner", "서버 셸 프로비저너");
-		m.put("Specify a Container Image to Test Against", "테스트할 컨테이너 이미지를 지정하세요.");
-		m.put("Specify agents applicable for this provisioner", "이 프로비저너에 적용 가능한 에이전트를 지정하세요.");
-		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
-			"이 프로비저너가 각 매칭된 에이전트에서 동시에 실행할 수 있는 최대 워크스페이스 수를 지정하세요. 비워 두면 에이전트 CPU 코어로 설정됩니다.");
-		m.put("Specify max number of workspaces this provisioner can run on each matched agent. Leave empty to set as agent CPU cores", 
-			"이 프로비저너가 각 매칭된 에이전트에서 실행할 수 있는 최대 워크스페이스 수를 지정하세요. 비워 두면 에이전트 CPU 코어로 설정됩니다.");
-		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@workspace_token@</code> for user name, and access token for password.", 
-			"필요한 경우 레지스트리 로그인을 지정하세요. 내장 레지스트리의 경우, 레지스트리 URL에 <code>@server_url@</code>, 사용자 이름에 <code>@workspace_token@</code>, 비밀번호에 액세스 토큰을 사용하세요.");
-		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. OneDev creates the namespace if it does not yet exist.", 
-			"이 프로비저너의 워크스페이스를 호스팅할 Kubernetes 네임스페이스를 지정하세요. 네임스페이스가 아직 존재하지 않는 경우 OneDev가 생성합니다.");
-		m.put("Storage Class", "스토리지 클래스");
-		m.put("Storage Size", "스토리지 크기");
-		m.put("Storage size requested for each workspace PVC. The value should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
-			"각 워크스페이스 PVC에 요청된 스토리지 크기. 값은 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 리소스 용량 형식</a>을 따라야 합니다. 예: <i>10Gi</i>");
-		m.put("This provisioner creates workspaces as pods inside a Kubernetes cluster. Workspace files are persisted in a PersistentVolumeClaim (one per workspace) so that the workspace pod may be restarted/re-provisioned without losing user changes.", 
-			"이 프로비저너는 Kubernetes 클러스터 내에서 pod로 워크스페이스를 생성합니다. 워크스페이스 파일은 PersistentVolumeClaim(워크스페이스당 하나)에 저장되므로 워크스페이스 pod를 다시 시작하거나 다시 프로비저닝해도 사용자 변경 사항이 손실되지 않습니다.");
-		m.put("This provisioner creates workspaces inside Docker containers on remote agents via\n<a href='/~administration/agents' target='_blank'>agents</a> for security and isolation purpose", 
-			"이 프로비저너는 보안 및 격리 목적으로\n<a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 에이전트의 Docker 컨테이너 내에서 워크스페이스를 생성합니다.");
-		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires\ntmux to be installed on matched agents", 
-			"이 프로비저너는 원격 에이전트의 셸 기능으로 워크스페이스를 생성하며,\n매칭된 에이전트에 tmux가 설치되어 있어야 합니다.");
-		m.put("Use cluster default storage class", "클러스터 기본 스토리지 클래스 사용");
-		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
-			"컨테이너를 실행할 때 항상 이미지를 가져올지 여부. 활성화하면 동일한 노드에서 실행 중인 악성 워크로드에 의해 이미지가 대체되는 것을 방지합니다.");
-		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
-			"이 프로비저너로 생성된 워크스페이스는 OneDev 프로세스와 동일한 권한을 가집니다.\n'**', '*' 또는 '?'를 사용하여 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매치</a>를 수행하세요.\n여러 프로젝트는 공백으로 구분해야 합니다.<br>\n<b class='text-danger'>경고</b>: 이 프로비저너로 생성된 워크스페이스는 OneDev 프로세스와 동일한 권한을 가집니다.\n이 프로비저너를 사용할 수 있는 프로젝트가 신뢰할 수 있는 프로젝트인지 확인하세요.");
+		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>Kubernetes 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>원격 Docker 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>원격 셸 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("Cannot remove agent \"{0}\" as it has workspaces", "에이전트 \"{0}\"를 제거할 수 없습니다. 작업 공간이 있습니다.");
+		m.put("Cannot remove agent as it has workspaces", "작업 공간이 있어 에이전트를 제거할 수 없습니다.");
+		m.put("Do you really want to remove agent \"{0}\"?", "정말로 에이전트 \"{0}\"를 제거하시겠습니까?");
+		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
+			"<a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 이상</a>이 설치되어 있는지 확인하세요.");
+		m.put("No default fork root", "기본 포크 루트가 없습니다.");
+		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
+			"작업 공간 PVC를 동적으로 할당하기 위해 스토리지 클래스를 선택적으로 지정하세요. 기본 스토리지 클래스를 사용하려면 비워 두세요. <b class='text-warning'>참고:</b> 스토리지 클래스의 복구 정책은 <code>Delete</code>로 설정되어야 합니다. 작업 공간이 삭제되면 볼륨도 삭제됩니다.");
+		m.put("Pull request is opened or updated", "풀 리퀘스트가 열리거나 업데이트되었습니다.");
+		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "쿼리된 모든 에이전트를 제거합니다. 아래에 <code>remove ALL agents</code>를 입력하여 확인하세요.");
+		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "선택된 에이전트를 제거합니다. 아래에 <code>yes</code>를 입력하여 확인하세요.");
+		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
+			"작업 공간 PVC에 요청할 스토리지 크기를 지정하세요. 크기는 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 리소스 용량 형식</a>을 따라야 하며, 예를 들어 <i>10Gi</i>와 같습니다.");
+		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "이 프로비저너는 Kubernetes 클러스터 내에서 작업 공간을 pod로 생성합니다.");
+		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "이 프로비저너는 OneDev 서버의 Docker 컨테이너 내에서 작업 공간을 생성합니다.");
+		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
+			"이 프로비저너는 \n<a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 Docker 컨테이너 내에서 작업 공간을 생성합니다.");
+		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
+			"이 프로비저너는 원격 에이전트의 셸 기능으로 작업 공간을 생성하며, 매칭된 에이전트에 tmux가 설치되어 있어야 합니다.");
+		m.put("Workspace Volume Storage Class", "작업 공간 볼륨 스토리지 클래스");
+		m.put("Workspace Volume Storage Size", "작업 공간 볼륨 스토리지 크기");
+		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
+			"재생성 후 에이전트 측에서 토큰을 업데이트해야 합니다. 계속하시겠습니까?");
+		m.put("pull request to any branch is opened or updated", "모든 브랜치에 대한 풀 리퀘스트가 열리거나 업데이트되었습니다.");
+		m.put("pull request to branches \"{0}\" is opened or updated", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 열리거나 업데이트되었습니다.");
 	}
 		
 	@Override

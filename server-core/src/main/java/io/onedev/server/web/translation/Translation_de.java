@@ -492,7 +492,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Both sides deleted this file", "Beide Seiten haben diese Datei gelöscht");
 		m.put("Bottom", "Unten");
 		m.put("Branch", "Branch");
-		m.put("Branch \"{0}\" already exists", "Branch \"{0}\" existiert bereits");
 		m.put("Branch \"{0}\" already exists, please choose a different name", "Branch \"{0}\" existiert bereits, bitte wählen Sie einen anderen Namen");
 		m.put("Branch \"{0}\" created", "Branch \"{0}\" erstellt");
 		m.put("Branch \"{0}\" deleted", "Branch \"{0}\" gelöscht");
@@ -561,7 +560,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Build statistics is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"Build-Statistiken sind eine Enterprise-Funktion. <a href='https://onedev.io/pricing' target='_blank'>30 Tage kostenlos testen</a>");
 		m.put("Build version", "Build-Version");
-		m.put("Build with Persistent Volume", "Build mit Persistent Volume");
 		m.put("Build {0} deleted", "Build {0} gelöscht");
 		m.put("Builds", "Builds");
 		m.put("Builds are {0}", "Builds sind {0}");
@@ -588,6 +586,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU-intensive Aufgaben-Konkurrenz");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "CPU-Kapazität in Millis. Dies ist normalerweise (CPU-Kerne)*1000");
 		m.put("CPU cores", "CPU-Kerne");
+		m.put("CPU request for the workspace container.", "CPU-Anforderung für den Workspace-Container.");
 		m.put("Cache \"{0}\" deleted", "Cache \"{0}\" gelöscht");
 		m.put("Cache Config", "Cache-Konfiguration");
 		m.put("Cache Key", "Cache-Schlüssel");
@@ -924,12 +923,20 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Create User", "Erstelle Benutzer");
 		m.put("Create Workspace", "Arbeitsbereich erstellen");
 		m.put("Create Workspace Spec", "Arbeitsbereichs-Spec erstellen");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Claude Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Erstellen Sie eine Workspace-Spezifikation, die Claude Code direkt mit der Server-Shell-Umgebung ausführt.\nWorkspaces, die mit der erstellten Spezifikation verwendet werden, teilen sich dieselben Umgebungen und Einstellungen.\nUm diese Vorlage zu verwenden, stellen Sie bitte sicher, dass:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> auf dem OneDev-Server installiert ist</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> auf dem OneDev-Server installiert ist und Begleitfähigkeiten für Claude Code installiert sind</li>\n    <li>Ein Shell-Provisioner unter 'Administration / Workspace Provisioners' hinzugefügt wurde und 'anwendbare Projekte' ordnungsgemäß konfiguriert sind</li>\n</ul>");
 		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Erstelle eine Workspace-Spezifikation, die Claude Code innerhalb eines Containers für Isolations- und Sicherheitszwecke ausführt.\nSie können das <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>Container-Image</a>\nspäter anpassen, um Ihren Bedürfnissen gerecht zu werden, falls gewünscht");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Codex</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Erstellen Sie eine Workspace-Spezifikation, die Codex direkt mit der Server-Shell-Umgebung ausführt.\nWorkspaces, die mit der erstellten Spezifikation verwendet werden, teilen sich dieselben Umgebungen und Einstellungen.\nUm diese Vorlage zu verwenden, stellen Sie bitte sicher, dass:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> auf dem OneDev-Server installiert ist</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> auf dem OneDev-Server installiert ist und Begleitfähigkeiten für Codex installiert sind</li>\n    <li>Ein Shell-Provisioner unter 'Administration / Workspace Provisioners' hinzugefügt wurde und 'anwendbare Projekte' ordnungsgemäß konfiguriert sind</li>\n</ul>");
 		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Erstelle eine Workspace-Spezifikation, die Codex innerhalb eines Containers für Isolations- und Sicherheitszwecke ausführt.\nSie können das <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>Container-Image</a>\nspäter anpassen, um Ihren Bedürfnissen gerecht zu werden, falls gewünscht");
+		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Cursor CLI</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Erstellen Sie eine Workspace-Spezifikation, die Cursor CLI direkt mit der Server-Shell-Umgebung ausführt.\nWorkspaces, die mit der erstellten Spezifikation verwendet werden, teilen sich dieselben Umgebungen und Einstellungen.\nUm diese Vorlage zu verwenden, stellen Sie bitte sicher, dass:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> auf dem OneDev-Server installiert ist</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> auf dem OneDev-Server installiert ist und Begleitfähigkeiten für Cursor CLI installiert sind</li>\n    <li>Ein Shell-Provisioner unter 'Administration / Workspace Provisioners' hinzugefügt wurde und 'anwendbare Projekte' ordnungsgemäß konfiguriert sind</li>\n</ul>");
 		m.put("Create a workspace spec running Cursor CLI inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Erstellen Sie eine Workspace-Spezifikation, indem Sie Cursor CLI innerhalb eines Containers für Isolations- und Sicherheitszwecke ausführen.\nSie können das <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>Container-Image</a>\nspäter anpassen, um es Ihren Anforderungen anzupassen, falls gewünscht");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Open Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Erstellen Sie eine Workspace-Spezifikation, die Open Code direkt mit der Server-Shell-Umgebung ausführt.\nWorkspaces, die mit der erstellten Spezifikation verwendet werden, teilen sich dieselben Umgebungen und Einstellungen.\nUm diese Vorlage zu verwenden, stellen Sie bitte sicher, dass:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> auf dem OneDev-Server installiert ist</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> auf dem OneDev-Server installiert ist und Begleitfähigkeiten für Open Code installiert sind</li>\n    <li>Ein Shell-Provisioner unter 'Administration / Workspace Provisioners' hinzugefügt wurde und 'anwendbare Projekte' ordnungsgemäß konfiguriert sind</li>\n</ul>");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Erstelle eine Workspace-Spezifikation, die Open Code innerhalb eines Containers für Isolations- und Sicherheitszwecke ausführt.\nSie können das <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>Container-Image</a>\nspäter anpassen, um Ihren Bedürfnissen gerecht zu werden, falls gewünscht");
 		m.put("Create body", "Erstelle Inhalt");
@@ -999,7 +1006,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Default Value Provider", "Standardwertanbieter");
 		m.put("Default Values", "Standardwerte");
 		m.put("Default branch", "Standard-Branch");
-		m.put("Default branch is not available", "Standard-Branch ist nicht verfügbar");
 		m.put("Default branding settings restored", "Standard-Branding-Einstellungen wiederhergestellt");
 		m.put("Default fixed issue filters saved", "Standard-Filter für behobene Probleme gespeichert");
 		m.put("Default merge strategy", "Standard-Merge-Strategie");
@@ -1193,7 +1199,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Do you really want to remove password of this user?", "Möchten Sie das Passwort dieses Benutzers wirklich entfernen?");
 		m.put("Do you really want to remove the issue from iteration \"{0}\"?", "Möchten Sie das Problem wirklich aus der Iteration \"{0}\" entfernen?");
 		m.put("Do you really want to remove this account?", "Möchten Sie dieses Konto wirklich entfernen?");
-		m.put("Do you really want to remove this agent?", "Möchten Sie diesen Agenten wirklich entfernen?");
 		m.put("Do you really want to remove this link?", "Möchten Sie diesen Link wirklich entfernen?");
 		m.put("Do you really want to restart this agent?", "Möchten Sie diesen Agenten wirklich neu starten?");
 		m.put("Do you really want to unauthorize user \"{0}\"?", "Möchten Sie den Benutzer \"{0}\" wirklich deautorisieren?");
@@ -1303,8 +1308,6 @@ public class Translation_de extends TranslationResourceBundle {
 			"Aktivieren Sie dies, um den Schritt zur Veröffentlichung des HTML-Berichts auszuführen. Um XSS-Angriffe zu vermeiden, stellen Sie sicher, dass dieser Executor nur von vertrauenswürdigen Jobs verwendet werden kann");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"Aktivieren Sie dies, um den Site-Veröffentlichungsschritt auszuführen. OneDev wird Projekt-Site-Dateien unverändert bereitstellen. Um XSS-Angriffe zu vermeiden, stellen Sie sicher, dass dieser Executor nur von vertrauenswürdigen Jobs verwendet werden kann");
-		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
-			"Aktivieren Sie dies, um Zwischendateien, die für die Jobausführung erforderlich sind, auf einem dynamisch zugewiesenen persistenten Volume anstelle von emptyDir zu platzieren");
 		m.put("Enable this to process issue or pull request comments posted via email", "Aktivieren Sie dies, um Kommentare zu Problemen oder Pull-Requests zu verarbeiten, die per E-Mail gepostet wurden");
 		m.put("Enable this to process issue or pull request comments posted via email. <b class='text-danger'>NOTE:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub addressing</a> needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts", 
 			"Aktivieren Sie dies, um Kommentare zu Problemen oder Pull-Requests zu verarbeiten, die per E-Mail gepostet wurden. <b class='text-danger'>HINWEIS:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub-Addressing</a> muss für die oben angegebene System-E-Mail-Adresse aktiviert sein, da OneDev diese verwendet, um Problem- und Pull-Request-Kontexte zu verfolgen");
@@ -1994,6 +1997,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Kubectl Config File", "Kubectl-Konfigurationsdatei");
 		m.put("Kubernetes", "Kubernetes");
 		m.put("Kubernetes Executor", "Kubernetes-Executor");
+		m.put("Kubernetes Provisioner", "Kubernetes-Provisioner");
 		m.put("LDAP URL", "LDAP-URL");
 		m.put("Label", "Label");
 		m.put("Label Management", "Label-Verwaltung");
@@ -2147,6 +2151,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Memory", "Speicher");
 		m.put("Memory Limit", "Speicherlimit");
 		m.put("Memory Request", "Speicheranforderung");
+		m.put("Memory request for the workspace container.", "Speicheranforderung für den Workspace-Container.");
 		m.put("Mention Someone", "Jemanden erwähnen");
 		m.put("Mention someone", "Jemanden erwähnen");
 		m.put("Merge", "Zusammenführen");
@@ -2158,7 +2163,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Merge preview not calculated yet", "Zusammenführungsvorschau noch nicht berechnet");
 		m.put("Merged", "Zusammengeführt");
 		m.put("Merged pull request \"{0}\" ({1})", "Zusammengeführter Pull-Request \"{0}\" ({1})");
-		m.put("Merges pull request", "Pull-Request zusammenführen");
 		m.put("Message is too long. Max {0} characters", "Nachricht ist zu lang. Maximal {0} Zeichen");
 		m.put("Meta", "Meta");
 		m.put("Meta Info", "Meta-Info");
@@ -2240,6 +2244,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Named Query", "Benannte Abfrage");
 		m.put("Named Workspace Queries Bean", "Benannte Arbeitsbereichsabfragen Bean");
 		m.put("Named Workspace Query", "Benannte Arbeitsbereichsabfrage");
+		m.put("Namespace", "Namespace");
 		m.put("Natural language query via AI", "Abfrage in natürlicher Sprache über KI");
 		m.put("Network Options", "Netzwerkoptionen");
 		m.put("Never", "Niemals");
@@ -2318,7 +2323,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No fields to prompt", "Keine Felder zum Abfragen");
 		m.put("No fields to remove", "Keine Felder zum Entfernen");
 		m.put("No file attachments", "Keine Dateianhänge");
-		m.put("No fork root", "Kein Fork-Root");
 		m.put("No group by", "Keine Gruppierung");
 		m.put("No groups claim returned", "Keine Gruppenansprüche zurückgegeben");
 		m.put("No groups to remove from", "Keine Gruppen zum Entfernen");
@@ -2530,6 +2534,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"Optional geben Sie <span class='text-info'>kommagetrennte</span> Plattformen zum Scannen an, beispielsweise <tt>linux/amd64,linux/arm64</tt>. Lassen Sie das Feld leer, um alle Plattformen im OCI-Layout zu scannen");
 		m.put("Optionally specify API key for authentication", "Optional API-Schlüssel für Authentifizierung angeben");
+		m.put("Optionally specify CPU limit for the workspace container.", "Optional CPU-Limit für den Workspace-Container angeben.");
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"Optional geben Sie die Dockerfile relativ zu <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job-Arbeitsbereich</a> an. Lassen Sie das Feld leer, um die Datei <tt>Dockerfile</tt> unter dem oben angegebenen Build-Pfad zu verwenden");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "Optional geben Sie die JavaScript-Konfiguration an, die von der Renovate-CLI verwendet werden soll");
@@ -2565,6 +2570,10 @@ public class Translation_de extends TranslationResourceBundle {
 			"Optional geben Sie ein Arbeitszeitfeld an, um Zeitabschätzungsinformationen zu speichern.<br><b>HINWEIS: </b> Sie können die OneDev-Probleme-Felder anpassen, falls hier keine geeignete Option vorhanden ist");
 		m.put("Optionally specify a working period field to hold time spent infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"Optional geben Sie ein Arbeitszeitfeld an, um aufgewendete Zeitinformationen zu speichern.<br><b>HINWEIS: </b> Sie können die OneDev-Probleme-Felder anpassen, falls hier keine geeignete Option vorhanden ist");
+		m.put("Optionally specify absolute path to the kubeconfig file used by kubectl to access the cluster. Leave empty to have kubectl determine cluster access automatically (works when OneDev itself runs in the cluster).", 
+			"Optional den absoluten Pfad zur kubeconfig-Datei angeben, die von kubectl zum Zugriff auf den Cluster verwendet wird. Leer lassen, damit kubectl den Clusterzugriff automatisch bestimmt (funktioniert, wenn OneDev selbst im Cluster läuft).");
+		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
+			"Optional den absoluten Pfad zur kubectl-Ausführungsdatei angeben. Leer lassen, um kubectl aus dem System-PATH zu verwenden.");
 		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint", 
 			"Optional zusätzliche HTTP-Header angeben, die in die Webhook-POST-Anfrage aufgenommen werden sollen, zum Beispiel einen Autorisierungs-Header, der vom empfangenden Endpunkt benötigt wird");
 		m.put("Optionally specify additional options for buildx build command", "Optional geben Sie zusätzliche Optionen für den Buildx-Build-Befehl an");
@@ -2653,6 +2662,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Geben Sie optional eine Liste von Verknüpfungen oben im Arbeitsbereich an. Wenn der Arbeitsbereich erstellt wird,\nwird die erste Verknüpfung automatisch geöffnet");
 		m.put("Optionally specify memory limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"Optional geben Sie das Speicherlimit für jeden Job/Service an, der diesen Executor verwendet. Überprüfen Sie <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes-Ressourcenmanagement</a> für Details");
+		m.put("Optionally specify memory limit for the workspace container.", "Optional Speicherlimit für den Workspace-Container angeben.");
 		m.put("Optionally specify memory limit for workspace containers. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> of the container", 
 			"Optional Speicherlimit für Arbeitsbereichs-Container angeben. Dies wird als Option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> des Containers verwendet");
 		m.put("Optionally specify memory limit of each job/service using this executor. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> of relevant containers", 
@@ -2913,6 +2923,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Bitte geben Sie einen Ihrer Wiederherstellungscodes ein, die beim Aktivieren der Zwei-Faktor-Authentifizierung gespeichert wurden");
 		m.put("Please login to perform this operation", "Bitte melden Sie sich an, um diese Operation auszuführen");
 		m.put("Please login to perform this query", "Bitte melden Sie sich an, um diese Abfrage auszuführen");
+		m.put("Please reprovision the workspace to show changes", "Bitte den Workspace neu bereitstellen, um Änderungen anzuzeigen.");
 		m.put("Please resolve undefined field values below", "Bitte beheben Sie die unten undefinierten Feldwerte");
 		m.put("Please resolve undefined fields below", "Bitte beheben Sie die unten undefinierten Felder");
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
@@ -3112,7 +3123,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Pull request is discarded", "Pull-Request wird verworfen");
 		m.put("Pull request is in error: {0}", "Pull-Request ist fehlerhaft: {0}");
 		m.put("Pull request is merged", "Pull-Request wird zusammengeführt");
-		m.put("Pull request is opened", "Pull-Request wird geöffnet");
 		m.put("Pull request is still a work in progress", "Pull-Anfrage ist noch in Bearbeitung");
 		m.put("Pull request is work in progress", "Pull-Anfrage ist in Bearbeitung");
 		m.put("Pull request list", "Pull-Request-Liste");
@@ -3211,8 +3221,10 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Remaining time", "Verbleibende Zeit");
 		m.put("Remember Me", "Angemeldet bleiben");
 		m.put("Remote Docker Executor", "Remote-Docker-Executor");
+		m.put("Remote Docker Provisioner", "Remote-Docker-Provisioner");
 		m.put("Remote Machine", "Remote-Maschine");
 		m.put("Remote Shell Executor", "Remote-Shell-Executor");
+		m.put("Remote Shell Provisioner", "Remote-Shell-Provisioner");
 		m.put("Remote URL", "Remote-URL");
 		m.put("Remote Url", "Remote-URL");
 		m.put("Remove", "Entfernen");
@@ -3231,8 +3243,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Remove this file", "Diese Datei entfernen");
 		m.put("Remove this image", "Entfernen Sie dieses Bild");
 		m.put("Remove this reviewer", "Entfernen Sie diesen Prüfer");
-		m.put("Removed all queried agents. Type <code>yes</code> below to confirm", "Alle abgefragten Agenten entfernt. Geben Sie unten <code>yes</code> ein, um zu bestätigen");
-		m.put("Removed selected agents. Type <code>yes</code> below to confirm", "Ausgewählte Agenten entfernt. Geben Sie unten <code>yes</code> ein, um zu bestätigen");
 		m.put("Rename {0}", "Umbenennen {0}");
 		m.put("Renew Subscription", "Abonnement erneuern");
 		m.put("Renovate CLI Options", "Renovate CLI-Optionen");
@@ -3442,11 +3452,13 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Sequential Group", "Sequentielle Gruppe");
 		m.put("Server", "Server");
 		m.put("Server Docker Executor", "Server-Docker-Executor");
+		m.put("Server Docker Provisioner", "Server-Docker-Provisioner");
 		m.put("Server Id", "Server-ID");
 		m.put("Server Information", "Server-Informationen");
 		m.put("Server Log", "Server-Log");
 		m.put("Server Setup", "Server-Setup");
 		m.put("Server Shell Executor", "Server-Shell-Executor");
+		m.put("Server Shell Provisioner", "Server-Shell-Provisioner");
 		m.put("Server URL", "Server-URL");
 		m.put("Server fingerprint", "Server-Fingerabdruck");
 		m.put("Server host", "Server-Host");
@@ -3702,6 +3714,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Einen <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java-Regulärausdruck</a> angeben, um die gesamte Commit-Nachricht zu validieren. Verwenden Sie das <code>(?s)</code>-Flag am Anfang für mehrzeiliges Matching");
 		m.put("Specify a <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron schedule</a> to fire the job automatically. <b class='text-info'>Note:</b> To save resource, seconds in cron expression will be ignored, and the minimum schedule interval is one minute", 
 			"Gibt einen <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>Cron-Zeitplan</a> an, um den Job automatisch auszulösen. <b class='text-info'>Hinweis:</b> Um Ressourcen zu sparen, werden Sekunden in der Cron-Ausdruck ignoriert, und das minimale Zeitplanintervall beträgt eine Minute");
+		m.put("Specify a Container Image to Test Against", "Geben Sie ein Container-Image an, gegen das getestet werden soll.");
 		m.put("Specify a Docker Image to Test Against", "Gibt ein Docker-Image an, gegen das getestet werden soll");
 		m.put("Specify a custom field of Enum type", "Gibt ein benutzerdefiniertes Feld vom Typ Enum an");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "Gibt eine Standardabfrage an, um behobene Issues der angegebenen Jobs zu filtern/zu sortieren");
@@ -3732,6 +3745,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"Gibt zusätzliche Benutzer an, die auf dieses vertrauliche Issue zugreifen können, zusätzlich zu denjenigen, die über die Rolle berechtigt sind. Benutzer, die im Issue erwähnt werden, werden automatisch autorisiert");
 		m.put("Specify agents applicable for this executor", "Gibt Agenten an, die für diesen Executor geeignet sind");
+		m.put("Specify agents applicable for this provisioner", "Geben Sie Agenten an, die für diesen Provisioner anwendbar sind.");
 		m.put("Specify allowed <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> separated by comma", 
 			"Zulässige <a href='https://spdx.org/licenses/'>SPDX-Lizenzkennungen</a> durch Komma getrennt angeben");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
@@ -3871,6 +3885,10 @@ public class Translation_de extends TranslationResourceBundle {
 			"Geben Sie die maximale Anzahl von Jobs/Diensten an, die dieser Executor gleichzeitig ausführen kann. Lassen Sie das Feld leer, um es als CPU-Kerne festzulegen.");
 		m.put("Specify max number of workspaces this provisioner can handle concurrently.\nLeave empty to set as CPU cores", 
 			"Geben Sie die maximale Anzahl von Arbeitsbereichen an, die dieser Provisioner gleichzeitig verarbeiten kann.\nLeer lassen, um als CPU-Kerne festzulegen");
+		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
+			"Geben Sie die maximale Anzahl von Workspaces an, die dieser Provisioner gleichzeitig auf jedem passenden Agenten ausführen kann. Leer lassen, um die CPU-Kerne des Agenten zu verwenden.");
+		m.put("Specify max number of workspaces this provisioner can run on each matched agent. Leave empty to set as agent CPU cores", 
+			"Geben Sie die maximale Anzahl von Workspaces an, die dieser Provisioner auf jedem passenden Agenten ausführen kann. Leer lassen, um die CPU-Kerne des Agenten zu verwenden.");
 		m.put("Specify max size of uploaded file in mega bytes via web interface. This applies to file uploaded to repository, markdown content (issue comment etc), and build artifacts", 
 			"Geben Sie die maximale Größe der hochgeladenen Datei in Megabyte über die Weboberfläche an. Dies gilt für Dateien, die in das Repository hochgeladen werden, Markdown-Inhalte (Issue-Kommentare usw.) und Build-Artefakte.");
 		m.put("Specify memory request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
@@ -3911,6 +3929,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Geben Sie die pylint-JSON-Ergebnisdatei relativ zum <a href='https://docs.onedev.io/concepts#job-workdir'>Job-Arbeitsbereich</a> an. Diese Datei kann mit der pylint-JSON-Ausgabeformatoption generiert werden, beispielsweise <code>--exit-zero --output-format=json:pylint-result.json</code>. Beachten Sie, dass wir den pylint-Befehl bei Verstößen nicht fehlschlagen lassen, da dieser Schritt den Build basierend auf der konfigurierten Schwelle fehlschlagen lässt. Verwenden Sie * oder ? für Musterabgleich.");
 		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password", 
 			"Geben Sie Registry-Logins an, falls erforderlich. Für das integrierte Registry verwenden Sie <code>@server_url@</code> für die Registry-URL, <code>@job_token@</code> für den Benutzernamen und den Zugriffstoken für das Passwort.");
+		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@workspace_token@</code> for user name, and access token for password.", 
+			"Geben Sie bei Bedarf Registry-Logins an. Für die integrierte Registry verwenden Sie <code>@server_url@</code> für die Registry-URL, <code>@workspace_token@</code> für den Benutzernamen und das Zugriffstoken für das Passwort.");
 		m.put("Specify registry url. Leave empty for official registry", "Geben Sie die Registry-URL an. Lassen Sie das Feld leer für das offizielle Registry.");
 		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout", 
 			"Geben Sie den relativen Pfad unter <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job-Arbeitsbereich</a> an, um das OCI-Layout zu speichern.");
@@ -3958,6 +3978,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Geben Sie den Text an, der mit den übereinstimmenden Problemreferenzen ersetzt werden soll, zum Beispiel: &lt;br&gt;&lt;em&gt;$1&amp;lt;a href='http://track.example.com/issues/$2'&amp;gt;$2&amp;lt;/a&amp;gt;&lt;/em&gt; &lt;br&gt;Hier repräsentieren $1 und $2 die Erfassungsgruppen im Beispielproblem-Muster (siehe Hilfe zum Problem-Muster)");
 		m.put("Specify the condition current build must satisfy to execute this action", "Geben Sie die Bedingung an, die der aktuelle Build erfüllen muss, um diese Aktion auszuführen");
 		m.put("Specify the condition preserved builds must match", "Geben Sie die Bedingung an, die erhaltene Builds erfüllen müssen");
+		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. OneDev creates the namespace if it does not yet exist.", 
+			"Geben Sie den Kubernetes-Namespace an, um Workspaces dieses Provisioners zu hosten. OneDev erstellt den Namespace, falls er noch nicht existiert.");
 		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
 			"Geben Sie den zu verwendenden Modellnamen an. <b class='text-danger'>HINWEIS: </b> Derzeit unterstützt OneDev nur\nModelle mit Chat-Vervollständigungs-API. OpenAI-Modelle mit der neuen Antwort-API werden noch nicht unterstützt");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
@@ -4263,8 +4285,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "Diese Berechtigung ermöglicht den Zugriff auf vertrauliche Issues");
 		m.put("This permission enables one to schedule issues into iterations", "Diese Berechtigung ermöglicht das Planen von Issues in Iterationen");
 		m.put("This property is imported from {0}", "Diese Eigenschaft wird aus {0} importiert");
-		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
-			"Dieser Provisioner erstellt Workspaces innerhalb von Docker-Containern auf dem OneDev-Server für\nSicherheits- und Isolationszwecke. Es wird derzeit nicht unterstützt, wenn der OneDev-Server\ninnerhalb eines Kubernetes-Clusters installiert ist");
 		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
 			"Dieser Bereitsteller erstellt Arbeitsbereiche mit der Shell-Funktionalität des OneDev-Servers und erfordert\ndass tmux auf dem OneDev-Server installiert ist");
 		m.put("This pull request has been discarded", "Dieser Pull-Request wurde verworfen");
@@ -4677,6 +4697,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Ob das Image immer gezogen werden soll, wenn ein Container ausgeführt oder Images erstellt werden. Diese Option sollte aktiviert werden, um zu vermeiden, dass Images durch bösartige Jobs auf demselben Node ersetzt werden");
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"Ob das Bild beim Ausführen des Containers immer gezogen werden soll oder nicht. Diese Option sollte aktiviert werden, um zu vermeiden, dass Bilder durch bösartige Operationen ersetzt werden");
+		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
+			"Ob das Image beim Ausführen des Containers immer gezogen werden soll. Aktivieren verhindert, dass Images durch bösartige Workloads ersetzt werden, die auf demselben Node laufen.");
 		m.put("Whether or not to be able to access time tracking info of issues", "Ob auf Zeitverfolgungsinformationen von Problemen zugegriffen werden kann oder nicht");
 		m.put("Whether or not to create the workspace inside container", "Ob der Arbeitsbereich im Container erstellt werden soll oder nicht");
 		m.put("Whether or not to enable code management for the project", "Ob die Codeverwaltung für das Projekt aktiviert werden soll oder nicht");
@@ -4753,6 +4775,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Workspace token", "Arbeitsbereichs-Token");
 		m.put("Workspace {0} deleted", "Arbeitsbereich {0} gelöscht");
 		m.put("Workspaces", "Arbeitsbereiche");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"Workspaces, die von diesem Provisioner erstellt werden, haben dieselben Berechtigungen wie der OneDev-Prozess.\nVerwenden Sie '**', '*' oder '?' für <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>Pfad-Wildcard-Matching</a>.\nMehrere Projekte sollten durch Leerzeichen getrennt werden.<br>\n<b class='text-danger'>WARNUNG</b>: Workspaces, die von diesem Provisioner erstellt werden, haben dieselben Berechtigungen wie der OneDev-Prozess.\nBitte stellen Sie sicher, dass nur vertrauenswürdige Projekte diesen Provisioner verwenden können.");
 		m.put("Workspaces on source branch", "Workspaces auf Quell-Branch");
 		m.put("Workspaces on this branch", "Arbeitsbereiche auf diesem Branch");
 		m.put("Workspaces on this issue", "Workspaces zu diesem Issue");
@@ -4935,10 +4959,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("pull request and code review", "Pull-Request und Code-Review");
 		m.put("pull request to any branch is discarded", "Pull-Request zu einem beliebigen Branch wird verworfen");
 		m.put("pull request to any branch is merged", "Pull-Request zu einem beliebigen Branch wird zusammengeführt");
-		m.put("pull request to any branch is opened", "Pull-Request zu einem beliebigen Branch wird geöffnet");
 		m.put("pull request to branches \"{0}\" is discarded", "Pull-Request zu Branches \"{0}\" wird verworfen");
 		m.put("pull request to branches \"{0}\" is merged", "Pull-Request zu Branches \"{0}\" wird zusammengeführt");
-		m.put("pull request to branches \"{0}\" is opened", "Pull-Request zu Branches \"{0}\" wird geöffnet");
 		m.put("pull request {0}", "Pull-Request {0}");
 		m.put("pull requests", "Pull-Requests");
 		m.put("reconciliation (need administrator permission)", "Abgleich (Administratorberechtigung erforderlich)");
@@ -5040,56 +5062,37 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("CPU request for the workspace container.", "CPU-Anforderung für den Workspace-Container.");
-		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Claude Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Erstellen Sie eine Workspace-Spezifikation, die Claude Code direkt mit der Server-Shell-Umgebung ausführt.\nWorkspaces, die mit der erstellten Spezifikation verwendet werden, teilen sich dieselben Umgebungen und Einstellungen.\nUm diese Vorlage zu verwenden, stellen Sie bitte sicher, dass:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> auf dem OneDev-Server installiert ist</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> auf dem OneDev-Server installiert ist und Begleitfähigkeiten für Claude Code installiert sind</li>\n    <li>Ein Shell-Provisioner unter 'Administration / Workspace Provisioners' hinzugefügt wurde und 'anwendbare Projekte' ordnungsgemäß konfiguriert sind</li>\n</ul>");
-		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Codex</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Erstellen Sie eine Workspace-Spezifikation, die Codex direkt mit der Server-Shell-Umgebung ausführt.\nWorkspaces, die mit der erstellten Spezifikation verwendet werden, teilen sich dieselben Umgebungen und Einstellungen.\nUm diese Vorlage zu verwenden, stellen Sie bitte sicher, dass:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> auf dem OneDev-Server installiert ist</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> auf dem OneDev-Server installiert ist und Begleitfähigkeiten für Codex installiert sind</li>\n    <li>Ein Shell-Provisioner unter 'Administration / Workspace Provisioners' hinzugefügt wurde und 'anwendbare Projekte' ordnungsgemäß konfiguriert sind</li>\n</ul>");
-		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Cursor CLI</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Erstellen Sie eine Workspace-Spezifikation, die Cursor CLI direkt mit der Server-Shell-Umgebung ausführt.\nWorkspaces, die mit der erstellten Spezifikation verwendet werden, teilen sich dieselben Umgebungen und Einstellungen.\nUm diese Vorlage zu verwenden, stellen Sie bitte sicher, dass:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> auf dem OneDev-Server installiert ist</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> auf dem OneDev-Server installiert ist und Begleitfähigkeiten für Cursor CLI installiert sind</li>\n    <li>Ein Shell-Provisioner unter 'Administration / Workspace Provisioners' hinzugefügt wurde und 'anwendbare Projekte' ordnungsgemäß konfiguriert sind</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Open Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Erstellen Sie eine Workspace-Spezifikation, die Open Code direkt mit der Server-Shell-Umgebung ausführt.\nWorkspaces, die mit der erstellten Spezifikation verwendet werden, teilen sich dieselben Umgebungen und Einstellungen.\nUm diese Vorlage zu verwenden, stellen Sie bitte sicher, dass:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> auf dem OneDev-Server installiert ist</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> auf dem OneDev-Server installiert ist und Begleitfähigkeiten für Open Code installiert sind</li>\n    <li>Ein Shell-Provisioner unter 'Administration / Workspace Provisioners' hinzugefügt wurde und 'anwendbare Projekte' ordnungsgemäß konfiguriert sind</li>\n</ul>");
-		m.put("Kubernetes Provisioner", "Kubernetes-Provisioner");
-		m.put("Memory request for the workspace container.", "Speicheranforderung für den Workspace-Container.");
-		m.put("Namespace", "Namespace");
-		m.put("Optionally specify CPU limit for the workspace container.", "Optional CPU-Limit für den Workspace-Container angeben.");
-		m.put("Optionally specify a storage class to allocate the workspace PVC. Leave empty to use the cluster default storage class.", 
-			"Optional eine Storage-Class angeben, um das Workspace-PVC zuzuweisen. Leer lassen, um die Standard-Storage-Class des Clusters zu verwenden.");
-		m.put("Optionally specify absolute path to the kubeconfig file used by kubectl to access the cluster. Leave empty to have kubectl determine cluster access automatically (works when OneDev itself runs in the cluster).", 
-			"Optional den absoluten Pfad zur kubeconfig-Datei angeben, die von kubectl zum Zugriff auf den Cluster verwendet wird. Leer lassen, damit kubectl den Clusterzugriff automatisch bestimmt (funktioniert, wenn OneDev selbst im Cluster läuft).");
-		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
-			"Optional den absoluten Pfad zur kubectl-Ausführungsdatei angeben. Leer lassen, um kubectl aus dem System-PATH zu verwenden.");
-		m.put("Optionally specify memory limit for the workspace container.", "Optional Speicherlimit für den Workspace-Container angeben.");
-		m.put("Please reprovision the workspace to show changes", "Bitte den Workspace neu bereitstellen, um Änderungen anzuzeigen.");
-		m.put("Remote Docker Provisioner", "Remote-Docker-Provisioner");
-		m.put("Remote Shell Provisioner", "Remote-Shell-Provisioner");
-		m.put("Server Docker Provisioner", "Server-Docker-Provisioner");
-		m.put("Server Shell Provisioner", "Server-Shell-Provisioner");
-		m.put("Specify a Container Image to Test Against", "Geben Sie ein Container-Image an, gegen das getestet werden soll.");
-		m.put("Specify agents applicable for this provisioner", "Geben Sie Agenten an, die für diesen Provisioner anwendbar sind.");
-		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
-			"Geben Sie die maximale Anzahl von Workspaces an, die dieser Provisioner gleichzeitig auf jedem passenden Agenten ausführen kann. Leer lassen, um die CPU-Kerne des Agenten zu verwenden.");
-		m.put("Specify max number of workspaces this provisioner can run on each matched agent. Leave empty to set as agent CPU cores", 
-			"Geben Sie die maximale Anzahl von Workspaces an, die dieser Provisioner auf jedem passenden Agenten ausführen kann. Leer lassen, um die CPU-Kerne des Agenten zu verwenden.");
-		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@workspace_token@</code> for user name, and access token for password.", 
-			"Geben Sie bei Bedarf Registry-Logins an. Für die integrierte Registry verwenden Sie <code>@server_url@</code> für die Registry-URL, <code>@workspace_token@</code> für den Benutzernamen und das Zugriffstoken für das Passwort.");
-		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. OneDev creates the namespace if it does not yet exist.", 
-			"Geben Sie den Kubernetes-Namespace an, um Workspaces dieses Provisioners zu hosten. OneDev erstellt den Namespace, falls er noch nicht existiert.");
-		m.put("Storage Class", "Storage-Class");
-		m.put("Storage Size", "Speichergröße");
-		m.put("Storage size requested for each workspace PVC. The value should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
-			"Speichergröße, die für jedes Workspace-PVC angefordert wird. Der Wert sollte dem <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes-Ressourcenkapazitätsformat</a> entsprechen, z. B. <i>10Gi</i>.");
-		m.put("This provisioner creates workspaces as pods inside a Kubernetes cluster. Workspace files are persisted in a PersistentVolumeClaim (one per workspace) so that the workspace pod may be restarted/re-provisioned without losing user changes.", 
-			"Dieser Provisioner erstellt Workspaces als Pods innerhalb eines Kubernetes-Clusters. Workspace-Dateien werden in einem PersistentVolumeClaim (einem pro Workspace) gespeichert, sodass der Workspace-Pod neu gestartet/neu bereitgestellt werden kann, ohne Benutzeränderungen zu verlieren.");
-		m.put("This provisioner creates workspaces inside Docker containers on remote agents via\n<a href='/~administration/agents' target='_blank'>agents</a> for security and isolation purpose", 
-			"Dieser Provisioner erstellt Workspaces in Docker-Containern auf Remote-Agenten über\n<a href='/~administration/agents' target='_blank'>Agenten</a> aus Sicherheits- und Isolationsgründen.");
-		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires\ntmux to be installed on matched agents", 
-			"Dieser Provisioner erstellt Workspaces mit der Shell-Funktionalität von Remote-Agenten und erfordert\ntmux, das auf passenden Agenten installiert ist.");
-		m.put("Use cluster default storage class", "Standard-Storage-Class des Clusters verwenden.");
-		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
-			"Ob das Image beim Ausführen des Containers immer gezogen werden soll. Aktivieren verhindert, dass Images durch bösartige Workloads ersetzt werden, die auf demselben Node laufen.");
-		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
-			"Workspaces, die von diesem Provisioner erstellt werden, haben dieselben Berechtigungen wie der OneDev-Prozess.\nVerwenden Sie '**', '*' oder '?' für <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>Pfad-Wildcard-Matching</a>.\nMehrere Projekte sollten durch Leerzeichen getrennt werden.<br>\n<b class='text-danger'>WARNUNG</b>: Workspaces, die von diesem Provisioner erstellt werden, haben dieselben Berechtigungen wie der OneDev-Prozess.\nBitte stellen Sie sicher, dass nur vertrauenswürdige Projekte diesen Provisioner verwenden können.");
+		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>HINWEIS: </b>Kubernetes-Provisioner ist eine Enterprise-Funktion. <a href='https://onedev.io/pricing' target='_blank'>30 Tage kostenlos testen</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>HINWEIS: </b>Remote-Docker-Provisioner ist eine Enterprise-Funktion. <a href='https://onedev.io/pricing' target='_blank'>30 Tage kostenlos testen</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>HINWEIS: </b>Remote-Shell-Provisioner ist eine Enterprise-Funktion. <a href='https://onedev.io/pricing' target='_blank'>30 Tage kostenlos testen</a>");
+		m.put("Cannot remove agent \"{0}\" as it has workspaces", "Agent \"{0}\" kann nicht entfernt werden, da er Arbeitsbereiche hat");
+		m.put("Cannot remove agent as it has workspaces", "Agent kann nicht entfernt werden, da er Arbeitsbereiche hat");
+		m.put("Do you really want to remove agent \"{0}\"?", "Möchten Sie den Agent \"{0}\" wirklich entfernen?");
+		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
+			"Stellen Sie sicher, dass <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 oder höher</a> installiert ist");
+		m.put("No default fork root", "Kein Standard-Fork-Root");
+		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
+			"Optional können Sie eine Storage-Class angeben, um das Workspace-PVC dynamisch zuzuweisen. Lassen Sie das Feld leer, um die Standard-Storage-Class zu verwenden. <b class='text-warning'>HINWEIS:</b> Die Reclaim-Policy der Storage-Class sollte auf <code>Delete</code> gesetzt sein, da das Volume gelöscht wird, wenn der Arbeitsbereich gelöscht wird");
+		m.put("Pull request is opened or updated", "Pull-Request wurde geöffnet oder aktualisiert");
+		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "Alle abgefragten Agents entfernen. Geben Sie <code>remove ALL agents</code> unten ein, um zu bestätigen");
+		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "Ausgewählte Agents entfernen. Geben Sie <code>yes</code> unten ein, um zu bestätigen");
+		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
+			"Geben Sie die Speichergröße an, die für das Workspace-PVC angefordert werden soll. Die Größe sollte dem <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes-Ressourcenkapazitätsformat</a> entsprechen, z. B. <i>10Gi</i>");
+		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "Dieser Provisioner erstellt Arbeitsbereiche als Pods im Kubernetes-Cluster");
+		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "Dieser Provisioner erstellt Arbeitsbereiche in Docker-Containern auf dem OneDev-Server");
+		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
+			"Dieser Provisioner erstellt Arbeitsbereiche in Docker-Containern auf einer Remote-Maschine über\n<a href='/~administration/agents' target='_blank'>Agents</a>.");
+		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
+			"Dieser Provisioner erstellt Arbeitsbereiche mit der Shell-Funktionalität von Remote-Agents und erfordert, dass tmux auf den zugeordneten Agents installiert ist");
+		m.put("Workspace Volume Storage Class", "Speicherklasse des Arbeitsbereichsvolumens");
+		m.put("Workspace Volume Storage Size", "Speichergröße des Arbeitsbereichsvolumens");
+		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
+			"Sie müssen das Token auf der Agent-Seite nach der Regeneration aktualisieren. Möchten Sie wirklich fortfahren?");
+		m.put("pull request to any branch is opened or updated", "Pull-Request zu einem beliebigen Branch wurde geöffnet oder aktualisiert");
+		m.put("pull request to branches \"{0}\" is opened or updated", "Pull-Request zu den Branches \"{0}\" wurde geöffnet oder aktualisiert");
 	}
 			
 	@Override

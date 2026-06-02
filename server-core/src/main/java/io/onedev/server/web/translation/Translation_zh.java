@@ -518,7 +518,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Both sides deleted this file", "双方都删除了此文件");
 		m.put("Bottom", "底部");
 		m.put("Branch", "分支");
-		m.put("Branch \"{0}\" already exists", "分支 \"{0}\" 已经存在");
 		m.put("Branch \"{0}\" already exists, please choose a different name", "分支 \"{0}\" 已存在，请选择不同的名称");
 		m.put("Branch \"{0}\" created", "分支 \"{0}\" 已创建");
 		m.put("Branch \"{0}\" deleted", "分支 \"{0}\" 已删除");
@@ -587,7 +586,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Build statistics is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"构建统计是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("Build version", "构建版本");
-		m.put("Build with Persistent Volume", "使用持久卷构建");
 		m.put("Build {0} deleted", "构建 {0} 已删除");
 		m.put("Builds", "构建");
 		m.put("Builds are {0}", "构建是 {0}");
@@ -614,6 +612,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU 密集型任务并发数");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "CPU 能力（毫秒）。通常为 (CPU 核心数)*1000");
 		m.put("CPU cores", "CPU 核心");
+		m.put("CPU request for the workspace container.", "工作区容器的 CPU 请求。");
 		m.put("Cache \"{0}\" deleted", "缓存 \"{0}\" 已删除");
 		m.put("Cache Config", "缓存配置");
 		m.put("Cache Key", "缓存键");
@@ -950,12 +949,20 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Create User", "创建用户");
 		m.put("Create Workspace", "创建工作区");
 		m.put("Create Workspace Spec", "创建工作区规格");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Claude Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接运行 Claude Code 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Claude Code 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
 		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Claude Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Codex</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接运行 Codex 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Codex 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
 		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Codex 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Cursor CLI</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接运行 Cursor CLI 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Cursor CLI 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
 		m.put("Create a workspace spec running Cursor CLI inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器内运行 Cursor CLI 的工作区规范，以实现隔离和安全目的。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Open Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接运行 Open Code 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Open Code 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Open Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>容器镜像</a>\n以满足您的需求");
 		m.put("Create body", "创建正文");
@@ -1025,7 +1032,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Default Value Provider", "默认值提供器");
 		m.put("Default Values", "默认值");
 		m.put("Default branch", "默认分支");
-		m.put("Default branch is not available", "默认分支不可用");
 		m.put("Default branding settings restored", "已恢复默认品牌设置");
 		m.put("Default fixed issue filters saved", "默认固定工单过滤器已保存");
 		m.put("Default merge strategy", "默认合并策略");
@@ -1219,7 +1225,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Do you really want to remove password of this user?", "您真的要删除此用户的密码吗？");
 		m.put("Do you really want to remove the issue from iteration \"{0}\"?", "您真的要从迭代 \"{0}\" 中移除这个工单吗？");
 		m.put("Do you really want to remove this account?", "您确定要删除此账户吗？");
-		m.put("Do you really want to remove this agent?", "你确定要删除这个代理吗？");
 		m.put("Do you really want to remove this link?", "您确定要删除此链接吗？");
 		m.put("Do you really want to restart this agent?", "你确定要重启这个代理吗？");
 		m.put("Do you really want to unauthorize user \"{0}\"?", "您真的要取消用户 \"{0}\" 的授权吗？");
@@ -1329,8 +1334,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"启用此选项以允许运行 HTML 报告发布步骤。为避免 XSS 攻击，请确保此执行器只能由受信任的任务使用");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"启用此选项以允许运行站点发布步骤。OneDev 将按原样提供项目站点文件。为避免 XSS 攻击，请确保此执行器只能由受信任的任务使用");
-		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
-			"启用此选项以将任务执行所需的中间文件放置在动态分配的持久卷而不是 emptyDir 中");
 		m.put("Enable this to process issue or pull request comments posted via email", "启用此选项以处理通过电子邮件发布的工单或合并请求评论");
 		m.put("Enable this to process issue or pull request comments posted via email. <b class='text-danger'>NOTE:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub addressing</a> needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts", 
 			"启用此选项以处理通过电子邮件发布的工单或合并请求评论。<b class='text-danger'>注意：</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> 需要为系统电子邮件地址启用，因为 OneDev 使用它来跟踪工单和合并请求上下文");
@@ -2020,6 +2023,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Kubectl Config File", "Kubectl 配置文件");
 		m.put("Kubernetes", "Kubernetes");
 		m.put("Kubernetes Executor", "Kubernetes 执行器");
+		m.put("Kubernetes Provisioner", "Kubernetes 配置器");
 		m.put("LDAP URL", "LDAP URL");
 		m.put("Label", "标签");
 		m.put("Label Management", "标签管理");
@@ -2173,6 +2177,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Memory", "内存");
 		m.put("Memory Limit", "内存限制");
 		m.put("Memory Request", "内存请求");
+		m.put("Memory request for the workspace container.", "工作区容器的内存请求。");
 		m.put("Mention Someone", "提及某人");
 		m.put("Mention someone", "提及某人");
 		m.put("Merge", "合并");
@@ -2184,7 +2189,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Merge preview not calculated yet", "合并预览尚未计算完成");
 		m.put("Merged", "合并");
 		m.put("Merged pull request \"{0}\" ({1})", "合并合并请求 \"{0}\"（{1}）");
-		m.put("Merges pull request", "合并请求");
 		m.put("Message is too long. Max {0} characters", "消息太长。最大 {0} 个字符");
 		m.put("Meta", "元");
 		m.put("Meta Info", "元数据");
@@ -2266,6 +2270,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Named Query", "命名查询");
 		m.put("Named Workspace Queries Bean", "命名工作区查询 Bean");
 		m.put("Named Workspace Query", "命名工作区查询");
+		m.put("Namespace", "命名空间");
 		m.put("Natural language query via AI", "通过 AI 的自然语言查询");
 		m.put("Network Options", "网络选项");
 		m.put("Never", "从不");
@@ -2344,7 +2349,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No fields to prompt", "无要提示的字段");
 		m.put("No fields to remove", "无要删除的字段");
 		m.put("No file attachments", "没有文件附件");
-		m.put("No fork root", "没有分叉根");
 		m.put("No group by", "无分组");
 		m.put("No groups claim returned", "没有返回组声明");
 		m.put("No groups to remove from", "没有可移除的组");
@@ -2556,6 +2560,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"可选择指定 <span class='text-info'>逗号分隔</span> 的平台，例如 <tt>linux/amd64,linux/arm64</tt>。留空则扫描 OCI 布局中的所有平台");
 		m.put("Optionally specify API key for authentication", "可选地指定 API 密钥进行身份验证");
+		m.put("Optionally specify CPU limit for the workspace container.", "可选地为工作区容器指定 CPU 限制。");
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>任务工作区</a> 的 Dockerfile。留空则使用上面指定的构建路径下的文件 <tt>Dockerfile</tt>");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "可选择指定用于 Renovate CLI 的 JavaScript 配置");
@@ -2591,6 +2596,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定一个工作周期字段来保存时间估计信息。<br><b>注意：</b>如果这里没有合适的选项，您可以自定义 OneDev 工单字段");
 		m.put("Optionally specify a working period field to hold time spent infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"可选择指定一个工作周期字段来保存已用时间信息。<br><b>注意：</b>如果这里没有合适的选项，您可以自定义 OneDev 工单字段");
+		m.put("Optionally specify absolute path to the kubeconfig file used by kubectl to access the cluster. Leave empty to have kubectl determine cluster access automatically (works when OneDev itself runs in the cluster).", 
+			"可选地指定由 kubectl 用于访问集群的 kubeconfig 文件的绝对路径。留空以让 kubectl 自动确定集群访问（当 OneDev 本身运行在集群中时有效）。");
+		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
+			"可选地指定 kubectl 可执行文件的绝对路径。留空以使用系统 PATH 中的 kubectl。");
 		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint", 
 			"可选地指定要包含在 webhook POST 请求中的额外 HTTP 头，例如接收端点所需的授权头");
 		m.put("Optionally specify additional options for buildx build command", "可选择为 buildx build 命令指定其他选项");
@@ -2679,6 +2688,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选地在工作区顶部指定快捷方式列表。当工作区创建时，\n第一个快捷方式将自动打开。");
 		m.put("Optionally specify memory limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"可选择为使用此执行器的每个任务/服务指定内存限制。详情请查看 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 资源管理</a>");
+		m.put("Optionally specify memory limit for the workspace container.", "可选地为工作区容器指定内存限制。");
 		m.put("Optionally specify memory limit for workspace containers. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> of the container", 
 			"可选地为工作区容器指定内存限制。这将用作容器的选项<a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a>");
 		m.put("Optionally specify memory limit of each job/service using this executor. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> of relevant containers", 
@@ -2939,6 +2949,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"请输入在启用两阶段验证时保存的恢复代码");
 		m.put("Please login to perform this operation", "请登录才能执行此操作");
 		m.put("Please login to perform this query", "请登录以执行此查询");
+		m.put("Please reprovision the workspace to show changes", "请重新配置工作区以显示更改");
 		m.put("Please resolve undefined field values below", "请解决以下未定义的字段值");
 		m.put("Please resolve undefined fields below", "请解决以下未定义的字段");
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
@@ -3138,7 +3149,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pull request is discarded", "合并请求被丢弃");
 		m.put("Pull request is in error: {0}", "合并请求处于错误状态: {0}");
 		m.put("Pull request is merged", "合并请求被合并");
-		m.put("Pull request is opened", "合并请求被打开");
 		m.put("Pull request is still a work in progress", "拉取请求仍在进行中");
 		m.put("Pull request is work in progress", "拉取请求正在进行中");
 		m.put("Pull request list", "合并请求列表");
@@ -3237,8 +3247,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Remaining time", "剩余时间");
 		m.put("Remember Me", "记住我");
 		m.put("Remote Docker Executor", "远程 Docker 执行器");
+		m.put("Remote Docker Provisioner", "远程 Docker 配置器");
 		m.put("Remote Machine", "远程机器");
 		m.put("Remote Shell Executor", "远程 Shell 执行器");
+		m.put("Remote Shell Provisioner", "远程 Shell 配置器");
 		m.put("Remote URL", "远程 URL");
 		m.put("Remote Url", "远程 URL");
 		m.put("Remove", "删除");
@@ -3257,8 +3269,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Remove this file", "删除此文件");
 		m.put("Remove this image", "删除此图片");
 		m.put("Remove this reviewer", "移除此审查者");
-		m.put("Removed all queried agents. Type <code>yes</code> below to confirm", "已删除所有查询的代理。在下面输入 <code>yes</code> 确认");
-		m.put("Removed selected agents. Type <code>yes</code> below to confirm", "已删除选定的代理。在下面输入 <code>yes</code> 确认");
 		m.put("Rename {0}", "重命名 {0}");
 		m.put("Renew Subscription", "续订订阅");
 		m.put("Renovate CLI Options", "Renovate CLI 选项");
@@ -3468,11 +3478,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Sequential Group", "顺序组");
 		m.put("Server", "服务器");
 		m.put("Server Docker Executor", "服务器 Docker 执行器");
+		m.put("Server Docker Provisioner", "服务器 Docker 配置器");
 		m.put("Server Id", "服务器 ID");
 		m.put("Server Information", "服务器信息");
 		m.put("Server Log", "服务器日志");
 		m.put("Server Setup", "服务器设置");
 		m.put("Server Shell Executor", "服务器 Shell 执行器");
+		m.put("Server Shell Provisioner", "服务器 Shell 配置器");
 		m.put("Server URL", "服务器 URL");
 		m.put("Server fingerprint", "服务器指纹");
 		m.put("Server host", "服务器主机");
@@ -3728,6 +3740,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定一个 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 正则表达式</a> 模式以验证整个提交信息。在开头使用 <code>(?s)</code> 标志进行多行匹配");
 		m.put("Specify a <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron schedule</a> to fire the job automatically. <b class='text-info'>Note:</b> To save resource, seconds in cron expression will be ignored, and the minimum schedule interval is one minute", 
 			"指定一个 <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron 计划</a>以自动触发任务。<b class='text-info'>注意：</b>为节省资源，cron 表达式中的秒数将被忽略，最小调度间隔为一分钟");
+		m.put("Specify a Container Image to Test Against", "指定一个用于测试的容器镜像");
 		m.put("Specify a Docker Image to Test Against", "指定要测试的 Docker 镜像");
 		m.put("Specify a custom field of Enum type", "指定枚举类型的自定义字段");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "指定用于过滤/排序指定任务修复工单的默认查询");
@@ -3758,6 +3771,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"指定额外用户可以访问此机密工单，除了通过角色授予的用户。提及在工单中的用户将自动被授权");
 		m.put("Specify agents applicable for this executor", "指定适用于此执行器的代理");
+		m.put("Specify agents applicable for this provisioner", "指定适用于此配置器的代理");
 		m.put("Specify allowed <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> separated by comma", 
 			"指定允许的逗号分隔的 <a href='https://spdx.org/licenses/'>SPDX 许可证标识符</a>");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
@@ -3897,6 +3911,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定此执行器可并发运行的任务/服务最大数量。留空以设置为 CPU 核心数");
 		m.put("Specify max number of workspaces this provisioner can handle concurrently.\nLeave empty to set as CPU cores", 
 			"指定此配置器可以同时处理的最大工作区数量。\n留空以设置为 CPU 核心数。");
+		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
+			"指定此配置器在每个匹配代理上可以同时运行的最大工作区数量。留空以设置为代理的 CPU 核心数");
+		m.put("Specify max number of workspaces this provisioner can run on each matched agent. Leave empty to set as agent CPU cores", 
+			"指定此配置器在每个匹配代理上可以运行的最大工作区数量。留空以设置为代理的 CPU 核心数");
 		m.put("Specify max size of uploaded file in mega bytes via web interface. This applies to file uploaded to repository, markdown content (issue comment etc), and build artifacts", 
 			"指定通过 Web 界面上传文件的最大大小（以兆字节为单位）。这适用于上传到仓库的文件、markdown 内容（工单评论等）以及构建产物");
 		m.put("Specify memory request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
@@ -3937,6 +3955,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workdir'>任务工作区</a> 的 pylint JSON 结果文件。此文件可使用 pylint JSON 输出格式选项生成，例如 <code>--exit-zero --output-format=json:pylint-result.json</code>。注意，违反规则时我们不会使 pylint 命令失败，因为此步骤将根据配置的阈值使构建失败。使用 * 或 ? 进行模式匹配");
 		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password", 
 			"如有必要，指定注册表登录信息。对于内置注册表，使用 <code>@server_url@</code> 作为注册表 URL，<code>@job_token@</code> 作为用户名，访问令牌作为密码");
+		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@workspace_token@</code> for user name, and access token for password.", 
+			"如有必要，指定注册表登录信息。对于内置注册表，使用 <code>@server_url@</code> 作为注册表 URL，<code>@workspace_token@</code> 作为用户名，并使用访问令牌作为密码。");
 		m.put("Specify registry url. Leave empty for official registry", "指定注册表 URL。留空表示官方注册表");
 		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout", 
 			"指定在 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>任务工作区</a> 下存储 OCI 布局的相对路径");
@@ -3984,6 +4004,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定用于替换匹配工单引用的文本，例如：&lt;br&gt;&lt;em&gt;$1&amp;lt;a href='http://track.example.com/issues/$2'&amp;gt;$2&amp;lt;/a&amp;gt;&lt;/em&gt; &lt;br&gt;这里 $1 和 $2 表示示例工单模式中的捕获组（参见工单模式帮助）");
 		m.put("Specify the condition current build must satisfy to execute this action", "指定当前构建必须满足的条件以执行此操作");
 		m.put("Specify the condition preserved builds must match", "指定保留的构建必须匹配的条件");
+		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. OneDev creates the namespace if it does not yet exist.", 
+			"指定用于托管此配置器工作区的 Kubernetes 命名空间。如果命名空间尚不存在，OneDev 将创建它。");
 		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
 			"指定要使用的模型名称。<b class='text-danger'>注意：</b>目前 OneDev 仅支持\n具有聊天完成 API 的模型。尚不支持具有新响应 API 的 OpenAI 模型。");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
@@ -4289,8 +4311,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
 		m.put("This property is imported from {0}", "此属性是从 {0} 导入的");
-		m.put("This provisioner creates workspaces inside Docker containers on the OneDev server for\nsecurity and isolation purpose. It is currently not supported when OneDev server is\ninstalled inside Kubernetes cluster", 
-			"此配置器在 OneDev 服务器上的 Docker 容器中创建工作区，以实现\n安全和隔离目的。当 OneDev 服务器安装在 Kubernetes 集群中时，当前不支持");
 		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
 			"此配置器使用 OneDev 服务器的 shell 功能创建工作区，并要求在 OneDev 服务器上安装 tmux");
 		m.put("This pull request has been discarded", "此合并请求已丢弃");
@@ -4703,6 +4723,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"是否在运行容器或构建镜像时始终拉取镜像。应启用此选项，以避免同一节点上运行的恶意任务替换镜像");
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"运行容器时是否总是拉取镜像。应启用此选项以避免镜像被恶意操作替换");
+		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
+			"运行容器时是否总是拉取镜像。启用此选项可以避免镜像被运行在同一节点上的恶意工作负载替换。");
 		m.put("Whether or not to be able to access time tracking info of issues", "是否能够访问工单的时间跟踪信息");
 		m.put("Whether or not to create the workspace inside container", "是否在容器内创建工作区");
 		m.put("Whether or not to enable code management for the project", "是否为项目启用代码管理");
@@ -4779,6 +4801,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Workspace token", "工作区令牌");
 		m.put("Workspace {0} deleted", "工作区 {0} 已删除");
 		m.put("Workspaces", "工作区");
+		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
+			"由此配置器创建的工作区具有与 OneDev 进程相同的权限。\n使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。\n多个项目应以空格分隔。<br>\n<b class='text-danger'>警告</b>：由此配置器创建的工作区具有与 OneDev 进程相同的权限。\n请确保只有受信任的项目可以使用此配置器");
 		m.put("Workspaces on source branch", "源分支上的工作区");
 		m.put("Workspaces on this branch", "此分支上的工作区");
 		m.put("Workspaces on this issue", "此工单上的工作区");
@@ -4961,10 +4985,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("pull request and code review", "合并请求和代码评审");
 		m.put("pull request to any branch is discarded", "任何分支的合并请求被放弃");
 		m.put("pull request to any branch is merged", "任何分支的合并请求被合并");
-		m.put("pull request to any branch is opened", "任何分支的合并请求被创建");
 		m.put("pull request to branches \"{0}\" is discarded", "分支 \"{0}\" 的合并请求被放弃");
 		m.put("pull request to branches \"{0}\" is merged", "分支 \"{0}\" 的合并请求被合并");
-		m.put("pull request to branches \"{0}\" is opened", "分支 \"{0}\" 的合并请求被创建");
 		m.put("pull request {0}", "合并请求 {0}");
 		m.put("pull requests", "合并请求");
 		m.put("reconciliation (need administrator permission)", "一致性检查（需要管理员权限）");
@@ -5066,56 +5088,37 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("CPU request for the workspace container.", "工作区容器的 CPU 请求。");
-		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Claude Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接运行 Claude Code 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Claude Code 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
-		m.put("Create a workspace spec running Codex directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Codex</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接运行 Codex 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Codex 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
-		m.put("Create a workspace spec running Cursor CLI directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Cursor CLI</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接运行 Cursor CLI 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Cursor CLI 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code directly with server shell environment.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on OneDev server and companion skills are installed for Open Code</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接运行 Open Code 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Open Code 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
-		m.put("Kubernetes Provisioner", "Kubernetes 配置器");
-		m.put("Memory request for the workspace container.", "工作区容器的内存请求。");
-		m.put("Namespace", "命名空间");
-		m.put("Optionally specify CPU limit for the workspace container.", "可选地为工作区容器指定 CPU 限制。");
-		m.put("Optionally specify a storage class to allocate the workspace PVC. Leave empty to use the cluster default storage class.", 
-			"可选地指定用于分配工作区 PVC 的存储类。留空以使用集群默认存储类。");
-		m.put("Optionally specify absolute path to the kubeconfig file used by kubectl to access the cluster. Leave empty to have kubectl determine cluster access automatically (works when OneDev itself runs in the cluster).", 
-			"可选地指定由 kubectl 用于访问集群的 kubeconfig 文件的绝对路径。留空以让 kubectl 自动确定集群访问（当 OneDev 本身运行在集群中时有效）。");
-		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
-			"可选地指定 kubectl 可执行文件的绝对路径。留空以使用系统 PATH 中的 kubectl。");
-		m.put("Optionally specify memory limit for the workspace container.", "可选地为工作区容器指定内存限制。");
-		m.put("Please reprovision the workspace to show changes", "请重新配置工作区以显示更改");
-		m.put("Remote Docker Provisioner", "远程 Docker 配置器");
-		m.put("Remote Shell Provisioner", "远程 Shell 配置器");
-		m.put("Server Docker Provisioner", "服务器 Docker 配置器");
-		m.put("Server Shell Provisioner", "服务器 Shell 配置器");
-		m.put("Specify a Container Image to Test Against", "指定一个用于测试的容器镜像");
-		m.put("Specify agents applicable for this provisioner", "指定适用于此配置器的代理");
-		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
-			"指定此配置器在每个匹配代理上可以同时运行的最大工作区数量。留空以设置为代理的 CPU 核心数");
-		m.put("Specify max number of workspaces this provisioner can run on each matched agent. Leave empty to set as agent CPU cores", 
-			"指定此配置器在每个匹配代理上可以运行的最大工作区数量。留空以设置为代理的 CPU 核心数");
-		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@workspace_token@</code> for user name, and access token for password.", 
-			"如有必要，指定注册表登录信息。对于内置注册表，使用 <code>@server_url@</code> 作为注册表 URL，<code>@workspace_token@</code> 作为用户名，并使用访问令牌作为密码。");
-		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. OneDev creates the namespace if it does not yet exist.", 
-			"指定用于托管此配置器工作区的 Kubernetes 命名空间。如果命名空间尚不存在，OneDev 将创建它。");
-		m.put("Storage Class", "存储类");
-		m.put("Storage Size", "存储大小");
-		m.put("Storage size requested for each workspace PVC. The value should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
-			"为每个工作区 PVC 请求的存储大小。该值应符合 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 资源容量格式</a>，例如 <i>10Gi</i>");
-		m.put("This provisioner creates workspaces as pods inside a Kubernetes cluster. Workspace files are persisted in a PersistentVolumeClaim (one per workspace) so that the workspace pod may be restarted/re-provisioned without losing user changes.", 
-			"此配置器在 Kubernetes 集群内以 pod 的形式创建工作区。工作区文件保存在 PersistentVolumeClaim（每个工作区一个）中，因此工作区 pod 可以在不丢失用户更改的情况下重新启动/重新配置。");
-		m.put("This provisioner creates workspaces inside Docker containers on remote agents via\n<a href='/~administration/agents' target='_blank'>agents</a> for security and isolation purpose", 
-			"此配置器通过\n<a href='/~administration/agents' target='_blank'>代理</a>在远程代理上的 Docker 容器中创建工作区，以实现安全性和隔离目的");
-		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires\ntmux to be installed on matched agents", 
-			"此配置器使用远程代理的 shell 功能创建工作区，并要求\n在匹配代理上安装 tmux");
-		m.put("Use cluster default storage class", "使用集群默认存储类");
-		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
-			"运行容器时是否总是拉取镜像。启用此选项可以避免镜像被运行在同一节点上的恶意工作负载替换。");
-		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
-			"由此配置器创建的工作区具有与 OneDev 进程相同的权限。\n使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。\n多个项目应以空格分隔。<br>\n<b class='text-danger'>警告</b>：由此配置器创建的工作区具有与 OneDev 进程相同的权限。\n请确保只有受信任的项目可以使用此配置器");
+		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>Kubernetes 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
+		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>远程 docker 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
+		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>远程 shell 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
+		m.put("Cannot remove agent \"{0}\" as it has workspaces", "无法移除代理 \"{0}\"，因为它有工作区");
+		m.put("Cannot remove agent as it has workspaces", "无法移除代理，因为它有工作区");
+		m.put("Do you really want to remove agent \"{0}\"?", "您确定要移除代理 \"{0}\" 吗？");
+		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
+			"确保已安装 <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 或更高版本</a>");
+		m.put("No default fork root", "没有默认的 fork 根目录");
+		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
+			"可选地指定一个存储类以动态分配工作区 PVC。留空以使用默认存储类。<b class='text-warning'>注意:</b> 存储类的回收策略应设置为 <code>Delete</code>，因为当工作区被删除时，卷也会被删除");
+		m.put("Pull request is opened or updated", "合并请求已打开或更新");
+		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "移除所有查询到的代理。在下方输入 <code>remove ALL agents</code> 以确认");
+		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "移除选定的代理。在下方输入 <code>yes</code> 以确认");
+		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
+			"指定请求工作区 PVC 的存储大小。大小应符合 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 资源容量格式</a>，例如 <i>10Gi</i>");
+		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "此配置器在 Kubernetes 集群内以 pod 的形式创建工作区");
+		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "此配置器在 OneDev 服务器上的 Docker 容器内创建工作区");
+		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
+			"此配置器通过\n<a href='/~administration/agents' target='_blank'>代理</a>在远程机器上的 Docker 容器内创建工作区。");
+		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
+			"此配置器使用远程代理的 shell 功能创建工作区，并要求在匹配的代理上安装 tmux");
+		m.put("Workspace Volume Storage Class", "工作区卷存储类");
+		m.put("Workspace Volume Storage Size", "工作区卷存储大小");
+		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
+			"重新生成后，您需要在代理端更新令牌。您确定要继续吗？");
+		m.put("pull request to any branch is opened or updated", "合并请求到任何分支已打开或更新");
+		m.put("pull request to branches \"{0}\" is opened or updated", "合并请求到分支 \"{0}\" 已打开或更新");
 	}
 		
 	@Override

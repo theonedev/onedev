@@ -43,14 +43,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.entityreference.EntityReference;
-import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueVote;
@@ -99,9 +98,6 @@ public abstract class IssueSidePanel extends Panel {
 	
 	@Inject
 	private IssueService issueService;
-
-	@Inject
-	private GitService gitService;
 
 	private boolean confidential;
 	
@@ -430,28 +426,11 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				User user = SecurityUtils.getAuthUser();
-				if (user == null)
-					throw new RestartResponseAtInterceptPageException(LoginPage.class);
-
-				Project project = getProject();
-				String suggestedBranch = issueService.suggestBranch(getIssue());
-
-				if (project.getBranchRef(suggestedBranch) != null) {
-					getSession().error(MessageFormat.format(_T("Branch \"{0}\" already exists"), suggestedBranch));
-				} else {
-					String defaultBranch = project.getDefaultBranch();
-					if (defaultBranch == null) {
-						getSession().error(_T("Default branch is not available"));
-					} else {
-						RevCommit commit = project.getRevCommit(defaultBranch, true);
-						if (!project.isCommitSignatureRequirementSatisfied(user, suggestedBranch, commit)) {
-							getSession().error(_T("Valid signature required for head commit of this branch per branch protection rule"));
-						} else {
-							gitService.createBranch(project, suggestedBranch, defaultBranch);
-							getSession().success(MessageFormat.format(_T("Branch \"{0}\" created"), suggestedBranch));
-						}
-					}
+				try {
+					var branch = issueService.ensureBranch(SecurityUtils.getSubject(), getIssue());
+					getSession().success(MessageFormat.format(_T("Branch \"{0}\" created"), branch));
+				} catch (ExplicitException e) {
+					getSession().error(e.getMessage());
 				}
 				target.add(IssueSidePanel.this);
 				onBranchCreated(target);

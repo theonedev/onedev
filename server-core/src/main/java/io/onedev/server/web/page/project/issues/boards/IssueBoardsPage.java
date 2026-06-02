@@ -7,7 +7,9 @@ import static java.util.stream.Collectors.toList;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
@@ -125,6 +127,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		}
 
 	};
+
+	private transient Map<Long, Boolean> canCreateWorkspaceCache = new HashMap<>();
 	
 	private IFeedbackMessageFilter newFeedbackMessageFilter(boolean backlog) {
 		return message -> ((QueryParseMessage)message.getMessage()).backlog == backlog;		
@@ -803,6 +807,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						return getBoard().getIterationPrefix();
 					}
 
+					@Override
+					protected boolean canCreateWorkspace(Project project) {
+						return IssueBoardsPage.this.canCreateWorkspace(project);
+					}
+
 				});
 			}
 			
@@ -839,6 +848,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						return queryModel.getObject();
 					}
 					
+					@Override
+					protected boolean canCreateWorkspace(Project project) {
+						return IssueBoardsPage.this.canCreateWorkspace(project);
+					}
+
 				});
 			}
 			body.add(columnsView);
@@ -1033,4 +1047,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
+	private boolean canCreateWorkspace(Project project) {
+		if (canCreateWorkspaceCache == null)
+			canCreateWorkspaceCache = new HashMap<>();
+		return canCreateWorkspaceCache.computeIfAbsent(project.getId(), it -> 
+				SecurityUtils.canWriteCode(project) && !project.getHierarchyWorkspaceSpecs().isEmpty());
+	}
+
 }

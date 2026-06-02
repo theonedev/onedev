@@ -244,6 +244,11 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 					handler.add(addToIterationLink);
 			}
 
+			@Override
+			protected boolean canCreateWorkspace(Project project) {
+				return BacklogColumnPanel.this.canCreateWorkspace(project);
+			}
+
 		});
 		
 		super.onBeforeRender();
@@ -273,4 +278,5 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 		return true;
 	}
 	
+	protected abstract boolean canCreateWorkspace(Project project);
 }

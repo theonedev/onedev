@@ -146,6 +146,11 @@ abstract class CardListPanel extends Panel {
 			}
 
 			@Override
+			protected boolean canCreateWorkspace(Project project) {
+				return CardListPanel.this.canCreateWorkspace(project);
+			}
+
+			@Override
 			protected Project getProject() {
 				return CardListPanel.this.getProject();
 			}
@@ -275,5 +280,7 @@ abstract class CardListPanel extends Panel {
 				getIssue(i).setBoardPosition(basePosition-baseIndex+i);
 		});
 	}
+
+	protected abstract boolean canCreateWorkspace(Project project);
 
 }

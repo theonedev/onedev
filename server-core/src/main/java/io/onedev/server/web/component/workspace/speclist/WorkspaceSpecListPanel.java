@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
@@ -34,40 +35,60 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 	@Inject
 	private WorkspaceService workspaceService;
 
-	private final String branch;
-
-	public WorkspaceSpecListPanel(String id, String branch) {
+	public WorkspaceSpecListPanel(String id) {
 		super(id);
-		this.branch = branch;
 	}
 
 	protected abstract Project getProject();
+
+	@Nullable
+	protected abstract String getBranch(boolean createIfNotExist);
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
+		var branch = getBranch(false);
+		
 		RepeatingView specsView = new RepeatingView("specs");
 		add(specsView);
 		for (WorkspaceSpec spec : getProject().getHierarchyWorkspaceSpecs()) {
 			WebMarkupContainer specItem = new WebMarkupContainer(specsView.newChildId());
 			specItem.add(new Label("name", spec.getName()));
 
-			List<Workspace> workspaces = queryWorkspaces(spec.getName());
+			if (branch != null) {
+				var workspacesModel = new LoadableDetachableModel<List<Workspace>>() {
 
-			String queryString = buildWorkspaceQueryString(spec.getName());
-			specItem.add(new BookmarkablePageLink<Void>("showInList", ProjectWorkspacesPage.class,
-					ProjectWorkspacesPage.paramsOf(getProject(), queryString, 0)) {
+					@Override
+					protected List<Workspace> load() {
+						return queryWorkspaces(branch, spec.getName());
+					}
+	
+				};
 
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(!workspaces.isEmpty());
-				}
+				String queryString = buildWorkspaceQueryString(branch, spec.getName());
+				specItem.add(new BookmarkablePageLink<Void>("showInList", ProjectWorkspacesPage.class,
+						ProjectWorkspacesPage.paramsOf(getProject(), queryString, 0)) {
+	
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!workspacesModel.getObject().isEmpty());
+					}
+	
+				});	
+				specItem.add(new MiniWorkspaceListPanel("detail", workspacesModel));	
+			} else {
+				specItem.add(new WebMarkupContainer("showInList").setVisible(false));
+				specItem.add(new MiniWorkspaceListPanel("detail", new LoadableDetachableModel<List<Workspace>>() {
+					@Override
+					protected List<Workspace> load() {
+						return new ArrayList<>();
+					}
+				}));
+			}
 
-			});
-
-			specItem.add(new CreateWorkspaceLink("create", branch) {
+			specItem.add(new CreateWorkspaceLink("create") {
 
 				@Override
 				protected Project getProject() {
@@ -79,40 +100,35 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 					return spec;
 				}
 
-			});
-
-			var workspacesModel = new LoadableDetachableModel<List<Workspace>>() {
-
 				@Override
-				protected List<Workspace> load() {
-					return queryWorkspaces(spec.getName());
+				protected String getBranch() {
+					return WorkspaceSpecListPanel.this.getBranch(true);
 				}
 
-			};
-			specItem.add(new MiniWorkspaceListPanel("detail", workspacesModel));
+			});
 
 			specItem.setOutputMarkupId(true);
 			specsView.add(specItem);
 		}
 	}
 
-	private Criteria<Workspace> buildWorkspaceCriteria(String specName) {
+	private Criteria<Workspace> buildWorkspaceCriteria(String branch, String specName) {
 		return Criteria.andCriterias(List.of(
 				new ProjectCriteria(getProject().getPath(), Is),
 				new SpecCriteria(specName, Is),
 				new BranchCriteria(branch, Is)));
 	}
 
-	private List<Workspace> queryWorkspaces(String specName) {
-		var query = new WorkspaceQuery(buildWorkspaceCriteria(specName));
+	private List<Workspace> queryWorkspaces(String branch, String specName) {
+		var query = new WorkspaceQuery(buildWorkspaceCriteria(branch, specName));
 		var workspaces = new ArrayList<>(workspaceService.query(
 				SecurityUtils.getSubject(), getProject(), query, 0, Integer.MAX_VALUE));
 		workspaces.sort(Comparator.comparing(Workspace::getNumber));
 		return workspaces;
 	}
 
-	private String buildWorkspaceQueryString(String specName) {
-		return new WorkspaceQuery(buildWorkspaceCriteria(specName)).toString();
+	private String buildWorkspaceQueryString(String branch, String specName) {
+		return new WorkspaceQuery(buildWorkspaceCriteria(branch, specName)).toString();
 	}
 
 	@Override

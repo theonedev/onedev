@@ -940,11 +940,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				var currentRefName = getRefName();
 				var currentBranch = currentRefName != null ? GitUtils.ref2branch(currentRefName) : "main";
-				return new WorkspaceSpecListPanel(id, currentBranch) {
+				return new WorkspaceSpecListPanel(id) {
 
 					@Override
 					protected Project getProject() {
 						return ProjectBlobPage.this.getProject();
+					}
+
+					@Override
+					protected String getBranch(boolean createIfNotExist) {
+						return currentBranch;
 					}
 
 				};

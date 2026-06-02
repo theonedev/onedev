@@ -105,4 +105,6 @@ public interface IssueService extends EntityService<Issue> {
 
 	String suggestBranch(Issue issue);
 	
+	String ensureBranch(Subject subject, Issue issue);
+	
 }
