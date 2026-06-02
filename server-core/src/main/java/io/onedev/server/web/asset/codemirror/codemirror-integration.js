@@ -8,20 +8,32 @@ onedev.server.codemirror = {
 	clearSelection: function(cm) {
     	cm.setCursor(cm.getCursor("from"));
 	},
+	markRange: function(cm, range) {
+		cm.markText(
+				{line: range.fromRow, ch: range.fromColumn}, 
+				{line: range.toRow, ch: range.toColumn},
+				{className: "CodeMirror-mark"});
+		onedev.server.codemirror.markBlankLines(cm, range);
+	},
+	markBlankLines: function(cm, range) {
+		var endRow = range.toColumn == 0? range.toRow-1: range.toRow;
+		for (var line = range.fromRow; line <= endRow && line < cm.lineCount(); line++) {
+			if (cm.getLine(line) == "") {
+				var marker = document.createElement("span");
+				marker.className = "CodeMirror-mark";
+				marker.setAttribute("aria-hidden", "true");
+				marker.textContent = "\u00a0";
+				cm.setBookmark({line: line, ch: 0}, {widget: marker});
+			}
+		}
+	},
 	mark: function(cm, range) {
         onedev.server.codemirror.clearMark(cm);
 		if (Array.isArray(range)) {
-			for (var i in range) {
-				cm.markText(
-						{line: range[i].fromRow, ch: range[i].fromColumn}, 
-						{line: range[i].toRow, ch: range[i].toColumn},
-						{className: "CodeMirror-mark"});
-			}			
+			for (var i in range)
+				onedev.server.codemirror.markRange(cm, range[i]);
 		} else {
-			cm.markText(
-					{line: range.fromRow, ch: range.fromColumn}, 
-					{line: range.toRow, ch: range.toColumn},
-					{className: "CodeMirror-mark"});
+			onedev.server.codemirror.markRange(cm, range);
 		}
 	},
 	scrollTo: function(cm, range) {
