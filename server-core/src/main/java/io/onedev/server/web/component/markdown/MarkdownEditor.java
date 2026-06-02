@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -437,7 +438,9 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					var currentProject = referenceSupport.getCurrentProject();
 					String atChar = params.getParameterValue("param1").toOptionalString();
 					String query = params.getParameterValue("param2").toOptionalString();
-					String type = params.getParameterValue("param3").toOptionalString();
+					String type = StringUtils.deleteWhitespace(StringUtils.defaultString(
+							params.getParameterValue("param3").toOptionalString()))
+							.toLowerCase(Locale.ENGLISH);
 					String projectKeyOrPath = params.getParameterValue("param4").toOptionalString();
 					List<Map<String, String>> referenceList = new ArrayList<>();
 					Project project;
