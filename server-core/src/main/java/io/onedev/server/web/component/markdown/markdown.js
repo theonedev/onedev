@@ -516,13 +516,36 @@ onedev.server.markdown = {
 	    } 	    
 
 	    if (canReferenceEntity) {
+			var referenceQueryPattern = "[^\\s!\"#$%&'()*+,./:;<=>?@\\[\\\\\\]^`{|}~]*";
+			function normalizeReferenceQuery(query) {
+				// Let users type sentence-like reference queries with hyphens while searching terms as words.
+				return query.replace(/-/g, " ");
+			}
+			function matchReferenceQuery(flag, subtext, shouldStartWithSpace) {
+				if (flag === '-') {
+					// Do not let the project-key trigger steal hyphens inside a # reference query.
+					var match = new RegExp("(^|[^#\\w-]+)((pull\\s*request|pr|issue|build|workspace)\\s+)?" + projectKeyPattern + "-(?<query>" + referenceQueryPattern + ")$", "i").exec(subtext);
+					if (match)
+						return normalizeReferenceQuery(match.groups.query);
+					else
+						return null;
+				}
+				flag = flag.replace(/[\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+				if (shouldStartWithSpace)
+					flag = "(?:^|\\s|\\W)" + flag;
+				var match = new RegExp(flag + "(" + referenceQueryPattern + ")$").exec(subtext);
+				if (match)
+					return normalizeReferenceQuery(match[1]);
+				else
+					return null;
+			}
 	    	function matchReference(atChar) {
 	    		var input = $input.val().substring(0, $input.caret());
 	    		var match;
 			if (atChar === '#')
-				match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?<project>" + projectPathPattern + ")?#(?<query>\\S*)$", 'gi').exec(input);
+				match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?<project>" + projectPathPattern + ")?#(?<query>" + referenceQueryPattern + ")$", 'gi').exec(input);
 			else
-				match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?<project>" + projectKeyPattern + ")-(?<query>\\S*)$", 'gi').exec(input);					
+				match = new RegExp("(^|[^#\\w-]+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?<project>" + projectKeyPattern + ")-(?<query>" + referenceQueryPattern + ")$", 'gi').exec(input);					
 	    		if (match) {
 					var index = match.index + match[1].length;
 					if (match[2])
@@ -531,7 +554,7 @@ onedev.server.markdown = {
 	    			return {
 	    				type: type,
 	    				project: match.groups.project,
-	    				query: match.groups.query,
+	    				query: normalizeReferenceQuery(match.groups.query),
 						index: index
 	    			}
 	    		}
@@ -541,6 +564,11 @@ onedev.server.markdown = {
 				var match = matchReference(atChar);
 				if (match)
 					callback("referenceQuery", atChar, match.query, match.type, match.project);
+				else
+					renderCallback([]);
+			}
+			function sortReferences(query, items, searchKey) {
+				return items;
 			}
 			function beforeInsertReference(atChar) {
 				$input.focus();
@@ -562,9 +590,11 @@ onedev.server.markdown = {
 		    	startWithSpace: false,
 		    	searchKey: "searchKey",
 		        callbacks: {
+					matcher: matchReferenceQuery,
 		        	remoteFilter: function(query, renderCallback) {
 						remoteFilterReference('#', query, renderCallback);
 		        	},
+					sorter: sortReferences,
 					beforeInsert: function(value) {
 						beforeInsertReference('#');
 						return value;
@@ -576,16 +606,19 @@ onedev.server.markdown = {
 		        insertTpl: function() {
 					return "${reference} ";
 		        }, 
-		        limit: atWhoLimit
+		        limit: atWhoLimit,
+				maxLen: 100
 		    });		   
 			$input.atwho({
 				at: '-',
 				startWithSpace: false,
 				searchKey: "searchKey",
 				callbacks: {
+					matcher: matchReferenceQuery,
 					remoteFilter: function(query, renderCallback) {
 						remoteFilterReference('-', query, renderCallback);
 					},
+					sorter: sortReferences,
 					beforeInsert: function(value) {
 						beforeInsertReference('-');
 						return value;
@@ -597,7 +630,8 @@ onedev.server.markdown = {
 				insertTpl: function() {
 					return "${reference} ";
 				},
-				limit: atWhoLimit
+				limit: atWhoLimit,
+				maxLen: 100
 			});
 		}
 	    
