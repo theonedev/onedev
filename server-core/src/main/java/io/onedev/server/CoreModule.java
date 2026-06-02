@@ -127,6 +127,7 @@ import io.onedev.server.markdown.HtmlProcessor;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.notification.BuildNotificationManager;
 import io.onedev.server.notification.CodeCommentNotificationManager;
 import io.onedev.server.notification.CommitNotificationManager;
@@ -425,6 +426,7 @@ import io.onedev.server.web.websocket.WebSocketService;
 import io.onedev.server.web.websocket.WorkspaceEventBroadcaster;
 import io.onedev.server.workspace.DefaultWorkspaceQueryPersonalizationService;
 import io.onedev.server.workspace.DefaultWorkspaceService;
+import io.onedev.server.workspace.WorkspaceProvisionerDiscoverer;
 import io.onedev.server.workspace.WorkspaceQueryPersonalizationService;
 import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.CommitInfoService;
@@ -644,6 +646,20 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(ProjectSettingContribution.class, () -> new ArrayList<>());
 		contribute(ChatToolsContribution.class, page -> List.of());
 		contribute(GitPreReceiveChecker.class, (project, submitter, refName, oldObjectId, newObjectId) -> null);
+
+		contribute(WorkspaceProvisionerDiscoverer.class, new WorkspaceProvisionerDiscoverer() {
+
+			@Override
+			public WorkspaceProvisioner discover() {
+				return null;
+			}
+
+			@Override
+			public int getOrder() {
+				return 10000;
+			}
+
+		});
 
 		bind(PackFilter.class);
 	}
