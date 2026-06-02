@@ -370,6 +370,8 @@ public class TodResource {
                         .append("\n  suffix pattern: ")
                         .append(suffix != null? suffix: "");
             }
+            requirementBuilder.append("\nIf '<prefix pattern> <issue reference> <suffix pattern>' reads as a complete sentence, ")
+                    .append("put it in the commit message footer.");
         }
 
         if (requirementBuilder.length() != 0)
