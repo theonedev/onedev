@@ -1,17 +1,19 @@
 package io.onedev.server.git.hook;
 
-import com.google.common.base.Preconditions;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UrlService;
-import io.onedev.server.service.UserService;
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionService;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.security.SecurityUtils;
+import static io.onedev.server.security.SecurityUtils.asPrincipals;
+import static io.onedev.server.security.SecurityUtils.asSubject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
@@ -23,19 +25,19 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import com.google.common.base.Preconditions;
 
-import static io.onedev.server.security.SecurityUtils.asPrincipals;
-import static io.onedev.server.security.SecurityUtils.asSubject;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.service.UserService;
 
 @Singleton
 public class GitPostReceiveCallback extends HttpServlet {
@@ -44,26 +46,21 @@ public class GitPostReceiveCallback extends HttpServlet {
 	
     public static final String PATH = "/git-postreceive-callback";
     
-    private final ProjectService projectService;
+	@Inject
+    private ProjectService projectService;
 
-	private final UserService userService;
-    
-    private final UrlService urlService;
-
-    private final SessionService sessionService;
-    
-    private final ListenerRegistry listenerRegistry;
+	@Inject
+	private UserService userService;
     
     @Inject
-    public GitPostReceiveCallback(ProjectService projectService, UrlService urlService,
-                                  SessionService sessionService, ListenerRegistry listenerRegistry, UserService userService) {
-    	this.projectService = projectService;
-    	this.urlService = urlService;
-    	this.sessionService = sessionService;
-        this.listenerRegistry = listenerRegistry;
-        this.userService = userService;
-    }
+    private UrlService urlService;
 
+    @Inject
+    private SessionService sessionService;
+    
+    @Inject
+    private ListenerRegistry listenerRegistry;
+    
     @Sessional
     @Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -124,7 +121,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         	}
 
         	if (branch != null && defaultBranch != null && !branch.equals(defaultBranch) 
-        			&& !SecurityUtils.isSystem(principal)) {
+        			&& !SecurityUtils.isSystem(principal) && !newObjectId.equals(ObjectId.zeroId())) {
         		showPullRequestLink(output, projectId, branch, defaultBranch);
         	}
         	
@@ -145,7 +142,6 @@ public class GitPostReceiveCallback extends HttpServlet {
         }
         
 		var userId = SecurityUtils.getUser().getId();
-
         sessionService.runAsyncAfterCommit(() -> {
 			Project project = projectService.load(projectId);
 			try {

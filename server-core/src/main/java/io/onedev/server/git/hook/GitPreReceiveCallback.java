@@ -1,11 +1,37 @@
 package io.onedev.server.git.hook;
 
+import static io.onedev.server.security.SecurityUtils.asPrincipals;
+import static io.onedev.server.security.SecurityUtils.asSubject;
+import static io.onedev.server.security.SecurityUtils.canManageProject;
+import static io.onedev.server.security.SecurityUtils.getUser;
+import static io.onedev.server.security.SecurityUtils.isSystem;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.shiro.util.ThreadContext;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -14,36 +40,22 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.persistence.annotation.Sessional;
-import org.apache.shiro.util.ThreadContext;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-
-import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.*;
-
-import static io.onedev.server.security.SecurityUtils.*;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.workspace.WorkspaceService;
 
 @Singleton
 public class GitPreReceiveCallback extends HttpServlet {
 
 	public static final String PATH = "/git-prereceive-callback";
 
-	private final ProjectService projectService;
-	
-	private final Set<GitPreReceiveChecker> preReceiveCheckers;
+	@Inject
+	private ProjectService projectService;
+
+	@Inject
+	private WorkspaceService workspaceService;
 	
 	@Inject
-	public GitPreReceiveCallback(ProjectService projectService, Set<GitPreReceiveChecker> preReceiveCheckers) {
-		this.projectService = projectService;
-		this.preReceiveCheckers = preReceiveCheckers;
-	}
+	private Set<GitPreReceiveChecker> preReceiveCheckers;	
 	
 	private void error(Output output, @Nullable String refName, List<String> messages) {
 		output.markError();
@@ -176,6 +188,10 @@ public class GitPreReceiveCallback extends HttpServlet {
 							if (errorMessage != null)
 								errorMessages.add(errorMessage);
 						}
+					}
+					if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
+						if (workspaceService.count(project, branchName) > 0) 
+							errorMessages.add("There are workspaces on this branch. Please delete them first");
 					}
 					if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 						try {
