@@ -356,23 +356,10 @@ public class TodResource {
                 requirementBuilder.append("\nExplanation: ").append(checker.getExplanation());
         }
 
-        var fixPatternEntries = settingService.getIssueSetting().getCommitMessageFixPatterns().getEntries();
-        if (!fixPatternEntries.isEmpty()) {
-            if (requirementBuilder.length() != 0)
-                requirementBuilder.append("\n\n");
-            requirementBuilder.append("When a commit closes/fixes/resolves an issue, mention the issue reference by enclosing it ")
-                    .append("with one of these prefix/suffix pattern pairs:");
-            for (var entry : fixPatternEntries) {
-                var prefix = entry.getPrefix();
-                var suffix = entry.getSuffix();
-                requirementBuilder.append("\n- prefix pattern: ")
-                        .append(prefix != null? prefix: "")
-                        .append("\n  suffix pattern: ")
-                        .append(suffix != null? suffix: "");
-            }
-            requirementBuilder.append("\nIf '<prefix pattern> <issue reference> <suffix pattern>' reads as a complete sentence, ")
-                    .append("put it in the commit message footer.");
-        }
+        var fixSuggestion = settingService.getIssueSetting().getCommitMessageFixSetting().getFixSuggestion();
+        if (requirementBuilder.length() != 0)
+            requirementBuilder.append("\n\n");
+        requirementBuilder.append(fixSuggestion);
 
         if (requirementBuilder.length() != 0)
             return requirementBuilder.toString();

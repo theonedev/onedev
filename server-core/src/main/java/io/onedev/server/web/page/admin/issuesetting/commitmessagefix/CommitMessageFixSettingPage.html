@@ -1,0 +1,12 @@
+<wicket:extend>
+	<div class="text-muted mb-4">
+		<wicket:svg href="bulb" class="icon"/> <wicket:t>Configure how coding agents should reference fixed issues in commit messages, 
+		and specify prefix/suffix patterns to detect fixed issues in commit messages. 
+		</wicket:t>
+	</div>
+	<form wicket:id="form">
+		<div wicket:id="feedback"></div>
+		<div wicket:id="editor" class="mb-4"></div>
+		<input type="submit" class="btn btn-primary" t:value="Update">
+	</form>
+</wicket:extend>

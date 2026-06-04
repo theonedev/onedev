@@ -124,7 +124,7 @@ import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupListPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
-import io.onedev.server.web.page.admin.issuesetting.commitmessagefixpatterns.CommitMessageFixPatternsPage;
+import io.onedev.server.web.page.admin.issuesetting.commitmessagefix.CommitMessageFixSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardListPage;
 import io.onedev.server.web.page.admin.issuesetting.externalissuepattern.ExternalIssueTransformersPage;
 import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
@@ -281,8 +281,8 @@ public abstract class LayoutPage extends BasePage {
 					}
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Description Templates"),
 							IssueTemplateListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Commit Message Fix Patterns"),
-							CommitMessageFixPatternsPage.class, new PageParameters()));
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Commit Message Fix Settings"),
+							CommitMessageFixSettingPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("External Issue Transformers"), ExternalIssueTransformersPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Check Workflow Integrity"),
 							CheckIssueIntegrityPage.class, new PageParameters()));

@@ -27,7 +27,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.CommitMessageFixPatterns;
+import io.onedev.server.model.support.issue.CommitMessageFixSetting;
 import io.onedev.server.model.support.issue.ExternalIssueTransformers;
 import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
@@ -78,7 +78,7 @@ public class GlobalIssueSetting implements Serializable {
 	
 	private List<IssueTemplate> issueTemplates = new ArrayList<>();
 	
-	private CommitMessageFixPatterns commitMessageFixPatterns;
+	private CommitMessageFixSetting commitMessageFixSetting = new CommitMessageFixSetting();
 
 	private ExternalIssueTransformers externalIssueTransformers;
 	
@@ -265,17 +265,7 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Open & Unscheduled", "\"State\" is \"Open\" and \"Iteration\" is empty"));
 		namedQueries.add(new NamedIssueQuery("All", null));
-		
-		commitMessageFixPatterns = new CommitMessageFixPatterns();
-		var entry = new CommitMessageFixPatterns.Entry();
-		entry.setPrefix("(^|\\W)(fix|fixed|fixes|fixing|resolve|resolved|resolves|resolving|close|closed|closes|closing)[\\s:]+");
-		entry.setSuffix("(?=$|\\W)");
-		commitMessageFixPatterns.getEntries().add(entry);
-		entry = new CommitMessageFixPatterns.Entry();
-		entry.setPrefix("\\(\\s*");
-		entry.setSuffix("\\s*\\)\\s*$");
-		commitMessageFixPatterns.getEntries().add(entry);
-		
+				
 		timeTrackingSetting.setAggregationLink("Sub Issues");
 		
 		externalIssueTransformers = new ExternalIssueTransformers();
@@ -749,12 +739,12 @@ public class GlobalIssueSetting implements Serializable {
 
 	@NotNull
 	@Valid
-	public CommitMessageFixPatterns getCommitMessageFixPatterns() {
-		return commitMessageFixPatterns;
+	public CommitMessageFixSetting getCommitMessageFixSetting() {
+		return commitMessageFixSetting;
 	}
 
-	public void setCommitMessageFixPatterns(CommitMessageFixPatterns commitMessageFixPatterns) {
-		this.commitMessageFixPatterns = commitMessageFixPatterns;
+	public void setCommitMessageFixSetting(CommitMessageFixSetting commitMessageFixSetting) {
+		this.commitMessageFixSetting = commitMessageFixSetting;
 	}
 
 	@Valid

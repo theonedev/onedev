@@ -12,7 +12,7 @@ import io.onedev.commons.loader.AppLoaderMocker;
 import io.onedev.server.model.Project;
 import io.onedev.server.service.ProjectService;
 
-public class CommitMessageFixPatternsTest extends AppLoaderMocker {
+public class CommitMessageFixSettingTest extends AppLoaderMocker {
 
     @Test
     public void parseFixedIssues() {
@@ -26,17 +26,9 @@ public class CommitMessageFixPatternsTest extends AppLoaderMocker {
 		when(projectService.findByKey("TESTPROJ")).thenReturn(project);
 		when(projectService.findByPath("test/project")).thenReturn(project);
 		
-		var commitMessageFixPatterns = new CommitMessageFixPatterns();
-		var entry = new CommitMessageFixPatterns.Entry();
-		entry.setPrefix("(^|\\W)(fix|fixed|fixes|fixing|resolve|resolved|resolves|resolving|close|closed|closes|closing)[\\s:]+");
-		entry.setSuffix("(?=$|\\W)");
-		commitMessageFixPatterns.getEntries().add(entry);
-		entry = new CommitMessageFixPatterns.Entry();
-		entry.setPrefix("\\(\\s*");
-		entry.setSuffix("\\s*\\)\\s*$");
-		commitMessageFixPatterns.getEntries().add(entry);
+		var commitMessageFixSetting = new CommitMessageFixSetting();
 
-		var issues = commitMessageFixPatterns.parseFixedIssues("" +
+		var issues = commitMessageFixSetting.parseFixedIssues("" +
 				"fix #123,resolve  :  issue  #456  Closing test/project#100 Resolves issue test/project#200\n" +
 				"feat(doc): this is a doc feat ( test/project#300 )\n" +
 				"feat: this is an improvement(UNKNOWN-400)\n" +

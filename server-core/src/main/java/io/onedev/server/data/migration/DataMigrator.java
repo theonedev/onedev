@@ -66,6 +66,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TimeGroups;
+import io.onedev.server.model.support.issue.CommitMessageFixSetting;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
@@ -8752,6 +8753,31 @@ public class DataMigrator {
 				for (Element element : dom.getRootElement().elements()) {
 					element.element("rocketCount").detach();
 					element.addElement("tickCount").setText("0");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate227(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var commitMessageFixPatternsElement = valueElement.element("commitMessageFixPatterns");
+							commitMessageFixPatternsElement.setName("commitMessageFixSetting");
+							commitMessageFixPatternsElement.addElement("fixSuggestion")
+									.setText(CommitMessageFixSetting.DEFAULT_FIX_SUGGESTION);
+							var entriesElement = commitMessageFixPatternsElement.element("entries");
+							entriesElement.setName("fixPatterns");
+							for (Element entryElement : entriesElement.elements()) {
+								entryElement.setName("io.onedev.server.model.support.issue.CommitMessageFixSetting_-FixPattern");
+							}
+						}
+					}
 				}
 				dom.writeToFile(file, false);
 			}
