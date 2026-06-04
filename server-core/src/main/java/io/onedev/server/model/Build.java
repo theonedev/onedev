@@ -1142,11 +1142,13 @@ public class Build extends ProjectBelonging
 		return null;
 	}
 	
-	public String getCaption(@Nullable Project currentProject) {
+	public String getCaption(@Nullable Project currentProject, boolean withReference) {
 		var caption = getJobName();
 		if (getVersion() != null)
 			caption += ": " + getVersion();
-		return caption + " (" + getReference().toString(currentProject) + ")";
+		if (withReference)
+			caption += " (" + getReference().toString(currentProject) + ")";
+		return caption;
 	}
 	
 	public LoggingSupport getLoggingSupport() {

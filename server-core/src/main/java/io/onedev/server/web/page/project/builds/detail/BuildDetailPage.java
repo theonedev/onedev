@@ -242,7 +242,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 			@Override
 			public String getObject() {
-				return getBuild().getCaption(getProject());
+				return getBuild().getCaption(getProject(), false);
 			}
 			
 		}) {
@@ -255,6 +255,8 @@ public abstract class BuildDetailPage extends ProjectPage
 			}
 			
 		});
+		
+		add(new Label("number", "#" + getBuild().getNumber()));
 		
 		add(new BuildStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
 

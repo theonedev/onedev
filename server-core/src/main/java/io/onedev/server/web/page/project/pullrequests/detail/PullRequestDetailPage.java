@@ -286,8 +286,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				var transformed = transformReferences(request.getTitle(), request.getTargetProject(),
 						new LinkTransformer(null));
-				transformed = Emojis.getInstance().apply(transformed);
-				return transformed + " (" + getPullRequest().getReference().toString(getProject()) + ")";
+				return Emojis.getInstance().apply(transformed);				
 			}
 
 		}) {
@@ -299,6 +298,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 		}.setEscapeModelStrings(false));
+
+		requestHead.add(new Label("number", "#" + getPullRequest().getNumber()));
 
 		requestHead.add(new AjaxLink<Void>("edit") {
 

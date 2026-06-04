@@ -2,17 +2,14 @@ package io.onedev.server.web.component.issue.title;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.Issue;
@@ -34,15 +31,9 @@ public abstract class IssueTitlePanel extends Panel {
 		super.onInitialize();
 		Issue issue = getIssue();
 		
-		var label = "(" + issue.getReference().toString(getCurrentProject()) + ")";
-		WebMarkupContainer numberLink;
-		add(numberLink = new ActionablePageLink("number", 
+		WebMarkupContainer link;
+		add(link = new ActionablePageLink("link", 
 				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
-
-			@Override
-			public IModel<?> getBody() {
-				return Model.of(label);
-			}
 
 			@Override
 			protected void doBeforeNav(AjaxRequestTarget target) {
@@ -71,11 +62,13 @@ public abstract class IssueTitlePanel extends Panel {
 						+ "    return false;\n"
 						+ "  }\n"
 						+ "});", 
-						getMarkupId(), numberLink.getMarkupId());
+						getMarkupId(), link.getMarkupId());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		}.setEscapeModelStrings(false).setOutputMarkupId(true));
+
+		add(new Label("number", issue.getReference().toString(getCurrentProject())));
 		
 		add(new WebMarkupContainer("confidential") {
 

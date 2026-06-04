@@ -914,16 +914,10 @@ public abstract class PullRequestListPanel extends Panel {
 				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
 						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
 
-				String label = "(" + request.getReference().toString(getProject()) + ")";
+				fragment.add(new Label("number", request.getReference().toString(getProject())));
 					
-				ActionablePageLink numberLink;
-				fragment.add(numberLink = new ActionablePageLink("number", 
+				ActionablePageLink prLink = new ActionablePageLink("link", 
 						PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request)) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of(label);
-					}
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
@@ -934,7 +928,8 @@ public abstract class PullRequestListPanel extends Panel {
 						WebSession.get().setRedirectUrlAfterDelete(PullRequest.class, redirectUrlAfterDelete);
 					}
 					
-				});
+				};
+				fragment.add(prLink);
 
 				String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
 						PullRequestActivitiesPage.paramsOf(request)).toString();
@@ -954,7 +949,7 @@ public abstract class PullRequestListPanel extends Panel {
 								+ "    return false;\n"
 								+ "  }\n"
 								+ "});", 
-								getMarkupId(), numberLink.getMarkupId());
+								getMarkupId(), prLink.getMarkupId());
 						response.render(OnDomReadyHeaderItem.forScript(script));
 					}
 					

@@ -1135,11 +1135,13 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getObject() {
-						return rowModel.getObject().getCaption(getProject());
+						return rowModel.getObject().getCaption(getProject(), false);
 					}
 
 				}));
 				fragment.add(link);
+
+				fragment.add(new Label("number", rowModel.getObject().getReference().toString(getProject())));
 
 				fragment.add(new EntityLabelsPanel<>("labels", rowModel));
 

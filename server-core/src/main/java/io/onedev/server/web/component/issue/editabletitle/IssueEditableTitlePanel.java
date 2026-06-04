@@ -116,10 +116,12 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			protected String load() {
 				var transformed = transformReferences(getIssue().getTitle(), getIssue().getProject(), 
 						new LinkTransformer(null));
-				return Emojis.getInstance().apply(transformed) + " (" + getIssue().getReference().toString(getProject()) + ")";
+				return Emojis.getInstance().apply(transformed);
 			}
 			
 		}).setEscapeModelStrings(false));
+		
+		titleViewer.add(new Label("number", "#" + getIssue().getNumber()));
 		
 		titleViewer.add(new WebMarkupContainer("confidential") {
 
