@@ -96,6 +96,12 @@ public class Translation_zh extends TranslationResourceBundle {
 			"<b class='text-danger'>注意：</b> 这需要企业订阅。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("<b class='text-danger'>NOTE: </b> This step requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意：</b> 此步骤需要企业版订阅。<a href='https://onedev.io/pricing' target='_blank'>免费试用 30 天</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>Kubernetes 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
+		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>远程 docker 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
+		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>远程 shell 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 		m.put("<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意：</b>SendGrid 集成是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
@@ -649,6 +655,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Cannot find issue board: ", "找不到工单看板：");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
 		m.put("Cannot perform this operation now", "当前无法执行此操作");
+		m.put("Cannot remove agent \"{0}\" as it has workspaces", "无法移除代理 \"{0}\"，因为它有工作区");
+		m.put("Cannot remove agent as it has workspaces", "无法移除代理，因为它有工作区");
 		m.put("Cannot reset password for disabled account", "无法为已禁用账户重置密码");
 		m.put("Cannot reset password for service or AI account", "无法为服务或 AI 账户重置密码");
 		m.put("Cannot reset password for user authenticating via external system", "无法重置通过外部系统认证的用户密码");
@@ -834,7 +842,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Commit Message", "提交信息");
 		m.put("Commit Message Bean", "提交信息 Bean");
 		m.put("Commit Message Checker", "提交信息检查器");
-		m.put("Commit Message Fix Patterns", "提交消息修复模式");
 		m.put("Commit Message Footer Pattern", "提交信息尾部模式");
 		m.put("Commit Notification", "提交通知");
 		m.put("Commit Notification Template", "提交通知模板");
@@ -1221,6 +1228,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Do you really want to discard changes to this file? This cannot be undone.", "您真的想放弃对此文件的更改吗？此操作无法撤销。");
 		m.put("Do you really want to enable this account?", "您真的要启用此账户吗？");
 		m.put("Do you really want to rebuild?", "您确定要重建此构建吗？");
+		m.put("Do you really want to remove agent \"{0}\"?", "您确定要移除代理 \"{0}\" 吗？");
 		m.put("Do you really want to remove assignee \"{0}\"?", "确定要移除指派人 \"{0}\" 吗？");
 		m.put("Do you really want to remove password of this user?", "您真的要删除此用户的密码吗？");
 		m.put("Do you really want to remove the issue from iteration \"{0}\"?", "您真的要从迭代 \"{0}\" 中移除这个工单吗？");
@@ -2120,6 +2128,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Mail service settings saved", "邮件服务设置已保存");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
 			"确保 <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 或更高版本</a> 已安装");
+		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
+			"确保已安装 <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 或更高版本</a>");
 		m.put("Make sure current user has permission to run docker containers", "确保当前用户有权运行 Docker 容器");
 		m.put("Make sure docker engine is installed and docker command line is available in system path", 
 			"确保 Docker 引擎已安装且 docker 命令行在系统路径中可用");
@@ -2332,6 +2342,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No current pull request in query context", "在查询上下文中没有当前合并请求");
 		m.put("No data", "没有数据");
 		m.put("No default branch", "没有默认分支");
+		m.put("No default fork root", "没有默认的 fork 根目录");
 		m.put("No default group", "无默认组");
 		m.put("No default roles", "没有默认角色");
 		m.put("No default value", "无默认值");
@@ -2588,6 +2599,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选地指定一个前缀，在生成工单分支时作为路径段添加。\n例如，使用前缀 <code>feature</code>，生成的工单分支将是\n<code>feature/issue-100-some-title</code>");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"可选择指定一个存储类来动态分配构建卷。留空则使用默认存储类。<b class='text-warning'>注意：</b>存储类的回收策略应设置为 <code>Delete</code>，因为该卷仅用于保存临时构建文件");
+		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
+			"可选地指定一个存储类以动态分配工作区 PVC。留空以使用默认存储类。<b class='text-warning'>注意:</b> 存储类的回收策略应设置为 <code>Delete</code>，因为当工作区被删除时，卷也会被删除");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"可选择指定一个工作周期字段来保存估计时间信息。<br><b>注意：</b>如果这里没有合适的选项，您可以自定义 OneDev 工单字段");
 		m.put("Optionally specify a working period field to hold spent time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3149,6 +3162,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pull request is discarded", "合并请求被丢弃");
 		m.put("Pull request is in error: {0}", "合并请求处于错误状态: {0}");
 		m.put("Pull request is merged", "合并请求被合并");
+		m.put("Pull request is opened or updated", "合并请求已打开或更新");
 		m.put("Pull request is still a work in progress", "拉取请求仍在进行中");
 		m.put("Pull request is work in progress", "拉取请求正在进行中");
 		m.put("Pull request list", "合并请求列表");
@@ -3260,10 +3274,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Remove From Current Iteration", "从当前迭代中删除");
 		m.put("Remove Selected Agents", "删除选定的代理");
 		m.put("Remove Selected Users from Group", "移除选定用户从组中");
+		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "移除所有查询到的代理。在下方输入 <code>remove ALL agents</code> 以确认");
 		m.put("Remove from All Queried Groups", "从所有查询的组中移除");
 		m.put("Remove from Selected Groups", "从选定的组中移除");
 		m.put("Remove from batch", "从批量中删除");
 		m.put("Remove issue from this iteration", "从此迭代中移除工单");
+		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "移除选定的代理。在下方输入 <code>yes</code> 以确认");
 		m.put("Remove this assignee", "移除此指派人");
 		m.put("Remove this external participant from issue", "从工单中移除此外部参与者");
 		m.put("Remove this file", "删除此文件");
@@ -3994,6 +4010,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workdir'>任务工作区</a> 的报告起始页面，例如：api/index.html");
 		m.put("Specify storage size to request for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
 			"指定为构建卷请求的存储大小。大小应符合 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 资源容量格式</a>，例如 <i>10Gi</i>");
+		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
+			"指定请求工作区 PVC 的存储大小。大小应符合 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 资源容量格式</a>，例如 <i>10Gi</i>");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
 			"指定用于计算报告中发现问题列值的制表符宽度");
 		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
@@ -4311,8 +4329,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
 		m.put("This property is imported from {0}", "此属性是从 {0} 导入的");
+		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "此配置器在 Kubernetes 集群内以 pod 的形式创建工作区");
+		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "此配置器在 OneDev 服务器上的 Docker 容器内创建工作区");
+		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
+			"此配置器通过\n<a href='/~administration/agents' target='_blank'>代理</a>在远程机器上的 Docker 容器内创建工作区。");
 		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
 			"此配置器使用 OneDev 服务器的 shell 功能创建工作区，并要求在 OneDev 服务器上安装 tmux");
+		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
+			"此配置器使用远程代理的 shell 功能创建工作区，并要求在匹配的代理上安装 tmux");
 		m.put("This pull request has been discarded", "此合并请求已丢弃");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"如果构建由合并请求触发，此报告将显示在合并请求概览页面中");
@@ -4791,6 +4815,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Workspace Spec", "工作区规范");
 		m.put("Workspace Spec Template", "工作区规范模板");
 		m.put("Workspace Specs", "工作区规范");
+		m.put("Workspace Volume Storage Class", "工作区卷存储类");
+		m.put("Workspace Volume Storage Size", "工作区卷存储大小");
 		m.put("Workspace administrative permission inside a project, including batch operations over multiple workspaces", 
 			"项目内的工作区管理权限，包括对多个工作区的批量操作");
 		m.put("Workspace data deleted", "工作区数据已删除");
@@ -4821,6 +4847,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"您可以通过 <a wicket:id=\"addFiles\" class=\"link-primary\">添加文件</a>，<a wicket:id=\"setupBuildSpec\" class=\"link-primary\">设置 CI/CD</a>，或 <a wicket:id=\"pushInstructions\" class=\"link-primary\">推送现有的代码库</a> 来初始化项目");
 		m.put("You selected to delete branch \"{0}\"", "您选择删除分支 \"{0}\"");
 		m.put("You will be notified of any activities", "您将收到任何活动的通知");
+		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
+			"重新生成后，您需要在代理端更新令牌。您确定要继续吗？");
 		m.put("You've been logged out", "您已登出");
 		m.put("YouTrack API URL", "YouTrack API URL");
 		m.put("YouTrack Issue Field", "YouTrack 工单字段");
@@ -4985,8 +5013,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("pull request and code review", "合并请求和代码评审");
 		m.put("pull request to any branch is discarded", "任何分支的合并请求被放弃");
 		m.put("pull request to any branch is merged", "任何分支的合并请求被合并");
+		m.put("pull request to any branch is opened or updated", "合并请求到任何分支已打开或更新");
 		m.put("pull request to branches \"{0}\" is discarded", "分支 \"{0}\" 的合并请求被放弃");
 		m.put("pull request to branches \"{0}\" is merged", "分支 \"{0}\" 的合并请求被合并");
+		m.put("pull request to branches \"{0}\" is opened or updated", "合并请求到分支 \"{0}\" 已打开或更新");
 		m.put("pull request {0}", "合并请求 {0}");
 		m.put("pull requests", "合并请求");
 		m.put("reconciliation (need administrator permission)", "一致性检查（需要管理员权限）");
@@ -5088,37 +5118,17 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意: </b>Kubernetes 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
-		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意: </b>远程 docker 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
-		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意: </b>远程 shell 配置器是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
-		m.put("Cannot remove agent \"{0}\" as it has workspaces", "无法移除代理 \"{0}\"，因为它有工作区");
-		m.put("Cannot remove agent as it has workspaces", "无法移除代理，因为它有工作区");
-		m.put("Do you really want to remove agent \"{0}\"?", "您确定要移除代理 \"{0}\" 吗？");
-		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
-			"确保已安装 <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 或更高版本</a>");
-		m.put("No default fork root", "没有默认的 fork 根目录");
-		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
-			"可选地指定一个存储类以动态分配工作区 PVC。留空以使用默认存储类。<b class='text-warning'>注意:</b> 存储类的回收策略应设置为 <code>Delete</code>，因为当工作区被删除时，卷也会被删除");
-		m.put("Pull request is opened or updated", "合并请求已打开或更新");
-		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "移除所有查询到的代理。在下方输入 <code>remove ALL agents</code> 以确认");
-		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "移除选定的代理。在下方输入 <code>yes</code> 以确认");
-		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
-			"指定请求工作区 PVC 的存储大小。大小应符合 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 资源容量格式</a>，例如 <i>10Gi</i>");
-		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "此配置器在 Kubernetes 集群内以 pod 的形式创建工作区");
-		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "此配置器在 OneDev 服务器上的 Docker 容器内创建工作区");
-		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
-			"此配置器通过\n<a href='/~administration/agents' target='_blank'>代理</a>在远程机器上的 Docker 容器内创建工作区。");
-		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
-			"此配置器使用远程代理的 shell 功能创建工作区，并要求在匹配的代理上安装 tmux");
-		m.put("Workspace Volume Storage Class", "工作区卷存储类");
-		m.put("Workspace Volume Storage Size", "工作区卷存储大小");
-		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
-			"重新生成后，您需要在代理端更新令牌。您确定要继续吗？");
-		m.put("pull request to any branch is opened or updated", "合并请求到任何分支已打开或更新");
-		m.put("pull request to branches \"{0}\" is opened or updated", "合并请求到分支 \"{0}\" 已打开或更新");
+		m.put("Commit Message Fix Setting", "提交消息修复设置");
+		m.put("Commit Message Fix Settings", "提交消息修复设置");
+		m.put("Configure how coding agents should reference fixed issues in commit messages, and specify prefix/suffix patterns to detect fixed issues in commit messages.", 
+			"配置编码代理应如何在提交消息中引用已修复的工单，并指定前缀/后缀模式以检测提交消息中的已修复工单。");
+		m.put("Fix Detection", "修复检测");
+		m.put("Fix Pattern", "修复模式");
+		m.put("Fix Suggestion", "修复建议");
+		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
+			"指定当提交旨在修复一个工单时，编码代理应如何在提交消息中引用该工单");
+		m.put("Specify prefix/suffix patterns to detect fixed issues in commit messages. Each line of the commit message will be matched against each entry defined here", 
+			"指定前缀/后缀模式以检测提交消息中的已修复工单。提交消息的每一行都将与此处定义的每个条目进行匹配");
 	}
 		
 	@Override

@@ -69,9 +69,8 @@ public class CommitMessageFixSetting implements Serializable, Validatable {
 		this.fixSuggestion = fixSuggestion;
 	}
 
-	@Editable(order=200, name="Prefix/Suffix Patterns", description="Specify prefix/suffix patterns to detect issues "
-			+ "to be fixed from commit messages. Each line of the commit message will be matched against "
-			+ "each entry defined here")
+	@Editable(order=200, name="Fix Detection", description="Specify prefix/suffix patterns to detect fixed issues "
+			+ "in commit messages. Each line of the commit message will be matched against each entry defined here")
 	@NotNull
 	@Valid
 	public List<FixPattern> getFixPatterns() {

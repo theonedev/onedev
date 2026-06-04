@@ -70,6 +70,12 @@ public class Translation_it extends TranslationResourceBundle {
 			"<b class='text-danger'>NOTA: </b> Questo richiede un abbonamento Enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
 		m.put("<b class='text-danger'>NOTE: </b> This step requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>NOTA: </b> Questo step richiede un abbonamento Enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
+		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>NOTA: </b>Il provisioner di Kubernetes è una funzionalità enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
+		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>NOTA: </b>Il provisioner docker remoto è una funzionalità enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
+		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>NOTA: </b>Il provisioner shell remoto è una funzionalità enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
 		m.put("<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>NOTA: </b>L'integrazione con SendGrid è una funzionalità Enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
 		m.put("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
@@ -623,6 +629,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Cannot find issue board: ", "Impossibile trovare la bacheca dei problemi:");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "Non è possibile spostare il progetto \"{0}\" sotto se stesso o i suoi discendenti");
 		m.put("Cannot perform this operation now", "Non è possibile eseguire questa operazione ora");
+		m.put("Cannot remove agent \"{0}\" as it has workspaces", "Impossibile rimuovere l'agente \"{0}\" poiché ha workspace");
+		m.put("Cannot remove agent as it has workspaces", "Impossibile rimuovere l'agente poiché ha workspace");
 		m.put("Cannot reset password for disabled account", "Impossibile reimpostare la password per l'account disabilitato");
 		m.put("Cannot reset password for service or AI account", "Impossibile reimpostare la password per l'account di servizio o AI");
 		m.put("Cannot reset password for user authenticating via external system", "Impossibile reimpostare la password per utente che si autentica tramite sistema esterno");
@@ -808,7 +816,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Commit Message", "Messaggio di Commit");
 		m.put("Commit Message Bean", "Bean del Messaggio di Commit");
 		m.put("Commit Message Checker", "Controllo del Messaggio di Commit");
-		m.put("Commit Message Fix Patterns", "Modelli di Correzione del Messaggio di Commit");
 		m.put("Commit Message Footer Pattern", "Modello del Footer del Messaggio di Commit");
 		m.put("Commit Notification", "Notifica di Commit");
 		m.put("Commit Notification Template", "Template di Notifica di Commit");
@@ -1195,6 +1202,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Do you really want to discard changes to this file? This cannot be undone.", "Vuoi davvero scartare le modifiche a questo file? Questo non può essere annullato.");
 		m.put("Do you really want to enable this account?", "Vuoi davvero abilitare questo account?");
 		m.put("Do you really want to rebuild?", "Vuoi davvero ricostruire?");
+		m.put("Do you really want to remove agent \"{0}\"?", "Vuoi davvero rimuovere l'agente \"{0}\"?");
 		m.put("Do you really want to remove assignee \"{0}\"?", "Vuoi davvero rimuovere l'assegnatario \"{0}\"?");
 		m.put("Do you really want to remove password of this user?", "Vuoi davvero rimuovere la password di questo utente?");
 		m.put("Do you really want to remove the issue from iteration \"{0}\"?", "Vuoi davvero rimuovere il problema dall'iterazione \"{0}\"?");
@@ -2094,6 +2102,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Mail service settings saved", "Impostazioni del servizio di posta salvate");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
 			"Assicurati che <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 o superiore</a> sia installato");
+		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
+			"Assicurati che <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 o superiore</a> sia installato");
 		m.put("Make sure current user has permission to run docker containers", "Assicurati che l'utente corrente abbia il permesso di eseguire contenitori docker");
 		m.put("Make sure docker engine is installed and docker command line is available in system path", 
 			"Assicurati che il motore docker sia installato e che la linea di comando docker sia disponibile nel percorso di sistema");
@@ -2306,6 +2316,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No current pull request in query context", "Nessuna pull request corrente nel contesto della query");
 		m.put("No data", "Nessun dato");
 		m.put("No default branch", "Nessun branch predefinito");
+		m.put("No default fork root", "Nessuna radice fork predefinita");
 		m.put("No default group", "Nessun gruppo predefinito");
 		m.put("No default roles", "Nessun ruolo predefinito");
 		m.put("No default value", "Nessun valore predefinito");
@@ -2562,6 +2573,8 @@ public class Translation_it extends TranslationResourceBundle {
 			"Specifica facoltativamente un prefisso da anteporre (come segmento di percorso) quando si genera un branch per i problemi.\nAd esempio, con il prefisso <code>feature</code>, il branch generato per i problemi sarà\n<code>feature/issue-100-some-title</code>");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"Specifica facoltativamente una classe di archiviazione per allocare dinamicamente il volume di build. Lascia vuoto per utilizzare la classe di archiviazione predefinita. <b class='text-warning'>NOTA:</b> La politica di recupero della classe di archiviazione dovrebbe essere impostata su <code>Delete</code>, poiché il volume viene utilizzato solo per contenere file di build temporanei");
+		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
+			"Specifica facoltativamente una classe di storage per allocare dinamicamente il PVC del workspace. Lascia vuoto per utilizzare la classe di storage predefinita. <b class='text-warning'>NOTA:</b> La policy di recupero della classe di storage dovrebbe essere impostata su <code>Delete</code>, poiché il volume verrà eliminato quando il workspace sarà eliminato");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"Specifica facoltativamente un campo di periodo lavorativo per contenere informazioni sul tempo stimato.<br><b>NOTA: </b> Puoi personalizzare i campi dei problemi di OneDev nel caso non ci sia un'opzione appropriata qui");
 		m.put("Optionally specify a working period field to hold spent time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3123,6 +3136,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Pull request is discarded", "La pull request è stata scartata");
 		m.put("Pull request is in error: {0}", "La pull request è in errore: {0}");
 		m.put("Pull request is merged", "La pull request è stata unita");
+		m.put("Pull request is opened or updated", "La pull request è stata aperta o aggiornata");
 		m.put("Pull request is still a work in progress", "La pull request è ancora un lavoro in corso");
 		m.put("Pull request is work in progress", "La pull request è un lavoro in corso");
 		m.put("Pull request list", "Elenco delle pull request");
@@ -3234,10 +3248,12 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Remove From Current Iteration", "Rimuovi dall'iterazione corrente");
 		m.put("Remove Selected Agents", "Rimuovi agenti selezionati");
 		m.put("Remove Selected Users from Group", "Rimuovi gli utenti selezionati dal gruppo");
+		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "Rimuovi tutti gli agenti interrogati. Digita <code>remove ALL agents</code> qui sotto per confermare");
 		m.put("Remove from All Queried Groups", "Rimuovi da tutti i gruppi interrogati");
 		m.put("Remove from Selected Groups", "Rimuovi dai gruppi selezionati");
 		m.put("Remove from batch", "Rimuovi dal batch");
 		m.put("Remove issue from this iteration", "Rimuovi il problema da questa iterazione");
+		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "Rimuovi gli agenti selezionati. Digita <code>yes</code> qui sotto per confermare");
 		m.put("Remove this assignee", "Rimuovi questo assegnatario");
 		m.put("Remove this external participant from issue", "Rimuovi questo partecipante esterno dal problema");
 		m.put("Remove this file", "Rimuovi questo file");
@@ -3968,6 +3984,8 @@ public class Translation_it extends TranslationResourceBundle {
 			"Specifica la pagina iniziale del report relativa a <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, ad esempio: api/index.html");
 		m.put("Specify storage size to request for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
 			"Specifica la dimensione di archiviazione da richiedere per il volume di build. La dimensione deve conformarsi al <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>formato di capacità delle risorse di Kubernetes</a>, ad esempio <i>10Gi</i>");
+		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
+			"Specifica la dimensione dello storage da richiedere per il PVC del workspace. La dimensione dovrebbe essere conforme al <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>formato di capacità delle risorse di Kubernetes</a>, ad esempio <i>10Gi</i>");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
 			"Specifica la larghezza della tabulazione utilizzata per calcolare il valore della colonna dei problemi trovati nel report fornito");
 		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
@@ -4285,8 +4303,14 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "Questo permesso consente di accedere ai problemi confidenziali");
 		m.put("This permission enables one to schedule issues into iterations", "Questo permesso consente di pianificare i problemi nelle iterazioni");
 		m.put("This property is imported from {0}", "Questa proprietà è importata da {0}");
+		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "Questo provisioner crea workspace come pod all'interno del cluster Kubernetes");
+		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "Questo provisioner crea workspace all'interno di container Docker sul server OneDev");
+		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
+			"Questo provisioner crea workspace all'interno di container Docker su una macchina remota tramite\n<a href='/~administration/agents' target='_blank'>agenti</a>.");
 		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
 			"Questo provisioner crea spazi di lavoro con la funzionalità shell del server OneDev e richiede\ntmux installato sul server OneDev");
+		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
+			"Questo provisioner crea workspace con la funzionalità shell degli agenti remoti e richiede che tmux sia installato sugli agenti corrispondenti");
 		m.put("This pull request has been discarded", "Questa pull request è stata scartata");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"Questo report verrà visualizzato nella pagina di panoramica della pull request se la build è attivata dalla pull request");
@@ -4765,6 +4789,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Workspace Spec", "Specifica del Workspace");
 		m.put("Workspace Spec Template", "Template della Specifica del Workspace");
 		m.put("Workspace Specs", "Specifiche del Workspace");
+		m.put("Workspace Volume Storage Class", "Classe di Storage del Volume del Workspace");
+		m.put("Workspace Volume Storage Size", "Dimensione di Storage del Volume del Workspace");
 		m.put("Workspace administrative permission inside a project, including batch operations over multiple workspaces", 
 			"Permesso amministrativo del workspace all'interno di un progetto, incluse operazioni batch su più workspace");
 		m.put("Workspace data deleted", "Dati del workspace eliminati");
@@ -4795,6 +4821,8 @@ public class Translation_it extends TranslationResourceBundle {
 			"Puoi inizializzare il progetto <a wicket:id=\"addFiles\" class=\"link-primary\">aggiungendo file</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">configurando CI/CD</a>, o <a wicket:id=\"pushInstructions\" class=\"link-primary\">spingendo un repository esistente</a>");
 		m.put("You selected to delete branch \"{0}\"", "Hai selezionato di eliminare il branch \"{0}\"");
 		m.put("You will be notified of any activities", "Sarai notificato di qualsiasi attività");
+		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
+			"Dovrai aggiornare il token sul lato agente dopo la rigenerazione. Vuoi davvero continuare?");
 		m.put("You've been logged out", "Sei stato disconnesso");
 		m.put("YouTrack API URL", "URL API di YouTrack");
 		m.put("YouTrack Issue Field", "Campo Problema di YouTrack");
@@ -4959,8 +4987,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("pull request and code review", "pull request e revisione del codice");
 		m.put("pull request to any branch is discarded", "la pull request su qualsiasi branch è scartata");
 		m.put("pull request to any branch is merged", "la pull request su qualsiasi branch è unita");
+		m.put("pull request to any branch is opened or updated", "la pull request verso qualsiasi branch è stata aperta o aggiornata");
 		m.put("pull request to branches \"{0}\" is discarded", "la pull request sui branch \"{0}\" è scartata");
 		m.put("pull request to branches \"{0}\" is merged", "la pull request sui branch \"{0}\" è unita");
+		m.put("pull request to branches \"{0}\" is opened or updated", "la pull request verso i branch \"{0}\" è stata aperta o aggiornata");
 		m.put("pull request {0}", "pull request {0}");
 		m.put("pull requests", "pull request");
 		m.put("reconciliation (need administrator permission)", "riconciliazione (richiede permessi di amministratore)");
@@ -5062,37 +5092,17 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>NOTA: </b>Il provisioner di Kubernetes è una funzionalità enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
-		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>NOTA: </b>Il provisioner docker remoto è una funzionalità enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
-		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>NOTA: </b>Il provisioner shell remoto è una funzionalità enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
-		m.put("Cannot remove agent \"{0}\" as it has workspaces", "Impossibile rimuovere l'agente \"{0}\" poiché ha workspace");
-		m.put("Cannot remove agent as it has workspaces", "Impossibile rimuovere l'agente poiché ha workspace");
-		m.put("Do you really want to remove agent \"{0}\"?", "Vuoi davvero rimuovere l'agente \"{0}\"?");
-		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
-			"Assicurati che <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 o superiore</a> sia installato");
-		m.put("No default fork root", "Nessuna radice fork predefinita");
-		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
-			"Specifica facoltativamente una classe di storage per allocare dinamicamente il PVC del workspace. Lascia vuoto per utilizzare la classe di storage predefinita. <b class='text-warning'>NOTA:</b> La policy di recupero della classe di storage dovrebbe essere impostata su <code>Delete</code>, poiché il volume verrà eliminato quando il workspace sarà eliminato");
-		m.put("Pull request is opened or updated", "La pull request è stata aperta o aggiornata");
-		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "Rimuovi tutti gli agenti interrogati. Digita <code>remove ALL agents</code> qui sotto per confermare");
-		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "Rimuovi gli agenti selezionati. Digita <code>yes</code> qui sotto per confermare");
-		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
-			"Specifica la dimensione dello storage da richiedere per il PVC del workspace. La dimensione dovrebbe essere conforme al <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>formato di capacità delle risorse di Kubernetes</a>, ad esempio <i>10Gi</i>");
-		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "Questo provisioner crea workspace come pod all'interno del cluster Kubernetes");
-		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "Questo provisioner crea workspace all'interno di container Docker sul server OneDev");
-		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
-			"Questo provisioner crea workspace all'interno di container Docker su una macchina remota tramite\n<a href='/~administration/agents' target='_blank'>agenti</a>.");
-		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
-			"Questo provisioner crea workspace con la funzionalità shell degli agenti remoti e richiede che tmux sia installato sugli agenti corrispondenti");
-		m.put("Workspace Volume Storage Class", "Classe di Storage del Volume del Workspace");
-		m.put("Workspace Volume Storage Size", "Dimensione di Storage del Volume del Workspace");
-		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
-			"Dovrai aggiornare il token sul lato agente dopo la rigenerazione. Vuoi davvero continuare?");
-		m.put("pull request to any branch is opened or updated", "la pull request verso qualsiasi branch è stata aperta o aggiornata");
-		m.put("pull request to branches \"{0}\" is opened or updated", "la pull request verso i branch \"{0}\" è stata aperta o aggiornata");
+		m.put("Commit Message Fix Setting", "Impostazione Messaggio di Commit per Correzione");
+		m.put("Commit Message Fix Settings", "Impostazioni Messaggio di Commit per Correzione");
+		m.put("Configure how coding agents should reference fixed issues in commit messages, and specify prefix/suffix patterns to detect fixed issues in commit messages.", 
+			"Configura come gli agenti di codifica dovrebbero fare riferimento ai problemi corretti nei messaggi di commit e specifica i modelli di prefisso/suffisso per rilevare i problemi corretti nei messaggi di commit.");
+		m.put("Fix Detection", "Rilevamento Correzione");
+		m.put("Fix Pattern", "Modello di Correzione");
+		m.put("Fix Suggestion", "Suggerimento di Correzione");
+		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
+			"Specifica come gli agenti di codifica dovrebbero fare riferimento a un problema nei messaggi di commit quando il commit è destinato a correggere un problema");
+		m.put("Specify prefix/suffix patterns to detect fixed issues in commit messages. Each line of the commit message will be matched against each entry defined here", 
+			"Specifica i modelli di prefisso/suffisso per rilevare i problemi corretti nei messaggi di commit. Ogni riga del messaggio di commit sarà confrontata con ogni voce definita qui");
 	}
 		
 	@Override

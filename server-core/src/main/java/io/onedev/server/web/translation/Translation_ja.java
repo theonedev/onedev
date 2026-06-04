@@ -70,6 +70,12 @@ public class Translation_ja extends TranslationResourceBundle {
 			"<b class='text-danger'>注意: </b> これはエンタープライズサブスクリプションが必要です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料で試す</a>");
 		m.put("<b class='text-danger'>NOTE: </b> This step requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意: </b> このステップはエンタープライズサブスクリプションが必要です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料で試す</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>Kubernetesプロビジョナーはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>リモートDockerプロビジョナーはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意: </b>リモートシェルプロビジョナーはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
 		m.put("<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意: </b>SendGridの統合はエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料で試す</a>");
 		m.put("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
@@ -623,6 +629,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Cannot find issue board: ", "課題ボードが見つかりません:");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "プロジェクト\"{0}\"を自身またはその子孫の下に移動することはできません");
 		m.put("Cannot perform this operation now", "現在この操作を実行することはできません");
+		m.put("Cannot remove agent \"{0}\" as it has workspaces", "エージェント \"{0}\" を削除できません。ワークスペースが存在します");
+		m.put("Cannot remove agent as it has workspaces", "エージェントを削除できません。ワークスペースが存在します");
 		m.put("Cannot reset password for disabled account", "無効なアカウントのパスワードをリセットできません");
 		m.put("Cannot reset password for service or AI account", "サービスまたはAIアカウントのパスワードをリセットできません");
 		m.put("Cannot reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
@@ -808,7 +816,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Commit Message", "コミットメッセージ");
 		m.put("Commit Message Bean", "コミットメッセージBean");
 		m.put("Commit Message Checker", "コミットメッセージチェッカー");
-		m.put("Commit Message Fix Patterns", "コミットメッセージ修正パターン");
 		m.put("Commit Message Footer Pattern", "コミットメッセージフッターパターン");
 		m.put("Commit Notification", "コミット通知");
 		m.put("Commit Notification Template", "コミット通知テンプレート");
@@ -1195,6 +1202,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do you really want to discard changes to this file? This cannot be undone.", "本当にこのファイルへの変更を破棄しますか？これは元に戻せません。");
 		m.put("Do you really want to enable this account?", "本当にこのアカウントを有効にしますか？");
 		m.put("Do you really want to rebuild?", "本当に再構築しますか？");
+		m.put("Do you really want to remove agent \"{0}\"?", "本当にエージェント \"{0}\" を削除しますか？");
 		m.put("Do you really want to remove assignee \"{0}\"?", "本当に担当者「{0}」を削除しますか？");
 		m.put("Do you really want to remove password of this user?", "本当にこのユーザーのパスワードを削除しますか？");
 		m.put("Do you really want to remove the issue from iteration \"{0}\"?", "本当に課題をイテレーション「{0}」から削除しますか？");
@@ -2094,6 +2102,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Mail service settings saved", "メールサービス設定が保存されました");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
 			"<a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11以上</a>がインストールされていることを確認してください");
+		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
+			"<a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17以上</a>がインストールされていることを確認してください");
 		m.put("Make sure current user has permission to run docker containers", "現在のユーザーがDockerコンテナを実行する権限を持っていることを確認してください");
 		m.put("Make sure docker engine is installed and docker command line is available in system path", 
 			"Dockerエンジンがインストールされており、Dockerコマンドラインがシステムパスにあることを確認してください");
@@ -2306,6 +2316,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No current pull request in query context", "クエリコンテキストに現在のプルリクエストなし");
 		m.put("No data", "データなし");
 		m.put("No default branch", "デフォルトブランチなし");
+		m.put("No default fork root", "デフォルトのフォークルートがありません");
 		m.put("No default group", "デフォルトグループなし");
 		m.put("No default roles", "デフォルトの役割なし");
 		m.put("No default value", "デフォルト値なし");
@@ -2562,6 +2573,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"課題ブランチを生成する際にプレフィックスを（パスセグメントとして）先頭に追加する場合は指定してください。\n例えば、プレフィックス<code>feature</code>を指定すると、生成される課題ブランチは\n<code>feature/issue-100-some-title</code>となります");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"オプションで、ビルドボリュームを動的に割り当てるためのストレージクラスを指定してください。デフォルトのストレージクラスを使用する場合は空のままにしてください。<b class='text-warning'>注意:</b> ストレージクラスの再利用ポリシーは<code>Delete</code>に設定する必要があります。ボリュームは一時的なビルドファイルを保持するためだけに使用されます。");
+		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
+			"ワークスペースPVCを動的に割り当てるためのストレージクラスを任意で指定してください。デフォルトのストレージクラスを使用する場合は空のままにしてください。<b class='text-warning'>注意:</b> ストレージクラスの再利用ポリシーは<code>Delete</code>に設定する必要があります。ワークスペースが削除されるとボリュームも削除されます");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"オプションで、推定時間情報を保持する作業期間フィールドを指定してください。<br><b>注意: </b>適切なオプションがない場合は、OneDev課題フィールドをカスタマイズすることができます。");
 		m.put("Optionally specify a working period field to hold spent time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3123,6 +3136,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pull request is discarded", "プルリクエストが破棄されました");
 		m.put("Pull request is in error: {0}", "プルリクエストにエラーがあります: {0}");
 		m.put("Pull request is merged", "プルリクエストがマージされました");
+		m.put("Pull request is opened or updated", "プルリクエストが作成または更新されました");
 		m.put("Pull request is still a work in progress", "プルリクエストはまだ作業中です");
 		m.put("Pull request is work in progress", "プルリクエストは作業中です");
 		m.put("Pull request list", "プルリクエスト一覧");
@@ -3234,10 +3248,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Remove From Current Iteration", "現在のイテレーションから削除");
 		m.put("Remove Selected Agents", "選択されたエージェントを削除");
 		m.put("Remove Selected Users from Group", "選択されたユーザーをグループから削除");
+		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "すべてのクエリされたエージェントを削除します。確認のために<code>remove ALL agents</code>と入力してください");
 		m.put("Remove from All Queried Groups", "クエリされたすべてのグループから削除");
 		m.put("Remove from Selected Groups", "選択されたグループから削除");
 		m.put("Remove from batch", "バッチから削除");
 		m.put("Remove issue from this iteration", "このイテレーションから課題を削除");
+		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "選択したエージェントを削除します。確認のために<code>yes</code>と入力してください");
 		m.put("Remove this assignee", "この担当者を削除");
 		m.put("Remove this external participant from issue", "課題からこの外部参加者を削除");
 		m.put("Remove this file", "このファイルを削除");
@@ -3968,6 +3984,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するレポートの開始ページを指定してください。例: api/index.html");
 		m.put("Specify storage size to request for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
 			"ビルドボリュームのストレージサイズをリクエストするために指定してください。サイズは<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetesリソース容量形式</a>に準拠する必要があります。例: <i>10Gi</i>");
+		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
+			"ワークスペースPVCのリクエストサイズを指定してください。このサイズは<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetesリソース容量形式</a>に準拠している必要があります。例えば<i>10Gi</i>");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
 			"提供されたレポート内の問題の列値を計算するために使用されるタブ幅を指定してください。");
 		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
@@ -4285,8 +4303,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "この権限により、機密事項にアクセスすることが可能になります");
 		m.put("This permission enables one to schedule issues into iterations", "この権限により、イテレーションに課題をスケジュールすることが可能になります");
 		m.put("This property is imported from {0}", "このプロパティは{0}からインポートされます");
+		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "このプロビジョナーはKubernetesクラスター内にポッドとしてワークスペースを作成します");
+		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "このプロビジョナーはOneDevサーバー上のDockerコンテナ内にワークスペースを作成します");
+		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
+			"このプロビジョナーはリモートマシン上のDockerコンテナ内にワークスペースを作成します\n<a href='/~administration/agents' target='_blank'>エージェント</a>を介して。");
 		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
 			"このプロビジョナーは OneDev サーバーのシェル機能でワークスペースを作成し、\nOneDev サーバーに tmux がインストールされている必要があります");
+		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
+			"このプロビジョナーはリモートエージェントのシェル機能を使用してワークスペースを作成し、一致するエージェントにtmuxがインストールされている必要があります");
 		m.put("This pull request has been discarded", "このプルリクエストは破棄されました");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"このレポートは、プルリクエストによってビルドがトリガーされた場合、プルリクエスト概要ページに表示されます");
@@ -4765,6 +4789,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Workspace Spec", "ワークスペック");
 		m.put("Workspace Spec Template", "ワークスペックテンプレート");
 		m.put("Workspace Specs", "ワークスペック");
+		m.put("Workspace Volume Storage Class", "ワークスペースボリュームストレージクラス");
+		m.put("Workspace Volume Storage Size", "ワークスペースボリュームストレージサイズ");
 		m.put("Workspace administrative permission inside a project, including batch operations over multiple workspaces", 
 			"プロジェクト内のワークスペース管理権限、複数のワークスペースに対するバッチ操作を含む");
 		m.put("Workspace data deleted", "ワークスペースデータが削除されました");
@@ -4795,6 +4821,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"プロジェクトを初期化するには、<a wicket:id=\"addFiles\" class=\"link-primary\">ファイルを追加</a>、<a wicket:id=\"setupBuildSpec\" class=\"link-primary\">CI/CDを設定</a>、または<a wicket:id=\"pushInstructions\" class=\"link-primary\">既存のリポジトリをプッシュ</a>してください");
 		m.put("You selected to delete branch \"{0}\"", "ブランチ「{0}」を削除することを選択しました");
 		m.put("You will be notified of any activities", "すべての活動について通知されます");
+		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
+			"再生成後、エージェント側でトークンを更新する必要があります。本当に続行しますか？");
 		m.put("You've been logged out", "ログアウトされました");
 		m.put("YouTrack API URL", "YouTrack API URL");
 		m.put("YouTrack Issue Field", "YouTrack課題フィールド");
@@ -4959,8 +4987,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("pull request and code review", "プルリクエストとコードレビュー");
 		m.put("pull request to any branch is discarded", "任意のブランチへのプルリクエストは破棄されました");
 		m.put("pull request to any branch is merged", "任意のブランチへのプルリクエストはマージされました");
+		m.put("pull request to any branch is opened or updated", "任意のブランチへのプルリクエストが作成または更新されました");
 		m.put("pull request to branches \"{0}\" is discarded", "ブランチ \"{0}\" へのプルリクエストは破棄されました");
 		m.put("pull request to branches \"{0}\" is merged", "ブランチ \"{0}\" へのプルリクエストはマージされました");
+		m.put("pull request to branches \"{0}\" is opened or updated", "ブランチ \"{0}\" へのプルリクエストが作成または更新されました");
 		m.put("pull request {0}", "プルリクエスト{0}");
 		m.put("pull requests", "プルリクエスト");
 		m.put("reconciliation (need administrator permission)", "調整 (管理者権限が必要)");
@@ -5062,37 +5092,17 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意: </b>Kubernetesプロビジョナーはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
-		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意: </b>リモートDockerプロビジョナーはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
-		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意: </b>リモートシェルプロビジョナーはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
-		m.put("Cannot remove agent \"{0}\" as it has workspaces", "エージェント \"{0}\" を削除できません。ワークスペースが存在します");
-		m.put("Cannot remove agent as it has workspaces", "エージェントを削除できません。ワークスペースが存在します");
-		m.put("Do you really want to remove agent \"{0}\"?", "本当にエージェント \"{0}\" を削除しますか？");
-		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
-			"<a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17以上</a>がインストールされていることを確認してください");
-		m.put("No default fork root", "デフォルトのフォークルートがありません");
-		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
-			"ワークスペースPVCを動的に割り当てるためのストレージクラスを任意で指定してください。デフォルトのストレージクラスを使用する場合は空のままにしてください。<b class='text-warning'>注意:</b> ストレージクラスの再利用ポリシーは<code>Delete</code>に設定する必要があります。ワークスペースが削除されるとボリュームも削除されます");
-		m.put("Pull request is opened or updated", "プルリクエストが作成または更新されました");
-		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "すべてのクエリされたエージェントを削除します。確認のために<code>remove ALL agents</code>と入力してください");
-		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "選択したエージェントを削除します。確認のために<code>yes</code>と入力してください");
-		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
-			"ワークスペースPVCのリクエストサイズを指定してください。このサイズは<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetesリソース容量形式</a>に準拠している必要があります。例えば<i>10Gi</i>");
-		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "このプロビジョナーはKubernetesクラスター内にポッドとしてワークスペースを作成します");
-		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "このプロビジョナーはOneDevサーバー上のDockerコンテナ内にワークスペースを作成します");
-		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
-			"このプロビジョナーはリモートマシン上のDockerコンテナ内にワークスペースを作成します\n<a href='/~administration/agents' target='_blank'>エージェント</a>を介して。");
-		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
-			"このプロビジョナーはリモートエージェントのシェル機能を使用してワークスペースを作成し、一致するエージェントにtmuxがインストールされている必要があります");
-		m.put("Workspace Volume Storage Class", "ワークスペースボリュームストレージクラス");
-		m.put("Workspace Volume Storage Size", "ワークスペースボリュームストレージサイズ");
-		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
-			"再生成後、エージェント側でトークンを更新する必要があります。本当に続行しますか？");
-		m.put("pull request to any branch is opened or updated", "任意のブランチへのプルリクエストが作成または更新されました");
-		m.put("pull request to branches \"{0}\" is opened or updated", "ブランチ \"{0}\" へのプルリクエストが作成または更新されました");
+		m.put("Commit Message Fix Setting", "コミットメッセージ修正設定");
+		m.put("Commit Message Fix Settings", "コミットメッセージ修正設定");
+		m.put("Configure how coding agents should reference fixed issues in commit messages, and specify prefix/suffix patterns to detect fixed issues in commit messages.", 
+			"コミットメッセージで修正された問題をコーディングエージェントがどのように参照するかを設定し、修正された問題を検出するためのプレフィックス/サフィックスパターンを指定します。");
+		m.put("Fix Detection", "修正検出");
+		m.put("Fix Pattern", "修正パターン");
+		m.put("Fix Suggestion", "修正提案");
+		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
+			"コミットが問題を修正することを意図している場合、コーディングエージェントがコミットメッセージで問題をどのように参照するかを指定します。");
+		m.put("Specify prefix/suffix patterns to detect fixed issues in commit messages. Each line of the commit message will be matched against each entry defined here", 
+			"コミットメッセージで修正された問題を検出するためのプレフィックス/サフィックスパターンを指定します。コミットメッセージの各行は、ここで定義された各エントリと照合されます。");
 	}
 		
 	@Override

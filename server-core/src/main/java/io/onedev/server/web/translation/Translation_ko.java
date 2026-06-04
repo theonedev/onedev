@@ -70,6 +70,12 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<b class='text-danger'>참고: </b> 이는 엔터프라이즈 구독이 필요합니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>을 시도해보세요");
 		m.put("<b class='text-danger'>NOTE: </b> This step requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>참고: </b> 이 단계는 엔터프라이즈 구독이 필요합니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>을 시도해보세요");
+		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>Kubernetes 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>원격 Docker 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>원격 셸 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>참고: </b>SendGrid 통합은 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>을 시도해보세요");
 		m.put("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
@@ -623,6 +629,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Cannot find issue board: ", "이슈 보드를 찾을 수 없습니다:");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "프로젝트 \"{0}\"를 자신 또는 하위 프로젝트 아래로 이동할 수 없습니다");
 		m.put("Cannot perform this operation now", "지금 이 작업을 수행할 수 없습니다");
+		m.put("Cannot remove agent \"{0}\" as it has workspaces", "에이전트 \"{0}\"를 제거할 수 없습니다. 작업 공간이 있습니다.");
+		m.put("Cannot remove agent as it has workspaces", "작업 공간이 있어 에이전트를 제거할 수 없습니다.");
 		m.put("Cannot reset password for disabled account", "비활성화된 계정의 비밀번호를 재설정할 수 없습니다");
 		m.put("Cannot reset password for service or AI account", "서비스 또는 AI 계정의 비밀번호를 재설정할 수 없습니다");
 		m.put("Cannot reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
@@ -808,7 +816,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Commit Message", "커밋 메시지");
 		m.put("Commit Message Bean", "커밋 메시지 빈");
 		m.put("Commit Message Checker", "커밋 메시지 검사기");
-		m.put("Commit Message Fix Patterns", "커밋 메시지 수정 패턴");
 		m.put("Commit Message Footer Pattern", "커밋 메시지 푸터 패턴");
 		m.put("Commit Notification", "커밋 알림");
 		m.put("Commit Notification Template", "커밋 알림 템플릿");
@@ -1195,6 +1202,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Do you really want to discard changes to this file? This cannot be undone.", "정말로 이 파일의 변경 사항을 버리시겠습니까? 이는 되돌릴 수 없습니다.");
 		m.put("Do you really want to enable this account?", "정말로 이 계정을 활성화하시겠습니까?");
 		m.put("Do you really want to rebuild?", "정말로 다시 빌드하시겠습니까?");
+		m.put("Do you really want to remove agent \"{0}\"?", "정말로 에이전트 \"{0}\"를 제거하시겠습니까?");
 		m.put("Do you really want to remove assignee \"{0}\"?", "정말로 담당자 \"{0}\"를 제거하시겠습니까?");
 		m.put("Do you really want to remove password of this user?", "정말로 이 사용자의 비밀번호를 제거하시겠습니까?");
 		m.put("Do you really want to remove the issue from iteration \"{0}\"?", "정말로 이슈를 반복 작업 \"{0}\"에서 제거하시겠습니까?");
@@ -2094,6 +2102,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Mail service settings saved", "메일 서비스 설정이 저장됨");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
 			"<a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 이상</a>이 설치되어 있는지 확인하세요");
+		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
+			"<a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 이상</a>이 설치되어 있는지 확인하세요.");
 		m.put("Make sure current user has permission to run docker containers", "현재 사용자가 도커 컨테이너를 실행할 권한이 있는지 확인하세요");
 		m.put("Make sure docker engine is installed and docker command line is available in system path", 
 			"도커 엔진이 설치되어 있고 도커 명령줄이 시스템 경로에서 사용 가능한지 확인하세요");
@@ -2306,6 +2316,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No current pull request in query context", "쿼리 컨텍스트에 현재 풀 리퀘스트 없음");
 		m.put("No data", "데이터 없음");
 		m.put("No default branch", "기본 브랜치 없음");
+		m.put("No default fork root", "기본 포크 루트가 없습니다.");
 		m.put("No default group", "기본 그룹 없음");
 		m.put("No default roles", "기본 역할 없음");
 		m.put("No default value", "기본값 없음");
@@ -2562,6 +2573,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이슈 브랜치를 생성할 때 경로 세그먼트로 추가될 접두사를 선택적으로 지정할 수 있습니다.\n예를 들어 접두사가 <code>feature</code>인 경우, 생성된 이슈 브랜치는\n<code>feature/issue-100-some-title</code>가 됩니다.");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"선택적으로 빌드 볼륨을 동적으로 할당할 스토리지 클래스를 지정하세요. 기본 스토리지 클래스를 사용하려면 비워 두세요. <b class='text-warning'>참고:</b> 스토리지 클래스의 복구 정책은 <code>Delete</code>로 설정되어야 합니다. 볼륨은 임시 빌드 파일을 저장하는 데만 사용됩니다.");
+		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
+			"작업 공간 PVC를 동적으로 할당하기 위해 스토리지 클래스를 선택적으로 지정하세요. 기본 스토리지 클래스를 사용하려면 비워 두세요. <b class='text-warning'>참고:</b> 스토리지 클래스의 복구 정책은 <code>Delete</code>로 설정되어야 합니다. 작업 공간이 삭제되면 볼륨도 삭제됩니다.");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"선택적으로 예상 시간을 보유할 작업 기간 필드를 지정하세요.<br><b>참고: </b> 적절한 옵션이 없는 경우 OneDev 문제 필드를 사용자 정의할 수 있습니다.");
 		m.put("Optionally specify a working period field to hold spent time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3123,6 +3136,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pull request is discarded", "풀 리퀘스트가 폐기됨");
 		m.put("Pull request is in error: {0}", "풀 리퀘스트 오류 발생: {0}");
 		m.put("Pull request is merged", "풀 리퀘스트가 병합됨");
+		m.put("Pull request is opened or updated", "풀 리퀘스트가 열리거나 업데이트되었습니다.");
 		m.put("Pull request is still a work in progress", "풀 리퀘스트가 아직 진행 중입니다");
 		m.put("Pull request is work in progress", "풀 리퀘스트가 진행 중입니다");
 		m.put("Pull request list", "풀 리퀘스트 목록");
@@ -3234,10 +3248,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Remove From Current Iteration", "현재 반복에서 제거");
 		m.put("Remove Selected Agents", "선택된 에이전트 제거");
 		m.put("Remove Selected Users from Group", "그룹에서 선택된 사용자 제거");
+		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "쿼리된 모든 에이전트를 제거합니다. 아래에 <code>remove ALL agents</code>를 입력하여 확인하세요.");
 		m.put("Remove from All Queried Groups", "조회된 모든 그룹에서 제거");
 		m.put("Remove from Selected Groups", "선택된 그룹에서 제거");
 		m.put("Remove from batch", "배치에서 제거");
 		m.put("Remove issue from this iteration", "이 반복에서 이슈 제거");
+		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "선택된 에이전트를 제거합니다. 아래에 <code>yes</code>를 입력하여 확인하세요.");
 		m.put("Remove this assignee", "이 담당자 제거");
 		m.put("Remove this external participant from issue", "이슈에서 이 외부 참가자 제거");
 		m.put("Remove this file", "이 파일 제거");
@@ -3968,6 +3984,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 보고서의 시작 페이지를 지정하세요. 예: api/index.html.");
 		m.put("Specify storage size to request for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
 			"빌드 볼륨에 요청할 저장소 크기를 지정하세요. 크기는 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 리소스 용량 형식</a>을 따라야 합니다. 예: <i>10Gi</i>.");
+		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
+			"작업 공간 PVC에 요청할 스토리지 크기를 지정하세요. 크기는 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 리소스 용량 형식</a>을 따라야 하며, 예를 들어 <i>10Gi</i>와 같습니다.");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
 			"제공된 보고서에서 발견된 문제의 열 값을 계산하는 데 사용되는 탭 너비를 지정하세요.");
 		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
@@ -4285,8 +4303,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "이 권한은 기밀 이슈에 액세스할 수 있도록 합니다");
 		m.put("This permission enables one to schedule issues into iterations", "이 권한은 이슈를 반복 작업에 일정으로 추가할 수 있도록 합니다");
 		m.put("This property is imported from {0}", "이 속성은 {0}에서 가져왔습니다");
+		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "이 프로비저너는 Kubernetes 클러스터 내에서 작업 공간을 pod로 생성합니다.");
+		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "이 프로비저너는 OneDev 서버의 Docker 컨테이너 내에서 작업 공간을 생성합니다.");
+		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
+			"이 프로비저너는 \n<a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 Docker 컨테이너 내에서 작업 공간을 생성합니다.");
 		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server", 
 			"이 프로비저너는 OneDev 서버의 셸 기능으로 작업 공간을 생성하며,\nOneDev 서버에 tmux가 설치되어 있어야 합니다");
+		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
+			"이 프로비저너는 원격 에이전트의 셸 기능으로 작업 공간을 생성하며, 매칭된 에이전트에 tmux가 설치되어 있어야 합니다.");
 		m.put("This pull request has been discarded", "이 풀 리퀘스트는 폐기되었습니다");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"이 보고서는 빌드가 풀 리퀘스트에 의해 트리거된 경우 풀 리퀘스트 개요 페이지에 표시됩니다");
@@ -4765,6 +4789,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Workspace Spec", "워크스페이스 사양");
 		m.put("Workspace Spec Template", "워크스페이스 사양 템플릿");
 		m.put("Workspace Specs", "워크스페이스 사양들");
+		m.put("Workspace Volume Storage Class", "작업 공간 볼륨 스토리지 클래스");
+		m.put("Workspace Volume Storage Size", "작업 공간 볼륨 스토리지 크기");
 		m.put("Workspace administrative permission inside a project, including batch operations over multiple workspaces", 
 			"프로젝트 내에서 워크스페이스 관리 권한, 여러 워크스페이스에 대한 일괄 작업 포함");
 		m.put("Workspace data deleted", "워크스페이스 데이터 삭제됨");
@@ -4795,6 +4821,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<a wicket:id=\"addFiles\" class=\"link-primary\">파일 추가</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">CI/CD 설정</a>, 또는 <a wicket:id=\"pushInstructions\" class=\"link-primary\">기존 저장소 푸시</a>를 통해 프로젝트를 초기화할 수 있습니다");
 		m.put("You selected to delete branch \"{0}\"", "브랜치 \"{0}\" 삭제를 선택했습니다");
 		m.put("You will be notified of any activities", "활동에 대한 알림을 받게 됩니다");
+		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
+			"재생성 후 에이전트 측에서 토큰을 업데이트해야 합니다. 계속하시겠습니까?");
 		m.put("You've been logged out", "로그아웃되었습니다");
 		m.put("YouTrack API URL", "YouTrack API URL");
 		m.put("YouTrack Issue Field", "YouTrack 이슈 필드");
@@ -4959,8 +4987,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("pull request and code review", "풀 리퀘스트 및 코드 리뷰");
 		m.put("pull request to any branch is discarded", "모든 브랜치에 대한 풀 리퀘스트가 폐기됨");
 		m.put("pull request to any branch is merged", "모든 브랜치에 대한 풀 리퀘스트가 병합됨");
+		m.put("pull request to any branch is opened or updated", "모든 브랜치에 대한 풀 리퀘스트가 열리거나 업데이트되었습니다.");
 		m.put("pull request to branches \"{0}\" is discarded", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 폐기됨");
 		m.put("pull request to branches \"{0}\" is merged", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 병합됨");
+		m.put("pull request to branches \"{0}\" is opened or updated", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 열리거나 업데이트되었습니다.");
 		m.put("pull request {0}", "풀 리퀘스트 {0}");
 		m.put("pull requests", "풀 리퀘스트들");
 		m.put("reconciliation (need administrator permission)", "조정 (관리자 권한 필요)");
@@ -5062,37 +5092,17 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("<b class='text-danger'>NOTE: </b>Kubernetes provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>참고: </b>Kubernetes 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
-		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>참고: </b>원격 Docker 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
-		m.put("<b class='text-danger'>NOTE: </b>Remote shell provisioner is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>참고: </b>원격 셸 프로비저너는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
-		m.put("Cannot remove agent \"{0}\" as it has workspaces", "에이전트 \"{0}\"를 제거할 수 없습니다. 작업 공간이 있습니다.");
-		m.put("Cannot remove agent as it has workspaces", "작업 공간이 있어 에이전트를 제거할 수 없습니다.");
-		m.put("Do you really want to remove agent \"{0}\"?", "정말로 에이전트 \"{0}\"를 제거하시겠습니까?");
-		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
-			"<a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 이상</a>이 설치되어 있는지 확인하세요.");
-		m.put("No default fork root", "기본 포크 루트가 없습니다.");
-		m.put("Optionally specify a storage class to allocate the workspace PVC dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume will be deleted when the workspace is deleted", 
-			"작업 공간 PVC를 동적으로 할당하기 위해 스토리지 클래스를 선택적으로 지정하세요. 기본 스토리지 클래스를 사용하려면 비워 두세요. <b class='text-warning'>참고:</b> 스토리지 클래스의 복구 정책은 <code>Delete</code>로 설정되어야 합니다. 작업 공간이 삭제되면 볼륨도 삭제됩니다.");
-		m.put("Pull request is opened or updated", "풀 리퀘스트가 열리거나 업데이트되었습니다.");
-		m.put("Remove all queried agents. Type <code>remove ALL agents</code> below to confirm", "쿼리된 모든 에이전트를 제거합니다. 아래에 <code>remove ALL agents</code>를 입력하여 확인하세요.");
-		m.put("Remove selected agents. Type <code>yes</code> below to confirm", "선택된 에이전트를 제거합니다. 아래에 <code>yes</code>를 입력하여 확인하세요.");
-		m.put("Specify storage size to request for the workspace PVC. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
-			"작업 공간 PVC에 요청할 스토리지 크기를 지정하세요. 크기는 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 리소스 용량 형식</a>을 따라야 하며, 예를 들어 <i>10Gi</i>와 같습니다.");
-		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "이 프로비저너는 Kubernetes 클러스터 내에서 작업 공간을 pod로 생성합니다.");
-		m.put("This provisioner creates workspaces inside Docker containers on OneDev server", "이 프로비저너는 OneDev 서버의 Docker 컨테이너 내에서 작업 공간을 생성합니다.");
-		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
-			"이 프로비저너는 \n<a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 Docker 컨테이너 내에서 작업 공간을 생성합니다.");
-		m.put("This provisioner creates workspaces with remote agents' shell facility, and requires tmux to be installed on matched agents", 
-			"이 프로비저너는 원격 에이전트의 셸 기능으로 작업 공간을 생성하며, 매칭된 에이전트에 tmux가 설치되어 있어야 합니다.");
-		m.put("Workspace Volume Storage Class", "작업 공간 볼륨 스토리지 클래스");
-		m.put("Workspace Volume Storage Size", "작업 공간 볼륨 스토리지 크기");
-		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
-			"재생성 후 에이전트 측에서 토큰을 업데이트해야 합니다. 계속하시겠습니까?");
-		m.put("pull request to any branch is opened or updated", "모든 브랜치에 대한 풀 리퀘스트가 열리거나 업데이트되었습니다.");
-		m.put("pull request to branches \"{0}\" is opened or updated", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 열리거나 업데이트되었습니다.");
+		m.put("Commit Message Fix Setting", "커밋 메시지 수정 설정");
+		m.put("Commit Message Fix Settings", "커밋 메시지 수정 설정들");
+		m.put("Configure how coding agents should reference fixed issues in commit messages, and specify prefix/suffix patterns to detect fixed issues in commit messages.", 
+			"코딩 에이전트가 커밋 메시지에서 수정된 이슈를 참조하는 방법을 구성하고, 커밋 메시지에서 수정된 이슈를 감지하기 위한 접두사/접미사 패턴을 지정합니다.");
+		m.put("Fix Detection", "수정 감지");
+		m.put("Fix Pattern", "수정 패턴");
+		m.put("Fix Suggestion", "수정 제안");
+		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
+			"커밋이 이슈를 수정하기 위한 것일 때, 코딩 에이전트가 커밋 메시지에서 이슈를 참조하는 방법을 지정합니다.");
+		m.put("Specify prefix/suffix patterns to detect fixed issues in commit messages. Each line of the commit message will be matched against each entry defined here", 
+			"커밋 메시지에서 수정된 이슈를 감지하기 위한 접두사/접미사 패턴을 지정합니다. 커밋 메시지의 각 줄은 여기 정의된 각 항목과 일치 여부를 확인합니다.");
 	}
 		
 	@Override
