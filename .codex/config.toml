@@ -1,0 +1,6 @@
+developer_instructions = """
+This is a multi-module Maven project. After modifying code, run an appropriate
+Maven command for the affected module(s), including required reactor
+dependencies (for example, with `-pl <module> -am`), and confirm that the
+changes compile successfully.
+"""
