@@ -1,3 +1,6 @@
+.workspace-spec-run-selector {
+	max-width: 480px;
+}
 .workspace-spec-run-selector .specs, .workspace-spec-run-selector .no-specs {
 	height: 400px;
 }

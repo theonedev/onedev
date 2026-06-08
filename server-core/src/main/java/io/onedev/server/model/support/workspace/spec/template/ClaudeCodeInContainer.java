@@ -22,7 +22,8 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 
         workspaceSpec.setName(getName());
         workspaceSpec.setRunInContainer(true);
-        workspaceSpec.setImage("1dev/claudecode");
+        workspaceSpec.setDescription("Claude Code, tod CLI, and companion skills are installed and accessible");
+        workspaceSpec.setImage("1dev/claudecode");        
         workspaceSpec.setShell(new CustomLinuxShell());
         workspaceSpec.setRunAs("1001:1001");
 

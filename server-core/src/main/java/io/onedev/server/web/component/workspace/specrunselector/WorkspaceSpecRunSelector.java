@@ -150,6 +150,7 @@ public abstract class WorkspaceSpecRunSelector extends Panel {
 
 		};
 		link.add(new Label("label", spec.getName()));
+		link.add(new Label("description", spec.getDescription()).setVisible(spec.getDescription() != null));
 		item.add(link);
 
 		return item;

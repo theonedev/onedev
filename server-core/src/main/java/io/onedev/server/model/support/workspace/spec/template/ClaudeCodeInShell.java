@@ -24,7 +24,7 @@ public class ClaudeCodeInShell extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
 
         workspaceSpec.setName(getName());
-        
+        workspaceSpec.setDescription("Claude Code, tod CLI, and companion skills are installed and accessible");
         var shortcutConfig = new ShortcutConfig();
         shortcutConfig.setName("Claude Code");
         shortcutConfig.setCommand("claude");

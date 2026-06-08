@@ -22,6 +22,7 @@ import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
@@ -46,6 +47,8 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	public static final String PROP_CONFIG_FILES = "configFiles";
 
 	private String name;
+
+	private String description;
 
 	private String provisioner;
 
@@ -82,6 +85,16 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Editable(order = 52, placeholder = "No description", description = "Optionally describe this workspace spec")
+	@Multiline
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@SuppressWarnings("unused")

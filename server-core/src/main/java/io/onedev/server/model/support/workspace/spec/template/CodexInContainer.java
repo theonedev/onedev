@@ -21,6 +21,7 @@ public class CodexInContainer extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
 
         workspaceSpec.setName(getName());
+        workspaceSpec.setDescription("Codex, tod CLI, and companion skills are installed and accessible");
         workspaceSpec.setRunInContainer(true);
         workspaceSpec.setImage("1dev/codex");
         workspaceSpec.setShell(new CustomLinuxShell());

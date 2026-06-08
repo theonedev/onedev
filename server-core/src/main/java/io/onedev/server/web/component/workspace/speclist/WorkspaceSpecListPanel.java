@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -106,6 +108,7 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 				}
 
 			});
+			specItem.add(new Label("description", spec.getDescription()).setVisible(spec.getDescription() != null));
 
 			specItem.setOutputMarkupId(true);
 			specsView.add(specItem);
@@ -137,4 +140,10 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 		setVisible(!getProject().getHierarchyWorkspaceSpecs().isEmpty());
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new WorkspaceSpecListCssResourceReference()));
+	}
+	
 }

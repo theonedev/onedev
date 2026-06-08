@@ -7,7 +7,10 @@
 		</div>
 		<ul wicket:id="specs" class="list-unstyled specs overflow-auto mb-0 mt-3">
 			<li wicket:id="specs" class="spec selectable">
-				<a wicket:id="link"><span wicket:id="label"></span></a>
+				<a wicket:id="link" class="d-block">
+					<span wicket:id="label"></span>
+					<div wicket:id="description" class="description text-muted font-size-sm"></div>
+				</a>
 			</li>
 		</ul>
 		<div wicket:id="noSpecs" class="no-specs mb-0 mt-4"><div class="alert alert-notice alert-light-warning"><wicket:t>No specs found</wicket:t></div></div>
