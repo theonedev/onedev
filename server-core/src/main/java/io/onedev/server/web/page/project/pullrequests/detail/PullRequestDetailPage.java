@@ -1676,8 +1676,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 
 					@Override
-					protected String getBranch(boolean createIfNotExist) {
+					protected String getBranch() {
 						return getPullRequest().getSourceBranch();
+					}
+
+					@Override
+					protected ObjectId getCommitId() {
+						return getPullRequest().getSourceHead();
 					}
 
 				};
@@ -1687,8 +1692,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				var request = getPullRequest();
-				setVisible(request.getSourceProject() != null 
-						&& SecurityUtils.canWriteCode(request.getSourceProject())
+				setVisible(request.getSourceHead() != null
+						&& SecurityUtils.canCreateWorkspaces(request.getSourceProject())
 						&& !request.getSourceProject().getHierarchyWorkspaceSpecs().isEmpty());
 			}
 

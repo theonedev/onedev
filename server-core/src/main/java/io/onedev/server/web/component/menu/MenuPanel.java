@@ -3,8 +3,6 @@ package io.onedev.server.web.component.menu;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -13,6 +11,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.web.component.svg.SpriteImage;
 

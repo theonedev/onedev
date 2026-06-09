@@ -40,6 +40,14 @@ public enum WorkspaceVariable {
 			return workspace.getToken();
 		}
 	},
+	COMMIT_HASH {
+
+		@Override
+		public String getValue(Workspace workspace) {
+			return workspace.getCommitHash();
+		}
+		
+	},
 	BRANCH {
 
 		@Override

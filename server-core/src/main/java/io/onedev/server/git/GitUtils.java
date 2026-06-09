@@ -357,17 +357,11 @@ public class GitUtils {
 	 *         represent a branch
 	 */
 	public static @Nullable String ref2branch(String refName) {
-		if (refName.startsWith(R_HEADS))
-			return refName.substring(R_HEADS.length());
-		else
-			return null;
+		return KubernetesHelper.ref2branch(refName);
 	}
 
 	public static String branch2ref(String branch) {
-		if (!branch.startsWith(R_HEADS))
-			return R_HEADS + branch;
-		else 
-			return branch;
+		return KubernetesHelper.branch2ref(branch);
 	}
 
 	/**

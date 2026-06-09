@@ -38,6 +38,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
+import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.jspecify.annotations.Nullable;
@@ -95,7 +96,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.WriteCode;
+import io.onedev.server.security.permission.CreateWorkspaces;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UrlService;
@@ -204,10 +205,11 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public Workspace create(User user, Project project, String branch, String specName) {
+	public Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch, String specName) {
 		var workspace = new Workspace();
 		workspace.setUser(user);
 		workspace.setProject(project);
+		workspace.setCommitHash(commitId.name());
 		workspace.setBranch(branch);
 		workspace.setSpecName(specName);
 		workspace.setToken(UUID.randomUUID().toString());
@@ -312,7 +314,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		if (project != null) {
 			predicates.add(builder.equal(root.get(Workspace.PROP_PROJECT), project));
 		} else if (!SecurityUtils.isAdministrator(subject)) {
-			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(subject, new WriteCode());
+			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(subject, new CreateWorkspaces());
 			if (!projects.isEmpty()) {
 				Path<Long> projectIdPath = root.get(Workspace.PROP_PROJECT).get(Project.PROP_ID);
 				predicates.add(Criteria.forManyValues(builder, projectIdPath,
@@ -780,11 +782,10 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				throw new ExplicitException("No email address for git operations configured");
 			
 			var cloneInfo = new DefaultCloneInfo(urlService.cloneUrlFor(workspace.getProject(), false), token);		
-			var branch = project.getDefaultBranch() != null? workspace.getBranch(): null;
 
 			var context = new WorkspaceContext(spec, provisioner, token, projectId, projectPath, projectGitDir, 
 					workspaceId, workspaceNumber, workspace.getUser().getId(), workspace.getUser().getDisplayName(), 
-					gitEmail.getValue(), cloneInfo, branch);
+					gitEmail.getValue(), cloneInfo, workspace.getCommitHash(), workspace.getBranch());
 
 			var pinnedServerAddress = workspace.getServerAddress();
 			var pinnedAgentId = workspace.getAgent() != null ? workspace.getAgent().getId() : null;

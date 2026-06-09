@@ -42,6 +42,9 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.jspecify.annotations.Nullable;
@@ -57,6 +60,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.Issue;
@@ -8778,6 +8782,24 @@ public class DataMigrator {
 							}
 						}
 					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate228(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element roleElement : dom.getRootElement().elements()) {
+					roleElement.addElement("createWorkspaces").setText("false");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Workspaces.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element workspaceElement : dom.getRootElement().elements()) {
+					workspaceElement.addElement("commitHash").setText(ObjectId.zeroId().name());
 				}
 				dom.writeToFile(file, false);
 			}

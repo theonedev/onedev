@@ -39,6 +39,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -52,7 +53,7 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.workspace.FuzzyCriteria;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.WriteCode;
+import io.onedev.server.security.permission.CreateWorkspaces;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndBranch;
@@ -61,6 +62,7 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.WorkspaceQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.BranchSelector;
+import io.onedev.server.web.component.commit.CommitLink;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -511,7 +513,7 @@ public abstract class WorkspaceListPanel extends Panel {
 
 						@Override
 						protected List<Project> load() {
-							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new WriteCode()));
+							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new CreateWorkspaces()));
 							projects.removeIf(p -> p.getHierarchyWorkspaceSpecs().isEmpty());
 							projects.sort(getProjectService().cloneCache().comparingPath());
 							return projects;
@@ -677,7 +679,7 @@ public abstract class WorkspaceListPanel extends Panel {
 			}
 		});
 
-		columns.add(new AbstractColumn<>(Model.of(_T("Branch"))) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Branch/Commit"))) {
 
 			@Override
 			public String getCssClass() {
@@ -687,10 +689,14 @@ public abstract class WorkspaceListPanel extends Panel {
 			@Override
 			public void populateItem(Item<ICellPopulator<Workspace>> cellItem, String componentId,
                                      IModel<Workspace> rowModel) {
-				Fragment fragment = new Fragment(componentId, "branchFrag", WorkspaceListPanel.this);
+				Fragment fragment = new Fragment(componentId, "revisionFrag", WorkspaceListPanel.this);
 				Workspace workspace = rowModel.getObject();
-				fragment.add(new BranchLink("branch",
-						new ProjectAndBranch(workspace.getProject(), workspace.getBranch()), true));
+				if (workspace.getBranch() != null) {
+					fragment.add(new BranchLink("revision",
+							new ProjectAndBranch(workspace.getProject(), workspace.getBranch()), true));
+				} else {
+					fragment.add(new CommitLink("revision", workspace.getProject(), ObjectId.fromString(workspace.getCommitHash())));
+				}
 				cellItem.add(fragment);
 			}
 		});

@@ -24,6 +24,9 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
@@ -333,6 +336,39 @@ public class ProjectTagsPage extends ProjectPage {
 						return null;
 					}
 					
+				});
+
+				fragment.add(new DropdownLink("workspaces") {
+
+					@Override
+					protected Component newContent(String id, FloatingPanel dropdown) {
+						return new WorkspaceSpecListPanel(id) {
+
+							@Override
+							protected Project getProject() {
+								return ProjectTagsPage.this.getProject();
+							}
+
+							@Override
+							protected String getBranch() {
+								return null;
+							}
+
+							@Override
+							protected ObjectId getCommitId() {
+								return ref.getPeeledObj().copy();
+							}
+
+						};
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getProject().canCreateWorkspace(SecurityUtils.getSubject())
+								&& !getProject().getHierarchyWorkspaceSpecs().isEmpty());
+					}
+
 				});
 
 				if (ref.getObj() instanceof RevTag) {

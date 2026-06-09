@@ -21,6 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.jspecify.annotations.Nullable;
@@ -31,6 +32,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.entityreference.WorkspaceReference;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.logging.WorkspaceLoggingSupport;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.search.entity.SortField;
@@ -68,6 +70,8 @@ public class Workspace extends AbstractEntity {
 
 	public static final String PROP_BRANCH = "branch";
 
+	public static final String PROP_COMMIT_HASH = "commitHash";
+
 	public static final String PROP_STATUS = "status";
 
 	public static final String PROP_PROVISIONER_NAME = "provisionerName";
@@ -84,6 +88,8 @@ public class Workspace extends AbstractEntity {
 
 	public static final String NAME_BRANCH = "Branch";
 
+	public static final String NAME_COMMIT = "Commit";
+
 	public static final String NAME_SPEC = "Spec";
 
 	public static final String NAME_STATUS = "Status";
@@ -97,7 +103,7 @@ public class Workspace extends AbstractEntity {
 	public static final String PROP_ACTIVE_DATE = "activeDate";
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NUMBER, NAME_PROJECT, NAME_BRANCH, NAME_SPEC, NAME_CREATE_DATE, NAME_ACTIVE_DATE);
+			NAME_NUMBER, NAME_PROJECT, NAME_BRANCH, NAME_COMMIT, NAME_SPEC, NAME_CREATE_DATE, NAME_ACTIVE_DATE);
 
 	public static final Map<String, SortField<Workspace>> SORT_FIELDS = new LinkedHashMap<>();
 	static {
@@ -138,8 +144,11 @@ public class Workspace extends AbstractEntity {
 	@Column(nullable=false)
 	private String specName;
 
-	@Column(nullable=false, length=255)
+	@Column(length=255)
 	private String branch;
+
+	@Column(nullable=false)
+	private String commitHash;
 
 	@Column(nullable=false)
 	private Status status = Status.PENDING;
@@ -210,12 +219,23 @@ public class Workspace extends AbstractEntity {
 		this.specName = specName;
 	}
 
+	@Nullable
 	public String getBranch() {
 		return branch;
 	}
 
 	public void setBranch(String branch) {
 		this.branch = branch;
+	}
+
+	public String getCommitHash() {
+		if (commitHash.equals(ObjectId.zeroId().name())) 
+			commitHash = getProject().getObjectId(getBranch(), true).name();
+		return commitHash;
+	}
+
+	public void setCommitHash(String commitHash) {
+		this.commitHash = commitHash;
 	}
 
 	public Status getStatus() {
@@ -294,6 +314,13 @@ public class Workspace extends AbstractEntity {
 
 	public void setAgent(@Nullable Agent agent) {
 		this.agent = agent;
+	}
+
+	public String getRevisionDescription() {
+		if (getBranch() != null)
+			return "branch " + getBranch();
+		else
+			return "commit " + GitUtils.abbreviateSHA(getCommitHash());
 	}
 
 	public static String getLogLockName(Long projectId, Long workspaceNumber) {

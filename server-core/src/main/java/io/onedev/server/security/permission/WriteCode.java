@@ -8,7 +8,7 @@ public class WriteCode implements BasePermission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof WriteCode || new ReadCode().implies(p);
+		return p instanceof WriteCode || new CreateWorkspaces().implies(p);
 	}
 
 	@Override

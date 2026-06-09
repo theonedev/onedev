@@ -31,8 +31,6 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.RoleName;
 import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.service.LinkSpecService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.role.AllIssueFields;
 import io.onedev.server.model.support.role.CodePrivilege;
 import io.onedev.server.model.support.role.IssueFieldSet;
@@ -47,6 +45,7 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.AccessTimeTracking;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.CreateChildren;
+import io.onedev.server.security.permission.CreateWorkspaces;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.EditIssueLink;
 import io.onedev.server.security.permission.JobPermission;
@@ -56,6 +55,7 @@ import io.onedev.server.security.permission.ManageIssues;
 import io.onedev.server.security.permission.ManageJob;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ManagePullRequests;
+import io.onedev.server.security.permission.ManageWorkspaces;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.ReadPack;
 import io.onedev.server.security.permission.RunJob;
@@ -63,6 +63,8 @@ import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.UploadCache;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.security.permission.WritePack;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.RoleFacade;
 import io.onedev.server.util.facade.UserFacade;
@@ -98,6 +100,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	private boolean manageCodeComments;
 
 	private boolean manageWorkspaces;
+
+	private boolean createWorkspaces;
 	
 	private CodePrivilege codePrivilege = CodePrivilege.NONE;
 	
@@ -190,40 +194,7 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.createChildren = createChildren;
 	}
 
-	@Editable(order=250, name="Pull Request Management", description="Pull request administrative permission inside a project, "
-			+ "including batch operations over multiple pull requests")
-	@DependsOn(property="manageProject", value="false")
-	public boolean isManagePullRequests() {
-		return managePullRequests;
-	}
-
-	public void setManagePullRequests(boolean managePullRequests) {
-		this.managePullRequests = managePullRequests;
-	}
-	
-	@Editable(order=255, name="Workspace Management", description="Workspace administrative permission inside a project, "
-			+ "including batch operations over multiple workspaces")
-	@DependsOn(property="manageProject", value="false")
-	public boolean isManageWorkspaces() {
-		return manageWorkspaces;
-	}	
-
-	public void setManageWorkspaces(boolean manageWorkspaces) {
-		this.manageWorkspaces = manageWorkspaces;
-	}
-
-	@Editable(order=260, name="Code Comment Management", description="Code comment administrative permission inside a project, "
-			+ "including batch operations over multiple code comments")
-	@DependsOn(property="manageProject", value="false")
-	public boolean isManageCodeComments() {
-		return manageCodeComments;
-	}
-
-	public void setManageCodeComments(boolean manageCodeComments) {
-		this.manageCodeComments = manageCodeComments;
-	}
-
-	@Editable(order=300)
+	@Editable(order=300, description="Specify the code privilege for the role. The Write permission implies CreateWorkspaces permission")
 	@ShowCondition("isCodePrivilegeVisible")
 	@NotNull
 	public CodePrivilege getCodePrivilege() {
@@ -240,7 +211,56 @@ public class Role extends AbstractEntity implements BasePermission {
 				&& !(boolean)EditContext.get().getInputValue("manageCodeComments");
 	}
 
+	@Editable(order=250, name="Pull Request Management", description="Pull request administrative permission inside a project, "
+			+ "including batch operations over multiple pull requests")
+	@DependsOn(property="manageProject", value="false")
+	public boolean isManagePullRequests() {
+		return managePullRequests;
+	}
+
+	public void setManagePullRequests(boolean managePullRequests) {
+		this.managePullRequests = managePullRequests;
+	}
+	
+	@Editable(order=255, name="Workspace Management", description="""
+			Workspace administrative permission inside a project, including batch operations 
+			over multiple workspaces including batch operations over multiple workspaces. 
+			This permission implies WriteCode permission.""")
+	@DependsOn(property="manageProject", value="false")
+	public boolean isManageWorkspaces() {
+		return manageWorkspaces;
+	}	
+
+	public void setManageWorkspaces(boolean manageWorkspaces) {
+		this.manageWorkspaces = manageWorkspaces;
+	}
+
+	@Editable(order=257, name="Create Workspaces", description="""
+			Create workspaces on any commit or branch under a project. 
+			This permission implies the permission to read code.
+			""")
+	@DependsOn(property="manageWorkspaces", value="false")
+	public boolean isCreateWorkspaces() {
+		return createWorkspaces;
+	}
+
+	public void setCreateWorkspaces(boolean createWorkspaces) {
+		this.createWorkspaces = createWorkspaces;
+	}
+
+	@Editable(order=260, name="Code Comment Management", description="Code comment administrative permission inside a project, "
+			+ "including batch operations over multiple code comments")
+	@DependsOn(property="manageProject", value="false")
+	public boolean isManageCodeComments() {
+		return manageCodeComments;
+	}
+
+	public void setManageCodeComments(boolean manageCodeComments) {
+		this.manageCodeComments = manageCodeComments;
+	}
+
 	@Editable(order=350, name="Package Privilege")
+	@DependsOn(property="manageProject", value="false")
 	@NotNull
 	public PackPrivilege getPackPrivilege() {
 		return packPrivilege;
@@ -420,6 +440,10 @@ public class Role extends AbstractEntity implements BasePermission {
 			permissions.add(new EditIssueLink(linkAuthorization.getLink()));
 		if (manageBuilds)
 			permissions.add(new ManageBuilds());
+		if (manageWorkspaces)
+			permissions.add(new ManageWorkspaces());
+		if (createWorkspaces)
+			permissions.add(new CreateWorkspaces());
 		if (uploadCache)
 			permissions.add(new UploadCache());
 		for (var jobPrivilege: jobPrivileges) {

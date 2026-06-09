@@ -8,7 +8,7 @@ public class ManageWorkspaces implements BasePermission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof ManageWorkspaces || new WriteCode().implies(p);
+		return p instanceof ManageWorkspaces || new CreateWorkspaces().implies(p) || new WriteCode().implies(p);
 	}
 
 	@Override

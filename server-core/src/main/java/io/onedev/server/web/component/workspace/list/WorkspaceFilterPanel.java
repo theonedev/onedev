@@ -24,6 +24,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -31,6 +32,7 @@ import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.workspace.ActiveCriteria;
+import io.onedev.server.search.entity.workspace.BranchCriteria;
 import io.onedev.server.search.entity.workspace.CreateDateCriteria;
 import io.onedev.server.search.entity.workspace.CreatedByCriteria;
 import io.onedev.server.search.entity.workspace.CreatedByUserCriteria;
@@ -200,6 +202,52 @@ abstract class WorkspaceFilterPanel extends FilterEditPanel<Workspace> {
 
 		});
 		add(ranAgentChoice);
+
+		var branchChoice = new StringMultiChoice("branch", new IModel<Collection<String>>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Collection<String> getObject() {
+				var criterias = getMatchingCriterias(getModelObject().getCriteria(), BranchCriteria.class, null);
+				return criterias.stream().map(BranchCriteria::getValue).collect(toList());
+			}
+
+			@Override
+			public void setObject(Collection<String> object) {
+				var criterias = Criteria.orCriterias(object.stream()
+						.map(it -> new BranchCriteria(it, Is)).collect(toList()));
+				var query = getModelObject();
+				query.setCriteria(setMatchingCriteria(query.getCriteria(), BranchCriteria.class, criterias, null));
+				getModel().setObject(query);
+			}
+
+		}, new LoadableDetachableModel<List<String>>() {
+
+			@Override
+			protected List<String> load() {
+				var project = getProject();
+				if (project == null)
+					return new ArrayList<>();
+				var branches = project.getBranchRefs().stream()
+						.map(it -> GitUtils.ref2branch(it.getName()))
+						.collect(toList());
+				Collections.sort(branches);
+				return branches;
+			}
+
+		}, getProject() == null);
+		
+		branchChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+			}
+
+		});
+		add(branchChoice);
 
 		var specChoice = new StringMultiChoice("spec", new IModel<Collection<String>>() {
 

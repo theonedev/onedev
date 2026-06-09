@@ -4,6 +4,8 @@ import javax.inject.Inject;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
@@ -22,20 +24,23 @@ public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 
 	protected abstract Project getProject();
 
+	@Nullable
 	protected abstract String getBranch();
+
+	protected abstract ObjectId getCommitId();
 
 	protected abstract WorkspaceSpec getSpec();
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), getBranch(), getSpec().getName());
+ 		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), getCommitId(), getBranch(), getSpec().getName());
 		setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
 	}
 
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canWriteCode(getProject()));
+		setVisible(getProject().canCreateWorkspace(SecurityUtils.getSubject()));
 	}
 
 }

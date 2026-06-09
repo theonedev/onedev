@@ -488,14 +488,14 @@ public class SuggestionUtils {
 		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', null);
 		if (scopedQuery != null) {
 			var subject = SecurityUtils.getSubject();
-			for (var session : OneDev.getInstance(WorkspaceService.class)
+			for (var workspace: OneDev.getInstance(WorkspaceService.class)
 					.query(subject, scopedQuery.getProject(), scopedQuery.getQuery(), count)) {
 				String ref;
 				if (project != null && project.equals(scopedQuery.getProject()))
-					ref = "#" + session.getNumber();
+					ref = "#" + workspace.getNumber();
 				else
-					ref = session.getProject().getPath() + "#" + session.getNumber();
-				suggestions.add(new InputSuggestion(ref, session.getBranch(), null));
+					ref = workspace.getProject().getPath() + "#" + workspace.getNumber();
+				suggestions.add(new InputSuggestion(ref, workspace.getRevisionDescription(), null));
 			}
 		}
 		if (suggestions.isEmpty() && matchWith.length() == 0) {

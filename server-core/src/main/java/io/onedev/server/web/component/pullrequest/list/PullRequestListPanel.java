@@ -54,6 +54,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
@@ -108,6 +109,7 @@ import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.watchstatus.WatchStatusPanel;
+import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
@@ -915,7 +917,7 @@ public abstract class PullRequestListPanel extends Panel {
 						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
 
 				fragment.add(new Label("number", request.getReference().toString(getProject())));
-					
+
 				ActionablePageLink prLink = new ActionablePageLink("link", 
 						PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request)) {
 
@@ -954,6 +956,41 @@ public abstract class PullRequestListPanel extends Panel {
 					}
 					
 				}.setEscapeModelStrings(false).setOutputMarkupId(true));
+
+				fragment.add(new DropdownLink("workspaces") {
+
+					@Override
+					protected Component newContent(String id, FloatingPanel dropdown) {
+						return new WorkspaceSpecListPanel(id) {
+
+							@Override
+							protected Project getProject() {
+								return rowModel.getObject().getSourceProject();
+							}
+
+							@Override
+							protected String getBranch() {
+								return rowModel.getObject().getSourceBranch();
+							}
+
+							@Override
+							protected ObjectId getCommitId() {
+								return rowModel.getObject().getSourceHead();
+							}
+
+						};
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						var pullRequest = rowModel.getObject();
+						setVisible(pullRequest.getSourceHead() != null
+								&& pullRequest.getSourceProject().canCreateWorkspace(SecurityUtils.getSubject())
+								&& !pullRequest.getSourceProject().getHierarchyWorkspaceSpecs().isEmpty());
+					}
+
+				});
 				
 				fragment.add(new EntityLabelsPanel<PullRequestLabel>("labels", rowModel));
 
@@ -999,7 +1036,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					});
 				}
-				
+								
 				LastActivity lastActivity = request.getLastActivity();
 				if (lastActivity.getUser() != null) 
 					fragment.add(new UserIdentPanel("user", lastActivity.getUser(), Mode.NAME));

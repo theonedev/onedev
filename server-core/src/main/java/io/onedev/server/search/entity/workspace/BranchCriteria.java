@@ -25,6 +25,10 @@ public class BranchCriteria extends Criteria<Workspace> {
 		this.operator = operator;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Workspace, Workspace> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Workspace.PROP_BRANCH);
@@ -37,7 +41,7 @@ public class BranchCriteria extends Criteria<Workspace> {
 
 	@Override
 	public boolean matches(Workspace workspace) {
-		var matches = WildcardUtils.matchString(value.toLowerCase(), workspace.getBranch().toLowerCase());
+		var matches = workspace.getBranch() != null && WildcardUtils.matchString(value.toLowerCase(), workspace.getBranch().toLowerCase());
 		if (operator == WorkspaceQueryLexer.IsNot)
 			matches = !matches;
 		return matches;

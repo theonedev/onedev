@@ -14,7 +14,6 @@ import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.ConfigFileFacade;
 import io.onedev.k8shelper.SetupScriptConfig;
 import io.onedev.k8shelper.UserDataFacade;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.model.support.workspace.spec.CacheConfig;
 import io.onedev.server.model.support.workspace.spec.ConfigFile;
@@ -51,10 +50,12 @@ public class WorkspaceContext implements Serializable {
 
 	private final String branch;
 
+	private final String commitHash;
+
 	public WorkspaceContext(WorkspaceSpec spec, WorkspaceProvisioner provisioner, String token, 
 				Long projectId, String projectPath, String projectGitDir, Long workspaceId, 
 				Long workspaceNumber, Long userId, String userName, String userEmail, 
-				CloneInfo cloneInfo, String branch) {
+				CloneInfo cloneInfo, String commitHash, @Nullable String branch) {
 		this.spec = spec;
 		this.provisioner = provisioner;
 		this.token = token;
@@ -67,6 +68,7 @@ public class WorkspaceContext implements Serializable {
 		this.userName = userName;
 		this.userEmail = userEmail;
 		this.cloneInfo = cloneInfo;
+		this.commitHash = commitHash;
 		this.branch = branch;
 	}
 	
@@ -123,16 +125,15 @@ public class WorkspaceContext implements Serializable {
 		return branch;
 	}
 
+	public String getCommitHash() {
+		return commitHash;
+	}
+
 	public Map<String, String> getEnvVars() {
 		var envVars = new LinkedHashMap<String, String>();
 		for (var envVar : spec.getEnvVars())
 			envVars.put(envVar.getName(), envVar.isSecret() ? envVar.getSecretValue() : envVar.getValue());
 		return envVars;
-	}
-
-	@Nullable
-	public String getRefName() {
-		return branch != null ? GitUtils.branch2ref(branch) : null;
 	}
 
 	public List<CacheConfigFacade> getCacheConfigFacades() {

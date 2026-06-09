@@ -482,6 +482,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	private transient Map<ObjectId, Collection<String>> reachableBranchesCache;
 	
+	private transient List<WorkspaceSpec> hierarchyWorkspaceSpecs;
+	
+	private transient Map<Object, Boolean> canCreateWorkspaceCache;
+
+	private transient Map<Object, Boolean> canWriteCodeCache;
+
 	@Editable(order=100)
 	@ProjectName
 	@NotEmpty
@@ -1093,14 +1099,17 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	public List<WorkspaceSpec> getHierarchyWorkspaceSpecs() {
-		var specMap = new LinkedHashMap<String, WorkspaceSpec>();
-		for (var spec : getWorkspaceSpecs())
-			specMap.put(spec.getName(), spec);
-		if (getParent() != null) {
-			for (var spec : getParent().getHierarchyWorkspaceSpecs())
-				specMap.putIfAbsent(spec.getName(), spec);
+		if (hierarchyWorkspaceSpecs == null) {
+			var specMap = new LinkedHashMap<String, WorkspaceSpec>();
+			for (var spec : getWorkspaceSpecs())
+				specMap.put(spec.getName(), spec);
+			if (getParent() != null) {
+				for (var spec : getParent().getHierarchyWorkspaceSpecs())
+					specMap.putIfAbsent(spec.getName(), spec);
+			}
+			hierarchyWorkspaceSpecs = new ArrayList<>(specMap.values());
 		}
-		return new ArrayList<>(specMap.values());
+		return hierarchyWorkspaceSpecs;
 	}
 	
 	@Editable(order=500, placeholder="Default", description="Specify an email address sharing same inbox as " +
@@ -2202,6 +2211,20 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			}
 		}
 		return independents;
+	}
+	
+	public boolean canCreateWorkspace(Subject subject) {
+		if (canCreateWorkspaceCache == null)
+			canCreateWorkspaceCache = new HashMap<>();
+		return canCreateWorkspaceCache.computeIfAbsent(subject.getPrincipal(), it ->
+				SecurityUtils.canCreateWorkspaces(subject, this));
+	}
+
+	public boolean canWriteCode(Subject subject) {
+		if (canWriteCodeCache == null)
+			canWriteCodeCache = new HashMap<>();
+		return canWriteCodeCache.computeIfAbsent(subject.getPrincipal(), it ->
+				SecurityUtils.canWriteCode(subject, this));
 	}
 	
 }

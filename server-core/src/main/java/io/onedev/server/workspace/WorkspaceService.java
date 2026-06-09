@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.agent.workspace.FileData;
@@ -23,7 +24,7 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	@Nullable Workspace find(Project project, long number);
 
-	Workspace create(User user, Project project, String branch, String specName);
+	Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch, String specName);
 
 	void update(Workspace workspace);
 

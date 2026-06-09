@@ -490,8 +490,13 @@ public class ProjectBranchesPage extends ProjectPage {
 							}
 
 							@Override
-							protected String getBranch(boolean createIfNotExist) {
+							protected String getBranch() {
 								return branch;
+							}
+
+							@Override
+							protected ObjectId getCommitId() {
+								return ref.getObjectId();
 							}
 
 						};
@@ -500,7 +505,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canWriteCode(getProject())
+						setVisible(getProject().canCreateWorkspace(SecurityUtils.getSubject())
 								&& !getProject().getHierarchyWorkspaceSpecs().isEmpty());
 					}
 

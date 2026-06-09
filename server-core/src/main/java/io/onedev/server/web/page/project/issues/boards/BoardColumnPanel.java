@@ -1,42 +1,21 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.service.UserService;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
-import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
-import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
-import io.onedev.server.search.entity.issue.*;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.issue.create.CreateIssuePanel;
-import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.util.ProjectAware;
-import io.onedev.server.web.util.WicketUtils;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.Is;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsEmpty;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsNot;
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static io.onedev.server.web.translation.Translation._T;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -54,17 +33,51 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
-import org.jspecify.annotations.Nullable;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.*;
-import static io.onedev.server.security.SecurityUtils.canManageIssues;
-import static io.onedev.server.web.translation.Translation._T;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.StateSpec;
+import io.onedev.server.model.support.issue.field.FieldUtils;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
+import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
+import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IterationCriteria;
+import io.onedev.server.search.entity.issue.IterationEmptyCriteria;
+import io.onedev.server.search.entity.issue.StateCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.UserService;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.util.ProjectAware;
+import io.onedev.server.web.util.WicketUtils;
 
 abstract class BoardColumnPanel extends AbstractColumnPanel {
 
@@ -212,11 +225,6 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						handler.add(countLabel);
 						if (addToIterationLink.getOutputMarkupId())
 							handler.add(addToIterationLink);
-					}
-
-					@Override
-					protected boolean canCreateWorkspace(Project project) {
-						return BoardColumnPanel.this.canCreateWorkspace(project);
 					}
 
 				});
@@ -536,7 +544,5 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 	protected boolean isBacklog() {
 		return false;
 	}
-	
-	protected abstract boolean canCreateWorkspace(Project project);
 	
 }

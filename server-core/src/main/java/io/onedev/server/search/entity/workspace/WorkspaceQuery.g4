@@ -9,6 +9,7 @@ query
 criteria
 	: operator=(Pending|Active|Inactive|CreatedByMe) #OperatorCriteria
 	| operator=(CreatedBy|RanOn) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(IsEmpty|IsNotEmpty) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(IsSince|IsUntil) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | Reference #ReferenceCriteria
@@ -61,6 +62,14 @@ Is
 
 IsNot
     : 'is' WS+ 'not'
+    ;
+
+IsEmpty
+	: 'is' WS+ 'empty'
+	;
+
+IsNotEmpty
+    : 'is' WS+ 'not' WS+ 'empty'
     ;
 
 IsGreaterThan

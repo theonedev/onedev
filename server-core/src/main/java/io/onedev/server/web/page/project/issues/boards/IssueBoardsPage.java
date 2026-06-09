@@ -7,11 +7,7 @@ import static java.util.stream.Collectors.toList;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,11 +38,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -54,6 +50,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScope;
@@ -127,8 +124,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		}
 
 	};
-
-	private transient Map<Long, Boolean> canCreateWorkspaceCache = new HashMap<>();
 	
 	private IFeedbackMessageFilter newFeedbackMessageFilter(boolean backlog) {
 		return message -> ((QueryParseMessage)message.getMessage()).backlog == backlog;		
@@ -807,11 +802,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						return getBoard().getIterationPrefix();
 					}
 
-					@Override
-					protected boolean canCreateWorkspace(Project project) {
-						return IssueBoardsPage.this.canCreateWorkspace(project);
-					}
-
 				});
 			}
 			
@@ -848,11 +838,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						return queryModel.getObject();
 					}
 					
-					@Override
-					protected boolean canCreateWorkspace(Project project) {
-						return IssueBoardsPage.this.canCreateWorkspace(project);
-					}
-
 				});
 			}
 			body.add(columnsView);
@@ -1047,11 +1032,4 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
-	private boolean canCreateWorkspace(Project project) {
-		if (canCreateWorkspaceCache == null)
-			canCreateWorkspaceCache = new HashMap<>();
-		return canCreateWorkspaceCache.computeIfAbsent(project.getId(), it -> 
-				SecurityUtils.canWriteCode(project) && !project.getHierarchyWorkspaceSpecs().isEmpty());
-	}
-
 }

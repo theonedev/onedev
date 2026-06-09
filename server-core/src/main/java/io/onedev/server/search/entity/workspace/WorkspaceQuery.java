@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.workspace;
 import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
 import static io.onedev.server.model.Workspace.NAME_ACTIVE_DATE;
 import static io.onedev.server.model.Workspace.NAME_BRANCH;
+import static io.onedev.server.model.Workspace.NAME_COMMIT;
 import static io.onedev.server.model.Workspace.NAME_CREATE_DATE;
 import static io.onedev.server.model.Workspace.NAME_PROJECT;
 import static io.onedev.server.model.Workspace.NAME_SPEC;
@@ -13,9 +14,11 @@ import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Active;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Inactive;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Is;
+import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsEmpty;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsGreaterThan;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsLessThan;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsNot;
+import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsNotEmpty;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsSince;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsUntil;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Pending;
@@ -40,6 +43,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.CriteriaContext;
+import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.FieldOperatorCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.FuzzyCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.NotCriteriaContext;
@@ -147,6 +151,16 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 					}
 
 					@Override
+					public Criteria<Workspace> visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
+						String fieldName = getValue(ctx.criteriaField.getText());
+						int operator = ctx.operator.getType();
+						checkField(fieldName, operator);
+						if (fieldName.equals(NAME_BRANCH))
+							return new BranchEmptyCriteria(operator);
+						throw new ExplicitException("Unexpected field: " + fieldName);
+					}
+
+					@Override
 					public Criteria<Workspace> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
@@ -164,6 +178,10 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 								break;
 							case NAME_BRANCH:
 								criterias.add(new BranchCriteria(value, operator));
+								break;
+							case NAME_COMMIT:
+								var commitId = getCommitId(project, value);
+								criterias.add(new CommitCriteria(commitId.getProject(), commitId.getCommitId(), operator));
 								break;
 							case NAME_SPEC:
 								criterias.add(new SpecCriteria(value, operator));
@@ -245,9 +263,15 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 			case Is:
 			case IsNot:
 				if (!fieldName.equals(NAME_NUMBER) && !fieldName.equals(NAME_PROJECT)
-						&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_SPEC)) {
+						&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_COMMIT)
+						&& !fieldName.equals(NAME_SPEC)) {
 					throw newOperatorException(fieldName, operator);
 				}
+				break;
+			case IsEmpty:
+			case IsNotEmpty:
+				if (!fieldName.equals(NAME_BRANCH))
+					throw newOperatorException(fieldName, operator);
 				break;
 			case IsGreaterThan:
 			case IsLessThan:

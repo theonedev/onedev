@@ -24,3 +24,10 @@
 .pull-request-list .request-status {
 	width: 75px;
 }
+.pull-request-list .number {
+	margin-right: 0.25rem;
+}
+.pull-request-list .number, .pull-request-list .title {
+	font-size: 1.175rem;
+	font-weight: 500;	
+}

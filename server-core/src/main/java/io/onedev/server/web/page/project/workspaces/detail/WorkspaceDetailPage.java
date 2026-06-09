@@ -33,6 +33,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.cluster.ClusterService;
@@ -50,6 +51,7 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.branch.BranchLink;
+import io.onedev.server.web.component.commit.CommitLink;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -122,7 +124,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canWriteCode(getProject());
+		return SecurityUtils.canCreateWorkspaces(getProject());
 	}
 
 	@Override
@@ -147,7 +149,10 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 		add(head);
 
 		head.add(new UserIdentPanel("user", workspace.getUser(), Mode.AVATAR_AND_NAME));
-		head.add(new BranchLink("branch", new ProjectAndBranch(workspace.getProject(), workspace.getBranch()), true));
+		if (workspace.getBranch() != null)
+			head.add(new BranchLink("revision", new ProjectAndBranch(workspace.getProject(), workspace.getBranch())));
+		else
+			head.add(new CommitLink("revision", workspace.getProject(), ObjectId.fromString(workspace.getCommitHash())));
 		head.add(new Label("spec", workspace.getSpecName()));
 		head.add(new InvalidWorkspaceSpecIcon("invalidSpec", workspaceModel));
 
@@ -374,7 +379,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 					tabs.add(new TerminalTab(getWorkspace(), shellId, displayLabel));
 				}
 
-				if (getWorkspace().getStatus() != Workspace.Status.PENDING)
+				if (getWorkspace().getStatus() != Workspace.Status.PENDING && getWorkspace().getBranch() != null)
 					tabs.add(new WorkspaceTab(Model.of(_T("Changes")), Model.of("diff"), WorkspaceChangesPage.class, WorkspaceChangesPage.paramsOf(getWorkspace())));
 				tabs.add(new WorkspaceTab(Model.of(_T("Log")), Model.of("log"), WorkspaceLogPage.class, WorkspaceLogPage.paramsOf(getWorkspace())));
 				return tabs;

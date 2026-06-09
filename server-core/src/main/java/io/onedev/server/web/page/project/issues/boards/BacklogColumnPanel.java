@@ -1,5 +1,33 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsEmpty;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsNot;
+import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static io.onedev.server.web.translation.Translation._T;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
+
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -17,33 +45,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import org.jspecify.annotations.Nullable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsEmpty;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsNot;
-import static io.onedev.server.security.SecurityUtils.canManageIssues;
-import static io.onedev.server.web.translation.Translation._T;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 abstract class BacklogColumnPanel extends AbstractColumnPanel {
 
@@ -244,11 +245,6 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 					handler.add(addToIterationLink);
 			}
 
-			@Override
-			protected boolean canCreateWorkspace(Project project) {
-				return BacklogColumnPanel.this.canCreateWorkspace(project);
-			}
-
 		});
 		
 		super.onBeforeRender();
@@ -278,5 +274,4 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 		return true;
 	}
 	
-	protected abstract boolean canCreateWorkspace(Project project);
 }

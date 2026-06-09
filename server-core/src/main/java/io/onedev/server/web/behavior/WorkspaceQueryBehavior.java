@@ -111,6 +111,11 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 												return SuggestionUtils.suggestBranches(project, matchWith);
 											else
 												return null;
+										case Workspace.NAME_COMMIT:
+											if (project != null)
+												return SuggestionUtils.suggestRevisions(project, matchWith);
+											else
+												return null;
 										case Workspace.NAME_SPEC:
 											if (project != null && !matchWith.contains("*"))
 												return SuggestionUtils.suggestWorkspaceSpecs(project, matchWith);

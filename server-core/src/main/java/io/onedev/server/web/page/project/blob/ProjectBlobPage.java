@@ -938,8 +938,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				var currentRefName = getRefName();
-				var currentBranch = currentRefName != null ? GitUtils.ref2branch(currentRefName) : "main";
+				var refName = getRefName();
+				var branch = refName != null ? GitUtils.ref2branch(refName) : null;
 				return new WorkspaceSpecListPanel(id) {
 
 					@Override
@@ -948,8 +948,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					}
 
 					@Override
-					protected String getBranch(boolean createIfNotExist) {
-						return currentBranch;
+					protected String getBranch() {
+						return branch;
+					}
+
+					@Override
+					protected ObjectId getCommitId() {
+						return Preconditions.checkNotNull(ProjectBlobPage.this.getCommit()).copy();
 					}
 
 				};
@@ -958,7 +963,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(isOnBranch() && SecurityUtils.canWriteCode(getProject())
+				setVisible(state.blobIdent.revision != null 
+						&& SecurityUtils.canCreateWorkspaces(getProject())
 						&& !getProject().getHierarchyWorkspaceSpecs().isEmpty());
 			}
 

@@ -257,7 +257,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					Lists.newArrayList(PackDetailPage.class)));
 		}
 
-		if (getProject().isCodeManagement() && SecurityUtils.canWriteCode(getProject()) 
+		if (getProject().isCodeManagement() && SecurityUtils.canCreateWorkspaces(getProject()) 
 				&& !getProject().getHierarchyWorkspaceSpecs().isEmpty()) {
 			menuItems.add(new SidebarMenuItem.Page("workspace", _T("Workspaces"),
 					ProjectWorkspacesPage.class, ProjectWorkspacesPage.paramsOf(getProject(), 0),

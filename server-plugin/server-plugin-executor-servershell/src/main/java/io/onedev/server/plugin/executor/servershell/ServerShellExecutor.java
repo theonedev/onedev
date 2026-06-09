@@ -238,11 +238,11 @@ public class ServerShellExecutor extends JobExecutor implements Testable<Testabl
 
 								var cloneInfo = checkoutFacade.getCloneInfo();
 								cloneInfo.setupGitAuth(git, buildDir, buildDir.getAbsolutePath(), infoLogger, warningLogger);
-					
+								
+								var branch = GitUtils.ref2branch(jobContext.getRefName());
 								cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
-										jobContext.getRefName(), jobContext.getCommitId().name(),
-										checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
-										checkoutFacade.getCloneDepth(),
+										branch, jobContext.getCommitId().name(), checkoutFacade.isWithLfs(),
+										checkoutFacade.isWithSubmodules(), checkoutFacade.getCloneDepth(),
 										infoLogger, warningLogger);
 							} else if (facade instanceof SetupCacheFacade) {
 								SetupCacheFacade setupCacheFacade = (SetupCacheFacade) facade;

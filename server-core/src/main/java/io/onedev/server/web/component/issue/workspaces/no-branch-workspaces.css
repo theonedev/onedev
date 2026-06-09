@@ -1,0 +1,6 @@
+.no-branch-workspaces {
+	max-width: 480px;
+}
+.no-branch-workspaces .spec .body {
+	padding: 0.5rem 1rem !important;	
+}

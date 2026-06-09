@@ -59,6 +59,7 @@ import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.CreateRootProjects;
+import io.onedev.server.security.permission.CreateWorkspaces;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.EditIssueLink;
 import io.onedev.server.security.permission.JobPermission;
@@ -478,6 +479,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	public static boolean canManageWorkspaces(Subject subject, Project project) {
 		return subject.isPermitted(new ProjectPermission(project, new ManageWorkspaces()));
+	}
+
+	public static boolean canCreateWorkspaces(Subject subject, Project project) {
+		return subject.isPermitted(new ProjectPermission(project, new CreateWorkspaces()));
+	}
+
+	public static boolean canCreateWorkspaces(Project project) {	
+		return canCreateWorkspaces(getSubject(), project);
 	}
 	
 	public static boolean canManageCodeComments(Project project) {

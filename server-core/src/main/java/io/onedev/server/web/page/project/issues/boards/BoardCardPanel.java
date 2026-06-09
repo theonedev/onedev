@@ -40,14 +40,12 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueLinkService;
 import io.onedev.server.service.IssueService;
 import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.iteration.IterationCrumbPanel;
@@ -55,12 +53,11 @@ import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
-import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.issue.workspaces.IssueWorkspacesLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 
@@ -281,34 +278,13 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		fragment.add(new CopyToClipboardLink("copy", 
 				Model.of(issue.getTitle() + " (" + issue.getReference().toString(getProject()) + ")")));
 
-		fragment.add(new DropdownLink("workspaces") {
+		fragment.add(new IssueWorkspacesLink("workspaces") {
 
 			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new WorkspaceSpecListPanel(id) {
-
-					@Override
-					protected Project getProject() {
-						return getIssue().getProject();
-					}
-
-					@Override
-					protected String getBranch(boolean createIfNotExist) {
-						if (createIfNotExist)
-							return issueService.ensureBranch(SecurityUtils.getSubject(), getIssue());
-						else
-							return getIssue().getBranch();
-					}
-
-				};
+			protected Issue getIssue() {
+				return issueModel.getObject();
 			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(canCreateWorkspace(getIssue().getProject()));
-			}
-
+			
 		});
 
 		var linksPanel = new IssueLinksPanel("links") {
@@ -435,7 +411,5 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 	protected abstract Project getProject();
 	
 	protected abstract void onDeleteIssue(AjaxRequestTarget target);
-	
-	protected abstract boolean canCreateWorkspace(Project project);
-	
+		
 }

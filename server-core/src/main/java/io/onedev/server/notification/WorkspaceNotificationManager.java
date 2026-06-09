@@ -74,10 +74,10 @@ public class WorkspaceNotificationManager {
 					workspace.getNumber(),
 					event.getActivity());
 
-			String summary = String.format("Dev session %s by user %s on branch %s",
+			String summary = String.format("Workspace %s by user %s on %s",
 					event.getActivity(),
 					workspace.getUser().getDisplayName(),
-					workspace.getBranch());
+					workspace.getRevisionDescription());
 
 			String url = urlService.urlFor(workspace, true);
 			String threadingReferences = "<" + workspace.getProject().getPath()

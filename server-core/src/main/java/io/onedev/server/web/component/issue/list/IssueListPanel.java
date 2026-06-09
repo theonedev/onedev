@@ -14,7 +14,6 @@ import java.io.OutputStreamWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -129,6 +128,7 @@ import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
+import io.onedev.server.web.component.issue.workspaces.IssueWorkspacesLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -144,7 +144,6 @@ import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.watchstatus.WatchStatusPanel;
-import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
@@ -184,9 +183,7 @@ public abstract class IssueListPanel extends Panel {
 	private TextField<String> queryInput;
 	
 	private boolean querySubmitted = true;
-	
-	private transient Map<Long, Boolean> canCreateWorkspaceCache = new HashMap<>();
-	
+		
 	public IssueListPanel(String id, IModel<String> queryModel) {
 		super(id);
 		this.queryStringModel = queryModel;
@@ -1963,39 +1960,13 @@ public abstract class IssueListPanel extends Panel {
 				fragment.add(new CopyToClipboardLink("copy",
 						Model.of(issue.getTitle() + " (" + issue.getReference().toString(getProject()) + ")")));
 
-				fragment.add(new DropdownLink("workspaces") {
+				fragment.add(new IssueWorkspacesLink("workspaces") {
 
 					@Override
-					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new WorkspaceSpecListPanel(id) {
-
-							@Override
-							protected Project getProject() {
-								return getIssue().getProject();
-							}
-
-							@Override
-							protected String getBranch(boolean createIfNotExist) {
-								if (createIfNotExist)
-									return getIssueService().ensureBranch(SecurityUtils.getSubject(), getIssue());
-								else
-									return getIssue().getBranch();
-							}
-
-							private Issue getIssue() {
-								return (Issue) fragment.getDefaultModelObject();
-							}
-
-						};
+					protected Issue getIssue() {
+						return (Issue) fragment.getDefaultModelObject();
 					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						var issue = (Issue) fragment.getDefaultModelObject();	
-						setVisible(canCreateWorkspace(issue.getProject()));
-					}
-
+					
 				});
 
 				fragment.add(new AjaxLink<Void>("pin") {
@@ -2261,14 +2232,7 @@ public abstract class IssueListPanel extends Panel {
 	
 	protected void onBatchDeleted(AjaxRequestTarget target) {
 	}
-	
-	private boolean canCreateWorkspace(Project project) {
-		if (canCreateWorkspaceCache == null)
-			canCreateWorkspaceCache = new HashMap<>();
-		return canCreateWorkspaceCache.computeIfAbsent(project.getId(), it ->
-				SecurityUtils.canWriteCode(project) && !project.getHierarchyWorkspaceSpecs().isEmpty());
-	}
-		
+			
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

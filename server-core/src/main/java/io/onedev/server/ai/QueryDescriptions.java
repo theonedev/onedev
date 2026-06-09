@@ -503,6 +503,8 @@ public class QueryDescriptions {
                     | '"Number"' 'is' ('greater'|'less') 'than' '"'EntityReference'"'
                     | '"Project"' 'is' ('not')? '"'ProjectPathOrPattern'"'
                     | '"Branch"' 'is' ('not')? '"'BranchNameOrPattern'"'
+                    | '"Branch"' 'is' ('not')? 'empty'
+                    | '"Commit"' 'is' ('not')? '"'CommitReference'"'
                     | '"Spec"' 'is' ('not')? '"'WorkspaceSpecName'"'
                     | '"Create Date"' 'is' ('until'|'since') '"'DateDescription'"'
                     | '"Active Date"' 'is' ('until'|'since') '"'DateDescription'"'

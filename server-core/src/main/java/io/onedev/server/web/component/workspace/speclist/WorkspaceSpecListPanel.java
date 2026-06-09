@@ -16,12 +16,14 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.search.entity.workspace.BranchCriteria;
+import io.onedev.server.search.entity.workspace.CommitCriteria;
 import io.onedev.server.search.entity.workspace.ProjectCriteria;
 import io.onedev.server.search.entity.workspace.SpecCriteria;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
@@ -44,13 +46,16 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 	protected abstract Project getProject();
 
 	@Nullable
-	protected abstract String getBranch(boolean createIfNotExist);
+	protected abstract String getBranch();
+
+	protected abstract ObjectId getCommitId();
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var branch = getBranch(false);
+		var branch = getBranch();
+		var commitId = getCommitId();
 		
 		RepeatingView specsView = new RepeatingView("specs");
 		add(specsView);
@@ -58,37 +63,27 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 			WebMarkupContainer specItem = new WebMarkupContainer(specsView.newChildId());
 			specItem.add(new Label("name", spec.getName()));
 
-			if (branch != null) {
-				var workspacesModel = new LoadableDetachableModel<List<Workspace>>() {
+			var workspacesModel = new LoadableDetachableModel<List<Workspace>>() {
 
-					@Override
-					protected List<Workspace> load() {
-						return queryWorkspaces(branch, spec.getName());
-					}
-	
-				};
+				@Override
+				protected List<Workspace> load() {
+					return queryWorkspaces(commitId, branch, spec.getName());
+				}
 
-				String queryString = buildWorkspaceQueryString(branch, spec.getName());
-				specItem.add(new BookmarkablePageLink<Void>("showInList", ProjectWorkspacesPage.class,
-						ProjectWorkspacesPage.paramsOf(getProject(), queryString, 0)) {
-	
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!workspacesModel.getObject().isEmpty());
-					}
-	
-				});	
-				specItem.add(new MiniWorkspaceListPanel("detail", workspacesModel));	
-			} else {
-				specItem.add(new WebMarkupContainer("showInList").setVisible(false));
-				specItem.add(new MiniWorkspaceListPanel("detail", new LoadableDetachableModel<List<Workspace>>() {
-					@Override
-					protected List<Workspace> load() {
-						return new ArrayList<>();
-					}
-				}));
-			}
+			};
+
+			String queryString = buildWorkspaceQueryString(commitId, branch, spec.getName());
+			specItem.add(new BookmarkablePageLink<Void>("showInList", ProjectWorkspacesPage.class,
+					ProjectWorkspacesPage.paramsOf(getProject(), queryString, 0)) {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!workspacesModel.getObject().isEmpty());
+				}
+
+			});	
+			specItem.add(new MiniWorkspaceListPanel("detail", workspacesModel));	
 
 			specItem.add(new CreateWorkspaceLink("create") {
 
@@ -104,9 +99,14 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 
 				@Override
 				protected String getBranch() {
-					return WorkspaceSpecListPanel.this.getBranch(true);
+					return branch;
 				}
 
+				@Override
+				protected ObjectId getCommitId() {
+					return commitId;
+				}
+				
 			});
 			specItem.add(new Label("description", spec.getDescription()).setVisible(spec.getDescription() != null));
 
@@ -115,23 +115,27 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 		}
 	}
 
-	private Criteria<Workspace> buildWorkspaceCriteria(String branch, String specName) {
-		return Criteria.andCriterias(List.of(
-				new ProjectCriteria(getProject().getPath(), Is),
-				new SpecCriteria(specName, Is),
-				new BranchCriteria(branch, Is)));
+	private Criteria<Workspace> buildWorkspaceCriteria(ObjectId commitId, @Nullable String branch, String specName) {
+		var criterias = new ArrayList<Criteria<Workspace>>();
+		criterias.add(new ProjectCriteria(getProject().getPath(), Is));
+		criterias.add(new SpecCriteria(specName, Is));
+		if (branch != null) 
+			criterias.add(new BranchCriteria(branch, Is));
+		else 
+			criterias.add(new CommitCriteria(getProject(), commitId, Is));
+		return Criteria.andCriterias(criterias);
 	}
 
-	private List<Workspace> queryWorkspaces(String branch, String specName) {
-		var query = new WorkspaceQuery(buildWorkspaceCriteria(branch, specName));
+	private List<Workspace> queryWorkspaces(ObjectId commitId, @Nullable String branch, String specName) {
+		var query = new WorkspaceQuery(buildWorkspaceCriteria(commitId, branch, specName));
 		var workspaces = new ArrayList<>(workspaceService.query(
 				SecurityUtils.getSubject(), getProject(), query, 0, Integer.MAX_VALUE));
 		workspaces.sort(Comparator.comparing(Workspace::getNumber));
 		return workspaces;
 	}
 
-	private String buildWorkspaceQueryString(String branch, String specName) {
-		return new WorkspaceQuery(buildWorkspaceCriteria(branch, specName)).toString();
+	private String buildWorkspaceQueryString(ObjectId commitId, @Nullable String branch, String specName) {
+		return new WorkspaceQuery(buildWorkspaceCriteria(commitId, branch, specName)).toString();
 	}
 
 	@Override

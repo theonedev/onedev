@@ -310,7 +310,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				var workspaceRef = WorkspaceReference.of(referenceId, null);
 				var workspace = workspaceService.find(workspaceRef.getProject(), workspaceRef.getNumber());
 				if (workspace != null && SecurityUtils.canReadCode(workspace.getProject())) {
-					String title = workspace.getUser().getDisplayName() + " on " + workspace.getBranch() + " for " + workspace.getSpecName() + " (" + workspace.getStatus().name() + ")";
+					String title = workspace.getUser().getDisplayName() + " on " + workspace.getRevisionDescription() + " for " + workspace.getSpecName() + " (" + workspace.getStatus().name() + ")";
 					String script = String.format("onedev.server.markdown.renderWorkspaceTooltip('%s');",
 							JavaScriptEscape.escapeJavaScript(title));
 					target.appendJavaScript(script);

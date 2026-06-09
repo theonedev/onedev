@@ -550,10 +550,10 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 									int cloneDepth = checkoutFacade.getCloneDepth();
 
+									var branch = GitUtils.ref2branch(jobContext.getRefName());
 									cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
-											jobContext.getRefName(), jobContext.getCommitId().name(),
-											checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
-											cloneDepth, infoLogger, warningLogger);
+											branch, jobContext.getCommitId().name(), checkoutFacade.isWithLfs(), 
+											checkoutFacade.isWithSubmodules(), cloneDepth, infoLogger, warningLogger);
 								} else if (facade instanceof SetupCacheFacade) {
 									SetupCacheFacade setupCacheFacade = (SetupCacheFacade) facade;
 									var cacheProvisioner = new ServerJobCacheProvisioner(setupCacheFacade.getCacheConfig(), cacheConfigIndex.getAndIncrement(), jobContext);

@@ -71,7 +71,7 @@ public class MiniWorkspaceListPanel extends GenericPanel<List<Workspace>> {
 			});
 			add(fragment);
 		} else {
-			add(new Label("content", _T("No workspaces")).add(AttributeAppender.append("class", "no-workspaces font-italic mx-5 my-4 text-nowrap")));
+			add(new Label("content", _T("No workspaces")).add(AttributeAppender.append("class", "no-workspaces font-italic text-nowrap")));
 		}
 	}
 
