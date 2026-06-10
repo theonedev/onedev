@@ -50,6 +50,7 @@ public class IssueHelper {
         summary.put("submitter", issue.getSubmitter().getName());
         summary.put("Project", issue.getProject().getPath());
         summary.remove("lastActivity");
+        summary.put("lastActivityDate", issue.getLastActivity().getDate());
         for (var it = summary.entrySet().iterator(); it.hasNext();) {
             var entry = it.next();
             if (entry.getKey().endsWith("Count"))

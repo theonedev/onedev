@@ -79,6 +79,7 @@ public class PullRequestHelper {
             summary.put("sourceProject", pullRequest.getSourceProject().getPath());
         summary.remove("codeCommentsUpdateDate");
         summary.remove("lastActivity");
+        summary.put("lastActivityDate", pullRequest.getLastActivity().getDate());
         for (var it = summary.entrySet().iterator(); it.hasNext();) {
             var entry = it.next();
             if (entry.getKey().endsWith("Count"))
