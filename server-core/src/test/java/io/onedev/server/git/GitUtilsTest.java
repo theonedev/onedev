@@ -12,11 +12,14 @@ import java.util.Set;
 
 import io.onedev.commons.utils.ZipUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.io.NullOutputStream;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
@@ -25,6 +28,32 @@ import com.google.common.io.Resources;
 import io.onedev.commons.utils.FileUtils;
 
 public class GitUtilsTest extends AbstractGitTest {
+
+	@Test
+	public void testExactOnlyRenameDetection() {
+		try (var formatter = new DiffFormatter(NullOutputStream.INSTANCE)) {
+			GitUtils.configureDiffFormatter(formatter, git.getRepository());
+			assertEquals(-1, formatter.getRenameDetector().getRenameLimit());
+		}
+
+		addFile("old-exact", "same");
+		addFile("old-similar", "before");
+		var oldCommit = commit("add files");
+
+		rm("old-exact", "old-similar");
+		addFile("new-exact", "same");
+		addFile("new-similar", "before and after");
+		var newCommit = commit("move files");
+
+		var diffs = GitUtils.diff(git.getRepository(),
+				ObjectId.fromString(oldCommit), ObjectId.fromString(newCommit));
+		assertTrue(diffs.stream().anyMatch(it -> it.getChangeType() == ChangeType.RENAME
+				&& it.getOldPath().equals("old-exact") && it.getNewPath().equals("new-exact")));
+		assertTrue(diffs.stream().anyMatch(it -> it.getChangeType() == ChangeType.DELETE
+				&& it.getOldPath().equals("old-similar")));
+		assertTrue(diffs.stream().anyMatch(it -> it.getChangeType() == ChangeType.ADD
+				&& it.getNewPath().equals("new-similar")));
+	}
 
 	@Test
 	public void testRebaseWithoutConflicts() throws Exception {
