@@ -17,6 +17,9 @@ rules:
   - apiGroups: [""]
     resources: ["services", "pods", "pods/log", "pods/exec", "secrets", "configmaps", "events"]
     verbs: ["get", "list", "watch", "create", "patch", "delete"] #require this permission to run builds as pods
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "patch", "delete"] #require this permission to provision build working directory PVCs
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["get", "list", "create", "patch", "delete"] #require this permission to run builds as pods
