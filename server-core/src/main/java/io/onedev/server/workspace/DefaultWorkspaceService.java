@@ -8,6 +8,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,9 +21,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -123,6 +126,10 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	private static final String WORKSPACE_LOGS_DIR = "workspace-logs";
 
 	private static final String AUTO_DISCOVERED_PROVISIONER_NAME = "auto-discovered";
+
+	private static final String RUN_PROMPT_SUCCESS_MARKER = "__ONEDEV_RUN_PROMPT_SUCCESS__";
+
+	private static final String RUN_PROMPT_FAILURE_MARKER = "__ONEDEV_RUN_PROMPT_FAILURE__";
 
 	@Inject
 	private ProjectService projectService;
@@ -826,7 +833,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Sessional
 	@Override
-	public String openShell(Workspace workspace, String label, String command) {
+	public String openShell(Workspace workspace, String label, @Nullable String command,
+							 @Nullable ShellOutputCallback outputCallback) {
 		var workspaceId = workspace.getId();
 		var server = workspaceServers.get(workspaceId);
 		if (server == null)
@@ -839,9 +847,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				if (runtime == null)
 					throw new ExplicitException("Workspace runtime not found");
 				var shellIdRef = new AtomicReference<String>(null);
+				var shellReady = new CompletableFuture<String>();
+				var firstOutputSeen = new AtomicBoolean(false);
 				shellIdRef.set(runtime.openShell(new Terminal() {
-
-					private boolean firstOutput = true;
 
 					@Override
 					public void onShellOutput(String base64Data) {
@@ -850,9 +858,24 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							// Use runOnAllServers instead of submitToAllServers to preserve output order
 							clusterService.runOnAllServers(newHandleShellOutputTask(workspaceId, shellId, base64Data));
 						}
-						if (command != null && firstOutput) 
-							runtime.writeShellStdin(shellId, command + "\n");
-						firstOutput = false;
+						if (outputCallback != null) {
+							try {
+								outputCallback.onOutput(base64Data);
+							} catch (Throwable e) {
+								logger.error("Error calling shell output callback", e);
+							}
+						}
+
+						if (command != null && firstOutputSeen.compareAndSet(false, true)) {
+							shellReady.thenAccept(it -> {
+								try {
+									Thread.sleep(1000);
+								} catch (InterruptedException e) {
+									throw new RuntimeException(e);
+								}
+								runtime.writeShellStdin(it, command + "\n");			
+							});
+						}
 					}
 		
 					@Override
@@ -863,7 +886,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 					}
 		
 				}, label));
-				return shellIdRef.get();
+				var shellId = shellIdRef.get();
+				shellReady.complete(shellId);
+				return shellId;
 			}
 
 		});
@@ -908,8 +933,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Sessional
 	@Override
-	public void onMessage(IWebSocketConnection connection, Workspace workspace, 
-					String shellId, String message) {
+	public void onMessage(Workspace workspace, String shellId, String message) {
 		if (message.startsWith("SHELL_INPUT:") || message.startsWith("TERMINAL_RESIZE:")) {
 			var workspaceId = workspace.getId();			
 			var server = workspaceServers.get(workspaceId);
@@ -1076,6 +1100,91 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		return activeWorkspaceIds;
 	}
 
+	@Transactional
+	@Override
+	public void runPrompt(User ai, Project project, String branch, String prompt) {
+		WorkspaceSpec applicableSpec = null;
+		for (var spec : project.getWorkspaceSpecs()) {
+			if (spec.getTaskAutomation() != null) {
+				var applicableUsers = spec.getTaskAutomation().getApplicableAis();
+				if (applicableUsers.isEmpty() || applicableUsers.contains(ai.getName())) {
+					applicableSpec = spec;
+					break;
+				}
+			}
+		}
+		if (applicableSpec != null) {
+			final WorkspaceSpec finalApplicableSpec = applicableSpec;
+			var workspaceId = create(ai, project, project.getObjectId(branch, true), branch, applicableSpec.getName()).getId();
+			
+			transactionService.runAfterCommit(() -> {
+				executorService.execute(() -> {
+					while (true) {					
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {							
+						}
+						if (sessionService.call(() -> {
+							var workspace = get(workspaceId);
+							if (workspace == null) {
+								logger.warn("AI task ignored as task workspace no longer exists");
+								return true;
+							}
+
+							if (workspace.getStatus() == Workspace.Status.ACTIVE) {
+								var command = decorateRunPromptCommand(finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), prompt);
+								var buffer = new StringBuilder();
+								openShell(workspace, "Terminal", command, base64Data -> {
+									synchronized (buffer) {
+										try {
+											buffer.append(new String(Base64.getDecoder().decode(base64Data), UTF_8));
+										} catch (IllegalArgumentException e) {
+											logger.debug("Unable to decode shell output", e);
+											return;
+										}
+										if (buffer.indexOf(RUN_PROMPT_SUCCESS_MARKER) != -1) {
+											delete(load(workspaceId));
+										} else if (buffer.length() > 1024) {
+											buffer.delete(0, buffer.length() - 1024);
+										}
+									}
+								});		
+								return true;
+							} else {
+								return false;
+							}
+						})) {
+							break;
+						}
+					}
+				});
+			});
+		} else {
+			throw new ExplicitException("I need to create workspace to do the job, but no applicable workspace spec found");
+		}
+	}
+
+	private String decorateRunPromptCommand(String command, String prompt) {
+		return "(\n"
+				+ "\texport PROMPT=" + shellQuote(prompt) + "\n"
+				+ command + "\n"
+				+ ")\n"
+				+ "if [ $? -eq 0 ]; then\n"
+				+ "\t" + shellPrintMarker(RUN_PROMPT_SUCCESS_MARKER) + "\n"
+				+ "else\n"
+				+ "\t" + shellPrintMarker(RUN_PROMPT_FAILURE_MARKER) + "\n"
+				+ "fi";
+	}
+
+	private String shellQuote(String value) {
+		return "'" + value.replace("'", "'\"'\"'") + "'";
+	}
+
+	private String shellPrintMarker(String marker) {
+		var splitIndex = marker.lastIndexOf('_', marker.length() - 3) + 1;
+		return "printf '%s\\n' " + shellQuote(marker.substring(0, splitIndex)) + shellQuote(marker.substring(splitIndex));
+	}
+
 	private ClusterTask<Void> newRunWorkspaceTask(WorkspaceContext context) {
 		return new ClusterTask<Void>() {
 		
@@ -1096,11 +1205,13 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						var workspace = load(workspaceId);
 						workspace.setStatus(Workspace.Status.ACTIVE);
 						workspace.setActiveDate(new Date());
-						var firstShortcut = context.getSpec().getShortcutConfigs().stream().findFirst().orElse(null);
-						if (firstShortcut != null) 
-							openShell(workspace, firstShortcut.getName(), firstShortcut.getCommand());
-						else 
-							openShell(workspace, "Terminal", null);
+						if (workspace.getUser().getType() != User.Type.AI) {
+							var firstShortcut = context.getSpec().getShortcutConfigs().stream().findFirst().orElse(null);
+							if (firstShortcut != null) 
+								openShell(workspace, firstShortcut.getName(), firstShortcut.getCommand(), null);
+							else 
+								openShell(workspace, "Terminal", null, null);
+						}
 						update(workspace);
 						listenerRegistry.post(new WorkspaceActive(workspace));
 					});

@@ -193,7 +193,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 							return new Link<Void>(id) {
 								@Override
 								public void onClick() {
-									var shellId = workspaceService.openShell(getWorkspace(), name, command);
+									var shellId = workspaceService.openShell(getWorkspace(), name, command, null);
 									setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId));
 								}
 							};
@@ -219,7 +219,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 			@Override
 			public void onClick() {
-				var shellId = workspaceService.openShell(getWorkspace(), _T("Terminal"), null);
+				var shellId = workspaceService.openShell(getWorkspace(), _T("Terminal"), null, null);
 				setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId));
 			}
 

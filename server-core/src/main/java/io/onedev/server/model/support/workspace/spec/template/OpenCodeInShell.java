@@ -24,12 +24,13 @@ public class OpenCodeInShell extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
 
         workspaceSpec.setName(getName());
-        workspaceSpec.setDescription("Open Code, tod CLI, and companion skills are installed and accessible");
         
         var shortcutConfig = new ShortcutConfig();
         shortcutConfig.setName("Open Code");
         shortcutConfig.setCommand("opencode");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
+
+        configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$PROMPT\"");
 
         return workspaceSpec;
     }

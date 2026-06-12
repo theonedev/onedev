@@ -30,8 +30,10 @@ public abstract class WorkspaceRuntime {
 
             @Override
             public void onShellExit() {
-                labels.remove(shellId);
-                shells.remove(shellId);
+                synchronized (WorkspaceRuntime.this) {
+                    labels.remove(shellId);
+                    shells.remove(shellId);
+                }
                 terminal.onShellExit();
             }
 

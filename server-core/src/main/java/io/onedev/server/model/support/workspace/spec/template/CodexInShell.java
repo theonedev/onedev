@@ -24,11 +24,12 @@ public class CodexInShell extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
 
         workspaceSpec.setName(getName());
-        workspaceSpec.setDescription("Codex, tod CLI, and companion skills are installed and accessible");
         var shortcutConfig = new ShortcutConfig();
         shortcutConfig.setName("Codex");
         shortcutConfig.setCommand("codex");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
+
+        configureTaskAutomation(workspaceSpec, "codex exec --dangerously-bypass-approvals-and-sandbox \"$PROMPT\"");
 
         return workspaceSpec;
     }

@@ -11,16 +11,14 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.jspecify.annotations.Nullable;
-
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.AiTask;
 import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
 import io.onedev.server.ai.taskchecker.NoopTaskChecker;
-import io.onedev.server.ai.tools.codecomment.GetCodeCommentReplies;
 import io.onedev.server.ai.tools.codecomment.GetCodeComment;
+import io.onedev.server.ai.tools.codecomment.GetCodeCommentReplies;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
@@ -67,7 +65,7 @@ public class CodeCommentNotificationManager {
 					if (mentionedUser != null) {
 						mentionService.mention(comment, mentionedUser);
 						if (mentionedUser.getType() == User.Type.AI) {
-							if (!(event instanceof CodeCommentEdited) && isAiEntitled(event.getUser(), comment, mentionedUser)) {
+							if (!(event instanceof CodeCommentEdited) && isAiEntitled(comment, mentionedUser)) {
 								String systemPrompt = """
 									You are mentioned in a code comment. The content mentioning you is presented as user prompt. \
 									Use existing replies as conversation context. Call relevant tools to get information about \
@@ -122,21 +120,12 @@ public class CodeCommentNotificationManager {
 		}
 	}
 
-	private boolean isAiEntitled(@Nullable User user, CodeComment comment, User ai) {
-		if (user != null && user.getId() > 0) {
-			if (user.isEntitledToAi(ai)) {
-				return true;
-			} else {
-				new AddCodeCommentReply(comment.getId()).onResponse(user, "@%s sorry but you are not entitled to access me".formatted(user.getName()));				
-				return false;
-			}
+	private boolean isAiEntitled(CodeComment comment, User ai) {
+		if (comment.getProject().isEntitledToAi(ai)) {
+			return true;
 		} else {
-			if (comment.getProject().isEntitledToAi(ai)) {
-				return true;
-			} else {
-				new AddCodeCommentReply(comment.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
-				return false;
-			}
+			new AddCodeCommentReply(comment.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
+			return false;
 		}
 	}
 

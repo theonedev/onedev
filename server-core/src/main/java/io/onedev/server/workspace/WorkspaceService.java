@@ -51,7 +51,8 @@ public interface WorkspaceService extends EntityService<Workspace> {
 	 */
 	File getLogFile(Long projectId, Long workspaceNumber);
 
-	String openShell(Workspace workspace, String label, @Nullable String command);
+	String openShell(Workspace workspace, String label, @Nullable String command, 
+		@Nullable ShellOutputCallback outputCallback);
 
 	Map<String, String> getShellLabels(Workspace workspace);	
 
@@ -65,8 +66,8 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	void onClose(IWebSocketConnection connection);
 
-	void onMessage(IWebSocketConnection connection, Workspace workspace, 
-					String shellId, String message);
+	void onMessage(Workspace workspace, String shellId, String message);
+
 	
 	@Nullable
 	WorkspaceContext getWorkspaceContext(String token, boolean mustExist);
@@ -76,4 +77,6 @@ public interface WorkspaceService extends EntityService<Workspace> {
 	@Nullable
 	FileData readFileData(Workspace workspace, String path);
 
+	void runPrompt(User ai, Project project, String branch, String prompt);
+	
 }

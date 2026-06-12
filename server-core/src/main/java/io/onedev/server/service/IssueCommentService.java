@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.User;
 
@@ -12,6 +13,8 @@ public interface IssueCommentService extends EntityService<IssueComment> {
 	void create(IssueComment comment);
 
 	void create(IssueComment comment, Collection<String> notifiedEmailAddresses);
+
+	void create(User user, Issue issue, String content);
 		
 	void delete(User user, IssueComment comment);
 	

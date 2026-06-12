@@ -17,6 +17,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueCommentEdited;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.User;
@@ -58,6 +59,17 @@ public class DefaultIssueCommentService extends BaseEntityService<IssueComment> 
 
 	public void create(IssueComment comment) {
 		create(comment, new ArrayList<>());
+	}
+
+	@Transactional
+	@Override
+	public void create(User user, Issue issue, String content) {
+        var comment = new IssueComment();
+        comment.setIssue(issue);
+        comment.setContent(content);
+        comment.setUser(user);
+        comment.setDate(new Date());
+        create(comment);
 	}
 	
 	@Transactional
