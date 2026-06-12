@@ -24,11 +24,12 @@ public class CursorInShell extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
 
         workspaceSpec.setName(getName());
-        workspaceSpec.setDescription("Cursor CLI, tod CLI, and companion skills are installed and accessible");
         var shortcutConfig = new ShortcutConfig();
         shortcutConfig.setName("Cursor CLI");
         shortcutConfig.setCommand("agent");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
+
+        configureTaskAutomation(workspaceSpec, "agent -p --force --approve-mcps --trust \"$PROMPT\"");
 
         return workspaceSpec;
     }

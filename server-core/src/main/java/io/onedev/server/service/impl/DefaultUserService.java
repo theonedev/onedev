@@ -194,6 +194,8 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 						protection.onRenameUser(oldName, user.getName());
 					project.getIssueSetting().onRenameUser(oldName, user.getName());
 					project.getPullRequestSetting().onRenameUser(oldName, user.getName());
+					for (var spec : project.getWorkspaceSpecs())
+						spec.onRenameUser(oldName, user.getName());
 				} catch (Exception e) {
 					throw new RuntimeException("Error checking user reference in project '" + project.getPath() + "'", e);
 				}
@@ -359,6 +361,8 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 					usageInProject.add(protection.onDeleteUser(user.getName()));
 				usageInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
 				usageInProject.add(project.getPullRequestSetting().onDeleteUser(user.getName()));
+				for (var spec : project.getWorkspaceSpecs())
+					spec.onDeleteUser(user.getName());
 				usageInProject.prefix("project '" + project.getPath() + "': settings");
 				usage.add(usageInProject);
 			} catch (Exception e) {

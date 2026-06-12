@@ -22,7 +22,6 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 
         workspaceSpec.setName(getName());
         workspaceSpec.setRunInContainer(true);
-        workspaceSpec.setDescription("Claude Code, tod CLI, and companion skills are installed and accessible");
         workspaceSpec.setImage("1dev/claudecode");        
         workspaceSpec.setShell(new CustomLinuxShell());
         workspaceSpec.setRunAs("1001:1001");
@@ -40,6 +39,8 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
         userData.getPaths().add("/home/claude/.claude.json");
         userData.getPaths().add("/home/claude/.local/state");
         workspaceSpec.getUserDatas().add(userData);
+
+        configureTaskAutomation(workspaceSpec, "claude --dangerously-skip-permissions -p --verbose \"$PROMPT\"");
 
         return workspaceSpec;
     }

@@ -21,7 +21,6 @@ public class CursorInContainer extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
 
         workspaceSpec.setName(getName());
-        workspaceSpec.setDescription("Cursor CLI, tod CLI, and companion skills are installed and accessible");
         workspaceSpec.setRunInContainer(true);
         workspaceSpec.setImage("1dev/cursor");
         workspaceSpec.setShell(new CustomLinuxShell());
@@ -39,6 +38,8 @@ public class CursorInContainer extends WorkspaceSpecTemplate {
         userData.getPaths().add("/home/cursor/.cursor");
         userData.getPaths().add("/home/cursor/.config/cursor");
         workspaceSpec.getUserDatas().add(userData);
+
+        configureTaskAutomation(workspaceSpec, "agent -p --force --approve-mcps --trust \"$PROMPT\"");
 
         return workspaceSpec;
     }

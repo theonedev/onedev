@@ -29,6 +29,7 @@ import io.onedev.server.model.support.administration.workspaceprovisioner.Worksp
 import io.onedev.server.model.support.workspace.spec.shell.DefaultShell;
 import io.onedev.server.model.support.workspace.spec.shell.WorkspaceShell;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -75,6 +76,8 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	private List<Integer> containerPorts = new ArrayList<>();
 
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
+
+	private TaskAutomation taskAutomation;
 
 	@Editable(order = 50, description = "Specify a name to identify this workspace spec")
 	@SuggestionProvider("getNameSuggestions")
@@ -229,6 +232,17 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	public void setShortcutConfigs(List<ShortcutConfig> shortcutConfigs) {
 		this.shortcutConfigs = shortcutConfigs;
 	}
+
+	@Editable(order = 650, placeholder = "Not configured", description = """
+			Enable this if the spec can be used by AI user to create workspaces to run assigned tasks""")
+	@Valid
+	public TaskAutomation getTaskAutomation() {
+		return taskAutomation;
+	}
+
+	public void setTaskAutomation(TaskAutomation taskAutomation) {
+		this.taskAutomation = taskAutomation;
+	}
 	
 	@Editable(order = 1100, name = "Retrieve LFS Files", group = "More Settings", description = "Enable this to retrieve Git LFS files")
 	public boolean isRetrieveLfs() {
@@ -352,6 +366,21 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	protected static List<InputSuggestion> suggestVariables(String matchWith) {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
+	}
+
+	public void onRenameUser(String oldName, String newName) {
+		if (taskAutomation != null)
+			taskAutomation.onRenameUser(oldName, newName);
+	}
+
+	public Usage onDeleteUser(String userName) {
+		if (taskAutomation != null) {
+			if (taskAutomation.getApplicableAis().removeIf(userName::equals) 
+					&& taskAutomation.getApplicableAis().isEmpty()) {
+				taskAutomation = null;
+			}
+		}
+		return new Usage();
 	}
 
 }

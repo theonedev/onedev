@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.ObjectId;
-import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -270,7 +269,7 @@ public class PullRequestNotificationManager {
 									replyAddress, senderName, threadingReferences);
 						}
 					} else if (changeData instanceof PullRequestRequestedForChangesData 
-							&& isAiEntitled(user, request, request.getSubmitter())) {
+							&& isAiEntitled(request, request.getSubmitter())) {
 						new AddPullRequestComment(request.getId()).onResponse(
 							request.getSubmitter(), 
 							"I don't know how to improve the pull request yet");
@@ -306,7 +305,7 @@ public class PullRequestNotificationManager {
 									getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(user, request, assignee)) {
+					} else if (isAiEntitled(request, assignee)) {
 						new AddPullRequestComment(request.getId()).onResponse(assignee, "I don't know how to work as assignee yet");
 					}
 					notifiedUsers.add(assignee);
@@ -337,7 +336,7 @@ public class PullRequestNotificationManager {
 									getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(null, request, reviewer)) {
+					} else if (isAiEntitled(request, reviewer)) {
 						var tools = new ArrayList<TaskTool>();
 						addPullRequestInspectionTools(tools, request, true, true);
 						var task = new AiTask(
@@ -376,7 +375,7 @@ public class PullRequestNotificationManager {
 											getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 											replyAddress, senderName, threadingReferences);
 								}
-							} else if (isAiEntitled(user, request, mentionedUser)) {
+							} else if (isAiEntitled(request, mentionedUser)) {
 								if (event instanceof PullRequestOpened) {
 									var tools = new ArrayList<TaskTool>();
 									addPullRequestInspectionTools(tools, request, false, true);
@@ -506,21 +505,12 @@ public class PullRequestNotificationManager {
 		tools.addAll(ToolUtils.getDiffTools(projectId, oldCommitId, newCommitId, requestId));
 	}
 
-	private boolean isAiEntitled(@Nullable User user, PullRequest request, User ai) {
-		if (user != null && user.getId() > 0) {
-			if (user.isEntitledToAi(ai)) {
-				return true;
-			} else {
-				new AddPullRequestComment(request.getId()).onResponse(user, "@%s sorry but you are not entitled to access me".formatted(user.getName()));				
-				return false;
-			}
+	private boolean isAiEntitled(PullRequest request, User ai) {
+		if (request.getProject().isEntitledToAi(ai)) {
+			return true;
 		} else {
-			if (request.getProject().isEntitledToAi(ai)) {
-				return true;
-			} else {
-				new AddPullRequestComment(request.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
-				return false;
-			}
+			new AddPullRequestComment(request.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
+			return false;
 		}
 	}
 

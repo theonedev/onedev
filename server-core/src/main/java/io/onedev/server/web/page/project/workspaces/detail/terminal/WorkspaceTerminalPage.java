@@ -55,13 +55,12 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 
 			@Override
 			protected void writeToStdin(IWebSocketConnection connection, String data) {
-				workspaceService.onMessage(connection, getWorkspace(), shellId, "SHELL_INPUT:" + data);
+				workspaceService.onMessage(getWorkspace(), shellId, "SHELL_INPUT:" + data);
 			}
 
 			@Override
 			protected void onResized(IWebSocketConnection connection, int rows, int cols) {
-				workspaceService.onMessage(connection, getWorkspace(), shellId,
-						"TERMINAL_RESIZE:" + rows + "," + cols);
+				workspaceService.onMessage(getWorkspace(), shellId, "TERMINAL_RESIZE:" + rows + "," + cols);
 			}
 
 			@Override

@@ -8,8 +8,8 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -17,21 +17,21 @@ import javax.inject.Singleton;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.server.ai.AiTask;
-import io.onedev.server.ai.tools.issue.GetIssueComments;
-import io.onedev.server.ai.tools.issue.GetIssue;
-import io.onedev.server.ai.responsehandlers.AddIssueComment;
-import io.onedev.server.ai.taskchecker.NoopTaskChecker;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.project.issue.IssuesMoved;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.EmailAddress;
@@ -48,7 +48,9 @@ import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.service.IssueAuthorizationService;
+import io.onedev.server.service.IssueCommentService;
 import io.onedev.server.service.IssueMentionService;
 import io.onedev.server.service.IssueQueryPersonalizationService;
 import io.onedev.server.service.IssueService;
@@ -59,11 +61,14 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.commenttext.MarkdownText;
 import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.VisitInfoService;
 
 @Singleton
 public class IssueNotificationManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(IssueNotificationManager.class);
+	
 	@Inject
 	private MailService mailService;
 
@@ -77,6 +82,9 @@ public class IssueNotificationManager {
 	private UserService userService;
 
 	@Inject
+	private GroupService groupService;
+
+	@Inject
 	private VisitInfoService userInfoManager;
 
 	@Inject
@@ -87,6 +95,12 @@ public class IssueNotificationManager {
 
 	@Inject
 	private IssueService issueService;
+
+	@Inject
+	private IssueCommentService issueCommentService;
+
+	@Inject
+	private WorkspaceService workspaceService;
 
 	@Inject
 	private UrlService urlService;
@@ -229,8 +243,8 @@ public class IssueNotificationManager {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(user, issue, member)) {
-						new AddIssueComment(issue.getId()).onResponse(member, "I don't know how to work as role '%s' yet".formatted(entry.getKey()));
+					} else if (isAiEntitled(issue, member) && canCreateWorkspace(member, issue)) {
+						handleFieldAssignment(member, issue, entry.getKey());
 					}
 				}
 			}
@@ -262,8 +276,8 @@ public class IssueNotificationManager {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}					
-					} else if (isAiEntitled(user, issue, member)) {
-						new AddIssueComment(issue.getId()).onResponse(member, "I don't know how to work as role '%s' yet".formatted(entry.getKey()));
+					} else if (isAiEntitled(issue, member) && canCreateWorkspace(member, issue)) {
+						handleFieldAssignment(member, issue, entry.getKey());
 					}
 				}
 			}
@@ -301,21 +315,41 @@ public class IssueNotificationManager {
 										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 										replyAddress, senderName, threadingReferences);
 							}
-						} else if (isAiEntitled(user, issue, mentionedUser)) {
-							if (event instanceof IssueOpened || event instanceof IssueCommentCreated) {
-								var systemPrompt = """
-									You are mentioned in an issue. The content mentioning you is presented as user prompt. \
-									Use existing comments as conversation context. Call relevant tools to get information \
-									about the issue if necessary""";
-								var task = new AiTask(
-									systemPrompt.formatted(mentionedUser.getName()), 
-									event.getTextBody(), 
-									List.of(
-											new GetIssue(issue.getId()),
-											new GetIssueComments(issue.getId())), 
-									new NoopTaskChecker(),
-									new AddIssueComment(issue.getId()));
-								userService.execute(mentionedUser, task);
+						} else if (isAiEntitled(issue, mentionedUser)) {
+							if ((event instanceof IssueOpened || event instanceof IssueCommentCreated)
+									&& canCreateWorkspace(mentionedUser, issue)) {
+								try {
+									String branch = issue.getBranch();									
+									var assignedFields = getAssignedFields(mentionedUser, issue);
+									String prompt;
+									if (assignedFields.isEmpty()) {
+										if (branch == null) 
+											branch = Preconditions.checkNotNull(issue.getProject().getDefaultBranch());
+										prompt = """
+											You are %s. Address %s's concern in issue %s. \
+											Examine code in workspace if necessary. \
+											Do not switch branch or modify code.\
+											""".formatted(mentionedUser.getName(), user.getName(), issue.getReference().toString(issue.getProject()));
+									} else {
+										if (branch == null) 
+											branch = issueService.ensureBranch(mentionedUser.asSubject(), issue);
+										prompt = """
+											Work on current issue as roles [%s] to address %s's concern. Submit work afterwards if code is modified.
+											""".formatted(StringUtils.join(assignedFields, ", "), user.getName());
+									}
+									if (mentionedUser.getAiSetting().getSystemPrompt() != null)
+										prompt = "Rules:\n" + mentionedUser.getAiSetting().getSystemPrompt() + "\n\nUser:" + prompt;
+
+									workspaceService.runPrompt(mentionedUser, issue.getProject(), branch, prompt);
+								} catch (Throwable t) {
+									var explicitException = ExceptionUtils.find(t, ExplicitException.class);
+									if (explicitException != null) {
+										issueCommentService.create(mentionedUser, issue, explicitException.getMessage());
+									} else {
+										logger.error("Error doing job via AI user", t);
+										issueCommentService.create(mentionedUser, issue, "Failed to do the job, check server log for details");
+									}
+								}
 							}		
 						}
 						notifiedUsers.add(mentionedUser);
@@ -371,6 +405,43 @@ public class IssueNotificationManager {
 			mailService.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
 					bccEmailAddresses, subject, htmlBody, textBody, 
 					replyAddress, senderName, threadingReferences);
+		}
+	}
+
+	private Set<String> getAssignedFields(User ai, Issue issue) {
+		var assignedFieldNames = new HashSet<String>();
+		for (var field: issue.getFields()) {
+			if (field.getType().equals(InputSpec.USER) && field.getValue().equals(ai.getName())) 
+				assignedFieldNames.add(field.getName());
+			if (field.getType().equals(InputSpec.GROUP)) {
+				var group = groupService.find(field.getValue());
+				if (group != null) {
+					for (var member: group.getMembers()) {
+						if (member.equals(ai))
+							assignedFieldNames.add(field.getName());
+					}
+				}
+			}
+		}
+		return assignedFieldNames;
+	}
+
+	private void handleFieldAssignment(User ai, Issue issue, String field) {
+		var fieldSpec = settingService.getIssueSetting().getFieldSpec(field);
+		if (fieldSpec != null) {
+			if (SecurityUtils.canWriteCode(ai.asSubject(), issue.getProject())) {
+				try {
+					var branch = issueService.ensureBranch(ai.asSubject(), issue);
+					workspaceService.runPrompt(ai, issue.getProject(), branch, "Work on current issue as role '%s'. Submit work afterwards if code is modified".formatted(field));						
+				} catch (Throwable t) {
+					logger.error("Error doing job via AI user", t);
+					issueCommentService.create(ai, issue, "Failed to do the job, check server log for details");
+				}
+			} else {
+				issueCommentService.create(ai, issue, "I need write code permission to work as '%s' in this project".formatted(field));
+			}
+		} else {
+			issueCommentService.create(ai, issue, "I don't know how to work as '%s' since it is not defined".formatted(field));
 		}
 	}
 
@@ -440,21 +511,24 @@ public class IssueNotificationManager {
 		}
 	}
 	
-	private boolean isAiEntitled(@Nullable User user, Issue issue, User ai) {
-		if (user != null && user.getId() > 0) {
-			if (user.isEntitledToAi(ai)) {
-				return true;
-			} else {
-				new AddIssueComment(issue.getId()).onResponse(user, "@%s sorry but you are not entitled to access me".formatted(user.getName()));				
-				return false;
-			}
+	private boolean canCreateWorkspace(User ai, Issue issue) {
+		if (!SecurityUtils.canCreateWorkspaces(ai.asSubject(), issue.getProject())) {
+			issueCommentService.create(ai, issue, "I need to create workspace to do the job, but I don't have permission to create that");				
+			return false;
+		}
+		if (issue.getProject().getDefaultBranch() == null) {
+			issueCommentService.create(ai, issue, "I need to create workspace to do the job, but the project doesn't have code yet");				
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isAiEntitled(Issue issue, User ai) {
+		if (issue.getProject().isEntitledToAi(ai)) {
+			return true;
 		} else {
-			if (issue.getProject().isEntitledToAi(ai)) {
-				return true;
-			} else {
-				new AddIssueComment(issue.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
-				return false;
-			}
+			issueCommentService.create(ai, issue, "Sorry but this project is not entitled to access me");				
+			return false;
 		}
 	}
 

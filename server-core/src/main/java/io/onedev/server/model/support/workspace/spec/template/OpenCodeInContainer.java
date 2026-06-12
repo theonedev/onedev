@@ -21,7 +21,6 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
         
         workspaceSpec.setName(getName());
-        workspaceSpec.setDescription("Open Code, tod CLI, and companion skills are installed and accessible");
         workspaceSpec.setRunInContainer(true);
         workspaceSpec.setImage("1dev/opencode");
         workspaceSpec.setRunAs("1001:1001");
@@ -40,6 +39,8 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
         userData.getPaths().add("/home/opencode/.local/share");
         userData.getPaths().add("/home/opencode/.local/state");
         workspaceSpec.getUserDatas().add(userData);
+
+        configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$PROMPT\"");
 
         return workspaceSpec;
     }

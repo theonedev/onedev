@@ -21,7 +21,6 @@ public class CodexInContainer extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
 
         workspaceSpec.setName(getName());
-        workspaceSpec.setDescription("Codex, tod CLI, and companion skills are installed and accessible");
         workspaceSpec.setRunInContainer(true);
         workspaceSpec.setImage("1dev/codex");
         workspaceSpec.setShell(new CustomLinuxShell());
@@ -38,6 +37,8 @@ public class CodexInContainer extends WorkspaceSpecTemplate {
         userData.getPaths().add("/home/codex/.bashrc");
         userData.getPaths().add("/home/codex/.profile");
         workspaceSpec.getUserDatas().add(userData);
+
+        configureTaskAutomation(workspaceSpec, "codex exec --dangerously-bypass-approvals-and-sandbox \"$PROMPT\"");
 
         return workspaceSpec;
     }

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.model.support.workspace.spec.TaskAutomation;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 
 @Editable
@@ -23,5 +24,11 @@ public abstract class WorkspaceSpecTemplate implements Serializable {
     }
 
 	public abstract WorkspaceSpec createWorkspaceSpec();
+
+	protected void configureTaskAutomation(WorkspaceSpec workspaceSpec, String runPromptCmd) {
+		var taskAutomation = new TaskAutomation();
+		taskAutomation.setRunTaskCmd(runPromptCmd);
+		workspaceSpec.setTaskAutomation(taskAutomation);
+	}
 
 }
