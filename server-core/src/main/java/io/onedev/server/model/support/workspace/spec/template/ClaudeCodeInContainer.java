@@ -23,7 +23,9 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
         workspaceSpec.setName(getName());
         workspaceSpec.setRunInContainer(true);
         workspaceSpec.setImage("1dev/claudecode");        
-        workspaceSpec.setShell(new PosixShell());
+        var shell = new PosixShell();
+        shell.setShell("bash");
+        workspaceSpec.setShell(shell);
         workspaceSpec.setRunAs("1001:1001");
 
         var shortcutConfig = new ShortcutConfig();

@@ -100,6 +100,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 	private CommandStep newPipBuildAndTestStep(String dependencyInstallCommand, boolean withPytest) {
 		CommandStep buildAndTest = new CommandStep();
 		var interpreter = new PosixInterpreter();
+		interpreter.setShell("bash");
 		buildAndTest.setInterpreter(interpreter);
 		buildAndTest.setName("build and test");
 		buildAndTest.setImage("python");
@@ -343,7 +344,9 @@ public class PythonJobSuggestion implements JobSuggestion {
 				CommandStep buildAndTest = new CommandStep();
 				buildAndTest.setName("build and test");
 				buildAndTest.setImage("1dev/conda:1.0.4");
-				buildAndTest.setInterpreter(new PosixInterpreter());
+				var interpreter = new PosixInterpreter();
+				interpreter.setShell("bash");
+				buildAndTest.setInterpreter(interpreter);
 				String commands = "" +
 						"set -e\n" +
 						"source /root/.bashrc\n" +
