@@ -28,7 +28,7 @@ import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetBuildVersionStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
-import io.onedev.server.buildspec.step.commandinterpreter.ShellInterpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.PosixInterpreter;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -99,7 +99,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 	
 	private CommandStep newPipBuildAndTestStep(String dependencyInstallCommand, boolean withPytest) {
 		CommandStep buildAndTest = new CommandStep();
-		var interpreter = new ShellInterpreter();
+		var interpreter = new PosixInterpreter();
 		buildAndTest.setInterpreter(interpreter);
 		buildAndTest.setName("build and test");
 		buildAndTest.setImage("python");
@@ -343,7 +343,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				CommandStep buildAndTest = new CommandStep();
 				buildAndTest.setName("build and test");
 				buildAndTest.setImage("1dev/conda:1.0.4");
-				buildAndTest.setInterpreter(new ShellInterpreter());
+				buildAndTest.setInterpreter(new PosixInterpreter());
 				String commands = "" +
 						"set -e\n" +
 						"source /root/.bashrc\n" +

@@ -1,3 +1,17 @@
+# 16.0.0
+
+### CI/CD
+
+The `Default (Shell on Linux, Batch on Windows)` command interpreter of the CI/CD `Command` step has been removed. Use the explicit `POSIX Compatible Shell` or `Windows Batch` interpreter instead.
+
+Existing build specs are migrated automatically. Commands running in a container are migrated to `POSIX Shell`. Commands running directly on an agent are inspected for Windows batch syntax; if the interpreter cannot be determined reliably, `POSIX Shell` is used. Review migrated host commands if they rely on Windows batch syntax that cannot be detected automatically.
+
+### Workspace
+
+The `Default (sh on Linux, batch on Windows)` workspace shell has been removed. Use the explicit `POSIX Compatible Shell` or `Windows Batch` workspace shell instead.
+
+Existing workspace specs are migrated automatically. Workspaces using a container image are migrated to `POSIX Shell`. Other workspaces are inspected using their setup commands; if the shell cannot be determined reliably, `POSIX Shell` is used. Review migrated host workspace specs if their setup commands rely on Windows batch syntax that cannot be detected automatically.
+
 # 15.1.0
 
 ### CI/CD

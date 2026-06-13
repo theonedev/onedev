@@ -22,7 +22,7 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.PosixInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.DockerAware;
@@ -42,7 +42,7 @@ public class CommandStep extends Step {
 	
 	private String image;
 	
-	private Interpreter interpreter = new DefaultInterpreter();
+	private Interpreter interpreter = new PosixInterpreter();
 	
 	private String runAs = "0:0";
 	

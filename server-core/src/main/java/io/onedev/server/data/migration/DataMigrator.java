@@ -8806,4 +8806,48 @@ public class DataMigrator {
 		}
 	}
 
+	private static boolean isClass(Element element, String className) {
+		return element.getName().equals(className)
+				|| className.equals(element.attributeValue("class"));
+	}
+
+	private static void setClass(Element element, String className) {
+		if (element.attribute("class") != null)
+			element.addAttribute("class", className);
+		else
+			element.setName(className);
+	}
+
+	private void migrate229(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element projectElement : dom.getRootElement().elements()) {
+					var workspaceSpecsElement = projectElement.element("workspaceSpecs");
+					if (workspaceSpecsElement != null) {
+						for (Element workspaceSpecElement : workspaceSpecsElement.elements()) {
+							var shellElement = workspaceSpecElement.element("shell");
+							var defaultShellClass = "io.onedev.server.model.support.workspace.spec.shell.DefaultShell";
+							var customLinuxShellClass = "io.onedev.server.model.support.workspace.spec.shell.CustomLinuxShell";
+							var posixShellClass = "io.onedev.server.model.support.workspace.spec.shell.PosixShell";
+							var windowsBatchShellClass = "io.onedev.server.model.support.workspace.spec.shell.WindowsBatchShell";
+							if (isClass(shellElement, customLinuxShellClass)) {
+								setClass(shellElement, posixShellClass);
+							} else if (isClass(shellElement, defaultShellClass)) {
+								boolean runInContainer = Boolean.parseBoolean(
+										workspaceSpecElement.elementTextTrim("runInContainer"));
+								boolean windowsBatch = !runInContainer
+										&& ShellCommandDetector.isWindowsBatch(shellElement.elementText("setupCommands"));
+								setClass(shellElement, windowsBatch ? windowsBatchShellClass : posixShellClass);
+								if (!windowsBatch)
+									shellElement.addElement("shell").setText("sh");
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }
