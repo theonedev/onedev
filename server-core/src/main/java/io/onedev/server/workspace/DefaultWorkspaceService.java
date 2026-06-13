@@ -1132,14 +1132,20 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							}
 
 							if (workspace.getStatus() == Workspace.Status.ACTIVE) {
-								var command = decorateRunPromptCommand(finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), prompt);
+								String fullPrompt;
+								if (ai.getAiSetting().getSystemPrompt() != null)
+									fullPrompt = "Rules:\n" + ai.getAiSetting().getSystemPrompt() + "\n\nUser:\n" + prompt;
+								else
+									fullPrompt = prompt;
+
+								var command = decorateRunPromptCommand(finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), fullPrompt);
 								var buffer = new StringBuilder();
 								openShell(workspace, "Terminal", command, base64Data -> {
 									synchronized (buffer) {
 										try {
 											buffer.append(new String(Base64.getDecoder().decode(base64Data), UTF_8));
 										} catch (IllegalArgumentException e) {
-											logger.debug("Unable to decode shell output", e);
+											logger.warn("Unable to decode shell output", e);
 											return;
 										}
 										if (buffer.indexOf(RUN_PROMPT_SUCCESS_MARKER) != -1) {
@@ -1166,7 +1172,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private String decorateRunPromptCommand(String command, String prompt) {
 		return "(\n"
-				+ "\texport PROMPT=" + shellQuote(prompt) + "\n"
+				+ "\texport TASK_PROMPT=" + shellQuote(prompt) + "\n"
 				+ command + "\n"
 				+ ")\n"
 				+ "if [ $? -eq 0 ]; then\n"

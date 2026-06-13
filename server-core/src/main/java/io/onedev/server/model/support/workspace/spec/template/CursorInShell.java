@@ -29,7 +29,7 @@ public class CursorInShell extends WorkspaceSpecTemplate {
         shortcutConfig.setCommand("agent");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
 
-        configureTaskAutomation(workspaceSpec, "agent -p --force --approve-mcps --trust \"$PROMPT\"");
+        configureTaskAutomation(workspaceSpec, "agent -p --force --approve-mcps --trust \"$TASK_PROMPT\"");
 
         return workspaceSpec;
     }

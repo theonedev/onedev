@@ -29,7 +29,7 @@ public class CodexInShell extends WorkspaceSpecTemplate {
         shortcutConfig.setCommand("codex");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
 
-        configureTaskAutomation(workspaceSpec, "codex exec --dangerously-bypass-approvals-and-sandbox \"$PROMPT\"");
+        configureTaskAutomation(workspaceSpec, "codex exec --dangerously-bypass-approvals-and-sandbox \"$TASK_PROMPT\"");
 
         return workspaceSpec;
     }

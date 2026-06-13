@@ -26,7 +26,7 @@ public class TaskAutomation implements Serializable {
 
 	@Editable(order = 100, name="Command to Run Task", description = """
 			Specify command to launch coding agent in headless mode to run assigned task in form of 
-			prompt. The prompt is stored in environment variable <code>$PROMPT</code>
+			prompt. The prompt is stored in environment variable <code>$TASK_PROMPT</code>
 			""")
 	@NotEmpty
 	public String getRunTaskCmd() {

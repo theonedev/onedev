@@ -30,7 +30,7 @@ public class OpenCodeInShell extends WorkspaceSpecTemplate {
         shortcutConfig.setCommand("opencode");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
 
-        configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$PROMPT\"");
+        configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$TASK_PROMPT\"");
 
         return workspaceSpec;
     }

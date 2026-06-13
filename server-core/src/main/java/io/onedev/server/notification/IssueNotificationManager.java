@@ -337,9 +337,6 @@ public class IssueNotificationManager {
 											Work on current issue as roles [%s] to address %s's concern. Submit work afterwards if code is modified.
 											""".formatted(StringUtils.join(assignedFields, ", "), user.getName());
 									}
-									if (mentionedUser.getAiSetting().getSystemPrompt() != null)
-										prompt = "Rules:\n" + mentionedUser.getAiSetting().getSystemPrompt() + "\n\nUser:" + prompt;
-
 									workspaceService.runPrompt(mentionedUser, issue.getProject(), branch, prompt);
 								} catch (Throwable t) {
 									var explicitException = ExceptionUtils.find(t, ExplicitException.class);
