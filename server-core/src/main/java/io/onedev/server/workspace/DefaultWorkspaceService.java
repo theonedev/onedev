@@ -1138,7 +1138,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 								else
 									fullPrompt = prompt;
 
-								var command = decorateRunPromptCommand(finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), fullPrompt);
+								var command = finalApplicableSpec.getShell().decorateRunPromptCommand(
+										finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), fullPrompt,
+										RUN_PROMPT_SUCCESS_MARKER, RUN_PROMPT_FAILURE_MARKER);
 								var buffer = new StringBuilder();
 								openShell(workspace, "Terminal", command, base64Data -> {
 									synchronized (buffer) {
@@ -1168,27 +1170,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		} else {
 			throw new ExplicitException("I need to create workspace to do the job, but no applicable workspace spec found");
 		}
-	}
-
-	private String decorateRunPromptCommand(String command, String prompt) {
-		return "(\n"
-				+ "\texport TASK_PROMPT=" + shellQuote(prompt) + "\n"
-				+ command + "\n"
-				+ ")\n"
-				+ "if [ $? -eq 0 ]; then\n"
-				+ "\t" + shellPrintMarker(RUN_PROMPT_SUCCESS_MARKER) + "\n"
-				+ "else\n"
-				+ "\t" + shellPrintMarker(RUN_PROMPT_FAILURE_MARKER) + "\n"
-				+ "fi";
-	}
-
-	private String shellQuote(String value) {
-		return "'" + value.replace("'", "'\"'\"'") + "'";
-	}
-
-	private String shellPrintMarker(String marker) {
-		var splitIndex = marker.lastIndexOf('_', marker.length() - 3) + 1;
-		return "printf '%s\\n' " + shellQuote(marker.substring(0, splitIndex)) + shellQuote(marker.substring(splitIndex));
 	}
 
 	private ClusterTask<Void> newRunWorkspaceTask(WorkspaceContext context) {
