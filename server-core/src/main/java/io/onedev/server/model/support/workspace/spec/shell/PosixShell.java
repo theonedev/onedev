@@ -44,4 +44,27 @@ public class PosixShell extends WorkspaceShell {
 		return new PosixFacility(shell);
 	}
 
+	@Override
+	public String decorateRunPromptCommand(String command, String prompt,
+										   String successMarker, String failureMarker) {
+		return "(\n"
+				+ "\texport TASK_PROMPT=" + quote(prompt) + "\n"
+				+ command + "\n"
+				+ ")\n"
+				+ "if [ $? -eq 0 ]; then\n"
+				+ "\t" + printMarker(successMarker) + "\n"
+				+ "else\n"
+				+ "\t" + printMarker(failureMarker) + "\n"
+				+ "fi";
+	}
+
+	private String quote(String value) {
+		return "'" + value.replace("'", "'\"'\"'") + "'";
+	}
+
+	private String printMarker(String marker) {
+		var splitIndex = marker.lastIndexOf('_', marker.length() - 3) + 1;
+		return "printf '%s\\n' " + quote(marker.substring(0, splitIndex)) + quote(marker.substring(splitIndex));
+	}
+
 }

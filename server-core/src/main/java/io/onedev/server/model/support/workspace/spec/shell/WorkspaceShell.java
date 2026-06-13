@@ -27,6 +27,9 @@ public abstract class WorkspaceShell implements Serializable {
 
 	public abstract ShellFacility getFacility();
 
+	public abstract String decorateRunPromptCommand(String command, String prompt,
+													String successMarker, String failureMarker);
+
 	protected static List<InputSuggestion> suggestVariables(String matchWith) {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}

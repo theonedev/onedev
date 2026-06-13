@@ -29,4 +29,28 @@ public class WindowsBatchShell extends WorkspaceShell {
 		return new WindowsBatchFacility();
 	}
 
+	@Override
+	public String decorateRunPromptCommand(String command, String prompt,
+										   String successMarker, String failureMarker) {
+		return "@setlocal DisableDelayedExpansion\n"
+				+ "@set \"TASK_PROMPT=" + escape(prompt) + "\"\n"
+				+ command + "\n"
+				+ "@if errorlevel 1 (\n"
+				+ "\t@" + printMarker(failureMarker) + "\n"
+				+ ") else (\n"
+				+ "\t@" + printMarker(successMarker) + "\n"
+				+ ")";
+	}
+
+	private String escape(String value) {
+		return value.replace("^", "^^")
+				.replace("%", "%%")
+				.replace("\"", "^\"");
+	}
+
+	private String printMarker(String marker) {
+		var splitIndex = marker.lastIndexOf('_', marker.length() - 3) + 1;
+		return "echo " + marker.substring(0, splitIndex) + "^" + marker.substring(splitIndex);
+	}
+
 }

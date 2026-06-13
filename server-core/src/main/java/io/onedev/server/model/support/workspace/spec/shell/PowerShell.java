@@ -44,4 +44,28 @@ public class PowerShell extends WorkspaceShell {
 		return new PowerShellFacility(powershell);
 	}
 
+	@Override
+	public String decorateRunPromptCommand(String command, String prompt,
+										   String successMarker, String failureMarker) {
+		return "$env:TASK_PROMPT = " + quote(prompt) + "\n"
+				+ "& {\n"
+				+ command + "\n"
+				+ "}\n"
+				+ "if ($?) {\n"
+				+ "\t" + printMarker(successMarker) + "\n"
+				+ "} else {\n"
+				+ "\t" + printMarker(failureMarker) + "\n"
+				+ "}";
+	}
+
+	private String quote(String value) {
+		return "'" + value.replace("'", "''") + "'";
+	}
+
+	private String printMarker(String marker) {
+		var splitIndex = marker.lastIndexOf('_', marker.length() - 3) + 1;
+		return "Write-Output (" + quote(marker.substring(0, splitIndex))
+				+ " + " + quote(marker.substring(splitIndex)) + ")";
+	}
+
 }
