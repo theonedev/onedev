@@ -40,7 +40,7 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
         userData.getPaths().add("/home/opencode/.local/state");
         workspaceSpec.getUserDatas().add(userData);
 
-        configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$PROMPT\"");
+        configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$TASK_PROMPT\"");
 
         return workspaceSpec;
     }

@@ -38,7 +38,7 @@ public class CodexInContainer extends WorkspaceSpecTemplate {
         userData.getPaths().add("/home/codex/.profile");
         workspaceSpec.getUserDatas().add(userData);
 
-        configureTaskAutomation(workspaceSpec, "codex exec --dangerously-bypass-approvals-and-sandbox \"$PROMPT\"");
+        configureTaskAutomation(workspaceSpec, "codex exec --dangerously-bypass-approvals-and-sandbox \"$TASK_PROMPT\"");
 
         return workspaceSpec;
     }
