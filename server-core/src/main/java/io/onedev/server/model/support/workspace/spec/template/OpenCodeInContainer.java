@@ -24,7 +24,9 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
         workspaceSpec.setRunInContainer(true);
         workspaceSpec.setImage("1dev/opencode");
         workspaceSpec.setRunAs("1001:1001");
-        workspaceSpec.setShell(new PosixShell());
+        var shell = new PosixShell();
+        shell.setShell("bash");
+        workspaceSpec.setShell(shell);
 
         var shortcutConfig = new ShortcutConfig();
         shortcutConfig.setName("OpenCode");
