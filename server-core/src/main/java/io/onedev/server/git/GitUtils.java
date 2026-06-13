@@ -158,9 +158,7 @@ public class GitUtils {
 		try (var diffFormatter = new DiffFormatter(stdout);
 			 var revWalk = new RevWalk(repository);
 			 var reader = repository.newObjectReader()) {
-			diffFormatter.setRepository(repository);
-			diffFormatter.setDetectRenames(true);
-			diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+			configureDiffFormatter(diffFormatter, repository);
 
 			var oldTreeParser = new CanonicalTreeParser();
 			if (!oldRevId.equals(ObjectId.zeroId()))
@@ -198,9 +196,7 @@ public class GitUtils {
 		try (var diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);
 			 var revWalk = new RevWalk(repository);
 			 var reader = repository.newObjectReader();) {
-			diffFormatter.setRepository(repository);
-			diffFormatter.setDetectRenames(true);
-			diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+			configureDiffFormatter(diffFormatter, repository);
 
 			var oldTreeParser = new CanonicalTreeParser();
 			if (!oldRevId.equals(ObjectId.zeroId()))
@@ -222,6 +218,13 @@ public class GitUtils {
 			throw new RuntimeException(e);
 		}
 		return diffs;
+	}
+
+	static void configureDiffFormatter(DiffFormatter diffFormatter, Repository repository) {
+		diffFormatter.setRepository(repository);
+		diffFormatter.setDetectRenames(true);
+		diffFormatter.getRenameDetector().setRenameLimit(-1);
+		diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
 	}
 
 	public static InputStream getInputStream(Repository repository, ObjectId revId, String path) {
