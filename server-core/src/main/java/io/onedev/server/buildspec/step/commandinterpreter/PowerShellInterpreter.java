@@ -1,7 +1,7 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
 import io.onedev.k8shelper.InterpreterFacade;
-import io.onedev.k8shelper.PowerShellFacade;
+import io.onedev.k8shelper.PowerShellInterpreterFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -47,7 +47,7 @@ public class PowerShellInterpreter extends Interpreter {
 	
 	@Override
 	public InterpreterFacade getFacade() {
-		return new PowerShellFacade(getCommands(), getPowershell());
+		return new PowerShellInterpreterFacade(getCommands(), getPowershell());
 	}
 
 }

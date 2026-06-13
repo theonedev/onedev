@@ -30,7 +30,7 @@ import io.onedev.server.annotation.Path;
 import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.PosixInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.DockerAware;
@@ -138,7 +138,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 	@Override
 	public Interpreter getInterpreter() {
-		return new DefaultInterpreter();
+		return new PosixInterpreter();
 	}
 
 	@Override

@@ -51,6 +51,7 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.buildspec.step.StepTemplate;
 import io.onedev.server.buildspec.step.UseTemplateStep;
+import io.onedev.server.data.migration.ShellCommandDetector;
 import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.data.migration.XmlBuildSpecMigrator;
 import io.onedev.server.job.JobAuthorizationContext;
@@ -2665,6 +2666,61 @@ public class BuildSpec implements Serializable, Validatable {
 				MappingNode stepNode = (MappingNode) stepsNodeItem;
 				if ("RunContainerStep".equals(getStepType(stepNode)))
 					migrate47_setDefaultRunAs(stepNode);
+			}
+		});
+	}
+
+	private static ScalarNode getScalarProperty(MappingNode node, String propertyName) {
+		for (var tuple : node.getValue()) {
+			if (((ScalarNode) tuple.getKeyNode()).getValue().equals(propertyName)
+					&& tuple.getValueNode() instanceof ScalarNode) {
+				return (ScalarNode) tuple.getValueNode();
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate50(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNodeItem : stepsNode.getValue()) {
+				var stepNode = (MappingNode) stepNodeItem;
+				if (!"CommandStep".equals(getStepType(stepNode)))
+					continue;
+				MappingNode interpreterNode = null;
+				for (var tuple : stepNode.getValue()) {
+					if (((ScalarNode) tuple.getKeyNode()).getValue().equals("interpreter")) {
+						interpreterNode = (MappingNode) tuple.getValueNode();
+						break;
+					}
+				}
+				if (interpreterNode == null)
+					continue;
+				var typeNode = getScalarProperty(interpreterNode, "type");
+				if (typeNode == null)
+					continue;
+				if (typeNode.getValue().equals("ShellInterpreter")) {
+					typeNode.setValue("PosixInterpreter");
+				} else if (typeNode.getValue().equals("DefaultInterpreter")) {
+					boolean runInContainer = true;
+					var runInContainerNode = getScalarProperty(stepNode, "runInContainer");
+					if (runInContainerNode != null)
+						runInContainer = Boolean.parseBoolean(runInContainerNode.getValue());
+					var imageNode = getScalarProperty(stepNode, "image");
+					boolean containerImageUsed = runInContainer
+							&& imageNode != null
+							&& StringUtils.isNotBlank(imageNode.getValue());
+					var commandsNode = getScalarProperty(interpreterNode, "commands");
+					boolean windowsBatch = !containerImageUsed
+							&& commandsNode != null
+							&& ShellCommandDetector.isWindowsBatch(commandsNode.getValue());
+					typeNode.setValue(windowsBatch ? "WindowsBatchInterpreter" : "PosixInterpreter");
+					if (!windowsBatch) {
+						interpreterNode.getValue().add(new NodeTuple(
+								new ScalarNode(Tag.STR, "shell"),
+								new ScalarNode(Tag.STR, "sh")));
+					}
+				}
 			}
 		});
 	}

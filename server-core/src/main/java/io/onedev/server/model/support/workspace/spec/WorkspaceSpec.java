@@ -26,7 +26,7 @@ import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
-import io.onedev.server.model.support.workspace.spec.shell.DefaultShell;
+import io.onedev.server.model.support.workspace.spec.shell.PosixShell;
 import io.onedev.server.model.support.workspace.spec.shell.WorkspaceShell;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.usage.Usage;
@@ -57,7 +57,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	private String image;
 
-	private WorkspaceShell shell = new DefaultShell();
+	private WorkspaceShell shell = new PosixShell();
 
 	private List<EnvVar> envVars = new ArrayList<>();
 

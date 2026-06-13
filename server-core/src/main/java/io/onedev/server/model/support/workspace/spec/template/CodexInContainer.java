@@ -7,7 +7,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.workspace.spec.ShortcutConfig;
 import io.onedev.server.model.support.workspace.spec.UserData;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
-import io.onedev.server.model.support.workspace.spec.shell.CustomLinuxShell;
+import io.onedev.server.model.support.workspace.spec.shell.PosixShell;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=300, name="nt:Codex in Container", description="""
@@ -23,7 +23,7 @@ public class CodexInContainer extends WorkspaceSpecTemplate {
         workspaceSpec.setName(getName());
         workspaceSpec.setRunInContainer(true);
         workspaceSpec.setImage("1dev/codex");
-        workspaceSpec.setShell(new CustomLinuxShell());
+        workspaceSpec.setShell(new PosixShell());
         workspaceSpec.setRunAs("1001:1001");
 
         var shortcutConfig = new ShortcutConfig();

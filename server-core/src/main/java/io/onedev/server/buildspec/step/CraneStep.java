@@ -19,7 +19,7 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.PosixInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.DockerAware;
@@ -85,7 +85,7 @@ public abstract class CraneStep extends CommandStep {
 
 	@Override
 	public Interpreter getInterpreter() {
-		return new DefaultInterpreter();
+		return new PosixInterpreter();
 	}
 
 	@Override

@@ -1,21 +1,21 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.k8shelper.InterpreterFacade;
-import io.onedev.k8shelper.ShellFacade;
+import io.onedev.k8shelper.PosixInterpreterFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 
-import javax.validation.constraints.NotEmpty;
-
-@Editable(order=200, name="Custom Linux Shell")
-public class ShellInterpreter extends Interpreter {
+@Editable(order=100, name="POSIX Compatible Shell")
+public class PosixInterpreter extends Interpreter {
 
 	private static final long serialVersionUID = 1L;
-	
-	private String shell = "bash";
 
-	@Editable(order=100, name="Shell Executable", description="Specify shell executable to be used")
+	private String shell = "sh";
+
+	@Editable(order=100, name="Shell Executable", description="Specify POSIX shell executable to be used")
 	@Interpolative(variableSuggester = "suggestVariables")
 	@NotEmpty
 	public String getShell() {
@@ -40,10 +40,10 @@ public class ShellInterpreter extends Interpreter {
 	public void setCommands(String commands) {
 		super.setCommands(commands);
 	}
-	
+
 	@Override
 	public InterpreterFacade getFacade() {
-		return new ShellFacade(getCommands(), getShell());
+		return new PosixInterpreterFacade(getCommands(), getShell());
 	}
 
 }

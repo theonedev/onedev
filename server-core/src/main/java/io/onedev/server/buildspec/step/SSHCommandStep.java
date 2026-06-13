@@ -15,7 +15,7 @@ import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.PosixInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -138,7 +138,7 @@ public class SSHCommandStep extends CommandStep {
 
 	@Override
 	public Interpreter getInterpreter() {
-		return new DefaultInterpreter() {
+		return new PosixInterpreter() {
 			@Override
 			public String getCommands() {
 				var commandsBuilder = new StringBuilder();
