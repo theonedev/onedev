@@ -50,15 +50,9 @@ public class PowerShell extends WorkspaceShell {
 		return "$env:TASK_PROMPT = " + quote(prompt) + "\n"
 				+ "$taskSucceeded = $false\n"
 				+ CHECK_TOD_VERSION_COMMAND + "\n"
-				+ "if ($?) {\n"
-				+ command + "\n"
-				+ "\t$taskSucceeded = $?\n"
-				+ "}\n"
-				+ "if ($taskSucceeded) {\n"
-				+ "\t" + printMarker(successMarker) + "\n"
-				+ "} else {\n"
-				+ "\t" + printMarker(failureMarker) + "\n"
-				+ "}";
+				+ "if ($?) { " + command + "; $taskSucceeded = $? }\n"
+				+ "if ($taskSucceeded) { " + printMarker(successMarker)
+				+ " } else { " + printMarker(failureMarker) + " }";
 	}
 
 	private String quote(String value) {

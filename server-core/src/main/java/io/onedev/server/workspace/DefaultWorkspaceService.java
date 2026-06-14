@@ -1140,7 +1140,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 									fullPrompt = prompt;
 								
 								var command = finalApplicableSpec.getShell().decorateRunPromptCommand(
-										finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), fullPrompt,
+										finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), fullPrompt.trim(),
 										RUN_PROMPT_SUCCESS_MARKER, RUN_PROMPT_FAILURE_MARKER);
 								var buffer = new StringBuilder();
 								var commandCompleted = new AtomicBoolean(false);

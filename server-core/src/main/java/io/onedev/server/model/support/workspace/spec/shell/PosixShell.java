@@ -47,17 +47,10 @@ public class PosixShell extends WorkspaceShell {
 	@Override
 	public String decorateRunPromptCommand(String command, String prompt,
 										   String successMarker, String failureMarker) {
-		return "(\n"
-				+ "\texport TASK_PROMPT=" + quote(prompt) + "\n"
-				+ "\t" + CHECK_TOD_VERSION_COMMAND + " && (\n"
-				+ command + "\n"
-				+ "\t)\n"
-				+ ")\n"
-				+ "if [ $? -eq 0 ]; then\n"
-				+ "\t" + printMarker(successMarker) + "\n"
-				+ "else\n"
-				+ "\t" + printMarker(failureMarker) + "\n"
-				+ "fi";
+		return "export TASK_PROMPT=" + quote(prompt) + "\n"
+				+ CHECK_TOD_VERSION_COMMAND + " && ( " + command + " )\n"
+				+ "if [ $? -eq 0 ]; then " + printMarker(successMarker)
+				+ "; else " + printMarker(failureMarker) + "; fi";
 	}
 
 	private String quote(String value) {
