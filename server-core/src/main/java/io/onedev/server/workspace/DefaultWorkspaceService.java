@@ -1102,7 +1102,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public void runPrompt(User ai, Project project, String branch, String prompt) {
+	public void runPrompt(User ai, Project project, String branch, String prompt, TaskFailedCallback taskFailedCallback) {
 		WorkspaceSpec applicableSpec = null;
 		for (var spec : project.getWorkspaceSpecs()) {
 			if (spec.getTaskAutomation() != null) {
@@ -1126,37 +1126,47 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						}
 						if (sessionService.call(() -> {
 							var workspace = get(workspaceId);
-							if (workspace == null) {
+							if (workspace == null) {								
 								logger.warn("AI task ignored as task workspace no longer exists");
 								return true;
 							}
 
+							var workspaceReference = workspace.getReference().toString(project);
 							if (workspace.getStatus() == Workspace.Status.ACTIVE) {
 								String fullPrompt;
 								if (ai.getAiSetting().getSystemPrompt() != null)
 									fullPrompt = "Rules:\n" + ai.getAiSetting().getSystemPrompt() + "\n\nUser:\n" + prompt;
 								else
 									fullPrompt = prompt;
-
+								
 								var command = finalApplicableSpec.getShell().decorateRunPromptCommand(
 										finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), fullPrompt,
 										RUN_PROMPT_SUCCESS_MARKER, RUN_PROMPT_FAILURE_MARKER);
 								var buffer = new StringBuilder();
+								var commandCompleted = new AtomicBoolean(false);
 								openShell(workspace, "Terminal", command, base64Data -> {
-									synchronized (buffer) {
+									if (!commandCompleted.get()) synchronized (buffer) {
 										try {
 											buffer.append(new String(Base64.getDecoder().decode(base64Data), UTF_8));
 										} catch (IllegalArgumentException e) {
 											logger.warn("Unable to decode shell output", e);
 											return;
 										}
-										if (buffer.indexOf(RUN_PROMPT_SUCCESS_MARKER) != -1) {
-											delete(load(workspaceId));
+										if (buffer.indexOf(RUN_PROMPT_SUCCESS_MARKER) != -1) {											
+											commandCompleted.set(true);
+											if (finalApplicableSpec.getTaskAutomation().isDeleteWorkspaceIfSucceeded()) 
+												delete(load(workspaceId));
+										} else if (buffer.indexOf(RUN_PROMPT_FAILURE_MARKER) != -1) {
+											commandCompleted.set(true);
+											taskFailedCallback.onTaskFailed(workspaceReference);
 										} else if (buffer.length() > 1024) {
 											buffer.delete(0, buffer.length() - 1024);
 										}
 									}
 								});		
+								return true;
+							} else if (workspace.getStatus() == Workspace.Status.INACTIVE) {
+								taskFailedCallback.onTaskFailed(workspaceReference);
 								return true;
 							} else {
 								return false;

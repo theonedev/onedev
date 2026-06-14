@@ -3,6 +3,8 @@ package io.onedev.server.notification;
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static io.onedev.server.notification.NotificationUtils.isNotified;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +25,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.ai.AiTask;
 import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.ToolUtils;
@@ -79,7 +82,7 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.xodus.VisitInfoService;
 
 @Singleton
-public class PullRequestNotificationManager {
+public class PullRequestNotificationManager implements Serializable {
 
 	private static final String AI_REVIEW_DECISION_TOOLS = """
 			one of these tools, and call it only once: `{0}` if you are satisfied with the change, or `{1}` if you \
@@ -512,6 +515,10 @@ public class PullRequestNotificationManager {
 			new AddPullRequestComment(request.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
 			return false;
 		}
+	}
+
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(PullRequestNotificationManager.class);
 	}
 
 } 

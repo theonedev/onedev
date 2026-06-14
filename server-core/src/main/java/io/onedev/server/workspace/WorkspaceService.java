@@ -68,7 +68,6 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	void onMessage(Workspace workspace, String shellId, String message);
 
-	
 	@Nullable
 	WorkspaceContext getWorkspaceContext(String token, boolean mustExist);
 
@@ -77,6 +76,6 @@ public interface WorkspaceService extends EntityService<Workspace> {
 	@Nullable
 	FileData readFileData(Workspace workspace, String path);
 
-	void runPrompt(User ai, Project project, String branch, String prompt);
+	void runPrompt(User ai, Project project, String branch, String prompt, TaskFailedCallback taskFailedCallback);
 	
 }

@@ -1,40 +1,49 @@
 package io.onedev.server.notification;
 
+import static io.onedev.server.notification.NotificationUtils.getEmailBody;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.shiro.authz.Permission;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
+
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UrlService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.mail.MailService;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.BuildQueryPersonalization;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
-
-import org.apache.shiro.authz.Permission;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import static io.onedev.server.notification.NotificationUtils.getEmailBody;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.service.UserService;
 
 @Singleton
-public class BuildNotificationManager {
+public class BuildNotificationManager implements Serializable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BuildNotificationManager.class);
 
@@ -208,6 +217,10 @@ public class BuildNotificationManager {
 			
 			notify(event, notifyEmails);
 		}				
+	}
+
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(BuildNotificationManager.class);
 	}
 
 }

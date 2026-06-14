@@ -1,3 +1,8 @@
 <wicket:extend>
 	<div wicket:id="terminal" class="d-flex flex-column flex-grow-1 p-2 bg-black"></div>
+	<wicket:fragment wicket:id="optionsFrag">
+		<span class="px-3" t:data-tippy-content="To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.">
+			<wicket:svg href="bulb" class="icon"/>
+		</span>
+	</wicket:fragment>
 </wicket:extend>

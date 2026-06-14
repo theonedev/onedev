@@ -6,6 +6,7 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.model.Workspace;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceTab;
+import io.onedev.server.web.util.WicketUtils;
 
 public class TerminalTab extends WorkspaceTab {
 
@@ -19,6 +20,11 @@ public class TerminalTab extends WorkspaceTab {
 	@Override
 	public Component render(String componentId) {
 		return new TerminalTabHead(componentId, this, shellId);
+	}
+
+	@Override
+	protected Component renderOptions(String componentId) {
+		return ((WorkspaceTerminalPage) WicketUtils.getPage()).renderOptions(componentId);
 	}
 
 	@Override

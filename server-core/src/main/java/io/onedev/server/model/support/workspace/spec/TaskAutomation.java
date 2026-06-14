@@ -24,6 +24,8 @@ public class TaskAutomation implements Serializable {
 
 	private List<String> applicableAis = new ArrayList<>();
 
+	private boolean deleteWorkspaceIfSucceeded = true;
+
 	@Editable(order = 100, name="Command to Run Task", description = """
 			Specify command to launch coding agent in headless mode to run assigned task in form of 
 			prompt. The prompt is stored in environment variable <code>$TASK_PROMPT</code>
@@ -49,6 +51,18 @@ public class TaskAutomation implements Serializable {
 		this.applicableAis = applicableAis;
 	}
 
+	@Editable(order = 300, description = """
+			Whether or not to delete workspace if task command completes successfully. Uncheck this if 
+			you want to check how the prompt is processed by coding agent after task command completes 
+			successfully. Note that workspace will not be deleted automatically if task command fails.""")
+	public boolean isDeleteWorkspaceIfSucceeded() {
+		return deleteWorkspaceIfSucceeded;
+	}
+
+	public void setDeleteWorkspaceIfSucceeded(boolean deleteWorkspaceIfSucceeded) {
+		this.deleteWorkspaceIfSucceeded = deleteWorkspaceIfSucceeded;
+	}
+	
 	@SuppressWarnings("unused")
 	private static List<User> getAiUsers() {
 		var cache = OneDev.getInstance(UserService.class).cloneCache();

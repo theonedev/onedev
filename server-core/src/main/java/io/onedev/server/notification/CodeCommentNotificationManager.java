@@ -3,6 +3,8 @@ package io.onedev.server.notification;
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static java.util.stream.Collectors.toSet;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +15,7 @@ import javax.inject.Singleton;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.AiTask;
 import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
@@ -34,7 +37,7 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.util.commenttext.MarkdownText;
 
 @Singleton
-public class CodeCommentNotificationManager {
+public class CodeCommentNotificationManager implements Serializable {
 
 	@Inject
 	private MailService mailService;
@@ -127,6 +130,10 @@ public class CodeCommentNotificationManager {
 			new AddCodeCommentReply(comment.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
 			return false;
 		}
+	}
+
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(CodeCommentNotificationManager.class);
 	}
 
 }

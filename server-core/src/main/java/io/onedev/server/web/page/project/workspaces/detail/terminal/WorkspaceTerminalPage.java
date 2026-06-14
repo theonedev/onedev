@@ -2,8 +2,10 @@ package io.onedev.server.web.page.project.workspaces.detail.terminal;
 
 import javax.inject.Inject;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -74,6 +76,10 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 			}
 
 		});
+	}
+
+	public Component renderOptions(String componentId) {
+		return new Fragment(componentId, "optionsFrag", this);
 	}
 	
 	public static PageParameters paramsOf(Workspace workspace, String shellId) {
