@@ -3,6 +3,11 @@ package io.onedev.server.plugin.provisioner.servershell;
 import static io.onedev.agent.AgentUtils.testCommands;
 import static io.onedev.agent.workspace.WorkspaceUtils.setupShellProvisioned;
 import static io.onedev.agent.workspace.WorkspaceUtils.testTmuxAvailability;
+import static io.onedev.k8shelper.WorkspaceHelper.buildEnvVars;
+import static io.onedev.server.workspace.ServerProvisionerUtils.getWorkDir;
+import static io.onedev.server.workspace.ServerProvisionerUtils.getWorkspaceDir;
+import static io.onedev.server.workspace.ServerProvisionerUtils.persistServerAddress;
+import static io.onedev.server.workspace.ServerProvisionerUtils.setupRepository;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.ByteArrayOutputStream;
@@ -30,7 +35,6 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.k8shelper.CacheProvisioner;
-import io.onedev.k8shelper.WorkspaceHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
@@ -40,7 +44,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.model.support.workspace.spec.EnvVar;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
@@ -137,18 +140,21 @@ public class ServerShellProvisioner extends WorkspaceProvisioner implements Test
 
 		var serverAddress = getClusterService().getLocalServerAddress();
 		workspaceLogger.log("Provisioning workspace on server '" + serverAddress + "'...");
-		ServerProvisionerUtils.persistServerAddress(context.getWorkspaceId(), serverAddress);		
+		persistServerAddress(context.getWorkspaceId(), serverAddress);		
 		
-		var workspaceDir = ServerProvisionerUtils.getWorkspaceDir(context);
+		var workspaceDir = getWorkspaceDir(context);
 		FileUtils.createDir(workspaceDir);
-		ServerProvisionerUtils.setupRepository(context, workspaceDir.getAbsolutePath(), workspaceLogger);
+		setupRepository(context, workspaceDir.getAbsolutePath(), workspaceLogger);
 
-		var workDir = ServerProvisionerUtils.getWorkDir(context);
-		var envVars = WorkspaceHelper.buildEnvVars(
+		var trustCertsFile = new File(workspaceDir, "trust-certs.pem");
+
+		var workDir = getWorkDir(context);
+		var envVars = buildEnvVars(
 				context.getSpec().getEnvVars().stream()
 						.collect(toMap(EnvVar::getName, it -> it.isSecret() ? it.getSecretValue() : it.getValue())),
-				OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl(),
-				context.getToken(), workDir.getAbsolutePath());
+				context.getServerUrl(), context.getToken(), 
+				trustCertsFile.exists()? trustCertsFile.getAbsolutePath(): null,
+				workDir.getAbsolutePath());
 
 		workspaceLogger.log("Setting up cache...");
 

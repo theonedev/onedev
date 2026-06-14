@@ -12,6 +12,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.rest.JerseyConfigurator;
+import io.onedev.server.rest.resource.WorkerResource;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -59,7 +60,7 @@ public class KubernetesModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(ResourceConfig resourceConfig) {
-				resourceConfig.register(KubernetesResource.class);
+				resourceConfig.register(WorkerResource.class);
 			}
 			
 		});

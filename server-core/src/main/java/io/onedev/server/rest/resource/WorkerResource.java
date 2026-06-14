@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.executor.kubernetes;
+package io.onedev.server.rest.resource;
 
 import static io.onedev.k8shelper.KubernetesHelper.readInt;
 import static io.onedev.k8shelper.KubernetesHelper.readString;
@@ -65,10 +65,10 @@ import io.onedev.server.workspace.WorkspaceContext;
 import io.onedev.server.workspace.WorkspaceService;
 
 @Api(internal = true)
-@Path("/k8s")
+@Path("/worker")
 @Consumes(MediaType.WILDCARD)
 @Singleton
-public class KubernetesResource {
+public class WorkerResource {
 
 	@Inject
 	private JobService jobService;

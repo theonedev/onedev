@@ -9,6 +9,8 @@ import static io.onedev.agent.workspace.WorkspaceUtils.getPublishedPorts;
 import static io.onedev.agent.workspace.WorkspaceUtils.upload;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static io.onedev.k8shelper.WorkspaceHelper.CONTAINER_READY_FILE;
+import static io.onedev.k8shelper.WorkspaceHelper.buildEnvVars;
+import static io.onedev.server.workspace.ServerProvisionerUtils.setupRepository;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -64,7 +66,6 @@ import io.onedev.server.model.support.administration.workspaceprovisioner.Worksp
 import io.onedev.server.model.support.workspace.spec.ConfigFile;
 import io.onedev.server.model.support.workspace.spec.EnvVar;
 import io.onedev.server.model.support.workspace.spec.UserData;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
@@ -306,13 +307,17 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 		var infoLogger = AgentUtils.newInfoLogger(workspaceLogger);
 		var warningLogger = AgentUtils.newWarningLogger(workspaceLogger);
 
-		ServerProvisionerUtils.setupRepository(context, WORKSPACE_PATH, workspaceLogger);
+		setupRepository(context, WORKSPACE_PATH, workspaceLogger);
 
-		var envVars = WorkspaceHelper.buildEnvVars(
+		var trustCertsFile = new File(workspaceDir, "trust-certs.pem");
+
+		var envVars = buildEnvVars(
 				context.getSpec().getEnvVars().stream()
 						.collect(toMap(EnvVar::getName, it -> it.isSecret() ? it.getSecretValue() : it.getValue())),
-				OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl(),
-				context.getToken(), WORKSPACE_PATH + "/work");
+				context.getServerUrl(), 
+				context.getToken(), 
+				trustCertsFile.exists()? WORKSPACE_PATH + "/trust-certs.pem": null,
+				WORKSPACE_PATH + "/work");
 		
 		var cacheProvisioners = new ArrayList<CacheProvisioner>();
 		var cacheConfigIndex = 1;

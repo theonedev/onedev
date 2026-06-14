@@ -28,8 +28,9 @@ public class TaskAutomation implements Serializable {
 
 	@Editable(order = 100, name="Command to Run Task", description = """
 			Specify command to launch coding agent in headless mode to run assigned task in form of 
-			prompt. The prompt is stored in environment variable <code>$TASK_PROMPT</code>
-			""")
+			prompt. The prompt is stored in environment variable <code>$TASK_PROMPT</code>.<br>
+			<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task
+			automation work. OneDev workspace images ship these components out of the box""")
 	@NotEmpty
 	public String getRunTaskCmd() {
 		return runTaskCmd;

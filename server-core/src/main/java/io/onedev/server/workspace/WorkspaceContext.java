@@ -52,10 +52,12 @@ public class WorkspaceContext implements Serializable {
 
 	private final String commitHash;
 
+	private final String serverUrl;
+
 	public WorkspaceContext(WorkspaceSpec spec, WorkspaceProvisioner provisioner, String token, 
 				Long projectId, String projectPath, String projectGitDir, Long workspaceId, 
 				Long workspaceNumber, Long userId, String userName, String userEmail, 
-				CloneInfo cloneInfo, String commitHash, @Nullable String branch) {
+				CloneInfo cloneInfo, String commitHash, @Nullable String branch, String serverUrl) {
 		this.spec = spec;
 		this.provisioner = provisioner;
 		this.token = token;
@@ -70,6 +72,7 @@ public class WorkspaceContext implements Serializable {
 		this.cloneInfo = cloneInfo;
 		this.commitHash = commitHash;
 		this.branch = branch;
+		this.serverUrl = serverUrl;
 	}
 	
 	public WorkspaceSpec getSpec() {
@@ -127,6 +130,10 @@ public class WorkspaceContext implements Serializable {
 
 	public String getCommitHash() {
 		return commitHash;
+	}
+
+	public String getServerUrl() {
+		return serverUrl;
 	}
 
 	public Map<String, String> getEnvVars() {

@@ -792,7 +792,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 			var context = new WorkspaceContext(spec, provisioner, token, projectId, projectPath, projectGitDir, 
 					workspaceId, workspaceNumber, workspace.getUser().getId(), workspace.getUser().getDisplayName(), 
-					gitEmail.getValue(), cloneInfo, workspace.getCommitHash(), workspace.getBranch());
+					gitEmail.getValue(), cloneInfo, workspace.getCommitHash(), workspace.getBranch(), 
+					settingService.getSystemSetting().getServerUrl());
 
 			var pinnedServerAddress = workspace.getServerAddress();
 			var pinnedAgentId = workspace.getAgent() != null ? workspace.getAgent().getId() : null;
