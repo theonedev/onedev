@@ -48,10 +48,13 @@ public class PowerShell extends WorkspaceShell {
 	public String decorateRunPromptCommand(String command, String prompt,
 										   String successMarker, String failureMarker) {
 		return "$env:TASK_PROMPT = " + quote(prompt) + "\n"
-				+ "& {\n"
-				+ command + "\n"
-				+ "}\n"
+				+ "$taskSucceeded = $false\n"
+				+ CHECK_TOD_VERSION_COMMAND + "\n"
 				+ "if ($?) {\n"
+				+ command + "\n"
+				+ "\t$taskSucceeded = $?\n"
+				+ "}\n"
+				+ "if ($taskSucceeded) {\n"
 				+ "\t" + printMarker(successMarker) + "\n"
 				+ "} else {\n"
 				+ "\t" + printMarker(failureMarker) + "\n"

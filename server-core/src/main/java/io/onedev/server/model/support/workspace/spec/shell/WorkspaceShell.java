@@ -14,6 +14,8 @@ import io.onedev.server.web.util.SuggestionUtils;
 public abstract class WorkspaceShell implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	protected static final String CHECK_TOD_VERSION_COMMAND = "tod check-version";
 	
 	private String setupCommands;
 	

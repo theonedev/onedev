@@ -34,7 +34,9 @@ public class WindowsBatchShell extends WorkspaceShell {
 										   String successMarker, String failureMarker) {
 		return "@setlocal DisableDelayedExpansion\n"
 				+ "@set \"TASK_PROMPT=" + escape(prompt) + "\"\n"
+				+ "@" + CHECK_TOD_VERSION_COMMAND + " && (\n"
 				+ command + "\n"
+				+ ")\n"
 				+ "@if errorlevel 1 (\n"
 				+ "\t@" + printMarker(failureMarker) + "\n"
 				+ ") else (\n"

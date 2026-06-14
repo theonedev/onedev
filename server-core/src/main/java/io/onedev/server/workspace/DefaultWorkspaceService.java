@@ -757,8 +757,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			} else {
 				throw new ExplicitException("""
 					No applicable provisioner discovered for current workspace. \
-					Please add a shell provisioner in menu 'Administration / Workspace Provisioners' \
-					with applicable projects configured properly""");
+					Please add a shell provisioner in menu 'Administration / Workspace Provisioners'""");
 			}
 		}
 	}
@@ -1159,7 +1158,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 												delete(load(workspaceId));
 										} else if (buffer.indexOf(RUN_PROMPT_FAILURE_MARKER) != -1) {
 											commandCompleted.set(true);
-											taskFailedCallback.onTaskFailed(workspaceReference);
+											sessionService.run(() -> {
+												taskFailedCallback.onTaskFailed(workspaceReference);
+											});
 										} else if (buffer.length() > 1024) {
 											buffer.delete(0, buffer.length() - 1024);
 										}
@@ -1167,7 +1168,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 								});		
 								return true;
 							} else if (workspace.getStatus() == Workspace.Status.INACTIVE) {
-								taskFailedCallback.onTaskFailed(workspaceReference);
+								sessionService.run(() -> {
+									taskFailedCallback.onTaskFailed(workspaceReference);
+								});
 								return true;
 							} else {
 								return false;

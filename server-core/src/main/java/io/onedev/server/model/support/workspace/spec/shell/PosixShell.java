@@ -49,7 +49,9 @@ public class PosixShell extends WorkspaceShell {
 										   String successMarker, String failureMarker) {
 		return "(\n"
 				+ "\texport TASK_PROMPT=" + quote(prompt) + "\n"
+				+ "\t" + CHECK_TOD_VERSION_COMMAND + " && (\n"
 				+ command + "\n"
+				+ "\t)\n"
 				+ ")\n"
 				+ "if [ $? -eq 0 ]; then\n"
 				+ "\t" + printMarker(successMarker) + "\n"
