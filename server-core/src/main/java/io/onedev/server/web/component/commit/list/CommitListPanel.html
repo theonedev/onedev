@@ -45,15 +45,15 @@
 					<a wicket:id="compare" t:data-tippy-content="Compare with base revision" class="mr-2"><wicket:svg href="diff" class="icon"></wicket:svg></a>
 					</wicket:enclosure>
 					<a wicket:id="signature" class="mr-2"></a>
-					<a wicket:id="buildStatus" class="build-status mr-2"></a>
-					<a wicket:id="workspaces" class="mr-2 text-nowrap" t:data-tippy-content="Workspaces at this commit"><wicket:svg href="workspace" class="icon"/> <wicket:svg href="arrow" class="icon rotate-90"/></a>	
 				</div>
 				<div class="labels">
 					<wicket:container wicket:id="labels">
 						<span wicket:id="label" class="badge badge-info badge-sm mr-2"></span>
 					</wicket:container>
 				</div>
-			</div>
+				<a wicket:id="buildStatus" class="build-status mr-2"></a>
+				<a wicket:id="workspaces" class="mr-2 text-nowrap workspaces" t:data-tippy-content="Workspaces at this commit"><wicket:svg href="workspace" class="icon"/> <wicket:svg href="arrow" class="icon rotate-90"/></a>	
+		</div>
 			<div wicket:id="contribution"></div>
 		</div>
 		<div class="btn-group hash d-none d-xl-flex ml-auto actions">

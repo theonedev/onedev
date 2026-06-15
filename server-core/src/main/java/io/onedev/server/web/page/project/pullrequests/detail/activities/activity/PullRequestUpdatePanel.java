@@ -8,18 +8,19 @@ import java.util.List;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -33,7 +34,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.PersonIdentPanel;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 
 class PullRequestUpdatePanel extends Panel {
 
@@ -106,12 +107,12 @@ class PullRequestUpdatePanel extends Panel {
 				});
 				
 				Project project = getUpdate().getRequest().getTarget().getProject();
-				CommitDetailPage.State commitState = new CommitDetailPage.State();
-				commitState.revision = commit.name();
-				PageParameters params = CommitDetailPage.paramsOf(project, commitState);
-				Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
-				item.add(hashLink);
+				BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TREE.getBits());
+				ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
+				PageParameters params = ProjectBlobPage.paramsOf(project, browseState);
+				var hashLink = new ViewStateAwarePageLink<Void>("hashLink", ProjectBlobPage.class, params);
 				hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
+				item.add(hashLink);
 				item.add(new CopyToClipboardLink("copyHash", Model.of(commit.name())));
 			}
 			

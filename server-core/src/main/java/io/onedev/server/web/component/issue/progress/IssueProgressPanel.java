@@ -1,19 +1,11 @@
 package io.onedev.server.web.component.issue.progress;
 
-import com.google.common.collect.Sets;
-import io.onedev.server.OneDev;
-import io.onedev.server.service.StopwatchService;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Stopwatch;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.CompletionRateBehavior;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.util.WicketUtils;
+import java.util.Collection;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -22,7 +14,18 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import java.util.Collection;
+import com.google.common.collect.Sets;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Stopwatch;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.StopwatchService;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.CompletionRateBehavior;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.util.WicketUtils;
 
 public abstract class IssueProgressPanel extends Panel {
 
@@ -131,6 +134,13 @@ public abstract class IssueProgressPanel extends Panel {
 
 	private StopwatchService getStopWatchManager() {
 		return OneDev.getInstance(StopwatchService.class);
+	}
+
+	@Override
+	protected void onComponentTag(ComponentTag tag) {
+		super.onComponentTag(tag);
+		if (getIssue().getTotalEstimatedTime() == 0 && getStopWatch() == null)
+			tag.append("class", "no-estimate", " ");
 	}
 
 	@Override

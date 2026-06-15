@@ -753,6 +753,13 @@ public class ProjectBranchesPage extends ProjectPage {
 				PAGE_SIZE, pagingHistorySupport) {
 			
 			@Override
+			protected Item<RefFacade> newRowItem(String id, int index, IModel<RefFacade> model) {
+				Item<RefFacade> item = super.newRowItem(id, index, model);
+				item.add(AttributeAppender.append("class", "branch-item"));
+				return item;
+			}
+			
+			@Override
 			protected void onBeforeRender() {
 				buildService.queryStatus(getProject(), getCommitIdsToDisplay());
 				getProject().cacheCommitStatuses(buildService.queryStatus(getProject(), getCommitIdsToDisplay()));

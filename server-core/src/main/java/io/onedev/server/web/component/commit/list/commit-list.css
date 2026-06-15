@@ -44,6 +44,13 @@
 		padding-left: 0.6rem;
 		padding-right: 0.6rem;
 	}
+	.commit-list li.commit .workspaces, .commit-list li.commit .no-builds {
+		display: none;
+	}
+	.commit-list li.commit:hover .workspaces, 
+	.commit-list li.commit:hover .no-builds {
+		display: inline-block;
+	}
 	.commit-list li.commit:hover, .commit-list li.commit.hover {
 		background: var(--light);
 	}

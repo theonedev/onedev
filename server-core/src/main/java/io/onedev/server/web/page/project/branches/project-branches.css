@@ -64,6 +64,15 @@
 		padding-right: 0;
 	}
 }
+@media(min-width: 992px) {
+	.project-branches .body>table tr .workspaces, .project-branches .body>table tr .no-builds {
+		display: none;
+	}
+	.project-branches .body>table tr:hover .workspaces, 
+	.project-branches .body>table tr:hover .no-builds {
+		display: inline-block;
+	}
+}
 
 #searching-branches {
 	background: url(/~img/ajax-indicator-big.png) no-repeat scroll center center;

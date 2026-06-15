@@ -22,3 +22,12 @@
 	border-left-color: var(--dark-mode-lighter-dark);
 }
 
+@media(min-width: 992px) {
+	.project-tags .body>table tr .workspaces, .project-tags .body>table tr .no-builds {
+		display: none;
+	}
+	.project-tags .body>table tr:hover .workspaces, 
+	.project-tags .body>table tr:hover .no-builds {
+		display: inline-block;
+	}
+}
