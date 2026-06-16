@@ -46,11 +46,17 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.SubscriptionService;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.codequality.BlobTarget;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.ContainerTarget;
+import io.onedev.server.codequality.GeneralTarget;
 import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
@@ -994,6 +1000,50 @@ public class TodResource {
         var currentProject = getProject(currentProjectPath);
         var build = getBuild(currentProject, buildReference);
         return BuildHelper.getDetail(currentProject, build);
+    }
+
+    @Path("/get-build-code-problems")
+    @GET
+    public List<Map<String, Object>> getBuildCodeProblems(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String buildReference, 
+                @QueryParam("reportName") @NotNull String reportName, 
+                @QueryParam("severityLevel") @NotNull CodeProblem.Severity severityLevel) {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var build = getBuild(currentProject, buildReference);
+
+        if (!SecurityUtils.canAccessReport(build, reportName))
+            throw new UnauthorizedException("No permission to access report: " + reportName);
+
+        var problems = new ArrayList<Map<String, Object>>();
+        for (var contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
+            for (var problem: contribution.getCodeProblems(build, null, reportName)) {
+                if (problem.getSeverity().ordinal() <= severityLevel.ordinal()) {
+                    var problemMap = new HashMap<String, Object>();
+                    problemMap.put("severity", problem.getSeverity().name());
+                    problemMap.put("message", problem.getMessage());
+                    if (problem.getTarget() instanceof BlobTarget blobTarget) {
+                        problemMap.put("file", blobTarget.getGroupKey().getName());
+                        if (blobTarget.getLocation() != null) {
+                            problemMap.put("beginLine", blobTarget.getLocation().getFromRow() + 1);
+                            problemMap.put("endLine", blobTarget.getLocation().getToRow() + 1);
+                        }
+                    } else if (problem.getTarget() instanceof ContainerTarget containerTarget) {
+                        problemMap.put("target", containerTarget.getGroupKey().getName());
+                        problemMap.put("platform", ((ContainerTarget.GroupKey) containerTarget.getGroupKey()).getPlatform());
+                    } else if (problem.getTarget() instanceof GeneralTarget generalTarget) {
+                        problemMap.put("target", generalTarget.getGroupKey().getName());
+                    } else {
+                        throw new ExplicitException("Unknown problem target type: " + problem.getTarget().getClass().getName());
+                    }
+                    problems.add(problemMap);
+                }               
+            }
+        }
+        return problems;
     }
     
     @Path("/get-previous-successful-similar-build")

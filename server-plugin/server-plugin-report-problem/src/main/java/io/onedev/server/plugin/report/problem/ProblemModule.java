@@ -19,11 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.lang.SerializationException;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +33,14 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.BuildMetricService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.ProblemMetric;
 import io.onedev.server.model.Project;
 import io.onedev.server.replica.BuildStorageSyncer;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildMetricService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.ProjectPageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
@@ -70,7 +69,7 @@ public class ProblemModule extends AbstractPluginModule {
 				List<SidebarMenuItem> menuItems = new ArrayList<>();
 				if (!OneDev.getInstance(BuildMetricService.class).getAccessibleReportNames(project, ProblemMetric.class).isEmpty()) {
 					PageParameters params = ProblemStatsPage.paramsOf(project);
-					menuItems.add(new SidebarMenuItem.Page(null, "Checkstyle", ProblemStatsPage.class, params));
+					menuItems.add(new SidebarMenuItem.Page(null, "Code Problems", ProblemStatsPage.class, params));
 				}
 				return Lists.newArrayList(new SidebarMenuItem.SubMenu("stats", _T("Statistics"), menuItems));
 			}
@@ -88,7 +87,7 @@ public class ProblemModule extends AbstractPluginModule {
 			
 			Map<String, Collection<CodeProblem>> problemsMap = getProjectService().runOnActiveServer(
 					projectId, new GetCodeProblems(projectId, buildNumber, blobPath, reportName));
-			
+						
 			List<CodeProblem> problems = new ArrayList<>();
 			for (var entry: problemsMap.entrySet()) {
 				if (SecurityUtils.canAccessReport(build, entry.getKey()))
@@ -146,7 +145,7 @@ public class ProblemModule extends AbstractPluginModule {
 		
 		private final String reportName;
 		
-		public GetCodeProblems(Long projectId, Long buildNumber, String blobPath, @Nullable String reportName) {
+		public GetCodeProblems(Long projectId, Long buildNumber, @Nullable String blobPath, @Nullable String reportName) {
 			this.projectId = projectId;
 			this.buildNumber = buildNumber;
 			this.blobPath = blobPath;
@@ -162,14 +161,18 @@ public class ProblemModule extends AbstractPluginModule {
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!isVersionFile(reportDir) && (reportName == null || reportName.equals(reportDir.getName()))) { 
-							File file = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
-							if (file.exists()) {
-								try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
-									problems.put(reportDir.getName(), (Collection<CodeProblem>) SerializationUtils.deserialize(is));
-								} catch (SerializationException e) {
-									logger.error("Error reading problem report: " + file, e);
-								}
-							}
+							if (blobPath != null) {
+								File file = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
+								if (file.exists()) {
+									try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
+										problems.put(reportDir.getName(), (Collection<CodeProblem>) SerializationUtils.deserialize(is));
+									} catch (SerializationException e) {
+										logger.error("Error reading problem report: " + file, e);
+									}
+								}	
+							} else {
+								problems.put(reportDir.getName(), ProblemReport.readFrom(reportDir).getProblems());
+							}					
 						}
 					}
 				}

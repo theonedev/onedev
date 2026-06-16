@@ -101,7 +101,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 				OneDev.getInstance(Dao.class).persist(metric);
 
 				if (report.getProblems().stream().anyMatch(it -> it.getSeverity().ordinal() <= failThreshold.ordinal())) {
-					logger.error(getReportName() + ": found problems with or severer than " + failThreshold + " severity");
+					logger.error(getReportName() + ": found problems with severity " + failThreshold + " or higher");
 					return new ServerStepResult(false);
 				} else {
 					return new ServerStepResult(true);
