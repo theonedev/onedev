@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource;
 
+import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
@@ -39,6 +40,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.SubscriptionService;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.UserName;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -46,7 +48,6 @@ import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
 import io.onedev.server.model.CommitQueryPersonalization;
-import io.onedev.server.model.WorkspaceQueryPersonalization;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueVote;
@@ -59,12 +60,14 @@ import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.WorkspaceQueryPersonalization;
+import io.onedev.server.model.support.AiSetting;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.build.NamedBuildQuery;
-import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
-import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
+import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.security.SecurityUtils;
@@ -112,6 +115,8 @@ public class UserResource {
 		data.setFullName(user.getFullName());
 		if (user.getType() != SERVICE) 
 			data.setNotifyOwnEvents(user.isNotifyOwnEvents());
+		if (user.getType() == AI)
+			data.setAiSetting(user.getAiSetting());
 		return data;
 	}
 
@@ -360,6 +365,9 @@ public class UserResource {
 		user.setType(data.getType());
 		user.setName(data.getName());
 		user.setFullName(data.getFullName());
+		if (data.getType() == AI) 
+			user.setAiSetting(data.getAiSetting());
+		
 		if (data.getType() != ORDINARY) {
 			userService.create(user);
 		} else {
@@ -475,16 +483,16 @@ public class UserResource {
     @POST
     public Response setPassword(@PathParam("userId") Long userId, @Password(checkPolicy=true) @NotEmpty String password) {
     	User user = userService.load(userId);
-		if (SecurityUtils.isAdministrator()) {
+		if (user.isDisabled()) {
+			throw new ExplicitException("Cannot set password for disabled account");
+		} else if (user.getType() != ORDINARY) {
+			throw new ExplicitException("Cannot set password for service or AI account");
+		} if (SecurityUtils.isAdministrator()) {
 			user.setPassword(passwordService.encryptPassword(password));
 			userService.update(user, null);
 			if (!getAuthUser().equals(user)) 
 				auditService.audit(null, "changed password of account \"" + user.getName() + "\" via RESTful API", null, null);
 			return Response.ok().build();
-		} else if (user.isDisabled()) {
-			throw new ExplicitException("Cannot set password for disabled account");
-		} else if (user.getType() != ORDINARY) {
-			throw new ExplicitException("Cannot set password for service or AI account");
 		} else if (user.equals(getAuthUser())) {
 			if (user.getPassword() == null) {
 				throw new ExplicitException("The user is currently authenticated via external system, "
@@ -494,6 +502,30 @@ public class UserResource {
 				userService.update(user, null);
 				return Response.ok().build();
 			}			
+    	} else {
+			throw new UnauthorizedException();
+		}
+    }
+
+	@Api(order=2000)
+	@Path("/{userId}/ai-setting")
+    @POST
+    public Response setAiSetting(@PathParam("userId") Long userId, @NotNull AiSetting aiSetting) {
+    	User user = userService.load(userId);
+		if (user.isDisabled()) {
+			throw new ExplicitException("Cannot set password for disabled account");
+		} else if (user.getType() != AI) {
+			throw new ExplicitException("Cannot set AI setting for non AI account");
+		} else if (SecurityUtils.isAdministrator()) {
+			user.setAiSetting(aiSetting);
+			userService.update(user, null);
+			if (!getAuthUser().equals(user)) 
+				auditService.audit(null, "changed AI setting of account \"" + user.getName() + "\" via RESTful API", null, null);
+			return Response.ok().build();	
+		} else if (user.equals(getAuthUser())) {
+			user.setAiSetting(aiSetting);
+			userService.update(user, null);
+			return Response.ok().build();
     	} else {
 			throw new UnauthorizedException();
 		}
@@ -622,8 +654,11 @@ public class UserResource {
 		@Api(order=200)
 		private String fullName;
 
-		@Api(order=300, description = "Whether or not to notify user on own events. Only meaningful for non service account")
+		@Api(order=300, description = "Whether or not to notify user on own events. Only meaningful for ordinary user")
 		private boolean notifyOwnEvents;
+
+		@Api(order=400, description = "AI settings for AI user")
+		private AiSetting aiSetting;
 
 		public Long getId() {
 			return id;
@@ -672,6 +707,15 @@ public class UserResource {
 		public void setNotifyOwnEvents(boolean notifyOwnEvents) {
 			this.notifyOwnEvents = notifyOwnEvents;
 		}
+
+		public AiSetting getAiSetting() {
+			return aiSetting;
+		}
+
+		public void setAiSetting(AiSetting aiSetting) {
+			this.aiSetting = aiSetting;
+		}
+
 	}
 
 	@EntityCreate(User.class)
@@ -685,16 +729,19 @@ public class UserResource {
 		@Api(order=100, description="Login name of the user")
 		private String name;
 		
-		@Api(order=150, description = "Password of the user. Only required if not created as service account")
+		@Api(order=150, description = "Password of the user. Required if created as ordinary user")
 		private String password;
 		
 		private String fullName;
 		
-		@Api(order=300, description = "Email address of the user. Only required if not created as service account")
+		@Api(order=300, description = "Email address of the user. Required if created as ordinary user")
 		private String emailAddress;
 
-		@Api(order=400, description = "Whether or not to notify user on own events. Only required if not created as service account")
+		@Api(order=400, description = "Whether or not to notify user on own events. Required if created as ordinary user")
 		private boolean notifyOwnEvents;
+
+		@Api(order=500, description = "AI model settings. Required if created as AI user")
+		private AiSetting aiSetting;
 
 		public User.Type getType() {
 			return type;
@@ -720,6 +767,7 @@ public class UserResource {
 		}
 
 		@Password(checkPolicy=true)
+		@DependsOn(property="type", value="ORDINARY")
 		@NotEmpty		
 		public String getPassword() {
 			return password;
@@ -739,6 +787,7 @@ public class UserResource {
 		}
 
 		@Email
+		@DependsOn(property="type", value="ORDINARY")
 		@NotEmpty
 		public String getEmailAddress() {
 			return emailAddress;
@@ -748,6 +797,7 @@ public class UserResource {
 			this.emailAddress = emailAddress;
 		}
 
+		@DependsOn(property="type", value="ORDINARY")
 		public boolean isNotifyOwnEvents() {
 			return notifyOwnEvents;
 		}
@@ -755,6 +805,17 @@ public class UserResource {
 		public void setNotifyOwnEvents(boolean notifyOwnEvents) {
 			this.notifyOwnEvents = notifyOwnEvents;
 		}
+
+		@DependsOn(property="type", value="AI")
+		@NotNull
+		public AiSetting getAiSetting() {
+			return aiSetting;
+		}
+
+		public void setAiSetting(AiSetting aiSetting) {
+			this.aiSetting = aiSetting;
+		}
+
 	}
 
 	public static class UserUpdateData implements Serializable {
@@ -767,7 +828,7 @@ public class UserResource {
 		@Api(order=200)
 		private String fullName;
 
-		@Api(order=300, description = "Whether or not to notify user on own events. Only required for non service account")
+		@Api(order=300, description = "Whether or not to notify user on own events. Required for ordinary user")
 		private boolean notifyOwnEvents;
 		
 		@UserName

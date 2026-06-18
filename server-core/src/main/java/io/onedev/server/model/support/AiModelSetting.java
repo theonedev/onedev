@@ -28,6 +28,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.EditContext;
 import nl.altindag.ssl.SSLFactory;
 
@@ -40,12 +41,16 @@ public class AiModelSetting implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(AiModelSetting.class);
 
+    @Api(order=100, description="Base URL of OpenAI compatible API endpoint")
     private String baseUrl;
 
+    @Api(order=200, description="API key for authentication. Leave empty for anonymous access")
     private String apiKey;
 
+    @Api(order=300, description="Name of the model to use")
     private String name;
 
+    @Api(order=400, description="Timeout in seconds to get model response")
     private int timeoutSeconds = 30;
 
     @Editable(order=200, name="Base URL", placeholder="https://api.openai.com/v1", description="""
