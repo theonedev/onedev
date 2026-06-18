@@ -94,7 +94,7 @@ public class ImportServer implements Serializable, Validatable {
 		
 		Client client = newClient();
 		try {
-			String apiEndpoint = getApiEndpoint("/user/permissions/workspaces");
+			String apiEndpoint = getApiEndpoint("/user/workspaces");
 			for (JsonNode valueElementNode: list(client, apiEndpoint, new TaskLogger() {
 
 				@Override
@@ -104,9 +104,13 @@ public class ImportServer implements Serializable, Validatable {
 				
 			})) {
 				JsonNode workspaceNode = valueElementNode.get("workspace");
-				workspaces.put(workspaceNode.get("slug").asText(), workspaceNode.get("name").asText());
+				if (workspaceNode != null && workspaceNode.hasNonNull("slug")) {
+					String slug = workspaceNode.get("slug").asText();
+					String name = workspaceNode.hasNonNull("name")? workspaceNode.get("name").asText(): slug;
+					workspaces.put(slug, name);
+				}
 			}	
-			CollectionUtils.sortByValue(workspaces);
+			workspaces = CollectionUtils.sortByValue(workspaces);
 		} catch (Exception e) {
 			logger.error("Error listing workspaces", e);
 		} finally {
