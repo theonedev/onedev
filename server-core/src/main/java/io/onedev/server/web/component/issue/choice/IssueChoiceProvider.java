@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
-
 import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
+import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.FuzzyCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedQuery;
 import io.onedev.server.util.criteria.AndCriteria;
@@ -35,6 +35,12 @@ public abstract class IssueChoiceProvider extends ChoiceProvider<Issue> {
 
 	private static final long serialVersionUID = 1L;
 	
+	private final boolean useNumber;
+
+	public IssueChoiceProvider(boolean useNumber) {
+		this.useNumber = useNumber;
+	}
+
 	@Nullable
 	protected abstract Project getProject();
 	
@@ -62,27 +68,39 @@ public abstract class IssueChoiceProvider extends ChoiceProvider<Issue> {
 	protected IssueQuery getBaseQuery() {
 		return null;
 	}
+
+	private IssueQuery buildQuery(String fuzzyQueryString) {
+		var criterias = new ArrayList<Criteria<Issue>>();
+		criterias.add(new FuzzyCriteria(fuzzyQueryString));
+		var sorts = new ArrayList<EntitySort>();
+		if (getBaseQuery() != null) {
+			if (getBaseQuery().getCriteria() != null)				
+				criterias.add(getBaseQuery().getCriteria());
+			sorts.addAll(getBaseQuery().getSorts());
+		}
+		return new IssueQuery(new AndCriteria<>(criterias), sorts);
+	}
 	
 	@Override
 	public void query(String term, int page, Response<Issue> response) {
 		var count = (page+1) * WebConstants.PAGE_SIZE + 1;
-		var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');
-		if (scopedQuery != null) {
-			var projectScope = new ProjectScope(scopedQuery.getProject(), false, false);
-			List<Criteria<Issue>> criterias = Lists.newArrayList(new FuzzyCriteria(scopedQuery.getQuery()));
-			var sorts = new ArrayList<EntitySort>();
-			if (getBaseQuery() != null) {
-				if (getBaseQuery().getCriteria() != null)				
-					criterias.add(getBaseQuery().getCriteria());
-				sorts.addAll(getBaseQuery().getSorts());
-			}
-			var issueQuery = new IssueQuery(new AndCriteria<>(criterias), sorts);
-			var subject = SecurityUtils.getSubject();
-			var issues = OneDev.getInstance(IssueService.class)
-					.query(subject, projectScope, issueQuery, false, 0, count);
+		var issueService = OneDev.getInstance(IssueService.class);
+		var subject = SecurityUtils.getSubject();
+		if (useNumber) {
+			Preconditions.checkState(getProject() != null);
+			var issueQuery = buildQuery(term);
+			var issues = issueService.query(subject, new ProjectScope(getProject(), false, false), issueQuery, false, 0, count);
 			new ResponseFiller<>(response).fill(issues, page, WebConstants.PAGE_SIZE);
 		} else {
-			response.setHasMore(false);
+			var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');
+			if (scopedQuery != null) {
+				var projectScope = new ProjectScope(scopedQuery.getProject(), false, false);
+				var issueQuery = buildQuery(scopedQuery.getQuery());
+				var issues = issueService.query(subject, projectScope, issueQuery, false, 0, count);
+				new ResponseFiller<>(response).fill(issues, page, WebConstants.PAGE_SIZE);
+			} else {
+				response.setHasMore(false);
+			}	
 		}
 	}
 	

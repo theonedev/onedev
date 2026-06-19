@@ -23,15 +23,14 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryLexer;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -67,7 +66,9 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if (spec.getRuleName().equals("Quoted")) {
+			if (spec.getRuleName().equals("Number")) {
+				return SuggestionUtils.suggestNumber(terminalExpect.getUnmatchedText(), _T("find by number"), true);
+			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
 					@Override
@@ -122,13 +123,13 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 											else
 												return null;
 										case Workspace.NAME_CREATE_DATE:
-											case Workspace.NAME_ACTIVE_DATE:
-												List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
-												return !suggestions.isEmpty() ? suggestions : null;
-											case AbstractEntity.NAME_NUMBER:
-												return SuggestionUtils.suggestWorkspaces(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-											default:
-												return new ArrayList<>();
+										case Workspace.NAME_ACTIVE_DATE:
+											List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
+											return !suggestions.isEmpty() ? suggestions : null;
+										case AbstractEntity.NAME_NUMBER:
+											return SuggestionUtils.suggestNumber(matchWith, _T("find by number"), false);
+										default:
+											return new ArrayList<>();
 									}
 								} catch (ExplicitException ignored) {
 								}

@@ -71,6 +71,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.Criteri
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.FuzzyCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.NumberCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OperatorCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OperatorValueCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrCriteriaContext;
@@ -129,7 +130,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 
 					@Override
 					public Criteria<PullRequest> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
-						return new ReferenceCriteria(project, ctx.getText(), Is);
+						return new ReferenceCriteria(null, ctx.getText(), Is);
+					}
+
+					@Override
+					public Criteria<PullRequest> visitNumberCriteria(NumberCriteriaContext ctx) {
+						return new NumberCriteria(getNumber(ctx.getText()), Is);
 					}
 
 					@Override
@@ -316,7 +322,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								case IsNot:
 									switch (fieldName) {
 										case PullRequest.NAME_NUMBER:
-											criterias.add(new ReferenceCriteria(project, value, operator));
+											criterias.add(new NumberCriteria(getNumber(value), operator));
 											break;
 										case PullRequest.NAME_MERGE_STRATEGY:
 											criterias.add(new MergeStrategyCriteria(MergeStrategy.fromString(value), operator));
@@ -371,7 +377,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								case IsGreaterThan:
 									switch (fieldName) {
 										case PullRequest.NAME_NUMBER:
-											criterias.add(new ReferenceCriteria(project, value, operator));
+											criterias.add(new NumberCriteria(getNumber(value), operator));
 											break;
 										case PullRequest.NAME_COMMENT_COUNT:
 											criterias.add(new CommentCountCriteria(getIntValue(value), operator));

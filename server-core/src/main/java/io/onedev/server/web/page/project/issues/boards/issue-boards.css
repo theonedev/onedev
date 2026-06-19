@@ -158,14 +158,14 @@
 	display: none;
 }
 
-@media(min-width: 992px) {
-	.board-card .issue-item .no-estimate,
-	.board-card .issue-item .workspaces {
-		display: none !important;
-	}
-	.board-card .issue-item:hover .no-estimate,
-	.board-card .issue-item:hover .workspaces {
-		display: inline-flex !important;
-	}
+.board-card .issue-item .no-estimate,
+.board-card .issue-item .workspaces {
+	display: none !important;
+}
+.board-card .issue-item:hover .no-estimate,
+.board-card .issue-item .dropdown-aware-open .no-estimate,
+.board-card .issue-item:hover .workspaces,
+.board-card .issue-item .dropdown-aware-open .workspaces {
+	display: inline-flex !important;
 }
 

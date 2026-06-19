@@ -19,13 +19,13 @@ public class ReferenceCriteria extends Criteria<PullRequest> {
 
 	private final int operator;
 	
-	private final String value;
+	private final Project project;
 	
 	private final PullRequestReference reference;
 	
 	public ReferenceCriteria(@Nullable Project project, String value, int operator) {
 		this.operator = operator;
-		this.value = value;
+		this.project = project;
 		reference = PullRequestReference.of(value, project);
 	}
 
@@ -36,12 +36,8 @@ public class ReferenceCriteria extends Criteria<PullRequest> {
 		
 		if (operator == PullRequestQueryLexer.Is)
 			numberPredicate = builder.equal(attribute, reference.getNumber());
-		else if (operator == PullRequestQueryLexer.IsNot)
+		else 
 			numberPredicate = builder.not(builder.equal(attribute, reference.getNumber()));
-		else if (operator == PullRequestQueryLexer.IsGreaterThan)
-			numberPredicate = builder.greaterThan(attribute, reference.getNumber());
-		else
-			numberPredicate = builder.lessThan(attribute, reference.getNumber());
 		
 		return builder.and(
 				builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), reference.getProject()),
@@ -53,12 +49,8 @@ public class ReferenceCriteria extends Criteria<PullRequest> {
 		if (request.getTargetProject().equals(reference.getProject())) {
 			if (operator == PullRequestQueryLexer.Is)
 				return request.getNumber() == reference.getNumber();
-			else if (operator == PullRequestQueryLexer.IsNot)
+			else 
 				return request.getNumber() != reference.getNumber();
-			else if (operator == PullRequestQueryLexer.IsGreaterThan)
-				return request.getNumber() > reference.getNumber();
-			else
-				return request.getNumber() < reference.getNumber();
 		} else {
 			return false;
 		}
@@ -66,9 +58,7 @@ public class ReferenceCriteria extends Criteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(PullRequest.NAME_NUMBER) + " " 
-				+ PullRequestQuery.getRuleName(operator) + " " 
-				+ quote(value);
+		return reference.toString(project);
 	}
 
 }

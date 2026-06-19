@@ -44,19 +44,21 @@
 		padding-left: 0.6rem;
 		padding-right: 0.6rem;
 	}
-	.commit-list li.commit .workspaces, .commit-list li.commit .no-builds {
-		display: none;
-	}
-	.commit-list li.commit:hover .workspaces, 
-	.commit-list li.commit:hover .no-builds {
-		display: inline-block;
-	}
 	.commit-list li.commit:hover, .commit-list li.commit.hover {
 		background: var(--light);
 	}
 	.dark-mode .commit-list li.commit:hover, .dark-mode .commit-list li.commit.hover {
 		background: var(--dark-mode-light-dark);
 	}
+}
+.commit-list li.commit .workspaces, .commit-list li.commit .no-builds {
+	display: none;
+}
+.commit-list li.commit:hover .workspaces, 
+.commit-list li.commit:hover .no-builds,
+.commit-list li.commit .dropdown-aware-open .workspaces,
+.commit-list li.commit .dropdown-aware-open .no-builds {
+	display: inline-block;
 }
 
 .commit-graph {

@@ -26,6 +26,7 @@ public class IssueChoiceEditSupport implements EditSupport {
         Method propertyGetter = descriptor.getPropertyGetter();
         IssueChoice issueChoice = propertyGetter.getAnnotation(IssueChoice.class);
         if (issueChoice != null) {
+			var useNumber = issueChoice.useNumber();
         	if (propertyGetter.getReturnType() == Long.class) {
         		return new PropertyContext<Long>(descriptor) {
 
@@ -35,16 +36,20 @@ public class IssueChoiceEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								Long issueId = model.getObject();
-								if (issueId != null) {
-									Issue issue = OneDev.getInstance(IssueService.class).get(issueId);
-									if (issue != null) {
-										if (Project.get() != null && Project.get().getForkRoot().equals(issue.getNumberScope()))
-											return new Label(id, "#" + issue.getNumber());
-										else
-											return new Label(id, issue.getReference().toString());
+								Long issueIdOrNumber = model.getObject();
+								if (issueIdOrNumber != null) {
+									if (useNumber) {
+										return new Label(id, "#" + String.valueOf(issueIdOrNumber));
 									} else {
-										return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
+										Issue issue = OneDev.getInstance(IssueService.class).get(issueIdOrNumber);
+										if (issue != null) {
+											if (Project.get() != null && Project.get().getForkRoot().equals(issue.getNumberScope()))
+												return new Label(id, "#" + issue.getNumber());
+											else
+												return new Label(id, issue.getReference().toString());
+										} else {
+											return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
+										}
 									}
 								} else { 
 									return new EmptyValueLabel(id) {
@@ -63,7 +68,7 @@ public class IssueChoiceEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
-						return new IssueChoiceEditor(componentId, descriptor, model);
+						return new IssueChoiceEditor(componentId, descriptor, model, useNumber);
 					}
         			
         		};

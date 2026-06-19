@@ -55,7 +55,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if (spec.getRuleName().equals("Quoted")) {
+			if (spec.getRuleName().equals("Id")) {
+				return SuggestionUtils.suggestNumber(terminalExpect.getUnmatchedText(), _T("find by id"), true);
+			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
 					@Override
@@ -105,6 +107,8 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestProjectKeys(matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(Project.NAME_ID)) {
+										return SuggestionUtils.suggestNumber(matchWith, _T("find by id"), false);
 									} else if (fieldName.equals(Project.NAME_PATH)) {
 										if (!matchWith.contains("*"))
 											return SuggestionUtils.suggestProjectPaths(matchWith);

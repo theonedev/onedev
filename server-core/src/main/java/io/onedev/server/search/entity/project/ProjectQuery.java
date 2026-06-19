@@ -9,6 +9,8 @@ import static io.onedev.server.search.entity.project.ProjectQueryParser.ForkRoot
 import static io.onedev.server.search.entity.project.ProjectQueryParser.ForksOf;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.HasOutdatedReplicas;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.Is;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.IsGreaterThan;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.IsLessThan;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.IsNot;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.IsSince;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.IsUntil;
@@ -16,15 +18,11 @@ import static io.onedev.server.search.entity.project.ProjectQueryParser.Leafs;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.MissingStorage;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.OwnedByMe;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.OwnedByNone;
-import static io.onedev.server.search.entity.project.ProjectQueryParser.IsGreaterThan;
-import static io.onedev.server.search.entity.project.ProjectQueryParser.IsLessThan;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.Roots;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.WithoutEnoughReplicas;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jspecify.annotations.Nullable;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -33,6 +31,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -43,6 +42,7 @@ import io.onedev.server.search.entity.project.ProjectQueryParser.AndCriteriaCont
 import io.onedev.server.search.entity.project.ProjectQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.FuzzyCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.IdCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.NotCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorValueCriteriaContext;
@@ -50,7 +50,6 @@ import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaConte
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.QueryContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.ReferenceCriteriaContext;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -106,8 +105,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 					}
 					
 					@Override
-					public Criteria<Project> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
-						return new IdCriteria(Long.parseLong(ctx.getText().substring(1)), Is);
+					public Criteria<Project> visitIdCriteria(IdCriteriaContext ctx) {
+						return new IdCriteria(getNumber(ctx.getText()), Is);
 					}
 					
 					@Override

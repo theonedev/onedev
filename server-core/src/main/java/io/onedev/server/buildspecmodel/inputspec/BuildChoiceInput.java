@@ -22,7 +22,7 @@ public class BuildChoiceInput {
 			else
 				buffer.append("    @NotNull\n");
 		}
-		buffer.append("    @BuildChoice\n");
+		buffer.append("    @BuildChoice(useNumber=true)\n");
 		if (inputSpec.isAllowMultiple())
 			inputSpec.appendMethods(buffer, index, "List<Long>", null, null);
 		else 
@@ -40,7 +40,7 @@ public class BuildChoiceInput {
 			else  
 				return Long.valueOf(strings.iterator().next());
 		} catch (NumberFormatException e) {
-			throw new ValidationException("Invalid build number");
+			throw new ValidationException("Invalid build id");
 		}
 	}
 

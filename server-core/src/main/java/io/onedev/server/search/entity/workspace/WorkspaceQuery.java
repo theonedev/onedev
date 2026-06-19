@@ -47,6 +47,7 @@ import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.FieldOperat
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.FuzzyCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.NumberCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.OperatorCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.OperatorValueCriteriaContext;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser.OrCriteriaContext;
@@ -147,7 +148,12 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 
 					@Override
 					public Criteria<Workspace> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
-						return new NumberCriteria(project, ctx.getText(), WorkspaceQueryParser.Is);
+						return new ReferenceCriteria(null, ctx.getText(), WorkspaceQueryParser.Is);
+					}
+
+					@Override
+					public Criteria<Workspace> visitNumberCriteria(NumberCriteriaContext ctx) {
+						return new NumberCriteria(getNumber(ctx.getText()), WorkspaceQueryParser.Is);
 					}
 
 					@Override
@@ -171,7 +177,7 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 							String value = getValue(quoted.getText());
 						switch (fieldName) {
 							case NAME_NUMBER:
-								criterias.add(new NumberCriteria(project, value, operator));
+								criterias.add(new NumberCriteria(getNumber(value), operator));
 								break;
 							case NAME_PROJECT:
 								criterias.add(new ProjectCriteria(value, operator));

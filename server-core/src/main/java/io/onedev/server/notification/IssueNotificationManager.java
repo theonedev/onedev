@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -421,26 +422,33 @@ public class IssueNotificationManager implements Serializable {
 
 	private void addressConcern(User commenter, User ai, Issue issue) {
 		try {
+			ObjectId commitId;
 			String branch = issue.getBranch();									
 			var assignedFields = getAssignedFields(ai, issue);
 			String prompt;
 			if (assignedFields.isEmpty()) {
-				if (branch == null) 
-					branch = Preconditions.checkNotNull(issue.getProject().getDefaultBranch());
+				if (branch == null) {
+					commitId = issue.getFieldCommitId();
+					if (commitId == null) 
+						commitId = issue.getProject().getObjectId(Preconditions.checkNotNull(issue.getProject().getDefaultBranch()), true);
+				} else {
+					commitId = issue.getProject().getObjectId(branch, true);
+				}
 				prompt = """
 					You are %s. Address %s's concern in issue %s. \
-					Examine code in workspace if necessary. \
-					Do not switch branch or modify code.\
+					Examine code in current workspace if necessary. \
+					Do not create branch, switch branch, or modify code.\
 					""".formatted(ai.getName(), commenter.getName(), issue.getReference().toString(issue.getProject()));
 			} else {
 				if (branch == null) 
 					branch = issueService.ensureBranch(ai.asSubject(), issue);
+				commitId = issue.getProject().getObjectId(branch, true);
 				prompt = """
 					Work on current issue as roles [%s] to address %s's concern. Submit work afterwards if code is modified.
 					""".formatted(StringUtils.join(assignedFields, ", "), commenter.getName());
 			}
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), issue.getId());
-			workspaceService.runPrompt(ai, issue.getProject(), branch, prompt, taskFailedCallback);
+			workspaceService.runPrompt(ai, issue.getProject(), commitId, branch, prompt, taskFailedCallback);
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {
@@ -485,7 +493,8 @@ public class IssueNotificationManager implements Serializable {
 				try {
 					var branch = issueService.ensureBranch(ai.asSubject(), issue);
 					var taskFailedCallback = newTaskFailedCallback(ai.getId(), issue.getId());
-					workspaceService.runPrompt(ai, issue.getProject(), branch, "Work on current issue as role '%s'. Submit work afterwards if code is modified".formatted(field), taskFailedCallback);						
+					var commitId = issue.getProject().getObjectId(branch, true);
+					workspaceService.runPrompt(ai, issue.getProject(), commitId, branch, "Work on current issue as role '%s'. Submit work afterwards if code is modified".formatted(field), taskFailedCallback);						
 				} catch (Throwable t) {
 					logger.error("Error doing job via AI user", t);
 					createComment(ai, issue, "Failed to do the job, check server log for details");

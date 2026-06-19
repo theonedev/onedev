@@ -2725,4 +2725,39 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	private void migratePostBuildActions(VersionedYamlDoc doc, Stack<Integer> versions,
+										 Consumer<SequenceNode> actionMigrator) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("postBuildActions"))
+							actionMigrator.accept((SequenceNode) jobTuple.getValueNode());
+					}
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate51(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migratePostBuildActions(doc, versions, actionsNode -> {
+			for (var actionNodeItem : actionsNode.getValue()) {
+				var actionNode = (MappingNode) actionNodeItem;
+				if (!"CreateIssueAction".equals(getStepType(actionNode)))
+					continue;
+				for (var itActionTuple = actionNode.getValue().iterator(); itActionTuple.hasNext();) {
+					var actionTuple = itActionTuple.next();
+					var propName = ((ScalarNode) actionTuple.getKeyNode()).getValue();
+					if (propName.equals("projectPath") || propName.equals("accessTokenSecret"))
+						itActionTuple.remove();
+				}
+			}
+		});
+	}
+
 }

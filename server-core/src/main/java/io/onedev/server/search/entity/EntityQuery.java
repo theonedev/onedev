@@ -220,6 +220,16 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		else
 			throw new NotFoundException("Unable to find build: " + value);
 	}
+
+	public static Long getNumber(String value) {
+		if (value.startsWith("#"))
+			value = value.substring(1);
+		try {
+			return Long.parseLong(value);
+		} catch (NumberFormatException e) {
+			throw new NotAcceptableException("Invalid number: " + value);
+		}
+	}
 	
 	public static Iteration getIteration(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":")) 

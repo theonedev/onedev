@@ -803,18 +803,7 @@ public class TodResource {
         if (!issue.getProject().equals(currentProject))
             throw new NotAcceptableException("Issue " + issueReference + " is not in current project");
 
-        var project = issue.getProject();
-        if (!SecurityUtils.canWriteCode(subject, project)) 
-            throw new UnauthorizedException("Write code permission required for project: " + project.getPath());
-
-        var branch = issue.getBranch();
-        if (branch == null) {
-            branch = issueService.suggestBranch(issue);
-            if (project.getBranchProtection(branch, SecurityUtils.getUser(subject)).isPreventCreation())
-                throw new NotAcceptableException("Branch creation prohibited by branch protection rule: " + branch);
-            gitService.createBranch(project, branch, project.getDefaultBranch());
-        }
-        return branch;
+        return issueService.ensureBranch(subject, issue);
     }
 
     @Path("/link-issues")

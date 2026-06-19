@@ -8,4 +8,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PullRequestChoice {
+
+    boolean useNumber() default false;
+    
 }

@@ -23,6 +23,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
+import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
@@ -33,6 +35,7 @@ import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TimeTrackingSetting;
+import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
@@ -42,6 +45,7 @@ import io.onedev.server.model.support.issue.transitionspec.BranchCreatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.model.support.issue.transitionspec.PullRequestMergedSpec;
 import io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedOrUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -114,6 +118,11 @@ public class GlobalIssueSetting implements Serializable {
 		supportRequest.setValue("Support Request");
 		supportRequest.setColor("#8950FC");
 		choices.add(supportRequest);
+
+		Choice buildFailed = new Choice();
+		buildFailed.setValue("Build Failed");
+		buildFailed.setColor("#F64E60");
+		choices.add(buildFailed);
 		
 		specifiedChoices.setChoices(choices);
 		type.setChoiceProvider(specifiedChoices);
@@ -170,6 +179,16 @@ public class GlobalIssueSetting implements Serializable {
 		assignees.setNameOfEmptyValue("Not assigned");
 		assignees.setName("Assignees");
 		fieldSpecs.add(assignees);
+
+		BuildChoiceField build = new BuildChoiceField();
+		build.setName("Build");
+		var showCondition = new ShowCondition();
+		showCondition.setInputName("Type");
+		var valueIsOneOf = new ValueIsOneOf();
+		valueIsOneOf.setValues(Lists.newArrayList("Build Failed"));
+		showCondition.setValueMatcher(valueIsOneOf);
+		build.setShowCondition(showCondition);
+		fieldSpecs.add(build);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
@@ -207,6 +226,11 @@ public class GlobalIssueSetting implements Serializable {
 		pullRequestOpenedSpec.setBranches("main master");
 		pullRequestOpenedSpec.setIssueQuery("fixed in current pull request");		
 		transitionSpecs.add(pullRequestOpenedSpec);
+
+		var pullRequestMergedSpec = new PullRequestMergedSpec();
+		pullRequestMergedSpec.setToState("Closed");
+		pullRequestMergedSpec.setIssueQuery("fixed in current pull request and \"Type\" is \"Build Failed\"");		
+		transitionSpecs.add(pullRequestMergedSpec);
 		
 		var issueStateTransitedSpec = new IssueStateTransitedSpec();
 		issueStateTransitedSpec.setToState("Open");

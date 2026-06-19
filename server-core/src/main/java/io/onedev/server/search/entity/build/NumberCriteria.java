@@ -1,4 +1,4 @@
-package io.onedev.server.search.entity.workspace;
+package io.onedev.server.search.entity.build;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -8,11 +8,11 @@ import javax.persistence.criteria.Predicate;
 
 import org.jspecify.annotations.Nullable;
 
-import io.onedev.server.model.Workspace;
+import io.onedev.server.model.Build;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
-public class NumberCriteria extends Criteria<Workspace> {
+public class NumberCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,15 +26,14 @@ public class NumberCriteria extends Criteria<Workspace> {
 	}
 
 	@Override
-	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query,
-                                  From<Workspace, Workspace> from, CriteriaBuilder builder) {
-		Path<Long> attribute = from.get(Workspace.PROP_NUMBER);
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+		Path<Long> attribute = from.get(Build.PROP_NUMBER);
 		Predicate predicate;
-		if (operator == WorkspaceQueryLexer.Is)
+		if (operator == BuildQueryLexer.Is)
 			predicate = builder.equal(attribute, number);
-		else if (operator == WorkspaceQueryLexer.IsNot)
+		else if (operator == BuildQueryLexer.IsNot)
 			predicate = builder.not(builder.equal(attribute, number));
-		else if (operator == WorkspaceQueryLexer.IsGreaterThan)
+		else if (operator == BuildQueryLexer.IsGreaterThan)
 			predicate = builder.greaterThan(attribute, number);
 		else
 			predicate = builder.lessThan(attribute, number);
@@ -42,15 +41,15 @@ public class NumberCriteria extends Criteria<Workspace> {
 	}
 
 	@Override
-	public boolean matches(Workspace workspace) {
-		if (operator == WorkspaceQueryLexer.Is)
-			return workspace.getNumber() == number;
-		else if (operator == WorkspaceQueryLexer.IsNot)
-			return workspace.getNumber() != number;
-		else if (operator == WorkspaceQueryLexer.IsGreaterThan)
-			return workspace.getNumber() > number;
+	public boolean matches(Build build) {
+		if (operator == BuildQueryLexer.Is)
+			return build.getNumber() == number;
+		else if (operator == BuildQueryLexer.IsNot)
+			return build.getNumber() != number;
+		else if (operator == BuildQueryLexer.IsGreaterThan)
+			return build.getNumber() > number;
 		else
-			return workspace.getNumber() < number;
+			return build.getNumber() < number;
 	}
 
 	@Override

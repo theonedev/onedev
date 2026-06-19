@@ -1389,6 +1389,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		}
 	}
 
+	@Sessional
 	@Override
 	public String ensureBranch(Subject subject, Issue issue) {
 		if (issue.getBranch() != null)
@@ -1403,17 +1404,21 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		if (project.getBranchRef(suggestedBranch) != null) {
 			throw new NotAcceptableException(MessageFormat.format("Branch \"{0}\" already exists", suggestedBranch));
 		} else {
-			String defaultBranch = project.getDefaultBranch();
-			if (defaultBranch == null) {
-				throw new NotAcceptableException("Default branch is not available");
+			RevCommit commit = null;
+			if (issue.getFieldCommitId() != null)
+				commit = project.getRevCommit(issue.getFieldCommitId(), false);
+			if (commit == null) {
+				String defaultBranch = project.getDefaultBranch();
+				if (defaultBranch == null) 
+					throw new NotAcceptableException("Default branch is not available");
+				else 
+					commit = project.getRevCommit(defaultBranch, true);	
+			}		
+			if (!project.isCommitSignatureRequirementSatisfied(SecurityUtils.getUser(subject), suggestedBranch, commit)) {
+				throw new NotAcceptableException("Valid signature required for head commit of this branch per branch protection rule");
 			} else {
-				RevCommit commit = project.getRevCommit(defaultBranch, true);
-				if (!project.isCommitSignatureRequirementSatisfied(SecurityUtils.getUser(subject), suggestedBranch, commit)) {
-					throw new NotAcceptableException("Valid signature required for head commit of this branch per branch protection rule");
-				} else {
-					gitService.createBranch(project, suggestedBranch, defaultBranch);
-					return suggestedBranch;
-				}
+				gitService.createBranch(project, suggestedBranch, commit.name());
+				return suggestedBranch;
 			}
 		}
 	}

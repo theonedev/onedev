@@ -99,10 +99,13 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 					if (target != null) {
 						var markupId = DropdownLink.this.getMarkupId(true);
-						String script = String.format(""
-								+ "$('#%s').removeClass('dropdown-open');"
-								+ "$('#%s').closest('.dropdown-aware').removeClass('dropdown-aware-open');", 
-								markupId, markupId);
+						String script = String.format("""
+								var $dropdown = $('#%s');
+								$dropdown.removeClass('dropdown-open');
+								var $dropdownAware = $dropdown.closest('.dropdown-aware');
+								if ($dropdownAware.find(".dropdown-open").length == 0) 
+									$dropdownAware.removeClass('dropdown-aware-open');""",
+								markupId);
 						target.appendJavaScript(script);
 					}
 					

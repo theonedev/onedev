@@ -142,7 +142,9 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if (spec.getRuleName().equals("Quoted")) {
+			if (spec.getRuleName().equals("Number")) {
+				return SuggestionUtils.suggestNumber(terminalExpect.getUnmatchedText(), _T("find by number"), true);
+			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
 					private Map<String, String> getFieldCandidates(Collection<String> fields) {
@@ -254,13 +256,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										} else if (fieldSpec instanceof UserChoiceField) {
 											return SuggestionUtils.suggestUsers(matchWith);
 										} else if (fieldSpec instanceof IssueChoiceField) {
-											return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+											return SuggestionUtils.suggestNumber(matchWith, _T("specify issue number"), false);
 										} else if (fieldSpec instanceof BuildChoiceField) {
-											return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+											return SuggestionUtils.suggestNumber(matchWith, _T("specify build number"), false);
 										} else if (fieldSpec instanceof CommitField) {
 											return null;
 										} else if (fieldSpec instanceof PullRequestChoiceField) {
-											return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+											return SuggestionUtils.suggestNumber(matchWith, _T("specify pull request number"), false);
 										} else if (fieldSpec instanceof BooleanField) {
 											return SuggestionUtils.suggest(newArrayList("true", "false"), matchWith);
 										} else if (fieldSpec instanceof GroupChoiceField) {
@@ -292,7 +294,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 												ComponentContext.pop();
 											}			
 										} else if (fieldName.equals(NAME_NUMBER)) {
-											return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+											return SuggestionUtils.suggestNumber(matchWith, _T("find by number"), false);
 										} else if (fieldName.equals(IssueSchedule.NAME_ITERATION)) {
 											if (project != null && !matchWith.contains("*"))
 												return SuggestionUtils.suggestIterations(project, matchWith);
@@ -373,11 +375,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				return Optional.of(_T("add another order"));
 			else
 				return Optional.of(_T("or match another value"));
-		} else if (suggestedLiteral.equals("#")) {
-			if (getProject() != null)
-				return Optional.of(_T("find issue by number"));
-			else 
-				return null;
 		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

@@ -2,19 +2,22 @@ package io.onedev.server.web.editable.issue.choice;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import javax.inject.Inject;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.service.IssueService;
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.web.component.issue.choice.IssueSingleChoice;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
+import io.onedev.server.web.component.issue.choice.IssueSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.util.IssueQueryAware;
@@ -22,11 +25,17 @@ import io.onedev.server.web.util.ProjectAware;
 
 public class IssueChoiceEditor extends PropertyEditor<Long> {
 
+	@Inject
+	private IssueService issueService;
+
 	private IssueSingleChoice input;
+
+	private final boolean useNumber;	
 	
 	public IssueChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
-			IModel<Long> propertyModel) {
+			IModel<Long> propertyModel, boolean useNumber) {
 		super(id, propertyDescriptor, propertyModel);
+		this.useNumber = useNumber;
 	}
 
 	private Project getProject() {
@@ -41,13 +50,18 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Issue issue;
-		if (getModelObject() != null)
-			issue = OneDev.getInstance(IssueService.class).get(getModelObject());
-		else
-			issue = null;
+		Issue issue = null;
+		var issueIdOrNumber = getModelObject();
+		if (issueIdOrNumber != null) {
+			if (useNumber) {
+				Preconditions.checkState(getProject() != null);
+				issue = issueService.find(getProject(), issueIdOrNumber);
+			} else {
+				issue = issueService.get(issueIdOrNumber);
+			}
+		}
 		
-		IssueChoiceProvider choiceProvider = new IssueChoiceProvider() {
+		IssueChoiceProvider choiceProvider = new IssueChoiceProvider(useNumber) {
 
 			@Override
 			protected Project getProject() {
@@ -92,7 +106,7 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 	protected Long convertInputToValue() throws ConversionException {
 		Issue issue = input.getConvertedInput();
 		if (issue != null)
-			return issue.getId();
+			return useNumber? issue.getNumber() : issue.getId();
 		else
 			return null;
 	}

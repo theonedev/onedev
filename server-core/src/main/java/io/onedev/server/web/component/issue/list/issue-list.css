@@ -61,15 +61,16 @@
 	border-top-color: var(--dark-mode-light-dark);
 }
 
-@media(min-width: 992px) {
-	.issue-list>div>.body tr.issue .issue-item .no-estimate,
-	.issue-list>div>.body tr.issue .issue-item .workspaces,
-	.issue-list>div>.body tr.issue .issue-item .pin {
-		display: none !important;
-	}
-	.issue-list>div>.body tr.issue .issue-item:hover .no-estimate,
-	.issue-list>div>.body tr.issue .issue-item:hover .workspaces,
-	.issue-list>div>.body tr.issue .issue-item:hover .pin {
-		display: inline-flex !important;
-	}
+.issue-list>div>.body tr.issue .issue-item .no-estimate,
+.issue-list>div>.body tr.issue .issue-item .workspaces,
+.issue-list>div>.body tr.issue .issue-item .pin {
+	display: none !important;
+}
+.issue-list>div>.body tr.issue .issue-item:hover .no-estimate,
+.issue-list>div>.body tr.issue .issue-item .dropdown-aware-open .no-estimate,
+.issue-list>div>.body tr.issue .issue-item:hover .workspaces,
+.issue-list>div>.body tr.issue .issue-item .dropdown-aware-open .workspaces,
+.issue-list>div>.body tr.issue .issue-item:hover .pin,
+.issue-list>div>.body tr.issue .issue-item .dropdown-aware-open .pin {
+	display: inline-flex !important;
 }

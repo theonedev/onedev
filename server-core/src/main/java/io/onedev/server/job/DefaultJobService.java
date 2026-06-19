@@ -1222,10 +1222,12 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 									for (var buildId : buildIdsOfServer) {
 										var build = buildService.load(buildId);
 										if (build.getStatus() == Status.WAITING) {
-											if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful()
-													&& it.getDependency().isFinished()
-													&& it.getDependency().getStatus() != Status.SUCCESSFUL)) {
-												markBuildError(build, "Some dependencies are required to be successful but failed");
+											var unsuccessfulDependency = build.getDependencies().stream()
+													.filter(it -> it.isRequireSuccessful() && it.getDependency().isFinished() && it.getDependency().getStatus() != Status.SUCCESSFUL)
+													.findFirst();
+											if (unsuccessfulDependency.isPresent()) {												
+												var unsuccessfulDependencyReference = unsuccessfulDependency.get().getDependency().getReference().toString(build.getProject());
+												markBuildError(build, "Dependency build is required to be successful but failed: " + unsuccessfulDependencyReference);
 											} else if (build.getDependencies().stream().allMatch(it -> it.getDependency().isFinished())) {
 												build.setStatus(Status.PENDING);
 												build.setPendingDate(new Date());

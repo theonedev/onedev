@@ -1102,7 +1102,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public void runPrompt(User ai, Project project, String branch, String prompt, TaskFailedCallback taskFailedCallback) {
+	public void runPrompt(User ai, Project project, ObjectId commitId, String branch, String prompt, TaskFailedCallback taskFailedCallback) {
 		WorkspaceSpec applicableSpec = null;
 		for (var spec : project.getWorkspaceSpecs()) {
 			if (spec.getTaskAutomation() != null) {
@@ -1115,7 +1115,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		}
 		if (applicableSpec != null) {
 			final WorkspaceSpec finalApplicableSpec = applicableSpec;
-			var workspaceId = create(ai, project, project.getObjectId(branch, true), branch, applicableSpec.getName()).getId();
+			var workspaceId = create(ai, project, commitId, branch, applicableSpec.getName()).getId();
 			
 			transactionService.runAfterCommit(() -> {
 				executorService.execute(() -> {

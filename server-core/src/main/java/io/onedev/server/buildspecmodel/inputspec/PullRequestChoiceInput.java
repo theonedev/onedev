@@ -17,7 +17,7 @@ public class PullRequestChoiceInput {
 		inputSpec.appendCommonAnnotations(buffer, index);
 		if (!inputSpec.isAllowEmpty())
 			buffer.append("    @NotNull\n");
-		buffer.append("    @PullRequestChoice\n");
+		buffer.append("    @PullRequestChoice(useNumber=true)\n");
 		inputSpec.appendMethods(buffer, index, "Long", null, null);
 		
 		return buffer.toString();
@@ -31,7 +31,7 @@ public class PullRequestChoiceInput {
 			try {
 				return Long.valueOf(value);
 			} catch (NumberFormatException e) {
-				throw new ValidationException("Invalid pull request number");
+				throw new ValidationException("Invalid pull request id");
 			}
 		} else {
 			throw new ValidationException("Not eligible for multi-value");

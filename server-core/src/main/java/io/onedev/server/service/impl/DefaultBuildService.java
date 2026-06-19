@@ -112,6 +112,7 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.ProjectBuildStatusStat;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
@@ -655,8 +656,10 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	private Predicate[] getPredicates(Subject subject, @Nullable Project project, @Nullable Criteria<Build> criteria, 
 			CriteriaQuery<?> query, From<Build, Build> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = getPredicates(subject, project, root, builder);
-		if (criteria != null) 
-			predicates.add(criteria.getPredicate(null, query, root, builder));
+		if (criteria != null) {
+			var projectScope = project!=null? new ProjectScope(project, false, false):null;
+			predicates.add(criteria.getPredicate(projectScope, query, root, builder));
+		}
 		return predicates.toArray(new Predicate[0]);
 	}
 	

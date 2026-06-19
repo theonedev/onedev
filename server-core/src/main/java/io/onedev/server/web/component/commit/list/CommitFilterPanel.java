@@ -105,7 +105,7 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 				getModel().setObject(query);
 			}
 
-		}, new BuildChoiceProvider() {
+		}, new BuildChoiceProvider(true) {
 
 			@Override
 			protected Project getProject() {

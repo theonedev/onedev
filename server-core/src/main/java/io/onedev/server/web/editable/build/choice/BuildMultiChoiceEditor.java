@@ -7,16 +7,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.service.BuildService;
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
 import io.onedev.server.web.component.build.choice.BuildMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -25,11 +28,17 @@ import io.onedev.server.web.util.ProjectAware;
 
 public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 
+	@Inject
+	private BuildService buildService;
+
 	private BuildMultiChoice input;
+
+	private final boolean useNumber;
 	
 	public BuildMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
-			IModel<List<Long>> propertyModel) {
+			IModel<List<Long>> propertyModel, boolean useNumber) {
 		super(id, propertyDescriptor, propertyModel);
+		this.useNumber = useNumber;
 	}
 
 	private Project getProject() {
@@ -45,16 +54,22 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 		super.onInitialize();
 
 		List<Build> selections = new ArrayList<>();
-		if (getModelObject() != null) {
-			BuildService buildService = OneDev.getInstance(BuildService.class);
-			for (Long buildId: getModelObject()) {
-				Build build = buildService.get(buildId);
+		var buildIdsOrNumbers = getModelObject();
+		if (buildIdsOrNumbers != null) {
+			if (useNumber) 
+				Preconditions.checkState(getProject() != null);
+			for (Long buildIdOrNumber: buildIdsOrNumbers) {
+				Build build = null;
+				if (useNumber) 
+					build = buildService.find(getProject(), buildIdOrNumber);
+				else 
+					build = buildService.get(buildIdOrNumber);
 				if (build != null)
 					selections.add(build);
 			}
 		} 
 		
-		BuildChoiceProvider choiceProvider = new BuildChoiceProvider() {
+		BuildChoiceProvider choiceProvider = new BuildChoiceProvider(useNumber) {
 
 			@Override
 			protected Project getProject() {
@@ -88,7 +103,7 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	protected List<Long> convertInputToValue() throws ConversionException {
 		Collection<Build> builds = input.getConvertedInput();
 		if (builds != null)
-			return builds.stream().map(it->it.getId()).collect(Collectors.toList());
+			return builds.stream().map(it->useNumber? it.getNumber() : it.getId()).collect(Collectors.toList());
 		else
 			return new ArrayList<>();
 	}

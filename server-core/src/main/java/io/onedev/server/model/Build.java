@@ -228,6 +228,7 @@ public class Build extends ProjectBelonging
 			NAME_JOB, NAME_BRANCH, NAME_PULL_REQUEST, BuildMetric.NAME_REPORT);
 	
 	public static final Map<String, SortField<Build>> SORT_FIELDS = new LinkedHashMap<>();
+
 	static {
 		SORT_FIELDS.put(NAME_JOB, new SortField<>(PROP_JOB_NAME));
 		SORT_FIELDS.put(NAME_STATUS, new SortField<>(PROP_STATUS));
@@ -1154,4 +1155,5 @@ public class Build extends ProjectBelonging
 	public LoggingSupport getLoggingSupport() {
 		return new BuildLoggingSupport(this);
 	}
+
 }

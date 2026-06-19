@@ -99,6 +99,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.FixedBetweenCriteri
 import io.onedev.server.search.entity.issue.IssueQueryParser.FuzzyCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.LinkMatchCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.NumberCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.OperatorCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.OperatorValueCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.OrCriteriaContext;
@@ -173,7 +174,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 
 					@Override
 					public Criteria<Issue> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
-						return new ReferenceCriteria(project, ctx.getText(), Is);
+						return new ReferenceCriteria(null, ctx.getText(), Is);
+					}
+
+					@Override
+					public Criteria<Issue> visitNumberCriteria(NumberCriteriaContext ctx) {
+						return new NumberCriteria(getNumber(ctx.getText()), Is);
 					}
 
 					@Override
@@ -370,7 +376,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 									} else if (fieldName.equals(NAME_TICK_COUNT)) {
 										criterias.add(new TickCountCriteria(getIntValue(value), operator));
 									} else if (fieldName.equals(NAME_NUMBER)) {
-										criterias.add(new ReferenceCriteria(project, value, operator));
+										criterias.add(new NumberCriteria(getNumber(value), operator));
 									} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
 										int intValue = timeTrackingSetting.parseWorkingPeriod(value);
 										criterias.add(new EstimatedTimeCriteria(intValue, operator));
@@ -380,11 +386,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 									} else {
 										FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 										if (field instanceof IssueChoiceField) {
-											criterias.add(new IssueFieldCriteria(fieldName, project, value, operator));
+											criterias.add(new IssueFieldCriteria(fieldName, getNumber(value), operator));
 										} else if (field instanceof BuildChoiceField) {
-											criterias.add(new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple(), operator));
+											criterias.add(new BuildFieldCriteria(fieldName, getNumber(value), field.isAllowMultiple(), operator));
 										} else if (field instanceof PullRequestChoiceField) {
-											criterias.add(new PullRequestFieldCriteria(fieldName, project, value, operator));
+											criterias.add(new PullRequestFieldCriteria(fieldName, getNumber(value), operator));
 										} else if (field instanceof CommitField) {
 											criterias.add(new CommitFieldCriteria(fieldName, project, value, operator));
 										} else if (field instanceof BooleanField) {
@@ -453,7 +459,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 											criterias.add(new ProgressCriteria(floatValue, operator));
 											break;
 										case NAME_NUMBER:
-											criterias.add(new ReferenceCriteria(project, value, operator));
+											criterias.add(new NumberCriteria(getNumber(value), operator));
 											break;
 										default:
 											FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);

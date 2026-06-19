@@ -41,8 +41,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
-
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -50,11 +48,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.BuildParamService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
@@ -65,6 +63,7 @@ import io.onedev.server.search.entity.build.BuildQueryParser.FieldOperatorCriter
 import io.onedev.server.search.entity.build.BuildQueryParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.FuzzyCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.NumberCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.OperatorCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.OperatorValueCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.OrCriteriaContext;
@@ -72,6 +71,7 @@ import io.onedev.server.search.entity.build.BuildQueryParser.OrderContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.QueryContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.ReferenceCriteriaContext;
+import io.onedev.server.service.BuildParamService;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
@@ -121,7 +121,12 @@ public class BuildQuery extends EntityQuery<Build> {
 
 					@Override
 					public Criteria<Build> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
-						return new ReferenceCriteria(project, ctx.getText(), BuildQueryParser.Is);
+						return new ReferenceCriteria(null, ctx.getText(), BuildQueryParser.Is);
+					}
+
+					@Override
+					public Criteria<Build> visitNumberCriteria(NumberCriteriaContext ctx) {
+						return new NumberCriteria(getNumber(ctx.getText()), BuildQueryParser.Is);
 					}
 
 					@Override
@@ -259,7 +264,7 @@ public class BuildQuery extends EntityQuery<Build> {
 											criterias.add(new JobCriteria(value, operator));
 											break;
 										case NAME_NUMBER:
-											criterias.add(new ReferenceCriteria(project, value, operator));
+											criterias.add(new NumberCriteria(getNumber(value), operator));
 											break;
 										case NAME_VERSION:
 											criterias.add(new VersionCriteria(value, operator));
@@ -282,7 +287,7 @@ public class BuildQuery extends EntityQuery<Build> {
 									break;
 								case IsLessThan:
 								case IsGreaterThan:
-									criterias.add(new ReferenceCriteria(project, value, operator));
+									criterias.add(new NumberCriteria(getNumber(value), operator));
 									break;
 								default:
 									throw new IllegalStateException();

@@ -72,9 +72,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Number")) {
-				return SuggestionUtils.suggestNumber(
-						terminalExpect.getUnmatchedText(), 
-						_T("find build with this number"));
+				return SuggestionUtils.suggestNumber(terminalExpect.getUnmatchedText(), _T("find by number"), true);
 			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
@@ -136,7 +134,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 											else
 												return null;
 										case Build.NAME_NUMBER:
-											return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+											return SuggestionUtils.suggestNumber(matchWith, _T("find by number"), false);
 										case Build.NAME_VERSION:
 											if (project != null && !matchWith.contains("*"))
 												return SuggestionUtils.suggestBuildVersions(project, matchWith);
@@ -214,11 +212,6 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				return Optional.of(_T("add another order"));
 			else
 				return Optional.of(_T("or match another value"));
-		} else if (suggestedLiteral.equals("#")) {
-			if (getProject() != null)
-				return Optional.of(_T("find build by number"));
-			else
-				return null;
 		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");

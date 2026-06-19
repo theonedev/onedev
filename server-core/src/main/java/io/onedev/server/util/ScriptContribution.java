@@ -1,15 +1,15 @@
 package io.onedev.server.util;
 
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.jspecify.annotations.Nullable;
+
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GroovyScript;
-import org.eclipse.jgit.revwalk.RevCommit;
-
-import org.jspecify.annotations.Nullable;
+import io.onedev.server.service.EmailAddressService;
 
 /**
  * Use abstract class instead of interface here as otherwise groovy cannot invoke static methods defined here

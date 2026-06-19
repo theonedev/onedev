@@ -472,7 +472,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 				}
 
 				private IssueChoiceProvider getIssueChoiceProvider() {
-					return new IssueChoiceProvider() {
+					return new IssueChoiceProvider(false) {
+						
 						@Override
 						protected Project getProject() {
 							return getIssue().getProject();

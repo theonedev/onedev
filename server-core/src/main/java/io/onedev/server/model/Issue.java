@@ -6,7 +6,6 @@ import static io.onedev.server.model.Issue.PROP_BOARD_POSITION;
 import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
 import static io.onedev.server.model.Issue.PROP_CONFUSED_COUNT;
 import static io.onedev.server.model.Issue.PROP_EYES_COUNT;
-import static io.onedev.server.model.Issue.PROP_TICK_COUNT;
 import static io.onedev.server.model.Issue.PROP_HEART_COUNT;
 import static io.onedev.server.model.Issue.PROP_SMILE_COUNT;
 import static io.onedev.server.model.Issue.PROP_STATE;
@@ -14,6 +13,7 @@ import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Issue.PROP_TADA_COUNT;
 import static io.onedev.server.model.Issue.PROP_THUMBS_DOWN_COUNT;
 import static io.onedev.server.model.Issue.PROP_THUMBS_UP_COUNT;
+import static io.onedev.server.model.Issue.PROP_TICK_COUNT;
 import static io.onedev.server.model.Issue.PROP_TITLE;
 import static io.onedev.server.model.Issue.PROP_UUID;
 import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
@@ -90,6 +90,7 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.IssueSortField;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.service.GroupService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.SettingService;
@@ -425,6 +426,10 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	private transient Collection<User> authorizedUsers;
 
 	private transient Optional<String> branchOptional;
+
+	private transient Optional<Build> fieldBuildOptional;
+
+	private transient Optional<ObjectId> fieldCommitIdOptional;
 	
 	public String getState() {
 		return state;
@@ -1410,6 +1415,44 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 				branchOptional = Optional.empty();
 		}
 		return branchOptional.orElse(null);
+	}
+
+	@Nullable
+	public ObjectId getFieldCommitId() {
+		if (fieldCommitIdOptional == null) {
+			ObjectId commitId = null;
+			for (var field: getFields()) {
+				if (field.getType().equals(InputSpec.COMMIT) && isFieldVisible(field.getName())) {
+					commitId = getProject().getObjectId(field.getValue(), false);
+					if (commitId != null)
+						break;
+				}
+			}
+			if (commitId == null && getFieldBuild() != null) 
+				commitId = getProject().getObjectId(getFieldBuild().getCommitHash(), false);
+			fieldCommitIdOptional = Optional.ofNullable(commitId);
+		}
+		return fieldCommitIdOptional.orElse(null);
+	}
+
+	@Nullable
+	public Build getFieldBuild() {
+		if (fieldBuildOptional == null) {
+			Build build = null;
+			for (var field: getFields()) {
+				if (field.getType().equals(InputSpec.BUILD) && isFieldVisible(field.getName())) {
+					try {
+						build = OneDev.getInstance(BuildService.class).find(getProject(), Long.valueOf(field.getValue()));
+						if (build != null)
+							break;
+					} catch (NumberFormatException e) {
+						continue;
+					}
+				}
+			}
+			fieldBuildOptional = Optional.ofNullable(build);
+		}
+		return fieldBuildOptional.orElse(null);
 	}
 
 }

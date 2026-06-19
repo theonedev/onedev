@@ -17,7 +17,7 @@ public class IssueChoiceInput {
 		inputSpec.appendCommonAnnotations(buffer, index);
 		if (!inputSpec.isAllowEmpty())
 			buffer.append("    @NotNull\n");
-		buffer.append("    @IssueChoice\n");
+		buffer.append("    @IssueChoice(useNumber=true)\n");
 		inputSpec.appendMethods(buffer, index, "Long", null, null);
 		
 		return buffer.toString();
@@ -31,7 +31,7 @@ public class IssueChoiceInput {
 			try {
 				return Long.valueOf(value);
 			} catch (NumberFormatException e) {
-				throw new ValidationException("Invalid issue number");
+				throw new ValidationException("Invalid issue id");
 			}
 		} else {
 			throw new ValidationException("Not eligible for multi-value");

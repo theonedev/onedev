@@ -32,11 +32,10 @@
 	font-weight: 500;	
 }
 
-@media(min-width: 992px) {
-	.pull-request-list>div>.body tr.request .workspaces {
-		display: none !important;
-	}
-	.pull-request-list>div>.body tr.request:hover .workspaces {
-		display: inline-flex !important;
-	}
+.pull-request-list>div>.body tr.request .workspaces {
+	display: none !important;
+}
+.pull-request-list>div>.body tr.request:hover .workspaces,
+.pull-request-list>div>.body tr.request .dropdown-aware-open .workspaces {
+	display: inline-flex !important;
 }

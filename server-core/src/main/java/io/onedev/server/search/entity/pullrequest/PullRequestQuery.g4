@@ -11,6 +11,7 @@ criteria
     | operator=(NeedActionOf|ToBeReviewedBy|ToBeChangedBy|ToBeMergedBy|AssignedTo|ApprovedBy|RequestedForChangesBy|SubmittedBy|WatchedBy|IgnoredBy|CommentedBy|Mentioned|IncludesCommit|IncludesIssue) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince|Contains) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | Reference #ReferenceCriteria
+    | Number #NumberCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -231,7 +232,11 @@ Quoted
     ;
 
 Reference
-    : ([a-zA-Z0-9_]([a-zA-Z0-9_\-/.]*[a-zA-Z0-9_])?)? '#' [0-9]+ | [A-Z][A-Z]+ '-' [0-9]+
+    : ([a-zA-Z0-9_]([a-zA-Z0-9_\-/.]*[a-zA-Z0-9_])?) '#' [0-9]+ | [A-Z][A-Z]+ '-' [0-9]+
+    ;
+
+Number
+    : '#' [0-9]+
     ;
 
 Comma

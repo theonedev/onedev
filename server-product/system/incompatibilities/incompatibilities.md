@@ -2,15 +2,21 @@
 
 ### CI/CD
 
-The `Default (Shell on Linux, Batch on Windows)` command interpreter of the CI/CD `Command` step has been removed. Use the explicit `POSIX Compatible Shell` or `Windows Batch` interpreter instead.
+1. The `Default (Shell on Linux, Batch on Windows)` command interpreter of the CI/CD `Command` step has been removed. Use the explicit `POSIX Compatible Shell` or `Windows Batch` interpreter instead.
 
-Existing build specs are migrated automatically. Commands running in a container are migrated to `POSIX Shell`. Commands running directly on an agent are inspected for Windows batch syntax; if the interpreter cannot be determined reliably, `POSIX Shell` is used. Review migrated host commands if they rely on Windows batch syntax that cannot be detected automatically.
+    Existing build specs are migrated automatically. Commands running in a container are migrated to `POSIX Shell`. Commands running directly on an agent are inspected for Windows batch syntax; if the interpreter cannot be determined reliably, `POSIX Shell` is used. Review migrated host commands if they rely on Windows batch syntax that cannot be detected automatically.
+
+1. The post-build action `Create issue` now only supports to create issues in the same project as the build. The option to specify a different target project has been removed.
 
 ### Workspace
 
 The `Default (sh on Linux, batch on Windows)` workspace shell has been removed. Use the explicit `POSIX Compatible Shell` or `Windows Batch` workspace shell instead.
 
 Existing workspace specs are migrated automatically. Workspaces using a container image are migrated to `POSIX Shell`. Other workspaces are inspected using their setup commands; if the shell cannot be determined reliably, `POSIX Shell` is used. Review migrated host workspace specs if their setup commands rely on Windows batch syntax that cannot be detected automatically.
+
+### Issue
+
+Custom issue fields of type `Build`, `Issue`, and `Pull Request` now only allow referencing entities in the same project as the issue. References to entities outside the project will be removed during upgrade.
 
 # 15.1.0
 

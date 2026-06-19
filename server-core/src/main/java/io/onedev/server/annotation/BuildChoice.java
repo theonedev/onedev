@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BuildChoice {
 
-	// optionally specify a method to return project for build query
+	boolean useNumber() default false;
 	
 }

@@ -409,12 +409,13 @@ public class SuggestionUtils {
 		return suggest(linkNames, matchWith);
 	}
 	
-	public static List<InputSuggestion> suggestNumber(String matchWith, String suggestDescription) {
+	public static List<InputSuggestion> suggestNumber(String matchWith, String suggestDescription, boolean withHashPrefix) {
+		var prefix = withHashPrefix? "#": "";
 		if (matchWith.startsWith("#"))
 			matchWith = matchWith.substring(1);
-		if (NumberUtils.isDigits(matchWith)) {
+		if (NumberUtils.isDigits(matchWith) || matchWith.length() == 0) {
 			var suggestions = new ArrayList<InputSuggestion>();
-			suggestions.add(new InputSuggestion(matchWith, suggestDescription, null));
+			suggestions.add(new InputSuggestion(prefix + matchWith, suggestDescription, null));
 			return suggestions;
 		} else {
 			return null;
@@ -482,7 +483,7 @@ public class SuggestionUtils {
 		}
 		return suggestions;
 	}
-	
+
 	public static List<InputSuggestion> suggestWorkspaces(@Nullable Project project, String matchWith, int count) {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', null);

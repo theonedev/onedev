@@ -8818,7 +8818,75 @@ public class DataMigrator {
 			element.setName(className);
 	}
 
+	@Nullable
+	private static String getReferenceChoiceNumber(
+			String type, 
+			String value, 
+			@Nullable String projectId,
+			Map<String, String> buildNumbers, 
+			Map<String, String> issueNumbers,
+			Map<String, String> pullRequestNumbers,
+			Map<String, String> buildProjects,
+			Map<String, String> issueProjects,
+			Map<String, String> pullRequestProjects) {
+		Map<String, String> numbers;
+		Map<String, String> projects;
+		if (InputSpec.BUILD.equals(type)) {
+			numbers = buildNumbers;
+			projects = buildProjects;
+		} else if (InputSpec.ISSUE.equals(type)) {
+			numbers = issueNumbers;
+			projects = issueProjects;
+		} else if (InputSpec.PULL_REQUEST.equals(type)) {
+			numbers = pullRequestNumbers;
+			projects = pullRequestProjects;
+		} else {
+			return null;
+		}
+
+		if (projectId != null && projectId.equals(projects.get(value)))
+			return numbers.get(value);
+		else
+			return null;
+	}
+
+	private static boolean isReferenceChoiceType(String type) {
+		return InputSpec.BUILD.equals(type) || InputSpec.ISSUE.equals(type) || InputSpec.PULL_REQUEST.equals(type);
+	}
+
 	private void migrate229(File dataDir, Stack<Integer> versions) {
+		Map<String, String> buildNumbers = new HashMap<>();
+		Map<String, String> issueNumbers = new HashMap<>();
+		Map<String, String> pullRequestNumbers = new HashMap<>();
+		Map<String, String> buildProjects = new HashMap<>();
+		Map<String, String> issueProjects = new HashMap<>();
+		Map<String, String> pullRequestProjects = new HashMap<>();
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element buildElement : dom.getRootElement().elements()) {
+					var id = buildElement.elementTextTrim("id");
+					buildNumbers.put(id, buildElement.elementTextTrim("number"));
+					buildProjects.put(id, buildElement.elementTextTrim("project"));
+				}
+			} else if (file.getName().startsWith("Issues.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element issueElement : dom.getRootElement().elements()) {
+					var id = issueElement.elementTextTrim("id");
+					issueNumbers.put(id, issueElement.elementTextTrim("number"));
+					issueProjects.put(id, issueElement.elementTextTrim("project"));
+				}
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element pullRequestElement : dom.getRootElement().elements()) {
+					var id = pullRequestElement.elementTextTrim("id");
+					pullRequestNumbers.put(id, pullRequestElement.elementTextTrim("number"));
+					pullRequestProjects.put(id, pullRequestElement.elementTextTrim("targetProject"));
+				}
+			}
+		}
+
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
@@ -8843,6 +8911,44 @@ public class DataMigrator {
 									shellElement.addElement("shell").setText("sh");
 							}
 						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueFields.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element issueFieldElement : dom.getRootElement().elements()) {
+					var type = issueFieldElement.elementTextTrim("type");
+					var valueElement = issueFieldElement.element("value");
+					var ordinalElement = issueFieldElement.element("ordinal");
+					if (valueElement != null) {
+						var projectId = issueProjects.get(issueFieldElement.elementTextTrim("issue"));
+						var number = getReferenceChoiceNumber(
+								type, valueElement.getTextTrim(), projectId, buildNumbers, issueNumbers,
+								pullRequestNumbers, buildProjects, issueProjects, pullRequestProjects);
+
+						if (number != null) {
+							valueElement.setText(number);
+							ordinalElement.setText(number);
+						} else if (isReferenceChoiceType(type)) {
+							issueFieldElement.detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("BuildParams.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element buildParamElement : dom.getRootElement().elements()) {
+					var type = buildParamElement.elementTextTrim("type");
+					var valueElement = buildParamElement.element("value");
+					if (valueElement != null) {
+						var projectId = buildProjects.get(buildParamElement.elementTextTrim("build"));
+						var number = getReferenceChoiceNumber(
+								type, valueElement.getTextTrim(), projectId, buildNumbers, issueNumbers,
+								pullRequestNumbers, buildProjects, issueProjects, pullRequestProjects);
+						if (number != null)
+							valueElement.setText(number);
+						else if (isReferenceChoiceType(type))
+							buildParamElement.detach();
 					}
 				}
 				dom.writeToFile(file, false);

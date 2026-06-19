@@ -19,13 +19,13 @@ public class ReferenceCriteria extends Criteria<Build> {
 
 	private final int operator;
 	
-	private final String value;
+	private final Project project;
 	
 	private final BuildReference reference;
 	
 	public ReferenceCriteria(@Nullable Project project, String value, int operator) {
 		this.operator = operator;
-		this.value = value;
+		this.project = project;
 		reference = BuildReference.of(value, project);
 	}
 
@@ -35,12 +35,8 @@ public class ReferenceCriteria extends Criteria<Build> {
 		Predicate numberPredicate;
 		if (operator == BuildQueryLexer.Is)
 			numberPredicate = builder.equal(attribute, reference.getNumber());
-		else if (operator == BuildQueryLexer.IsNot)
+		else 
 			numberPredicate = builder.not(builder.equal(attribute, reference.getNumber()));
-		else if (operator == BuildQueryLexer.IsGreaterThan)
-			numberPredicate = builder.greaterThan(attribute, reference.getNumber());
-		else
-			numberPredicate = builder.lessThan(attribute, reference.getNumber());
 		return builder.and(
 				builder.equal(from.get(Build.PROP_PROJECT), reference.getProject()),
 				numberPredicate);
@@ -51,12 +47,8 @@ public class ReferenceCriteria extends Criteria<Build> {
 		if (build.getProject().equals(reference.getProject())) {
 			if (operator == BuildQueryLexer.Is)
 				return build.getNumber() == reference.getNumber();
-			else if (operator == BuildQueryLexer.IsNot)
+			else 
 				return build.getNumber() != reference.getNumber();
-			else if (operator == BuildQueryLexer.IsGreaterThan)
-				return build.getNumber() > reference.getNumber();
-			else
-				return build.getNumber() < reference.getNumber();
 		} else {
 			return false;
 		}
@@ -64,9 +56,7 @@ public class ReferenceCriteria extends Criteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Build.NAME_NUMBER) + " " 
-				+ BuildQuery.getRuleName(operator) + " " 
-				+ quote(value);
+		return reference.toString(project);
 	}
 
 }
