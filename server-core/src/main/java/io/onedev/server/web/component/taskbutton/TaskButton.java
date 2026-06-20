@@ -185,18 +185,26 @@ public abstract class TaskButton extends AjaxButton {
 			prevFuture.cancel(true);
 		
 		new ModalPanel(target) {
-			
-			private TaskResult result;
-			
+						
 			@Override
 			protected void onClosed() {
 				super.onClosed();
 				TaskFuture future = taskFutureService.getTaskFutures().remove(taskId);
 				
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				if (future != null) 
+				boolean successful = false;
+				if (future != null) {
+					if (future.isDone() && !future.isCancelled()) {
+						try {
+							TaskResult taskResult = future.get();
+							successful = taskResult.isSuccessful();
+						} catch (InterruptedException | ExecutionException e) {
+							throw new RuntimeException(e);
+						}
+					}
 					future.cancel(true);
-				onCompleted(target, result != null && result.isSuccessful());
+				}
+				onCompleted(target, successful);
 			}
 
 			@Override

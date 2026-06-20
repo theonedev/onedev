@@ -39,7 +39,10 @@ public class LfsFetchAllCommand {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				if (line.contains("Fetching all references..."))
+					logger.trace(line);
+				else
+					logger.error(line);
 			}
 
 		}).checkReturnCode();
