@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.pullrequests.detail;
 
 import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.model.PullRequestReview.Status.EXCLUDED;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
@@ -2047,7 +2048,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getAuthUser());
-					return review != null && review.getStatus() == Status.PENDING;
+					return review != null && review.getStatus() != EXCLUDED;
 				} else {
 					return false;
 				}
@@ -2090,7 +2091,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getAuthUser());
-					return review != null && review.getStatus() == Status.PENDING;
+					return review != null && review.getStatus() != EXCLUDED;
 				} else {
 					return false;
 				}

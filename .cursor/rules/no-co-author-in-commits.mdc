@@ -5,6 +5,9 @@ alwaysApply: true
 
 # No Co-Author Trailers in Commit Messages
 
+**Note:** Do not add co-author or AI attribution info to commit messages in
+future work unless the user explicitly asks for it.
+
 When drafting, generating, or composing a git commit message (including via
 `generate-commit-message` or before `git commit`):
 

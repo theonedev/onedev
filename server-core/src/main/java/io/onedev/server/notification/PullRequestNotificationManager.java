@@ -1,15 +1,16 @@
 package io.onedev.server.notification;
 
+import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static io.onedev.server.notification.NotificationUtils.isNotified;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,40 +22,31 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.server.ai.AiTask;
-import io.onedev.server.ai.TaskTool;
-import io.onedev.server.ai.ToolUtils;
-import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
-import io.onedev.server.ai.responsehandlers.AddPullRequestComment;
-import io.onedev.server.ai.taskchecker.NoopTaskChecker;
-import io.onedev.server.ai.taskchecker.PullRequestReviewTaskChecker;
-import io.onedev.server.ai.tools.codecomment.GetCodeComment;
-import io.onedev.server.ai.tools.codecomment.GetCodeCommentReplies;
-import io.onedev.server.ai.tools.codecomment.ResolveCodeComment;
-import io.onedev.server.ai.tools.codecomment.UnresolveCodeComment;
-import io.onedev.server.ai.tools.pullrequest.ApprovePullRequest;
-import io.onedev.server.ai.tools.pullrequest.GetPullRequest;
-import io.onedev.server.ai.tools.pullrequest.GetPullRequestComments;
-import io.onedev.server.ai.tools.pullrequest.RequestChangesForPullRequestTool;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
+import io.onedev.server.event.project.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
-import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentCreated;
-import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentEvent;
-import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentReplyCreated;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
+import io.onedev.server.event.project.pullrequest.PullRequestMergePreviewUpdated;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
 import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
@@ -71,50 +63,26 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.service.PullRequestCommentService;
 import io.onedev.server.service.PullRequestMentionService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.PullRequestWatchService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.commenttext.MarkdownText;
 import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.workspace.TaskFailedCallback;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.VisitInfoService;
 
 @Singleton
 public class PullRequestNotificationManager implements Serializable {
 
-	private static final String AI_REVIEW_DECISION_TOOLS = """
-			one of these tools, and call it only once: `{0}` if you are satisfied with the change, or `{1}` if you \
-			think it needs more work. If you are unsure, explain what is unclear via final response""";
-
-	private static final String AI_PROMPT_MENTIONED_IN_PULL_REQUEST = """
-			You are mentioned in a pull request. The content mentioning you is presented as user \
-			prompt. Use existing comments as conversation context. Use getPullRequest for PR details; \
-			use getDiffPatch, getFileContent, querySymbolDefinitions, or queryCodeSnippets as needed to \
-			inspect the change. When feedback should be tied to specific lines, use \
-			getPullRequestCodeComments and addPullRequestCodeComment \
-			(range on the right side of the diff, 1-based at PR head); use \
-			addCodeCommentReply, resolveCodeComment, or \
-			unresolveCodeComment to continue or triage existing code-comment threads.""";
-
-	private static final String AI_PROMPT_MENTIONED_IN_CODE_COMMENT = """
-			You are mentioned in a pull request code comment. The content mentioning you is presented \
-			as user prompt. Use existing comment and replies as conversation context. Call relevant \
-			tools to inspect associated pull request if necessary. Use resolveCodeComment or \
-			unresolveCodeComment when the discussion outcome is to close or reopen the thread""";
-
-	private static final String AI_PROMPT_REVIEW_PULL_REQUEST = """
-			Review current pull request. Use getPullRequest for PR details; use getDiffPatch, getFileContent, \
-			querySymbolDefinitions, and queryCodeSnippets as needed to inspect the change. \
-			Use getPullRequestComments and getPullRequestCodeComments for \
-			discussion context. Prefer line-anchored feedback: call addPullRequestCodeComment for \
-			each distinct issue (the line range must lie on the right side of the PR diff—added or \
-			unchanged context—using 1-based line numbers in the file at the PR head). To follow up on \
-			an existing anchor, use addCodeCommentReply with the comment id; use \
-			resolveCodeComment or unresolveCodeComment when a prior thread should be closed or reopened. \
-			""";
-
+	private static final Logger logger = LoggerFactory.getLogger(PullRequestNotificationManager.class);
+	
 	@Inject
 	private MailService mailService;
 
@@ -132,6 +100,15 @@ public class PullRequestNotificationManager implements Serializable {
 
 	@Inject
 	private SettingService settingService;
+
+	@Inject
+	private PullRequestCommentService pullRequestCommentService;
+
+	@Inject
+	private PullRequestService pullRequestService;
+
+	@Inject
+	private WorkspaceService workspaceService;
 
 	@Transactional
 	@Listen
@@ -204,7 +181,7 @@ public class PullRequestNotificationManager implements Serializable {
 			if (user != null) {
 				if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 					notifiedUsers.add(user); 
-				if (!user.isSystem() && user.getType() != User.Type.AI)
+				if (!user.isSystem() && user.getType() != AI)
 					watchService.watch(request, user, true);
 			}
 	
@@ -217,7 +194,7 @@ public class PullRequestNotificationManager implements Serializable {
 					notifiedUsers.add(committer);
 				}
 				for (User each : committers) {
-					if (!each.isSystem() && each.getType() != User.Type.AI)
+					if (!each.isSystem() && each.getType() != AI)
 						watchService.watch(request, each, true);
 				}
 			}
@@ -255,7 +232,7 @@ public class PullRequestNotificationManager implements Serializable {
 						|| changeData instanceof PullRequestRequestedForChangesData
 						|| changeData instanceof PullRequestDiscardData)
 						&& request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
-					if (request.getSubmitter().getType() != User.Type.AI) {
+					if (request.getSubmitter().getType() != AI) {
 						String subject = String.format(
 								"[Pull Request %s] (%s) %s", 
 								request.getReference(),
@@ -271,11 +248,6 @@ public class PullRequestNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (changeData instanceof PullRequestRequestedForChangesData 
-							&& isAiEntitled(request, request.getSubmitter())) {
-						new AddPullRequestComment(request.getId()).onResponse(
-							request.getSubmitter(), 
-							"I don't know how to improve the pull request yet");
 					}
 					notifiedUsers.add(request.getSubmitter());
 				}
@@ -286,10 +258,10 @@ public class PullRequestNotificationManager implements Serializable {
 			}
 	
 			for (User assignee : assignees) {
-				if (assignee.getType() != User.Type.AI)
+				if (assignee.getType() != AI) 
 					watchService.watch(request, assignee, true);
 				if (!notifiedUsers.contains(assignee)) {
-					if (assignee.getType() != User.Type.AI) {
+					if (assignee.getType() != AI) {
 						String subject = String.format(
 								"[Pull Request %s] (Assigned) %s",
 								request.getReference(), 
@@ -309,17 +281,16 @@ public class PullRequestNotificationManager implements Serializable {
 									replyAddress, senderName, threadingReferences);
 						}
 					} else if (isAiEntitled(request, assignee)) {
-						new AddPullRequestComment(request.getId()).onResponse(assignee, "I don't know how to work as assignee yet");
 					}
 					notifiedUsers.add(assignee);
 				}
 			}
 	
 			for (User reviewer : reviewers) {
-				if (reviewer.getType() != User.Type.AI)
+				if (reviewer.getType() != AI) 
 					watchService.watch(request, reviewer, true);
 				if (!notifiedUsers.contains(reviewer)) {
-					if (reviewer.getType() != User.Type.AI) {
+					if (reviewer.getType() != AI) {
 						String subject = String.format(
 							"[Pull Request %s] (Review Request) %s",
 							request.getReference(), 
@@ -339,16 +310,16 @@ public class PullRequestNotificationManager implements Serializable {
 									getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(request, reviewer)) {
-						var tools = new ArrayList<TaskTool>();
-						addPullRequestInspectionTools(tools, request, true, true);
-						var task = new AiTask(
-							null,
-							aiPromptReviewPullRequest(),
-							tools,
-							new PullRequestReviewTaskChecker(),
-							new AddPullRequestComment(request.getId()));
-						userService.execute(reviewer, task);
+					} else if (isAiEntitled(request, reviewer) && canCreateWorkspace(reviewer, request)) {				
+						var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
+						var prompt = """
+								Work on pull request %d to perform the review. \
+								Mention @%s in your review note or summary ONLY if you \
+								want the user to react to your feedbacks. \
+								Stay on current checkout and do not modify code. \
+								Submit work afterwards without confirmation."""
+								.formatted(request.getNumber(), request.getSubmitter().getName());
+						runPrompt(reviewer, request, request.getProject(), commitId, null, prompt);
 					}
 					notifiedUsers.add(reviewer);
 				}
@@ -360,10 +331,10 @@ public class PullRequestNotificationManager implements Serializable {
 					User mentionedUser = userService.findByName(userName);
 					if (mentionedUser != null) {
 						mentionService.mention(request, mentionedUser);
-						if (mentionedUser.getType() != User.Type.AI) 
+						if (mentionedUser.getType() != AI) 
 							watchService.watch(request, mentionedUser, true);
 						if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
-							if (mentionedUser.getType() != User.Type.AI) {
+							if (mentionedUser.getType() != AI) {
 								String subject = String.format(
 										"[Pull Request %s] (Mentioned You) %s", 
 										request.getReference(), 
@@ -379,45 +350,7 @@ public class PullRequestNotificationManager implements Serializable {
 											replyAddress, senderName, threadingReferences);
 								}
 							} else if (isAiEntitled(request, mentionedUser)) {
-								if (event instanceof PullRequestOpened) {
-									var tools = new ArrayList<TaskTool>();
-									addPullRequestInspectionTools(tools, request, false, true);
-									var task = new AiTask(
-										AI_PROMPT_MENTIONED_IN_PULL_REQUEST,
-										event.getTextBody(),
-										tools,
-										new NoopTaskChecker(),
-										new AddPullRequestComment(request.getId()));
-									userService.execute(mentionedUser, task);
-								} else if (event instanceof PullRequestCommentCreated) {
-									var review = request.getReview(mentionedUser);
-									var pendingReview = review != null && review.getStatus() == PullRequestReview.Status.PENDING;
-									var tools = new ArrayList<TaskTool>();
-									addPullRequestInspectionTools(tools, request, pendingReview, true);
-									var task = new AiTask(
-										aiPromptMentionedInPullRequest(pendingReview),
-										event.getTextBody(),
-										tools,
-										new PullRequestReviewTaskChecker(),
-										new AddPullRequestComment(request.getId()));
-									userService.execute(mentionedUser, task);
-								} else if (event instanceof PullRequestCodeCommentCreated || event instanceof PullRequestCodeCommentReplyCreated) {
-									var tools = new ArrayList<TaskTool>();
-									var codeCommentEvent = (PullRequestCodeCommentEvent) event;
-									var comment = codeCommentEvent.getComment();
-									tools.add(new GetCodeComment(comment.getId()));
-									tools.add(new GetCodeCommentReplies(comment.getId()));
-									tools.add(new ResolveCodeComment());
-									tools.add(new UnresolveCodeComment());
-									addPullRequestInspectionTools(tools, request, false, false);
-									var task = new AiTask(
-										aiPromptMentionedInCodeComment(false),
-										event.getTextBody(),
-										tools,
-										new NoopTaskChecker(),
-										new AddCodeCommentReply(comment.getId()));
-									userService.execute(mentionedUser, task);
-								}
+								addressConcern(mentionedUser, user, request);
 							}
 							notifiedUsers.add(mentionedUser);
 						}
@@ -463,58 +396,167 @@ public class PullRequestNotificationManager implements Serializable {
 							bccEmailAddresses, subject, htmlBody, textBody,
 							replyAddress, senderName, threadingReferences);
 				}
-			}			
+			}	
+
+			if (request.getSubmitter().getType() == AI) {
+				if (event instanceof PullRequestBuildEvent pullRequestBuildEvent 
+							&& pullRequestBuildEvent.getBuild().isFailed() 
+							&& canWriteCode(request.getSubmitter(), request, request.getSourceProject())) {
+					var commitId = Preconditions.checkNotNull(request.getSourceHead());
+					var prompt = """
+							Work on pull request %d to fix failure of build %d. \
+							Do not modify code unless the reason is clear. \
+							Stay on current checkout to do the job. \
+							Submit work afterwards without confirmation."""
+							.formatted(request.getNumber(), pullRequestBuildEvent.getBuild().getNumber());
+					runPrompt(request.getSubmitter(), request, request.getSourceProject(), commitId, request.getSourceBranch(), prompt);
+				}
+				if (event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null 
+							&& request.getMergePreview().getMergeCommitHash() == null 
+							&& canWriteCode(request.getSubmitter(), request, request.getSourceProject())
+							&& canReadCode(request.getSubmitter(), request, request.getTargetProject())) {
+					var commitId = Preconditions.checkNotNull(request.getSourceHead());
+					var prompt = """
+						Work on pull request %d to resolve merge conflict. \
+						Stay on current checkout to do the job. \
+						Submit work afterwards without confirmation."""
+						.formatted(request.getNumber());
+					runPrompt(request.getSubmitter(), request, request.getSourceProject(), commitId, request.getSourceBranch(), prompt);					
+				}
+			}
+			
+			User aiAssignee = null;
+			if (event instanceof PullRequestAssigned) {
+				aiAssignee = ((PullRequestAssigned) event).getAssignee();
+			} else if (event instanceof PullRequestOpened 
+					|| event instanceof PullRequestChanged pullRequestChanged && pullRequestChanged.getChange().getData() instanceof PullRequestApproveData
+					|| event instanceof PullRequestBuildEvent pullRequestBuildEvent && pullRequestBuildEvent.getBuild().isSuccessful()) {
+				for (PullRequestAssignment assignment : request.getAssignments()) {
+					if (assignment.getUser().getType() == AI) {
+						aiAssignee = assignment.getUser();
+						break;
+					}
+				}
+			}
+			if (aiAssignee != null && request.checkMergeCondition() == null && canWriteCode(aiAssignee, request, request.getTargetProject())) {
+				var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
+				var prompt = """
+						Work on pull request %d to review and merge if ready. \
+						Otherwise, mention @%s in a PR comment to request changes. \
+						Stay on current checkout and do not modify code. \
+						Submit work afterwards without confirmation."""
+						.formatted(request.getNumber(), request.getSubmitter().getName());
+				runPrompt(aiAssignee, request, request.getTargetProject(), commitId, null, prompt);								
+			}
 		}
-	}
-
-	private static String formatAiReviewDecisionTools() {
-		return MessageFormat.format(AI_REVIEW_DECISION_TOOLS,
-				ApprovePullRequest.TOOL_NAME, RequestChangesForPullRequestTool.TOOL_NAME);
-	}
-
-	private static String formatAiReviewDecisionWhenRequested() {
-		return "If you are requested to review the pull request, record your final decision by calling "
-				+ formatAiReviewDecisionTools();
-	}
-
-	private static String aiPromptMentionedInPullRequest(boolean pendingReview) {
-		if (pendingReview)
-			return AI_PROMPT_MENTIONED_IN_PULL_REQUEST + "\n\n" + formatAiReviewDecisionWhenRequested();
-		return AI_PROMPT_MENTIONED_IN_PULL_REQUEST;
-	}
-
-	private static String aiPromptMentionedInCodeComment(boolean pendingReview) {
-		if (pendingReview)
-			return AI_PROMPT_MENTIONED_IN_CODE_COMMENT + ".\n\n" + formatAiReviewDecisionWhenRequested();
-		return AI_PROMPT_MENTIONED_IN_CODE_COMMENT;
-	}
-
-	private static String aiPromptReviewPullRequest() {
-		return AI_PROMPT_REVIEW_PULL_REQUEST + "Record your final decision by calling " + formatAiReviewDecisionTools();
-	}
-
-	private static void addPullRequestInspectionTools(ArrayList<TaskTool> tools, PullRequest request,
-			boolean includeReviewTools, boolean includeCodeCommentTools) {
-		long requestId = request.getId();
-		var projectId = request.getProject().getId();
-		var oldCommitId = ObjectId.fromString(request.getBaseCommitHash());
-		var newCommitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
-		tools.add(new GetPullRequest(requestId));
-		tools.add(new GetPullRequestComments(requestId));
-		if (includeReviewTools)
-			tools.addAll(ToolUtils.getPullRequestReviewTools(requestId));
-		if (includeCodeCommentTools)
-			tools.addAll(ToolUtils.getPullRequestCodeCommentTools(requestId));
-		tools.addAll(ToolUtils.getDiffTools(projectId, oldCommitId, newCommitId, requestId));
 	}
 
 	private boolean isAiEntitled(PullRequest request, User ai) {
 		if (request.getProject().isEntitledToAi(ai)) {
 			return true;
 		} else {
-			new AddPullRequestComment(request.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
+			createComment(ai, request, "Sorry but this project is not entitled to access me");				
 			return false;
 		}
+	}
+
+	private void addressConcern(User ai, User commenter, PullRequest request) {
+		if (ai.equals(request.getSubmitter()) && !canWriteCode(ai, request, request.getSourceProject()) 
+				|| request.getAssignees().contains(ai) && !canWriteCode(ai, request, request.getTargetProject())
+				|| !canCreateWorkspace(ai, request)) {
+			return;
+		}
+		
+		List<String> prompts = new ArrayList<>();
+		prompts.add("Work on pull request %d to address %s's concern."
+				.formatted(request.getNumber(), commenter.getName()));
+		if (request.getAssignees().contains(ai) && request.checkMergeCondition() == null) {
+			prompts.add("Review the pull request and merge it if ready.");
+		}
+		prompts.add("Stay on current checkout to do the job.");
+
+		if (ai.equals(request.getSubmitter())) {			
+			prompts.add("""
+				If code is modified, mention the user in a PR comment so that the code can be reviewed; \
+				otherwise, mention the user only when you expect a response.""");
+		} else {
+			prompts.add("Mention the user in a PR comment ONLY if you expect a response.");
+			prompts.add("Do not modify code.");
+		}
+		prompts.add("Submit work afterwards without confirmation.");
+		
+		var concatenatedPrompts = String.join(" ", prompts);
+		if (ai.equals(request.getSubmitter())) {
+			var commitId = Preconditions.checkNotNull(request.getSourceHead());
+			runPrompt(ai, request, request.getSourceProject(), commitId, request.getSourceBranch(), concatenatedPrompts);					
+		} else {
+			var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
+			runPrompt(ai, request, request.getTargetProject(), commitId, null, concatenatedPrompts);					
+		}
+	}
+
+	private void runPrompt(User ai, PullRequest request, Project project, 
+				ObjectId commitId, @Nullable String branch, String prompt) {
+		try {
+			var taskFailedCallback = newTaskFailedCallback(ai.getId(), request.getId());
+			workspaceService.runPrompt(ai, project, commitId, branch, prompt, taskFailedCallback);						
+		} catch (Throwable t) {
+			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
+			if (explicitException != null) {
+				createComment(ai, request, explicitException.getMessage());
+			} else {
+				logger.error("Error doing job via AI user", t);
+				createComment(ai, request, "Failed to do the job, check server log for details");
+			}
+		}		
+	}
+
+	private void createComment(User ai, PullRequest request, String comment) {
+		if (SecurityUtils.canReadCode(ai.asSubject(), request.getProject())) {
+			pullRequestCommentService.create(ai, request, comment);
+		} else {
+			pullRequestCommentService.create(userService.getSystem(), request, "_Commenting on behalf of **%s** as the user does not even have permission to post here._\n\n%s".formatted(ai.getName(), comment));
+		}
+	}
+
+	private boolean canCreateWorkspace(User ai, PullRequest request) {
+		if (!SecurityUtils.canCreateWorkspaces(ai.asSubject(), request.getProject())) {			
+			createComment(ai, request, "I need to create workspace to do the job, but I don't have permission to create that");				
+			return false;
+		}
+		if (request.getProject().getDefaultBranch() == null) {
+			createComment(ai, request, "I need to create workspace to do the job, but the project doesn't have code yet");				
+			return false;
+		}
+		return true;
+	}
+
+	private boolean canWriteCode(User ai, PullRequest request, Project project) {
+		if (SecurityUtils.canWriteCode(ai.asSubject(), project)) {
+			return true;
+		} else {
+			createComment(ai, request, "I need write code permission in project '%s' to do the job".formatted(project.getPath()));				
+			return false;
+		}
+	}
+
+	private boolean canReadCode(User ai, PullRequest request, Project project) {
+		if (SecurityUtils.canWriteCode(ai.asSubject(), project)) {
+			return true;
+		} else {
+			createComment(ai, request, "I need read code permission in project '%s' to do the job".formatted(project.getPath()));				
+			return false;
+		}
+	}
+
+	private TaskFailedCallback newTaskFailedCallback(Long aiId, Long requestId) {
+		return new TaskFailedCallback() {
+		
+			public void onTaskFailed(String workspaceReference) {							
+				createComment(userService.load(aiId), pullRequestService.load(requestId), "Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
+			}
+
+		};
 	}
 
 	public Object writeReplace() throws ObjectStreamException {

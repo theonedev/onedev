@@ -36,8 +36,10 @@ import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
+import io.onedev.server.util.ProjectAndBranch;
 
 @Singleton
 public class GitPostReceiveCallback extends HttpServlet {
@@ -60,6 +62,9 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     @Inject
     private ListenerRegistry listenerRegistry;
+
+	@Inject
+	private PullRequestService pullRequestService;
     
     @Sessional
     @Override
@@ -122,7 +127,11 @@ public class GitPostReceiveCallback extends HttpServlet {
 
         	if (branch != null && defaultBranch != null && !branch.equals(defaultBranch) 
         			&& !SecurityUtils.isSystem(principal) && !newObjectId.equals(ObjectId.zeroId())) {
-        		showPullRequestLink(output, projectId, branch, defaultBranch);
+        		var source = new ProjectAndBranch(projectId, branch);
+        		boolean hasOpenPullRequest = pullRequestService.queryOpen(source).stream()
+        				.anyMatch(it -> it.getSourceProject().getId().equals(projectId) && it.getSourceBranch().equals(branch));
+        		if (!hasOpenPullRequest)
+        			showPullRequestCreateLink(output, projectId, branch, defaultBranch);
         	}
         	
         	try (RevWalk revWalk = new RevWalk(repository)) {
@@ -156,7 +165,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 		});
 	}
 
-	private void showPullRequestLink(Output output, Long projectId, String branch, String defaultBranch) {
+	private void showPullRequestCreateLink(Output output, Long projectId, String branch, String defaultBranch) {
     	output.writeLine();
     	output.writeLine("Create a pull request for '"+ branch +"' by visiting:");
 		output.writeLine("    " + urlService.urlForProject(projectId, true) 

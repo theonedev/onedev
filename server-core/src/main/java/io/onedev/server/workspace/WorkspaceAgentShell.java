@@ -18,7 +18,7 @@ public class WorkspaceAgentShell implements Shell {
 	
 	private static final Map<String, WorkspaceAgentShell> shells = new ConcurrentHashMap<>();
 
-	private final String sessionId;
+	private final String shellId;
 
 	private final Terminal terminal;
 
@@ -27,8 +27,8 @@ public class WorkspaceAgentShell implements Shell {
 	public WorkspaceAgentShell(Terminal terminal, Session agent, WorkspaceShellOpenData data) {
 		this.terminal = terminal;
 		this.agent = agent;
-		sessionId = data.getSessionId();
-		shells.put(sessionId, this);
+		this.shellId = data.getShellId();
+		shells.put(shellId, this);
 		new Message(MessageTypes.WORKSPACE_SHELL_OPEN, SerializationUtils.serialize(data)).sendBy(agent);
 	}
 
@@ -41,26 +41,26 @@ public class WorkspaceAgentShell implements Shell {
 		return terminal;
 	}
 
-	public String getSessionId() {
-		return sessionId;
+	public String getShellId() {
+		return shellId;
 	}
 
 	@Override
 	public void writeToStdin(String data) {
 		new Message(MessageTypes.WORKSPACE_SHELL_INPUT, 
-				new WorkspaceShellInputRequest(sessionId, data)).sendBy(agent);
+				new WorkspaceShellInputRequest(shellId, data)).sendBy(agent);
 	}
 
 	@Override
 	public void resize(int rows, int cols) {
 		new Message(MessageTypes.WORKSPACE_SHELL_RESIZE, 
-				new WorkspaceShellResizeRequest(sessionId, rows, cols)).sendBy(agent);
+				new WorkspaceShellResizeRequest(shellId, rows, cols)).sendBy(agent);
 	}
 
 	@Override
 	public void terminate() {
-		shells.remove(sessionId);
-		new Message(MessageTypes.WORKSPACE_SHELL_TERMINATE, sessionId).sendBy(agent);
+		shells.remove(shellId);
+		new Message(MessageTypes.WORKSPACE_SHELL_TERMINATE, shellId).sendBy(agent);
 	}
 
 }

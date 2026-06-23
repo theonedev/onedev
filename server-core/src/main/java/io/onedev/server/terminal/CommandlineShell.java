@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +36,16 @@ public class CommandlineShell implements Shell {
 	private volatile OutputStream stdin;
 	
 	private final Future<?> future;
+
+	@Nullable
+	private final Runnable onTerminate;
 	
 	public CommandlineShell(Terminal terminal, Commandline cmdline) {
+		this(terminal, cmdline, null);
+	}
+
+	public CommandlineShell(Terminal terminal, Commandline cmdline, @Nullable Runnable onTerminate) {
+		this.onTerminate = onTerminate;
         ptyMode = new PtyMode();
         cmdline.ptyMode(ptyMode);
 
@@ -131,6 +140,8 @@ public class CommandlineShell implements Shell {
 	@Override
 	public void terminate() {
 		future.cancel(true);
+		if (onTerminate != null)
+			onTerminate.run();
 	}
 
 }

@@ -60,6 +60,9 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
+import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
+import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.markdown.MentionParser;
@@ -71,6 +74,7 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.model.support.issue.CommitMessageFixSetting;
+import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
@@ -8854,6 +8858,12 @@ public class DataMigrator {
 		return InputSpec.BUILD.equals(type) || InputSpec.ISSUE.equals(type) || InputSpec.PULL_REQUEST.equals(type);
 	}
 
+	private static Element beanToElement(Object bean) {
+		var element = VersionedXmlDoc.fromBean(bean).getRootElement();
+		element.detach();
+		return element;
+	}
+
 	private void migrate229(File dataDir, Stack<Integer> versions) {
 		Map<String, String> buildNumbers = new HashMap<>();
 		Map<String, String> issueNumbers = new HashMap<>();
@@ -8949,6 +8959,68 @@ public class DataMigrator {
 							valueElement.setText(number);
 						else if (isReferenceChoiceType(type))
 							buildParamElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							var commitMessageFixSettingElement = valueElement.element("commitMessageFixSetting");
+							if (commitMessageFixSettingElement != null) {
+								var fixSuggestionElement = commitMessageFixSettingElement.element("fixSuggestion");
+								if (fixSuggestionElement == null)
+									fixSuggestionElement = commitMessageFixSettingElement.addElement("fixSuggestion");
+								fixSuggestionElement.setText(CommitMessageFixSetting.DEFAULT_FIX_SUGGESTION);
+							}
+							var fieldSpecsElement = valueElement.element("fieldSpecs");
+							if (fieldSpecsElement != null) {
+								for (Element fieldSpecElement : fieldSpecsElement.elements()) {
+									if ("Type".equals(fieldSpecElement.elementTextTrim("name"))) {
+										var choiceProviderElement = fieldSpecElement.element("choiceProvider");
+										if (choiceProviderElement != null) {
+											var choicesElement = choiceProviderElement.element("choices");
+											if (choicesElement != null) {
+												boolean hasBuildFailed = false;
+												for (Element choiceElement : choicesElement.elements()) {
+													if ("Build Failed".equals(choiceElement.elementTextTrim("value"))) {
+														hasBuildFailed = true;
+														break;
+													}
+												}
+												if (!hasBuildFailed) {
+													var buildFailed = new Choice();
+													buildFailed.setValue("Build Failed");
+													buildFailed.setColor("#F64E60");
+													choicesElement.add(beanToElement(buildFailed));
+												}
+											}
+										}
+										break;
+									}
+								}
+								boolean hasBuildField = false;
+								for (Element fieldSpecElement : fieldSpecsElement.elements()) {
+									if ("Build".equals(fieldSpecElement.elementTextTrim("name"))) {
+										hasBuildField = true;
+										break;
+									}
+								}
+								if (!hasBuildField) {
+									var build = new BuildChoiceField();
+									build.setName("Build");
+									var showCondition = new ShowCondition();
+									showCondition.setInputName("Type");
+									var valueIsOneOf = new ValueIsOneOf();
+									valueIsOneOf.setValues(List.of("Build Failed"));
+									showCondition.setValueMatcher(valueIsOneOf);
+									build.setShowCondition(showCondition);
+									fieldSpecsElement.add(beanToElement(build));
+								}
+							}
+						}
 					}
 				}
 				dom.writeToFile(file, false);

@@ -17,6 +17,7 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -75,6 +76,7 @@ import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.UserDeleteLink;
+import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.component.user.profile.activity.ApprovePullRequest;
 import io.onedev.server.web.component.user.profile.activity.CommentIssue;
 import io.onedev.server.web.component.user.profile.activity.CommentPullRequest;
@@ -347,6 +349,22 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 		}.add(new ConfirmClickModifier(_T("Disabling account will reset password, clear access tokens, "
 				+ "and remove all references from other entities except for past activities. Do you "
 				+ "really want to continue?"))));
+
+		add(new Link<Void>("runAs") {
+
+			@Override
+			public void onClick() {
+				SecurityUtils.getSubject().runAs(getUser().getPrincipals());
+				throw new RestartResponseException(HomePage.class);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator() && !getUser().equals(SecurityUtils.getAuthUser()));
+			}
+
+		});
 		
 		add(new UserDeleteLink("delete") {
 

@@ -1,5 +1,6 @@
 package io.onedev.server.notification;
 
+import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static io.onedev.server.notification.NotificationUtils.isNotified;
 import static io.onedev.server.util.EmailAddressUtils.describe;
@@ -10,7 +11,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +21,7 @@ import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +31,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.ai.AiTask;
-import io.onedev.server.ai.ResponseHandler;
-import io.onedev.server.ai.taskchecker.NoopTaskChecker;
-import io.onedev.server.ai.tools.issue.GetIssue;
-import io.onedev.server.ai.tools.issue.GetIssueComments;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
@@ -49,6 +45,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
@@ -226,7 +223,7 @@ public class IssueNotificationManager implements Serializable {
 		if (user != null) {
 			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 				notifiedUsers.add(user); 
-			if (!user.isSystem())
+			if (!user.isSystem() && user.getType() != AI)
 				watchService.watch(issue, user, true);
 		}
 
@@ -245,7 +242,7 @@ public class IssueNotificationManager implements Serializable {
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User member: entry.getValue().getMembers()) {
 				if (!member.equals(user)) {
-					if (member.getType() != User.Type.AI) {
+					if (member.getType() != AI) {
 						EmailAddress emailAddress = member.getPrimaryEmailAddress();
 						if (emailAddress != null && emailAddress.isVerified()) {
 							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
@@ -254,19 +251,18 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
-						watchService.watch(issue, member, true);
-						authorizationService.authorize(issue, member);		
-					} else if (isAiEntitled(issue, member)) {
-						if (canCreateWorkspace(member, issue)) 
-							handleFieldAssignment(member, issue, entry.getKey());
-						watchService.watch(issue, member, true);
-						authorizationService.authorize(issue, member);								
-					} else {
-						authorizationService.authorize(issue, member);								
+					} else if (isAiEntitled(issue, member) && canCreateWorkspace(member, issue)) { 
+						handleFieldAssignment(member, issue, entry.getKey());
 					}
 				}
 			}
 			
+			for (User member: entry.getValue().getMembers()) {
+				if (member.getType() != AI) 
+					watchService.watch(issue, member, true);
+				authorizationService.authorize(issue, member);
+			}
+
 			notifiedUsers.addAll(entry.getValue().getMembers());
 		}
 		
@@ -279,7 +275,7 @@ public class IssueNotificationManager implements Serializable {
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User assignedUser: entry.getValue()) {
 				if (!assignedUser.equals(user)) {
-					if (assignedUser.getType() != User.Type.AI) {
+					if (assignedUser.getType() != AI) {
 						EmailAddress emailAddress = assignedUser.getPrimaryEmailAddress();
 						if (emailAddress != null && emailAddress.isVerified()) {
 							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
@@ -288,17 +284,16 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}					
-						watchService.watch(issue, assignedUser, true);
-						authorizationService.authorize(issue, assignedUser);
-					} else if (isAiEntitled(issue, assignedUser)) {
-						if (canCreateWorkspace(assignedUser, issue)) 
-							handleFieldAssignment(assignedUser, issue, entry.getKey());
-						watchService.watch(issue, assignedUser, true);
-						authorizationService.authorize(issue, assignedUser);
-					} else {
-						authorizationService.authorize(issue, assignedUser);
-					}
+					} else if (isAiEntitled(issue, assignedUser) && canCreateWorkspace(assignedUser, issue)) { 
+						handleFieldAssignment(assignedUser, issue, entry.getKey());
+					} 
 				}
+			}
+
+			for (User each: entry.getValue()) {
+				if (each.getType() != AI) 
+					watchService.watch(issue, each, true);
+				authorizationService.authorize(issue, each);
 			}
 			
 			notifiedUsers.addAll(entry.getValue());
@@ -311,9 +306,10 @@ public class IssueNotificationManager implements Serializable {
 				if (mentionedUser != null) {
 					mentionService.mention(issue, mentionedUser);
 					authorizationService.authorize(issue, mentionedUser);
+					if (mentionedUser.getType() != AI) 
+						watchService.watch(issue, mentionedUser, true);
 					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {						
-						if (mentionedUser.getType() != User.Type.AI) {
-							watchService.watch(issue, mentionedUser, true);
+						if (mentionedUser.getType() != AI) {
 							String subject = String.format(
 									"[Issue %s] (Mentioned You) %s", 
 									issue.getReference(), 
@@ -333,12 +329,9 @@ public class IssueNotificationManager implements Serializable {
 								&& user.getId() > 0 
 								&& !user.equals(mentionedUser) 
 								&& canCreateWorkspace(mentionedUser, issue)) {
-							watchService.watch(issue, mentionedUser, true);
-							addressConcern(user, mentionedUser, issue);
+							addressConcern(mentionedUser, user, issue);
 						}
 						notifiedUsers.add(mentionedUser);
-					} else {
-						watchService.watch(issue, mentionedUser, true);
 					}
 				}
 			}
@@ -359,35 +352,9 @@ public class IssueNotificationManager implements Serializable {
 						&& !notifiedUsers.contains(watch.getUser())
 						&& !isNotified(notifiedEmailAddresses, watch.getUser())
 						&& SecurityUtils.canAccessIssue(watch.getUser().asSubject(), issue)) {
-				if (watch.getUser().getType() != User.Type.AI) {
-					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified())
-						bccEmailAddresses.add(emailAddress.getValue());
-				} else if (event.getCommentText() instanceof MarkdownText 
-						&& user != null 
-						&& user.getId() > 0 
-						&& !user.equals(watch.getUser())) {
-					var issueId = issue.getId();
-					var task = new AiTask(
-						null,
-						"Check issue and comments to see if you should respond to %s's latest comment. If you think you should, reply with 'yes', otherwise reply with 'no'. No any explanation should be included in your response".formatted(event.getUser().getName()),
-						List.of(new GetIssue(issue.getId()), new GetIssueComments(issue.getId())),
-						new NoopTaskChecker(),
-						new ResponseHandler() {
-
-							@Override
-							public void onResponse(User ai, String response) {
-								var issue = issueService.load(issueId);
-								if (response.equalsIgnoreCase("yes") 
-										&& isAiEntitled(issue, ai) 
-										&& canCreateWorkspace(ai, issue)) {
-									addressConcern(user, ai, issue);
-								}
-							}
-							
-						});
-					userService.execute(watch.getUser(), task);
-				}
+				EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
+				if (emailAddress != null && emailAddress.isVerified())
+					bccEmailAddresses.add(emailAddress.getValue());
 			}
 		}
 		
@@ -420,35 +387,48 @@ public class IssueNotificationManager implements Serializable {
 		}
 	}
 
-	private void addressConcern(User commenter, User ai, Issue issue) {
-		try {
-			ObjectId commitId;
+	private void addressConcern(User ai, User commenter, Issue issue) {
+		var assignedFields = getAssignedFields(ai, issue);
+		if (assignedFields.isEmpty()) {
 			String branch = issue.getBranch();									
-			var assignedFields = getAssignedFields(ai, issue);
-			String prompt;
-			if (assignedFields.isEmpty()) {
-				if (branch == null) {
-					commitId = issue.getFieldCommitId();
-					if (commitId == null) 
-						commitId = issue.getProject().getObjectId(Preconditions.checkNotNull(issue.getProject().getDefaultBranch()), true);
-				} else {
-					commitId = issue.getProject().getObjectId(branch, true);
-				}
-				prompt = """
-					You are %s. Address %s's concern in issue %s. \
-					Examine code in current workspace if necessary. \
-					Do not create branch, switch branch, or modify code.\
-					""".formatted(ai.getName(), commenter.getName(), issue.getReference().toString(issue.getProject()));
+			ObjectId commitId;
+			if (branch == null) {
+				commitId = issue.getFieldCommitId();
+				if (commitId == null) 
+					commitId = issue.getProject().getObjectId(Preconditions.checkNotNull(issue.getProject().getDefaultBranch()), true);
 			} else {
-				if (branch == null) 
-					branch = issueService.ensureBranch(ai.asSubject(), issue);
 				commitId = issue.getProject().getObjectId(branch, true);
-				prompt = """
-					Work on current issue as roles [%s] to address %s's concern. Submit work afterwards if code is modified.
-					""".formatted(StringUtils.join(assignedFields, ", "), commenter.getName());
 			}
+			var prompt = """
+				Work on issue %d to address %s's concern. \
+				Mention the user in your comment ONLY if you \
+				expect a response. \
+				Stay on current checkout and do not modify code. \
+				Submit work afterwards without confirmation."""
+				.formatted(issue.getNumber(), commenter.getName());
+			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);
+		} else if (canWriteCode(ai, issue)) {
+			String branch = issue.getBranch();									
+			ObjectId commitId;
+			if (branch == null) 
+				branch = issueService.ensureBranch(ai.asSubject(), issue);
+			commitId = issue.getProject().getObjectId(branch, true);
+			var prompt = """
+				Work on issue %d as roles [%s] to address %s's concern. \
+				Mention the user in your comment ONLY if you \
+				expect a response. \
+				Stay on current checkout to do the job. \
+				Submit work afterwards without confirmation.""".
+				formatted(issue.getNumber(), StringUtils.join(assignedFields, ", "), commenter.getName());
+			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);
+		}
+	}
+
+	private void runPrompt(User ai, Issue issue, Project project, 
+		ObjectId commitId, @Nullable String branch, String prompt) {
+		try {
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), issue.getId());
-			workspaceService.runPrompt(ai, issue.getProject(), commitId, branch, prompt, taskFailedCallback);
+			workspaceService.runPrompt(ai, project, commitId, branch, prompt, taskFailedCallback);						
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {
@@ -457,7 +437,7 @@ public class IssueNotificationManager implements Serializable {
 				logger.error("Error doing job via AI user", t);
 				createComment(ai, issue, "Failed to do the job, check server log for details");
 			}
-		}
+		}		
 	}
 
 	private void createComment(User ai, Issue issue, String comment) {
@@ -487,23 +467,15 @@ public class IssueNotificationManager implements Serializable {
 	}
 
 	private void handleFieldAssignment(User ai, Issue issue, String field) {
-		var fieldSpec = settingService.getIssueSetting().getFieldSpec(field);
-		if (fieldSpec != null) {
-			if (SecurityUtils.canWriteCode(ai.asSubject(), issue.getProject())) {
-				try {
-					var branch = issueService.ensureBranch(ai.asSubject(), issue);
-					var taskFailedCallback = newTaskFailedCallback(ai.getId(), issue.getId());
-					var commitId = issue.getProject().getObjectId(branch, true);
-					workspaceService.runPrompt(ai, issue.getProject(), commitId, branch, "Work on current issue as role '%s'. Submit work afterwards if code is modified".formatted(field), taskFailedCallback);						
-				} catch (Throwable t) {
-					logger.error("Error doing job via AI user", t);
-					createComment(ai, issue, "Failed to do the job, check server log for details");
-				}
-			} else {
-				createComment(ai, issue, "I need write code permission to work as '%s' in this project".formatted(field));
-			}
-		} else {
-			createComment(ai, issue, "I don't know how to work as '%s' since it is not defined".formatted(field));
+		if (canWriteCode(ai, issue)) {
+			var branch = issueService.ensureBranch(ai.asSubject(), issue);
+			var commitId = issue.getProject().getObjectId(branch, true);
+			var prompt = """
+					Work on issue %d as role '%s'. \
+					Stay on current checkout to do the job. \
+					Submit work afterwards without confirmation."""
+					.formatted(issue.getNumber(), field);
+			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);						
 		}
 	}
 
@@ -593,6 +565,15 @@ public class IssueNotificationManager implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	private boolean canWriteCode(User ai, Issue issue) {
+		if (SecurityUtils.canWriteCode(ai.asSubject(), issue.getProject())) {
+			return true;
+		} else {
+			createComment(ai, issue, "I need write code permission in this project to do the job");				
+			return false;
+		}
 	}
 
 	private boolean isAiEntitled(Issue issue, User ai) {

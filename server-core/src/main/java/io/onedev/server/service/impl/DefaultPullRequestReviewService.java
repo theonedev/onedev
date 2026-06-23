@@ -78,6 +78,7 @@ public class DefaultPullRequestReviewService extends BaseEntityService<PullReque
 		PullRequestReview review = request.getReview(user);
 		if (review == null || review.getStatus() == PullRequestReview.Status.EXCLUDED)
 			throw new NotAcceptableException("You are not reviewer of this pull request. Add your option as comment instead");
+
 		if (approved)
 			review.setStatus(PullRequestReview.Status.APPROVED);
 		else

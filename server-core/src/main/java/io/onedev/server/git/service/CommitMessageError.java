@@ -40,4 +40,5 @@ public class CommitMessageError implements Serializable {
 			return "Error validating auto merge commit message: " + errorMessage;
 		}
 	}
+	
 }

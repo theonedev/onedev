@@ -1,9 +1,28 @@
+.user-profile {
+    margin: -2rem -2.25rem -2rem;
+}
+
+.user-detail .user-profile {
+    margin-top: -1.5rem;
+}
+
 .user-profile .info {
-    width: 240px;
+    width: 300px;
 }
 .user-profile>.info .avatar {
     width: 160px;
     height: 160px;
+}
+
+.user-profile .info .actions {
+    display: flex;
+    gap: 1.2rem;
+    width: 100%;
+}
+
+.user-profile .info .actions > .btn {
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .user-profile .activities, .user-profile .daily-stats {

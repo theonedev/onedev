@@ -219,7 +219,7 @@ public class TodResource {
 	public VersionInfo checkVersion() {
         var versionInfo = new VersionInfo();
         versionInfo.serverVersion = OneDev.getInstance().getVersion();
-        versionInfo.minRequiredTodVersion = "3.0.0";
+        versionInfo.minRequiredTodVersion = "4.0.0";
         return versionInfo;
 	}
 
@@ -360,6 +360,14 @@ public class TodResource {
                     .append(checker.getPattern());
             if (checker.getExplanation() != null)
                 requirementBuilder.append("\nExplanation: ").append(checker.getExplanation());
+        }
+
+        if (branchProtection.getMaxCommitMessageLineLength() != null) {
+            if (requirementBuilder.length() != 0)
+                requirementBuilder.append('\n');
+            requirementBuilder.append("Each line must not exceed ")
+                    .append(branchProtection.getMaxCommitMessageLineLength())
+                    .append(" characters");
         }
 
         var fixSuggestion = settingService.getIssueSetting().getCommitMessageFixSetting().getFixSuggestion();
@@ -790,9 +798,9 @@ public class TodResource {
         return IssueHelper.getDetail(subject, currentProject, issue);
     }
 
-    @Path("/create-issue-branch") 
+    @Path("/ensure-issue-branch") 
     @POST
-    public String createIssueBranch(
+    public String ensureIssueBranch(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
         var subject = SecurityUtils.getSubject();

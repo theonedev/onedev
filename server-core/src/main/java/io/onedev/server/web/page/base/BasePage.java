@@ -518,13 +518,11 @@ public abstract class BasePage extends WebPage {
 	
 	public void removeAutosaveKey(String autosaveKey) {
 		var target = RequestCycle.get().find(AjaxRequestTarget.class);
-		if (target != null) {
+		if (target != null)
 			target.prependJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
-		} else {
-			var removeAutosaveKeys = getRemoveAutosaveKeys();
-			removeAutosaveKeys.add(autosaveKey);
-			getSession().setMetaData(REMOVE_AUTOSAVE_KEYS, removeAutosaveKeys);
-		}
+		var removeAutosaveKeys = getRemoveAutosaveKeys();
+		removeAutosaveKeys.add(autosaveKey);
+		getSession().setMetaData(REMOVE_AUTOSAVE_KEYS, removeAutosaveKeys);
 	}
 	
 	public HashSet<String> getRemoveAutosaveKeys() {

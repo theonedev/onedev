@@ -1,5 +1,5 @@
 <wicket:panel>
-    <div class="user-profile d-flex m-n5 no-autofocus">
+    <div class="user-profile d-flex no-autofocus">
         <div class="flex-shrink-0 info p-5 border-right d-none d-lg-block text-center">
             <img wicket:id="avatar">
             <div wicket:id="name" class="mt-4"></div>
@@ -10,9 +10,10 @@
                 </div>
             </wicket:enclosure>
             <div wicket:id="note" class="mt-5"></div>
-            <div class="mt-5 text-center">
-                <a wicket:id="enable" class="btn btn-sm btn-outline-primary mr-3"><wicket:t>Enable</wicket:t></a>
-                <a wicket:id="disable" class="btn btn-sm btn-outline-warning mr-3"><wicket:t>Disable</wicket:t></a>
+            <div class="mt-5 actions">
+                <a wicket:id="runAs" class="btn btn-sm btn-outline-primary"><wicket:t>Run As</wicket:t></a>
+                <a wicket:id="enable" class="btn btn-sm btn-outline-primary"><wicket:t>Enable</wicket:t></a>
+                <a wicket:id="disable" class="btn btn-sm btn-outline-warning"><wicket:t>Disable</wicket:t></a>
                 <a wicket:id="delete" class="btn btn-sm btn-outline-danger"><wicket:t>Delete</wicket:t></a>
             </div>
         </div>

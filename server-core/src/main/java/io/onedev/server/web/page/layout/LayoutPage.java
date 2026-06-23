@@ -1230,7 +1230,7 @@ public abstract class LayoutPage extends BasePage {
 				}
 
 			};
-			signOutLink.add(new Label("label", _T("Exit Impersonation")));
+			signOutLink.add(new Label("label", _T("Exit Run As")));
 			userInfo.add(signOutLink);
 		} else {
 			ViewStateAwarePageLink<Void> signOutLink = new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class);

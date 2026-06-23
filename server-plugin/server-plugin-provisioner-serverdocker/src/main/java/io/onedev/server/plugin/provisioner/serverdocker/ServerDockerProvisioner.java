@@ -455,13 +455,16 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 					}
 
 					@Override
-					public Shell doOpenShell(Terminal terminal) {
+					public Shell doOpenShell(String shellId, Terminal terminal) {
 						var docker = newDocker();
+						var tmuxSocket = "onedev-" + shellId;
 						var shellExecutable = context.getSpec().getShell().getFacility().getExecutable();
 						docker.addArgs("exec", "-it", "--detach-keys=ctrl-z,z", 
 								"-w", containerWorkDirPath, containerName,
-								"tmux", "new-session", shellExecutable);
-						return new CommandlineShell(terminal, docker);
+								"tmux", "-L", tmuxSocket, "new-session", shellExecutable);
+						return new CommandlineShell(terminal, docker, () -> {
+							WorkspaceUtils.killTmuxServer(docker, containerName, tmuxSocket);
+						});
 					}
 
 					@Override

@@ -38,7 +38,11 @@ public class CommitMessageFixSetting implements Serializable, Validatable {
 	public static final String DEFAULT_FIX_SUGGESTION = """
 		When a commit is intended to fix/close/resolve an issue, add the issue reference in the commit message \
 		footer as a separate line, for instance: 
-		Fixes <issue reference>""";
+		
+		Fixes #100
+		Fixes PROJ-100
+		
+		Note that this footer should not be added to fixup commits for previous commits.""";
 
 	private String fixSuggestion = DEFAULT_FIX_SUGGESTION;
 		

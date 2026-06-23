@@ -18,7 +18,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.UrlService;
 
 public class IssueHelper {
@@ -74,31 +73,29 @@ public class IssueHelper {
 
     public static Map<String, Object> getDetail(Subject subject, Project currentProject, Issue issue) {
         var data = getSummary(currentProject, issue);
-        if (SecurityUtils.canReadCode(subject, issue.getProject()))
-            data.put("branch", issue.getBranch());
-        for (var entry : issue.getFieldInputs().entrySet()) {
-            data.put(entry.getKey(), entry.getValue().getValues());
-        }
 
-        if (SecurityUtils.canReadCode(subject, issue.getProject())) {
-            var fieldBuild = issue.getFieldBuild();
-            if (fieldBuild != null) {
-                if (fieldBuild.getRequest() != null) {
-                    if (fieldBuild.getRequest().getSourceHead() != null) {
-                        data.put("defaultPullRequestTargetProject", fieldBuild.getRequest().getSourceProject().getPath());
-                        data.put("defaultPullRequestTargetBranch", fieldBuild.getRequest().getSourceBranch());
-                    }
-                } else {
-                    var branch = GitUtils.ref2branch(fieldBuild.getRefName());
-                    if (branch != null) {
-                        data.put("defaultPullRequestTargetProject", issue.getProject().getPath());
-                        data.put("defaultPullRequestTargetBranch", branch);
-                    }
+        data.put("branch", issue.getBranch());
+        var fieldBuild = issue.getFieldBuild();
+        if (fieldBuild != null) {
+            if (fieldBuild.getRequest() != null) {
+                if (fieldBuild.getRequest().getSourceHead() != null) {
+                    data.put("defaultPullRequestTargetProject", fieldBuild.getRequest().getSourceProject().getPath());
+                    data.put("defaultPullRequestTargetBranch", fieldBuild.getRequest().getSourceBranch());
                 }
             } else {
-                data.put("defaultPullRequestTargetProject", issue.getProject().getPath());
-                data.put("defaultPullRequestTargetBranch", issue.getProject().getDefaultBranch());
+                var branch = GitUtils.ref2branch(fieldBuild.getRefName());
+                if (branch != null) {
+                    data.put("defaultPullRequestTargetProject", issue.getProject().getPath());
+                    data.put("defaultPullRequestTargetBranch", branch);
+                }
             }
+        } else {
+            data.put("defaultPullRequestTargetProject", issue.getProject().getPath());
+            data.put("defaultPullRequestTargetBranch", issue.getProject().getDefaultBranch());
+        }
+
+        for (var entry : issue.getFieldInputs().entrySet()) {
+            data.put(entry.getKey(), entry.getValue().getValues());
         }
         
         Map<String, Collection<String>> linkedIssues = new HashMap<>();

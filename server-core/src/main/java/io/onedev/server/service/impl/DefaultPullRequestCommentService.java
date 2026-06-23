@@ -17,6 +17,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentEdited;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
@@ -52,6 +53,17 @@ public class DefaultPullRequestCommentService extends BaseEntityService<PullRequ
 	@Override
 	public void create(PullRequestComment comment) {
 		create(comment, new ArrayList<>());
+	}
+
+	@Transactional
+	@Override
+	public void create(User user, PullRequest request, String content) {
+		var comment = new PullRequestComment();
+		comment.setRequest(request);
+		comment.setContent(content);
+		comment.setUser(user);
+		comment.setDate(new Date());
+		create(comment);
 	}
 	
 	@Transactional

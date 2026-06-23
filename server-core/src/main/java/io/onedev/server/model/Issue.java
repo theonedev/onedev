@@ -1454,5 +1454,5 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		}
 		return fieldBuildOptional.orElse(null);
 	}
-
+	
 }

@@ -21,7 +21,7 @@ public abstract class WorkspaceRuntime {
 
     public String openShell(Terminal terminal, String label) {
         var shellId = UUID.randomUUID().toString();
-        var shell = doOpenShell(new Terminal() {
+        var shell = doOpenShell(shellId, new Terminal() {
 
             @Override
             public void onShellOutput(String base64Data) {
@@ -89,7 +89,7 @@ public abstract class WorkspaceRuntime {
             shell.resize(rows, cols);
     }
 
-    protected abstract Shell doOpenShell(Terminal terminal);
+    protected abstract Shell doOpenShell(String shellId, Terminal terminal);
     
     public abstract void await();
 

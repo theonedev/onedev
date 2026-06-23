@@ -198,13 +198,17 @@ public class ServerShellProvisioner extends WorkspaceProvisioner implements Test
 			}
 
 			@Override
-			public Shell doOpenShell(Terminal terminal) {
+			public Shell doOpenShell(String shellId, Terminal terminal) {
+				// Use a dedicated tmux server (unique socket) per shell so that tearing down one
+				// shell can never kill the tmux server shared by other shells/workspaces on this host
+				var tmuxSocket = "onedev-" + shellId;
 				var tmux = newTmux();
-				tmux.addArgs("new-session")
-					.addArgs(context.getSpec().getShell().getFacility().getExecutable())
-					.workingDir(workDir)
-					.envs(envVars);
-				return new CommandlineShell(terminal, tmux);
+				tmux.addArgs("-L", tmuxSocket, "new-session");
+				for (var envVar : envVars.entrySet()) 
+					tmux.addArgs("-e", envVar.getKey() + "=" + envVar.getValue());
+				tmux.addArgs(context.getSpec().getShell().getFacility().getExecutable());
+				tmux.workingDir(workDir);
+				return new CommandlineShell(terminal, tmux, null);
 			}
 
 			@Override

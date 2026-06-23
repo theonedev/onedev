@@ -150,7 +150,7 @@ query to get notified of interesting events.
 
 ## 🤖 Built-in AI for DevOps Intelligence
 
-Query with natural language. Explain code snippets, help understand codebase, review commits and pull requests, assist with CI/CD specs, investigate build failures. 
+Query with natural language. Explain code snippets, help understand codebase, review commits and pull requests, assist with CI/CD specs, investigate build errors. 
 [**Tutorial**](https://docs.onedev.io/tutorials/ai/working-with-built-in-ai)
 
 ![ai-pr-review](./doc/images/ai-pr-review.png)

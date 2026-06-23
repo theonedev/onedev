@@ -936,7 +936,7 @@ public class UserListPage extends AdministrationPage {
 		
 				});
 
-				fragment.add(new Link<Void>("impersonate") {
+				fragment.add(new Link<Void>("runAs") {
 
 					@Override
 					public void onClick() {

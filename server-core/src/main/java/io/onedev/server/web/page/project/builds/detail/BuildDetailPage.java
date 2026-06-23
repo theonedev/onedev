@@ -365,7 +365,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				}.setOutputMarkupId(true));
 
-				add(new AjaxLink<Void>("failureInvestigation") {
+				add(new AjaxLink<Void>("errorInvestigation") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
