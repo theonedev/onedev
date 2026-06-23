@@ -8920,6 +8920,20 @@ public class DataMigrator {
 								if (!windowsBatch)
 									shellElement.addElement("shell").setText("sh");
 							}
+							var userDatasElement = workspaceSpecElement.element("userDatas");
+							for (Element userDataElement : userDatasElement.elements()) {
+								var pathsElement = userDataElement.element("paths");
+								var changeDetectionExcludesElement = userDataElement.element("changeDetectionExcludes");
+								if (changeDetectionExcludesElement != null)
+									changeDetectionExcludesElement.detach();
+								pathsElement.setName("entries");
+								for (Element pathElement : pathsElement.elements()) {
+									var path = pathElement.getText();
+									pathElement.setName("io.onedev.server.model.support.workspace.spec.UserDataEntry");
+									pathElement.setText("");
+									pathElement.addElement("path").setText(path);
+								}
+							}
 						}
 					}
 				}

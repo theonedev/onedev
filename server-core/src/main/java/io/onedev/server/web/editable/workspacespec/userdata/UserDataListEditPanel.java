@@ -53,13 +53,13 @@ class UserDataListEditPanel extends DrawCardBeanListEditPanel<UserData> {
 
 		});
 
-		columns.add(new AbstractColumn<UserData, Void>(Model.of(_T("#Paths"))) {
+		columns.add(new AbstractColumn<UserData, Void>(Model.of(_T("#Entries"))) {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void populateItem(Item<ICellPopulator<UserData>> cellItem, String componentId, IModel<UserData> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getPaths().size()));
+				cellItem.add(new Label(componentId, rowModel.getObject().getEntries().size()));
 			}
 
 		});

@@ -6,6 +6,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.workspace.spec.ShortcutConfig;
 import io.onedev.server.model.support.workspace.spec.UserData;
+import io.onedev.server.model.support.workspace.spec.UserDataEntry;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.model.support.workspace.spec.shell.PosixShell;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -35,10 +36,10 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
 
         var userData = new UserData();
         userData.setKey("opencode");
-        userData.getPaths().add("/home/opencode/.config/opencode");
-        userData.getPaths().add("/home/opencode/.local/share");
-        userData.getPaths().add("/home/opencode/.local/state");
-        userData.getPaths().add("/home/opencode/.agents");
+        userData.getEntries().add(newUserDataEntry("/home/opencode/.config/opencode"));
+        userData.getEntries().add(newUserDataEntry("/home/opencode/.local/share"));
+        userData.getEntries().add(newUserDataEntry("/home/opencode/.local/state"));
+        userData.getEntries().add(newUserDataEntry("/home/opencode/.agents"));
         workspaceSpec.getUserDatas().add(userData);
 
         configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$TASK_PROMPT\"");
@@ -50,5 +51,11 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}
+
+    private static UserDataEntry newUserDataEntry(String path) {
+        var entry = new UserDataEntry();
+        entry.setPath(path);
+        return entry;
+    }
 
 }

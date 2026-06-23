@@ -3,6 +3,7 @@ package io.onedev.server.model.support.workspace.spec;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -12,7 +13,6 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.UserDataFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.Path;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
@@ -22,9 +22,7 @@ public class UserData implements Serializable {
 	
 	private String key;
 		
-	private List<String> paths = new ArrayList<>();
-		
-	private String changeDetectionExcludes;
+	private List<UserDataEntry> entries = new ArrayList<>();
 	
 	@Editable(order=100, name="Data Key", description = """
 			Specify a key to identify the user data. Data with same key will be shared across workspaces 
@@ -39,39 +37,24 @@ public class UserData implements Serializable {
 		this.key = key;
 	}
 
-	@Editable(order=200, name="Data Paths", description = "Specify data paths to persist across workspaces. Only absolute path is accepted")
+	@Editable(order=200, name="Data Entries", description = "Specify data entries to persist across workspaces")
 	@Valid
-	@Path(Path.Type.ABSOLUTE)
-	@Interpolative(variableSuggester="suggestVariables", exampleVar = "/")
 	@Size(min=1, max=100)
-	public List<String> getPaths() {
-		return paths;
+	public List<UserDataEntry> getEntries() {
+		return entries;
 	}
 
-	public void setPaths(List<String> paths) {
-		this.paths = paths;
+	public void setEntries(List<UserDataEntry> entries) {
+		this.entries = entries;
 	}
 
-	@Editable(order=300, description = """
-			Optionally specify files relative to data path to ignore when detect data changes. 
-			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
-			Multiple files should be separated by space, and single file containing space should be quoted""")
-	@Interpolative(variableSuggester="suggestVariables")
-	public String getChangeDetectionExcludes() {
-		return changeDetectionExcludes;
-	}
-	
-	public void setChangeDetectionExcludes(String changeDetectionExcludes) {
-		this.changeDetectionExcludes = changeDetectionExcludes;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}
 		
 	public UserDataFacade getFacade() {
-		return new UserDataFacade(key, paths, changeDetectionExcludes);
+		return new UserDataFacade(key, entries.stream().map(UserDataEntry::getFacade).collect(Collectors.toList()));
 	}
 	
 }

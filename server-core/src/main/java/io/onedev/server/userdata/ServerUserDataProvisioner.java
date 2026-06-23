@@ -33,7 +33,8 @@ public class ServerUserDataProvisioner extends UserDataProvisioner {
 			var lockName = User.getWorkspaceDataLockName(userId, key);
 			LockUtils.read(lockName, () -> {
 				var pathIndexes = PathIndexUtils.read(dataStorageDir);
-				for (var path : userData.getPaths()) {
+				for (var entry : userData.getEntries()) {
+					var path = entry.getPath();
 					var pathIndex = pathIndexes.get(path);
 					if (pathIndex != null && new File(dataStorageDir, String.valueOf(pathIndex)).exists())
 						storedPaths.add(path);
@@ -73,8 +74,8 @@ public class ServerUserDataProvisioner extends UserDataProvisioner {
 	}
 
 	@Override
-	protected void upload(String key, String path, File pathFile) {
-		getUserService().uploadWorkspaceData(userId, key, path, os -> TarUtils.tar(pathFile, os, false));
+	protected void upload(String key, String path, File pathFile, List<String> excludes) {
+		getUserService().uploadWorkspaceData(userId, key, path, os -> TarUtils.tar(pathFile, excludes, os, false));
 	}
 
 	@Override

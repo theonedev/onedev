@@ -336,8 +336,8 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		Set<String> seenUserDataPaths = new HashSet<>();
 		for (int i = 0; i < userDatas.size(); i++) {
 			var userData = userDatas.get(i);
-			for (int j = 0; j < userData.getPaths().size(); j++) {
-				String path = userData.getPaths().get(j);
+			for (int j = 0; j < userData.getEntries().size(); j++) {
+				String path = userData.getEntries().get(j).getPath();
 				if (path != null && !path.isEmpty() && !seenUserDataPaths.add(path)) {
 					context.buildConstraintViolationWithTemplate(
 							"Item #" + (i + 1) + ": duplicate path '" + path + "'")
