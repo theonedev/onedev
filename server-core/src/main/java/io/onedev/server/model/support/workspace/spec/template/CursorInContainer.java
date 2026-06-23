@@ -35,10 +35,10 @@ public class CursorInContainer extends WorkspaceSpecTemplate {
 
         var userData = new UserData();
         userData.setKey("cursor");
-        userData.getPaths().add("/home/cursor/.profile");
-        userData.getPaths().add("/home/cursor/.bashrc");
         userData.getPaths().add("/home/cursor/.cursor");
         userData.getPaths().add("/home/cursor/.config/cursor");
+        userData.getPaths().add("/home/cursor/.agents");
+
         workspaceSpec.getUserDatas().add(userData);
 
         configureTaskAutomation(workspaceSpec, "agent -p --force --approve-mcps --trust \"$TASK_PROMPT\"");

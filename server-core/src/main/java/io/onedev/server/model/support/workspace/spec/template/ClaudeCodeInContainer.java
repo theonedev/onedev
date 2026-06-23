@@ -35,8 +35,6 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 
         var userData = new UserData();
         userData.setKey("claudecode");
-        userData.getPaths().add("/home/claude/.profile");
-        userData.getPaths().add("/home/claude/.bashrc");
         userData.getPaths().add("/home/claude/.claude");
         userData.getPaths().add("/home/claude/.claude.json");
         userData.getPaths().add("/home/claude/.local/state");

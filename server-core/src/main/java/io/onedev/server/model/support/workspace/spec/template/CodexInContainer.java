@@ -36,8 +36,7 @@ public class CodexInContainer extends WorkspaceSpecTemplate {
         var userData = new UserData();
         userData.setKey("codex");
         userData.getPaths().add("/home/codex/.codex");
-        userData.getPaths().add("/home/codex/.bashrc");
-        userData.getPaths().add("/home/codex/.profile");
+        userData.getPaths().add("/home/codex/.agents");
         workspaceSpec.getUserDatas().add(userData);
 
         configureTaskAutomation(workspaceSpec, "codex exec --dangerously-bypass-approvals-and-sandbox \"$TASK_PROMPT\"");

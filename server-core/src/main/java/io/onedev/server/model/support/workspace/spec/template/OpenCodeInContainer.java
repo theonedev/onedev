@@ -35,11 +35,10 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
 
         var userData = new UserData();
         userData.setKey("opencode");
-        userData.getPaths().add("/home/opencode/.profile");
-        userData.getPaths().add("/home/opencode/.bashrc");
         userData.getPaths().add("/home/opencode/.config/opencode");
         userData.getPaths().add("/home/opencode/.local/share");
         userData.getPaths().add("/home/opencode/.local/state");
+        userData.getPaths().add("/home/opencode/.agents");
         workspaceSpec.getUserDatas().add(userData);
 
         configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$TASK_PROMPT\"");
