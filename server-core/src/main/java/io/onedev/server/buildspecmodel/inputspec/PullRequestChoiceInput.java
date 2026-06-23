@@ -31,7 +31,7 @@ public class PullRequestChoiceInput {
 			try {
 				return Long.valueOf(value);
 			} catch (NumberFormatException e) {
-				throw new ValidationException("Invalid pull request id");
+				throw new ValidationException("Invalid pull request id/number");
 			}
 		} else {
 			throw new ValidationException("Not eligible for multi-value");

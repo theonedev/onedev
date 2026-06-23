@@ -40,7 +40,7 @@ public class BuildChoiceInput {
 			else  
 				return Long.valueOf(strings.iterator().next());
 		} catch (NumberFormatException e) {
-			throw new ValidationException("Invalid build id");
+			throw new ValidationException("Invalid build id/number");
 		}
 	}
 

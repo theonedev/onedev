@@ -31,7 +31,7 @@ public class IssueChoiceInput {
 			try {
 				return Long.valueOf(value);
 			} catch (NumberFormatException e) {
-				throw new ValidationException("Invalid issue id");
+				throw new ValidationException("Invalid issue id/number");
 			}
 		} else {
 			throw new ValidationException("Not eligible for multi-value");
