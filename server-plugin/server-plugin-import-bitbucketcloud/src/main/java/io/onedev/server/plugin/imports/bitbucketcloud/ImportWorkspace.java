@@ -1,6 +1,8 @@
 package io.onedev.server.plugin.imports.bitbucketcloud;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotEmpty;
@@ -22,7 +24,7 @@ public class ImportWorkspace implements Serializable {
 	private boolean includeForks;
 
 	@Editable(order=100, name="Bitbucket Workspace", description="Select workspace to import from")
-	@ChoiceProvider("getWorkspaceChoices")
+	@ChoiceProvider(value="getWorkspaceChoices", displayNames="getWorkspaceDisplayNames")
 	@NotEmpty
 	public String getWorkspace() {
 		return workspace;
@@ -32,11 +34,15 @@ public class ImportWorkspace implements Serializable {
 		this.workspace = workspace;
 	}
 	
-	@SuppressWarnings("unused")
-	private static Map<String, String> getWorkspaceChoices() {
+	private static Map<String, String> getWorkspaceDisplayNames() {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportWorkspace setting = (ImportWorkspace) editor.getModelObject();
 		return setting.server.listWorkspaces();
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<String> getWorkspaceChoices() {
+		return new ArrayList<>(getWorkspaceDisplayNames().keySet());
 	}
 	
 	@Editable(order=200, description="Whether or not to include forked repositories")
