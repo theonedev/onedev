@@ -280,7 +280,6 @@ public class PullRequestNotificationManager implements Serializable {
 									getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(request, assignee)) {
 					}
 					notifiedUsers.add(assignee);
 				}
@@ -310,7 +309,7 @@ public class PullRequestNotificationManager implements Serializable {
 									getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(request, reviewer) && canCreateWorkspace(reviewer, request)) {				
+					} else if (isAiEntitled(null, request, reviewer) && canCreateWorkspace(reviewer, request)) {				
 						var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
 						var prompt = """
 								Work on pull request %d to perform the review. \
@@ -349,7 +348,7 @@ public class PullRequestNotificationManager implements Serializable {
 											getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 											replyAddress, senderName, threadingReferences);
 								}
-							} else if (isAiEntitled(request, mentionedUser)) {
+							} else if (isAiEntitled(user, request, mentionedUser)) {
 								addressConcern(mentionedUser, user, request);
 							}
 							notifiedUsers.add(mentionedUser);
@@ -438,7 +437,9 @@ public class PullRequestNotificationManager implements Serializable {
 					}
 				}
 			}
-			if (aiAssignee != null && request.checkMergeCondition() == null && canWriteCode(aiAssignee, request, request.getTargetProject())) {
+			if (aiAssignee != null && request.checkMergeCondition() == null 
+					&& isAiEntitled(null, request, aiAssignee) 
+					&& canWriteCode(aiAssignee, request, request.getTargetProject())) {
 				var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
 				var prompt = """
 						Work on pull request %d to review and merge if ready. \
@@ -451,12 +452,21 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 	}
 
-	private boolean isAiEntitled(PullRequest request, User ai) {
-		if (request.getProject().isEntitledToAi(ai)) {
-			return true;
+	private boolean isAiEntitled(@Nullable User user, PullRequest request, User ai) {
+		if (user != null && user.getId() > 0) {
+			if (user.isEntitledToAi(ai)) {
+				return true;
+			} else {
+				createComment(ai, request, "@%s you are not entitled to interact with me".formatted(user.getName()));				
+				return false;
+			}
 		} else {
-			createComment(ai, request, "Sorry but this project is not entitled to access me");				
-			return false;
+			if (request.getProject().isEntitledToAi(ai)) {
+				return true;
+			} else {
+				createComment(ai, request, "I'm not entitled to work on this project");				
+				return false;
+			}
 		}
 	}
 

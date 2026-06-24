@@ -379,9 +379,9 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 					tabs.add(new TerminalTab(getWorkspace(), shellId, displayLabel));
 				}
 
+				tabs.add(new WorkspaceTab(Model.of(_T("Log")), Model.of("log"), WorkspaceLogPage.class, WorkspaceLogPage.paramsOf(getWorkspace())));
 				if (getWorkspace().getStatus() != Workspace.Status.PENDING && getWorkspace().getBranch() != null)
 					tabs.add(new WorkspaceTab(Model.of(_T("Changes")), Model.of("diff"), WorkspaceChangesPage.class, WorkspaceChangesPage.paramsOf(getWorkspace())));
-				tabs.add(new WorkspaceTab(Model.of(_T("Log")), Model.of("log"), WorkspaceLogPage.class, WorkspaceLogPage.paramsOf(getWorkspace())));
 				return tabs;
 			}
 
@@ -389,23 +389,28 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 			@Override
 			public Collection<String> findObservables() {
-				return Set.of(getWorkspace().getStatusChangeObservable());
+				return Set.of(getWorkspace().getStatusChangeObservable(), getWorkspace().getTerminalChangeObservable());
 			}
 			
 		}));
 
 		workspaceStatus = getWorkspace().getStatus();
+
+		int shellCount = workspaceService.getShellLabels(getWorkspace()).size();
+
 		add(new ChangeObserver() {
 
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-				if ((workspaceStatus == Workspace.Status.ACTIVE) != (getWorkspace().getStatus() == Workspace.Status.ACTIVE))
+				if ((shellCount == 0 && workspaceService.getShellLabels(getWorkspace()).size() != 0) 
+						|| (workspaceStatus == Workspace.Status.ACTIVE) != (getWorkspace().getStatus() == Workspace.Status.ACTIVE)) {
 					setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(getWorkspace()));
+				}
 			}
 
 			@Override
 			public Collection<String> findObservables() {
-				return Set.of(getWorkspace().getStatusChangeObservable());
+				return Set.of(getWorkspace().getStatusChangeObservable(), getWorkspace().getTerminalChangeObservable());
 			}
 
 		});	

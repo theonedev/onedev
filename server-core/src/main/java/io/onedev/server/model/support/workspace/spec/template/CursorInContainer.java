@@ -11,8 +11,8 @@ import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.model.support.workspace.spec.shell.PosixShell;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=400, name="nt:Cursor CLI in Container", description="""
-        Create a workspace spec running Cursor CLI inside container for isolation and security purpose.
+@Editable(order=400, name="nt:Cursor in Container", description="""
+        Create a workspace spec running Cursor inside container for isolation and security purpose.
         You may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a> 
         later to suit your needs if desired""")
 public class CursorInContainer extends WorkspaceSpecTemplate {
@@ -30,15 +30,15 @@ public class CursorInContainer extends WorkspaceSpecTemplate {
         workspaceSpec.setRunAs("1001:1001");
 
         var shortcutConfig = new ShortcutConfig();
-        shortcutConfig.setName("Cursor CLI");
+        shortcutConfig.setName("Cursor");
         shortcutConfig.setCommand("agent");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
 
         var userData = new UserData();
         userData.setKey("cursor");
-        userData.getEntries().add(newUserDataEntry("/home/cursor/.cursor"));
-        userData.getEntries().add(newUserDataEntry("/home/cursor/.config/cursor"));
-        userData.getEntries().add(newUserDataEntry("/home/cursor/.agents"));
+        userData.getEntries().add(UserDataEntry.of("/home/cursor/.cursor", "chats extensions ai-tracking **/*.log"));
+        userData.getEntries().add(UserDataEntry.of("/home/cursor/.config/cursor", null));
+        userData.getEntries().add(UserDataEntry.of("/home/cursor/.agents", null));
 
         workspaceSpec.getUserDatas().add(userData);
 
@@ -51,11 +51,5 @@ public class CursorInContainer extends WorkspaceSpecTemplate {
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}
-
-    private static UserDataEntry newUserDataEntry(String path) {
-        var entry = new UserDataEntry();
-        entry.setPath(path);
-        return entry;
-    }
 
 }

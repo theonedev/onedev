@@ -24,7 +24,7 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	@Nullable Workspace find(Project project, long number);
 
-	Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch, String specName);
+	Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch, String specName, boolean forTaskAutomation);
 
 	void update(Workspace workspace);
 

@@ -36,9 +36,8 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 
         var userData = new UserData();
         userData.setKey("claudecode");
-        userData.getEntries().add(newUserDataEntry("/home/claude/.claude"));
-        userData.getEntries().add(newUserDataEntry("/home/claude/.claude.json"));
-        userData.getEntries().add(newUserDataEntry("/home/claude/.local/state"));
+        userData.getEntries().add(UserDataEntry.of("/home/claude/.claude", "backups cache downloads file-history plans plugins sessions session-env shell-snapshots **/*.log"));
+        userData.getEntries().add(UserDataEntry.of("/home/claude/.claude.json", null));
         workspaceSpec.getUserDatas().add(userData);
 
         configureTaskAutomation(workspaceSpec, "claude --dangerously-skip-permissions -p --verbose \"$TASK_PROMPT\"");
@@ -50,11 +49,5 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}
-
-    private static UserDataEntry newUserDataEntry(String path) {
-        var entry = new UserDataEntry();
-        entry.setPath(path);
-        return entry;
-    }
 
 }

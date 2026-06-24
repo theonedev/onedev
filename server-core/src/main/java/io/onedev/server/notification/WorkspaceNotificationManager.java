@@ -92,7 +92,7 @@ public class WorkspaceNotificationManager {
 	@Sessional
 	@Listen
 	public void on(WorkspaceEvent event) {
-		if (event.getUser() == null || event.getUser().getType() != User.Type.SERVICE) {
+		if ((event.getUser() == null || event.getUser().getType() != User.Type.SERVICE) && !event.isMinor()) {
 			Project project = event.getProject();
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 			for (WorkspaceQueryPersonalization personalization : project.getWorkspaceQueryPersonalizations()) {

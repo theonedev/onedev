@@ -144,7 +144,7 @@ public abstract class WorkspaceSpecRunSelector extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				var commitId = getProject().getObjectId(branch, true);
-				var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), commitId, branch, spec.getName());
+				var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), commitId, branch, spec.getName(), false);
 				onSelect(target, spec);
 				setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
 			}

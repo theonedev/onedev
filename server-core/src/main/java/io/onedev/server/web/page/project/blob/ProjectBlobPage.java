@@ -1115,6 +1115,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		
 		newRevisionPicker(target);
 		newCommitStatusLink(target);
+		newWorkspacesLink(target);
 		target.add(revisionIndexing);
 		newBlobNavigator(target);
 		newBlobOperations(target);

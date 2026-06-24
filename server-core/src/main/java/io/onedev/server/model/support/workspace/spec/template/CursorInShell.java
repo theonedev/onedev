@@ -8,8 +8,8 @@ import io.onedev.server.model.support.workspace.spec.ShortcutConfig;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=1400, name="nt:Cursor CLI In Shell", description="""
-        Create a workspace spec running Cursor CLI directly with server shell environment. 
+@Editable(order=1400, name="nt:Cursor In Shell", description="""
+        Create a workspace spec running Cursor directly with server shell environment. 
         Workspaces using created spec will share same environments and settings. 
         To use this template, please ensure that: 
         <ul>
@@ -25,7 +25,7 @@ public class CursorInShell extends WorkspaceSpecTemplate {
 
         workspaceSpec.setName(getName());
         var shortcutConfig = new ShortcutConfig();
-        shortcutConfig.setName("Cursor CLI");
+        shortcutConfig.setName("Cursor");
         shortcutConfig.setCommand("agent");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
 

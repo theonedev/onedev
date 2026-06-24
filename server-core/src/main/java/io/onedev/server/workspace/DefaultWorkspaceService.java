@@ -69,6 +69,7 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.NodeStopping;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.project.workspace.WorkspaceTerminalOpened;
 import io.onedev.server.event.project.workspace.WorkspaceActive;
 import io.onedev.server.event.project.workspace.WorkspaceCreated;
 import io.onedev.server.event.project.workspace.WorkspaceEvent;
@@ -212,13 +213,14 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch, String specName) {
+	public Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch, String specName, boolean forTaskAutomation) {
 		var workspace = new Workspace();
 		workspace.setUser(user);
 		workspace.setProject(project);
 		workspace.setCommitHash(commitId.name());
 		workspace.setBranch(branch);
 		workspace.setSpecName(specName);
+		workspace.setForTaskAutomation(forTaskAutomation);
 		workspace.setToken(UUID.randomUUID().toString());
 		workspace.setNumberScope(workspace.getProject().getForkRoot());
 		workspace.setNumber(getNumberGenerator().getNextSequence(workspace.getNumberScope()));
@@ -839,7 +841,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		var server = workspaceServers.get(workspaceId);
 		if (server == null)
 			throw new ExplicitException("Workspace server not found");
-		return clusterService.runOnServer(server, new ClusterTask<String>() {
+		var shellId = clusterService.runOnServer(server, new ClusterTask<String>() {
 
 			@Override
 			public String call() throws Exception {
@@ -892,7 +894,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			}
 
 		});
-
+		listenerRegistry.post(new WorkspaceTerminalOpened(workspace));
+		return shellId;
 	}
 
 	@Sessional
@@ -1115,7 +1118,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		}
 		if (applicableSpec != null) {
 			final WorkspaceSpec finalApplicableSpec = applicableSpec;
-			var workspaceId = create(ai, project, commitId, branch, applicableSpec.getName()).getId();
+			var workspaceId = create(ai, project, commitId, branch, applicableSpec.getName(), true).getId();
 			
 			transactionService.runAfterCommit(() -> {
 				executorService.execute(() -> {
@@ -1206,7 +1209,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						var workspace = load(workspaceId);
 						workspace.setStatus(Workspace.Status.ACTIVE);
 						workspace.setActiveDate(new Date());
-						if (workspace.getUser().getType() != User.Type.AI) {
+						if (!workspace.isForTaskAutomation()) {
 							var firstShortcut = context.getSpec().getShortcutConfigs().stream().findFirst().orElse(null);
 							if (firstShortcut != null) 
 								openShell(workspace, firstShortcut.getName(), firstShortcut.getCommand(), null);

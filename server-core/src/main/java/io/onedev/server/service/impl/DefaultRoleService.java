@@ -186,6 +186,25 @@ public class DefaultRoleService extends BaseEntityService<Role> implements RoleS
 		codeReader.getJobPrivileges().add(jobPrivilege);
 
 		create(codeReader, new ArrayList<>());
+
+		Role workspaceCreator = new Role();
+		workspaceCreator.setName("Workspace Creator");
+		workspaceCreator.setCreateWorkspaces(true);
+		workspaceCreator.setCodePrivilege(CodePrivilege.READ);
+		workspaceCreator.setPackPrivilege(PackPrivilege.READ);
+		workspaceCreator.setAccessTimeTracking(false);
+		
+		if (hasAssigneesField) {
+			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
+			allfieldsExcept.getExcludeFields().add("Assignees");
+			workspaceCreator.setEditableIssueFields(allfieldsExcept);
+		}
+
+		jobPrivilege = new JobPrivilege();
+		jobPrivilege.setJobNames("*");
+		workspaceCreator.getJobPrivileges().add(jobPrivilege);
+
+		create(workspaceCreator, new ArrayList<>());
 		
 		Role packWriter = new Role();
 		packWriter.setName("Package Writer");

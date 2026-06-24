@@ -241,8 +241,8 @@ public class IssueNotificationManager implements Serializable {
 					emojis.apply(issue.getTitle()));
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User member: entry.getValue().getMembers()) {
-				if (!member.equals(user)) {
-					if (member.getType() != AI) {
+				if (member.getType() != AI) {
+					if (!member.equals(user)) {
 						EmailAddress emailAddress = member.getPrimaryEmailAddress();
 						if (emailAddress != null && emailAddress.isVerified()) {
 							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
@@ -251,9 +251,9 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(issue, member) && canCreateWorkspace(member, issue)) { 
-						handleFieldAssignment(member, issue, entry.getKey());
 					}
+				} else if (isAiEntitled(null, issue, member) && canCreateWorkspace(member, issue)) { 
+					handleFieldAssignment(member, issue, entry.getKey());
 				}
 			}
 			
@@ -274,8 +274,8 @@ public class IssueNotificationManager implements Serializable {
 					emojis.apply(issue.getTitle()));
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User assignedUser: entry.getValue()) {
-				if (!assignedUser.equals(user)) {
-					if (assignedUser.getType() != AI) {
+				if (assignedUser.getType() != AI) {
+					if (!assignedUser.equals(user)) {
 						EmailAddress emailAddress = assignedUser.getPrimaryEmailAddress();
 						if (emailAddress != null && emailAddress.isVerified()) {
 							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
@@ -283,11 +283,11 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
-						}					
-					} else if (isAiEntitled(issue, assignedUser) && canCreateWorkspace(assignedUser, issue)) { 
-						handleFieldAssignment(assignedUser, issue, entry.getKey());
-					} 
-				}
+						}
+					}
+				} else if (isAiEntitled(null, issue, assignedUser) && canCreateWorkspace(assignedUser, issue)) { 
+					handleFieldAssignment(assignedUser, issue, entry.getKey());
+				} 
 			}
 
 			for (User each: entry.getValue()) {
@@ -324,9 +324,8 @@ public class IssueNotificationManager implements Serializable {
 										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 										replyAddress, senderName, threadingReferences);
 							}
-						} else if (isAiEntitled(issue, mentionedUser) 
+						} else if (isAiEntitled(user, issue, mentionedUser) 
 								&& user != null 
-								&& user.getId() > 0 
 								&& !user.equals(mentionedUser) 
 								&& canCreateWorkspace(mentionedUser, issue)) {
 							addressConcern(mentionedUser, user, issue);
@@ -451,9 +450,9 @@ public class IssueNotificationManager implements Serializable {
 	private Set<String> getAssignedFields(User ai, Issue issue) {
 		var assignedFieldNames = new HashSet<String>();
 		for (var field: issue.getFields()) {
-			if (field.getType().equals(InputSpec.USER) && field.getValue().equals(ai.getName())) 
+			if (field.getType().equals(InputSpec.USER) && ai.getName().equals(field.getValue())) 
 				assignedFieldNames.add(field.getName());
-			if (field.getType().equals(InputSpec.GROUP)) {
+			if (field.getType().equals(InputSpec.GROUP) && field.getValue() != null) {
 				var group = groupService.find(field.getValue());
 				if (group != null) {
 					for (var member: group.getMembers()) {
@@ -576,12 +575,21 @@ public class IssueNotificationManager implements Serializable {
 		}
 	}
 
-	private boolean isAiEntitled(Issue issue, User ai) {
-		if (issue.getProject().isEntitledToAi(ai)) {
-			return true;
+	private boolean isAiEntitled(@Nullable User user, Issue issue, User ai) {
+		if (user != null && user.getId() > 0) {
+			if (user.isEntitledToAi(ai)) {
+				return true;
+			} else {
+				createComment(ai, issue, "@%s you are not entitled to interact with me".formatted(user.getName()));				
+				return false;
+			}
 		} else {
-			createComment(ai, issue, "Sorry but this project is not entitled to access me");				
-			return false;
+			if (issue.getProject().isEntitledToAi(ai)) {
+				return true;
+			} else {
+				createComment(ai, issue, "I'm not entitled to work on this project");				
+				return false;
+			}
 		}
 	}
 

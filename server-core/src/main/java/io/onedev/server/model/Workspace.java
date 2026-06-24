@@ -169,6 +169,8 @@ public class Workspace extends AbstractEntity {
 	@Column(length=255)
 	private String serverAddress;
 
+	private boolean forTaskAutomation;
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
 	private Agent agent;
@@ -381,6 +383,14 @@ public class Workspace extends AbstractEntity {
 			return null;
 	}
 
+	public boolean isForTaskAutomation() {
+		return forTaskAutomation;
+	}
+
+	public void setForTaskAutomation(boolean forTaskAutomation) {
+		this.forTaskAutomation = forTaskAutomation;
+	}
+
 	public WorkspaceReference getReference() {
 		return new WorkspaceReference(getProject(), getNumber());
 	}
@@ -391,6 +401,10 @@ public class Workspace extends AbstractEntity {
 
 	public String getStatusChangeObservable() {
 		return "workspace-status:" + getId();
+	}
+
+	public String getTerminalChangeObservable() {
+		return "workspace-terminal:" + getId();
 	}
 
 }

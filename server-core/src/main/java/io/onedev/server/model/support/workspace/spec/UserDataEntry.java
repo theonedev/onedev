@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 
+import org.jspecify.annotations.Nullable;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.UserDataEntryFacade;
 import io.onedev.server.annotation.Editable;
@@ -53,6 +55,13 @@ public class UserDataEntry implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
+	}
+
+	public static UserDataEntry of(String path, @Nullable String excludes) {
+		var entry = new UserDataEntry();
+		entry.setPath(path);
+		entry.setExcludes(excludes);
+		return entry;
 	}
 
 }

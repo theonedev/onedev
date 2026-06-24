@@ -37,7 +37,9 @@ public class EntitlementEditBean implements Serializable{
         this.entitleToAll = entitleToAll;
     }
 
-    @Editable(order=200, description="Entitled users will be able to access this AI service")
+    @Editable(order=200, description="""
+        Entitled users will be able to chat with the AI user and mention it in \
+        issues or pull requests to ask questions or give instructions.""")
     @UserChoice("getUsers")
     @DependsOn(property="entitleToAll", value="false")
     public List<String> getEntitledUsers() {
@@ -57,7 +59,10 @@ public class EntitlementEditBean implements Serializable{
                 .collect(Collectors.toList());
     }
 
-    @Editable(order=300, description="All members of entitled groups will be able to access this AI service")
+    @Editable(order=300, description="""
+        All members of entitled groups will be able to chat with the AI user \
+        and mention it in issues or pull requests to ask questions or give \
+        instructions""")
     @GroupChoice
     @DependsOn(property="entitleToAll", value="false")
     public List<String> getEntitledGroups() {
@@ -68,7 +73,9 @@ public class EntitlementEditBean implements Serializable{
         this.entitledGroups = entitledGroups;
     }
 
-    @Editable(order=400, description="Entitled projects and all the sub-projects will be able to access this AI service")
+    @Editable(order=400, description="""
+        Entitled projects and all their sub-projects will be able to assign \
+        the AI user to work on issues or pull requests""")
     @ProjectChoice
     @DependsOn(property="entitleToAll", value="false")
     public List<String> getEntitledProjects() {

@@ -4,22 +4,30 @@
         <dl class="mt-2 mb-0">
             <dt><wicket:t>Via chat interface</wicket:t></dt>
             <dd class="small mt-1">
-                <wicket:t>Entitled users can interact with the AI user through the chat interface to perform tasks 
-                such as understanding codebase, authoring CI/CD spec, or investigating 
-                CI/CD job failures. In this mode, the AI user operates with same permissions as the 
-                user interacting with it, ignoring permissions assigned to the AI user itself.</wicket:t>                
+                <wicket:t>
+                    Entitled users can interact with the AI user through the chat interface to 
+                    perform tasks such as understanding codebase, summarizing issue/PR comments, or 
+                    authoring CI/CD spec. In this mode, the AI user operates with same permissions as 
+                    the user interacting with it, ignoring permissions assigned to the AI user itself.
+                </wicket:t>                
+            </dd>
+            <dt><wicket:t>Via issue/PR assignee and reviewer</wicket:t></dt>
+            <dd class="small mt-1">
+                <wicket:t>
+                    Entitled projects can assign the AI user to work on issues and pull requests. 
+                    In this mode, the AI user executes tasks using its own permissions. 
+                </wicket:t>
             </dd>
             <dt><wicket:t>Via mention in issue or pull request comments</wicket:t></dt>
             <dd class="small mt-1">
-                <wicket:t>Entitled users can mention the AI user in issue or pull request comments to request assistance. 
-                In this case, the AI user executes tasks using its own permissions.</wicket:t>
-            </dd>
-            <dt><wicket:t>Via pull request reviewer</wicket:t></dt>
-            <dd class="small mt-1">
-                <wicket:t>Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user 
-                executes tasks using its own permissions.</wicket:t>
+                <wicket:t>
+                    Entitled users can mention the AI user in issue or pull request comments to ask 
+                    questions or give instructions. In this mode, the AI user executes tasks using 
+                    its own permissions.
+                </wicket:t>
             </dd>
         </dl>
+        <div class="mt-4"><b class="text-info">NOTE:</b> AI users can access each other’s services without requiring entitlements.</div>
     </div>
     <form wicket:id="form" class="leave-confirm">
         <div wicket:id="editor" class="mb-4"></div>

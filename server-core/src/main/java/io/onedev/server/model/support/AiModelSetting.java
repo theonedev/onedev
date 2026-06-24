@@ -54,9 +54,10 @@ public class AiModelSetting implements Serializable {
     private int timeoutSeconds = 30;
 
     @Editable(order=200, name="Base URL", placeholder="https://api.openai.com/v1", description="""
-        Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint. 
+        Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. 
         <b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not 
         supported and will get a connection timeout error""")
+    @NotEmpty
     @Pattern(regexp="https?://.+", message="Base URL should be a valid http/https URL")
     public String getBaseUrl() {
         return baseUrl;

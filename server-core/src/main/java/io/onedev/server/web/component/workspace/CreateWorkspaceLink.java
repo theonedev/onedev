@@ -33,7 +33,7 @@ public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
- 		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), getCommitId(), getBranch(), getSpec().getName());
+ 		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), getCommitId(), getBranch(), getSpec().getName(), false);
 		setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
 	}
 

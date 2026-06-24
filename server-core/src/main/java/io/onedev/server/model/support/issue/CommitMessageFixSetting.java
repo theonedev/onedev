@@ -42,7 +42,7 @@ public class CommitMessageFixSetting implements Serializable, Validatable {
 		Fixes #100
 		Fixes PROJ-100
 		
-		Note that this footer should not be added to fixup commits for previous commits.""";
+		Note that this footer should not be added to fixup commits.""";
 
 	private String fixSuggestion = DEFAULT_FIX_SUGGESTION;
 		

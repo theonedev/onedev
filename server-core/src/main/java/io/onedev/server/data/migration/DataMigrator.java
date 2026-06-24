@@ -8864,6 +8864,14 @@ public class DataMigrator {
 		return element;
 	}
 
+	private static void setDefaultAiModelBaseUrlIfBlank(Element modelSettingElement) {
+		Element baseUrlElement = modelSettingElement.element("baseUrl");
+		if (baseUrlElement == null) {
+			baseUrlElement = modelSettingElement.addElement("baseUrl");
+			baseUrlElement.setText("https://api.openai.com/v1");
+		}
+	}
+
 	private void migrate229(File dataDir, Stack<Integer> versions) {
 		Map<String, String> buildNumbers = new HashMap<>();
 		Map<String, String> issueNumbers = new HashMap<>();
@@ -8994,10 +9002,32 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var aiSettingElement = element.element("aiSetting");
+					var modelSettingElement = aiSettingElement.element("modelSetting");
+					if (modelSettingElement != null) 
+						setDefaultAiModelBaseUrlIfBlank(modelSettingElement);
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Workspaces.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element workspaceElement : dom.getRootElement().elements()) {
+					workspaceElement.addElement("forTaskAutomation").setText("false");
+				}
+				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					if (element.elementTextTrim("key").equals("ISSUE")) {
+					if (element.elementTextTrim("key").equals("AI")) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							var liteModelSettingElement = valueElement.element("liteModelSetting");
+							if (liteModelSettingElement != null)
+								setDefaultAiModelBaseUrlIfBlank(liteModelSettingElement);
+						}
+					} else if (element.elementTextTrim("key").equals("ISSUE")) {
 						var valueElement = element.element("value");
 						if (valueElement != null) {
 							var commitMessageFixSettingElement = valueElement.element("commitMessageFixSetting");

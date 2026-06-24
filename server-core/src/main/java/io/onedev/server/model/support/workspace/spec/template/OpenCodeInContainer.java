@@ -36,10 +36,10 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
 
         var userData = new UserData();
         userData.setKey("opencode");
-        userData.getEntries().add(newUserDataEntry("/home/opencode/.config/opencode"));
-        userData.getEntries().add(newUserDataEntry("/home/opencode/.local/share"));
-        userData.getEntries().add(newUserDataEntry("/home/opencode/.local/state"));
-        userData.getEntries().add(newUserDataEntry("/home/opencode/.agents"));
+        userData.getEntries().add(UserDataEntry.of("/home/opencode/.config/opencode", "node_modules"));
+        userData.getEntries().add(UserDataEntry.of("/home/opencode/.local/share/opencode", "log tool-output repos snapshot"));
+        userData.getEntries().add(UserDataEntry.of("/home/opencode/.local/state/opencode", "locks"));
+        userData.getEntries().add(UserDataEntry.of("/home/opencode/.agents", null));
         workspaceSpec.getUserDatas().add(userData);
 
         configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$TASK_PROMPT\"");
@@ -51,11 +51,5 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}
-
-    private static UserDataEntry newUserDataEntry(String path) {
-        var entry = new UserDataEntry();
-        entry.setPath(path);
-        return entry;
-    }
 
 }
