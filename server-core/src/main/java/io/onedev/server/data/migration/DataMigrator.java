@@ -8934,6 +8934,24 @@ public class DataMigrator {
 									pathElement.addElement("path").setText(path);
 								}
 							}
+							var cacheConfigsElement = workspaceSpecElement.element("cacheConfigs");
+							if (cacheConfigsElement != null) {
+								for (Element cacheConfigElement : cacheConfigsElement.elements()) {
+									var pathsElement = cacheConfigElement.element("paths");
+									var changeDetectionExcludesElement = cacheConfigElement.element("changeDetectionExcludes");
+									if (changeDetectionExcludesElement != null)
+										changeDetectionExcludesElement.detach();
+									if (pathsElement != null) {
+										pathsElement.setName("entries");
+										for (Element pathElement : pathsElement.elements()) {
+											var path = pathElement.getText();
+											pathElement.setName("io.onedev.server.model.support.workspace.spec.CacheEntry");
+											pathElement.setText("");
+											pathElement.addElement("path").setText(path);
+										}
+									}
+								}
+							}
 						}
 					}
 				}

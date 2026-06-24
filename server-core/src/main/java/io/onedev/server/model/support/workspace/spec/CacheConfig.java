@@ -6,7 +6,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -16,7 +18,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CacheConfigFacade;
 import io.onedev.k8shelper.UploadStrategy;
-import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.ProjectChoice;
@@ -32,11 +33,9 @@ public class CacheConfig implements Serializable {
 	
 	private String checksumFiles;
 	
-	private List<String> paths = new ArrayList<>();
+	private List<CacheEntry> entries = new ArrayList<>();
 	
 	private UploadStrategy uploadStrategy = UPLOAD_IF_NOT_EXACT_MATCH;
-	
-	private String changeDetectionExcludes;
 	
 	private String uploadProjectPath;
 	
@@ -75,19 +74,29 @@ public class CacheConfig implements Serializable {
 		this.checksumFiles = checksumFiles;
 	}
 
-	@Editable(order=300, name="Cache Paths", description = """
-			Non-absolute path is considered to be relative to workspace working directory. 
-			Note that only relative path is accepted if not running in container""")
-	@Interpolative(variableSuggester="suggestVariables")
+	@Editable(order=300, name="Cache Entries", description = "Specify cache entries")
+	@Valid
 	@Size(min=1, max=100)
+	public List<CacheEntry> getEntries() {
+		return entries;
+	}
+
+	public void setEntries(List<CacheEntry> entries) {
+		this.entries = entries;
+	}
+
 	public List<String> getPaths() {
-		return paths;
+		return getEntries().stream().map(CacheEntry::getPath).collect(Collectors.toList());
 	}
 
 	public void setPaths(List<String> paths) {
-		this.paths = paths;
+		entries = paths.stream().map(it -> {
+			var entry = new CacheEntry();
+			entry.setPath(it);
+			return entry;
+		}).collect(Collectors.toList());
 	}
-
+	
 	@Editable(order=400, description = """
 			Specify cache upload strategy after build successful. <i>Upload If Not Exact Match</i> 
 			means to upload when no cache found with matching key and checksum , and 
@@ -101,20 +110,6 @@ public class CacheConfig implements Serializable {
 		this.uploadStrategy = uploadStrategy;
 	}
 
-	@Editable(order=425, description = """
-			Optionally specify files relative to cache path to ignore when detect cache changes. 
-			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
-			Multiple files should be separated by space, and single file containing space should be quoted""")
-	@Interpolative(variableSuggester="suggestVariables")
-	@DependsOn(property="uploadStrategy", value="UPLOAD_IF_CHANGED")
-	public String getChangeDetectionExcludes() {
-		return changeDetectionExcludes;
-	}
-	
-	public void setChangeDetectionExcludes(String changeDetectionExcludes) {
-		this.changeDetectionExcludes = changeDetectionExcludes;
-	}
-	
 	@Editable(order=450, name="Upload to Project", placeholder = "Current project", description = """
 			In case cache needs to be uploaded, this property specifies target project for the upload. 
 			Leave empty for current project""")
@@ -144,8 +139,9 @@ public class CacheConfig implements Serializable {
 			var patterns = PatternSet.parse(checksumFiles);
 			parsedChecksumFiles = Pair.of(patterns.getIncludes(), patterns.getExcludes());
 		}
-		return new CacheConfigFacade(key, parsedChecksumFiles, getPaths(), uploadStrategy, 
-				changeDetectionExcludes, uploadProjectPath, uploadAccessToken);
+		return new CacheConfigFacade(key, parsedChecksumFiles,
+				getEntries().stream().map(CacheEntry::getFacade).collect(Collectors.toList()), uploadStrategy,
+				uploadProjectPath, uploadAccessToken);
 	}
 
 	@SuppressWarnings("unused")

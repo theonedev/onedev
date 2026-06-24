@@ -52,7 +52,7 @@ class CacheConfigListViewPanel extends DrawCardBeanListViewPanel<CacheConfig> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<CacheConfig>> cellItem, String componentId, IModel<CacheConfig> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getPaths().size()));
+				cellItem.add(new Label(componentId, rowModel.getObject().getEntries().size()));
 			}
 
 		});

@@ -6,7 +6,9 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -19,7 +21,6 @@ import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.k8shelper.UploadStrategy;
 import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.ProjectChoice;
@@ -42,11 +43,9 @@ public class SetupCacheStep extends Step {
 	
 	private String checksumFiles;
 	
-	private List<String> paths = new ArrayList<>();
+	private List<CacheEntry> entries = new ArrayList<>();
 	
 	private UploadStrategy uploadStrategy = UPLOAD_IF_NOT_EXACT_MATCH;
-	
-	private String changeDetectionExcludes;
 	
 	private String uploadProjectPath;
 	
@@ -85,17 +84,27 @@ public class SetupCacheStep extends Step {
 		this.checksumFiles = checksumFiles;
 	}
 
-	@Editable(order=300, name="Cache Paths", description = """
-			Non-absolute path is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. 
-			Note that shell related executors runs directly on host machine, and only accept relative paths""")
-	@Interpolative(variableSuggester="suggestVariables")
+	@Editable(order=300, name="Cache Entries", description = "Specify cache entries")
+	@Valid
 	@Size(min=1, max=100)
+	public List<CacheEntry> getEntries() {
+		return entries;
+	}
+
+	public void setEntries(List<CacheEntry> entries) {
+		this.entries = entries;
+	}
+
 	public List<String> getPaths() {
-		return paths;
+		return getEntries().stream().map(CacheEntry::getPath).collect(Collectors.toList());
 	}
 
 	public void setPaths(List<String> paths) {
-		this.paths = paths;
+		entries = paths.stream().map(it -> {
+			var entry = new CacheEntry();
+			entry.setPath(it);
+			return entry;
+		}).collect(Collectors.toList());
 	}
 
 	@Editable(order=400, description = """
@@ -109,20 +118,6 @@ public class SetupCacheStep extends Step {
 
 	public void setUploadStrategy(UploadStrategy uploadStrategy) {
 		this.uploadStrategy = uploadStrategy;
-	}
-
-	@Editable(order=425, description = """
-			Optionally specify files relative to cache path to ignore when detect cache changes. 
-			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
-			Multiple files should be separated by space, and single file containing space should be quoted""")
-	@Interpolative(variableSuggester="suggestVariables")
-	@DependsOn(property="uploadStrategy", value="UPLOAD_IF_CHANGED")
-	public String getChangeDetectionExcludes() {
-		return changeDetectionExcludes;
-	}
-	
-	public void setChangeDetectionExcludes(String changeDetectionExcludes) {
-		this.changeDetectionExcludes = changeDetectionExcludes;
 	}
 	
 	@Editable(order=450, name="Upload to Project", placeholder = "Current project", description = """
@@ -175,7 +170,8 @@ public class SetupCacheStep extends Step {
 			var patterns = PatternSet.parse(checksumFiles);
 			parsedChecksumFiles = Pair.of(patterns.getIncludes(), patterns.getExcludes());
 		}
-		var cacheConfig = new CacheConfigFacade(key, parsedChecksumFiles, getPaths(), uploadStrategy, changeDetectionExcludes,
+		var cacheConfig = new CacheConfigFacade(key, parsedChecksumFiles,
+				getEntries().stream().map(CacheEntry::getFacade).collect(toList()), uploadStrategy,
 				uploadProjectPath, uploadAccessToken);
 		return new SetupCacheFacade(cacheConfig);
 	}

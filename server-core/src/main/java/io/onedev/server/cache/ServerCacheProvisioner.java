@@ -3,6 +3,7 @@ package io.onedev.server.cache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -83,7 +84,7 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 	}
 
 	@Override
-	protected boolean upload(CacheConfigFacade config, String path, File pathDir) {
+	protected boolean upload(CacheConfigFacade config, String path, File pathDir, List<String> excludes) {
 		var key = config.getKey();
 		var checksum = config.getChecksum();
 
@@ -114,7 +115,7 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 			var activeServer = getProjectService().getActiveServer(projectId, true);
 			if (activeServer.equals(getClusterService().getLocalServerAddress())) {
 				getCacheService().uploadCache(projectId, key, checksum, path,
-						os -> TarUtils.tar(pathDir, os, false));
+						os -> TarUtils.tar(pathDir, excludes, os, false));
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -129,7 +130,7 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
 							KubernetesHelper.BEARER + " " + getClusterService().getCredential());
-					StreamingOutput output = os -> TarUtils.tar(pathDir, os, false);
+					StreamingOutput output = os -> TarUtils.tar(pathDir, excludes, os, false);
 					try (Response response = builder.post(Entity.entity(output, MediaType.APPLICATION_OCTET_STREAM))) {
 						KubernetesHelper.checkStatus(response);
 					}

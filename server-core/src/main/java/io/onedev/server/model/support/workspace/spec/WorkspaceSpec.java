@@ -311,8 +311,8 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		Set<String> seenCachePaths = new HashSet<>();
 		for (int i = 0; i < cacheConfigs.size(); i++) {
 			var cacheConfig = cacheConfigs.get(i);
-			for (int j = 0; j < cacheConfig.getPaths().size(); j++) {
-				var path = cacheConfig.getPaths().get(j);
+			for (int j = 0; j < cacheConfig.getEntries().size(); j++) {
+				var path = cacheConfig.getEntries().get(j).getPath();
 				if (path == null || path.isEmpty())
 					continue;
 				if (!path.contains("@")) {

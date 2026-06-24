@@ -2760,4 +2760,47 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	private static boolean isSetupCacheStep(MappingNode stepNode) {
+		var stepType = getStepType(stepNode);
+		return "SetupCacheStep".equals(stepType)
+				|| "RenovateCacheStep".equals(stepType)
+				|| stepNode.getTag().getValue().equals("!SetupCacheStep")
+				|| stepNode.getTag().getValue().equals("!RenovateCacheStep");
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate52(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNodeItem : stepsNode.getValue()) {
+				var stepNode = (MappingNode) stepNodeItem;
+				if (!isSetupCacheStep(stepNode))
+					continue;
+				SequenceNode pathsNode = null;
+				for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
+					var stepTuple = itStepTuple.next();
+					var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+					if (propName.equals("paths")) {
+						pathsNode = (SequenceNode) stepTuple.getValueNode();
+						itStepTuple.remove();
+					} else if (propName.equals("changeDetectionExcludes")) {
+						itStepTuple.remove();
+					}
+				}
+				if (pathsNode != null) {
+					List<Node> entryNodes = new ArrayList<>();
+					for (var pathNode : pathsNode.getValue()) {
+						List<NodeTuple> entryTuples = new ArrayList<>();
+						entryTuples.add(new NodeTuple(
+								new ScalarNode(Tag.STR, "path"),
+								new ScalarNode(Tag.STR, ((ScalarNode) pathNode).getValue())));
+						entryNodes.add(new MappingNode(Tag.MAP, entryTuples, FlowStyle.BLOCK));
+					}
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "entries"),
+							new SequenceNode(Tag.SEQ, entryNodes, FlowStyle.BLOCK)));
+				}
+			}
+		});
+	}
+
 }
