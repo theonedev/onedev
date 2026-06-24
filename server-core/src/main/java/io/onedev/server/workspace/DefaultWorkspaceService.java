@@ -1220,8 +1220,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	
 					runtime.await();
 				} finally {
-					for (var shellId : runtime.getShellLabels().keySet())
-						terminateShell(workspaceId, shellId);
 					workspaceRuntimes.remove(workspaceId);
 				}
 			}

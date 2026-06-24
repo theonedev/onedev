@@ -217,9 +217,14 @@ public class ServerShellProvisioner extends WorkspaceProvisioner implements Test
 					new CountDownLatch(1).await();
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
-				} finally {
-					for (var cacheProvisioner : cacheProvisioners) 
-						cacheProvisioner.upload(workspaceDir, workspaceLogger);
+				} finally {					
+					try {
+						for (var cacheProvisioner : cacheProvisioners) 
+							cacheProvisioner.upload(workspaceDir, workspaceLogger);
+					} finally {
+						for (var shellId : getShellLabels().keySet())
+							terminateShell(shellId);
+					}
 				}
 			}
 
