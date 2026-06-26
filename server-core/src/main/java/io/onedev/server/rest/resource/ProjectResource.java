@@ -60,9 +60,9 @@ import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
-import io.onedev.server.model.support.workspace.ProjectWorkspaceSetting;
 import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
+import io.onedev.server.model.support.workspace.ProjectWorkspaceSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
@@ -153,11 +153,11 @@ public class ProjectResource {
 	@Api(order=300)
 	@Path("/{projectId}/forks")
     @GET
-    public Collection<Project> getForks(@PathParam("projectId") Long projectId) {
+    public Collection<ProjectData> getForks(@PathParam("projectId") Long projectId) {
     	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canAccessProject(project)) 
 			throw new UnauthorizedException();
-    	return project.getForks();
+    	return project.getForks().stream().map(ProjectData::from).collect(Collectors.toList());
     }
 
 	@Api(order=350, description = "A base authorization corresponds to a default role. It can be added/removed via <a href='/~help/api/io.onedev.server.rest.resource.BaseAuthorizationResource'>base authorizations resource</a>")
