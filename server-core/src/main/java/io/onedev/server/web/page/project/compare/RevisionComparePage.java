@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
+import javax.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -34,21 +34,17 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.CodeCommentReplyService;
-import io.onedev.server.service.CodeCommentStatusChangeService;
-import io.onedev.server.service.PullRequestService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
@@ -63,6 +59,10 @@ import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -120,6 +120,27 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	private static final String TABS_ID = "tabs";
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
+
+	@Inject
+	private GitService gitService;
+
+	@Inject
+	private CodeCommentService codeCommentService;
+
+	@Inject
+	private PullRequestService pullRequestService;
+
+	@Inject
+	private CodeCommentReplyService codeCommentReplyService;
+
+	@Inject
+	private CodeCommentStatusChangeService codeCommentStatusChangeService;
+
+	@Inject
+	private Set<CodeProblemContribution> codeProblemContributions;
+
+	@Inject
+	private Set<LineCoverageContribution> lineCoverageContributions;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -128,8 +149,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 
 				@Override
 				protected Collection<CodeComment> load() {
-					CodeCommentService manager = OneDev.getInstance(CodeCommentService.class);
-					return manager.query(projectModel.getObject(),
+					return codeCommentService.query(projectModel.getObject(),
 							state.compareWithMergeBase ? mergeBase : leftCommitId, rightCommitId);
 				}
 
@@ -251,7 +271,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				if (state.leftSide.getBranch() != null && state.rightSide.getBranch() != null) {
 					ProjectAndBranch left = new ProjectAndBranch(state.leftSide.toString());
 					ProjectAndBranch right = new ProjectAndBranch(state.rightSide.toString());
-					return OneDev.getInstance(PullRequestService.class).findEffective(left, right);
+					return pullRequestService.findEffective(left, right);
 				} else {
 					return null;
 				}
@@ -260,16 +280,12 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		};
 
 		if (leftCommitId != null && rightCommitId != null) {
-			mergeBase = getGitService().getMergeBase(
+			mergeBase = gitService.getMergeBase(
 					state.rightSide.getProject(), rightCommitId,
 					state.leftSide.getProject(), leftCommitId);
 		}
 	}
-	
-	private GitService getGitService() {
-		return OneDev.getInstance(GitService.class);
-	}
-	
+		
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -771,7 +787,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	@Override
 	public CodeComment getOpenComment() {
 		if (state.commentId != null)
-			return OneDev.getInstance(CodeCommentService.class).load(state.commentId);
+			return codeCommentService.load(state.commentId);
 		else
 			return null;
 	}
@@ -817,22 +833,22 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	@Override
 	public void onSaveComment(CodeComment comment) {
 		if (comment.isNew())
-			OneDev.getInstance(CodeCommentService.class).create(comment);
+			codeCommentService.create(comment);
 		else
-			OneDev.getInstance(CodeCommentService.class).update(comment);
+			codeCommentService.update(comment);
 	}
 	
 	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
 		if (reply.isNew())
-			OneDev.getInstance(CodeCommentReplyService.class).create(reply);
+			codeCommentReplyService.create(reply);
 		else
-			OneDev.getInstance(CodeCommentReplyService.class).update(reply);
+			codeCommentReplyService.update(reply);
 	}
 
 	@Override
 	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, note);
+		codeCommentStatusChangeService.create(change, note);
 	}
 	
 	@Override
@@ -894,7 +910,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		Set<CodeProblem> problems = new HashSet<>();
 		ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
 		for (Build build: state.leftSide.getProject().getBuilds(oldCommitId)) {
-			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
+			for (CodeProblemContribution contribution: codeProblemContributions)
 				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
 		}
 		return problems;
@@ -904,7 +920,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	public Collection<CodeProblem> getNewProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
 		for (Build build: state.rightSide.getProject().getBuilds(rightCommitId)) {
-			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
+			for (CodeProblemContribution contribution: codeProblemContributions)
 				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
 		}
 		return problems;
@@ -915,7 +931,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
 		for (Build build: state.leftSide.getProject().getBuilds(oldCommitId)) {
-			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
+			for (LineCoverageContribution contribution: lineCoverageContributions) {
 				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
 					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
 				});
@@ -928,7 +944,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		for (Build build: state.rightSide.getProject().getBuilds(rightCommitId)) {
-			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
+			for (LineCoverageContribution contribution: lineCoverageContributions) {
 				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
 					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
 				});

@@ -43,7 +43,7 @@ public class ListNumStatsCommand {
 			git.addArgs("diff", "--numstat", "--no-renames", fromRev + ".." + toRev);
 		} else {
 			git.addArgs("-c", "diff.renameLimit=1000", "diff", "--numstat", 
-					"--find-renames", fromRev + ".." + toRev);
+					"--find-renames=100%", fromRev + ".." + toRev);
 		}
 		
 		git.execute(new LineConsumer() {

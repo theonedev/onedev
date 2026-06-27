@@ -1107,7 +1107,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Override
 	public void runPrompt(User ai, Project project, ObjectId commitId, String branch, String prompt, TaskFailedCallback taskFailedCallback) {
 		WorkspaceSpec applicableSpec = null;
-		for (var spec : project.getWorkspaceSpecs()) {
+		for (var spec : project.getHierarchyWorkspaceSpecs()) {
 			if (spec.getTaskAutomation() != null) {
 				var applicableUsers = spec.getTaskAutomation().getApplicableAis();
 				if (applicableUsers.isEmpty() || applicableUsers.contains(ai.getName())) {

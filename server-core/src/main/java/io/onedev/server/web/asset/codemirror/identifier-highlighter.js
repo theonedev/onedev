@@ -58,13 +58,19 @@
   					var tokenPos = new CodeMirror.Pos(cur.line, (start+end)/2);
   					var tokenType = cm.getTokenTypeAt(tokenPos);
   					if (tokenType != null) {
-  	  					if (tokenType.indexOf("variable") != -1 
-  	  							|| tokenType.indexOf("property") != -1 
+  	  					if (tokenType.indexOf("property") != -1 
+								|| tokenType.indexOf("variable") != -1
+								|| tokenType.indexOf("variable-2") != -1
+								|| tokenType.indexOf("variable-3") != -1
   	  							|| tokenType.indexOf("def") != -1
-  	  							|| tokenType.indexOf("tag") != -1
-  	  							|| tokenType.indexOf("attribute") != -1
+  	  							|| tokenType.indexOf("meta") != -1
   	  							|| tokenType.indexOf("string") != -1
-  	  							|| tokenType.indexOf("string2") != -1) {
+								|| tokenType.indexOf("string-2") != -1
+  	  							|| tokenType.indexOf("tag") != -1
+								|| tokenType.indexOf("attribute") != -1
+  	  							|| tokenType.indexOf("built-in") != -1
+								|| tokenType.indexOf("qualifier") != -1
+								|| tokenType.indexOf("type") != -1) {
   	  						var token = cm.getTokenAt(tokenPos);
 	  	  		  			var state = cm.state.identifierHighlighter;
 		  	  	  			if (state.overlay) {

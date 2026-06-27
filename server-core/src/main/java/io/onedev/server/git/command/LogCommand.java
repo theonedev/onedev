@@ -118,9 +118,9 @@ public abstract class LogCommand {
     	        git.addArgs("log");
         } else {
             if (fields.contains(Field.LINE_CHANGES)) 
-    	        git.addArgs("-c", "diff.renameLimit=1000", "log", "--numstat", "--find-renames");
+    	        git.addArgs("-c", "diff.renameLimit=1000", "log", "--numstat", "--find-renames=100%");
             else if (fields.contains(Field.FILE_CHANGES))
-                git.addArgs("-c", "diff.renameLimit=1000", "log", "--name-status", "--find-renames");
+                git.addArgs("-c", "diff.renameLimit=1000", "log", "--name-status", "--find-renames=100%");
             else 
     	        git.addArgs("log");
         }

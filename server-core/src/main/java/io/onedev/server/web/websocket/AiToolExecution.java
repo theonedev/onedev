@@ -2,9 +2,8 @@ package io.onedev.server.web.websocket;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.protocol.ws.api.message.IWebSocketPushMessage;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
