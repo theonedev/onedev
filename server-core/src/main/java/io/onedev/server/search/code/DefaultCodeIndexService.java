@@ -250,6 +250,7 @@ public class DefaultCodeIndexService implements CodeIndexService, Serializable {
 			SymbolExtractor<Symbol> extractor, ObjectId blobId, String blobPath) throws IOException {
 		Document document = new Document();
 		
+		logger.trace("Indexing blob '{}'...", blobPath);
 		document.add(new StoredField(BLOB_INDEX_VERSION.name(), getIndexVersion(extractor)));
 		document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.NO));
 		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.NO));
@@ -302,6 +303,7 @@ public class DefaultCodeIndexService implements CodeIndexService, Serializable {
 		}
 
 		writer.addDocument(document);
+		logger.trace("Indexed blob '{}'.", blobPath);
 	}
 	
 	private BatchWorker getBatchWorker(Long projectId) {
