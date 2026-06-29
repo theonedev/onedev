@@ -17,8 +17,8 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.model.WorkspaceQueryPersonalization;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.WorkspaceQueryPersonalization;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalWorkspaceSetting;
@@ -26,13 +26,13 @@ import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
 import io.onedev.server.model.support.workspace.ProjectWorkspaceSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.web.component.workspace.list.WorkspaceListPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
+import io.onedev.server.web.component.workspace.list.WorkspaceListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.NamedWorkspaceQueriesBean;
@@ -68,7 +68,7 @@ public class ProjectWorkspacesPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canWriteCode(getProject());
+		return SecurityUtils.canCreateWorkspaces(getProject());
 	}
 
 	@Override
