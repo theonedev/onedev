@@ -4,7 +4,8 @@ onedev.server.sideInfo = {
 		$(document).on("mouseup touchstart", function(e) {
 			if ($(".flatpickr-calendar.open").length == 0 
 					&& $(".pcr-app.visible").length == 0 
-					&& $container.find(".dropdown-open").length == 0) {
+					&& $container.find(".dropdown-open").length == 0
+					&& $(".select2-drop:visible").length == 0) {
 				var x = e.pageX;
 				var y = e.pageY;
 				

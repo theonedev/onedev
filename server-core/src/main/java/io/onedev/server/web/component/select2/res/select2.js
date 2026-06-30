@@ -701,17 +701,22 @@ the specific language governing permissions and limitations under the Apache Lic
            search.bind("focus", function () { search.addClass("select2-focused"); });
            search.bind("blur", function () { search.removeClass("select2-focused");});
 
-           this.dropdown.delegate(resultsSelector, "mouseup", this.bind(function (e) {
+           var selectHighlightedResult = this.bind(function (e) {
                if ($(e.target).closest(".select2-result-selectable").length > 0) {
                    this.highlightUnderEvent(e);
                    this.selectHighlighted(e);
                }
+           });
+           this.dropdown.delegate(resultsSelector, "mouseup", selectHighlightedResult);
+           this.dropdown.delegate(resultsSelector, "touchend", this.bind(function (e) {
+               selectHighlightedResult(e);
+               e.preventDefault();
            }));
 
            // trap all mouse events from leaving the dropdown. sometimes there may be a modal that is listening
            // for mouse events outside of itself so it can close itself. since the dropdown is now outside the select2's
            // dom it will trigger the popup close, which is not what we want
-           this.dropdown.bind("click mouseup mousedown", function (e) { e.stopPropagation(); });
+           this.dropdown.bind("click mouseup mousedown touchstart", function (e) { e.stopPropagation(); });
 
            if ($.isFunction(this.opts.initSelection)) {
                // initialize selection based on the current value of the source element

@@ -7,7 +7,8 @@ onedev.server.floating = {
 		$floating.data("mouseUpOrTouchStart", function(e) {
 			if ($(".flatpickr-calendar.open").length == 0 
 					&& $(".pcr-app.visible").length == 0 
-					&& $floating.find(".dropdown-open").length == 0) {
+					&& $floating.find(".dropdown-open").length == 0
+					&& $(".select2-drop:visible").length == 0) {
 				/*
 				 * Close the floating panel if mouse clicks outside of the floating. Also we 
 				 * do not close the panel if mouse clicks on the element triggering this 
