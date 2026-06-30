@@ -161,6 +161,7 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setPackSetting(getProject().getPackSetting());
 						newProject.setPullRequestSetting(getProject().getPullRequestSetting());
 						newProject.setWorkspaceSetting(getProject().getWorkspaceSetting());
+						newProject.setWorkspaceSpecs(getProject().getWorkspaceSpecs());
 						newProject.setNamedCommitQueries(getProject().getNamedCommitQueries());
 						newProject.setIssueSetting(getProject().getIssueSetting());
 						newProject.setNamedCodeCommentQueries(getProject().getNamedCodeCommentQueries());

@@ -400,10 +400,9 @@ public class IssueNotificationManager implements Serializable {
 			}
 			var prompt = """
 				Work on issue %d to address %s's concern. \
-				Mention the user in your comment ONLY if you \
-				expect a response. \
+				Mention the user in your comment if you expect a response. \
 				Stay on current checkout and do not modify code. \
-				Submit work afterwards without confirmation."""
+				Make sure to submit work afterwards without confirmation."""
 				.formatted(issue.getNumber(), commenter.getName());
 			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);
 		} else if (canWriteCode(ai, issue)) {
@@ -414,10 +413,9 @@ public class IssueNotificationManager implements Serializable {
 			commitId = issue.getProject().getObjectId(branch, true);
 			var prompt = """
 				Work on issue %d as roles [%s] to address %s's concern. \
-				Mention the user in your comment ONLY if you \
-				expect a response. \
+				Mention the user in your comment if you expect a response. \
 				Stay on current checkout to do the job. \
-				Submit work afterwards without confirmation.""".
+				Make sure to submit work afterwards without confirmation.""".
 				formatted(issue.getNumber(), StringUtils.join(assignedFields, ", "), commenter.getName());
 			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);
 		}
@@ -472,7 +470,7 @@ public class IssueNotificationManager implements Serializable {
 			var prompt = """
 					Work on issue %d as role '%s'. \
 					Stay on current checkout to do the job. \
-					Submit work afterwards without confirmation."""
+					Make sure to submit work afterwards without confirmation."""
 					.formatted(issue.getNumber(), field);
 			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);						
 		}

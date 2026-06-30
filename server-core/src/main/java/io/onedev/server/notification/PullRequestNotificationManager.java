@@ -36,6 +36,7 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
 import io.onedev.server.event.project.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestMergePreviewUpdated;
@@ -313,10 +314,10 @@ public class PullRequestNotificationManager implements Serializable {
 						var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
 						var prompt = """
 								Work on pull request %d to perform the review. \
-								Mention @%s in your review note or summary ONLY if you \
-								want the user to react to your feedbacks. \
+								Make sure to mention @%s in review summary if you want \
+								the user to react to your feedbacks. \
 								Stay on current checkout and do not modify code. \
-								Submit work afterwards without confirmation."""
+								Make sure to submit work afterwards without confirmation."""
 								.formatted(request.getNumber(), request.getSubmitter().getName());
 						runPrompt(reviewer, request, request.getProject(), commitId, null, prompt);
 					}
@@ -348,7 +349,7 @@ public class PullRequestNotificationManager implements Serializable {
 											getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 											replyAddress, senderName, threadingReferences);
 								}
-							} else if (isAiEntitled(user, request, mentionedUser)) {
+							} else if (!(event instanceof PullRequestCodeCommentEvent) && isAiEntitled(user, request, mentionedUser)) {
 								addressConcern(mentionedUser, user, request);
 							}
 							notifiedUsers.add(mentionedUser);
@@ -406,7 +407,7 @@ public class PullRequestNotificationManager implements Serializable {
 							Work on pull request %d to fix failure of build %d. \
 							Do not modify code unless the reason is clear. \
 							Stay on current checkout to do the job. \
-							Submit work afterwards without confirmation."""
+							Make sure to submit work afterwards without confirmation."""
 							.formatted(request.getNumber(), pullRequestBuildEvent.getBuild().getNumber());
 					runPrompt(request.getSubmitter(), request, request.getSourceProject(), commitId, request.getSourceBranch(), prompt);
 				}
@@ -418,7 +419,7 @@ public class PullRequestNotificationManager implements Serializable {
 					var prompt = """
 						Work on pull request %d to resolve merge conflict. \
 						Stay on current checkout to do the job. \
-						Submit work afterwards without confirmation."""
+						Make sure to submit work afterwards without confirmation."""
 						.formatted(request.getNumber());
 					runPrompt(request.getSubmitter(), request, request.getSourceProject(), commitId, request.getSourceBranch(), prompt);					
 				}
@@ -445,7 +446,7 @@ public class PullRequestNotificationManager implements Serializable {
 						Work on pull request %d to review and merge if ready. \
 						Otherwise, mention @%s in a PR comment to request changes. \
 						Stay on current checkout and do not modify code. \
-						Submit work afterwards without confirmation."""
+						Make sure to submit work afterwards without confirmation."""
 						.formatted(request.getNumber(), request.getSubmitter().getName());
 				runPrompt(aiAssignee, request, request.getTargetProject(), commitId, null, prompt);								
 			}
@@ -493,7 +494,7 @@ public class PullRequestNotificationManager implements Serializable {
 			prompts.add("Mention the user in a PR comment ONLY if you expect a response.");
 			prompts.add("Do not modify code.");
 		}
-		prompts.add("Submit work afterwards without confirmation.");
+		prompts.add("Make sure to submit work afterwards without confirmation.");
 		
 		var concatenatedPrompts = String.join(" ", prompts);
 		if (ai.equals(request.getSubmitter())) {
