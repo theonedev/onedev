@@ -243,6 +243,14 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 				.collect(toList());
 	}
 
+	protected List<RegistryLoginFacade> getAllRegistryLogins(WorkspaceContext context) {
+		var provisionerRegistryLogins = getRegistryLoginFacades(context.getToken());
+		var registryLogins = context.getSpec().getRegistryLogins().stream()
+				.map(it -> new RegistryLoginFacade(it.getRegistryUrl(), it.getUserName(), it.getPassword()))
+				.collect(toList());
+		return merge(registryLogins, provisionerRegistryLogins);
+	}
+
 	private void checkApplicable() {
 		if (OneDev.getK8sService() != null) {
 			throw new ExplicitException("OneDev running inside kubernetes cluster does not support workspaces yet");
@@ -298,11 +306,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 			changeOwner(newDocker(), osIds, workspaceDir, osIds, workspaceLogger);
 		}
 
-		var provisionerRegistryLogins = getRegistryLoginFacades(context.getToken());
-		var registryLogins = context.getSpec().getRegistryLogins().stream()
-				.map(it -> new RegistryLoginFacade(it.getRegistryUrl(), it.getUserName(), it.getPassword()))
-				.collect(toList());
-		var allRegistryLogins = merge(registryLogins, provisionerRegistryLogins);
+		var allRegistryLogins = getAllRegistryLogins(context);
 
 		var infoLogger = AgentUtils.newInfoLogger(workspaceLogger);
 		var warningLogger = AgentUtils.newWarningLogger(workspaceLogger);
