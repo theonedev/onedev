@@ -212,6 +212,8 @@ public class Build extends ProjectBelonging
 	public static final String PROP_ISSUE = "issue";
 	
 	public static final String NAME_LOG = "Log";
+
+	public static final String NAME_AI_PULL_REQUEST = "AI Pull Request";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_LABEL, NAME_STATUS, NAME_SUBMITTER, 

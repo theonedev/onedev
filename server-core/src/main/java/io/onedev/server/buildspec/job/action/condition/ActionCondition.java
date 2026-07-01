@@ -6,6 +6,7 @@ import static io.onedev.server.buildspec.job.action.condition.ActionConditionLex
 import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.IsNot;
 import static io.onedev.server.buildspec.job.action.condition.ActionConditionLexer.IsNotEmpty;
 import static io.onedev.server.model.Build.NAME_BRANCH;
+import static io.onedev.server.model.Build.NAME_AI_PULL_REQUEST;
 import static io.onedev.server.model.Build.NAME_LOG;
 import static io.onedev.server.model.Build.NAME_PROJECT;
 import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
@@ -14,7 +15,6 @@ import static io.onedev.server.model.Build.NAME_TAG;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -27,6 +27,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
@@ -135,6 +136,8 @@ public class ActionCondition extends Criteria<Build> {
 						return new TagEmptyCriteria(operator);
 					else if (fieldName.equals(NAME_PULL_REQUEST))
 						return new PullRequestEmptyCriteria(operator);
+					else if (fieldName.equals(NAME_AI_PULL_REQUEST))
+						return new AiPullRequestEmptyCriteria(operator);
 					else
 						return new ParamEmptyCriteria(fieldName, operator);
 				}
@@ -200,6 +203,9 @@ public class ActionCondition extends Criteria<Build> {
 			if (operator != Is && operator != IsNot && operator != IsEmpty && operator != IsNotEmpty)
 				throw newOperatorException(fieldName, operator);
 		} else if (fieldName.equals(NAME_PULL_REQUEST)) {
+			if (operator != IsEmpty && operator != IsNotEmpty)
+				throw newOperatorException(fieldName, operator);
+		} else if (fieldName.equals(NAME_AI_PULL_REQUEST)) {
 			if (operator != IsEmpty && operator != IsNotEmpty)
 				throw newOperatorException(fieldName, operator);
 		} else if (fieldName.equals(NAME_LOG)) {

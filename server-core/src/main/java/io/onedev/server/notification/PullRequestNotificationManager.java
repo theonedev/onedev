@@ -46,6 +46,7 @@ import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.MentionParser;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -401,6 +402,8 @@ public class PullRequestNotificationManager implements Serializable {
 			if (request.getSubmitter().getType() == AI) {
 				if (event instanceof PullRequestBuildEvent pullRequestBuildEvent 
 							&& pullRequestBuildEvent.getBuild().isFailed() 
+							&& !pullRequestBuildEvent.getBuild().getDependencies().stream().anyMatch(it -> 
+									it.isRequireSuccessful() && it.getDependency().isFinished() && it.getDependency().getStatus() != Build.Status.SUCCESSFUL)
 							&& canWriteCode(request.getSubmitter(), request, request.getSourceProject())) {
 					var commitId = Preconditions.checkNotNull(request.getSourceHead());
 					var prompt = """

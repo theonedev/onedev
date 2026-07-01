@@ -125,7 +125,9 @@ public class IssueResource {
 		var subject = SecurityUtils.getSubject();
     	if (!SecurityUtils.canAccessIssue(subject, issue)) 
 			throw new UnauthorizedException();
-		return getIssueMap(subject, issue);
+		var issueMap = getIssueMap(subject, issue);
+		issueMap.put("branch", issue.getBranch());
+		return issueMap;
     }
 
 	private Map<String, Object> getIssueMap(Subject subject, Issue issue) {
@@ -301,7 +303,7 @@ public class IssueResource {
 		issues.add(OneDev.getInstance(ObjectMapper.class).convertValue(issue, new TypeReference<Map<String, Object>>() {}));
 		return issues;
 	}
-	
+
 	@Api(order=1000)
     @POST
     public Long createIssue(@NotNull @Valid IssueOpenData data) {
@@ -495,6 +497,14 @@ public class IssueResource {
 		var url = urlService.urlForAttachment(issue.getProject(), issue.getUUID(), attachmentName, false);
 		return url;
     }
+
+	@Api(order=1575)
+	@Path("/{issueId}/branch")
+	@POST
+	public String createBranch(@PathParam("issueId") Long issueId) {
+		Issue issue = issueService.load(issueId);
+		return issueService.ensureBranch(SecurityUtils.getSubject(), issue);
+	}
 	
 	@Api(order=1600)
 	@Path("/{issueId}")

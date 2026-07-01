@@ -9,6 +9,7 @@ import static io.onedev.server.model.Build.NAME_BRANCH;
 import static io.onedev.server.model.Build.NAME_LOG;
 import static io.onedev.server.model.Build.NAME_PROJECT;
 import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
+import static io.onedev.server.model.Build.NAME_AI_PULL_REQUEST;
 import static io.onedev.server.model.Build.NAME_TAG;
 import static io.onedev.server.web.translation.Translation._T;
 
@@ -53,7 +54,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
-
+					
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
@@ -61,7 +62,8 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 							fields.put(NAME_PROJECT, _T("project of the running job"));
 							fields.put(NAME_BRANCH, _T("branch the job is running against"));
 							fields.put(NAME_TAG, _T("tag the job is running against"));
-							fields.put(NAME_PULL_REQUEST, null);
+							fields.put(NAME_PULL_REQUEST, "pull request this build belongs to");
+							fields.put(NAME_AI_PULL_REQUEST, "AI pull request this build belongs to");
 							fields.put(NAME_LOG, null);
 							JobAware jobAware = getComponent().findParent(JobAware.class);
 							Job job = jobAware.getJob();
