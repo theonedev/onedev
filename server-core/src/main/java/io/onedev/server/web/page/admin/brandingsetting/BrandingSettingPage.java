@@ -57,8 +57,7 @@ public class BrandingSettingPage extends AdministrationPage {
 
 	private String getDefaultLogoData(boolean darkMode) {
 		try {
-			var fileName = darkMode?"logo-dark.png":"logo.png";
-			URL url = Resources.getResource(ImageScope.class, fileName);
+			URL url = Resources.getResource(ImageScope.class, "logo.png");
 			return DATA_PREFIX + Base64.encodeBase64String(Resources.toByteArray(url));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
