@@ -352,13 +352,6 @@ onedev.server = {
 			pageUnloading = true;
 		});
 
-		function onWebSocketTimeout() {
-			$("body>.error").hide();
-			$(".connection-error").show();
-		}
-
-		webSocketTimeoutTimer = setTimeout(onWebSocketTimeout, webSocketTimeout);
-
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
 			$(".connection-error").hide();
 		});
@@ -375,8 +368,6 @@ onedev.server = {
 				$(".page-error").show();
 			} else if (message == "KeepAlive") {	
 				Wicket.WebSocket.send("KeepAlive");
-				clearTimeout(webSocketTimeoutTimer);
-				webSocketTimeoutTimer = setTimeout(onWebSocketTimeout, webSocketTimeout);
 				if (sessionKeepAliveInterval > 0) {
 					var now = new Date().getTime();
 					if (now - lastSessionKeepAliveTime > sessionKeepAliveInterval) {

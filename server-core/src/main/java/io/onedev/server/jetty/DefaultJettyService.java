@@ -49,7 +49,7 @@ public class DefaultJettyService implements JettyService, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultJettyService.class);
 	
-	private static final int DEFAULT_SESSION_TIMEOUT = 300;
+	private static final int DEFAULT_SESSION_TIMEOUT = 1800;
 
 	private static final int MAX_CONTENT_SIZE = 5000000;
 
