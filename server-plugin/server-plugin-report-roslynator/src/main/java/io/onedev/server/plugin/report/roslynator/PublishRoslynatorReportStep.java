@@ -13,6 +13,7 @@ import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.codequality.GeneralTarget;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
@@ -71,55 +72,73 @@ public class PublishRoslynatorReportStep extends PublishProblemReportStep {
 				xml = StringUtils.removeBOM(xml);
 				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 				
-				var codeAnalysisElement = doc.getRootElement().element("CodeAnalysis");
-				Map<String, String> messages = new HashMap<>();
-				for (var diagnosticElement: codeAnalysisElement.element("Summary").elements("Diagnostic")) {
-					var id = diagnosticElement.attributeValue("Id");
-					var message = diagnosticElement.attributeValue("Title");
-					var description = diagnosticElement.elementText("Description");
-					if (description != null)
-						message += "\n\n" + description;
-					messages.put(id, message);
-				}
-				for (var projectElement: codeAnalysisElement.element("Projects").elements("Project")) {
-					for (var diagnosticsElement: projectElement.element("Diagnostics").elements("Diagnostic")) {
-						var id = diagnosticsElement.attributeValue("Id");
-						var message = messages.get(id);
-						if (message == null)
-							message = diagnosticsElement.elementText("Message");
-						message = id + ": " + message;
-						CodeProblem.Severity severity;
-						switch (diagnosticsElement.elementText("Severity").trim()) {
-							case "Error":
-								severity = Severity.HIGH;
-								break;
-							case "Warning":
-								severity = Severity.MEDIUM;
-								break;
-							default:
-								severity = Severity.LOW;
-						}
-						var filePath = diagnosticsElement.elementText("FilePath").trim();
-						var blobPath = blobPaths.get(filePath);
-						if (blobPath == null) {
-							blobPath = Optional.ofNullable(build.getBlobPath(filePath));
-							if (blobPath.isEmpty()) 
-								logger.warning("Unable to find blob path for file: " + filePath);
-							blobPaths.put(filePath, blobPath);
-						}
-						if (blobPath.isPresent()) {
-							var locationElement = diagnosticsElement.element("Location");
-							int line = parseInt(locationElement.attributeValue("Line"));
-							int character = parseInt(locationElement.attributeValue("Character"));
-							var location = new PlanarRange(line-1, character-1, line-1, character);
-							problems.add(new CodeProblem(severity, new BlobTarget(blobPath.get(), location), escapeHtml5(message)));
-						}
-					}
-				}
+				problems.addAll(parse(build, doc, blobPaths, logger));
 			} catch (DocumentException e) {
 				logger.warning("Ignored Roslynator report '" + relativePath + "' as it is not a valid XML");
 			} catch (IOException e) {
 				throw new RuntimeException(e);
+			}
+		}
+		return problems;
+	}
+
+	static List<CodeProblem> parse(Build build, Document doc, Map<String, Optional<String>> blobPaths, TaskLogger logger) {
+		List<CodeProblem> problems = new ArrayList<>();
+		var codeAnalysisElement = doc.getRootElement().element("CodeAnalysis");
+		Map<String, String> messages = new HashMap<>();
+		for (var diagnosticElement: codeAnalysisElement.element("Summary").elements("Diagnostic")) {
+			var id = diagnosticElement.attributeValue("Id");
+			var message = diagnosticElement.attributeValue("Title");
+			var description = diagnosticElement.elementText("Description");
+			if (description != null)
+				message += "\n\n" + description;
+			messages.put(id, message);
+		}
+		for (var projectElement: codeAnalysisElement.element("Projects").elements("Project")) {
+			var projectName = StringUtils.trimToNull(projectElement.attributeValue("Name"));
+			if (projectName == null)
+				projectName = StringUtils.trimToNull(projectElement.attributeValue("FilePath"));
+			if (projectName == null)
+				projectName = "General";
+			for (var diagnosticsElement: projectElement.element("Diagnostics").elements("Diagnostic")) {
+				var id = diagnosticsElement.attributeValue("Id");
+				var message = messages.get(id);
+				if (message == null)
+					message = diagnosticsElement.elementText("Message");
+				message = id + ": " + message;
+				CodeProblem.Severity severity;
+				switch (diagnosticsElement.elementText("Severity").trim()) {
+					case "Error":
+						severity = Severity.HIGH;
+						break;
+					case "Warning":
+						severity = Severity.MEDIUM;
+						break;
+					default:
+						severity = Severity.LOW;
+				}
+				var filePath = StringUtils.trimToNull(diagnosticsElement.elementText("FilePath"));
+				if (filePath == null) {
+					problems.add(new CodeProblem(severity, new GeneralTarget(projectName), escapeHtml5(message)));
+					continue;
+				}
+				var blobPath = blobPaths.get(filePath);
+				if (blobPath == null) {
+					blobPath = Optional.ofNullable(build.getBlobPath(filePath));
+					if (blobPath.isEmpty())
+						logger.warning("Unable to find blob path for file: " + filePath);
+					blobPaths.put(filePath, blobPath);
+				}
+				if (blobPath.isPresent()) {
+					PlanarRange location = null;
+					var locationElement = diagnosticsElement.element("Location");
+					if (locationElement != null) {
+						int line = parseInt(locationElement.attributeValue("Line"));
+						int character = parseInt(locationElement.attributeValue("Character"));
+						location = new PlanarRange(line-1, character-1, line-1, character);
+					}
+					problems.add(new CodeProblem(severity, new BlobTarget(blobPath.get(), location), escapeHtml5(message)));
+				}
 			}
 		}
 		return problems;

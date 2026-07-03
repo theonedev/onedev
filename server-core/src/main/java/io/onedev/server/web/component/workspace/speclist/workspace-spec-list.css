@@ -1,3 +1,7 @@
 .workspace-spec-list {
 	max-width: 480px;
 }
+
+.workspace-spec-workspaces.no-workspaces {
+	margin: 0.5rem 1rem !important;
+}

@@ -316,6 +316,14 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 						return new Link<Void>(componentId) {
 
 							@Override
+							protected void onInitialize() {
+								super.onInitialize();
+								if (getIssue().getWorkspaces().size() == 0) {
+									add(new ConfirmClickModifier(_T("Do you really want to delete this issue?")));
+								}
+							}
+
+							@Override
 							public void onClick() {
 								issueService.delete(getIssue());
 								var oldAuditContent = VersionedXmlDoc.fromBean(getIssue()).toXML();
@@ -330,7 +338,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 									setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
 							}
 							
-						}.add(new ConfirmClickModifier(_T("Do you really want to delete this issue?")));
+						};
 					}
 
 				};

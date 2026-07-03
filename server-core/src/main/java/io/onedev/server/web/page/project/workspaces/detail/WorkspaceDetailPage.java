@@ -33,7 +33,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.cluster.ClusterService;
@@ -46,12 +45,9 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.branch.BranchLink;
-import io.onedev.server.web.component.commit.CommitLink;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -62,6 +58,7 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.workspace.invalidspec.InvalidWorkspaceSpecIcon;
+import io.onedev.server.web.component.workspace.on.WorkspaceOnPanel;
 import io.onedev.server.web.component.workspace.status.WorkspaceStatusIcon;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -149,10 +146,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 		add(head);
 
 		head.add(new UserIdentPanel("user", workspace.getUser(), Mode.AVATAR_AND_NAME));
-		if (workspace.getBranch() != null)
-			head.add(new BranchLink("revision", new ProjectAndBranch(workspace.getProject(), workspace.getBranch())));
-		else
-			head.add(new CommitLink("revision", workspace.getProject(), ObjectId.fromString(workspace.getCommitHash())));
+		head.add(new WorkspaceOnPanel("reference", workspaceModel));
 		head.add(new Label("spec", workspace.getSpecName()));
 		head.add(new InvalidWorkspaceSpecIcon("invalidSpec", workspaceModel));
 

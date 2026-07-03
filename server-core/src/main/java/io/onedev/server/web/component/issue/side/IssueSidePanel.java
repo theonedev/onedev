@@ -150,10 +150,18 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		if (SecurityUtils.canManageIssues(getProject())) 
-			addOrReplace(newDeleteLink("delete"));		
-		else 
+		if (SecurityUtils.canManageIssues(getProject())) {
+			Component deleteLink = newDeleteLink("delete");
+			if (getIssue().getWorkspaces().size() > 0) {
+				deleteLink.setEnabled(false);
+				deleteLink.add(AttributeAppender.append("class", "disabled"));
+				deleteLink.add(AttributeAppender.append("data-tippy-content",
+						_T("Cannot delete issue as it has workspaces")));
+			}
+			addOrReplace(deleteLink);
+		} else {
 			addOrReplace(new WebMarkupContainer("delete").setVisible(false));
+		}
 		
 		super.onBeforeRender();
 	}

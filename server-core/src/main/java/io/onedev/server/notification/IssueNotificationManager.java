@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -253,7 +254,7 @@ public class IssueNotificationManager implements Serializable {
 						}
 					}
 				} else if (isAiEntitled(null, issue, member) && canCreateWorkspace(member, issue)) { 
-					handleFieldAssignment(member, issue, entry.getKey());
+					onFieldSet(member, issue, entry.getKey());
 				}
 			}
 			
@@ -286,7 +287,7 @@ public class IssueNotificationManager implements Serializable {
 						}
 					}
 				} else if (isAiEntitled(null, issue, assignedUser) && canCreateWorkspace(assignedUser, issue)) { 
-					handleFieldAssignment(assignedUser, issue, entry.getKey());
+					onFieldSet(assignedUser, issue, entry.getKey());
 				} 
 			}
 
@@ -386,46 +387,46 @@ public class IssueNotificationManager implements Serializable {
 		}
 	}
 
+	private Pair<ObjectId, String> getWorkspaceCommitIdAndBranch(Issue issue) {
+		String branch = issue.getBranch();									
+		ObjectId commitId;
+		if (branch == null) {
+			commitId = issue.getFieldCommitId();
+			if (commitId == null) 
+				commitId = issue.getProject().getObjectId(Preconditions.checkNotNull(issue.getProject().getDefaultBranch()), true);
+		} else {
+			commitId = issue.getProject().getObjectId(branch, true);
+		}
+		return Pair.of(commitId, branch);
+	}
+
 	private void addressConcern(User ai, User commenter, Issue issue) {
+		var branchAndCommitId = getWorkspaceCommitIdAndBranch(issue);
+		String prompt;
 		var assignedFields = getAssignedFields(ai, issue);
 		if (assignedFields.isEmpty()) {
-			String branch = issue.getBranch();									
-			ObjectId commitId;
-			if (branch == null) {
-				commitId = issue.getFieldCommitId();
-				if (commitId == null) 
-					commitId = issue.getProject().getObjectId(Preconditions.checkNotNull(issue.getProject().getDefaultBranch()), true);
-			} else {
-				commitId = issue.getProject().getObjectId(branch, true);
-			}
-			var prompt = """
-				Work on issue %d to address %s's concern. \
+			prompt = """
+				Work on issue %d to address %s's latest concern. \
+				Do not switch checkout if the concern does not require you to write code. \
 				Mention the user in your comment if you expect a response. \
-				Stay on current checkout and do not modify code. \
 				Make sure to submit work afterwards without confirmation."""
 				.formatted(issue.getNumber(), commenter.getName());
-			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);
-		} else if (canWriteCode(ai, issue)) {
-			String branch = issue.getBranch();									
-			ObjectId commitId;
-			if (branch == null) 
-				branch = issueService.ensureBranch(ai.asSubject(), issue);
-			commitId = issue.getProject().getObjectId(branch, true);
-			var prompt = """
-				Work on issue %d as roles [%s] to address %s's concern. \
+		} else {
+			prompt = """
+				Work on issue %d as roles [%s] to address %s's latest concern. \
+				Do not switch checkout if the concern does not require you to write code. \
 				Mention the user in your comment if you expect a response. \
-				Stay on current checkout to do the job. \
 				Make sure to submit work afterwards without confirmation.""".
 				formatted(issue.getNumber(), StringUtils.join(assignedFields, ", "), commenter.getName());
-			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);
 		}
+		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(), branchAndCommitId.getRight(), prompt);
 	}
 
 	private void runPrompt(User ai, Issue issue, Project project, 
 		ObjectId commitId, @Nullable String branch, String prompt) {
 		try {
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), issue.getId());
-			workspaceService.runPrompt(ai, project, commitId, branch, prompt, taskFailedCallback);						
+			workspaceService.runPrompt(ai, project, issue, null, commitId, branch, prompt, taskFailedCallback);
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {
@@ -463,17 +464,14 @@ public class IssueNotificationManager implements Serializable {
 		return assignedFieldNames;
 	}
 
-	private void handleFieldAssignment(User ai, Issue issue, String field) {
-		if (canWriteCode(ai, issue)) {
-			var branch = issueService.ensureBranch(ai.asSubject(), issue);
-			var commitId = issue.getProject().getObjectId(branch, true);
-			var prompt = """
-					Work on issue %d as role '%s'. \
-					Stay on current checkout to do the job. \
-					Make sure to submit work afterwards without confirmation."""
-					.formatted(issue.getNumber(), field);
-			runPrompt(ai, issue, issue.getProject(), commitId, branch, prompt);						
-		}
+	private void onFieldSet(User ai, Issue issue, String field) {
+		var commitIdAndBranch = getWorkspaceCommitIdAndBranch(issue);
+		var prompt = """
+				Work on issue %d as role '%s'. \
+				Do not switch checkout if your role does not need to write code. \
+				Make sure to submit work afterwards without confirmation."""
+				.formatted(issue.getNumber(), field);
+		runPrompt(ai, issue, issue.getProject(), commitIdAndBranch.getLeft(), commitIdAndBranch.getRight(), prompt);						
 	}
 
 	private TaskFailedCallback newTaskFailedCallback(Long aiId, Long issueId) {
@@ -562,15 +560,6 @@ public class IssueNotificationManager implements Serializable {
 			return false;
 		}
 		return true;
-	}
-
-	private boolean canWriteCode(User ai, Issue issue) {
-		if (SecurityUtils.canWriteCode(ai.asSubject(), issue.getProject())) {
-			return true;
-		} else {
-			createComment(ai, issue, "I need write code permission in this project to do the job");				
-			return false;
-		}
 	}
 
 	private boolean isAiEntitled(@Nullable User user, Issue issue, User ai) {

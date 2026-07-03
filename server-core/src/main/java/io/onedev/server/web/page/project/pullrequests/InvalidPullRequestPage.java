@@ -11,6 +11,7 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -27,10 +28,10 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.PullRequestService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -96,6 +97,17 @@ public class InvalidPullRequestPage extends ProjectPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(SecurityUtils.canManageProject(getPullRequest().getTargetProject()));
+				setEnabled(getPullRequest().getWorkspaces().size() == 0);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				configure();
+				if (!isEnabled()) {
+					tag.append("class", "disabled", " ");
+					tag.put("data-tippy-content", _T("Cannot delete pull request as it has workspaces"));
+				}
 			}
 			
 		}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete pull request #{0}?"), getPullRequest().getNumber()))));

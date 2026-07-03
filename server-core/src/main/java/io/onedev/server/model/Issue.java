@@ -399,6 +399,9 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueMention> mentions = new ArrayList<>();
+
+	@OneToMany(mappedBy="issue")
+	private Collection<Workspace> workspaces = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -678,6 +681,14 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	public void setMentions(Collection<IssueMention> mentions) {
 		this.mentions = mentions;
+	}
+
+	public Collection<Workspace> getWorkspaces() {
+		return workspaces;
+	}
+
+	public void setWorkspaces(Collection<Workspace> workspaces) {
+		this.workspaces = workspaces;
 	}
 
 	public Collection<IssueAuthorization> getAuthorizations() {

@@ -1261,6 +1261,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					actions.add(new Link<Void>("delete") {
 
 						@Override
+						protected void onInitialize() {
+							super.onInitialize();
+							if (getPullRequest().getWorkspaces().size() == 0) {
+								add(new ConfirmClickModifier(_T("Do you really want to delete this pull request?")));
+							}
+						}
+
+						@Override
 						public void onClick() {
 							PullRequest request = getPullRequest();
 							pullRequestService.delete(request);
@@ -1276,7 +1284,23 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 								setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject()));
 						}
 
-					}.add(new ConfirmClickModifier(_T("Do you really want to delete this pull request?"))));
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setEnabled(getPullRequest().getWorkspaces().size() == 0);
+						}
+
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							configure();
+							if (!isEnabled()) {
+								tag.append("class", "disabled", " ");
+								tag.put("data-tippy-content", _T("Cannot delete pull request as it has workspaces"));
+							}
+						}
+
+					});
 				} else {
 					actions.add(new WebMarkupContainer("synchronize"));
 					actions.add(new WebMarkupContainer("delete"));
@@ -1673,17 +1697,31 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected Project getProject() {
-						return getPullRequest().getSourceProject();
+						return getPullRequest().getProject();
 					}
 
 					@Override
 					protected String getBranch() {
-						return getPullRequest().getSourceBranch();
+						if (getPullRequest().getSourceProject() != null) {
+							return getPullRequest().getSourceBranch();
+						} else {
+							return null;
+						}
 					}
 
 					@Override
 					protected ObjectId getCommitId() {
-						return getPullRequest().getSourceHead();
+						return getPullRequest().getLatestUpdate().getHeadCommit().copy();
+					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return PullRequestDetailPage.this.getPullRequest();
+					}
+
+					@Override
+					protected boolean isOnInfoVisible() {
+						return false;
 					}
 
 				};
@@ -1693,9 +1731,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				var request = getPullRequest();
-				setVisible(request.getSourceHead() != null
-						&& SecurityUtils.canCreateWorkspaces(request.getSourceProject())
-						&& !request.getSourceProject().getHierarchyWorkspaceSpecs().isEmpty());
+				setVisible(!request.getProject().getHierarchyWorkspaceSpecs().isEmpty()
+						&& SecurityUtils.canCreateWorkspaces(request.getProject()));
 			}
 
 		});

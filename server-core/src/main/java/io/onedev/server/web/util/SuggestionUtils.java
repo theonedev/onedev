@@ -74,7 +74,6 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
-import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.workspace.WorkspaceVariable;
 import io.onedev.server.xodus.CommitInfoService;
 
@@ -480,29 +479,6 @@ public class SuggestionUtils {
 			suggestions.add(new InputSuggestion("path/to/project#100", "An example build", null));
 			if (project != null)
 				suggestions.add(new InputSuggestion("#100", "An example build", null));
-		}
-		return suggestions;
-	}
-
-	public static List<InputSuggestion> suggestWorkspaces(@Nullable Project project, String matchWith, int count) {
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', null);
-		if (scopedQuery != null) {
-			var subject = SecurityUtils.getSubject();
-			for (var workspace: OneDev.getInstance(WorkspaceService.class)
-					.query(subject, scopedQuery.getProject(), scopedQuery.getQuery(), count)) {
-				String ref;
-				if (project != null && project.equals(scopedQuery.getProject()))
-					ref = "#" + workspace.getNumber();
-				else
-					ref = workspace.getProject().getPath() + "#" + workspace.getNumber();
-				suggestions.add(new InputSuggestion(ref, workspace.getRevisionDescription(), null));
-			}
-		}
-		if (suggestions.isEmpty() && matchWith.length() == 0) {
-			suggestions.add(new InputSuggestion("path/to/project#100", "An example workspace", null));
-			if (project != null)
-				suggestions.add(new InputSuggestion("#100", "An example workspace", null));
 		}
 		return suggestions;
 	}

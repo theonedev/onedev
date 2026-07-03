@@ -43,6 +43,8 @@ import io.onedev.server.web.util.TextUtils;
 		indexes={
 				@Index(columnList="o_user_id"),
 				@Index(columnList="o_project_id"),
+				@Index(columnList="o_issue_id"),
+				@Index(columnList="o_request_id"),
 				@Index(columnList="o_agent_id"),
 				@Index(columnList=Workspace.PROP_SPEC),
 				@Index(columnList= Workspace.PROP_STATUS),
@@ -66,6 +68,10 @@ public class Workspace extends AbstractEntity {
 
 	public static final String PROP_PROJECT = "project";
 
+	public static final String PROP_ISSUE = "issue";
+
+	public static final String PROP_PULL_REQUEST = "request";
+
 	public static final String PROP_SPEC = "specName";
 
 	public static final String PROP_BRANCH = "branch";
@@ -86,6 +92,10 @@ public class Workspace extends AbstractEntity {
 
 	public static final String NAME_PROJECT = "Project";
 
+	public static final String NAME_ISSUE = "Issue";
+
+	public static final String NAME_PULL_REQUEST = "Pull Request";
+
 	public static final String NAME_BRANCH = "Branch";
 
 	public static final String NAME_COMMIT = "Commit";
@@ -103,7 +113,8 @@ public class Workspace extends AbstractEntity {
 	public static final String PROP_ACTIVE_DATE = "activeDate";
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NUMBER, NAME_PROJECT, NAME_BRANCH, NAME_COMMIT, NAME_SPEC, NAME_CREATE_DATE, NAME_ACTIVE_DATE);
+			NAME_NUMBER, NAME_PROJECT, NAME_ISSUE, NAME_PULL_REQUEST, NAME_BRANCH, NAME_COMMIT,
+			NAME_SPEC, NAME_CREATE_DATE, NAME_ACTIVE_DATE);
 
 	public static final Map<String, SortField<Workspace>> SORT_FIELDS = new LinkedHashMap<>();
 	static {
@@ -140,6 +151,14 @@ public class Workspace extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Project project;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn
+	private Issue issue;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn
+	private PullRequest request;
 
 	@Column(nullable=false)
 	private String specName;
@@ -211,6 +230,24 @@ public class Workspace extends AbstractEntity {
 
 	public void setProject(Project project) {
 		this.project = project;
+	}
+
+	@Nullable
+	public Issue getIssue() {
+		return issue;
+	}
+
+	public void setIssue(@Nullable Issue issue) {
+		this.issue = issue;
+	}
+
+	@Nullable
+	public PullRequest getRequest() {
+		return request;
+	}
+
+	public void setRequest(@Nullable PullRequest request) {
+		this.request = request;
 	}
 
 	public String getSpecName() {
@@ -318,8 +355,12 @@ public class Workspace extends AbstractEntity {
 		this.agent = agent;
 	}
 
-	public String getRevisionDescription() {
-		if (getBranch() != null)
+	public String getOnDescription() {
+		if (getIssue() != null)
+			return "issue " + getIssue().getReference().toString(getProject());
+		else if (getRequest() != null)
+			return "pull request " + getRequest().getReference().toString(getProject());
+		else if (getBranch() != null)
 			return "branch " + getBranch();
 		else
 			return "commit " + GitUtils.abbreviateSHA(getCommitHash());

@@ -69,12 +69,12 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.NodeStopping;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.project.workspace.WorkspaceTerminalOpened;
 import io.onedev.server.event.project.workspace.WorkspaceActive;
 import io.onedev.server.event.project.workspace.WorkspaceCreated;
 import io.onedev.server.event.project.workspace.WorkspaceEvent;
 import io.onedev.server.event.project.workspace.WorkspaceInactive;
 import io.onedev.server.event.project.workspace.WorkspacePending;
+import io.onedev.server.event.project.workspace.WorkspaceTerminalOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
@@ -83,7 +83,9 @@ import io.onedev.server.logging.LogService;
 import io.onedev.server.logging.ServerLogger;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Agent;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Workspace.Status;
@@ -213,10 +215,13 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch, String specName, boolean forTaskAutomation) {
+	public Workspace create(User user, Project project, Issue issue, PullRequest request,
+			ObjectId commitId, String branch, String specName, boolean forTaskAutomation) {
 		var workspace = new Workspace();
 		workspace.setUser(user);
 		workspace.setProject(project);
+		workspace.setIssue(issue);
+		workspace.setRequest(request);
 		workspace.setCommitHash(commitId.name());
 		workspace.setBranch(branch);
 		workspace.setSpecName(specName);
@@ -789,7 +794,14 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			if (gitEmail == null)
 				throw new ExplicitException("No email address for git operations configured");
 			
-			var cloneInfo = new DefaultCloneInfo(urlService.cloneUrlFor(workspace.getProject(), false), token);		
+			String cloneUrl;
+			if (workspace.getRequest() != null && workspace.getBranch() != null) {
+				Preconditions.checkState(workspace.getRequest().getSourceProject() != null, "Source project no longer exists");
+				cloneUrl = urlService.cloneUrlFor(workspace.getRequest().getSourceProject(), false);
+			} else {
+				cloneUrl = urlService.cloneUrlFor(workspace.getProject(), false);
+			}
+			var cloneInfo = new DefaultCloneInfo(cloneUrl, token);		
 
 			var context = new WorkspaceContext(spec, provisioner, token, projectId, projectPath, projectGitDir, 
 					workspaceId, workspaceNumber, workspace.getUser().getId(), workspace.getUser().getDisplayName(), 
@@ -1105,7 +1117,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public void runPrompt(User ai, Project project, ObjectId commitId, String branch, String prompt, TaskFailedCallback taskFailedCallback) {
+	public void runPrompt(User ai, Project project, @Nullable Issue issue, @Nullable PullRequest request,
+			@Nullable ObjectId commitId, @Nullable String branch, String prompt, TaskFailedCallback taskFailedCallback) {
 		WorkspaceSpec applicableSpec = null;
 		for (var spec : project.getHierarchyWorkspaceSpecs()) {
 			if (spec.getTaskAutomation() != null) {
@@ -1118,7 +1131,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		}
 		if (applicableSpec != null) {
 			final WorkspaceSpec finalApplicableSpec = applicableSpec;
-			var workspaceId = create(ai, project, commitId, branch, applicableSpec.getName(), true).getId();
+			var workspaceId = create(ai, project, issue, request, commitId, branch, applicableSpec.getName(), true).getId();
 			
 			transactionService.runAfterCommit(() -> {
 				executorService.execute(() -> {
@@ -1136,11 +1149,10 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 							var workspaceReference = workspace.getReference().toString(project);
 							if (workspace.getStatus() == Workspace.Status.ACTIVE) {
-								String fullPrompt;
+								String fullPrompt = "### Rules\nYou are talking to an AI user.\n";
 								if (ai.getAiSetting().getSystemPrompt() != null)
-									fullPrompt = "Rules:\n" + ai.getAiSetting().getSystemPrompt() + "\n\nUser:\n" + prompt;
-								else
-									fullPrompt = prompt;
+									fullPrompt += ai.getAiSetting().getSystemPrompt().trim() + "\n";
+								fullPrompt += "\n### User\n" + prompt;
 								
 								var command = finalApplicableSpec.getShell().decorateRunPromptCommand(
 										finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), fullPrompt.trim(),

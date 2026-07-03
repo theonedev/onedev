@@ -144,6 +144,11 @@ public abstract class PullRequestListPanel extends Panel {
 	@Inject
 	private Set<PullRequestListActionRenderer> pullRequestListActionRenderers;
 
+	@Nullable
+	private PullRequest findPullRequestWithWorkspaces(Collection<PullRequest> requests) {
+		return requests.stream().filter(it -> !it.getWorkspaces().isEmpty()).findFirst().orElse(null);
+	}
+
 	private final IModel<String> queryStringModel;
 	
 	private final IModel<PullRequestQuery> queryModel = new LoadableDetachableModel<>() {
@@ -433,10 +438,18 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<PullRequest> requests = new ArrayList<>();
+											for (IModel<PullRequest> each : selectionColumn.getSelections())
+												requests.add(each.getObject());
+											var requestWithWorkspaces = findPullRequestWithWorkspaces(requests);
+											if (requestWithWorkspaces != null) {
+												Session.get().error(MessageFormat.format(
+														_T("Unable to delete pull request \"{0}\" as it has workspaces"),
+														requestWithWorkspaces.getReference().toString(getProject())));
+												target.add(body);
+												return;
+											}
 											transactionService.run(()-> {
-												Collection<PullRequest> requests = new ArrayList<>();
-												for (IModel<PullRequest> each : selectionColumn.getSelections())
-													requests.add(each.getObject());
 												pullRequestService.delete(requests, getProject());
 												for (var request: requests) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
@@ -629,10 +642,18 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<PullRequest> requests = new ArrayList<>();
+											for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+												requests.add(it.next());
+											var requestWithWorkspaces = findPullRequestWithWorkspaces(requests);
+											if (requestWithWorkspaces != null) {
+												Session.get().error(MessageFormat.format(
+														_T("Unable to delete pull request \"{0}\" as it has workspaces"),
+														requestWithWorkspaces.getReference().toString(getProject())));
+												target.add(body);
+												return;
+											}
 											transactionService.run(()-> {
-												Collection<PullRequest> requests = new ArrayList<>();
-												for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
-													requests.add(it.next());
 												pullRequestService.delete(requests, getProject());
 												for (var request: requests) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
@@ -965,17 +986,26 @@ public abstract class PullRequestListPanel extends Panel {
 
 							@Override
 							protected Project getProject() {
-								return rowModel.getObject().getSourceProject();
+								return rowModel.getObject().getProject();
 							}
 
 							@Override
 							protected String getBranch() {
-								return rowModel.getObject().getSourceBranch();
+								if (rowModel.getObject().getSourceProject() != null) {
+									return rowModel.getObject().getSourceBranch();
+								} else {
+									return null;
+								}
 							}
 
 							@Override
 							protected ObjectId getCommitId() {
-								return rowModel.getObject().getSourceHead();
+								return rowModel.getObject().getLatestUpdate().getHeadCommit().copy();
+							}
+
+							@Override
+							protected PullRequest getPullRequest() {
+								return rowModel.getObject();
 							}
 
 						};
@@ -985,9 +1015,8 @@ public abstract class PullRequestListPanel extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						var pullRequest = rowModel.getObject();
-						setVisible(pullRequest.getSourceHead() != null
-								&& pullRequest.getSourceProject().canCreateWorkspace(SecurityUtils.getSubject())
-								&& !pullRequest.getSourceProject().getHierarchyWorkspaceSpecs().isEmpty());
+						setVisible(!pullRequest.getProject().getHierarchyWorkspaceSpecs().isEmpty()
+								&& pullRequest.getProject().canCreateWorkspace(SecurityUtils.getSubject()));
 					}
 
 				});

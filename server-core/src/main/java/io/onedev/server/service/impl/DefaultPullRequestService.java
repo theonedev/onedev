@@ -224,8 +224,16 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Transactional
 	@Override
 	public void delete(PullRequest request) {
+		checkNoWorkspaces(request);
 		doDelete(request);
 		listenerRegistry.post(new PullRequestDeleted(request));
+	}
+
+	private void checkNoWorkspaces(PullRequest request) {
+		if (request.getWorkspaces().size() > 0) {
+			throw new NotAcceptableException("Cannot delete pull request \""
+					+ request.getReference().toString(request.getProject()) + "\" as it has workspaces");
+		}
 	}
 
 	private void doDelete(PullRequest request) {
@@ -1096,8 +1104,10 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Transactional
 	@Override
 	public void delete(Collection<PullRequest> requests, Project project) {
-		for (PullRequest request: requests)
+		for (PullRequest request: requests) {
+			checkNoWorkspaces(request);
 			doDelete(request);
+		}
 		listenerRegistry.post(new PullRequestsDeleted(project, requests));
 	}
 

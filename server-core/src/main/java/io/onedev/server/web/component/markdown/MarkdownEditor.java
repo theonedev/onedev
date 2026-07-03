@@ -490,7 +490,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("type", "workspace");
 								referenceMap.put("reference", workspace.getReference().toString(currentProject));
-								String title = workspace.getUser().getDisplayName() + " on " + workspace.getRevisionDescription() + " for " + workspace.getSpecName();
+								String title = workspace.getUser().getDisplayName() + " on " + workspace.getOnDescription() + " for " + workspace.getSpecName();
 								referenceMap.put("title", title);
 								referenceMap.put("searchKey", workspace.getNumber() + " " + StringUtils.deleteWhitespace(title));
 								referenceList.add(referenceMap);

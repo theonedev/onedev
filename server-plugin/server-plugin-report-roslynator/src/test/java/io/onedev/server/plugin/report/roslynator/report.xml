@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Roslynator>
+  <CodeAnalysis>
+    <Summary>
+      <Diagnostic Id="CA1822" Title="Mark members as static" Count="1">
+        <Description>Members that do not access instance data or call instance methods can be marked as static.</Description>
+      </Diagnostic>
+      <Diagnostic Id="CS0103" Title="" Count="1" />
+      <Diagnostic Id="CS0518" Title="" Count="1" />
+    </Summary>
+    <Projects>
+      <Project Name="supermario" FilePath="/onedev-build/work/supermario/supermario.csproj">
+        <Diagnostics>
+          <Diagnostic Id="CS0518">
+            <Severity>Error</Severity>
+            <Message></Message>
+          </Diagnostic>
+          <Diagnostic Id="CA1822">
+            <Severity>Info</Severity>
+            <Message>Mark members as static</Message>
+            <FilePath>/onedev-build/work/supermario/Dialogue.cs</FilePath>
+            <Location Line="11" Character="17" />
+          </Diagnostic>
+          <Diagnostic Id="CS0103">
+            <Severity>Warning</Severity>
+            <Message></Message>
+            <FilePath>/onedev-build/work/supermario/Program.cs</FilePath>
+          </Diagnostic>
+        </Diagnostics>
+      </Project>
+    </Projects>
+  </CodeAnalysis>
+</Roslynator>

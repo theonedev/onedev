@@ -1,69 +1,75 @@
 package io.onedev.server.web.component.issue.workspaces;
 
+import javax.inject.Inject;
+
 import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 
 public abstract class IssueWorkspacesLink extends DropdownLink {
 
-    public IssueWorkspacesLink(String id) {
-        super(id);
-    }
+	@Inject
+	private IssueService issueService;
 
-    @Override
-    protected Component newContent(String id, FloatingPanel dropdown) {    
-        var branch = getIssue().getBranch();
-        if (branch != null) {
-            return new WorkspaceSpecListPanel(id) {
+	public IssueWorkspacesLink(String id) {
+		super(id);
+	}
 
-                @Override
-                protected Project getProject() {
-                    return getIssue().getProject();
-                }
+	@Override
+	protected Component newContent(String id, FloatingPanel dropdown) {
+		return new WorkspaceSpecListPanel(id) {
 
-                @Override
-                protected String getBranch() {
-                    return branch;
-                }
+			private String branch;
 
-                @Override
-                protected ObjectId getCommitId() {
-                    return getIssue().getProject().getObjectId(branch, true);
-                }
+			@Override
+			protected Project getProject() {
+				return getIssue().getProject();
+			}
 
-            };
-        } else {
-            return new NoBranchWorkspacesPanel(id) {
+			@Override
+			protected String getBranch() {
+				if (branch == null) {
+					if (getIssue().getBranch() != null)
+						branch = getIssue().getBranch();
+					else
+						branch = issueService.ensureBranch(SecurityUtils.getSubject(), getIssue());
+				}
+				return branch;
+			}
 
-                @Override
-                protected Issue getIssue() {
-                    return IssueWorkspacesLink.this.getIssue();
-                }
+			@Override
+			protected ObjectId getCommitId() {
+				return getIssue().getProject().getObjectId(getBranch(), true);
+			}
 
-            };
-        }
-    }
+			@Override
+			protected Issue getIssue() {
+				return IssueWorkspacesLink.this.getIssue();
+			}
 
-    protected abstract Issue getIssue();
+			@Override
+			protected boolean isOnInfoVisible() {
+				return false;
+			}
+
+		};
+	}
+
+	protected abstract Issue getIssue();
     
-    @Override
-    protected void onConfigure() {
-        super.onConfigure();
+	@Override
+	protected void onConfigure() {
+		super.onConfigure();
 
-        if (getIssue().getProject().getHierarchyWorkspaceSpecs().isEmpty()) {
-            setVisible(false);
-        } else if (getIssue().getProject().canWriteCode(SecurityUtils.getSubject())) {
-            setVisible(true);
-        } else if (getIssue().getBranch() == null) {
-            setVisible(false);
-        } else {
-            setVisible(getIssue().getProject().canCreateWorkspace(SecurityUtils.getSubject()));
-        }
-    }
+		var issue = getIssue();
+		setVisible(!issue.getProject().getHierarchyWorkspaceSpecs().isEmpty() 
+				&& issue.getProject().canCreateWorkspace(SecurityUtils.getSubject()));
+	}
 }

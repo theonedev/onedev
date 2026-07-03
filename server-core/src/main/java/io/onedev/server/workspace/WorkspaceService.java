@@ -12,7 +12,9 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.agent.workspace.FileData;
 import io.onedev.agent.workspace.GitExecutionResult;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
@@ -24,7 +26,13 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	@Nullable Workspace find(Project project, long number);
 
-	Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch, String specName, boolean forTaskAutomation);
+	default Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch,
+			String specName, boolean forTaskAutomation) {
+		return create(user, project, null, null, commitId, branch, specName, forTaskAutomation);
+	}
+
+	Workspace create(User user, Project project, @Nullable Issue issue, @Nullable PullRequest pullRequest,
+			ObjectId commitId, @Nullable String branch, String specName, boolean forTaskAutomation);
 
 	void update(Workspace workspace);
 
@@ -76,7 +84,8 @@ public interface WorkspaceService extends EntityService<Workspace> {
 	@Nullable
 	FileData readFileData(Workspace workspace, String path);
 
-	void runPrompt(User ai, Project project, ObjectId commitId, @Nullable String branch, 
-			String prompt, TaskFailedCallback taskFailedCallback);
+	void runPrompt(User ai, Project project, @Nullable Issue issue, @Nullable PullRequest request,
+			@Nullable ObjectId commitId, @Nullable String branch, String prompt,
+			TaskFailedCallback taskFailedCallback);
 	
 }

@@ -77,7 +77,7 @@ public class WorkspaceNotificationManager {
 			String summary = String.format("Workspace %s by user %s on %s",
 					event.getActivity(),
 					workspace.getUser().getDisplayName(),
-					workspace.getRevisionDescription());
+					workspace.getOnDescription());
 
 			String url = urlService.urlFor(workspace, true);
 			String threadingReferences = "<" + workspace.getProject().getPath()

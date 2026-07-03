@@ -9090,4 +9090,7 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate230(File dataDir, Stack<Integer> versions) {
+	}
+
 }

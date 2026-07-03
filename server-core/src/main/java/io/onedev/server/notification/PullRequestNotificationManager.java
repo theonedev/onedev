@@ -26,7 +26,6 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -312,7 +311,6 @@ public class PullRequestNotificationManager implements Serializable {
 									replyAddress, senderName, threadingReferences);
 						}
 					} else if (isAiEntitled(null, request, reviewer) && canCreateWorkspace(reviewer, request)) {				
-						var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
 						var prompt = """
 								Work on pull request %d to perform the review. \
 								Make sure to mention @%s in review summary if you want \
@@ -320,7 +318,8 @@ public class PullRequestNotificationManager implements Serializable {
 								Stay on current checkout and do not modify code. \
 								Make sure to submit work afterwards without confirmation."""
 								.formatted(request.getNumber(), request.getSubmitter().getName());
-						runPrompt(reviewer, request, request.getProject(), commitId, null, prompt);
+						var commitId = request.getLatestUpdate().getHeadCommit().copy();						
+						runPrompt(reviewer, request, commitId, getWorkspaceBranch(request), prompt);
 					}
 					notifiedUsers.add(reviewer);
 				}
@@ -350,7 +349,9 @@ public class PullRequestNotificationManager implements Serializable {
 											getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 											replyAddress, senderName, threadingReferences);
 								}
-							} else if (!(event instanceof PullRequestCodeCommentEvent) && isAiEntitled(user, request, mentionedUser)) {
+							} else if (!(event instanceof PullRequestCodeCommentEvent) 
+									&& isAiEntitled(user, request, mentionedUser)
+									&& canCreateWorkspace(mentionedUser, request)) {
 								addressConcern(mentionedUser, user, request);
 							}
 							notifiedUsers.add(mentionedUser);
@@ -404,27 +405,23 @@ public class PullRequestNotificationManager implements Serializable {
 							&& pullRequestBuildEvent.getBuild().isFailed() 
 							&& !pullRequestBuildEvent.getBuild().getDependencies().stream().anyMatch(it -> 
 									it.isRequireSuccessful() && it.getDependency().isFinished() && it.getDependency().getStatus() != Build.Status.SUCCESSFUL)
-							&& canWriteCode(request.getSubmitter(), request, request.getSourceProject())) {
-					var commitId = Preconditions.checkNotNull(request.getSourceHead());
+							&& canCreateWorkspace(request.getSubmitter(), request)) {
 					var prompt = """
 							Work on pull request %d to fix failure of build %d. \
-							Do not modify code unless the reason is clear. \
-							Stay on current checkout to do the job. \
 							Make sure to submit work afterwards without confirmation."""
 							.formatted(request.getNumber(), pullRequestBuildEvent.getBuild().getNumber());
-					runPrompt(request.getSubmitter(), request, request.getSourceProject(), commitId, request.getSourceBranch(), prompt);
+					var commitId = request.getLatestUpdate().getHeadCommit().copy();
+					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request), prompt);
 				}
 				if (event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null 
 							&& request.getMergePreview().getMergeCommitHash() == null 
-							&& canWriteCode(request.getSubmitter(), request, request.getSourceProject())
-							&& canReadCode(request.getSubmitter(), request, request.getTargetProject())) {
-					var commitId = Preconditions.checkNotNull(request.getSourceHead());
+							&& canCreateWorkspace(request.getSubmitter(), request)) {
 					var prompt = """
 						Work on pull request %d to resolve merge conflict. \
-						Stay on current checkout to do the job. \
 						Make sure to submit work afterwards without confirmation."""
 						.formatted(request.getNumber());
-					runPrompt(request.getSubmitter(), request, request.getSourceProject(), commitId, request.getSourceBranch(), prompt);					
+					var commitId = request.getLatestUpdate().getHeadCommit().copy();
+					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request), prompt);					
 				}
 			}
 			
@@ -444,15 +441,33 @@ public class PullRequestNotificationManager implements Serializable {
 			if (aiAssignee != null && request.checkMergeCondition() == null 
 					&& isAiEntitled(null, request, aiAssignee) 
 					&& canWriteCode(aiAssignee, request, request.getTargetProject())) {
-				var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
 				var prompt = """
 						Work on pull request %d to review and merge if ready. \
 						Otherwise, mention @%s in a PR comment to request changes. \
 						Stay on current checkout and do not modify code. \
 						Make sure to submit work afterwards without confirmation."""
 						.formatted(request.getNumber(), request.getSubmitter().getName());
-				runPrompt(aiAssignee, request, request.getTargetProject(), commitId, null, prompt);								
+				var commitId = request.getLatestUpdate().getHeadCommit().copy();
+				runPrompt(aiAssignee, request, commitId, getWorkspaceBranch(request), prompt);								
 			}
+		}
+	}
+
+	@Nullable
+	private String getWorkspaceBranch(PullRequest request) {
+		if (request.getSourceProject() != null) {
+			return request.getSourceBranch();
+		} else {
+			return null;
+		}
+	}
+
+	private boolean canWriteCode(User ai, PullRequest request, Project project) {
+		if (SecurityUtils.canWriteCode(ai.asSubject(), project)) {
+			return true;
+		} else {
+			createComment(ai, request, "I need write code permission in target project to do the job");				
+			return false;
 		}
 	}
 
@@ -474,46 +489,35 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 	}
 
-	private void addressConcern(User ai, User commenter, PullRequest request) {
-		if (ai.equals(request.getSubmitter()) && !canWriteCode(ai, request, request.getSourceProject()) 
-				|| request.getAssignees().contains(ai) && !canWriteCode(ai, request, request.getTargetProject())
-				|| !canCreateWorkspace(ai, request)) {
-			return;
-		}
-		
+	private void addressConcern(User ai, User commenter, PullRequest request) {		
 		List<String> prompts = new ArrayList<>();
-		prompts.add("Work on pull request %d to address %s's concern."
-				.formatted(request.getNumber(), commenter.getName()));
-		if (request.getAssignees().contains(ai) && request.checkMergeCondition() == null) {
-			prompts.add("Review the pull request and merge it if ready.");
-		}
-		prompts.add("Stay on current checkout to do the job.");
-
-		if (ai.equals(request.getSubmitter())) {			
-			prompts.add("""
-				If code is modified, mention the user in a PR comment so that the code can be reviewed; \
-				otherwise, mention the user only when you expect a response.""");
+		if (request.getSubmitter().equals(ai)) {
+			prompts.add("Work on pull request %d as submitter to address %s's latest concern."
+					.formatted(request.getNumber(), commenter.getName()));
 		} else {
-			prompts.add("Mention the user in a PR comment ONLY if you expect a response.");
-			prompts.add("Do not modify code.");
+			prompts.add("Work on pull request %d to address %s's latest concern."
+					.formatted(request.getNumber(), commenter.getName()));
 		}
-		prompts.add("Make sure to submit work afterwards without confirmation.");
+		prompts.add("Do not switch checkout if the concern does not require you to write code.");
+		if (request.getAssignees().contains(ai) && request.checkMergeCondition() == null 
+				&& canWriteCode(ai, request, request.getTargetProject())) {
+			prompts.add("Also merge the pull request if your review passes.");
+		}
+
+		prompts.add("""
+			If code is modified, mention the user in a PR comment so that the code can be reviewed; \
+			otherwise, mention the user only when you expect a response. \
+			Make sure to submit work afterwards without confirmation.""");
 		
 		var concatenatedPrompts = String.join(" ", prompts);
-		if (ai.equals(request.getSubmitter())) {
-			var commitId = Preconditions.checkNotNull(request.getSourceHead());
-			runPrompt(ai, request, request.getSourceProject(), commitId, request.getSourceBranch(), concatenatedPrompts);					
-		} else {
-			var commitId = ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash());
-			runPrompt(ai, request, request.getTargetProject(), commitId, null, concatenatedPrompts);					
-		}
+		var commitId = request.getLatestUpdate().getHeadCommit().copy();
+		runPrompt(ai, request, commitId, getWorkspaceBranch(request), concatenatedPrompts);					
 	}
 
-	private void runPrompt(User ai, PullRequest request, Project project, 
-				ObjectId commitId, @Nullable String branch, String prompt) {
+	private void runPrompt(User ai, PullRequest request, ObjectId commitId, @Nullable String branch, String prompt) {
 		try {
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), request.getId());
-			workspaceService.runPrompt(ai, project, commitId, branch, prompt, taskFailedCallback);						
+			workspaceService.runPrompt(ai, request.getProject(), null, request, commitId, branch, prompt, taskFailedCallback);
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {
@@ -543,24 +547,6 @@ public class PullRequestNotificationManager implements Serializable {
 			return false;
 		}
 		return true;
-	}
-
-	private boolean canWriteCode(User ai, PullRequest request, Project project) {
-		if (SecurityUtils.canWriteCode(ai.asSubject(), project)) {
-			return true;
-		} else {
-			createComment(ai, request, "I need write code permission in project '%s' to do the job".formatted(project.getPath()));				
-			return false;
-		}
-	}
-
-	private boolean canReadCode(User ai, PullRequest request, Project project) {
-		if (SecurityUtils.canWriteCode(ai.asSubject(), project)) {
-			return true;
-		} else {
-			createComment(ai, request, "I need read code permission in project '%s' to do the job".formatted(project.getPath()));				
-			return false;
-		}
 	}
 
 	private TaskFailedCallback newTaskFailedCallback(Long aiId, Long requestId) {

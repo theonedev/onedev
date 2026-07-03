@@ -14,4 +14,16 @@
 			</div>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="hasWorkspacesFrag">
+		<div class="workspace-spec-workspaces has-workspaces">
+			<div class="body py-2">
+				<div wicket:id="workspaces">
+					<a wicket:id="workspace" class="workspace d-flex align-items-center bg-hover-light text-hover-gray-dark px-3 py-2">
+						<svg wicket:id="status" class="status mr-2"></svg>
+						<span wicket:id="title" class="title"></span>
+					</a>
+				</div>
+			</div>
+		</div>
+	</wicket:fragment>
 </wicket:panel>

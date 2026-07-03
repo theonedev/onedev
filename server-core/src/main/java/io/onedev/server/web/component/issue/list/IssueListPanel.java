@@ -204,6 +204,11 @@ public abstract class IssueListPanel extends Panel {
 	private AuditService getAuditService() {
 		return OneDev.getInstance(AuditService.class);
 	}
+
+	@Nullable
+	private Issue findIssueWithWorkspaces(Collection<Issue> issues) {
+		return issues.stream().filter(it -> !it.getWorkspaces().isEmpty()).findFirst().orElse(null);
+	}
 	
 	@Override
 	protected void onDetach() {
@@ -1162,10 +1167,18 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<Issue> issues = new ArrayList<>();
+											for (IModel<Issue> each : selectionColumn.getSelections())
+												issues.add(each.getObject());
+											var issueWithWorkspaces = findIssueWithWorkspaces(issues);
+											if (issueWithWorkspaces != null) {
+												Session.get().error(MessageFormat.format(
+														_T("Unable to delete issue \"{0}\" as it has workspaces"),
+														issueWithWorkspaces.getReference().toString(getProject())));
+												target.add(body);
+												return;
+											}
 											getTransactionService().run(()-> {
-												Collection<Issue> issues = new ArrayList<>();
-												for (IModel<Issue> each : selectionColumn.getSelections())
-													issues.add(each.getObject());
 												getIssueService().delete(issues, getProject());
 												for (var issue: issues) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
@@ -1529,10 +1542,18 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<Issue> issues = new ArrayList<>();
+											for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+												issues.add(it.next());
+											var issueWithWorkspaces = findIssueWithWorkspaces(issues);
+											if (issueWithWorkspaces != null) {
+												Session.get().error(MessageFormat.format(
+														_T("Unable to delete issue \"{0}\" as it has workspaces"),
+														issueWithWorkspaces.getReference().toString(getProject())));
+												target.add(body);
+												return;
+											}
 											getTransactionService().run(()-> {
-												Collection<Issue> issues = new ArrayList<>();
-												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
-													issues.add(it.next());
 												getIssueService().delete(issues, getProject());
 												for (var issue: issues) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
@@ -2240,4 +2261,3 @@ public abstract class IssueListPanel extends Panel {
 	}
 	
 }
-

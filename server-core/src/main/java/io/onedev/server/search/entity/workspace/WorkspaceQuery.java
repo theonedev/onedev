@@ -5,6 +5,8 @@ import static io.onedev.server.model.Workspace.NAME_ACTIVE_DATE;
 import static io.onedev.server.model.Workspace.NAME_BRANCH;
 import static io.onedev.server.model.Workspace.NAME_COMMIT;
 import static io.onedev.server.model.Workspace.NAME_CREATE_DATE;
+import static io.onedev.server.model.Workspace.NAME_ISSUE;
+import static io.onedev.server.model.Workspace.NAME_PULL_REQUEST;
 import static io.onedev.server.model.Workspace.NAME_PROJECT;
 import static io.onedev.server.model.Workspace.NAME_SPEC;
 import static io.onedev.server.model.Workspace.QUERY_FIELDS;
@@ -161,7 +163,11 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 						String fieldName = getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(fieldName, operator);
-						if (fieldName.equals(NAME_BRANCH))
+						if (fieldName.equals(NAME_ISSUE))
+							return new IssueEmptyCriteria(operator);
+						else if (fieldName.equals(NAME_PULL_REQUEST))
+							return new PullRequestEmptyCriteria(operator);
+						else if (fieldName.equals(NAME_BRANCH))
 							return new BranchEmptyCriteria(operator);
 						throw new ExplicitException("Unexpected field: " + fieldName);
 					}
@@ -181,6 +187,12 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 								break;
 							case NAME_PROJECT:
 								criterias.add(new ProjectCriteria(value, operator));
+								break;
+							case NAME_ISSUE:
+								criterias.add(new IssueCriteria(project, value, operator));
+								break;
+							case NAME_PULL_REQUEST:
+								criterias.add(new PullRequestCriteria(project, value, operator));
 								break;
 							case NAME_BRANCH:
 								criterias.add(new BranchCriteria(value, operator));
@@ -269,6 +281,7 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 			case Is:
 			case IsNot:
 				if (!fieldName.equals(NAME_NUMBER) && !fieldName.equals(NAME_PROJECT)
+						&& !fieldName.equals(NAME_ISSUE) && !fieldName.equals(NAME_PULL_REQUEST)
 						&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_COMMIT)
 						&& !fieldName.equals(NAME_SPEC)) {
 					throw newOperatorException(fieldName, operator);
@@ -276,7 +289,8 @@ public class WorkspaceQuery extends EntityQuery<Workspace> {
 				break;
 			case IsEmpty:
 			case IsNotEmpty:
-				if (!fieldName.equals(NAME_BRANCH))
+				if (!fieldName.equals(NAME_ISSUE) && !fieldName.equals(NAME_PULL_REQUEST)
+						&& !fieldName.equals(NAME_BRANCH))
 					throw newOperatorException(fieldName, operator);
 				break;
 			case IsGreaterThan:

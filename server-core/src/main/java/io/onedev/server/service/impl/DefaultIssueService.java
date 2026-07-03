@@ -937,8 +937,17 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	@Transactional
 	@Override
 	public void delete(Issue issue) {
+		checkNoWorkspaces(issue, "delete");
 		dao.remove(issue);
 		listenerRegistry.post(new IssueDeleted(issue));
+	}
+
+	private void checkNoWorkspaces(Issue issue, String operation) {
+		if (issue.getWorkspaces().size() > 0) {
+			throw new NotAcceptableException(MessageFormat.format(
+					"Cannot {0} issue \"{1}\" as it has workspaces",
+					operation, issue.getReference().toString(issue.getProject())));
+		}
 	}
 	
 	private String getCacheKey(Issue issue) {
@@ -1118,6 +1127,8 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		Map<Long, Long> numberMapping = new HashMap<>();
 		List<Issue> sortedIssues = new ArrayList<>(issues);
 		Collections.sort(sortedIssues);
+		for (Issue issue: sortedIssues)
+			checkNoWorkspaces(issue, "move");
 		for (Issue issue: sortedIssues) {
 			if (issue.getDescription() != null) {
 				issue.setDescription(issue.getDescription().replace(
@@ -1175,8 +1186,10 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	@Transactional
 	@Override
 	public void delete(Collection<Issue> issues, Project project) {
-		for (Issue issue: issues)
+		for (Issue issue: issues) {
+			checkNoWorkspaces(issue, "delete");
 			dao.remove(issue);
+		}
 		listenerRegistry.post(new IssuesDeleted(project, issues));
 	}
 	

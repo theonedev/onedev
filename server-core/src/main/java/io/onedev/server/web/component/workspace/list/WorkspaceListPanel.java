@@ -39,7 +39,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -56,13 +55,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateWorkspaces;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.WorkspaceQueryBehavior;
-import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.BranchSelector;
-import io.onedev.server.web.component.commit.CommitLink;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -81,6 +77,7 @@ import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.workspace.invalidspec.InvalidWorkspaceSpecIcon;
+import io.onedev.server.web.component.workspace.on.WorkspaceOnPanel;
 import io.onedev.server.web.component.workspace.specrunselector.WorkspaceSpecRunSelector;
 import io.onedev.server.web.component.workspace.status.WorkspaceStatusIcon;
 import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
@@ -679,24 +676,18 @@ public abstract class WorkspaceListPanel extends Panel {
 			}
 		});
 
-		columns.add(new AbstractColumn<>(Model.of(_T("Branch/Commit"))) {
+		columns.add(new AbstractColumn<>(Model.of(_T("On"))) {
 
 			@Override
 			public String getCssClass() {
-				return "branch";
+				return "on";
 			}
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Workspace>> cellItem, String componentId,
                                      IModel<Workspace> rowModel) {
-				Fragment fragment = new Fragment(componentId, "revisionFrag", WorkspaceListPanel.this);
-				Workspace workspace = rowModel.getObject();
-				if (workspace.getBranch() != null) {
-					fragment.add(new BranchLink("revision",
-							new ProjectAndBranch(workspace.getProject(), workspace.getBranch()), true));
-				} else {
-					fragment.add(new CommitLink("revision", workspace.getProject(), ObjectId.fromString(workspace.getCommitHash())));
-				}
+				Fragment fragment = new Fragment(componentId, "referenceFrag", WorkspaceListPanel.this);
+				fragment.add(new WorkspaceOnPanel("reference", rowModel));
 				cellItem.add(fragment);
 			}
 		});

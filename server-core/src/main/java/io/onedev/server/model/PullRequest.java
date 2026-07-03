@@ -417,6 +417,9 @@ public class PullRequest extends ProjectBelonging
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
+	@OneToMany(mappedBy="request")
+	private Collection<Workspace> workspaces = new ArrayList<>();
+
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestChange> changes = new ArrayList<>();
 	
@@ -614,6 +617,14 @@ public class PullRequest extends ProjectBelonging
 
 	public void setChanges(Collection<PullRequestChange> changes) {
 		this.changes = changes;
+	}
+
+	public Collection<Workspace> getWorkspaces() {
+		return workspaces;
+	}
+
+	public void setWorkspaces(Collection<Workspace> workspaces) {
+		this.workspaces = workspaces;
 	}
 
 	public Collection<PullRequestReaction> getReactions() {

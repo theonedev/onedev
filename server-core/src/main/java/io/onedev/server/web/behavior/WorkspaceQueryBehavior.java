@@ -31,6 +31,7 @@ import io.onedev.server.search.entity.workspace.WorkspaceQueryParser;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -107,6 +108,10 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 												return SuggestionUtils.suggestProjectPaths(matchWith);
 											else
 												return null;
+										case Workspace.NAME_ISSUE:
+											return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+										case Workspace.NAME_PULL_REQUEST:
+											return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 										case Workspace.NAME_BRANCH:
 											if (!matchWith.contains("*"))
 												return SuggestionUtils.suggestBranches(project, matchWith);

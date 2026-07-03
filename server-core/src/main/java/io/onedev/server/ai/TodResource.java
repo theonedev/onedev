@@ -219,7 +219,7 @@ public class TodResource {
 	public VersionInfo checkVersion() {
         var versionInfo = new VersionInfo();
         versionInfo.serverVersion = OneDev.getInstance().getVersion();
-        versionInfo.minRequiredTodVersion = "4.0.0";
+        versionInfo.minRequiredTodVersion = "4.1.0";
         return versionInfo;
 	}
 
@@ -547,13 +547,18 @@ public class TodResource {
     @GET
     public Map<String, Object> getIssueDetail(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("reference") @NotNull String issueReference) {
+                @QueryParam("reference") @NotNull String issueReference, 
+                @QueryParam("forWrite") Boolean forWrite) {
         var subject = SecurityUtils.getSubject();
         if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
         var issue = getIssue(currentProject, issueReference);                
+
+        if (forWrite != null && forWrite &&!SecurityUtils.canWriteCode(issue.getProject()))
+            throw new UnauthorizedException("No permission to write code in issue project");
+
         return IssueHelper.getDetail(subject, currentProject, issue);
     }
 
@@ -1066,12 +1071,22 @@ public class TodResource {
     @GET
     public Map<String, Object> getPullRequestDetail(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("reference") @NotNull String pullRequestReference) {
+                @QueryParam("reference") @NotNull String pullRequestReference, 
+                @QueryParam("forWrite") Boolean forWrite) {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
+
+        if (forWrite != null && forWrite) {
+            if (pullRequest.getSourceProject() == null)
+                throw new NotAcceptableException("Pull request source project no longer exists");
+
+            if (!SecurityUtils.canWriteCode(pullRequest.getSourceProject()))            
+                throw new UnauthorizedException("No permission to write code in pull request source project");
+        }
+
         return PullRequestHelper.getDetail(currentProject, pullRequest);
     }
 
