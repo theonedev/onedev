@@ -5,10 +5,11 @@
 </div>
 
 <div align="center">
-<h1>Git Server with CI/CD, Kanban, and Packages</h1>
+<h1>The Unified and Autonomous Development Platform</h1>
 
 <h2>
-<a href="https://docs.onedev.io">Get Started</a> 
+<a href="https://docs.onedev.io" style="margin-right: 20px;">Get Started</a> 
+<a href="https://onedev.io/blogs/33">AI Autonomous</a> 
 </h2>
 
 <p style="margin-bottom: 20px;">
@@ -162,13 +163,19 @@ Work on any branch with preconfigured dev containers on server. Use OpenCode, Cl
 
 ![workspace](./doc/images/workspace.png)
 
-## 🤖 MCP server to interact with OneDev via AI agents
+## 🤹 Skills and CLI to interact with OneDev in AI agents
 
-MCP server for managing issues, pull requests, and builds. Streamline DevOps workflows, configure CI/CD jobs, 
-and investigate build failures through conversations.
-[**Tutorial**](https://docs.onedev.io/tutorials/ai/working-with-mcp)
+TOD CLI to query and edit issues, pull requests, and builds, run CI/CD jobs against local changes, and check out pull requests locally. Shipped skills to drive OneDev workflows in coding agents.
+[**Skills and CLI**](https://code.onedev.io/onedev/tod/~files/main/readme.md)
 
-![mcp](./doc/images/mcp.png)
+![mcp](./doc/images/skills-and-cli.png)
+
+## 🤖 AI for DevOps intelligence
+
+AI users work autonomously in your issue and pull request flow: implement assigned issues, review and improve pull requests, fix CI/CD failures, and resolve merge conflicts. They can also explain code, summarize long discussions, help write CI/CD specs, and answer project questions.
+[**Tutorial**](https://docs.onedev.io/category/ai)
+
+![ai integration](./doc/images/ai-pr-review.png)
 
 ## 🎛️ Dashboard for teams and users
 
