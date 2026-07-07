@@ -8,7 +8,8 @@
 <h1>The Unified and Autonomous Development Platform</h1>
 
 <h2>
-<a href="https://docs.onedev.io" style="margin-right: 20px;">Get Started</a> 
+<a href="https://docs.onedev.io">Get Started</a> 
+&nbsp;&nbsp;
 <a href="https://onedev.io/blogs/33">AI Autonomous</a> 
 </h2>
 
