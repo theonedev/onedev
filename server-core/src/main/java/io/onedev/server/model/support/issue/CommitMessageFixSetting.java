@@ -36,7 +36,7 @@ public class CommitMessageFixSetting implements Serializable, Validatable {
 	private static final long serialVersionUID = 1L;
 
 	public static final String DEFAULT_FIX_SUGGESTION = """
-		When a commit is intended to fix/close/resolve an issue, add the issue reference in the commit message \
+		When a commit is intended to resolve/fix/close an issue, add the issue reference in the commit message \
 		footer as a separate line, for instance: 
 		
 		Fixes #100

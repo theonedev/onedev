@@ -48,7 +48,7 @@ public final class ServerProvisionerUtils {
 			OneDev.getInstance(ClusterService.class).runOnServer(pinnedServer, () -> {
 				var workspaceDir = getWorkspaceDir(projectId, workspaceNumber);
 				if (workspaceDir.exists())
-					FileUtils.deleteDir(workspaceDir);
+					FileUtils.deleteDir(workspaceDir, 5);
 				return null;
 			});
 		} else {

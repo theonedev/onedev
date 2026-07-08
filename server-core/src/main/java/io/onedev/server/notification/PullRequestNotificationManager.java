@@ -262,8 +262,8 @@ public class PullRequestNotificationManager implements Serializable {
 						&& canCreateWorkspace(request.getSubmitter(), request)) {
 					var prompt = """
 							Work on pull request %d to address user feedbacks since your last work. \
-							Do not mention users in any comments if will change the code \
-							as this change will notify users automatically. \
+							If code is changed as a result of this, make sure to not mention users \
+							in your comments; otherwise, mention users only when you expect a response. \
 							Make sure to submit work afterwards without confirmation."""
 							.formatted(request.getNumber());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
@@ -343,8 +343,9 @@ public class PullRequestNotificationManager implements Serializable {
 						var prompt = """
 								Work on pull request %d to perform the review. \
 								Stay on current checkout and do not modify code. \
-								Do not mention users in any comments if you will change your review state 
-								as this change will notify users automatically. \
+								If review state is changed as a result of this, \
+								make sure to not mention users in the review notes or comments; \
+								otherwise, mention users only when you expect a response. \
 								Make sure to submit work afterwards without confirmation."""
 								.formatted(request.getNumber(), request.getSubmitter().getName());
 						var commitId = request.getLatestUpdate().getHeadCommit().copy();						
