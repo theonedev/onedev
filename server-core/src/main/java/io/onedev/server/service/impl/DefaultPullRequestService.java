@@ -876,6 +876,18 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 							request, Sets.newHashSet(file), sourceUpdated);
 				}
 			}
+
+			if (sourceUpdated) {
+				// For AI user, we will request reviews every time source is updated even if the 
+				// review is not enforced by branch protection rules
+				for (PullRequestReview review: request.getReviews()) {
+					if (review.getUser().getType() == User.Type.AI 
+							&& review.getStatus() != PullRequestReview.Status.EXCLUDED 
+							&& review.getStatus() != PullRequestReview.Status.PENDING) {
+						review.setStatus(PullRequestReview.Status.PENDING);
+					}
+				}
+			}
 		}
 	}
 

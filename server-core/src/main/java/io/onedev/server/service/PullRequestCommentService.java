@@ -12,7 +12,7 @@ public interface PullRequestCommentService extends EntityService<PullRequestComm
 
 	void create(PullRequestComment comment);
 
-	void create(PullRequestComment comment, Collection<String> notifiedEmailAddresses);
+	void create(PullRequestComment comment, Collection<String> listeningEmailAddresses);
 
 	void create(User user, PullRequest request, String content);
 

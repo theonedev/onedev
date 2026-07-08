@@ -38,7 +38,7 @@ public interface IssueService extends EntityService<Issue> {
     
 	void open(Issue issue);
 	
-	void open(Issue issue, Collection<String> notifiedEmailAddresses);
+	void open(Issue issue, Collection<String> listeningEmailAddresses);
 	
 	void togglePin(Issue issue);
 	

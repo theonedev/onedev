@@ -15,12 +15,12 @@ public class IssueCommentCreated extends IssueEvent {
 
 	private final Long commentId;
 	
-	private final Collection<String> notifiedEmailAddresses;
+	private final Collection<String> listeningEmailAddresses;
 	
-	public IssueCommentCreated(IssueComment comment, Collection<String> notifiedEmailAddresses) {
+	public IssueCommentCreated(IssueComment comment, Collection<String> listeningEmailAddresses) {
 		super(comment.getUser(), comment.getDate(), comment.getIssue());
 		commentId = comment.getId();
-		this.notifiedEmailAddresses = notifiedEmailAddresses;
+		this.listeningEmailAddresses = listeningEmailAddresses;
 	}
 
 	public IssueComment getComment() {
@@ -37,8 +37,8 @@ public class IssueCommentCreated extends IssueEvent {
 		return false;
 	}
 
-	public Collection<String> getNotifiedEmailAddresses() {
-		return notifiedEmailAddresses;
+	public Collection<String> getListeningEmailAddresses() {
+		return listeningEmailAddresses;
 	}
 
 	@Override

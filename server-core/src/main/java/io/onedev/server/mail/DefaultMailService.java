@@ -647,9 +647,9 @@ public class DefaultMailService implements MailService, Serializable {
 			// Add double line breaks in the beginning and ending as otherwise plain text content 
 			// received from email may not be formatted correctly with our markdown renderer. 
 			comment.setContent(decorateContent(content));
-			var notifiedEmailAddresses = receiverInternetAddresses.stream().map(InternetAddress::getAddress).collect(toSet());
-			notifiedEmailAddresses.add(authorInternetAddress.getAddress());
-			issueCommentService.create(comment, notifiedEmailAddresses);
+			var listeningEmailAddresses = receiverInternetAddresses.stream().map(InternetAddress::getAddress).collect(toSet());
+			listeningEmailAddresses.add(authorInternetAddress.getAddress());
+			issueCommentService.create(comment, listeningEmailAddresses);
 		}
 	}
 	
@@ -660,9 +660,9 @@ public class DefaultMailService implements MailService, Serializable {
 		String content = parseBody(message, pullRequest.getProject(), pullRequest.getUUID());
 		if (content != null) {
 			comment.setContent(decorateContent(content));
-			var notifiedEmailAddresses = receiverInternetAddresses.stream().map(InternetAddress::getAddress).collect(toSet());
-			notifiedEmailAddresses.add(authorInternetAddress.getAddress());
-			pullRequestCommentService.create(comment, notifiedEmailAddresses);
+			var listeningEmailAddresses = receiverInternetAddresses.stream().map(InternetAddress::getAddress).collect(toSet());
+			listeningEmailAddresses.add(authorInternetAddress.getAddress());
+			pullRequestCommentService.create(comment, listeningEmailAddresses);
 		}
 	}
 	

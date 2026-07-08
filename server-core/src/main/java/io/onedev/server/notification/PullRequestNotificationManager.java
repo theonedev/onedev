@@ -1,8 +1,10 @@
 package io.onedev.server.notification;
 
+import static io.onedev.server.model.PullRequestReview.Status.PENDING;
+import static io.onedev.server.model.PullRequestReview.Status.REQUESTED_FOR_CHANGES;
 import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
-import static io.onedev.server.notification.NotificationUtils.isNotified;
+import static io.onedev.server.notification.NotificationUtils.isListening;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -51,7 +53,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -172,15 +173,15 @@ public class PullRequestNotificationManager implements Serializable {
 				watchService.watch(request, entry.getKey(), entry.getValue());
 			}
 	
-			Collection<String> notifiedEmailAddresses;
+			Collection<String> listeningEmailAddresses;
 			if (event instanceof PullRequestCommentCreated)
-				notifiedEmailAddresses = ((PullRequestCommentCreated) event).getNotifiedEmailAddresses();
+				listeningEmailAddresses = ((PullRequestCommentCreated) event).getListeningEmailAddresses();
 			else
-				notifiedEmailAddresses = new HashSet<>();
+				listeningEmailAddresses = new HashSet<>();
 			
 			Collection<User> notifiedUsers = Sets.newHashSet();
 			if (user != null) {
-				if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
+				if (!user.isNotifyOwnEvents())
 					notifiedUsers.add(user); 
 				if (!user.isSystem() && user.getType() != AI)
 					watchService.watch(request, user, true);
@@ -221,8 +222,9 @@ public class PullRequestNotificationManager implements Serializable {
 			Set<User> assignees = new HashSet<>();
 			if (event instanceof PullRequestOpened) {
 				for (PullRequestReview review : request.getReviews()) {
-					if (review.getStatus() == Status.PENDING)
+					if (review.getStatus() == PENDING) {
 						reviewers.add(review.getUser());
+					}
 				}
 				for (PullRequestAssignment assignment : request.getAssignments())
 					assignees.add(assignment.getUser());
@@ -230,39 +232,66 @@ public class PullRequestNotificationManager implements Serializable {
 				PullRequestChanged changeEvent = (PullRequestChanged) event;
 				PullRequestChangeData changeData = changeEvent.getChange().getData();
 				if ((changeData instanceof PullRequestApproveData
-						|| changeData instanceof PullRequestRequestedForChangesData
-						|| changeData instanceof PullRequestDiscardData)
-						&& request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
-					if (request.getSubmitter().getType() != AI) {
-						String subject = String.format(
-								"[Pull Request %s] (%s) %s", 
-								request.getReference(),
-								WordUtils.capitalize(changeData.getActivity()), 
-								emojis.apply(request.getTitle()));
-						String threadingReferences = String.format("<%s-%s@onedev>",
-								changeData.getActivity().replace(' ', '-'), request.getUUID());
-						EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
-						if (emailAddress != null && emailAddress.isVerified()) {
-							mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
-									Lists.newArrayList(), Lists.newArrayList(), subject,
-									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
-									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
-									replyAddress, senderName, threadingReferences);
-						}
+							|| changeData instanceof PullRequestRequestedForChangesData
+							|| changeData instanceof PullRequestDiscardData) 
+						&& request.getSubmitter().getType() != AI 
+						&& notifiedUsers.add(request.getSubmitter())) {
+					String subject = String.format(
+							"[Pull Request %s] (%s) %s", 
+							request.getReference(),
+							WordUtils.capitalize(changeData.getActivity()), 
+							emojis.apply(request.getTitle()));
+					String threadingReferences = String.format("<%s-%s@onedev>",
+							changeData.getActivity().replace(' ', '-'), request.getUUID());
+					EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified()) {
+						mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+								Lists.newArrayList(), Lists.newArrayList(), subject,
+								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
+								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
+								replyAddress, senderName, threadingReferences);
 					}
-					notifiedUsers.add(request.getSubmitter());
 				}
-			} else if (event instanceof PullRequestAssigned) {
+				if ((changeData instanceof PullRequestRequestedForChangesData || changeData instanceof PullRequestApproveData) 
+						&& user.getType() == AI
+						&& request.getSubmitter().getType() == AI 
+						&& request.getReviews().stream().noneMatch(it -> it.getUser().getType() == AI && it.getStatus() == PENDING)
+						&& request.getReviews().stream().anyMatch(it -> it.getUser().getType() == AI && it.getStatus() == REQUESTED_FOR_CHANGES)
+						&& notifiedUsers.add(request.getSubmitter())
+						&& isAiEntitled(null, request, request.getSubmitter())
+						&& canCreateWorkspace(request.getSubmitter(), request)) {
+					var prompt = """
+							Work on pull request %d to address user feedbacks since your last work. \
+							Do not mention users in any comments if will change the code \
+							as this change will notify users automatically. \
+							Make sure to submit work afterwards without confirmation."""
+							.formatted(request.getNumber());
+					var commitId = request.getLatestUpdate().getHeadCommit().copy();
+					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request), prompt);
+				}
+				if ((changeData instanceof PullRequestRequestedForChangesData) 
+						&& user.getType() != AI
+						&& request.getSubmitter().getType() == AI 
+						&& notifiedUsers.add(request.getSubmitter())
+						&& isAiEntitled(null, request, request.getSubmitter())
+						&& canCreateWorkspace(request.getSubmitter(), request)) {
+					var prompt = """
+							Work on pull request %d to address %s's latest concern. \
+							Make sure to submit work afterwards without confirmation."""
+							.formatted(request.getNumber(), user.getName());
+					var commitId = request.getLatestUpdate().getHeadCommit().copy();
+					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request), prompt);
+				}
+		} else if (event instanceof PullRequestAssigned) {
 				assignees.add(((PullRequestAssigned) event).getAssignee());
-			} else if (event instanceof PullRequestReviewRequested) {
-				reviewers.add(((PullRequestReviewRequested) event).getReviewer());
+			} else if (event instanceof PullRequestReviewRequested pullRequestReviewRequested) {
+				reviewers.add(pullRequestReviewRequested.getReviewer());
 			}
 	
 			for (User assignee : assignees) {
-				if (assignee.getType() != AI) 
+				if (assignee.getType() != AI) {
 					watchService.watch(request, assignee, true);
-				if (!notifiedUsers.contains(assignee)) {
-					if (assignee.getType() != AI) {
+					if (notifiedUsers.add(assignee)) {
 						String subject = String.format(
 								"[Pull Request %s] (Assigned) %s",
 								request.getReference(), 
@@ -282,14 +311,13 @@ public class PullRequestNotificationManager implements Serializable {
 									replyAddress, senderName, threadingReferences);
 						}
 					}
-					notifiedUsers.add(assignee);
 				}
 			}
 	
 			for (User reviewer : reviewers) {
 				if (reviewer.getType() != AI) 
 					watchService.watch(request, reviewer, true);
-				if (!notifiedUsers.contains(reviewer)) {
+				if (notifiedUsers.add(reviewer)) {
 					if (reviewer.getType() != AI) {
 						String subject = String.format(
 							"[Pull Request %s] (Review Request) %s",
@@ -310,18 +338,18 @@ public class PullRequestNotificationManager implements Serializable {
 									getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(null, request, reviewer) && canCreateWorkspace(reviewer, request)) {				
+					} else if (isAiEntitled(null, request, reviewer) 
+							&& canCreateWorkspace(reviewer, request)) {				
 						var prompt = """
 								Work on pull request %d to perform the review. \
-								Make sure to mention @%s in review summary if you want \
-								the user to react to your feedbacks. \
 								Stay on current checkout and do not modify code. \
+								Do not mention users in any comments if you will change your review state 
+								as this change will notify users automatically. \
 								Make sure to submit work afterwards without confirmation."""
 								.formatted(request.getNumber(), request.getSubmitter().getName());
 						var commitId = request.getLatestUpdate().getHeadCommit().copy();						
 						runPrompt(reviewer, request, commitId, getWorkspaceBranch(request), prompt);
 					}
-					notifiedUsers.add(reviewer);
 				}
 			}
 			
@@ -333,7 +361,7 @@ public class PullRequestNotificationManager implements Serializable {
 						mentionService.mention(request, mentionedUser);
 						if (mentionedUser.getType() != AI) 
 							watchService.watch(request, mentionedUser, true);
-						if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
+						if (notifiedUsers.add(mentionedUser)) {
 							if (mentionedUser.getType() != AI) {
 								String subject = String.format(
 										"[Pull Request %s] (Mentioned You) %s", 
@@ -354,7 +382,6 @@ public class PullRequestNotificationManager implements Serializable {
 									&& canCreateWorkspace(mentionedUser, request)) {
 								addressConcern(mentionedUser, user, request);
 							}
-							notifiedUsers.add(mentionedUser);
 						}
 					}
 				}
@@ -375,7 +402,7 @@ public class PullRequestNotificationManager implements Serializable {
 							&& (visitDate == null || visitDate.before(event.getDate()))
 							&& (!(event instanceof PullRequestUpdated) || !watch.getUser().equals(request.getSubmitter()))
 							&& !notifiedUsers.contains(watch.getUser())
-							&& !isNotified(notifiedEmailAddresses, watch.getUser())
+							&& !isListening(listeningEmailAddresses, watch.getUser())
 							&& watch.getUser().asSubject().isPermitted(permission)) {
 						EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 						if (emailAddress != null && emailAddress.isVerified())
@@ -405,6 +432,8 @@ public class PullRequestNotificationManager implements Serializable {
 							&& pullRequestBuildEvent.getBuild().isFailed() 
 							&& !pullRequestBuildEvent.getBuild().getDependencies().stream().anyMatch(it -> 
 									it.isRequireSuccessful() && it.getDependency().isFinished() && it.getDependency().getStatus() != Build.Status.SUCCESSFUL)
+							&& notifiedUsers.add(request.getSubmitter())
+							&& isAiEntitled(null, request, request.getSubmitter())
 							&& canCreateWorkspace(request.getSubmitter(), request)) {
 					var prompt = """
 							Work on pull request %d to fix failure of build %d. \
@@ -415,6 +444,8 @@ public class PullRequestNotificationManager implements Serializable {
 				}
 				if (event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null 
 							&& request.getMergePreview().getMergeCommitHash() == null 
+							&& notifiedUsers.add(request.getSubmitter())
+							&& isAiEntitled(null, request, request.getSubmitter())
 							&& canCreateWorkspace(request.getSubmitter(), request)) {
 					var prompt = """
 						Work on pull request %d to resolve merge conflict. \
@@ -426,8 +457,9 @@ public class PullRequestNotificationManager implements Serializable {
 			}
 			
 			User aiAssignee = null;
-			if (event instanceof PullRequestAssigned) {
-				aiAssignee = ((PullRequestAssigned) event).getAssignee();
+			if (event instanceof PullRequestAssigned pullRequestAssigned) {
+				if (pullRequestAssigned.getAssignee().getType() == AI) 
+					aiAssignee = pullRequestAssigned.getAssignee();
 			} else if (event instanceof PullRequestOpened 
 					|| event instanceof PullRequestChanged pullRequestChanged && pullRequestChanged.getChange().getData() instanceof PullRequestApproveData
 					|| event instanceof PullRequestBuildEvent pullRequestBuildEvent && pullRequestBuildEvent.getBuild().isSuccessful()) {
@@ -439,6 +471,7 @@ public class PullRequestNotificationManager implements Serializable {
 				}
 			}
 			if (aiAssignee != null && request.checkMergeCondition() == null 
+					&& notifiedUsers.add(aiAssignee)
 					&& isAiEntitled(null, request, aiAssignee) 
 					&& canWriteCode(aiAssignee, request, request.getTargetProject())) {
 				var prompt = """
@@ -505,8 +538,7 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 
 		prompts.add("""
-			If code is modified, mention the user in a PR comment so that the code can be reviewed; \
-			otherwise, mention the user only when you expect a response. \
+			Mention the user only when you expect a response. \
 			Make sure to submit work afterwards without confirmation.""");
 		
 		var concatenatedPrompts = String.join(" ", prompts);

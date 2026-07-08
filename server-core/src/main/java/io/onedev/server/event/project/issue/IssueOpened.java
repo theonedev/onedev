@@ -23,11 +23,11 @@ public class IssueOpened extends IssueEvent implements ProjectScopedCommitAware 
 
 	private static final long serialVersionUID = 1L;
 
-	private final Collection<String> notifiedEmailAddresses;
+	private final Collection<String> listeningEmailAddresses;
 	
-	public IssueOpened(Issue issue, Collection<String> notifiedEmailAddresses) {
+	public IssueOpened(Issue issue, Collection<String> listeningEmailAddresses) {
 		super(issue.getSubmitter(), issue.getSubmitDate(), issue);
-		this.notifiedEmailAddresses = notifiedEmailAddresses;
+		this.listeningEmailAddresses = listeningEmailAddresses;
 	}
 
 	@Override
@@ -40,8 +40,8 @@ public class IssueOpened extends IssueEvent implements ProjectScopedCommitAware 
 		return true;
 	}
 
-	public Collection<String> getNotifiedEmailAddresses() {
-		return notifiedEmailAddresses;
+	public Collection<String> getListeningEmailAddresses() {
+		return listeningEmailAddresses;
 	}
 	
 	@Override

@@ -15,20 +15,20 @@ public class PullRequestCommentCreated extends PullRequestEvent {
 
 	private final Long commentId;
 	
-	private final Collection<String> notifiedEmailAddresses;
+	private final Collection<String> listeningEmailAddresses;
 	
-	public PullRequestCommentCreated(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
+	public PullRequestCommentCreated(PullRequestComment comment, Collection<String> listeningEmailAddresses) {
 		super(comment.getUser(), comment.getDate(), comment.getRequest());
 		commentId = comment.getId();
-		this.notifiedEmailAddresses = notifiedEmailAddresses;
+		this.listeningEmailAddresses = listeningEmailAddresses;
 	}
 
 	public PullRequestComment getComment() {
 		return OneDev.getInstance(PullRequestCommentService.class).load(commentId);
 	}
 
-	public Collection<String> getNotifiedEmailAddresses() {
-		return notifiedEmailAddresses;
+	public Collection<String> getListeningEmailAddresses() {
+		return listeningEmailAddresses;
 	}
 
 	@Override

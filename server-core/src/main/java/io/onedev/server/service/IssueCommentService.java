@@ -12,7 +12,7 @@ public interface IssueCommentService extends EntityService<IssueComment> {
 
 	void create(IssueComment comment);
 
-	void create(IssueComment comment, Collection<String> notifiedEmailAddresses);
+	void create(IssueComment comment, Collection<String> listeningEmailAddresses);
 
 	void create(User user, Issue issue, String content);
 		

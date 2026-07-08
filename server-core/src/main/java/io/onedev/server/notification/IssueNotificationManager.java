@@ -2,7 +2,7 @@ package io.onedev.server.notification;
 
 import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
-import static io.onedev.server.notification.NotificationUtils.isNotified;
+import static io.onedev.server.notification.NotificationUtils.isListening;
 import static io.onedev.server.util.EmailAddressUtils.describe;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -212,17 +212,17 @@ public class IssueNotificationManager implements Serializable {
 
 		setupWatches(issue);
 
-		Collection<String> notifiedEmailAddresses;
+		Collection<String> listeningEmailAddresses;
 		if (event instanceof IssueCommentCreated)
-			notifiedEmailAddresses = ((IssueCommentCreated) event).getNotifiedEmailAddresses();
+			listeningEmailAddresses = ((IssueCommentCreated) event).getListeningEmailAddresses();
 		else if (event instanceof IssueOpened)
-			notifiedEmailAddresses = ((IssueOpened) event).getNotifiedEmailAddresses();
+			listeningEmailAddresses = ((IssueOpened) event).getListeningEmailAddresses();
 		else
-			notifiedEmailAddresses = new HashSet<>();
+			listeningEmailAddresses = new HashSet<>();
 		
 		Collection<User> notifiedUsers = Sets.newHashSet();
 		if (user != null) {
-			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
+			if (!user.isNotifyOwnEvents())
 				notifiedUsers.add(user); 
 			if (!user.isSystem() && user.getType() != AI)
 				watchService.watch(issue, user, true);
@@ -242,8 +242,8 @@ public class IssueNotificationManager implements Serializable {
 					emojis.apply(issue.getTitle()));
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User member: entry.getValue().getMembers()) {
-				if (member.getType() != AI) {
-					if (!member.equals(user)) {
+				if (notifiedUsers.add(member)) {
+					if (member.getType() != AI) {
 						EmailAddress emailAddress = member.getPrimaryEmailAddress();
 						if (emailAddress != null && emailAddress.isVerified()) {
 							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
@@ -252,9 +252,9 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
+					} else if (isAiEntitled(null, issue, member) && canCreateWorkspace(member, issue)) { 
+						onFieldSet(member, issue, entry.getKey());
 					}
-				} else if (isAiEntitled(null, issue, member) && canCreateWorkspace(member, issue)) { 
-					onFieldSet(member, issue, entry.getKey());
 				}
 			}
 			
@@ -263,8 +263,6 @@ public class IssueNotificationManager implements Serializable {
 					watchService.watch(issue, member, true);
 				authorizationService.authorize(issue, member);
 			}
-
-			notifiedUsers.addAll(entry.getValue().getMembers());
 		}
 		
 		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
@@ -275,8 +273,8 @@ public class IssueNotificationManager implements Serializable {
 					emojis.apply(issue.getTitle()));
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User assignedUser: entry.getValue()) {
-				if (assignedUser.getType() != AI) {
-					if (!assignedUser.equals(user)) {
+				if (notifiedUsers.add(assignedUser)) {
+					if (assignedUser.getType() != AI) {
 						EmailAddress emailAddress = assignedUser.getPrimaryEmailAddress();
 						if (emailAddress != null && emailAddress.isVerified()) {
 							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
@@ -285,9 +283,9 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
+					} else if (isAiEntitled(null, issue, assignedUser) && canCreateWorkspace(assignedUser, issue)) { 
+						onFieldSet(assignedUser, issue, entry.getKey());
 					}
-				} else if (isAiEntitled(null, issue, assignedUser) && canCreateWorkspace(assignedUser, issue)) { 
-					onFieldSet(assignedUser, issue, entry.getKey());
 				} 
 			}
 
@@ -296,8 +294,6 @@ public class IssueNotificationManager implements Serializable {
 					watchService.watch(issue, each, true);
 				authorizationService.authorize(issue, each);
 			}
-			
-			notifiedUsers.addAll(entry.getValue());
 		}
 		
 		if (event.getCommentText() instanceof MarkdownText) {
@@ -309,7 +305,7 @@ public class IssueNotificationManager implements Serializable {
 					authorizationService.authorize(issue, mentionedUser);
 					if (mentionedUser.getType() != AI) 
 						watchService.watch(issue, mentionedUser, true);
-					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {						
+					if (notifiedUsers.add(mentionedUser)) {						
 						if (mentionedUser.getType() != AI) {
 							String subject = String.format(
 									"[Issue %s] (Mentioned You) %s", 
@@ -331,7 +327,6 @@ public class IssueNotificationManager implements Serializable {
 								&& canCreateWorkspace(mentionedUser, issue)) {
 							addressConcern(mentionedUser, user, issue);
 						}
-						notifiedUsers.add(mentionedUser);
 					}
 				}
 			}
@@ -350,7 +345,7 @@ public class IssueNotificationManager implements Serializable {
 			if (watch.isWatching()
 						&& (visitDate == null || visitDate.before(event.getDate()))
 						&& !notifiedUsers.contains(watch.getUser())
-						&& !isNotified(notifiedEmailAddresses, watch.getUser())
+						&& !isListening(listeningEmailAddresses, watch.getUser())
 						&& SecurityUtils.canAccessIssue(watch.getUser().asSubject(), issue)) {
 				EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 				if (emailAddress != null && emailAddress.isVerified())
@@ -358,6 +353,7 @@ public class IssueNotificationManager implements Serializable {
 			}
 		}
 		
+		var notifiedEmailAddresses = new HashSet<String>();
 		for (var notifiedUser: notifiedUsers) {
 			for (var emailAddress: notifiedUser.getEmailAddresses()) {
 				if (emailAddress.isVerified())
@@ -365,8 +361,10 @@ public class IssueNotificationManager implements Serializable {
 			}
 		}
 		for (var participant: issue.getExternalParticipants()) {
-			if (!notifiedEmailAddresses.contains(participant.getAddress())) 
+			if (!listeningEmailAddresses.contains(participant.getAddress()) 
+					&& !notifiedEmailAddresses.contains(participant.getAddress())) {
 				bccEmailAddresses.add(participant.getAddress());
+			}
 		}
 
 		if (!bccEmailAddresses.isEmpty()) {

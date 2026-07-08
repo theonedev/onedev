@@ -68,11 +68,11 @@ public class DefaultPullRequestCommentService extends BaseEntityService<PullRequ
 	
 	@Transactional
 	@Override
-	public void create(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
+	public void create(PullRequestComment comment, Collection<String> listeningEmailAddresses) {
 		Preconditions.checkState(comment.isNew());
 		dao.persist(comment);
 		comment.getRequest().setCommentCount(comment.getRequest().getCommentCount()+1);
-		listenerRegistry.post(new PullRequestCommentCreated(comment, notifiedEmailAddresses));
+		listenerRegistry.post(new PullRequestCommentCreated(comment, listeningEmailAddresses));
 	}
 
 	@Transactional

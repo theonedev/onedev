@@ -239,7 +239,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	
 	@Transactional
 	@Override
-	public void open(Issue issue, Collection<String> notifiedEmailAddresses) {
+	public void open(Issue issue, Collection<String> listeningEmailAddresses) {
 		Preconditions.checkArgument(issue.isNew());
 		issue.setNumberScope(issue.getProject().getForkRoot());
 		issue.setNumber(getNextNumber(issue.getNumberScope()));
@@ -269,7 +269,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			authorizationService.createOrUpdate(authorization);
 		}
 		
-		listenerRegistry.post(new IssueOpened(issue, notifiedEmailAddresses));
+		listenerRegistry.post(new IssueOpened(issue, listeningEmailAddresses));
 	}
 
 	@Transactional

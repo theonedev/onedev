@@ -74,11 +74,11 @@ public class DefaultIssueCommentService extends BaseEntityService<IssueComment> 
 	
 	@Transactional
 	@Override
-	public void create(IssueComment comment, Collection<String> notifiedEmailAddresses) {
+	public void create(IssueComment comment, Collection<String> listeningEmailAddresses) {
 		Preconditions.checkState(comment.isNew());
 		dao.persist(comment);
 		comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
-		listenerRegistry.post(new IssueCommentCreated(comment, notifiedEmailAddresses));
+		listenerRegistry.post(new IssueCommentCreated(comment, listeningEmailAddresses));
 	}
 
 	@Sessional

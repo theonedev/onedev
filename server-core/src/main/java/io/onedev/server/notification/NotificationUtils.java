@@ -65,9 +65,9 @@ public class NotificationUtils {
 		return EmailTemplates.evalTemplate(htmlVersion, template, bindings);
 	}
 	
-	public static boolean isNotified(Collection<String> notifiedEmailAddresses, User user) {
+	public static boolean isListening(Collection<String> listeningEmailAddresses, User user) {
 		for (EmailAddress emailAddress: user.getEmailAddresses()) {
-			if (emailAddress.isVerified() && notifiedEmailAddresses.contains(emailAddress.getValue()))
+			if (emailAddress.isVerified() && listeningEmailAddresses.contains(emailAddress.getValue()))
 				return true;
 		}
 		return false;
