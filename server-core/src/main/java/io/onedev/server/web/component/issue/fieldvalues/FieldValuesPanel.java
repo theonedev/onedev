@@ -144,8 +144,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
 				Collection<String> dependentFields = fieldSpec.getTransitiveDependents();
 				boolean hasVisibleEditableDependents = dependentFields.stream()
-						.anyMatch(it->SecurityUtils.canEditIssueField(getIssue().getProject(), it) 
-								&& FieldUtils.isFieldVisible(beanDescriptor, bean, it));
+						.anyMatch(it->SecurityUtils.canEditIssueField(getIssue(), it) && FieldUtils.isFieldVisible(beanDescriptor, bean, it));
 				
 				Map<String, Object> fieldValues = new HashMap<>();
 				Object propertyValue = new PropertyDescriptor(bean.getClass(), propertyName).getPropertyValue(bean);
@@ -228,19 +227,10 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 	private String getUneditableReason() {
 		if (getIssueSetting().isReconciled()) { 
 			if (getField() != null && getIssueSetting().getFieldSpec(getField().getName()) != null) {
-				User user = SecurityUtils.getUser();
-				String initialState = settingService.getIssueSetting().getInitialStateSpec().getName();
-				if (SecurityUtils.canManageIssues(getIssue().getProject())) {
+				if (SecurityUtils.canEditIssueField(getIssue(), getField().getName())) {
 					return null;
 				} else {
-					if (SecurityUtils.canEditIssueField(getIssue().getProject(), getField().getName())
-							&& user != null
-							&& user.equals(getIssue().getSubmitter())
-							&& getIssue().getState().equals(initialState)) {
-						return null;
-					} else {
-						return "No permission to edit field";
-					}
+					return "No permission to edit issue field";
 				}
 			} else {
 				return "Field spec not found";

@@ -46,6 +46,7 @@ import io.onedev.server.security.permission.AccessTimeTracking;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.CreateWorkspaces;
+import io.onedev.server.security.permission.EditFieldsOfOtherIssues;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.EditIssueLink;
 import io.onedev.server.security.permission.JobPermission;
@@ -118,6 +119,9 @@ public class Role extends AbstractEntity implements BasePermission {
 	@Lob
 	@Column(length=65535, nullable=false)
 	private IssueFieldSet editableIssueFields = new AllIssueFields();
+
+	@Column(name="EDIT_OTHER_ISSUES")
+	private boolean canEditFieldsOfOtherIssues;
 	
 	@Transient
 	private List<String> editableIssueLinks = new ArrayList<>();
@@ -311,7 +315,7 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.scheduleIssues = scheduleIssues;
 	}
 
-	@Editable(order=600, description="Optionally specify custom fields allowed to edit when open new issues")
+	@Editable(order=600, description="Optionally specify custom fields allowed to edit")
 	@DependsOn(property="manageIssues", value="false")
 	@NotNull
 	public IssueFieldSet getEditableIssueFields() {
@@ -320,6 +324,18 @@ public class Role extends AbstractEntity implements BasePermission {
 
 	public void setEditableIssueFields(IssueFieldSet editableIssueFields) {
 		this.editableIssueFields = editableIssueFields;
+	}
+	
+	@Editable(order=610, description="""
+		By default, users are only allowed to edit fields specified above for issues submitted by themselves. 
+		Enable this option to allow to edit fields for issues submitted by others.""")
+	@DependsOn(property="manageIssues", value="false")
+	public boolean isCanEditFieldsOfOtherIssues() {
+		return canEditFieldsOfOtherIssues;
+	}
+
+	public void setCanEditFieldsOfOtherIssues(boolean canEditFieldsOfOtherIssues) {
+		this.canEditFieldsOfOtherIssues = canEditFieldsOfOtherIssues;
 	}
 
 	@SuppressWarnings("unused")
@@ -436,6 +452,8 @@ public class Role extends AbstractEntity implements BasePermission {
 		if (scheduleIssues)
 			permissions.add(new ScheduleIssues());
 		permissions.add(new EditIssueField(editableIssueFields.getIncludeFields()));
+		if (canEditFieldsOfOtherIssues)
+			permissions.add(new EditFieldsOfOtherIssues());
 		for (LinkAuthorization linkAuthorization: getLinkAuthorizations()) 
 			permissions.add(new EditIssueLink(linkAuthorization.getLink()));
 		if (manageBuilds)

@@ -443,11 +443,8 @@ public class IssueResource {
 		Issue issue = issueService.load(issueId);
 		var subject = SecurityUtils.getSubject();
 		var user = SecurityUtils.getUser(subject);
-		var issueSetting = settingService.getIssueSetting();
-		String initialState = issueSetting.getInitialStateSpec().getName();
 		
-    	if (!SecurityUtils.canManageIssues(subject, issue.getProject()) 
-				&& !(issue.getSubmitter().equals(user) && issue.getState().equals(initialState))) {
+    	if (!SecurityUtils.canEditIssueFields(subject, issue)) {
 			throw new UnauthorizedException();
 		}
 

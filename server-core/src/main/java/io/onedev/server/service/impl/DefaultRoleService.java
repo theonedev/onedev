@@ -161,6 +161,7 @@ public class DefaultRoleService extends BaseEntityService<Role> implements RoleS
 		codeWriter.setScheduleIssues(true);
 		codeWriter.setAccessConfidentialIssues(true);
 		codeWriter.setEditableIssueFields(new AllIssueFields());
+		codeWriter.setCanEditFieldsOfOtherIssues(true);
 		
 		JobPrivilege jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");

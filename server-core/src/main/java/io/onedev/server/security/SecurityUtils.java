@@ -62,6 +62,7 @@ import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.CreateWorkspaces;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.EditIssueLink;
+import io.onedev.server.security.permission.EditFieldsOfOtherIssues;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ManageBuilds;
 import io.onedev.server.security.permission.ManageCodeComments;
@@ -325,6 +326,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return canOpenTerminal(getSubject(), build);
 	}
 	
+	public static boolean canEditIssueField(Issue issue, String fieldName) {
+		return canEditIssueField(getSubject(), issue, fieldName);
+	}
+
+	public static boolean canEditIssueField(Subject subject, Issue issue, String fieldName) {
+		return canEditIssueField(subject, issue.getProject(), fieldName) && canEditIssueFields(subject, issue);
+	}
+
 	public static boolean canEditIssueField(Project project, String fieldName) {
 		return canEditIssueField(getSubject(), project, fieldName);
 	}
@@ -332,7 +341,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canEditIssueField(Subject subject, Project project, String fieldName) {
 		return subject.isPermitted(new ProjectPermission(project, new EditIssueField(Sets.newHashSet(fieldName))));
 	}
+
+	public static boolean canEditIssueFields(Issue issue) {
+		return canEditIssueFields(getSubject(), issue);
+	}
 	
+	public static boolean canEditIssueFields(Subject subject, Issue issue) {
+		return issue.getSubmitter().equals(getAuthUser(subject)) 
+				|| subject.isPermitted(new ProjectPermission(issue.getProject(), new EditFieldsOfOtherIssues()));
+	}
+
 	public static boolean canEditIssueLink(Project project, LinkSpec link) {
 		return getSubject().isPermitted(new ProjectPermission(project, new EditIssueLink(link)));
 	}

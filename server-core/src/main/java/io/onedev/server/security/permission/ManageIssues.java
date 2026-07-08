@@ -13,6 +13,7 @@ public class ManageIssues implements BasePermission {
 				|| new AccessConfidentialIssues().implies(p)
 				|| new EditIssueField(null).implies(p) 
 				|| new EditIssueLink(null).implies(p) 
+				|| new EditFieldsOfOtherIssues().implies(p)
 				|| new ScheduleIssues().implies(p);
 	}
 

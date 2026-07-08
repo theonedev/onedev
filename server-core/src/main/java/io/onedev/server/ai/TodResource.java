@@ -713,21 +713,28 @@ public class TodResource {
         var currentProject = getProject(currentProjectPath);
 
         var issue = getIssue(currentProject, issueReference);
-        if (!SecurityUtils.canModifyIssue(issue))
-            throw new UnauthorizedException();
 
         normalizeIssueData(data);
 
         var title = (String) data.remove("title");
-        if (title != null) 
+        if (title != null) { 
+            if (!SecurityUtils.canModifyIssue(subject, issue))
+                throw new UnauthorizedException("No permission to update issue title");
             issueChangeService.changeTitle(user, issue, title);
+        }
 
-        if (data.containsKey("description")) 
+        if (data.containsKey("description")) {
+            if (!SecurityUtils.canModifyIssue(subject, issue))
+                throw new UnauthorizedException("No permission to update issue description");
             issueChangeService.changeDescription(user, issue, (String) data.remove("description"));
+        }
 
         var confidential = (Boolean) data.remove("confidential");
-        if (confidential != null)
+        if (confidential != null) {
+            if (!SecurityUtils.canModifyIssue(subject, issue))
+                throw new UnauthorizedException("No permission to update issue confidential");
             issueChangeService.changeConfidential(user, issue, confidential);
+        }
 
         Integer ownEstimatedTime = (Integer) data.remove("ownEstimatedTime");
         if (ownEstimatedTime != null) {
@@ -756,13 +763,8 @@ public class TodResource {
         }
 
         if (!data.isEmpty()) {
-            var issueSetting = settingService.getIssueSetting();
-            String initialState = issueSetting.getInitialStateSpec().getName();
-
-            if (!SecurityUtils.canManageIssues(subject, issue.getProject())
-                    && !(issue.getSubmitter().equals(user) && issue.getState().equals(initialState))) {
+            if (!SecurityUtils.canEditIssueFields(subject, issue)) 
                 throw new UnauthorizedException("No permission to update issue fields");
-            }
 
             issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(subject, issue.getProject(), data));
         }

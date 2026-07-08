@@ -9093,4 +9093,17 @@ public class DataMigrator {
 	private void migrate230(File dataDir, Stack<Integer> versions) {
 	}
 
+	private void migrate231(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element roleElement : dom.getRootElement().elements()) {
+					roleElement.addElement("canEditFieldsOfOtherIssues")
+							.setText("Code Writer".equals(roleElement.elementTextTrim("name")) ? "true" : "false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }
