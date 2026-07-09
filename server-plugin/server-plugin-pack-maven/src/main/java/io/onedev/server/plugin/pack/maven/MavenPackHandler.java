@@ -9,6 +9,7 @@ import static io.onedev.server.util.IOUtils.copyWithMaxSize;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static javax.servlet.http.HttpServletResponse.SC_CREATED;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
@@ -388,6 +389,7 @@ public class MavenPackHandler implements PackHandler {
 						pack.setType(TYPE);
 						pack.setName(getName(groupId, artifactId));
 						pack.setVersion(version != null? version: NONE);
+						pack.setPrerelease(version != null && version.endsWith(VERSION_SUFFIX_SNAPSHOT));
 						pack.setData(new MavenData());
 					}
 					
@@ -398,7 +400,15 @@ public class MavenPackHandler implements PackHandler {
 					pack.setUser(SecurityUtils.getUser());
 					pack.setPublishDate(new Date());
 					MavenData data = (MavenData) pack.getData();
-					var prevSha256BlobHash = data.getSha256BlobHashes().put(blobName, sha256BlobHash);
+					var prevSha256BlobHash = data.getSha256BlobHashes().get(blobName);
+					if (version != null
+							&& !version.endsWith(VERSION_SUFFIX_SNAPSHOT)
+							&& prevSha256BlobHash != null
+							&& !prevSha256BlobHash.equals(sha256BlobHash)) {
+						throw new HttpResponseAwareException(SC_CONFLICT, "Can not redeploy package: "
+								+ pack.getName() + ":" + pack.getVersion());
+					}
+					data.getSha256BlobHashes().put(blobName, sha256BlobHash);
 					packService.createOrUpdate(pack, null, false);
 					if (prevSha256BlobHash != null) {
 						for (var blobReference: pack.getBlobReferences()) {

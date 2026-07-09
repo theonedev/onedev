@@ -10,6 +10,7 @@ import static io.onedev.server.model.Pack.PROP_VERSION;
 import static io.onedev.server.model.Pack.SORT_FIELDS;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static java.lang.Math.min;
+import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
+import io.onedev.server.exception.HttpResponseAwareException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -435,6 +437,15 @@ public class DefaultPackService extends BaseEntityService<Pack>
 	@Transactional
 	@Override
 	public void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs, boolean postPublishEvent) {
+		if (!pack.isNew() && packBlobs != null) {
+			var sha256Hashes = packBlobs.stream().map(PackBlob::getSha256Hash).collect(Collectors.toSet());
+			for (var blobReference: pack.getBlobReferences()) {
+				if (!sha256Hashes.contains(blobReference.getPackBlob().getSha256Hash())) {
+					throw new HttpResponseAwareException(SC_CONFLICT, "Can not redeploy package: "
+							+ pack.getName() + ":" + pack.getVersion());
+				}
+			}
+		}
 		dao.persist(pack);
 		if (packBlobs != null) {
 			packBlobs = new HashSet<>(packBlobs);
