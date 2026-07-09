@@ -1293,7 +1293,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		if (getType() == Type.SERVICE || getType() == Type.AI) {
 			var emailAddress = new EmailAddress();
 			var emailPrefix = getType() == Type.SERVICE ? SERVICE_ACCOUNT_EMAIL_PREFIX : AI_ACCOUNT_EMAIL_PREFIX;
-			emailAddress.setValue(emailPrefix + getId() + SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX);
+			emailAddress.setValue(emailPrefix + getName() + SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX);
 			emailAddress.setOwner(this);
 			emailAddress.setPrimary(true);
 			emailAddress.setGit(true);
@@ -1349,15 +1349,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	@Nullable
-	public static Long getServiceOrAiAccountId(String value) {
+	public static String getServiceOrAiAccountName(String value) {
 		if (value.endsWith(SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX)) {
 			value = value.substring(0, value.length() - SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX.length());
 			if (value.startsWith(SERVICE_ACCOUNT_EMAIL_PREFIX)) {
-				var serviceAccountId = value.substring(SERVICE_ACCOUNT_EMAIL_PREFIX.length());
-				return Long.parseLong(serviceAccountId);
+				return value.substring(SERVICE_ACCOUNT_EMAIL_PREFIX.length());
 			} else if (value.startsWith(AI_ACCOUNT_EMAIL_PREFIX)) {
-				var aiAccountId = value.substring(AI_ACCOUNT_EMAIL_PREFIX.length());
-				return Long.parseLong(aiAccountId);
+				return value.substring(AI_ACCOUNT_EMAIL_PREFIX.length());
 			}
 		}
 		return null;

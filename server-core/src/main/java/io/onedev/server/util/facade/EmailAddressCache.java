@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.model.User;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.MapProxy;
 
 public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
@@ -24,9 +26,14 @@ public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 	@Nullable
 	public EmailAddressFacade findByValue(String value) {
 		value = value.toLowerCase();
-		var serviceOrAiAccountId = User.getServiceOrAiAccountId(value);
-		if (serviceOrAiAccountId != null) 
-			return new EmailAddressFacade(null, serviceOrAiAccountId, value, true, true, true, null);
+		var serviceOrAiAccountName = User.getServiceOrAiAccountName(value);
+		if (serviceOrAiAccountName != null) {
+			var serviceOrAiAccount = OneDev.getInstance(UserService.class).findByName(serviceOrAiAccountName);
+			if (serviceOrAiAccount != null) 
+				return new EmailAddressFacade(null, serviceOrAiAccount.getId(), value, true, true, true, null);
+			else
+				return null;
+		}
 
 		for (EmailAddressFacade facade: values()) {
 			if (facade.getValue().equals(value))
