@@ -65,7 +65,7 @@ public class DiffStatBar extends Panel {
 			}
 		}).setEscapeModelStrings(false));
 		
-		add(AttributeAppender.append("data-tippy-content", MessageFormat.format(_T("{0} additions & {1} deletions"), additions, deletions)));			
+		add(AttributeAppender.append("data-tippy-content", MessageFormat.format(_T("{0} additions & {1} deletions"), String.valueOf(additions), String.valueOf(deletions))));			
 	}
 	
 	private int getAdditionBlocks() {

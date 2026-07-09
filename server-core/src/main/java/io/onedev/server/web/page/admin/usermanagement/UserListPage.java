@@ -960,7 +960,7 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} users"), dataProvider.size());
+					return MessageFormat.format(_T("found {0} users"), String.valueOf(dataProvider.size()));
 				else
 					return _T("found 1 user");
 			}

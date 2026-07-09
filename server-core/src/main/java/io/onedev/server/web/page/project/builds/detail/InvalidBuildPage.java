@@ -47,7 +47,7 @@ public class InvalidBuildPage extends ProjectPage {
 				Long buildNumber = params.get(PARAM_BUILD).toLong();
 				Build build = OneDev.getInstance(BuildService.class).find(getProject(), buildNumber);
 				if (build == null)
-					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), buildNumber, getProject()));
+					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), String.valueOf(buildNumber), getProject()));
 				Preconditions.checkState(!build.isValid());
 				return build;
 			}
@@ -84,7 +84,7 @@ public class InvalidBuildPage extends ProjectPage {
 				setVisible(SecurityUtils.canManageBuild(getBuild()));
 			}
 			
-		}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete build #{0}?"), getBuild().getNumber()))));
+		}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete build #{0}?"), String.valueOf(getBuild().getNumber())))));
 	}
 
 	public static PageParameters paramsOf(Build build) {

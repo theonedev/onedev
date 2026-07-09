@@ -262,7 +262,7 @@ public class ProblemReportPage extends BuildReportPage {
 							.setVisible(groupKey instanceof BlobTarget.GroupKey));
 
 					item.add(new Label("tooManyProblems",
-							MessageFormat.format(_T("Too many problems, displaying first {0}"), MAX_PROBLEMS_TO_DISPLAY)) {
+							MessageFormat.format(_T("Too many problems, displaying first {0}"), String.valueOf(MAX_PROBLEMS_TO_DISPLAY))) {
 
 						@Override
 						protected void onConfigure() {

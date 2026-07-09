@@ -53,7 +53,7 @@ public class PersonCardPanel extends Panel {
 		if (personIdent.getName().equals(User.SYSTEM_NAME)) 
 			builder.append("<i>System Account</i>");
 		else if (emailAddress != null && emailAddress.isVerified()) 
-			builder.append(MessageFormat.format("<a href=\"/~users/{0}\">@{1}</a>", emailAddress.getOwner().getId(), escapeHtml5(emailAddress.getOwner().getName()))); 
+			builder.append(MessageFormat.format("<a href=\"/~users/{0}\">@{1}</a>", String.valueOf(emailAddress.getOwner().getId()), escapeHtml5(emailAddress.getOwner().getName()))); 
 		else 
 			builder.append("<i>No OneDev Account</i>");
 		

@@ -53,7 +53,7 @@ public class UserCardPanel extends GenericPanel<User> {
 		else if (getUser().isSystem()) 
 			builder.append("<i>System Account</i>");
 		else 
-			builder.append(MessageFormat.format("<a href=\"/~users/{0}\">@{1}</a>", getUser().getId(), escapeHtml5(getUser().getName())));
+			builder.append(MessageFormat.format("<a href=\"/~users/{0}\">@{1}</a>", String.valueOf(getUser().getId()), escapeHtml5(getUser().getName())));
 		container.add(new Label("info", builder.toString()).setEscapeModelStrings(false));
 	}
 

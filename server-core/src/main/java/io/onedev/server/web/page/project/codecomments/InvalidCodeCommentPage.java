@@ -76,7 +76,7 @@ public class InvalidCodeCommentPage extends ProjectPage {
 			public void onClick() {
 				OneDev.getInstance(CodeCommentService.class).delete(getCodeComment());
 				
-				Session.get().success(MessageFormat.format(_T("Code comment #{0} deleted"), getCodeComment().getId()));
+				Session.get().success(MessageFormat.format(_T("Code comment #{0} deleted"), String.valueOf(getCodeComment().getId())));
 				
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(CodeComment.class);
 				if (redirectUrlAfterDelete != null)

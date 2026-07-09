@@ -41,7 +41,7 @@ public class AgentLogPage extends AgentDetailPage {
 			List<String> lines = OneDev.getInstance(AgentService.class).getAgentLog(getAgent());
 			String content;
 			if (lines.size() > MAX_DISPLAY_LINES) {
-				fragment.add(new Label("warning", MessageFormat.format(_T("Too many log entries, displaying recent {0}"), MAX_DISPLAY_LINES)));
+				fragment.add(new Label("warning", MessageFormat.format(_T("Too many log entries, displaying recent {0}"), String.valueOf(MAX_DISPLAY_LINES))));
 				content = Joiner.on("\n").join(toZoneId(lines.subList(lines.size()-MAX_DISPLAY_LINES, lines.size()), getZoneId()));
 			} else {
 				fragment.add(new WebMarkupContainer("warning").setVisible(false));

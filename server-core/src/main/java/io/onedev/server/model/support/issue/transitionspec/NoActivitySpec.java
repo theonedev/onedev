@@ -27,7 +27,7 @@ public class NoActivitySpec extends AutoSpec {
 	
 	@Override
 	public String getTriggerDescription() {
-		return MessageFormat.format(_T("no activity for {0} days"), days); 
+		return MessageFormat.format(_T("no activity for {0} days"), String.valueOf(days)); 
 	}
 	
 }

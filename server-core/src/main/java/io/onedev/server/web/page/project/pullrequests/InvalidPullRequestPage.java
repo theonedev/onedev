@@ -110,7 +110,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 				}
 			}
 			
-		}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete pull request #{0}?"), getPullRequest().getNumber()))));
+		}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete pull request #{0}?"), String.valueOf(getPullRequest().getNumber())))));
 	}
 
 	public static PageParameters paramsOf(PullRequest request) {

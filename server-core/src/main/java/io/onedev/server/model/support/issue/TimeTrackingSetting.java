@@ -171,13 +171,13 @@ public class TimeTrackingSetting implements Serializable {
 
 			StringBuilder builder = new StringBuilder();
 			if (hours != 0)
-				builder.append(MessageFormat.format(translate? _T("{0}h"): "{0}h", hours)).append(" ");
+				builder.append(MessageFormat.format(translate? _T("{0}h"): "{0}h", String.valueOf(hours))).append(" ");
 			if (minutes != 0)
-				builder.append(MessageFormat.format(translate? _T("{0}m"): "{0}m", minutes));
+				builder.append(MessageFormat.format(translate? _T("{0}m"): "{0}m", String.valueOf(minutes)));
 	
 			String formatted = builder.toString().trim();
 			if (formatted.length() == 0)
-				formatted = MessageFormat.format(translate? _T("{0}h"): "{0}h", 0);
+				formatted = MessageFormat.format(translate? _T("{0}h"): "{0}h", String.valueOf(0));
 			return formatted;	
 		} else {
 			int weeks = minutes / (60 * hoursPerDay * daysPerWeek);
@@ -189,17 +189,17 @@ public class TimeTrackingSetting implements Serializable {
 	
 			StringBuilder builder = new StringBuilder();
 			if (weeks != 0)
-				builder.append(MessageFormat.format(translate? _T("{0}w"): "{0}w", weeks)).append(" ");
+				builder.append(MessageFormat.format(translate? _T("{0}w"): "{0}w", String.valueOf(weeks))).append(" ");
 			if (days != 0)
-				builder.append(MessageFormat.format(translate? _T("{0}d"): "{0}d", days)).append(" ");
+				builder.append(MessageFormat.format(translate? _T("{0}d"): "{0}d", String.valueOf(days))).append(" ");
 			if (hours != 0)
-				builder.append(MessageFormat.format(translate? _T("{0}h"): "{0}h", hours)).append(" ");
+				builder.append(MessageFormat.format(translate? _T("{0}h"): "{0}h", String.valueOf(hours))).append(" ");
 			if (minutes != 0)
-				builder.append(MessageFormat.format(translate? _T("{0}m"): "{0}m", minutes));
+				builder.append(MessageFormat.format(translate? _T("{0}m"): "{0}m", String.valueOf(minutes)));
 	
 			String formatted = builder.toString().trim();
 			if (formatted.length() == 0)
-				formatted = MessageFormat.format(translate? _T("{0}h"): "{0}h", 0);
+				formatted = MessageFormat.format(translate? _T("{0}h"): "{0}h", String.valueOf(0));
 			return formatted;	
 		}
 	}
@@ -209,7 +209,7 @@ public class TimeTrackingSetting implements Serializable {
 			return _T("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute");
 		} else {
 			return MessageFormat.format(_T("Expects one or more <tt>&lt;number&gt;(w|d|h|m)</tt>. For instance <tt>1w 1d 1h 1m</tt> represents 1 week ({0} days), 1 day ({1} hours), 1 hour, and 1 minute"), 
-					daysPerWeek, hoursPerDay);
+					String.valueOf(daysPerWeek), String.valueOf(hoursPerDay));
 		}
 	}
 	

@@ -1089,7 +1089,7 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} pull requests"), dataProvider.size());
+					return MessageFormat.format(_T("found {0} pull requests"), String.valueOf(dataProvider.size()));
 				else
 					return _T("found 1 pull request");
 			}

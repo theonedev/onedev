@@ -101,7 +101,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				+ Criteria.quote(getProject().getPath());
 		PageParameters params = ProjectListPage.paramsOf(query, 0, getProject().getForks().size());
 		Link<Void> forksLink = new BookmarkablePageLink<Void>("forks", ProjectListPage.class, params);
-		forksLink.add(new Label("label", MessageFormat.format(_T("{0} forks"), getProject().getForks().size())));
+		forksLink.add(new Label("label", MessageFormat.format(_T("{0} forks"), String.valueOf(getProject().getForks().size()))));
 		forkInfo.add(forksLink);
 		
 		ModalLink forkNow = new ModalLink("forkNow") {
@@ -218,7 +218,7 @@ public abstract class ProjectInfoPanel extends Panel {
 							try {
 								getProjectService().requestToSyncReplica(projectId, activeServer);
 							} catch (Throwable e) {
-								logger.error(MessageFormat.format("Error requestig to sync replica of project with id \"{0}\"", projectId), e);
+								logger.error(MessageFormat.format("Error requestig to sync replica of project with id \"{0}\"", String.valueOf(projectId)), e);
 							}
 							return null;
 						});

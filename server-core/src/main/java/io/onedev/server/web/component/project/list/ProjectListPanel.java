@@ -1134,7 +1134,7 @@ public class ProjectListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} projects"), dataProvider.size());
+					return MessageFormat.format(_T("found {0} projects"), String.valueOf(dataProvider.size()));
 				else
 					return _T("found 1 project");
 			}
@@ -1351,7 +1351,7 @@ public class ProjectListPanel extends Panel {
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-		 					add(new Label("label", MessageFormat.format(_T("{0} child projects"), children.size())));
+		 					add(new Label("label", MessageFormat.format(_T("{0} child projects"), String.valueOf(children.size()))));
 						}
  						
  					});

@@ -63,7 +63,7 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 
 			@Override
 			protected String load() {
-				return MessageFormat.format(_T("{0} files"), getCommitInfoManager().getFileCount(getProject().getId()));
+				return MessageFormat.format(_T("{0} files"), String.valueOf(getCommitInfoManager().getFileCount(getProject().getId())));
 			}
 			
 		}));
@@ -75,7 +75,7 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 
 			@Override
 			protected String load() {
-				return MessageFormat.format(_T("{0} commits"), commitCountModel.getObject());
+				return MessageFormat.format(_T("{0} commits"), String.valueOf(commitCountModel.getObject()));
 			}
 			
 		}));
@@ -89,7 +89,7 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 			protected String load() {
 				int branchCount = OneDev.getInstance(GitService.class)
 						.countRefs(getProject().getId(), Constants.R_HEADS);
-				return MessageFormat.format(_T("{0} branches"), branchCount);
+				return MessageFormat.format(_T("{0} branches"), String.valueOf(branchCount));
 			}
 			
 		}));
@@ -103,7 +103,7 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 			protected String load() {
 				int tagCount = OneDev.getInstance(GitService.class)
 						.countRefs(getProject().getId(), Constants.R_TAGS);
-				return MessageFormat.format(_T("{0} tags"), tagCount);
+				return MessageFormat.format(_T("{0} tags"), String.valueOf(tagCount));
 			}
 			
 		}));

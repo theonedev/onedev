@@ -764,7 +764,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return MessageFormat.format(_T("Showing first {0} files as there are too many"), getDisplayChanges().size());
+				return MessageFormat.format(_T("Showing first {0} files as there are too many"), String.valueOf(getDisplayChanges().size()));
 			}
 			
 		}) {

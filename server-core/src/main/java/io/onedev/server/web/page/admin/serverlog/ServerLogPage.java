@@ -36,7 +36,7 @@ public class ServerLogPage extends ServerDetailPage {
 		List<String> lines = ServerLogResource.readServerLog(server);		
 		String content;
 		if (lines.size() > MAX_DISPLAY_LINES) {
-			add(new Label("warning", MessageFormat.format(_T("Too many log entries, displaying recent {0}"), MAX_DISPLAY_LINES)));
+			add(new Label("warning", MessageFormat.format(_T("Too many log entries, displaying recent {0}"), String.valueOf(MAX_DISPLAY_LINES))));
 			content = Joiner.on("\n").join(toZoneId(lines.subList(lines.size()-MAX_DISPLAY_LINES, lines.size()), getZoneId()));
 		} else {
 			add(new WebMarkupContainer("warning").setVisible(false));

@@ -1839,7 +1839,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} issues"), dataProvider.size());
+					return MessageFormat.format(_T("found {0} issues"), String.valueOf(dataProvider.size()));
 				else
 					return _T("found 1 issue");
 			} 

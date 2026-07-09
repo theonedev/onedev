@@ -550,7 +550,7 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} packages"), dataProvider.size());
+					return MessageFormat.format(_T("found {0} packages"), String.valueOf(dataProvider.size()));
 				else
 					return _T("found 1 package");
 			}

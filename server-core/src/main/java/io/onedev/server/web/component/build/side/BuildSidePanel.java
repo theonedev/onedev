@@ -428,7 +428,7 @@ public abstract class BuildSidePanel extends Panel {
 		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", BuildListPage.class, 
 				BuildListPage.paramsOf(query, 0));
 		dependentsLink.setVisible(!getBuild().getDependents().isEmpty());
-		dependentsLink.add(new Label("label", MessageFormat.format(_T("{0} build(s)"), getBuild().getDependents().size())));
+		dependentsLink.add(new Label("label", MessageFormat.format(_T("{0} build(s)"), String.valueOf(getBuild().getDependents().size()))));
 		
 		dependencesContainer.add(dependentsLink);
 		
@@ -436,7 +436,7 @@ public abstract class BuildSidePanel extends Panel {
 		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", BuildListPage.class, 
 				BuildListPage.paramsOf(query, 0));
 		dependenciesLink.setVisible(!getBuild().getDependencies().isEmpty());
-		dependenciesLink.add(new Label("label", MessageFormat.format(_T("{0} build(s)"), getBuild().getDependencies().size())));
+		dependenciesLink.add(new Label("label", MessageFormat.format(_T("{0} build(s)"), String.valueOf(getBuild().getDependencies().size()))));
 		dependencesContainer.add(dependenciesLink);
 		
 		WebMarkupContainer comma = new WebMarkupContainer("comma");

@@ -46,7 +46,7 @@ class PullRequestUpdatePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String tooManyMessage = MessageFormat.format(_T("Too many commits, displaying recent {0}"), WebConstants.MAX_DISPLAY_COMMITS);
+		String tooManyMessage = MessageFormat.format(_T("Too many commits, displaying recent {0}"), String.valueOf(WebConstants.MAX_DISPLAY_COMMITS));
 		add(new Label("tooManyCommits", tooManyMessage) {
 
 			@Override

@@ -784,7 +784,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Label("label", MessageFormat.format(ahead? _T("{0} ahead") : _T("{0} behind"), count)));
+				add(new Label("label", MessageFormat.format(ahead? _T("{0} ahead") : _T("{0} behind"), String.valueOf(count))));
 			}
 
 			@Override
@@ -792,9 +792,9 @@ public class ProjectBranchesPage extends ProjectPage {
 				super.onComponentTag(tag);
 				
 				if (ahead)
-					tag.put("data-tippy-content", MessageFormat.format(_T("{0} commits ahead of base branch"), count));
+					tag.put("data-tippy-content", MessageFormat.format(_T("{0} commits ahead of base branch"), String.valueOf(count)));
 				else
-					tag.put("data-tippy-content", MessageFormat.format(_T("{0} commits behind of base branch"), count));
+					tag.put("data-tippy-content", MessageFormat.format(_T("{0} commits behind of base branch"), String.valueOf(count)));
 					
 				if (count == 0)
 					tag.setName("span");

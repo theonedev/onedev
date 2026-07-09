@@ -156,7 +156,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				Long buildNumber = params.get(PARAM_BUILD).toLong();
 				Build build = buildService.find(getProject(), buildNumber);
 				if (build == null)
-					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), buildNumber, getProject()));
+					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), String.valueOf(buildNumber), getProject()));
 				else if (!build.getProject().equals(getProject()))
 					throw new RestartResponseException(getPageClass(), paramsOf(build));
 				else

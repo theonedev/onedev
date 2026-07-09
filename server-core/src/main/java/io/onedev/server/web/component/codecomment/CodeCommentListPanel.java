@@ -739,7 +739,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} comments"), dataProvider.size());
+					return MessageFormat.format(_T("found {0} comments"), String.valueOf(dataProvider.size()));
 				else
 					return _T("found 1 comment");
 			}

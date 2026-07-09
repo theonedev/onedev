@@ -952,7 +952,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 				SpriteImage.getVersionedHref(IconScope.class, "ellipsis"));
 		
 		String script = String.format("javascript:$('#%s').data('callback')('expand', %d);", getMarkupId(), blockIndex);
-		var skippedMessage = MessageFormat.format(_T("skipped {0} lines"), skippedLines);
+		var skippedMessage = MessageFormat.format(_T("skipped {0} lines"), String.valueOf(skippedLines));
 		if (diffMode == DiffViewMode.UNIFIED) {
 			if (blameInfo != null) {
 				builder.append("<td colspan='3' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"")

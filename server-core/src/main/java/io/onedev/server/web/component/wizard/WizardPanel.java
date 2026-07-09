@@ -54,7 +54,7 @@ public abstract class WizardPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return format(_T("Step {0} of {1}: "), activeStepIndex+1, steps.size()) + _T(getActiveStep().getTitle());
+				return format(_T("Step {0} of {1}: "), String.valueOf(activeStepIndex+1), String.valueOf(steps.size())) + _T(getActiveStep().getTitle());
 			}
 			
 		}));

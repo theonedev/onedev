@@ -314,7 +314,7 @@ public abstract class BuildListPanel extends Panel {
 								for (IModel<Build> each: selectionColumn.getSelections()) {
 									Build build = each.getObject();
 									if (build.isFinished()) {
-										errorMessage = MessageFormat.format(_T("Build #{0} already finished"), build.getNumber());
+										errorMessage = MessageFormat.format(_T("Build #{0} already finished"), String.valueOf(build.getNumber()));
 										break;
 									} 
 								}
@@ -386,7 +386,7 @@ public abstract class BuildListPanel extends Panel {
 								for (IModel<Build> each: selectionColumn.getSelections()) {
 									Build build = each.getObject();
 									if (!build.isFinished()) {
-										errorMessage = MessageFormat.format(_T("Build #{0} not finished yet"), build.getNumber());
+										errorMessage = MessageFormat.format(_T("Build #{0} not finished yet"), String.valueOf(build.getNumber()));
 										break;
 									} 
 								}
@@ -532,7 +532,7 @@ public abstract class BuildListPanel extends Panel {
 								for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) { 
 									Build build = it.next();
 									if (build.isFinished()) {
-										errorMessage = MessageFormat.format(_T("Build #{0} already finished"), build.getNumber());
+										errorMessage = MessageFormat.format(_T("Build #{0} already finished"), String.valueOf(build.getNumber()));
 										break;
 									}
 								}
@@ -605,7 +605,7 @@ public abstract class BuildListPanel extends Panel {
 								for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) { 
 									Build build = it.next();
 									if (!build.isFinished()) {
-										errorMessage = MessageFormat.format(_T("Build #{0} not finished yet"), build.getNumber());
+										errorMessage = MessageFormat.format(_T("Build #{0} not finished yet"), String.valueOf(build.getNumber()));
 										break;
 									}
 								}
@@ -1029,7 +1029,7 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} builds"), dataProvider.size());
+					return MessageFormat.format(_T("found {0} builds"), String.valueOf(dataProvider.size()));
 				else
 					return _T("found 1 build");					
 			}
@@ -1169,7 +1169,7 @@ public abstract class BuildListPanel extends Panel {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
 							PageParameters params = PullRequestActivitiesPage.paramsOf(build.getRequest());
 							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, params);
-							link.add(new Label("label", MessageFormat.format(_T("pull request #{0}"), build.getRequest().getNumber())));
+							link.add(new Label("label", MessageFormat.format(_T("pull request #{0}"), String.valueOf(build.getRequest().getNumber()))));
 							fragment.add(link);
 							cellItem.add(fragment);
 						} else if (build.getBranch() != null) {
@@ -1201,7 +1201,7 @@ public abstract class BuildListPanel extends Panel {
 						}
 					} else {
 						if (build.getRequest() != null)
-							cellItem.add(new Label(componentId, MessageFormat.format(_T("pull request #{0}"), build.getRequest().getNumber())));
+							cellItem.add(new Label(componentId, MessageFormat.format(_T("pull request #{0}"), String.valueOf(build.getRequest().getNumber()))));
 						else if (build.getBranch() != null)
 							cellItem.add(new Label(componentId, MessageFormat.format(_T("branch {0}"), build.getBranch())));
 						else if (build.getTag() != null)
