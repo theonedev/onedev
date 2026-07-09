@@ -541,6 +541,11 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
     }
 
     @Override
+    public UserFacade findFacadeByName(String userName) {
+		return cache.findByName(userName);
+    }
+
+    @Override
     public UserFacade findFacadeById(Long userId) {
 		return cache.get(userId);
     }

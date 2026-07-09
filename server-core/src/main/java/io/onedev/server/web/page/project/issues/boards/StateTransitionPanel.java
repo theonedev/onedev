@@ -59,8 +59,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 				
 				Collection<String> editableFields = FieldUtils.getEditableFields(
 						getIssue().getProject(), transition.getPromptFields());
-				Map<String, Object> fieldValues = FieldUtils.getFieldValues(
-						editor.newComponentContext(), fieldBean, editableFields);
+				Map<String, Object> fieldValues = FieldUtils.getFieldValues(fieldBean, editableFields);
 				OneDev.getInstance(IssueChangeService.class).changeState(SecurityUtils.getUser(), getIssue(),
 						getToState(), fieldValues, transition.getPromptFields(), transition.getRemoveFields(), null);
 				onSaved(target);

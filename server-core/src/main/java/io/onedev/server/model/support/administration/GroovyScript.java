@@ -50,7 +50,7 @@ public class GroovyScript implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=300)
+	@Editable(order=300, description="Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>")
 	@Code(language = Code.GROOVY)
 	@Size(min=1, message="May not be empty")
 	public List<String> getContent() {

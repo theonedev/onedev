@@ -497,9 +497,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 
 								@Override
 								protected String onSave(AjaxRequestTarget target, Serializable bean) {
-									fieldValues.putAll(FieldUtils.getFieldValues(
-											FieldUtils.newBeanComponentContext(beanDescriptor, bean),
-											bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
+									fieldValues.putAll(FieldUtils.getFieldValues(bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
 									close();
 									Issue issue = getIssueService().load(issueId);
 									getIssueChangeService().changeFields(SecurityUtils.getUser(), issue, fieldValues);

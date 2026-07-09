@@ -1098,7 +1098,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		try {
 			var fieldBean = FieldUtils.getFieldBeanClass().getConstructor().newInstance();
 			var existingFieldNames = getFieldNames();
-			var fieldValues = FieldUtils.getFieldValues(null, fieldBean, fieldNames);
+			var fieldValues = FieldUtils.getFieldValues(fieldBean, fieldNames);
 			for (var entry: fieldValues.entrySet()) {
 				if (!existingFieldNames.contains(entry.getKey())) 
 					setFieldValue(entry.getKey(), entry.getValue());

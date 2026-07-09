@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
@@ -34,6 +32,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
+import org.jspecify.annotations.Nullable;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Objects;
@@ -43,8 +42,6 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
@@ -56,7 +53,8 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entitytext.IssueTextService;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -109,7 +107,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 		
 		var fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
-		issue.setFieldValues(FieldUtils.getFieldValues(new ComponentContext(this), fieldBean, 
+		issue.setFieldValues(FieldUtils.getFieldValues(fieldBean, 
 				FieldUtils.getEditableFields(getProject(), fieldNames)));
 		
 		titleInput = new TextField<>("title", Model.of("")); 
@@ -411,8 +409,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		fieldEditor.convertInput();
 		
 		var fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
-		issue.setFieldValues(FieldUtils.getFieldValues(fieldEditor.newComponentContext(), 
-				fieldEditor.getConvertedInput(), fieldNames));
+		issue.setFieldValues(FieldUtils.getFieldValues(fieldEditor.getConvertedInput(), fieldNames));
 		
 		iterationChoice.convertInput();
 		issue.getSchedules().clear();

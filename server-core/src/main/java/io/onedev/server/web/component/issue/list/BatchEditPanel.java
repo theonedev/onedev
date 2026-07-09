@@ -311,8 +311,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 							iterations = null;
 						}
 						
-						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
-								customFieldsBean, selectedFields);
+						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsBean, selectedFields);
 						try {
 							var user = SecurityUtils.getUser();
 							OneDev.getInstance(IssueChangeService.class).batchUpdate(

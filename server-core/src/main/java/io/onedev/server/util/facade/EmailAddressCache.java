@@ -28,7 +28,7 @@ public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 		value = value.toLowerCase();
 		var serviceOrAiAccountName = User.getServiceOrAiAccountName(value);
 		if (serviceOrAiAccountName != null) {
-			var serviceOrAiAccount = OneDev.getInstance(UserService.class).findByName(serviceOrAiAccountName);
+			var serviceOrAiAccount = OneDev.getInstance(UserService.class).findFacadeByName(serviceOrAiAccountName);
 			if (serviceOrAiAccount != null) 
 				return new EmailAddressFacade(null, serviceOrAiAccount.getId(), value, true, true, true, null);
 			else

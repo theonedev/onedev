@@ -87,6 +87,9 @@ public interface UserService extends EntityService<User> {
 	
 	@Nullable
 	UserFacade findFacadeById(Long userId);
+
+	@Nullable
+	UserFacade findFacadeByName(String userName);
 	
 	@Nullable
 	User findByFullName(String fullName);

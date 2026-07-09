@@ -107,9 +107,8 @@ public class FieldUtils {
 		return null;
 	}
 	
-	public static Map<String, Object> getFieldValues(@Nullable ComponentContext context, Serializable fieldBean, Collection<String> fieldNames) {
-		if (context != null)
-			ComponentContext.push(context);
+	public static Map<String, Object> getFieldValues(Serializable fieldBean, Collection<String> fieldNames) {
+		ComponentContext.push(newBeanComponentContext(new BeanDescriptor(fieldBean.getClass()), fieldBean));
 		try {
 			Map<String, Object> fieldValues = new HashMap<>();
 			BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
@@ -122,8 +121,7 @@ public class FieldUtils {
 			
 			return fieldValues;
 		} finally {
-			if (context != null)
-				ComponentContext.pop();
+			ComponentContext.pop();
 		}
 	}
 	
