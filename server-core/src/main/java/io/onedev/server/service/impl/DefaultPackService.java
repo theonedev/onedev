@@ -437,7 +437,7 @@ public class DefaultPackService extends BaseEntityService<Pack>
 	@Transactional
 	@Override
 	public void createOrUpdate(Pack pack, Collection<PackBlob> packBlobs, boolean postPublishEvent) {
-		if (!pack.isNew() && packBlobs != null) {
+		if (!pack.isNew() && packBlobs != null && !pack.getSupport().isVersionMutable(pack)) {
 			var sha256Hashes = packBlobs.stream().map(PackBlob::getSha256Hash).collect(Collectors.toSet());
 			for (var blobReference: pack.getBlobReferences()) {
 				if (!sha256Hashes.contains(blobReference.getPackBlob().getSha256Hash())) {

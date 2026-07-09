@@ -17,6 +17,10 @@ public interface PackSupport extends Serializable {
 	String getPackIcon();
 	
 	String getReference(Pack pack, boolean withProject);
+
+	default boolean isVersionMutable(Pack pack) {
+		return false;
+	}
 	
 	Component renderContent(String componentId, Pack pack);
 	

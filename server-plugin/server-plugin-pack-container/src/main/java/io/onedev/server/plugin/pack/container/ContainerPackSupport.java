@@ -36,6 +36,11 @@ public class ContainerPackSupport implements PackSupport {
 	}
 
 	@Override
+	public boolean isVersionMutable(Pack pack) {
+		return true;
+	}
+
+	@Override
 	public Component renderContent(String componentId, Pack pack) {
 		var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 		var server = UrlUtils.getServer(serverUrl);
