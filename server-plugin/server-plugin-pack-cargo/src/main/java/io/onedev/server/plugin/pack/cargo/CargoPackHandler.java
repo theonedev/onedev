@@ -157,6 +157,9 @@ public class CargoPackHandler implements PackHandler {
 			throw new ClientException(SC_BAD_REQUEST, "Package version not specified");
 		if (!name.equals(name.toLowerCase()))
 			throw new ClientException(SC_BAD_REQUEST, "Package name should be lower case");
+		var checksum = metadata.path("cksum").asText(null);
+		if (StringUtils.isBlank(checksum))
+			throw new ClientException(SC_BAD_REQUEST, "Package checksum not specified");
 
 		LockUtils.run(getLockName(projectId, name), () -> transactionService.run(() -> {
 			var project = checkProject(projectId, true);
@@ -165,7 +168,10 @@ public class CargoPackHandler implements PackHandler {
 						String.format("Package already exists (name: %s, version: %s)", name, version));
 			}
 
-			var packBlob = packBlobService.load(packBlobService.uploadBlob(projectId, upload.crateFile, null));
+			var packBlobId = packBlobService.uploadBlob(projectId, upload.crateFile, checksum);
+			if (packBlobId == null)
+				throw new ClientException(SC_BAD_REQUEST, "Digest mismatch");
+			var packBlob = packBlobService.load(packBlobId);
 			var pack = new Pack();
 			pack.setType(TYPE);
 			pack.setName(name);
