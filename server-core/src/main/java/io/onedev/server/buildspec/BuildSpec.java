@@ -204,15 +204,19 @@ public class BuildSpec implements Serializable, Validatable {
 		if (jobMap == null) { 
 			var unorderedJobMap = new LinkedHashMap<String, Job>();
 			for (BuildSpec buildSpec: getImportedBuildSpecs(new HashSet<>())) {  
-				for (Job job: buildSpec.getJobs())
+				for (Job job: buildSpec.getJobs()) {
+					if (job.getName() != null)
+						unorderedJobMap.put(job.getName(), job);
+				}
+			}
+			for (Job job: getJobs()) {
+				if (job.getName() != null)
 					unorderedJobMap.put(job.getName(), job);
 			}
-			for (Job job: getJobs())
-				unorderedJobMap.put(job.getName(), job);
 			jobMap = new LinkedHashMap<>();
 			unorderedJobMap.keySet().stream()
 				.sorted()
-				.forEachOrdered(jobName -> jobMap.put(jobName, unorderedJobMap.get(jobName)));
+				.forEachOrdered(it -> jobMap.put(it, unorderedJobMap.get(it)));
 		}
 		return jobMap;
 	}
