@@ -1286,26 +1286,23 @@ public class TodResource {
             targetBranch, sourceBranch);
         var target = createPullRequestEssentialInfo.target;
         var submitter = createPullRequestEssentialInfo.submitter;
-        var mergeStrategy = getMergeStrategy(target.getProject(), mergeStrategyName);
 
-        if (mergeStrategy == MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS) {
-            var commitMessageRequirement = getCommitMessageRequirement(
-                    submitter, target.getProject(), target.getBranch());
-            if (commitMessageRequirement != null) {
-                return String.format("""
-                        This pull request will squash source branch commits into a single commit. \
-                        And the single commit message will be constructed as:
+        var commitMessageRequirement = getCommitMessageRequirement(
+                submitter, target.getProject(), target.getBranch());
+        if (commitMessageRequirement != null) {
+            return String.format("""
+                    Source branch commits of this pull request may be squashed into a single commit. \
+                    And the single commit message will be constructed as:
 
-                        <pull request title>
-                        <blank line>
-                        <pull request description, if any>
+                    <pull request title>
+                    <blank line>
+                    <pull request description, if any>
 
-                        Write the title and description so the full commit message conforms to the \
-                        commit message requirement below:
+                    Write the title and description so the constructed commit message conforms to \
+                    requirement below:
 
-                        %s
-                        """, commitMessageRequirement);
-            }
+                    %s
+                    """, commitMessageRequirement);
         }
         return null;
     }
