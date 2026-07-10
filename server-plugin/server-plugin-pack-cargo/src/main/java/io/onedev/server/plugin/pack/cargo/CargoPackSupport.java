@@ -24,7 +24,7 @@ public class CargoPackSupport implements PackSupport {
 
 	@Override
 	public String getPackIcon() {
-		return "package";
+		return "rust";
 	}
 
 	@Override

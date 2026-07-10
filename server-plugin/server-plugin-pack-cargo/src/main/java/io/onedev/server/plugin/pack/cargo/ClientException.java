@@ -1,21 +1,16 @@
 package io.onedev.server.plugin.pack.cargo;
 
-public class ClientException extends RuntimeException {
+import io.onedev.server.exception.HttpResponseAwareException;
 
-	private static final long serialVersionUID = 1L;
+public class ClientException extends HttpResponseAwareException {
 
-	private final int statusCode;
+	public ClientException(int statusCode, String errorMessage) {
+		super(statusCode, errorMessage);
+	}
 
 	public ClientException(int statusCode) {
-		this(statusCode, null);
-	}
+		super(statusCode);
 
-	public ClientException(int statusCode, String message) {
-		super(message);
-		this.statusCode = statusCode;
 	}
-
-	public int getStatusCode() {
-		return statusCode;
-	}
+	
 }

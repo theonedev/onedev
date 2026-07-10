@@ -26,8 +26,10 @@ public class CargoHelpPanel extends Panel {
 		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + CargoPackHandler.HANDLER_ID + "/";
 		add(new CodeSnippetPanel("addRegistry", Model.of("" +
 				"[registries.onedev]\n" +
-				"index = \"sparse+" + registryUrl + "\"\n\n" +
-				"$ cargo login --registry onedev <onedev_access_token>")));
+				"index = \"sparse+" + registryUrl + "\"\n" +
+				"credential-provider = \"cargo:token\"")));
+
+		add(new CodeSnippetPanel("registryAuth", Model.of("$ cargo login --registry onedev <onedev_access_token>")));
 
 		add(new CodeSnippetPanel("publishCommand", Model.of("$ cargo publish --registry onedev")));
 
@@ -41,6 +43,7 @@ public class CargoHelpPanel extends Panel {
 						"cat << EOF >> $HOME/.cargo/config.toml\n" +
 						"[registries.onedev]\n" +
 						"index = \"sparse+" + registryUrl + "\"\n" +
+						"credential-provider = \"cargo:token\"\n" +
 						"EOF\n\n" +
 						"cat << EOF >> $HOME/.cargo/credentials.toml\n" +
 						"[registries.onedev]\n" +

@@ -5,7 +5,6 @@ import static io.onedev.server.plugin.pack.cargo.CargoPackSupport.TYPE;
 import static io.onedev.server.util.UrlUtils.decodePath;
 import static java.util.Comparator.comparing;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
 import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
@@ -28,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -101,38 +101,32 @@ public class CargoPackHandler implements PackHandler {
 		var isPut = method.equals("PUT");
 		var isDelete = method.equals("DELETE");
 
-		try {
-			if (pathSegments.equals(newArrayList("api", "v1", "crates", "new"))) {
-				if (!isPut)
-					throw new ClientException(SC_METHOD_NOT_ALLOWED);
-				publish(request, response, projectId, buildId);
-			} else if (pathSegments.size() == 6
-					&& pathSegments.subList(0, 3).equals(newArrayList("api", "v1", "crates"))
-					&& pathSegments.get(5).equals("download")) {
-				if (!isGet)
-					throw new ClientException(SC_METHOD_NOT_ALLOWED);
-				download(response, projectId, decodePath(pathSegments.get(3)), decodePath(pathSegments.get(4)));
-			} else if (pathSegments.size() == 6
-					&& pathSegments.subList(0, 3).equals(newArrayList("api", "v1", "crates"))
-					&& pathSegments.get(5).equals("yank")) {
-				if (!isDelete)
-					throw new ClientException(SC_METHOD_NOT_ALLOWED);
-				setYanked(response, projectId, decodePath(pathSegments.get(3)), decodePath(pathSegments.get(4)), true);
-			} else if (pathSegments.size() == 6
-					&& pathSegments.subList(0, 3).equals(newArrayList("api", "v1", "crates"))
-					&& pathSegments.get(5).equals("unyank")) {
-				if (!isPut)
-					throw new ClientException(SC_METHOD_NOT_ALLOWED);
-				setYanked(response, projectId, decodePath(pathSegments.get(3)), decodePath(pathSegments.get(4)), false);
-			} else if (isGet) {
-				serveIndex(response, projectId, pathSegments);
-			} else {
+		if (pathSegments.equals(newArrayList("api", "v1", "crates", "new"))) {
+			if (!isPut)
 				throw new ClientException(SC_METHOD_NOT_ALLOWED);
-			}
-		} catch (ClientException e) {
-			response.setStatus(e.getStatusCode());
-			if (e.getMessage() != null)
-				writeError(response, e.getMessage());
+			publish(request, response, projectId, buildId);
+		} else if (pathSegments.size() == 6
+				&& pathSegments.subList(0, 3).equals(newArrayList("api", "v1", "crates"))
+				&& pathSegments.get(5).equals("download")) {
+			if (!isGet)
+				throw new ClientException(SC_METHOD_NOT_ALLOWED);
+			download(response, projectId, decodePath(pathSegments.get(3)), decodePath(pathSegments.get(4)));
+		} else if (pathSegments.size() == 6
+				&& pathSegments.subList(0, 3).equals(newArrayList("api", "v1", "crates"))
+				&& pathSegments.get(5).equals("yank")) {
+			if (!isDelete)
+				throw new ClientException(SC_METHOD_NOT_ALLOWED);
+			setYanked(response, projectId, decodePath(pathSegments.get(3)), decodePath(pathSegments.get(4)), true);
+		} else if (pathSegments.size() == 6
+				&& pathSegments.subList(0, 3).equals(newArrayList("api", "v1", "crates"))
+				&& pathSegments.get(5).equals("unyank")) {
+			if (!isPut)
+				throw new ClientException(SC_METHOD_NOT_ALLOWED);
+			setYanked(response, projectId, decodePath(pathSegments.get(3)), decodePath(pathSegments.get(4)), false);
+		} else if (isGet) {
+			serveIndex(response, projectId, pathSegments);
+		} else {
+			throw new ClientException(SC_METHOD_NOT_ALLOWED);
 		}
 	}
 
@@ -157,27 +151,19 @@ public class CargoPackHandler implements PackHandler {
 			throw new ClientException(SC_BAD_REQUEST, "Package version not specified");
 		if (!name.equals(name.toLowerCase()))
 			throw new ClientException(SC_BAD_REQUEST, "Package name should be lower case");
-		var checksum = metadata.path("cksum").asText(null);
-		if (StringUtils.isBlank(checksum))
-			throw new ClientException(SC_BAD_REQUEST, "Package checksum not specified");
-
 		LockUtils.run(getLockName(projectId, name), () -> transactionService.run(() -> {
 			var project = checkProject(projectId, true);
-			if (packService.findByNameAndVersion(project, TYPE, name, version) != null) {
-				throw new ClientException(SC_CONFLICT,
-						String.format("Package already exists (name: %s, version: %s)", name, version));
-			}
-
-			var packBlobId = packBlobService.uploadBlob(projectId, upload.crateFile, checksum);
-			if (packBlobId == null)
-				throw new ClientException(SC_BAD_REQUEST, "Digest mismatch");
+			var packBlobId = packBlobService.uploadBlob(projectId, upload.crateFile, null);
 			var packBlob = packBlobService.load(packBlobId);
-			var pack = new Pack();
-			pack.setType(TYPE);
-			pack.setName(name);
-			pack.setVersion(version);
-			pack.setPrerelease(version.contains("-"));
-			pack.setProject(project);
+			var pack = packService.findByNameAndVersion(project, TYPE, name, version);
+			if (pack == null) {
+				pack = new Pack();
+				pack.setType(TYPE);
+				pack.setName(name);
+				pack.setVersion(version);
+				pack.setPrerelease(version.contains("-"));
+				pack.setProject(project);
+			}
 			pack.setData(new CargoData(upload.metadata, packBlob.getSha256Hash()));
 			Build build = null;
 			if (buildId != null)
@@ -293,7 +279,9 @@ public class CargoPackHandler implements PackHandler {
 			if (publishMetadata.hasNonNull("rust_version"))
 				indexEntry.set("rust_version", publishMetadata.get("rust_version"));
 			indexEntry.put("v", 2);
-			return objectMapper.writeValueAsBytes(indexEntry);
+			return objectMapper.writer()
+					.without(SerializationFeature.INDENT_OUTPUT)
+					.writeValueAsBytes(indexEntry);
 		} catch (IOException e) {
 			throw new ClientException(SC_BAD_REQUEST, "Invalid publish request body");
 		}
@@ -388,10 +376,6 @@ public class CargoPackHandler implements PackHandler {
 		}
 	}
 
-	private void writeError(HttpServletResponse response, String message) {
-		writeJson(response, Map.of("errors", List.of(Map.of("detail", message))));
-	}
-
 	private String getLockName(Long projectId, String name) {
 		return "update-pack:" + projectId + ":" + TYPE + ":" + name;
 	}
@@ -410,15 +394,7 @@ public class CargoPackHandler implements PackHandler {
 
 	@Override
 	public String getApiKey(HttpServletRequest request) {
-		var authzHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (authzHeader != null) {
-			if (authzHeader.toLowerCase().startsWith("bearer "))
-				return StringUtils.substringAfter(authzHeader, " ");
-			else
-				return authzHeader;
-		} else {
-			return null;
-		}
+		return request.getHeader(HttpHeaders.AUTHORIZATION);
 	}
 
 	@Override

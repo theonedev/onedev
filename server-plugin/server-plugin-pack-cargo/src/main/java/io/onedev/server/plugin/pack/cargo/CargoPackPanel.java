@@ -35,8 +35,17 @@ public class CargoPackPanel extends GenericPanel<Pack> {
 		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + CargoPackHandler.HANDLER_ID + "/";
 		var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
 				new ProjectPermission(getPack().getProject(), new ReadPack()));
+		add(new CodeSnippetPanel("registryConfig", Model.of("" +
+				"[registries.onedev]\n" +
+				"index = \"sparse+" + registryUrl + "\"\n" +
+				"credential-provider = \"cargo:token\"")));
+		var registryAuth = new CodeSnippetPanel("registryAuth",
+				Model.of("$ cargo login --registry onedev <onedev_access_token>"));
+		registryAuth.setVisible(!canAccessAnonymously);
+		add(registryAuth);
 		add(new WebMarkupContainer("readPermissionNote").setVisible(!canAccessAnonymously));
-		add(new Label("install", "$ cargo add " + getPack().getName() + "@" + getPack().getVersion() + " --registry onedev"));
+		add(new CodeSnippetPanel("install", Model.of(
+				"$ cargo add " + getPack().getName() + "@" + getPack().getVersion() + " --registry onedev")));
 
 		var jobCommands = "" +
 				"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
@@ -45,6 +54,7 @@ public class CargoPackPanel extends GenericPanel<Pack> {
 				"cat << EOF >> $HOME/.cargo/config.toml\n" +
 				"[registries.onedev]\n" +
 				"index = \"sparse+" + registryUrl + "\"\n" +
+				"credential-provider = \"cargo:token\"\n" +
 				"EOF\n\n" +
 				"cat << EOF >> $HOME/.cargo/credentials.toml\n" +
 				"[registries.onedev]\n" +

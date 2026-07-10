@@ -1,6 +1,9 @@
 <wicket:panel>
 	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below</wicket:t></div>
-	<div wicket:id="addRegistry"></div>
+	<div wicket:id="addRegistry" class="mb-5"></div>
+
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>And login to the registry</wicket:t></div>
+	<div wicket:id="registryAuth"></div>
 	<div class="text-muted font-size-sm mt-2 mb-5"><wicket:t>Make sure the user has package write permission over the project</wicket:t></div>
 
 	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Then publish package to the registry</wicket:t></div>
