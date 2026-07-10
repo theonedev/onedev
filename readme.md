@@ -10,7 +10,7 @@
 <h2>
 <a href="https://docs.onedev.io">Get Started</a> 
 &nbsp;&nbsp;
-<a href="https://onedev.io/blogs/33">AI Autonomous</a> 
+<a href="https://onedev.io/blogs/33">AI Teammates</a> 
 </h2>
 
 <p style="margin-bottom: 20px;">
@@ -22,7 +22,7 @@
 Language aware symbol search and navigation in any commit.
 Click symbol to show occurrences in current file.
 Fast code search with regular expression. 
-[**Try It**](https://code.onedev.io/demo/dotnet-runtime)
+[**Try It**](https://code.onedev.io/demo/kubernetes)
 
 ![code search and navigation](./doc/images/code-navigation.gif)
 
