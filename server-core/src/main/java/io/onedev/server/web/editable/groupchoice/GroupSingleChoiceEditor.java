@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import io.onedev.server.util.ComponentContext;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
@@ -16,13 +15,15 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.GroupService;
+import io.onedev.server.annotation.GroupChoice;
 import io.onedev.server.model.Group;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.groupchoice.GroupSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.GroupChoice;
 
 public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 	
@@ -39,8 +40,8 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 
 		List<Group> choices = new ArrayList<>();
 
-		ComponentContext componentContext = new ComponentContext(this);
-		ComponentContext.push(componentContext);
+		HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(this));
+		HierarchicalContext.push(hierarchicalContext);
 		try {
 			GroupChoice groupChoice = descriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
 			Preconditions.checkNotNull(groupChoice);
@@ -52,7 +53,7 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 				choices.sort(Comparator.comparing(Group::getName));
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 		Group group;
 		if (getModelObject() != null)

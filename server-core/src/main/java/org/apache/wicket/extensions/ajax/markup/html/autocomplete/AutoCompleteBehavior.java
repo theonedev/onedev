@@ -25,7 +25,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.util.lang.Args;
 
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 
 
 /**
@@ -95,7 +96,7 @@ public abstract class AutoCompleteBehavior<T> extends AbstractAutoCompleteBehavi
 			@Override
 			public void respond(final IRequestCycle requestCycle)
 			{
-				ComponentContext.push(new ComponentContext(getComponent()));				
+				HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(getComponent())));				
 				try {
 					WebResponse r = (WebResponse)requestCycle.getResponse();
 	
@@ -118,7 +119,7 @@ public abstract class AutoCompleteBehavior<T> extends AbstractAutoCompleteBehavi
 					}
 					renderer.renderFooter(r, count);
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 			}
 

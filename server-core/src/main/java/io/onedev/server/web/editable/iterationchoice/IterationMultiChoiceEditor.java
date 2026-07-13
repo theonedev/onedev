@@ -1,26 +1,29 @@
 package io.onedev.server.web.editable.iterationchoice;
 
-import com.google.common.base.Preconditions;
-import io.onedev.server.annotation.IterationChoice;
-import io.onedev.server.model.Iteration;
-import io.onedev.server.model.Project;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.component.iteration.choice.IterationMultiChoice;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.util.convert.ConversionException;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.util.convert.ConversionException;
+
+import com.google.common.base.Preconditions;
+
+import io.onedev.server.annotation.IterationChoice;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.component.iteration.choice.IterationMultiChoice;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
 
 public class IterationMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
@@ -39,8 +42,8 @@ public class IterationMultiChoiceEditor extends PropertyEditor<List<String>> {
 		List<Iteration> choices = new ArrayList<>();
 		List<Iteration> selections = new ArrayList<>();
 		
-		ComponentContext componentContext = new ComponentContext(this);
-		ComponentContext.push(componentContext);
+		HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(this));
+		HierarchicalContext.push(hierarchicalContext);
 		try {
 			IterationChoice iterationChoice = descriptor.getPropertyGetter().getAnnotation(IterationChoice.class);
 			Preconditions.checkNotNull(iterationChoice);
@@ -56,7 +59,7 @@ public class IterationMultiChoiceEditor extends PropertyEditor<List<String>> {
 					selections.add(choice);
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 		
 		input = new IterationMultiChoice("input", Model.of(selections), Model.of(choices)) {

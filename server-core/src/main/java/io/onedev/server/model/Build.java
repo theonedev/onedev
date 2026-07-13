@@ -96,7 +96,7 @@ import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.BuildService;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.criteria.Criteria;
@@ -105,7 +105,6 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.TextUtils;
-import io.onedev.server.web.util.WicketUtils;
 
 @Entity
 @Table(
@@ -1090,9 +1089,9 @@ public class Build extends ProjectBelonging
 		if (!stack.get().isEmpty()) { 
 			return stack.get().peek();
 		} else {
-			ComponentContext componentContext = ComponentContext.get();
-			if (componentContext != null) {
-				BuildAware buildAware = WicketUtils.findInnermost(componentContext.getComponent(), BuildAware.class);
+			var hierarchicalContext = HierarchicalContext.get();
+			if (hierarchicalContext != null) {
+				BuildAware buildAware = hierarchicalContext.findData(BuildAware.class);
 				if (buildAware != null) 
 					return buildAware.getBuild();
 			}

@@ -8,10 +8,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
@@ -20,9 +21,9 @@ import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.util.BeanUtils;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DependsOnUtils;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
 
 public class PropertyDescriptor implements Serializable {
@@ -144,22 +145,22 @@ public class PropertyDescriptor implements Serializable {
 		return null;
 	}
 	
-	public boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor) {
-		return isPropertyVisible(componentContexts, beanDescriptor, Sets.newHashSet());
+	public boolean isPropertyVisible(Map<String, HierarchicalContext> hierarchicalContexts, BeanDescriptor beanDescriptor) {
+		return isPropertyVisible(hierarchicalContexts, beanDescriptor, Sets.newHashSet());
 	}
 	
 	public boolean isSubscriptionRequired() {
 		return getPropertyGetter().getAnnotation(SubscriptionRequired.class) != null;
 	}
 	
-	private boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
+	private boolean isPropertyVisible(Map<String, HierarchicalContext> hierarchicalContexts, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
 		if (!checkedPropertyNames.add(getPropertyName()))
 			return false;
 		
 		Set<String> prevDependencyPropertyNames = new HashSet<>(getDependencyPropertyNames());
-		var componentContext = componentContexts.get(getPropertyName());
-		if (componentContext != null)
-			ComponentContext.push(componentContext);
+		var hierarchicalContext = hierarchicalContexts.get(getPropertyName());
+		if (hierarchicalContext != null)
+			HierarchicalContext.push(hierarchicalContext);
 		try {
 			/* 
 			 * Sometimes, the dependency may include properties introduced while evaluating available choices 
@@ -183,14 +184,14 @@ public class PropertyDescriptor implements Serializable {
 			getDependencyPropertyNames().remove(getPropertyName());
 			for (String dependencyPropertyName: getDependencyPropertyNames()) {
 				Set<String> copyOfCheckedPropertyNames = new HashSet<>(checkedPropertyNames);
-				if (!beanDescriptor.getProperty(dependencyPropertyName).isPropertyVisible(componentContexts, beanDescriptor, copyOfCheckedPropertyNames))
+				if (!beanDescriptor.getProperty(dependencyPropertyName).isPropertyVisible(hierarchicalContexts, beanDescriptor, copyOfCheckedPropertyNames))
 					return false;
 			}
 			return true;
 		} finally {
 			getDependencyPropertyNames().addAll(prevDependencyPropertyNames);
-			if (componentContext != null)
-				ComponentContext.pop();
+			if (hierarchicalContext != null)
+				HierarchicalContext.pop();
 		}
 	}
 	

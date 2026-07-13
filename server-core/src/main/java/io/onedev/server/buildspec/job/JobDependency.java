@@ -20,8 +20,8 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.instance.ParamInstances;
 import io.onedev.server.buildspec.param.instance.ParamMap;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @Editable
@@ -87,8 +87,8 @@ public class JobDependency implements Serializable {
 
 	@SuppressWarnings({ "unused", "unchecked" })
 	private static boolean isExcludeParamMapsVisible() {
-		var componentContext = ComponentContext.get();
-		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
+		var hierarchicalContext = HierarchicalContext.get();
+		if (hierarchicalContext != null && hierarchicalContext.findData(BeanEditor.class) != null) {
 			return !getParamSpecs().isEmpty();
 		} else {
 			var excludeParamMaps = (List<ParamMap>) EditContext.get().getInputValue("excludeParamMaps");

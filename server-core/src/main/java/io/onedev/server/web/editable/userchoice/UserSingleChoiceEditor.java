@@ -18,9 +18,10 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.UserChoice;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.service.UserService;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
@@ -50,8 +51,8 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 		
 		List<Long> choiceIds;
 		
-		ComponentContext componentContext = new ComponentContext(this);
-		ComponentContext.push(componentContext);
+		HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(UserSingleChoiceEditor.this));
+		HierarchicalContext.push(hierarchicalContext);
 		try {
 			UserChoice userChoice = descriptor.getPropertyGetter().getAnnotation(UserChoice.class);
 			Preconditions.checkNotNull(userChoice);
@@ -67,7 +68,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 				choiceIds.sort(Comparator.comparing(it -> cache.get(it).getDisplayName()));
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 		
 		AtomicReference<Long> selectionId = new AtomicReference<>(null);

@@ -4,8 +4,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.util.HierarchicalContext;
 
 public interface InputContext {
 
@@ -16,9 +15,9 @@ public interface InputContext {
 
 	@Nullable
 	public static InputContext get() {
-		ComponentContext componentContext = ComponentContext.get();
-		if (componentContext != null)
-			return WicketUtils.findInnermost(componentContext.getComponent(), InputContext.class);
+		var hierarchicalContext = HierarchicalContext.get();
+		if (hierarchicalContext != null)
+			return hierarchicalContext.findData(InputContext.class);
 		else
 			return null;
 	}

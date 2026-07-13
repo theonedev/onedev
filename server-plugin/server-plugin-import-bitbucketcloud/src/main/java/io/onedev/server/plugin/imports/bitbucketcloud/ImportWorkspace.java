@@ -7,10 +7,10 @@ import java.util.Map;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 @Editable
 public class ImportWorkspace implements Serializable {
@@ -35,7 +35,7 @@ public class ImportWorkspace implements Serializable {
 	}
 	
 	private static Map<String, String> getWorkspaceDisplayNames() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		BeanEditor editor = HierarchicalContext.get().findData(BeanEditor.class);
 		ImportWorkspace setting = (ImportWorkspace) editor.getModelObject();
 		return setting.server.listWorkspaces();
 	}

@@ -2,20 +2,18 @@ package io.onedev.server.buildspec.param.spec;
 
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
-
-import io.onedev.server.annotation.Multiline;
-import org.apache.wicket.Component;
 import javax.validation.constraints.NotEmpty;
 
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.ParamName;
 import io.onedev.server.buildspec.ParamSpecAware;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.annotation.ParamName;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.util.HierarchicalContext;
 
 @Editable
 public abstract class ParamSpec extends InputSpec {
@@ -89,8 +87,8 @@ public abstract class ParamSpec extends InputSpec {
 
 	@Nullable
 	public static List<ParamSpec> list() {
-		Component component = ComponentContext.get().getComponent();
-		ParamSpecAware paramSpecAware = WicketUtils.findInnermost(component, ParamSpecAware.class);
+		var hierarchicalContext = HierarchicalContext.get();
+		ParamSpecAware paramSpecAware = hierarchicalContext.findData(ParamSpecAware.class);
 		if (paramSpecAware != null) 
 			return paramSpecAware.getParamSpecs();
 		else

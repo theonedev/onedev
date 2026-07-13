@@ -86,8 +86,8 @@ public class WicketUtils {
 	}
 	
 	@Nullable
-	public static <T> T findInnermost(Component component, Class<T> clazz) {
-		List<T> parents = findParents(component, clazz);
+	public static <T> T findSelfOrParent(Component component, Class<T> clazz) {
+		List<T> parents = findSelfOrParents(component, clazz);
 		if (!parents.isEmpty())
 			return parents.get(0);
 		else
@@ -104,7 +104,7 @@ public class WicketUtils {
 	 * 			list of parent components of specified clazz, with inner component comes first
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> List<T> findParents(Component component, Class<T> clazz) {
+	public static <T> List<T> findSelfOrParents(Component component, Class<T> clazz) {
 		List<T> parents = new ArrayList<>();
 		Component current = component;
 		do {

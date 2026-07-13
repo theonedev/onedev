@@ -1,12 +1,12 @@
 package io.onedev.server.web.page.project.blob.render.commitoption;
 
+import java.io.Serializable;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.ReferenceAware;
-import io.onedev.server.util.ComponentContext;
-
-import java.io.Serializable;
+import io.onedev.server.util.HierarchicalContext;
 
 @Editable
 public class CommitMessageBean implements Serializable {
@@ -29,7 +29,7 @@ public class CommitMessageBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static String getDefaultCommitMessage() {
-		return ComponentContext.get().getComponent().findParent(CommitOptionPanel.class).getDefaultCommitMessage();
+		return HierarchicalContext.get().findData(CommitOptionPanel.class).getDefaultCommitMessage();
 	}
 	
 }

@@ -15,9 +15,8 @@ import io.onedev.server.annotation.RoleChoice;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ManageProject;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.web.util.UserAware;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class AccessTokenAuthorizationBean implements Serializable {
@@ -41,7 +40,7 @@ public class AccessTokenAuthorizationBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<Project> getManageableProjects() {
-		var user = WicketUtils.findInnermost(ComponentContext.get().getComponent(), UserAware.class).getUser();
+		var user = HierarchicalContext.get().findData(UserAware.class).getUser();
 		var projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(user.asSubject(), new ManageProject()));
 		projects.sort(comparing(Project::getPath));
 		return projects;

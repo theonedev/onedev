@@ -20,8 +20,7 @@ import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.util.HierarchicalContext;
 
 public class JobAuthorizationContext {
 	
@@ -125,11 +124,10 @@ public class JobAuthorizationContext {
 		if (!stack.get().isEmpty()) {
 			return stack.get().peek();
 		} else {
-			ComponentContext componentContext = ComponentContext.get();
-			if (componentContext != null) {
-				JobAuthorizationContextAware jobAuthorizationContextAware = WicketUtils.findInnermost(
-						componentContext.getComponent(),
-						JobAuthorizationContextAware.class);
+			var hierarchicalContext = HierarchicalContext.get();
+			if (hierarchicalContext != null) {
+				JobAuthorizationContextAware jobAuthorizationContextAware = hierarchicalContext.findData(
+					JobAuthorizationContextAware.class);
 				if (jobAuthorizationContextAware != null)
 					return jobAuthorizationContextAware.getJobAuthorizationContext();
 			}

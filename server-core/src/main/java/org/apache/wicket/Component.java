@@ -95,7 +95,8 @@ import org.apache.wicket.util.visit.Visit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 
 
 /**
@@ -873,7 +874,7 @@ public abstract class Component
 	 */
 	final void fireInitialize()
 	{
-		ComponentContext.push(new ComponentContext(this));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(this)));
 		try {
 			if (!getFlag(FLAG_INITIALIZED))
 			{
@@ -905,7 +906,7 @@ public abstract class Component
 				}
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 
@@ -987,7 +988,7 @@ public abstract class Component
 	 */
 	public final void beforeRender()
 	{
-		ComponentContext.push(new ComponentContext(this));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(this)));
 		try {
 			if (this instanceof IFeedback)
 			{
@@ -1027,7 +1028,7 @@ public abstract class Component
 				internalBeforeRender();
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 
@@ -2328,7 +2329,7 @@ public abstract class Component
 	 */
 	public final void render()
 	{
-		ComponentContext.push(new ComponentContext(this));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(this)));
 		try {
 			RuntimeException exception = null;
 	
@@ -2372,7 +2373,7 @@ public abstract class Component
 				throw exception;
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 
@@ -2739,7 +2740,7 @@ public abstract class Component
 	 */
 	public void internalRenderHead(final HtmlHeaderContainer container)
 	{
-		ComponentContext.push(new ComponentContext(this));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(this)));
 		try {
 			if (isVisibleInHierarchy() && isRenderAllowed())
 			{
@@ -2792,7 +2793,7 @@ public abstract class Component
 				}
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 

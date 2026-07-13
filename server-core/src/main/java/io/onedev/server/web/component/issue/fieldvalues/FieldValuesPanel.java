@@ -9,8 +9,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -28,6 +26,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.buildspecmodel.inputspec.Input;
@@ -35,13 +34,6 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.IssueChangeService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IterationService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -55,10 +47,18 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ColorUtils;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.MultilineLabel;
@@ -350,7 +350,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 					
 					if (fieldSpec != null && fieldSpec instanceof ChoiceField) {
 						ChoiceProvider choiceProvider = ((ChoiceField)fieldSpec).getChoiceProvider();
-						ComponentContext.push(new ComponentContext(this));
+						HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(this)));
 						try {
 							String backgroundColor = choiceProvider.getChoices(false).get(value);
 							if (backgroundColor == null)
@@ -362,7 +362,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 							label.add(AttributeAppender.append("style", style));
 							label.add(AttributeAppender.append("class", "badge"));
 						} finally {
-							ComponentContext.pop();
+							HierarchicalContext.pop();
 						}
 					} 
 					valueContainer.add(label);

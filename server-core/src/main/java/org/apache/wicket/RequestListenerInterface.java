@@ -32,7 +32,8 @@ import org.apache.wicket.util.lang.Classes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 
 
 /**
@@ -206,7 +207,7 @@ public class RequestListenerInterface
 		// we are in Wicket core land
 		final Component component = (Component)rcomponent;
 
-		ComponentContext.push(new ComponentContext(component));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(component)));
 		try {
 			if (!component.canCallListenerInterface(method))
 			{
@@ -219,7 +220,7 @@ public class RequestListenerInterface
 	
 			internalInvoke(component, component);
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 
@@ -237,7 +238,7 @@ public class RequestListenerInterface
 		// we are in Wicket core land
 		final Component component = (Component)rcomponent;
 
-		ComponentContext.push(new ComponentContext(component));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(component)));
 		try {
 			if (!behavior.canCallListenerInterface(component, method))
 			{
@@ -249,7 +250,7 @@ public class RequestListenerInterface
 	
 			internalInvoke(component, behavior);
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 

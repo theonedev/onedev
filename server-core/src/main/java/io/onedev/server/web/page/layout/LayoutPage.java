@@ -508,7 +508,7 @@ public abstract class LayoutPage extends BasePage {
 									item.add(menuBody);
 								}
 
-								int nestLevel = WicketUtils.findParents(item, MenuBody.class).size();
+								int nestLevel = WicketUtils.findSelfOrParents(item, MenuBody.class).size();
 
 								if (menuItem.getIconHref() != null) {
 									menuLink.add(new SpriteImage("icon", menuItem.getIconHref()));

@@ -12,18 +12,20 @@
  */
 package io.onedev.server.web.component.select2;
 
-import io.onedev.server.annotation.OmitName;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.web.component.select2.json.Json;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import org.json.JSONException;
-import org.json.JSONStringer;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+
+import org.json.JSONException;
+import org.json.JSONStringer;
+
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.web.component.select2.json.Json;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.PropertyDescriptor;
 
 /**
  * Select2 settings. Refer to the Select2 documentation for what these options
@@ -413,7 +415,7 @@ public final class Settings implements Serializable {
 	}
 	
 	public void configurePlaceholder(PropertyDescriptor propertyDescriptor) {
-		ComponentContext.push(new ComponentContext(select2));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(select2)));
 		try {
 			Method propertyGetter = propertyDescriptor.getPropertyGetter();
 			String placeholder = EditableUtils.getPlaceholder(propertyGetter);
@@ -428,7 +430,7 @@ public final class Settings implements Serializable {
 				setPlaceholder(_T(propertyDescriptor.getDisplayName()));
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 	

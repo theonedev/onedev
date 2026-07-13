@@ -9,7 +9,6 @@ import static io.onedev.server.model.Issue.NAME_CONFUSED_COUNT;
 import static io.onedev.server.model.Issue.NAME_DESCRIPTION;
 import static io.onedev.server.model.Issue.NAME_ESTIMATED_TIME;
 import static io.onedev.server.model.Issue.NAME_EYES_COUNT;
-import static io.onedev.server.model.Issue.NAME_TICK_COUNT;
 import static io.onedev.server.model.Issue.NAME_HEART_COUNT;
 import static io.onedev.server.model.Issue.NAME_LAST_ACTIVITY_DATE;
 import static io.onedev.server.model.Issue.NAME_PROGRESS;
@@ -21,6 +20,7 @@ import static io.onedev.server.model.Issue.NAME_SUBMIT_DATE;
 import static io.onedev.server.model.Issue.NAME_TADA_COUNT;
 import static io.onedev.server.model.Issue.NAME_THUMBS_DOWN_COUNT;
 import static io.onedev.server.model.Issue.NAME_THUMBS_UP_COUNT;
+import static io.onedev.server.model.Issue.NAME_TICK_COUNT;
 import static io.onedev.server.model.Issue.NAME_TITLE;
 import static io.onedev.server.model.Issue.NAME_VOTE_COUNT;
 import static io.onedev.server.model.Issue.QUERY_FIELDS;
@@ -101,11 +101,12 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.service.GroupService;
 import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -285,13 +286,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 													.collect(Collectors.toList());
 											return SuggestionUtils.suggest(candidates, matchWith);
 										} else if (fieldSpec instanceof ChoiceField) {
-											ComponentContext.push(new ComponentContext(getComponent()));
+											HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(getComponent())));
 											try {
 												List<String> candidates = new ArrayList<>(((ChoiceField)fieldSpec)
 														.getChoiceProvider().getChoices(true).keySet());
 												return SuggestionUtils.suggest(candidates, matchWith);
 											} finally {
-												ComponentContext.pop();
+												HierarchicalContext.pop();
 											}			
 										} else if (fieldName.equals(NAME_NUMBER)) {
 											return SuggestionUtils.suggestNumber(matchWith, _T("find by number"), false);

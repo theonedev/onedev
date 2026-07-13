@@ -36,8 +36,9 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.Shallow;
 import io.onedev.server.annotation.SubscriptionRequired;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Named;
@@ -52,7 +53,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	
 	private RepeatingView groupsView;
 	
-	private final Map<String, ComponentContext> componentContexts = new HashMap<>();
+	private final Map<String, HierarchicalContext> hierarchicalContexts = new HashMap<>();
 	
 	public BeanEditor(String id, BeanDescriptor descriptor, IModel<Serializable> model) {
 		super(id, model);
@@ -116,8 +117,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 						PropertyContainer newPropertyContainer = 
 								newPropertyContainer(propertyContainer.getId(), propertyContext);
 						propertyContainer.replaceWith(newPropertyContainer);
-						componentContexts.put(propertyContext.getPropertyName(), 
-								new ComponentContext(newPropertyContainer));
+						hierarchicalContexts.put(propertyContext.getPropertyName(), 
+								new HierarchicalContext(new ComponentHierarchical(newPropertyContainer)));
 						propertyUpdating.getHandler().add(newPropertyContainer);
 						String script = String.format("$('#%s').addClass('no-autofocus');", 
 								newPropertyContainer.getMarkupId());
@@ -168,13 +169,13 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 				Serializable propertyValue;		
 				
-				ComponentContext context = new ComponentContext(this);
+				HierarchicalContext context = new HierarchicalContext(new ComponentHierarchical(this));
 				
-				ComponentContext.push(context);
+				HierarchicalContext.push(context);
 				try {
 					propertyValue = (Serializable) property.getDescriptor().getPropertyValue(getModelObject());
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 				PropertyEditor<Serializable> propertyEditor = property.renderForEdit("value", Model.of(propertyValue)); 
 				add(propertyEditor);
@@ -232,7 +233,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!property.isPropertyExcluded() 
-						&& property.isPropertyVisible(componentContexts, descriptor));
+						&& property.isPropertyVisible(hierarchicalContexts, descriptor));
 			}
 
 		};
@@ -282,7 +283,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			for (PropertyContext<Serializable> property: entry.getValue()) {
 				PropertyContainer propertyContainer = newPropertyContainer(propertiesView.newChildId(), property);
 				propertiesView.add(propertyContainer);
-				componentContexts.put(property.getPropertyName(), new ComponentContext(propertyContainer));
+				hierarchicalContexts.put(property.getPropertyName(), new HierarchicalContext(new ComponentHierarchical(propertyContainer)));
 			}
 			
 			if (entry.getKey().length() == 0) {
@@ -293,13 +294,13 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		}
 		
 		add(validatable -> {
-			ComponentContext.push(newComponentContext());
+			HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(this)));
 			try {
 				Validator validator = AppLoader.getInstance(Validator.class, Shallow.class);
 				for (var violation : validator.validate(validatable.getValue()))
 					error(new Path(violation.getPropertyPath()), violation.getMessage());
 			} finally {
-				ComponentContext.pop();
+				HierarchicalContext.pop();
 			}
 		});
 		
@@ -349,18 +350,18 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		return bean;
 	}
 	
-	public ComponentContext newComponentContext() {
-		return new ComponentContext(this) {
+	public HierarchicalContext newHierarchicalContext() {
+		return new HierarchicalContext(new ComponentHierarchical(this)) {
 
 			@Override
-			public ComponentContext getChildContext(String childName) {
+			public HierarchicalContext getChildContext(String childName) {
 				for (Component groupContainer: groupsView) {
 					RepeatingView propertiesView = (RepeatingView) groupContainer.get("properties");
 					for (Component item: propertiesView) {
 						@SuppressWarnings("unchecked")
 						PropertyContext<Serializable> propertyContext = (PropertyContext<Serializable>) item.getDefaultModelObject(); 
 						if (propertyContext.getPropertyName().equals(childName))
-							return new ComponentContext(item);
+							return new HierarchicalContext(new ComponentHierarchical(item));
 					}
 				}
 				return null;

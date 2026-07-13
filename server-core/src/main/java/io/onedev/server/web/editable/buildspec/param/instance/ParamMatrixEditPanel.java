@@ -1,22 +1,17 @@
 package io.onedev.server.web.editable.buildspec.param.instance;
 
-import com.google.common.collect.Lists;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.annotation.ParamSpecProvider;
-import io.onedev.server.annotation.Password;
-import io.onedev.server.annotation.VariableOption;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.param.ParamUtils;
-import io.onedev.server.buildspec.param.instance.*;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.param.spec.SecretParam;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.behavior.InterpolativeAssistBehavior;
-import io.onedev.server.web.editable.*;
-import io.onedev.server.web.editable.buildspec.job.trigger.JobTriggerEditPanel;
-import io.onedev.server.web.editable.string.StringPropertyEditor;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.ValidationException;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -35,12 +30,34 @@ import org.apache.wicket.util.convert.ConversionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.ValidationException;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import com.google.common.collect.Lists;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.VariableOption;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.instance.IgnoreValues;
+import io.onedev.server.buildspec.param.instance.ParamInstances;
+import io.onedev.server.buildspec.param.instance.PassthroughValues;
+import io.onedev.server.buildspec.param.instance.ScriptingValues;
+import io.onedev.server.buildspec.param.instance.SpecifiedValues;
+import io.onedev.server.buildspec.param.instance.ValuesProvider;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.SecretParam;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.behavior.InterpolativeAssistBehavior;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.JobSecretEditBean;
+import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.buildspec.job.trigger.JobTriggerEditPanel;
+import io.onedev.server.web.editable.string.StringPropertyEditor;
 
 class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 
@@ -83,7 +100,7 @@ class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 	@SuppressWarnings("unchecked")
 	private Map<String, ParamSpec> getParamSpecs() {
 		if (paramSpecs == null) {
-			ComponentContext.push(new ComponentContext(this));
+			HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(this)));
 			paramSpecs = new LinkedHashMap<>();
 			try {
 				for (ParamSpec paramSpec: (List<ParamSpec>) ReflectionUtils.invokeStaticMethod(
@@ -91,7 +108,7 @@ class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 					paramSpecs.put(paramSpec.getName(), paramSpec);
 				}
 			} finally {
-				ComponentContext.pop();
+				HierarchicalContext.pop();
 			}
 		}
 		return paramSpecs;

@@ -5,13 +5,14 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.annotation.RevisionChoice;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.revision.RevisionPicker;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.RevisionChoice;
 
 public class RevisionChoiceEditor extends PropertyEditor<String> {
 
@@ -35,7 +36,7 @@ public class RevisionChoiceEditor extends PropertyEditor<String> {
 
 			@Override
 			protected Project load() {
-				ComponentContext.push(new ComponentContext(RevisionChoiceEditor.this));
+				HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(RevisionChoiceEditor.this)));
 				try {
 					RevisionChoice revisionChoice = descriptor.getPropertyGetter().getAnnotation(RevisionChoice.class);
 					if (revisionChoice.value().length() != 0) 
@@ -43,7 +44,7 @@ public class RevisionChoiceEditor extends PropertyEditor<String> {
 					else 
 						return Project.get();
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 			}
 			

@@ -13,8 +13,8 @@ import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -82,7 +82,7 @@ public class ImportRepositories extends ImportWorkspace implements Validatable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getBitbucketRepositoryChoices() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		BeanEditor editor = HierarchicalContext.get().findData(BeanEditor.class);
 		ImportRepositories repositories = (ImportRepositories) editor.getModelObject();
 		String workspace = (String) EditContext.get().getInputValue("workspace");
 		return repositories.server.listRepositories(workspace, true);

@@ -1,8 +1,29 @@
 package io.onedev.server.web.component.job;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.basic.Label;
+import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamUtils;
@@ -15,27 +36,12 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.xodus.CommitInfoService;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.basic.Label;
-import org.eclipse.jgit.lib.ObjectId;
-
-import org.jspecify.annotations.Nullable;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizationContextAware {
 
@@ -66,7 +72,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 	
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		ComponentContext.push(new ComponentContext(this));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(this)));
 		try {
 			BuildSpec buildSpec = Preconditions.checkNotNull(getProject().getBuildSpec(commitId));
 
@@ -165,7 +171,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 				};
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 

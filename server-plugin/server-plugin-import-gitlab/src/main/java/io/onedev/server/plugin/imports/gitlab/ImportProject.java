@@ -1,13 +1,14 @@
 package io.onedev.server.plugin.imports.gitlab;
 
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
+
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 @Editable
 public class ImportProject extends ImportGroup {
@@ -29,7 +30,7 @@ public class ImportProject extends ImportGroup {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		BeanEditor editor = HierarchicalContext.get().findData(BeanEditor.class);
 		ImportProject project = (ImportProject) editor.getModelObject();
 		String groupId = (String) EditContext.get().getInputValue("groupId");
 		return project.server.listProjects(groupId, true);

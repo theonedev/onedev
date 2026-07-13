@@ -22,9 +22,10 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 
 public class BeanViewer extends Panel {
 
@@ -47,7 +48,7 @@ public class BeanViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Map<String, ComponentContext> componentContexts = new HashMap<>();
+		Map<String, HierarchicalContext> hierarchicalContexts = new HashMap<>();
 		RepeatingView groupsView = new RepeatingView("groups");
 		for (Map.Entry<String, List<PropertyContext<Serializable>>> entry: properties.entrySet()) {
 			WebMarkupContainer groupContainer = new WebMarkupContainer(groupsView.newChildId());
@@ -85,12 +86,12 @@ public class BeanViewer extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(property.isPropertyVisible(componentContexts, descriptor) && !property.isPropertyExcluded());
+						setVisible(property.isPropertyVisible(hierarchicalContexts, descriptor) && !property.isPropertyExcluded());
 					}
 					
 				};
 				propertiesView.add(propertyContainer);
-				componentContexts.put(property.getPropertyName(), new ComponentContext(propertyContainer));
+				hierarchicalContexts.put(property.getPropertyName(), new HierarchicalContext(new ComponentHierarchical(propertyContainer)));
 				
 				Method propertyGetter = property.getPropertyGetter();
 				

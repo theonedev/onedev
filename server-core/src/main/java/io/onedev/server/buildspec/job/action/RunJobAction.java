@@ -10,8 +10,6 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotEmpty;
 
-import org.apache.wicket.Component;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
@@ -29,11 +27,10 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
 import io.onedev.server.service.UserService;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable(name="Run job", order=100)
 public class RunJobAction extends PostBuildAction {
@@ -87,8 +84,8 @@ public class RunJobAction extends PostBuildAction {
 	
 	@SuppressWarnings({ "unused", "unchecked" })
 	private static boolean isExcludeParamMapsVisible() {
-		var componentContext = ComponentContext.get();
-		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
+		var hierarchicalContext = HierarchicalContext.get();
+		if (hierarchicalContext != null && hierarchicalContext.findData(BeanEditor.class) != null) {
 			return !getParamSpecs().isEmpty();
 		} else {
 			var excludeParamMaps = (List<ParamMap>) EditContext.get().getInputValue("excludeParamMaps");
@@ -99,8 +96,7 @@ public class RunJobAction extends PostBuildAction {
 	public static List<ParamSpec> getParamSpecs() {
 		String jobName = (String) EditContext.get().getInputValue("jobName");
 		if (jobName != null) {
-			Component component = ComponentContext.get().getComponent();
-			BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
+			BuildSpecAware buildSpecAware = HierarchicalContext.get().findData(BuildSpecAware.class);
 			if (buildSpecAware != null) {
 				BuildSpec buildSpec = buildSpecAware.getBuildSpec();
 				if (buildSpec != null) {

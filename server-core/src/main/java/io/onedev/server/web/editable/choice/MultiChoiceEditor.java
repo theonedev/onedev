@@ -18,7 +18,8 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
@@ -46,12 +47,12 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 
 			@Override
 			protected List<String> load() {
-				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);				
-				ComponentContext.push(componentContext);
+				HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(MultiChoiceEditor.this));				
+				HierarchicalContext.push(hierarchicalContext);
 				try {
 					return (List<String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().value());
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 			}
 			
@@ -61,13 +62,13 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 
 			@Override
 			protected Map<String, String> load() {
-				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);				
+				HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(MultiChoiceEditor.this));				
 				if (getChoiceProvider().displayNames().length() != 0) {
-					ComponentContext.push(componentContext);
+					HierarchicalContext.push(hierarchicalContext);
 					try {
 						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().displayNames());
 					} finally {
-						ComponentContext.pop();
+						HierarchicalContext.pop();
 					} 
 				} else {
 					return new HashMap<>();
@@ -80,13 +81,13 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 
 			@Override
 			protected Map<String, String> load() {
-				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);				
+				HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(MultiChoiceEditor.this));				
 				if (getChoiceProvider().descriptions().length() != 0) {
-					ComponentContext.push(componentContext);
+					HierarchicalContext.push(hierarchicalContext);
 					try {
 						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().descriptions());
 					} finally {
-						ComponentContext.pop();
+						HierarchicalContext.pop();
 					} 
 				} else {
 					return new HashMap<>();

@@ -24,7 +24,6 @@ import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -96,7 +95,7 @@ import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -104,7 +103,6 @@ import io.onedev.server.web.component.iteration.burndown.BurndownIndicators;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.IssueAware;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.xodus.CommitInfoService;
 import io.onedev.server.xodus.PullRequestInfoService;
 import io.onedev.server.xodus.VisitInfoService;
@@ -1096,16 +1094,15 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public void addMissingFields(Collection<String> fieldNames) {
 		Project.push(getProject());
 		try {
-			var fieldBean = FieldUtils.getFieldBeanClass().getConstructor().newInstance();
+			Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
+			var fieldBean = getFieldBean(fieldBeanClass, true); 
+	
 			var existingFieldNames = getFieldNames();
 			var fieldValues = FieldUtils.getFieldValues(fieldBean, fieldNames);
 			for (var entry: fieldValues.entrySet()) {
 				if (!existingFieldNames.contains(entry.getKey())) 
 					setFieldValue(entry.getKey(), entry.getValue());
 			}			
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
-				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
 		} finally {
 			Project.pop();
 		}
@@ -1375,9 +1372,9 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		if (!stack.get().isEmpty()) { 
 			return stack.get().peek();
 		} else {
-			ComponentContext componentContext = ComponentContext.get();
-			if (componentContext != null) {
-				IssueAware issueAware = WicketUtils.findInnermost(componentContext.getComponent(), IssueAware.class);
+			var hierarchicalContext = HierarchicalContext.get();
+			if (hierarchicalContext != null) {
+				IssueAware issueAware = hierarchicalContext.findData(IssueAware.class);
 				if (issueAware != null) 
 					return issueAware.getIssue();
 			}

@@ -1,20 +1,20 @@
 package io.onedev.server.util;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.util.WicketUtils;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Stack;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-
 import org.jspecify.annotations.Nullable;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Stack;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
 
 public class ProjectScopedCommit implements Serializable {
 
@@ -102,9 +102,9 @@ public class ProjectScopedCommit implements Serializable {
 		if (!stack.get().isEmpty()) { 
 			return stack.get().peek();
 		} else {
-			ComponentContext componentContext = ComponentContext.get();
-			if (componentContext != null) {
-				ProjectScopedCommitAware commitAware = WicketUtils.findInnermost(componentContext.getComponent(), ProjectScopedCommitAware.class);
+			HierarchicalContext hierarchicalContext = HierarchicalContext.get();
+			if (hierarchicalContext != null) {
+				ProjectScopedCommitAware commitAware = hierarchicalContext.findData(ProjectScopedCommitAware.class);
 				if (commitAware != null) 
 					return commitAware.getProjectScopedCommit();
 			}

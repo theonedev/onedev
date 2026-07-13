@@ -1,22 +1,11 @@
 package io.onedev.server.web.editable.code;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.annotation.Code;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -32,11 +21,25 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.convert.ConversionException;
 
-import static io.onedev.server.web.translation.Translation._T;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
 
 public class CodePropertyEditor extends PropertyEditor<Serializable> {
 
@@ -91,7 +94,7 @@ public class CodePropertyEditor extends PropertyEditor<Serializable> {
 				ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 				ArrayNode variablesNode = mapper.createArrayNode();
 				if (variableProvider.length() != 0) {
-					ComponentContext.push(new ComponentContext(input));
+					HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(input)));
 					try { 
 						for (InputSuggestion suggestion: ((List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
 								descriptor.getBeanClass(), variableProvider, matchWith))) {
@@ -103,7 +106,7 @@ public class CodePropertyEditor extends PropertyEditor<Serializable> {
 							variablesNode.add(variableNode);
 						}
 					} finally {
-						ComponentContext.pop();
+						HierarchicalContext.pop();
 					}
 				}
 				try {

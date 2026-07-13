@@ -5,17 +5,18 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.annotation.BlobChoice;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.component.blob.BlobPicker;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.BlobChoice;
 
 public class BlobChoiceEditor extends PropertyEditor<String> {
 
@@ -23,13 +24,13 @@ public class BlobChoiceEditor extends PropertyEditor<String> {
 
 		@Override
 		protected ProjectScopedCommit load() {
-			ComponentContext.push(new ComponentContext(BlobChoiceEditor.this));
+			HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(BlobChoiceEditor.this)));
 			try {
 				BlobChoice blobChoice = descriptor.getPropertyGetter().getAnnotation(BlobChoice.class);
 				return (ProjectScopedCommit) ReflectionUtils.invokeStaticMethod(
 						descriptor.getBeanClass(), blobChoice.commitProvider());
 			} finally {
-				ComponentContext.pop();
+				HierarchicalContext.pop();
 			}
 		}
 		
@@ -39,12 +40,12 @@ public class BlobChoiceEditor extends PropertyEditor<String> {
 
 		@Override
 		protected PatternSet load() {
-			ComponentContext.push(new ComponentContext(BlobChoiceEditor.this));
+			HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(BlobChoiceEditor.this)));
 			try {
 				BlobChoice blobChoice = descriptor.getPropertyGetter().getAnnotation(BlobChoice.class);
 				return PatternSet.parse(blobChoice.patterns());
 			} finally {
-				ComponentContext.pop();
+				HierarchicalContext.pop();
 			}
 		}
 		

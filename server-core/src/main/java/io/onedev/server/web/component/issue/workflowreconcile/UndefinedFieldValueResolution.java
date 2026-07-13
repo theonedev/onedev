@@ -14,11 +14,12 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
 
 @Editable
@@ -58,15 +59,14 @@ public class UndefinedFieldValueResolution implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
-		UndefinedFieldValueContainer container = ComponentContext.get().getComponent()
-				.findParent(UndefinedFieldValueContainer.class); 
+		UndefinedFieldValueContainer container = HierarchicalContext.get().findData(UndefinedFieldValueContainer.class);
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		FieldSpec fieldSpec = Preconditions.checkNotNull(issueSetting.getFieldSpec(container.getFieldName()));
-		ComponentContext.push(new ComponentContext(container));
+		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(container)));
 		try {
 			return new ArrayList<>(((ChoiceField)fieldSpec).getChoiceProvider().getChoices(true).keySet());
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 	}
 

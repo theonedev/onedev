@@ -17,7 +17,8 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -44,12 +45,12 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 
 			@Override
 			protected List<String> load() {
-				ComponentContext componentContext = new ComponentContext(SingleChoiceEditor.this);			
-				ComponentContext.push(componentContext);
+				HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(SingleChoiceEditor.this));			
+				HierarchicalContext.push(hierarchicalContext);
 				try {
 					return (List<String>)ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().value());
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 			}
 			
@@ -59,13 +60,13 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 
 			@Override
 			protected Map<String, String> load() {
-				ComponentContext componentContext = new ComponentContext(SingleChoiceEditor.this);				
+				HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(SingleChoiceEditor.this));				
 				if (getChoiceProvider().displayNames().length() != 0) {
-					ComponentContext.push(componentContext);
+					HierarchicalContext.push(hierarchicalContext);
 					try {
 						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().displayNames());
 					} finally {
-						ComponentContext.pop();
+						HierarchicalContext.pop();
 					} 
 				} else {
 					return new HashMap<>();
@@ -78,13 +79,13 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 
 			@Override
 			protected Map<String, String> load() {
-				ComponentContext componentContext = new ComponentContext(SingleChoiceEditor.this);				
+				HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(SingleChoiceEditor.this));				
 				if (getChoiceProvider().descriptions().length() != 0) {
-					ComponentContext.push(componentContext);
+					HierarchicalContext.push(hierarchicalContext);
 					try {
 						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().descriptions());
 					} finally {
-						ComponentContext.pop();
+						HierarchicalContext.pop();
 					} 
 				} else {
 					return new HashMap<>();

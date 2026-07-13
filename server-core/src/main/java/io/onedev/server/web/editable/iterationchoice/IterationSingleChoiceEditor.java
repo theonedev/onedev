@@ -1,24 +1,27 @@
 package io.onedev.server.web.editable.iterationchoice;
 
-import com.google.common.base.Preconditions;
-import io.onedev.server.annotation.IterationChoice;
-import io.onedev.server.model.Iteration;
-import io.onedev.server.model.Project;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.component.iteration.choice.IterationSingleChoice;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import static io.onedev.server.web.translation.Translation._T;
+import com.google.common.base.Preconditions;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.server.annotation.IterationChoice;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.component.iteration.choice.IterationSingleChoice;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
 
 public class IterationSingleChoiceEditor extends PropertyEditor<String> {
 
@@ -37,8 +40,8 @@ public class IterationSingleChoiceEditor extends PropertyEditor<String> {
 		List<Iteration> choices = new ArrayList<>();
 		Iteration selection = null;
 		
-		ComponentContext componentContext = new ComponentContext(this);
-		ComponentContext.push(componentContext);
+		HierarchicalContext hierarchicalContext = new HierarchicalContext(new ComponentHierarchical(this));
+		HierarchicalContext.push(hierarchicalContext);
 		try {
 			IterationChoice iterationChoice = descriptor.getPropertyGetter().getAnnotation(IterationChoice.class);
 			Preconditions.checkNotNull(iterationChoice);
@@ -56,7 +59,7 @@ public class IterationSingleChoiceEditor extends PropertyEditor<String> {
 				}
 			}
 		} finally {
-			ComponentContext.pop();
+			HierarchicalContext.pop();
 		}
 		
     	input = new IterationSingleChoice("input", Model.of(selection), Model.of(choices)) {

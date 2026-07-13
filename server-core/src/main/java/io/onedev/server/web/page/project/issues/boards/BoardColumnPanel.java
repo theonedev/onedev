@@ -61,7 +61,8 @@ import io.onedev.server.search.entity.issue.IterationEmptyCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.UserService;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -249,11 +250,11 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
 				if (fieldSpec instanceof ChoiceField) {
 					ChoiceProvider choiceProvider = ((ChoiceField)fieldSpec).getChoiceProvider();
-					ComponentContext.push(new ComponentContext(this));
+					HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(BoardColumnPanel.this)));
 					try {
 						color = choiceProvider.getChoices(true).get(getColumn());
 					} finally {
-						ComponentContext.pop();
+						HierarchicalContext.pop();
 					}
 				} else if (fieldSpec instanceof UserChoiceField) {
 					user = OneDev.getInstance(UserService.class).findByName(getColumn());

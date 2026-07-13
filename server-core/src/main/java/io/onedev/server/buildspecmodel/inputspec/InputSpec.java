@@ -169,15 +169,15 @@ public abstract class InputSpec implements Serializable {
 	}
 
 	private void wrapWithChildContext(StringBuffer buffer, int index, String statement) {
-		buffer.append("            ComponentContext context = ComponentContext.get();\n");
+		buffer.append("            HierarchicalContext context = HierarchicalContext.get();\n");
 		buffer.append("            if (context != null) {\n");
-		buffer.append("                ComponentContext childContext = context.getChildContext(\"input" + index + "\");\n");
+		buffer.append("                HierarchicalContext childContext = context.getChildContext(\"input" + index + "\");\n");
 		buffer.append("                if (childContext != null) {\n");
-		buffer.append("                    ComponentContext.push(childContext);\n");
+		buffer.append("                    HierarchicalContext.push(childContext);\n");
 		buffer.append("                    try {\n");
 		buffer.append("                        " + statement + "\n");
 		buffer.append("                    } finally {\n");
-		buffer.append("                        ComponentContext.pop();\n");
+		buffer.append("                        HierarchicalContext.pop();\n");
 		buffer.append("                    }\n");
 		buffer.append("                } else {\n");
 		buffer.append("                    " + statement + "\n");

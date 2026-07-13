@@ -36,7 +36,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.exception.ExceptionUtils;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.RangeUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -164,7 +165,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			if (inputCaret != -1) {
 				InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
 				List<InputCompletion> suggestions = new ArrayList<>();				
-				ComponentContext.push(new ComponentContext(getComponent()));
+				HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(getComponent())));
 				try {
 					for (InputCompletion suggestion: getSuggestions(new InputStatus(inputContent, inputCaret))) {
 						suggestions.add(suggestion);
@@ -172,7 +173,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 							break;
 					}
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 				if (!suggestions.isEmpty()) {
 					boolean hasOtherSuggestions = false;

@@ -17,14 +17,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
-import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
@@ -52,8 +51,8 @@ import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -250,8 +249,7 @@ public class Job implements NamedElement, Validatable {
 	@SuppressWarnings("unused")
 	private static List<String> getServiceChoices() {
 		List<String> choices = new ArrayList<>();
-		Component component = ComponentContext.get().getComponent();
-		BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
+		BuildSpecAware buildSpecAware = HierarchicalContext.get().findData(BuildSpecAware.class);
 		if (buildSpecAware != null) {
 			BuildSpec buildSpec = buildSpecAware.getBuildSpec();
 			if (buildSpec != null) { 
@@ -442,15 +440,15 @@ public class Job implements NamedElement, Validatable {
 	
 	public static List<String> getChoices() {
 		List<String> choices = new ArrayList<>();
-		Component component = ComponentContext.get().getComponent();
-		BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
+		var hierarchicalContext = HierarchicalContext.get();
+		BuildSpecAware buildSpecAware = hierarchicalContext.findData(BuildSpecAware.class);
 		if (buildSpecAware != null) {
 			BuildSpec buildSpec = buildSpecAware.getBuildSpec();
 			if (buildSpec != null) {
 				choices.addAll(buildSpec.getJobMap().values().stream()
 						.map(it->it.getName()).collect(Collectors.toList()));
 			}
-			JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
+			JobAware jobAware = hierarchicalContext.findData(JobAware.class);
 			if (jobAware != null) {
 				Job job = jobAware.getJob();
 				if (job != null)

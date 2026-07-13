@@ -12,11 +12,11 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -85,7 +85,7 @@ public class ImportRepositories extends ImportOrganization implements Validatabl
 
 	@SuppressWarnings("unused")
 	private static List<String> getGiteaRepositoryChoices() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		BeanEditor editor = HierarchicalContext.get().findData(BeanEditor.class);
 		ImportRepositories repositories = (ImportRepositories) editor.getModelObject();
 		String organization = (String) EditContext.get().getInputValue("organization");
 		return repositories.server.listRepositories(organization, true);

@@ -1,5 +1,13 @@
 package io.onedev.server.buildspec.param.instance;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.apache.wicket.Component;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.ParamSpecProvider;
@@ -9,17 +17,12 @@ import io.onedev.server.buildspec.job.action.RunJobAction;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.UseTemplateStep;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.buildspec.job.jobdependency.JobDependencyEditPanel;
 import io.onedev.server.web.editable.buildspec.job.postbuildaction.PostBuildActionEditPanel;
 import io.onedev.server.web.editable.buildspec.job.trigger.JobTriggerEditPanel;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.wicket.Component;
-
-import javax.validation.Valid;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Editable
 public class ParamMap implements Serializable {
@@ -43,12 +46,12 @@ public class ParamMap implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<ParamSpec> getParamSpecs() {
-		Component component = ComponentContext.get().getComponent();
-		if (WicketUtils.findInnermost(component, JobTriggerEditPanel.class) != null)
+		Component component = HierarchicalContext.get().findData(BeanEditor.class);
+		if (WicketUtils.findSelfOrParent(component, JobTriggerEditPanel.class) != null)
 			return JobTrigger.getParamSpecs();
-		else if (WicketUtils.findInnermost(component, PostBuildActionEditPanel.class) != null)
+		else if (WicketUtils.findSelfOrParent(component, PostBuildActionEditPanel.class) != null)
 			return RunJobAction.getParamSpecs();
-		else if (WicketUtils.findInnermost(component, JobDependencyEditPanel.class) != null)
+		else if (WicketUtils.findSelfOrParent(component, JobDependencyEditPanel.class) != null)
 			return JobDependency.getParamSpecs();
 		else 
 			return UseTemplateStep.getParamSpecs();

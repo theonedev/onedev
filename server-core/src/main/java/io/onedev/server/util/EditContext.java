@@ -7,8 +7,6 @@ import java.util.Stack;
 
 import org.jspecify.annotations.Nullable;
 
-import io.onedev.server.web.util.WicketUtils;
-
 public interface EditContext {
 
 	static ThreadLocal<Stack<EditContext>> stack = ThreadLocal.withInitial(Stack::new);
@@ -44,9 +42,9 @@ public interface EditContext {
 			return list;
 		} 
 		
-		ComponentContext componentContext = ComponentContext.get();
-		if (componentContext != null)
-			return WicketUtils.findParents(componentContext.getComponent(), EditContext.class);
+		HierarchicalContext hierarchicalContext = HierarchicalContext.get();
+		if (hierarchicalContext != null)
+			return hierarchicalContext.findAllData(EditContext.class);
 		else
 			return new ArrayList<>();
 	}

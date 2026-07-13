@@ -8,7 +8,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 
 public abstract class EmptyValueLabel extends Label {
 
@@ -19,7 +20,7 @@ public abstract class EmptyValueLabel extends Label {
 
 			@Override
 			protected String load() {
-				ComponentContext.push(new ComponentContext(EmptyValueLabel.this));
+				HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(EmptyValueLabel.this)));
 				try {
 					String placeholder = EditableUtils.getPlaceholder(getElement());
 					if (placeholder != null && EditableUtils.isDisplayPlaceholderAsValue(getElement()))
@@ -27,7 +28,7 @@ public abstract class EmptyValueLabel extends Label {
 					else
 						return "<i>" + _T("Unspecified") + "</i>";
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 			}
 			

@@ -14,7 +14,7 @@ import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -72,7 +72,7 @@ public class ImportProjects implements Serializable, Validatable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getJiraProjectChoices() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		BeanEditor editor = HierarchicalContext.get().findData(BeanEditor.class);
 		ImportProjects projects = (ImportProjects) editor.getModelObject();
 		return projects.server.listProjects();
 	}

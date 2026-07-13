@@ -36,16 +36,17 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.RefreshToken;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.oauth.OAuthUtils;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.oauth.OAuthUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.security.OAuthCallbackPage;
-import io.onedev.server.annotation.RefreshToken;
 
 public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 
@@ -80,7 +81,7 @@ public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				ComponentContext.push(new ComponentContext(RefreshTokenPropertyEditor.this));
+				HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(RefreshTokenPropertyEditor.this)));
 				try {
 					RefreshToken authentication = descriptor.getPropertyGetter().getAnnotation(RefreshToken.class);
 					RefreshToken.Callback callback = (RefreshToken.Callback) ReflectionUtils.invokeStaticMethod(
@@ -124,7 +125,7 @@ public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 					else
 						throw e;
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 			}
 
@@ -135,7 +136,7 @@ public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				String refreshTokenValue = "";
-				ComponentContext.push(new ComponentContext(RefreshTokenPropertyEditor.this));
+				HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(RefreshTokenPropertyEditor.this)));
 				try {
 					RefreshToken authentication = descriptor.getPropertyGetter().getAnnotation(RefreshToken.class);
 					RefreshToken.Callback callback = (RefreshToken.Callback) ReflectionUtils.invokeStaticMethod(
@@ -169,7 +170,7 @@ public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 					else
 						throw ExceptionUtils.unchecked(e);
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 					target.appendJavaScript(String.format("onedev.server.refreshToken.onGenerated('%s', '%s');", 
 							RefreshTokenPropertyEditor.this.getMarkupId(), refreshTokenValue));
 				}

@@ -54,6 +54,7 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -136,7 +137,7 @@ import io.onedev.server.service.PullRequestQueryPersonalizationService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -1730,9 +1731,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} else if (Build.get() != null) {
 			return Build.get().getProject();
 		} else {
-			ComponentContext componentContext = ComponentContext.get();
-			if (componentContext != null) {
-				ProjectAware projectAware = WicketUtils.findInnermost(componentContext.getComponent(), ProjectAware.class);
+			var hierarchicalContext = HierarchicalContext.get();
+			if (hierarchicalContext != null) {
+				ProjectAware projectAware = hierarchicalContext.findData(ProjectAware.class);
 				if (projectAware != null) 
 					return projectAware.getProject();
 			}

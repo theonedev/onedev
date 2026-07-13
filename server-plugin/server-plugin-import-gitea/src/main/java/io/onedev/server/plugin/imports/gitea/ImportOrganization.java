@@ -3,10 +3,10 @@ package io.onedev.server.plugin.imports.gitea;
 import java.io.Serializable;
 import java.util.List;
 
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 @Editable
 public class ImportOrganization implements Serializable {
@@ -32,7 +32,7 @@ public class ImportOrganization implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getOrganizationChoices() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		BeanEditor editor = HierarchicalContext.get().findData(BeanEditor.class);
 		ImportOrganization setting = (ImportOrganization) editor.getModelObject();
 		return setting.server.listOrganizations();
 	}

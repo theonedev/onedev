@@ -8,7 +8,6 @@ import static io.onedev.server.model.PullRequest.PROP_CLOSE_WEEK;
 import static io.onedev.server.model.PullRequest.PROP_COMMENT_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_CONFUSED_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_EYES_COUNT;
-import static io.onedev.server.model.PullRequest.PROP_TICK_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_HEART_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_SMILE_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_STATUS;
@@ -19,6 +18,7 @@ import static io.onedev.server.model.PullRequest.PROP_SUBMIT_WEEK;
 import static io.onedev.server.model.PullRequest.PROP_TADA_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_THUMBS_DOWN_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_THUMBS_UP_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_TICK_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_TITLE;
 import static io.onedev.server.model.PullRequest.PROP_UUID;
 import static io.onedev.server.model.support.TimeGroups.PROP_DAY;
@@ -98,12 +98,11 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.BranchSemantic;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.TextUtils;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.xodus.VisitInfoService;
 
 @Entity
@@ -1164,10 +1163,9 @@ public class PullRequest extends ProjectBelonging
 		if (!stack.get().isEmpty()) { 
 			return stack.get().peek();
 		} else {
-			ComponentContext componentContext = ComponentContext.get();
-			if (componentContext != null) {
-				PullRequestAware pullRequestAware = WicketUtils.findInnermost(
-						componentContext.getComponent(), PullRequestAware.class);
+			var hierarchicalContext = HierarchicalContext.get();
+			if (hierarchicalContext != null) {
+				PullRequestAware pullRequestAware = hierarchicalContext.findData(PullRequestAware.class);
 				if (pullRequestAware != null) 
 					return pullRequestAware.getPullRequest();
 			}

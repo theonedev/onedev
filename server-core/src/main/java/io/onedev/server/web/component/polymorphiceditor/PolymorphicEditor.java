@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -23,13 +21,15 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.server.annotation.ImplementationProvider;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.ReflectionUtils;
@@ -136,7 +136,7 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 
 			@Override
 			protected String getNullValidDisplayValue() {
-				ComponentContext.push(new ComponentContext(PolymorphicEditor.this));
+				HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(PolymorphicEditor.this)));
 				try {
 					String placeholder = getNullValidPlaceholder();
 					if (placeholder != null)
@@ -144,7 +144,7 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 					else
 						return super.getNullValidDisplayValue();
 				} finally {
-					ComponentContext.pop();
+					HierarchicalContext.pop();
 				}
 			}
 

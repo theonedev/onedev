@@ -7,7 +7,7 @@ import java.util.Map;
 
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @Editable
@@ -31,7 +31,7 @@ public class ImportGroup implements Serializable {
 	}
 	
 	private static Map<String, String> getGroupDisplayNames() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		BeanEditor editor = HierarchicalContext.get().findData(BeanEditor.class);
 		ImportGroup setting = (ImportGroup) editor.getModelObject();
 		return setting.server.listGroups();
 	}

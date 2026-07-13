@@ -1,8 +1,23 @@
 package io.onedev.server.buildspec.step;
 
+import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.Action;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.annotation.VariableOption;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.ParamUtils;
@@ -11,20 +26,11 @@ import io.onedev.server.buildspec.param.instance.ParamMap;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.web.editable.BeanEditor;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 
 @Editable(order=10000, name="Use Step Template", description="Run specified step template")
 public class UseTemplateStep extends CompositeStep {
@@ -81,8 +87,8 @@ public class UseTemplateStep extends CompositeStep {
 
 	@SuppressWarnings({ "unused", "unchecked" })
 	private static boolean isExcludeParamMapsVisible() {
-		var componentContext = ComponentContext.get();
-		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
+		var hierarchicalContext = HierarchicalContext.get();
+		if (hierarchicalContext != null && hierarchicalContext.findData(BeanEditor.class) != null) {
 			return !getParamSpecs().isEmpty();
 		} else {
 			var excludeParamMaps = (List<ParamMap>) EditContext.get().getInputValue("excludeParamMaps");

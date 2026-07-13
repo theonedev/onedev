@@ -21,7 +21,6 @@ import javax.validation.ValidationException;
 import javax.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.wicket.Component;
 import org.jspecify.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -57,7 +56,7 @@ import io.onedev.server.data.migration.XmlBuildSpecMigrator;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.JobProperty;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -551,8 +550,7 @@ public class BuildSpec implements Serializable, Validatable {
 		
 	@Nullable
 	public static BuildSpec get() {
-		Component component = ComponentContext.get().getComponent();
-		BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
+		BuildSpecAware buildSpecAware = HierarchicalContext.get().findData(BuildSpecAware.class);
 		if (buildSpecAware != null) 
 			return buildSpecAware.getBuildSpec();
 		else

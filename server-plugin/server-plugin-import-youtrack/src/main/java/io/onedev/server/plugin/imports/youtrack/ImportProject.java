@@ -5,10 +5,10 @@ import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.util.HierarchicalContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 @Editable
 public class ImportProject implements Serializable {
@@ -34,7 +34,7 @@ public class ImportProject implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		BeanEditor editor = HierarchicalContext.get().findData(BeanEditor.class);
 		ImportProject setting = (ImportProject) editor.getModelObject();
 		return setting.server.listProjects();
 	}

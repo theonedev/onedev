@@ -1,7 +1,23 @@
 package io.onedev.server.buildspec.job.trigger;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import javax.validation.Valid;
+
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.jspecify.annotations.Nullable;
+
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.annotation.*;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.TriggerMatch;
@@ -9,23 +25,11 @@ import io.onedev.server.buildspec.param.instance.ParamInstances;
 import io.onedev.server.buildspec.param.instance.ParamMap;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.event.project.ProjectEvent;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.util.SuggestionUtils;
-import io.onedev.server.web.util.WicketUtils;
-import org.apache.wicket.Component;
-import org.eclipse.jgit.revwalk.RevCommit;
-
-import org.jspecify.annotations.Nullable;
-import javax.validation.Valid;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 
 @Editable
 public abstract class JobTrigger implements Serializable {
@@ -87,8 +91,8 @@ public abstract class JobTrigger implements Serializable {
 
 	@SuppressWarnings({ "unused", "unchecked" })
 	private static boolean isExcludeParamMapsVisible() {
-		var componentContext = ComponentContext.get();
-		if (componentContext != null && componentContext.getComponent().findParent(BeanEditor.class) != null) {
+		var hierarchicalContext = HierarchicalContext.get();
+		if (hierarchicalContext != null && hierarchicalContext.findData(BeanEditor.class) != null) {
 			return !getParamSpecs().isEmpty();
 		} else {
 			var excludeParamMaps = (List<ParamMap>) EditContext.get().getInputValue("excludeParamMaps");
@@ -97,8 +101,7 @@ public abstract class JobTrigger implements Serializable {
 	}
 
 	public static List<ParamSpec> getParamSpecs() {
-		Component component = ComponentContext.get().getComponent();
-		JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
+		JobAware jobAware = HierarchicalContext.get().findData(JobAware.class);
 		if (jobAware != null) {
 			Job job = jobAware.getJob();
 			if (job != null)
