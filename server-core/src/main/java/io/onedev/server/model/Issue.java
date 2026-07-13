@@ -1092,12 +1092,15 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	}
 
 	public void addMissingFields(Collection<String> fieldNames) {
+		var existingFieldNames = getFieldNames();
+		if (existingFieldNames.containsAll(fieldNames))
+			return;
+		
 		Project.push(getProject());
 		try {
 			Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 			var fieldBean = getFieldBean(fieldBeanClass, true); 
 	
-			var existingFieldNames = getFieldNames();
 			var fieldValues = FieldUtils.getFieldValues(fieldBean, fieldNames);
 			for (var entry: fieldValues.entrySet()) {
 				if (!existingFieldNames.contains(entry.getKey())) 
