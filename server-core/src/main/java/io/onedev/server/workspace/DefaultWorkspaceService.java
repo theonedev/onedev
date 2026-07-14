@@ -1149,7 +1149,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 							var workspaceReference = workspace.getReference().toString(project);
 							if (workspace.getStatus() == Workspace.Status.ACTIVE) {
-								String fullPrompt = "### Rules\nYou are talking to an AI user.\n";
+								String fullPrompt = "### Rules\nYou are talking to an AI user.\n"
+										+ "If you start any sub-agents, wait for them to complete before finishing.\n";
 								if (ai.getAiSetting().getSystemPrompt() != null)
 									fullPrompt += ai.getAiSetting().getSystemPrompt().trim() + "\n";
 								fullPrompt += "\n### User\n" + prompt;
