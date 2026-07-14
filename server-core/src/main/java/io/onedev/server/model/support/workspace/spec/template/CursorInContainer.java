@@ -38,7 +38,6 @@ public class CursorInContainer extends WorkspaceSpecTemplate {
         userData.setKey("cursor");
         userData.getEntries().add(UserDataEntry.of("/home/cursor/.cursor", "chats extensions ai-tracking **/*.log"));
         userData.getEntries().add(UserDataEntry.of("/home/cursor/.config/cursor", null));
-        userData.getEntries().add(UserDataEntry.of("/home/cursor/.agents", null));
 
         workspaceSpec.getUserDatas().add(userData);
 
