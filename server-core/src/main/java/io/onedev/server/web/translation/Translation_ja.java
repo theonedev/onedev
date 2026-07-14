@@ -514,7 +514,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Branch Revision", "ブランチリビジョン");
 		m.put("Branch is created", "ブランチが作成されました");
 		m.put("Branch update", "ブランチ更新");
-		m.put("Branch/Commit", "ブランチ/コミット");
 		m.put("Branches", "ブランチ一覧");
 		m.put("Brand Setting Edit Bean", "ブランド設定編集Bean");
 		m.put("Branding", "ブランディング");
@@ -2636,7 +2635,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、このエグゼキューターを使用する各ジョブ/サービスのCPU制限を指定してください。これは関連するコンテナのオプション<a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a>として使用されます。");
 		m.put("Optionally specify criteria of issues which can be linked", "オプションで、リンク可能な課題の基準を指定してください。");
 		m.put("Optionally specify criteria of issues which can be linked on the other side", "オプションで、他の側でリンク可能な課題の基準を指定してください。");
-		m.put("Optionally specify custom fields allowed to edit when open new issues", "オプションで、新しい課題を開く際に編集を許可するカスタムフィールドを指定してください。");
 		m.put("Optionally specify depth for a shallow clone in order to speed up source retrieval", 
 			"オプションで、ソース取得を高速化するための浅いクローンの深さを指定してください。");
 		m.put("Optionally specify description of the issue", "オプションで、課題の説明を指定してください。");
@@ -5125,6 +5123,27 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("And login to the registry", "そしてレジストリにログインします");
+		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
+			"デフォルトでは、ユーザーは自分が提出した課題に対して上記で指定されたフィールドのみ編集できます。\nこのオプションを有効にすると、他の人が提出した課題のフィールドも編集できるようになります。");
+		m.put("Can Edit Fields Of Other Issues", "他の課題のフィールドを編集可能");
+		m.put("Cannot delete issue as it has workspaces", "ワークスペースがあるため、課題を削除できません");
+		m.put("Cannot delete pull request as it has workspaces", "ワークスペースがあるため、プルリクエストを削除できません");
+		m.put("Click to copy", "クリックしてコピー");
+		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
+			"<a href='https://groovy-lang.org' target='_blank'>groovyスクリプト</a>の内容を定義します");
+		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "以下のようにレジストリを追加するために<code>$HOME/.cargo/config.toml</code>を編集します");
+		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
+			"CI/CDジョブの場合、このパッケージをCargo.tomlに追加し、コマンドステップで以下を実行してパッケージをインストールします");
+		m.put("For CI/CD job, run below to add package registry via command step", "CI/CDジョブの場合、コマンドステップで以下を実行してパッケージレジストリを追加します");
+		m.put("On", "オン");
+		m.put("Optionally specify custom fields allowed to edit", "編集を許可するカスタムフィールドを任意で指定します");
+		m.put("Then add the package", "次にパッケージを追加します");
+		m.put("Then publish package to the registry", "次にパッケージをレジストリに公開します");
+		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
+			"このパッケージを使用するには、以下のようにレジストリを追加するために<code>$HOME/.cargo/config.toml</code>を編集します");
+		m.put("Unable to delete issue \"{0}\" as it has workspaces", "ワークスペースがあるため、課題「{0}」を削除できません");
+		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "ワークスペースがあるため、プルリクエスト「{0}」を削除できません");
 	}
 		
 	@Override
