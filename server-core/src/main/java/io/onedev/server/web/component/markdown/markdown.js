@@ -1210,6 +1210,7 @@ onedev.server.markdown = {
 				return;
 
 			$code.addClass("code-span");
+			$code.attr("data-tippy-content", onedev.server.markdown.translations["copy-to-clipboard"]);
 
 			var dragStart = null;
 			var dragged = false;
