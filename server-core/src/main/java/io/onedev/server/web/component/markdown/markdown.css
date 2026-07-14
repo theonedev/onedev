@@ -274,6 +274,17 @@
 	word-break: break-word !important;
 	overflow-wrap: break-word !important;	
 }
+.markdown-rendered code.code-span {
+	cursor: pointer;
+}
+.markdown-rendered code.code-span.copied {
+	background-color: var(--primary);
+	color: white;
+}
+.dark-mode .markdown-rendered code.code-span.copied {
+	background-color: var(--primary);
+	color: white;
+}
 .markdown-rendered pre.code.suggestion {
 	white-space: normal;
 }
