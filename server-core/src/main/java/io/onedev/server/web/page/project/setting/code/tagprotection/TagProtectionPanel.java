@@ -30,6 +30,7 @@ abstract class TagProtectionPanel extends Panel {
 		super.onInitialize();
 		
 		add(new Label("tags", protection.getTags()));
+		add(new Label("userMatch", "(" + protection.getUserMatch() + ")"));
 		
 		add(new AjaxLink<Void>("edit") {
 

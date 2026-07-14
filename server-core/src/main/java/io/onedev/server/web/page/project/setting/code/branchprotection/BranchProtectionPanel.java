@@ -30,6 +30,7 @@ abstract class BranchProtectionPanel extends Panel {
 		super.onInitialize();
 		
 		add(new Label("branches", protection.getBranches()));
+		add(new Label("userMatch", "(" + protection.getUserMatch() + ")"));
 		
 		add(new AjaxLink<Void>("edit") {
 
