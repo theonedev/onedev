@@ -514,7 +514,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Branch Revision", "Revisión de rama");
 		m.put("Branch is created", "La rama ha sido creada");
 		m.put("Branch update", "Actualización de rama");
-		m.put("Branch/Commit", "Rama/Commit");
 		m.put("Branches", "Ramas");
 		m.put("Brand Setting Edit Bean", "Bean de edición de configuración de marca");
 		m.put("Branding", "Marca");
@@ -2636,7 +2635,6 @@ public class Translation_es extends TranslationResourceBundle {
 			"Opcionalmente especifique el límite de CPU de cada trabajo/servicio que use este ejecutor. Esto se utilizará como opción <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a> de los contenedores relevantes.");
 		m.put("Optionally specify criteria of issues which can be linked", "Opcionalmente especifique criterios de problemas que se pueden vincular.");
 		m.put("Optionally specify criteria of issues which can be linked on the other side", "Opcionalmente especifique criterios de problemas que se pueden vincular en el otro lado.");
-		m.put("Optionally specify custom fields allowed to edit when open new issues", "Opcionalmente especifique campos personalizados permitidos para editar al abrir nuevos problemas.");
 		m.put("Optionally specify depth for a shallow clone in order to speed up source retrieval", 
 			"Opcionalmente especifique la profundidad para un clon superficial con el fin de acelerar la recuperación de la fuente.");
 		m.put("Optionally specify description of the issue", "Opcionalmente especifique la descripción del problema.");
@@ -5125,6 +5123,27 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("And login to the registry", "Y accede al registro");
+		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
+			"De forma predeterminada, los usuarios solo pueden editar los campos especificados anteriormente para los problemas que hayan enviado ellos mismos.\nHabilita esta opción para permitir la edición de campos en problemas enviados por otros.");
+		m.put("Can Edit Fields Of Other Issues", "Pueden editar campos de otros problemas");
+		m.put("Cannot delete issue as it has workspaces", "No se puede eliminar el problema ya que tiene espacios de trabajo");
+		m.put("Cannot delete pull request as it has workspaces", "No se puede eliminar la solicitud de extracción ya que tiene espacios de trabajo");
+		m.put("Click to copy", "Haz clic para copiar");
+		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
+			"Define el contenido del <a href='https://groovy-lang.org' target='_blank'>script groovy</a>");
+		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "Edita <code>$HOME/.cargo/config.toml</code> para agregar un registro como el siguiente");
+		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
+			"Para el trabajo de CI/CD, agrega este paquete a Cargo.toml y ejecuta lo siguiente para instalar el paquete mediante el paso de comando");
+		m.put("For CI/CD job, run below to add package registry via command step", "Para el trabajo de CI/CD, ejecuta lo siguiente para agregar el registro del paquete mediante el paso de comando");
+		m.put("On", "Activado");
+		m.put("Optionally specify custom fields allowed to edit", "Opcionalmente, especifica campos personalizados permitidos para editar");
+		m.put("Then add the package", "Luego agrega el paquete");
+		m.put("Then publish package to the registry", "Luego publica el paquete en el registro");
+		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
+			"Para usar este paquete, edita <code>$HOME/.cargo/config.toml</code> para agregar un registro como el siguiente");
+		m.put("Unable to delete issue \"{0}\" as it has workspaces", "No se puede eliminar el problema \"{0}\" ya que tiene espacios de trabajo");
+		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "No se puede eliminar la solicitud de extracción \"{0}\" ya que tiene espacios de trabajo");
 	}
 		
 	@Override

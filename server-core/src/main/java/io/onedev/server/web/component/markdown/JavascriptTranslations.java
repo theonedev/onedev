@@ -24,6 +24,7 @@ public class JavascriptTranslations {
               map.put("unable-to-connect-to-server", _T("Unable to connect to server"));
               map.put("programming-language", _T("Programming language"));
               map.put("copy-to-clipboard", _T("Copy to clipboard"));
+              map.put("click-to-copy", _T("Click to copy"));
               map.put("suggestion-outdated", _T("Suggestion is outdated either due to code change or pull request close"));
               map.put("remove-from-batch", _T("Remove from batch"));
               map.put("add-to-batch", _T("Add to batch to commit with other suggestions later"));

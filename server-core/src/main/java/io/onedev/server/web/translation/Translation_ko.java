@@ -514,7 +514,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Branch Revision", "브랜치 수정");
 		m.put("Branch is created", "브랜치가 생성되었습니다.");
 		m.put("Branch update", "브랜치 업데이트");
-		m.put("Branch/Commit", "브랜치/커밋");
 		m.put("Branches", "브랜치들");
 		m.put("Brand Setting Edit Bean", "브랜드 설정 편집 빈");
 		m.put("Branding", "브랜딩");
@@ -2636,7 +2635,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 이 실행자를 사용하는 각 작업/서비스의 CPU 제한을 지정하세요. 이는 관련 컨테이너의 옵션 <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a>로 사용됩니다.");
 		m.put("Optionally specify criteria of issues which can be linked", "선택적으로 연결할 수 있는 문제의 기준을 지정하세요.");
 		m.put("Optionally specify criteria of issues which can be linked on the other side", "선택적으로 다른 쪽에서 연결할 수 있는 문제의 기준을 지정하세요.");
-		m.put("Optionally specify custom fields allowed to edit when open new issues", "선택적으로 새 문제를 열 때 편집할 수 있는 사용자 정의 필드를 지정하세요.");
 		m.put("Optionally specify depth for a shallow clone in order to speed up source retrieval", 
 			"소스 검색 속도를 높이기 위해 얕은 클론의 깊이를 선택적으로 지정하세요.");
 		m.put("Optionally specify description of the issue", "선택적으로 문제의 설명을 지정하세요.");
@@ -5125,6 +5123,27 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("And login to the registry", "그리고 레지스트리에 로그인하세요");
+		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
+			"기본적으로 사용자는 자신이 제출한 이슈에 대해 위에서 지정된 필드만 편집할 수 있습니다.\n이 옵션을 활성화하면 다른 사람이 제출한 이슈의 필드를 편집할 수 있습니다.");
+		m.put("Can Edit Fields Of Other Issues", "다른 이슈의 필드를 편집할 수 있음");
+		m.put("Cannot delete issue as it has workspaces", "워크스페이스가 있어서 이슈를 삭제할 수 없습니다");
+		m.put("Cannot delete pull request as it has workspaces", "워크스페이스가 있어서 풀 리퀘스트를 삭제할 수 없습니다");
+		m.put("Click to copy", "클릭하여 복사");
+		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
+			"<a href='https://groovy-lang.org' target='_blank'>groovy 스크립트</a>의 내용을 정의하세요");
+		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "아래와 같이 레지스트리를 추가하려면 <code>$HOME/.cargo/config.toml</code>을 편집하세요");
+		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
+			"CI/CD 작업의 경우, 이 패키지를 Cargo.toml에 추가하고 아래 명령 단계를 실행하여 패키지를 설치하세요");
+		m.put("For CI/CD job, run below to add package registry via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 패키지 레지스트리를 추가하세요");
+		m.put("On", "켜짐");
+		m.put("Optionally specify custom fields allowed to edit", "편집이 허용된 사용자 지정 필드를 선택적으로 지정하세요");
+		m.put("Then add the package", "그런 다음 패키지를 추가하세요");
+		m.put("Then publish package to the registry", "그런 다음 패키지를 레지스트리에 게시하세요");
+		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
+			"이 패키지를 사용하려면, 아래와 같이 레지스트리를 추가하기 위해 <code>$HOME/.cargo/config.toml</code>을 편집하세요");
+		m.put("Unable to delete issue \"{0}\" as it has workspaces", "워크스페이스가 있어서 \"{0}\" 이슈를 삭제할 수 없습니다");
+		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "워크스페이스가 있어서 \"{0}\" 풀 리퀘스트를 삭제할 수 없습니다");
 	}
 		
 	@Override

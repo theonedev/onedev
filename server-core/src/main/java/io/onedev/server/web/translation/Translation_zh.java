@@ -540,7 +540,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Branch Revision", "分支修订");
 		m.put("Branch is created", "分支已创建");
 		m.put("Branch update", "分支更新");
-		m.put("Branch/Commit", "分支/提交");
 		m.put("Branches", "分支");
 		m.put("Brand Setting Edit Bean", "品牌设置编辑Bean");
 		m.put("Branding", "品牌设置");
@@ -2662,7 +2661,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择为使用此执行器的每个任务/服务指定 CPU 限制。这将用作相关容器的选项 <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a>");
 		m.put("Optionally specify criteria of issues which can be linked", "可选择指定可以链接的工单的条件");
 		m.put("Optionally specify criteria of issues which can be linked on the other side", "可选择指定可以在另一端链接的工单的条件");
-		m.put("Optionally specify custom fields allowed to edit when open new issues", "可选择指定在打开新工单时允许编辑的自定义字段");
 		m.put("Optionally specify depth for a shallow clone in order to speed up source retrieval", 
 			"可选择指定浅克隆的深度，以加快源代码获取速度");
 		m.put("Optionally specify description of the issue", "可选择指定工单的描述");
@@ -5151,6 +5149,27 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("And login to the registry", "并登录到注册表");
+		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
+			"默认情况下，用户只能编辑自己提交的工单中指定的字段。\n启用此选项以允许编辑他人提交的工单中的字段。");
+		m.put("Can Edit Fields Of Other Issues", "可以编辑其他工单的字段");
+		m.put("Cannot delete issue as it has workspaces", "无法删除工单，因为它包含工作区");
+		m.put("Cannot delete pull request as it has workspaces", "无法删除合并请求，因为它包含工作区");
+		m.put("Click to copy", "点击复制");
+		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
+			"定义<a href='https://groovy-lang.org' target='_blank'>groovy 脚本</a>的内容");
+		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "编辑 <code>$HOME/.cargo/config.toml</code> 以添加如下注册表");
+		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
+			"对于 CI/CD 任务，将此包添加到 Cargo.toml 并运行以下命令步骤安装该包");
+		m.put("For CI/CD job, run below to add package registry via command step", "对于 CI/CD 任务，运行以下命令步骤添加包注册表");
+		m.put("On", "开启");
+		m.put("Optionally specify custom fields allowed to edit", "可选地指定允许编辑的自定义字段");
+		m.put("Then add the package", "然后添加该包");
+		m.put("Then publish package to the registry", "然后将包发布到注册表");
+		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
+			"要使用此包，请编辑 <code>$HOME/.cargo/config.toml</code> 以添加如下注册表");
+		m.put("Unable to delete issue \"{0}\" as it has workspaces", "无法删除工单 \"{0}\"，因为它包含工作区");
+		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "无法删除合并请求 \"{0}\"，因为它包含工作区");
 	}
 		
 	@Override
