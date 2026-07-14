@@ -40,9 +40,7 @@ public class CommitMessageFixSetting implements Serializable, Validatable {
 		footer as a separate line, for instance: 
 		
 		Fixes #100
-		Fixes PROJ-100
-		
-		Note that this footer should not be added to fixup commits.""";
+		Fixes PROJ-100""";
 
 	private String fixSuggestion = DEFAULT_FIX_SUGGESTION;
 		
