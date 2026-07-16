@@ -1,4 +1,4 @@
-version: 47
+version: 52
 imports:
 - projectPath: onedev
   revision: main
@@ -30,7 +30,8 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter:
-      type: DefaultInterpreter
+      type: PosixInterpreter
+      shell: sh
       commands: |
         set -e
         set -o pipefail
@@ -38,6 +39,8 @@ jobs:
         buildVersion=@build_version@
 
         projectDir=`pwd`
+
+        curl -H "Authorization: Bearer @secret:onedev-token@" -G -X DELETE https://code.onedev.io/~/api/packages --data-urlencode 'query="Version" is "@build_version@"'
 
         mvn -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
 
@@ -125,7 +128,8 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter:
-      type: DefaultInterpreter
+      type: PosixInterpreter
+      shell: sh
       commands: |
         set -e
 
@@ -146,7 +150,8 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter:
-      type: DefaultInterpreter
+      type: PosixInterpreter
+      shell: sh
       commands: |
         set -e
         set -o pipefail
@@ -198,7 +203,8 @@ jobs:
     runInContainer: true
     image: ubuntu
     interpreter:
-      type: DefaultInterpreter
+      type: PosixInterpreter
+      shell: sh
       commands: "apt update \napt install -y zip\nbuildVersion=`ls onedev-*.tar.gz | grep -Po 'onedev-\\K.*(?=.tar.gz)'`\ntar zxvf onedev-$buildVersion.tar.gz\nmv onedev-$buildVersion onedev-latest\ntar zcvf onedev-latest.tar.gz onedev-latest\nzip -r onedev-latest.zip onedev-latest\nsha256sum onedev-latest.zip > onedev-latest.zip.sha256\nsha256sum onedev-latest.tar.gz > onedev-latest.tar.gz.sha256\necho $buildVersion > build_version\n"
     runAs: 0:0
     useTTY: false
@@ -248,7 +254,8 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter:
-      type: DefaultInterpreter
+      type: PosixInterpreter
+      shell: sh
       commands: |
         set -e
 
@@ -323,7 +330,8 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter:
-      type: DefaultInterpreter
+      type: PosixInterpreter
+      shell: sh
       commands: |
         mvn clean package
     runAs: 0:0
@@ -380,7 +388,8 @@ jobs:
     runInContainer: true
     image: '@property:buildEnvironment@'
     interpreter:
-      type: DefaultInterpreter
+      type: PosixInterpreter
+      shell: sh
       commands: |
         mvn package
     runAs: 0:0
@@ -423,7 +432,8 @@ jobs:
     runInContainer: true
     image: alpine/git:1.0.7
     interpreter:
-      type: DefaultInterpreter
+      type: PosixInterpreter
+      shell: sh
       commands: |
         git config --global --unset http.extraHeader
         git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
