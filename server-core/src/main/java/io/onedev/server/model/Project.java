@@ -2021,14 +2021,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public Collection<Long> parseFixedIssueIds(String commitMessage) {
 		return OneDev.getInstance(IssueService.class).parseFixedIssueIds(this, commitMessage);
 	}
-	
-	public Collection<Project> getTree() {
-		List<Project> projects = Lists.newArrayList(this);
-		projects.addAll(getDescendants());
-		projects.addAll(getAncestors());
-		return projects;
-	}
-	
+		
 	public MediaType detectMediaType(BlobIdent blobIdent) {
 		Blob blob = getBlob(blobIdent, true);
 		if (blob.getLfsPointer() != null) {

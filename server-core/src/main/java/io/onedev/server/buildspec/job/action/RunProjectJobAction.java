@@ -154,7 +154,7 @@ public class RunProjectJobAction extends PostBuildAction implements Validatable 
 		Project project = getInputProject();
 		List<String> jobNames = new ArrayList<>();
 		if (project != null) {
-			jobNames.addAll(getBuildService().getAccessibleJobNames(SecurityUtils.getSubject(), project));
+			jobNames.addAll(getBuildService().getJobNames(project));
 			Collections.sort(jobNames);
 		}
 		return jobNames;

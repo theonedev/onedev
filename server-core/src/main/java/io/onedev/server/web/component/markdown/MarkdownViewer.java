@@ -260,7 +260,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					reference = BuildReference.of(referenceId, null);
 					var build = buildService.find(reference.getProject(), reference.getNumber());
 					// check permission here as build project may not be the same as current project
-					if (build != null && SecurityUtils.canAccessBuild(build)) {
+					if (build != null && SecurityUtils.canAccessProject(build.getProject())) {
 						String iconHref = SpriteImage.getVersionedHref(BuildStatusIcon.getIconHref(build.getStatus()));
 						String iconCss = BuildStatusIcon.getIconClass(build.getStatus());
 						

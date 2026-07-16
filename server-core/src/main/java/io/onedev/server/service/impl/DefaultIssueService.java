@@ -1273,10 +1273,10 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	public Collection<Long> parseFixedIssueIds(Project project, String commitMessage) {
 		Collection<Long> issueIds = new HashSet<>();
 		
-		for (var reference: getIssueSetting().getCommitMessageFixSetting().parseFixedIssues(commitMessage, project)) {
-			var referenceProject = reference.getProject();
-			if (referenceProject.isSelfOrAncestorOf(project) || project.isSelfOrAncestorOf(referenceProject)) {
-				Long issueId = getIssueId(referenceProject.getId(), reference.getNumber());
+		for (var issueReference: getIssueSetting().getCommitMessageFixSetting().parseFixedIssues(commitMessage, project)) {
+			var referenceProject = issueReference.getProject();
+			if (referenceProject.equals(project)) {
+				Long issueId = getIssueId(referenceProject.getId(), issueReference.getNumber());
 				if (issueId != null)
 					issueIds.add(issueId);
 			}

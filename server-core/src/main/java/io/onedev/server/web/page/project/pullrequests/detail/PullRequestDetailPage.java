@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
@@ -74,8 +73,8 @@ import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.ToolUtils;
-import io.onedev.server.ai.tools.pullrequest.GetPullRequestComments;
 import io.onedev.server.ai.tools.pullrequest.GetPullRequest;
+import io.onedev.server.ai.tools.pullrequest.GetPullRequestComments;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -1072,24 +1071,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 
 				});
-				fragment.add(new WebMarkupContainer("hiddenJobsNote") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						boolean hasHiddenJobs = false;
-						for (String jobName: getPullRequest().getCurrentBuilds().stream()
-								.map(it->it.getJobName()).collect(Collectors.toSet())) {
-							if (!SecurityUtils.canAccessJob(getProject(), jobName)) {
-								hasHiddenJobs = true;
-								break;
-							}
-						}
-						setVisible(hasHiddenJobs);
-					}
-
-				});
 				fragment.add(new PullRequestJobsPanel("jobs") {
 
 					@Override
@@ -1104,15 +1085,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					protected void onConfigure() {
 						super.onConfigure();
 
-						boolean hasVisibleRequiredJobs = false;
+						boolean hasRequiredJobs = false;
 						for (Build build: getPullRequest().getCurrentBuilds()) {
-							if (getPullRequest().getBuildRequirement().getRequiredJobs().contains(build.getJobName())
-									&& SecurityUtils.canAccessJob(getProject(), build.getJobName())) {
-								hasVisibleRequiredJobs = true;
+							if (getPullRequest().getBuildRequirement().getRequiredJobs().contains(build.getJobName())) {
+								hasRequiredJobs = true;
 								break;
 							}
 						}
-						setVisible(hasVisibleRequiredJobs);
+						setVisible(hasRequiredJobs);
 					}
 
 				});

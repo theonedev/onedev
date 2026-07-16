@@ -84,7 +84,7 @@ public abstract class PackSidePanel extends Panel {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setEnabled(SecurityUtils.canAccessBuild(build));
+					setEnabled(SecurityUtils.canAccessProject(build.getProject()));
 				}
 			};
 			add(buildLink);

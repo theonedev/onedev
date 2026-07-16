@@ -43,9 +43,7 @@ public class IncludesIssueCriteria extends Criteria<PullRequest> {
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, 
 			CriteriaBuilder builder) {
 		Collection<Long> pullRequestIds = new HashSet<>();
-		issue.getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {
-			pullRequestIds.addAll(getPullRequestIds(it));
-		});
+		pullRequestIds.addAll(getPullRequestIds(issue.getProject()));
 		if (!pullRequestIds.isEmpty()) 
 			return from.get(PullRequest.PROP_ID).in(pullRequestIds);
 		else 

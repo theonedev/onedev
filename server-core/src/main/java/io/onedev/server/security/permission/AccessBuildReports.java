@@ -27,7 +27,7 @@ public class AccessBuildReports implements BasePermission {
 			AccessBuildReports accessBuildReports = (AccessBuildReports) p;
 			return getReportPatterns().matches(new StringMatcher(), accessBuildReports.reportNames);
 		} else {
-			return new AccessBuild().implies(p);
+			return new AccessProject().implies(p);
 		}
 	}
 

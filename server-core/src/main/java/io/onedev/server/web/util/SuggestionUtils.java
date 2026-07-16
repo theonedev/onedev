@@ -498,8 +498,7 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestJobs(Project project, String matchWith) {
-		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildService.class)
-				.getAccessibleJobNames(SecurityUtils.getSubject(), project));
+		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildService.class).getJobNames(project));
 		Collections.sort(jobNames);
 		return suggest(jobNames, matchWith);
 	}

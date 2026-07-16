@@ -1873,7 +1873,7 @@ public class TodResource {
         var buildReference = BuildReference.of(referenceString, currentProject);
         var build = buildService.find(buildReference.getProject(), buildReference.getNumber());
         if (build != null) {
-            if (!SecurityUtils.canAccessBuild(build))
+            if (!SecurityUtils.canAccessProject(build.getProject()))
                 throw new UnauthorizedException("No permission to access build: " + referenceString);
             return build;
         } else {

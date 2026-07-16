@@ -1,17 +1,20 @@
 package io.onedev.server.web.component.pullrequest.build;
 
-import com.google.common.collect.Sets;
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.pullrequest.MergePreview;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import static io.onedev.server.model.Build.NAME_COMMIT;
+import static io.onedev.server.model.Build.NAME_JOB;
+import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
+import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
+import static io.onedev.server.util.criteria.Criteria.quote;
+import static java.util.Comparator.comparing;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -26,15 +29,19 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.common.collect.Sets;
 
-import static io.onedev.server.model.Build.*;
-import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.util.criteria.Criteria.quote;
-import static java.util.Comparator.*;
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 
 public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInfo>> {
 
@@ -52,12 +59,10 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 					map.computeIfAbsent(build.getJobName(), k -> new ArrayList<>()).add(build);
 				for (var entry : map.entrySet()) {
 					var jobName = entry.getKey();
-					if (SecurityUtils.canAccessJob(getPullRequest().getTargetProject(), jobName)) {
-						var builds = new ArrayList<>(entry.getValue());
-						Collections.sort(builds);
-						var required = getPullRequest().getBuildRequirement().getRequiredJobs().contains(jobName);
-						listOfJobBuildInfo.add(new JobBuildInfo(jobName, required, builds));
-					}
+					var builds = new ArrayList<>(entry.getValue());
+					Collections.sort(builds);
+					var required = getPullRequest().getBuildRequirement().getRequiredJobs().contains(jobName);
+					listOfJobBuildInfo.add(new JobBuildInfo(jobName, required, builds));
 				}
 				Collections.sort(listOfJobBuildInfo, comparing((JobBuildInfo o) -> o.getBuilds().iterator().next().getId()));
 				return listOfJobBuildInfo;

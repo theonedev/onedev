@@ -35,8 +35,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.security.permission.AccessBuild;
-import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UrlService;
@@ -148,8 +147,7 @@ public class BuildNotificationManager implements Serializable {
 			}
 			for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
 				User user = entry.getKey();
-				Permission permission = new ProjectPermission(build.getProject(), 
-						new JobPermission(build.getJobName(), new AccessBuild()));
+				Permission permission = new ProjectPermission(build.getProject(), new AccessProject());
 				if (user.asSubject().isPermitted(permission)) {
 					for (String queryString: entry.getValue()) {
 						User.push(user);
@@ -192,8 +190,7 @@ public class BuildNotificationManager implements Serializable {
 
 			for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
 				User user = entry.getKey();
-				Permission permission = new ProjectPermission(build.getProject(), 
-						new JobPermission(build.getJobName(), new AccessBuild()));
+				Permission permission = new ProjectPermission(build.getProject(), new AccessProject());
 				if (user.asSubject().isPermitted(permission)) {
 					for (String queryString: entry.getValue()) {
 						User.push(user);

@@ -116,7 +116,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of(_T("Privilege"))) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Additional Privileges"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
@@ -131,10 +131,12 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 						accessibles.add(_T("log"));
 					if (privilege.isAccessPipeline())
 						accessibles.add(_T("pipeline"));
-					accessibles.add(_T("artifacts"));
 					if (privilege.getAccessibleReports() != null)
 						accessibles.add(_T("reports") + ":" + privilege.getAccessibleReports());
-					cellItem.add(new Label(componentId, MessageFormat.format(_T("access [{0}]"), Joiner.on(", ").join(accessibles))));
+					if (accessibles.isEmpty())
+						cellItem.add(new Label(componentId, _T("<i>None</i>")).setEscapeModelStrings(false));
+					else
+						cellItem.add(new Label(componentId, MessageFormat.format(_T("access [{0}]"), Joiner.on(", ").join(accessibles))));
 				}
 			}
 		});		

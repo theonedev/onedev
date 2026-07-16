@@ -44,6 +44,7 @@ import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
@@ -54,7 +55,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -104,6 +104,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.service.BuildLabelService;
 import io.onedev.server.service.BuildParamService;
 import io.onedev.server.service.BuildService;
@@ -464,43 +465,22 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
-
-		List<Criterion> projectCriterions = new ArrayList<>();
-		Collection<String> availableJobNames = jobNames.get(project.getId());
-		if (availableJobNames != null && !availableJobNames.isEmpty()) {
-			Collection<String> accessibleJobNames = getAccessibleJobNames(subject, project);
-			if (accessibleJobNames.containsAll(availableJobNames)) {
-				projectCriterions.add(Restrictions.eq(Build.PROP_PROJECT, project));
-			} else {
-				List<Criterion> jobCriterions = new ArrayList<>();
-				for (String jobName: accessibleJobNames) 
-					jobCriterions.add(Restrictions.eq(Build.PROP_JOB_NAME, jobName));
-				if (!jobCriterions.isEmpty()) {
-					projectCriterions.add(Restrictions.and(
-							Restrictions.eq(Build.PROP_PROJECT, project), 
-							Restrictions.or(jobCriterions.toArray(new Criterion[0]))));
-				}
+		criteria.add(Restrictions.eq(Build.PROP_PROJECT, project));
+		
+		if (fuzzyQuery.length() != 0) {
+			try {
+				long buildNumber = Long.parseLong(fuzzyQuery);
+				criteria.add(Restrictions.eq(Build.PROP_NUMBER, buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.or(
+						Restrictions.ilike(Build.PROP_VERSION, fuzzyQuery, MatchMode.ANYWHERE),
+						Restrictions.ilike(Build.PROP_JOB_NAME, fuzzyQuery, MatchMode.ANYWHERE)));
 			}
 		}
-		
-		if (!projectCriterions.isEmpty()) {
-			criteria.add(Restrictions.or(projectCriterions.toArray(new Criterion[0])));
-			
-			if (fuzzyQuery.length() != 0) {
-				try {
-					long buildNumber = Long.parseLong(fuzzyQuery);
-					criteria.add(Restrictions.eq(Build.PROP_NUMBER, buildNumber));
-				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.or(
-							Restrictions.ilike(Build.PROP_VERSION, fuzzyQuery, MatchMode.ANYWHERE),
-							Restrictions.ilike(Build.PROP_JOB_NAME, fuzzyQuery, MatchMode.ANYWHERE)));
-				}
-			}
 
-			criteria.addOrder(Order.desc(Build.PROP_PROJECT));
-			criteria.addOrder(Order.desc(Build.PROP_NUMBER));
-			builds.addAll(query(criteria, 0, count));
-		} 
+		criteria.addOrder(Order.desc(Build.PROP_PROJECT));
+		criteria.addOrder(Order.desc(Build.PROP_NUMBER));
+		builds.addAll(query(criteria, 0, count));
 
 		return builds;
 	}
@@ -608,46 +588,16 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 
 		if (project != null) {
 			predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-			if (!SecurityUtils.canManageBuilds(subject, project)) {
-				Collection<String> accessibleJobNames = getAccessibleJobNames(subject, project);
-				Collection<String> availableJobNames = jobNames.get(project.getId());
-				if (availableJobNames != null && !accessibleJobNames.containsAll(availableJobNames)) {
-					List<Predicate> jobPredicates = new ArrayList<>();
-					for (String jobName: accessibleJobNames) 
-						jobPredicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
-					predicates.add(builder.or(jobPredicates.toArray(new Predicate[0])));
-				}
-			}
 		} else if (!SecurityUtils.isAdministrator(subject)) {
-			List<Predicate> projectPredicates = new ArrayList<>();
-			Collection<Long> projectsWithAllJobs = new HashSet<>();
-			for (Map.Entry<Project, Collection<String>> entry: getAccessibleJobNames(subject).entrySet()) {
-				project = entry.getKey();
-				if (SecurityUtils.canManageBuilds(subject, project)) {
-					projectPredicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-					projectsWithAllJobs.add(project.getId());
-				} else {
-					Collection<String> availableJobNamesOfProject = jobNames.get(project.getId());
-					if (availableJobNamesOfProject != null) {
-						Collection<String> accessibleJobNamesOfProject = entry.getValue();
-						if (accessibleJobNamesOfProject.containsAll(availableJobNamesOfProject)) {
-							projectsWithAllJobs.add(project.getId());
-							projectPredicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-						} else {
-							List<Predicate> jobPredicates = new ArrayList<>();
-							for (String jobName: accessibleJobNamesOfProject) 
-								jobPredicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), jobName));
-							projectPredicates.add(builder.and(
-									builder.equal(root.get(Build.PROP_PROJECT), project), 
-									builder.or(jobPredicates.toArray(new Predicate[0]))));
-						}
-					} else {
-						projectsWithAllJobs.add(project.getId());
-					}
-				}
+			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(subject, new AccessProject());
+			if (!projects.isEmpty()) {
+				Path<Long> projectIdPath = root.get(Build.PROP_PROJECT).get(Project.PROP_ID);
+				predicates.add(Criteria.forManyValues(builder, projectIdPath,
+						projects.stream().map(it -> it.getId()).collect(Collectors.toSet()),
+						projectService.getIds()));
+			} else {
+				predicates.add(builder.disjunction());
 			}
-			if (!projectsWithAllJobs.containsAll(jobNames.keySet()))
-				predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		}
 		
 		return predicates;
@@ -1013,27 +963,6 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 		return jobNames;
 	}
 	
-	@Override
-	public Map<Project, Collection<String>> getAccessibleJobNames(Subject subject) {
-		Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();
-		for (Long projectId: jobNames.keySet()) {
-			Project project = projectService.load(projectId);
-			Collection<String> accessibleJobNamsOfProject = getAccessibleJobNames(subject, project);
-			if (!accessibleJobNamsOfProject.isEmpty())
-				accessibleJobNames.put(project, accessibleJobNamsOfProject); 
-		}
-		return accessibleJobNames;
-	}
-	
-	@Override
-	public Collection<String> getAccessibleJobNames(Subject subject, Project project) {
-		Collection<String> availableJobNames = jobNames.get(project.getId());
-		if (availableJobNames != null) 
-			return SecurityUtils.getAccessibleJobNames(subject, project, availableJobNames);
-		else 
-			return new HashSet<>();
-	}
-
 	@Override
 	public void populateBuilds(Collection<PullRequest> requests) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();

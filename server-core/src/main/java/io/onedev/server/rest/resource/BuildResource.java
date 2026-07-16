@@ -61,7 +61,7 @@ public class BuildResource {
     @GET
     public Build getBuild(@PathParam("buildId") Long buildId) {
 		Build build = buildService.load(buildId);
-    	if (!SecurityUtils.canAccessBuild(build)) 
+    	if (!SecurityUtils.canAccessProject(build.getProject())) 
 			throw new UnauthorizedException();
     	return build;
     }
@@ -71,7 +71,7 @@ public class BuildResource {
 	@GET
 	public Collection<BuildLabel> getLabels(@PathParam("buildId") Long buildId) {
 		Build build = buildService.load(buildId);
-		if (!SecurityUtils.canAccessBuild(build))
+		if (!SecurityUtils.canAccessProject(build.getProject()))
 			throw new UnauthorizedException();
 		return build.getLabels();
 	}
@@ -81,7 +81,7 @@ public class BuildResource {
     @GET
     public Collection<BuildParam> getParams(@PathParam("buildId") Long buildId) {
 		Build build = buildService.load(buildId);
-    	if (!SecurityUtils.canAccessBuild(build)) 
+    	if (!SecurityUtils.canAccessProject(build.getProject())) 
 			throw new UnauthorizedException();
     	
     	List<BuildParam> params = SerializationUtils.clone(new ArrayList<>(build.getParams()));
@@ -98,7 +98,7 @@ public class BuildResource {
     @GET
     public Collection<BuildDependence> getDependencies(@PathParam("buildId") Long buildId) {
 		Build build = buildService.load(buildId);
-    	if (!SecurityUtils.canAccessBuild(build)) 
+    	if (!SecurityUtils.canAccessProject(build.getProject())) 
 			throw new UnauthorizedException();
     	return build.getDependencies();
     }
@@ -108,7 +108,7 @@ public class BuildResource {
     @GET
     public Collection<BuildDependence> getDependents(@PathParam("buildId") Long buildId) {
 		Build build = buildService.load(buildId);
-    	if (!SecurityUtils.canAccessBuild(build)) 
+    	if (!SecurityUtils.canAccessProject(build.getProject())) 
 			throw new UnauthorizedException();
     	return build.getDependents();
     }
@@ -118,7 +118,7 @@ public class BuildResource {
     @GET
     public Collection<Long> getFixedIssueIds(@PathParam("buildId") Long buildId) {
 		Build build = buildService.load(buildId);
-    	if (!SecurityUtils.canAccessBuild(build)) 
+    	if (!SecurityUtils.canAccessProject(build.getProject())) 
 			throw new UnauthorizedException();
     	return build.getFixedIssueIds();
     }

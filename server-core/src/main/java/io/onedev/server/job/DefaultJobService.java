@@ -139,8 +139,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.AccessBuild;
-import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.BuildService;
@@ -420,9 +419,9 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					throw new ExplicitException(errorMessage);
 				}
 
-				JobPermission jobPermission = new JobPermission(dependencyBuild.getJobName(), new AccessBuild());
-				if (!dependencyProject.isPermittedByLoginUser(jobPermission)
-						&& !subject.isPermitted(new ProjectPermission(dependencyProject, jobPermission))) {
+				AccessProject projectPermission = new AccessProject();
+				if (!dependencyProject.isPermittedByLoginUser(projectPermission)
+						&& !subject.isPermitted(new ProjectPermission(dependencyProject, projectPermission))) {
 					throw new ExplicitException("Unable to access dependency build '"
 							+ dependencyBuild.getReference().toString(null) + "': permission denied");
 				}

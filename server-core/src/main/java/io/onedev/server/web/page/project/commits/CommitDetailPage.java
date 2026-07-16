@@ -464,10 +464,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 				try {
 					BuildSpec buildSpec = getProject().getBuildSpec(getCommit().copy());
 					if (buildSpec != null) {
-						for (Job job : buildSpec.getJobMap().values()) {
-							if (SecurityUtils.canAccessJob(getProject(), job.getName()))
-								jobs.add(job);
-						}
+						jobs.addAll(buildSpec.getJobMap().values());
 					}
 				} catch (Exception e) {
 					logger.error("Error retrieving build spec (project: {}, commit: {})",

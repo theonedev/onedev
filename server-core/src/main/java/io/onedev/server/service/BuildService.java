@@ -85,11 +85,7 @@ public interface BuildService extends EntityService<Build> {
 
 	Map<Integer, Integer> queryFrequencyStats(Subject subject, Project project, @Nullable Criteria<Build> buildCriteria, 
 			@Nullable Date startDate, @Nullable Date endDate, StatsGroup group);
-	
-	Collection<String> getAccessibleJobNames(Subject subject, Project project);
-
-	Map<Project, Collection<String>> getAccessibleJobNames(Subject subject);
-	
+		
 	void populateBuilds(Collection<PullRequest> requests);
 	
 	void delete(Collection<Build> builds);

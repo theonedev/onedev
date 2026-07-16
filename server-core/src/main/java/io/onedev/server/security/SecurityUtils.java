@@ -48,7 +48,6 @@ import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.Workspace;
-import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildPipeline;
 import io.onedev.server.security.permission.AccessBuildReports;
@@ -60,9 +59,9 @@ import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.CreateWorkspaces;
+import io.onedev.server.security.permission.EditFieldsOfOtherIssues;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.EditIssueLink;
-import io.onedev.server.security.permission.EditFieldsOfOtherIssues;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ManageBuilds;
 import io.onedev.server.security.permission.ManageCodeComments;
@@ -541,16 +540,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(build.getProject(),
 				new JobPermission(build.getJobName(), new AccessBuildPipeline())));
 	}
-	
-	public static boolean canAccessBuild(Build build) {
-		return canAccessJob(build.getProject(), build.getJobName());
-	}
-	
-	public static boolean canAccessJob(Project project, String jobName) {
-		return getSubject().isPermitted(new ProjectPermission(project, 
-				new JobPermission(jobName, new AccessBuild())));
-	}
-
+		
 	public static boolean canReadPack(Project project) {
 		return getSubject().isPermitted(new ProjectPermission(project, new ReadPack()));
 	}
@@ -840,66 +830,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 
 		return filterApplicableUsers(authorizedUsers, permission);
-	}
-
-	private static void populateAccessibleJobNames(Collection<String> accessibleJobNames,
-											Collection<String> availableJobNames, Role role) {
-		for (String jobName: availableJobNames) {
-			if (role.implies(new JobPermission(jobName, new AccessBuild())))
-				accessibleJobNames.add(jobName);
-		}
-	}
-
-	public static Collection<String> getAccessibleJobNames(Project project, Collection<String> availableJobNames) {
-		return getAccessibleJobNames(getSubject(), project, availableJobNames);
-	}
-
-	public static Collection<String> getAccessibleJobNames(Subject subject, Project project, Collection<String> availableJobNames) {
-		Collection<String> accessibleJobNames = new HashSet<>();
-		if (subject.isPermitted(new SystemAdministration())) {
-			accessibleJobNames.addAll(availableJobNames);
-		} else {
-			String principal = (String) subject.getPrincipal();
-			var user = getAuthUser(principal);
-			if (user != null) {
-				for (UserAuthorization authorization: user.getProjectAuthorizations()) {
-					if (authorization.getProject().isSelfOrAncestorOf(project)) {
-						populateAccessibleJobNames(accessibleJobNames, availableJobNames,
-								authorization.getRole());
-					}
-				}
-
-				for (Group group: user.getGroups()) {
-					for (GroupAuthorization authorization: group.getAuthorizations()) {
-						if (authorization.getProject().isSelfOrAncestorOf(project)) {
-							populateAccessibleJobNames(accessibleJobNames, availableJobNames,
-									authorization.getRole());
-						}
-					}
-				}
-			}
-			
-			var accessToken = getAccessToken(principal);
-			if (accessToken != null) {
-				for (var authorization: accessToken.getAuthorizations()) {
-					if (authorization.getProject().isSelfOrAncestorOf(project)) {
-						populateAccessibleJobNames(accessibleJobNames, availableJobNames,
-								authorization.getRole());
-					}
-				}
-			}
-
-			if (!isAnonymous(principal) || getSettingService().getSecuritySetting().isEnableAnonymousAccess()) {
-				Project current = project;
-				do {
-					for (var authorization: current.getBaseAuthorizations()) {
-						populateAccessibleJobNames(accessibleJobNames, availableJobNames, authorization.getRole());
-					}
-					current = current.getParent();
-				} while (current != null);
-			}
-		}
-		return accessibleJobNames;
 	}
 
 	private static void populateAccessibleReportNames(Map<String, Collection<String>> accessibleReportNames,

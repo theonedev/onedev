@@ -105,7 +105,7 @@ public class InvalidBuildPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccessBuild(getBuild());
+		return SecurityUtils.canAccessProject(getBuild().getProject());
 	}
 	
 	@Override

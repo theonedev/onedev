@@ -88,7 +88,7 @@ public class ArtifactResource extends AbstractResource {
 				throw new EntityNotFoundException(message);
 			}
 			
-			if (!SecurityUtils.canAccessBuild(build))
+			if (!SecurityUtils.canAccessProject(build.getProject()))
 				throw new UnauthorizedException();
 			
 			fileInfo = (FileInfo) getBuildService().getArtifactInfo(build, artifactPath);

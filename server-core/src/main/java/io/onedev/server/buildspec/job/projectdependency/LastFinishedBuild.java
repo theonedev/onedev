@@ -11,7 +11,6 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.util.EditContext;
 
@@ -50,7 +49,7 @@ public class LastFinishedBuild implements BuildProvider {
 		Project project = ProjectDependency.getInputProject(EditContext.get(1));
 		List<String> jobNames = new ArrayList<>();
 		if (project != null) {
-			jobNames.addAll(OneDev.getInstance(BuildService.class).getAccessibleJobNames(SecurityUtils.getSubject(), project));
+			jobNames.addAll(OneDev.getInstance(BuildService.class).getJobNames(project));
 			Collections.sort(jobNames);
 		}
 		return jobNames;

@@ -30,7 +30,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ProjectScopedCommitAware;
@@ -50,21 +49,7 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 	private final String refName;
 	
 	private final List<Job> jobs;
-	
-	private final IModel<List<Job>> accessibleJobsModel = new LoadableDetachableModel<List<Job>>() {
-
-		@Override
-		protected List<Job> load() {
-			List<Job> accessibleJobs = new ArrayList<>();
-			for (Job job: jobs) {
-				if (SecurityUtils.canAccessJob(getProject(), job.getName()))
-					accessibleJobs.add(job);
-			}
-			return accessibleJobs;
-		}
 		
-	};
-	
 	public JobListPanel(String id, ObjectId commitId, @Nullable String refName, List<Job> jobs) {
 		super(id);
 		this.commitId = commitId;
@@ -82,20 +67,10 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new WebMarkupContainer("note") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(accessibleJobsModel.getObject().size() != jobs.size());
-			}
-			
-		});
-				
+						
 		RepeatingView jobsView = new RepeatingView("jobs");
 		add(jobsView);
-		for (Job job: accessibleJobsModel.getObject()) {
+		for (Job job: jobs) {
 			WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
 			Status status = getProject().getCommitStatuses(commitId, getPullRequest(), refName).get(job.getName());
 					
@@ -171,12 +146,6 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 	
 	private Collection<String> getChangeObservables() {
 		return Sets.newHashSet(Build.getCommitStatusChangeObservable(getProject().getId(), commitId.name()));
-	}
-
-	@Override
-	protected void onDetach() {
-		accessibleJobsModel.detach();
-		super.onDetach();
 	}
 
 	@Override

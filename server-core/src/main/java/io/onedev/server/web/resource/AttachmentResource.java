@@ -83,7 +83,7 @@ public class AttachmentResource extends AbstractResource {
 					if (!SecurityUtils.canAccessIssue(issue))
 						throw new UnauthorizedException();
 				} else if ((build = OneDev.getInstance(BuildService.class).find(attachmentGroup)) != null) {
-					if (!SecurityUtils.canAccessBuild(build))
+					if (!SecurityUtils.canAccessProject(build.getProject()))
 						throw new UnauthorizedException();
 				} else if (!SecurityUtils.canAccessProject(project)) {
 					throw new UnauthorizedException();

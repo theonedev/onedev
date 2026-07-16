@@ -36,7 +36,6 @@ import io.onedev.server.model.support.role.CodePrivilege;
 import io.onedev.server.model.support.role.IssueFieldSet;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.model.support.role.PackPrivilege;
-import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildPipeline;
 import io.onedev.server.security.permission.AccessBuildReports;
@@ -389,7 +388,9 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.uploadCache = uploadCache;
 	}
 
-	@Editable(order=700)
+	@Editable(order=700, name="Additional Job Privileges", description="""
+		By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, \
+		specify them here.""")
 	@DependsOn(property="manageBuilds", value="false")
 	public List<JobPrivilege> getJobPrivileges() {
 		return jobPrivileges;
@@ -465,7 +466,6 @@ public class Role extends AbstractEntity implements BasePermission {
 		if (uploadCache)
 			permissions.add(new UploadCache());
 		for (var jobPrivilege: jobPrivileges) {
-			permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
 			if (jobPrivilege.isManageJob()) 
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new ManageJob()));
 			if (jobPrivilege.isRunJob()) 

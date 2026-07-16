@@ -42,7 +42,6 @@ import io.onedev.server.search.entity.build.SubmittedByUserCriteria;
 import io.onedev.server.search.entity.build.SuccessfulCriteria;
 import io.onedev.server.search.entity.build.TimedOutCriteria;
 import io.onedev.server.search.entity.build.WaitingCriteria;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.LabelSpecService;
@@ -143,8 +142,7 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 
 			@Override
 			protected List<String> load() {
-				var subject = SecurityUtils.getSubject();
-				var jobNames = new ArrayList<>(getBuildService().getAccessibleJobNames(subject, getProject()));
+				var jobNames = new ArrayList<>(getBuildService().getJobNames(getProject()));
 				Collections.sort(jobNames);
 				return jobNames;
 			}

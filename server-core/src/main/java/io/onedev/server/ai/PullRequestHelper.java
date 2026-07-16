@@ -35,7 +35,6 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UrlService;
@@ -116,7 +115,6 @@ public class PullRequestHelper {
     public static List<Map<String, Object>> getBuilds(Project currentProject, PullRequest pullRequest) {
         var builds = new ArrayList<Map<String, Object>>();
         pullRequest.getCurrentBuilds().stream()
-            .filter(it -> SecurityUtils.canAccessJob(pullRequest.getTargetProject(), it.getJobName()))
             .forEach(it -> {
                 var summary = BuildHelper.getSummary(currentProject, it);
                 summary.put("link", getUrlService().urlFor(it, true));

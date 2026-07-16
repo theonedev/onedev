@@ -76,7 +76,7 @@ public class ArtifactResource {
     public ArtifactInfo getArtifactInfo(@PathParam("buildId") Long buildId, 
 										@PathParam("artifactPath") @Api(example = "/path/to/directoryOrFile") String artifactPath) {
 		Build build = buildService.load(buildId);
-		if (!SecurityUtils.canAccessBuild(build))
+		if (!SecurityUtils.canAccessProject(build.getProject()))
 			throw new UnauthorizedException();
 		return buildService.getArtifactInfo(build, normalizeArtifactPath(artifactPath));
     }
@@ -88,7 +88,7 @@ public class ArtifactResource {
 	public StreamingOutput downloadArtifact(@PathParam("buildId") Long buildId,
 									 @PathParam("artifactPath") @Api(example = "path/to/file") String artifactPath) {
 		Build build = buildService.load(buildId);
-		if (!SecurityUtils.canAccessBuild(build))
+		if (!SecurityUtils.canAccessProject(build.getProject()))
 			throw new UnauthorizedException();
 
 		var projectId = build.getProject().getId();
