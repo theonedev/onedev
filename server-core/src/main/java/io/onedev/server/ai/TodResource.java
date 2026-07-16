@@ -588,7 +588,6 @@ public class TodResource {
             projectDetail.put("issueManagement", project.isIssueManagement());
             projectDetail.put("timeTracking", project.isTimeTracking());
         }
-        projectDetail.put("effectiveDefaultPullRequestMergeStrategy", project.findDefaultPullRequestMergeStrategy());
         projectDetail.put("defaultBranch", project.getDefaultBranch());
         projectDetail.put("link", urlService.urlFor(project, true));
         return projectDetail;
@@ -1279,8 +1278,7 @@ public class TodResource {
                 @QueryParam("targetProject") String targetProjectPath,
                 @QueryParam("sourceProject") String sourceProjectPath,
                 @QueryParam("targetBranch") String targetBranch,
-                @QueryParam("sourceBranch") @NotNull String sourceBranch,
-                @QueryParam("mergeStrategy") String mergeStrategyName) {
+                @QueryParam("sourceBranch") @NotNull String sourceBranch) {
         var createPullRequestEssentialInfo = getCreatePullRequestEssentialInfo(
             currentProjectPath, targetProjectPath, sourceProjectPath, 
             targetBranch, sourceBranch);

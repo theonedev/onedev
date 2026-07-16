@@ -1,3 +1,11 @@
+# 16.1.0
+
+### CI/CD
+
+1. Issues defined in parent project are now longer able to link with commits/builds/PRs in child projects. This restriction is added to address the performance problem when a project has many child projects
+
+1. Users authorized to access a projectd will be able to access artifacts of all CI/CD jobs of the project. This is added to address performance issue when massive number of projects are created in OneDev
+
 # 16.0.0
 
 ### CI/CD
