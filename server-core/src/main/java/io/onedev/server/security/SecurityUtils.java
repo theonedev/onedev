@@ -560,7 +560,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canWritePack(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, new WritePack()));
+		return canWritePack(getSubject(), project);
+	}
+
+	public static boolean canWritePack(Subject subject, Project project) {
+		return subject.isPermitted(new ProjectPermission(project, new WritePack()));
 	}
 	
 	public static boolean isAdministrator() {

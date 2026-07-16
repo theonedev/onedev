@@ -111,5 +111,31 @@ public class PackResource {
 		auditService.audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
+
+	@Api(order=800, description="Delete all packages matching query")
+	@DELETE
+	public Response deletePacks(
+			@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~packages'>packages page</a>", example="\"Type\" is \"Container Image\"") String query) {
+		var subject = SecurityUtils.getSubject();
+
+		PackQuery parsedQuery;
+		try {
+			parsedQuery = PackQuery.parse(null, query, true);
+		} catch (Exception e) {
+			throw new NotAcceptableException("Error parsing query", e);
+		}
+
+		var packs = packService.query(subject, null, parsedQuery, false, 0, Integer.MAX_VALUE);
+		for (var pack: packs) {
+			if (!SecurityUtils.canWritePack(subject, pack.getProject()))
+				throw new UnauthorizedException();
+		}
+		packService.delete(packs);
+		for (var pack: packs) {
+			var oldAuditContent = VersionedXmlDoc.fromBean(pack).toXML();
+			auditService.audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\" via RESTful API", oldAuditContent, null);
+		}
+		return Response.ok().build();
+	}
 	
 }
