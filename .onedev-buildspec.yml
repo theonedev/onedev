@@ -40,7 +40,7 @@ jobs:
 
         projectDir=`pwd`
 
-        curl -H "Authorization: Bearer @secret:onedev-token@" -G -X DELETE https://code.onedev.io/~/api/packages --data-urlencode 'query="Version" is "@build_version@"'
+        curl -H "Authorization: Bearer @secret:onedev-token@" -G -X DELETE https://code.onedev.io/~api/packages --data-urlencode 'query="Version" is "@build_version@"'
 
         mvn -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
 
