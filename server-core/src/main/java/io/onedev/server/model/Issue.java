@@ -1228,8 +1228,9 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			for (ProjectScopedCommit commit: getFixCommits(false)) 
 				pullRequestIds.addAll(infoService.getPullRequestIds(commit.getProject(), commit.getCommitId()));
 			pullRequestIds.addAll(infoService.getPullRequestIds(getProject(), getId()));
-			getProject().getTree().stream().filter(Project::isCodeManagement).forEach(it ->
-					pullRequestIds.addAll(infoService.getPullRequestIds(it, getId())));
+
+			//getProject().getTree().stream().filter(Project::isCodeManagement).forEach(it ->
+			//		pullRequestIds.addAll(infoService.getPullRequestIds(it, getId())));
 			
 			var pullRequestService = OneDev.getInstance(PullRequestService.class);
 			for (Long requestId: pullRequestIds) {
@@ -1246,6 +1247,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		var fixCommits = new ArrayList<ProjectScopedCommit>();
 		CommitInfoService commitInfoService = OneDev.getInstance(CommitInfoService.class);
 
+		/* 
 		getProject().getTree().stream().filter(Project::isCodeManagement).forEach(it-> {
 			for (ObjectId commitId: commitInfoService.getFixCommits(it.getId(), getId(), headOnly)) {
 				RevCommit commit = it.getRevCommit(commitId, false);
@@ -1253,6 +1255,13 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 					fixCommits.add(new ProjectScopedCommit(it, commit.copy()));
 			}
 		});
+		*/
+
+		for (ObjectId commitId: commitInfoService.getFixCommits(project.getId(), getId(), headOnly)) {
+			RevCommit commit = project.getRevCommit(commitId, false);
+			if (commit != null)
+				fixCommits.add(new ProjectScopedCommit(project.getId(), commit.copy()));
+		}
 
 		Collections.sort(fixCommits, (Comparator<ProjectScopedCommit>) (o1, o2) -> o2.getRevCommit().getCommitTime() - o1.getRevCommit().getCommitTime());
 		return fixCommits;
