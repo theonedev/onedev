@@ -1,9 +1,9 @@
 # Build the docker image for onedev server
-FROM ubuntu:26.10 AS build
+FROM ubuntu:26.04 AS build
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://get.docker.com | sh
 
-FROM ubuntu:26.10
+FROM ubuntu:26.04
 ARG TARGETPLATFORM
 COPY app /app
 COPY entrypoint-server.sh /root/bin/entrypoint.sh
