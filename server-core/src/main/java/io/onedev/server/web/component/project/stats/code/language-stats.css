@@ -1,0 +1,26 @@
+.language-stats-bar {
+	display: flex;
+	overflow: hidden;
+	border-radius: 0.42rem;
+	height: 0.5rem;
+	background: var(--light-gray);
+	margin-bottom: 0.75rem;
+}
+.dark-mode .language-stats-bar {
+	background: var(--dark-mode-dark-gray);
+}
+.language-stats-bar>span {
+	display: block;
+	min-width: 2px;
+	height: 100%;
+}
+.language-stats-dot {
+	display: inline-block;
+	width: 0.6rem;
+	height: 0.6rem;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+.language-stats-legend {
+	font-size: 0.85rem;
+}

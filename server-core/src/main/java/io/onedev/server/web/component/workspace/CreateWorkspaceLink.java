@@ -12,7 +12,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.workspace.WorkspaceService;
 
 public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
@@ -47,7 +47,7 @@ public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 	public void onClick(AjaxRequestTarget target) {
 		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), getIssue(),
 				getPullRequest(), getCommitId(), getBranch(), getSpec().getName(), false);
-		setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
+		setResponsePage(WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(workspace));
 	}
 
 	@Override

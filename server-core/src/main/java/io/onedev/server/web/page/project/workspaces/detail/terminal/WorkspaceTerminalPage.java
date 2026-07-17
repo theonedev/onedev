@@ -13,7 +13,7 @@ import io.onedev.server.model.Workspace;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.terminal.TerminalPanel;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.workspace.WorkspaceService;
 
 public class WorkspaceTerminalPage extends WorkspaceDetailPage {
@@ -32,7 +32,7 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 		shellId = params.get(PARAM_SHELL).toString();
 
 		if (!workspaceService.getShellLabels(getWorkspace()).containsKey(shellId))
-			throw new RestartResponseException(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(getWorkspace()));
+			throw new RestartResponseException(WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(getWorkspace()));
 	}
 
 	public String getShellId() {
@@ -72,7 +72,7 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 
 			@Override
 			protected void onShellExit(IPartialPageRequestHandler handler) {
-				setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(getWorkspace()));	
+				setResponsePage(WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(getWorkspace()));	
 			}
 
 		});

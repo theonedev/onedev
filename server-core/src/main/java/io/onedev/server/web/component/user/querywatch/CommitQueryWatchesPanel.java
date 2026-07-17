@@ -38,7 +38,7 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
@@ -156,7 +156,7 @@ class CommitQueryWatchesPanel extends GenericPanel<User> {
                                      IModel<QueryInfo> rowModel) {
                 var project = getProjectService().load(rowModel.getObject().projectId);
                 var fragment = new Fragment(componentId, "linkFrag", CommitQueryWatchesPanel.this);
-                var link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project));
+                var link = new BookmarkablePageLink<Void>("link", ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project));
                 link.add(new Label("label", project.getPath()));
                 fragment.add(link);
                 cellItem.add(fragment);

@@ -7,8 +7,8 @@ import org.jspecify.annotations.Nullable;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
+import io.onedev.server.web.page.project.builds.detail.BuildDefaultPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -27,14 +27,14 @@ public class LinkTransformer implements BiFunction<EntityReference, String, Stri
 			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(IssueActivitiesPage.class,
 					IssueActivitiesPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";
 		} else if (reference instanceof BuildReference) {
-			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(BuildDashboardPage.class,
-					BuildDashboardPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";
+			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(BuildDefaultPage.class,
+					BuildDefaultPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";
 		} else if (reference instanceof PullRequestReference) {
 			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(PullRequestActivitiesPage.class,
 					PullRequestActivitiesPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";
 		} else if (reference instanceof WorkspaceReference) {
-			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(WorkspaceDashboardPage.class,
-					WorkspaceDashboardPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";
+			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(WorkspaceDefaultPage.class,
+					WorkspaceDefaultPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";
 		} else if (noneReferenceUrl != null) {
 			return String.format("<a href='%s'>%s</a>", noneReferenceUrl, text);			
 		} else {

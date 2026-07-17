@@ -55,7 +55,6 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
-import io.onedev.server.web.component.project.info.ProjectInfoPanel;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.opengraph.OpenGraphHeaderMeta;
@@ -68,7 +67,6 @@ import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.InvalidBuildPage;
-import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -81,6 +79,7 @@ import io.onedev.server.web.page.project.issues.iteration.IterationEditPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationListPage;
 import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -178,7 +177,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		projectModel.setObject(project);
 		
 		if (!(this instanceof ProjectSettingPage) 
-				&& !(this instanceof ProjectChildrenPage)
+				&& !(this instanceof ProjectOverviewPage)
 				&& !(this instanceof NoProjectStoragePage) 
 				&& getProject().getActiveServer(false) == null) {
 			throw new RestartResponseException(NoProjectStoragePage.class, 
@@ -203,6 +202,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	@Override
 	protected List<SidebarMenu> getSidebarMenus() {
 		List<SidebarMenuItem> menuItems = new ArrayList<>();
+
+		menuItems.add(new SidebarMenuItem.Page("dashboard", _T("Overview"),
+				ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(getProject())));
 		
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
 			List<SidebarMenuItem> codeMenuItems = new ArrayList<>();
@@ -273,9 +275,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		// Add the sub menu even if it is empty as we need to place stats menu in the right place.
 		// Menu items may be added to the sub menu later via contribution
 		menuItems.add(new SidebarMenuItem.SubMenu("stats", _T("Statistics"), statsMenuItems));
-		
-		menuItems.add(new SidebarMenuItem.Page("tree", _T("Child Projects"), 
-				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
 		
 		if (SecurityUtils.canManageProject(getProject())) {
 			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();
@@ -348,22 +347,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		}
 		
 		String avatarUrl = OneDev.getInstance(AvatarService.class).getProjectAvatarUrl(getProject().getId());
-		SidebarMenu.Header menuHeader = new SidebarMenu.Header(avatarUrl, getProject().getName()) {
-			
-			@Override
-			protected Component newMoreInfo(String componentId, FloatingPanel dropdown) {
-				return new ProjectInfoPanel(componentId, projectModel) {
-
-					@Override
-					protected void onPromptForkOption(AjaxRequestTarget target) {
-						dropdown.close();
-					}
-					
-				};
-			}
-			
-		};
-		var menu = new SidebarMenu(menuHeader, menuItems);
+		var menu = new SidebarMenu(new SidebarMenu.Header(avatarUrl, getProject().getName()), menuItems);
 		
 		if (SecurityUtils.canManageProject(getProject())) {
 			List<Class<? extends ContributedProjectSetting>> contributedSettingClasses = new ArrayList<>();

@@ -445,14 +445,18 @@ public abstract class LayoutPage extends BasePage {
 					Fragment fragment = new Fragment("header", "menuHeaderFrag", LayoutPage.this);
 					fragment.add(new ExternalImage("icon", Model.of(header.getImageUrl())));
 					fragment.add(new Label("label", header.getLabel()));
-					fragment.add(new DropdownLink("moreInfo") {
+					if (header.hasMoreInfo()) {
+						fragment.add(new DropdownLink("moreInfo") {
 
-						@Override
-						protected Component newContent(String id, FloatingPanel dropdown) {
-							return header.newMoreInfo(id, dropdown);
-						}
+							@Override
+							protected Component newContent(String id, FloatingPanel dropdown) {
+								return header.newMoreInfo(id, dropdown);
+							}
 
-					});
+						});
+					} else {
+						fragment.add(new WebMarkupContainer("moreInfo").setVisible(false));
+					}
 					item.add(fragment);
 				} else {
 					item.add(new WebMarkupContainer("header").setVisible(false));

@@ -9129,4 +9129,24 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate233(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Dashboards.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					for (var widgetElement : element.element("widgets").elements()) {
+						for (var tabElement : widgetElement.element("tabs").elements()) {
+							if (tabElement.getName().endsWith("ProjectOverviewWidget")) {
+								tabElement.addElement("showWorkspaceStats").setText("true");
+								tabElement.addElement("showLanguageStats").setText("true");
+								tabElement.addElement("showNextIteration").setText("true");
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

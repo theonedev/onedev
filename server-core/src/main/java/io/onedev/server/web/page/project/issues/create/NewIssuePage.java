@@ -33,9 +33,9 @@ import io.onedev.server.web.component.issue.create.NewIssueEditor;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.security.LoginPage;
 
 public class NewIssuePage extends ProjectPage implements InputContext {
@@ -149,7 +149,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		if (project.isIssueManagement()) 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, 0));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project.getId()));
 	}
 	
 }

@@ -2,6 +2,7 @@ package io.onedev.server.web.component.issue.statestats;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -16,8 +17,8 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.StateSpec;
+import io.onedev.server.service.SettingService;
 
 public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 
@@ -32,13 +33,13 @@ public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 		int totalCount = getModelObject().values().stream().collect(Collectors.summingInt(it->it));
 		if (totalCount != 0) {
 			RepeatingView statesView = new RepeatingView("states");
-			for (StateSpec state: OneDev.getInstance(SettingService.class).getIssueSetting().getStateSpecs()) {
-				Integer count = getModelObject().get(state.getName());
+			for (String state: getOrderedStates()) {
+				Integer count = getModelObject().get(state);
 				if (count != null) { 
-					Link<Void> link = newStateLink(statesView.newChildId(), state.getName());
-					link.add(AttributeAppender.append("title", count + " " + state.getName().toLowerCase() + " issues"));
+					Link<Void> link = newStateLink(statesView.newChildId(), state);
+					link.add(AttributeAppender.append("data-tippy-content", getStateTitle(count, state)));
 					link.add(AttributeAppender.append("style", ""
-							+ "background-color: " + state.getColor() + ";" 
+							+ "background-color: " + getStateColor(state) + ";" 
 							+ "width: " + count*100.0/totalCount + "%;"
 							+ "min-width: 4px;"));
 					statesView.add(link);
@@ -61,6 +62,19 @@ public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 		}
 		
 		setOutputMarkupId(true);
+	}
+
+	protected Collection<String> getOrderedStates() {
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getStateSpecs()
+				.stream().map(StateSpec::getName).collect(Collectors.toList());
+	}
+
+	protected String getStateColor(String state) {
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getStateSpec(state).getColor();
+	}
+
+	protected String getStateTitle(int count, String state) {
+		return count + " " + state.toLowerCase() + " issues";
 	}
 	
 	protected abstract Link<Void> newStateLink(String componentId, String state);

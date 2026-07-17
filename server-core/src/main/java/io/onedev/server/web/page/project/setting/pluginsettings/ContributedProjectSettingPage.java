@@ -28,7 +28,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
@@ -189,7 +189,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 		if (SecurityUtils.canManageProject(project)) 
 			return new ViewStateAwarePageLink<Void>(componentId, ContributedProjectSettingPage.class, paramsOf(project, settingClass));
 		else 
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectPage.paramsOf(project.getId()));
 	}
 	
 }

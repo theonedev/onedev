@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 
 public abstract class ProjectSettingPage extends ProjectPage {
 
@@ -27,7 +27,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 		if (SecurityUtils.canManageProject(project))
 			return new ViewStateAwarePageLink<Void>(componentId, getPageClass(), paramsOf(project.getId()));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectPage.paramsOf(project.getId()));
 	}
 
 	@Override

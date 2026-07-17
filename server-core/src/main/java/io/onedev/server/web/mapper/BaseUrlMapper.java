@@ -105,18 +105,16 @@ import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.InvalidBuildPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
 import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.builds.detail.BuildDefaultPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
-import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
@@ -133,6 +131,7 @@ import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationListPage;
 import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -164,7 +163,7 @@ import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
 import io.onedev.server.web.page.project.workspaces.detail.changes.WorkspaceChangesPage;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
 import io.onedev.server.web.page.project.workspaces.detail.terminal.WorkspaceTerminalPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
@@ -425,9 +424,9 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~projects/import/${importer}", ProjectImportPage.class));
 
 		// For backward compatibility
-		add(new BasePageMapper("projects/${project}", ProjectDashboardPage.class));
+		add(new BasePageMapper("projects/${project}", ProjectOverviewPage.class));
 		
-		add(new ProjectPageMapper("${project}", ProjectDashboardPage.class));
+		add(new ProjectPageMapper("${project}", ProjectOverviewPage.class));
 
 		add(new ProjectPageMapper("${project}/~files", ProjectBlobPage.class));
 		add(new ProjectPageMapper("${project}/~commits", ProjectCommitsPage.class));
@@ -465,7 +464,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~iterations/new", NewIterationPage.class));
 		
 		add(new ProjectPageMapper("${project}/~builds", ProjectBuildsPage.class));
-		add(new ProjectPageMapper("${project}/~builds/${build}", BuildDashboardPage.class));
+		add(new ProjectPageMapper("${project}/~builds/${build}", BuildDefaultPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/pipeline", BuildPipelinePage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/log", BuildLogPage.class));
 		add(new ProjectPageMapper("${project}/~builds/${build}/changes", BuildChangesPage.class));
@@ -478,12 +477,10 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~packages/${pack}", PackDetailPage.class));
 
 		add(new ProjectPageMapper("${project}/~workspaces", ProjectWorkspacesPage.class));
-		add(new ProjectPageMapper("${project}/~workspaces/${workspace}", WorkspaceDashboardPage.class));
+		add(new ProjectPageMapper("${project}/~workspaces/${workspace}", WorkspaceDefaultPage.class));
 		add(new ProjectPageMapper("${project}/~workspaces/${workspace}/terminals/${shell}", WorkspaceTerminalPage.class));
 		add(new ProjectPageMapper("${project}/~workspaces/${workspace}/changes", WorkspaceChangesPage.class));
 		add(new ProjectPageMapper("${project}/~workspaces/${workspace}/log", WorkspaceLogPage.class));
-		
-		add(new ProjectPageMapper("${project}/~children", ProjectChildrenPage.class));
 		
 		add(new ProjectPageMapper("${project}/~settings/general", GeneralProjectSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/user-authorizations", io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage.class));

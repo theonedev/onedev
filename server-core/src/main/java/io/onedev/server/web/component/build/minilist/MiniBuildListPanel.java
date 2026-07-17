@@ -26,7 +26,7 @@ import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.builds.detail.BuildDefaultPage;
 
 public class MiniBuildListPanel extends GenericPanel<List<Build>> {
 
@@ -53,7 +53,7 @@ public class MiniBuildListPanel extends GenericPanel<List<Build>> {
 					Build build = item.getModelObject();
 					
 					Link<Void> buildLink = new BookmarkablePageLink<Void>("build", 
-							BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
+							BuildDefaultPage.class, BuildDefaultPage.paramsOf(build));
 					
 					Long buildId = build.getId();
 					buildLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {

@@ -14,7 +14,8 @@ import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -64,8 +65,8 @@ public abstract class CommitInfoPanel extends GenericPanel<ProjectScopedCommit> 
 		add(new ContributorPanel("contribution", revCommit.getAuthorIdent(),
 				revCommit.getCommitterIdent()));
 
-		add(new BookmarkablePageLink<Void>("project", ProjectDashboardPage.class,
-				ProjectDashboardPage.paramsOf(project)) {
+		add(new BookmarkablePageLink<Void>("project", ProjectOverviewPage.class,
+				ProjectOverviewPage.paramsOf(project)) {
 
 			@Override
 			public IModel<?> getBody() {

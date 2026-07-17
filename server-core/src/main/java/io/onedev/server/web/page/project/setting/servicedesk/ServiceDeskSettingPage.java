@@ -23,7 +23,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 
@@ -98,7 +98,7 @@ public class ServiceDeskSettingPage extends ProjectSettingPage {
 			else
 				return new ViewStateAwarePageLink<Void>(componentId, GeneralProjectSettingPage.class, paramsOf(project.getId()));
 		} else {
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectPage.paramsOf(project.getId()));
 		}
 	}
 	

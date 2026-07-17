@@ -3,8 +3,6 @@ package io.onedev.server.xodus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,16 +12,6 @@ import io.onedev.server.git.command.FileChange;
 import io.onedev.server.util.patternset.PatternSet;
 
 public class DefaultCommitInfoServiceTest {
-
-	@Test
-	public void shouldCountTextLinesAndIgnoreBinaryContent() throws Exception {
-		assertEquals(0, countLines(""));
-		assertEquals(1, countLines("first"));
-		assertEquals(1, countLines("first\n"));
-		assertEquals(2, countLines("first\nsecond"));
-		assertEquals(-1, DefaultCommitInfoService.countLines(
-				new ByteArrayInputStream(new byte[] {'a', 0, 'b'})));
-	}
 
 	@Test
 	public void shouldApplyLineChangesToLatestStats() {
@@ -39,11 +27,6 @@ public class DefaultCommitInfoServiceTest {
 		assertEquals(13, lineStats.get("Java").intValue());
 		assertFalse(lineStats.containsKey("Python"));
 		assertEquals(1, lineStats.size());
-	}
-
-	private int countLines(String content) throws Exception {
-		return DefaultCommitInfoService.countLines(
-				new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
 	}
 
 }

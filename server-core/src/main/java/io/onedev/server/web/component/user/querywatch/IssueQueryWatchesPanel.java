@@ -39,8 +39,8 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.page.issues.IssueListPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
@@ -184,7 +184,7 @@ class IssueQueryWatchesPanel extends GenericPanel<User> {
                 if (projectId != null) {
                     var project = getProjectService().load(projectId);
                     var fragment = new Fragment(componentId, "linkFrag", IssueQueryWatchesPanel.this);
-                    var link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project));
+                    var link = new BookmarkablePageLink<Void>("link", ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project));
                     link.add(new Label("label", project.getPath()));
                     fragment.add(link);
                     cellItem.add(fragment);

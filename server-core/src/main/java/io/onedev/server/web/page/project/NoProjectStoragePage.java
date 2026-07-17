@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 
 public class NoProjectStoragePage extends ProjectPage {
 
@@ -17,8 +17,8 @@ public class NoProjectStoragePage extends ProjectPage {
 		super(params);
 		
 		if (getProject().getActiveServer(false) != null) {
-			throw new RestartResponseException(ProjectDashboardPage.class, 
-					ProjectDashboardPage.paramsOf(getProject()));
+			throw new RestartResponseException(ProjectOverviewPage.class, 
+					ProjectOverviewPage.paramsOf(getProject()));
 		}
 	}
 
@@ -33,7 +33,7 @@ public class NoProjectStoragePage extends ProjectPage {
 		if (project.isCodeManagement()) 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(project, 0));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project.getId()));
 	}
 	
 	@Override

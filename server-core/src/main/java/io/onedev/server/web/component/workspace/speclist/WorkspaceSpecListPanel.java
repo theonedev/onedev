@@ -47,7 +47,7 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.workspace.CreateWorkspaceLink;
 import io.onedev.server.web.component.workspace.status.WorkspaceStatusIcon;
 import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.workspace.WorkspaceService;
 
 public abstract class WorkspaceSpecListPanel extends Panel {
@@ -162,7 +162,7 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 					Workspace workspace = item.getModelObject();
 
 					Link<Void> workspaceLink = new BookmarkablePageLink<Void>("workspace",
-							WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
+							WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(workspace));
 
 					Long workspaceId = workspace.getId();
 					workspaceLink.add(new WorkspaceStatusIcon("status", new LoadableDetachableModel<Status>() {

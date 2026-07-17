@@ -17,7 +17,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.workspace.WorkspaceService;
 
 public class TerminalTabHead extends Panel {
@@ -57,7 +57,7 @@ public class TerminalTabHead extends Panel {
 				workspaceService.terminateShell(workspace, shellId);
 
 				if (page instanceof WorkspaceTerminalPage terminalPage && shellId.equals(terminalPage.getShellId())) {
-					setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
+					setResponsePage(WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(workspace));
 				} else {
 					setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}

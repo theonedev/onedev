@@ -22,22 +22,19 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.TransactionService;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.BaseAuthorizationService;
 import io.onedev.server.service.ProjectLabelService;
 import io.onedev.server.service.ProjectService;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.layout.LayoutPage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.children.ProjectChildrenPage;
-import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.page.project.packs.ProjectPacksPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRolesBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
@@ -115,14 +112,7 @@ public class NewProjectPage extends LayoutPage {
 						});
 						
 						Session.get().success(_T("New project created"));
-						if (newProject.isCodeManagement())
-							setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
-						else if (newProject.isIssueManagement())
-							setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(newProject));
-						else if (newProject.isPackManagement())
-							setResponsePage(ProjectPacksPage.class, ProjectPacksPage.paramsOf(newProject));
-						else
-							setResponsePage(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(newProject));
+						setResponsePage(ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(newProject));
 					}
 				} catch (UnauthorizedException e) {
 					if (parentEditor.isVisible())

@@ -18,7 +18,7 @@ import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 
 public class IssueBranchPrefixPage extends ProjectIssueSettingPage {
 
@@ -62,7 +62,7 @@ public class IssueBranchPrefixPage extends ProjectIssueSettingPage {
 		if (SecurityUtils.canManageProject(project))
 			return new ViewStateAwarePageLink<Void>(componentId, IssueBranchPrefixPage.class, paramsOf(project.getId()));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectPage.paramsOf(project.getId()));
 	}
 
 }

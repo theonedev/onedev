@@ -69,7 +69,7 @@ public class SidebarMenu implements Serializable {
 		}
 	}
 	
-	public static abstract class Header implements Serializable {
+	public static class Header implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
 
@@ -90,7 +90,14 @@ public class SidebarMenu implements Serializable {
 			return label;
 		}
 
-		protected abstract Component newMoreInfo(String componentId, FloatingPanel dropdown);
+		protected boolean hasMoreInfo() {
+			return false;
+		}
+
+		@Nullable
+		protected Component newMoreInfo(String componentId, FloatingPanel dropdown) {
+			return null;
+		}
 		
 	}
 	

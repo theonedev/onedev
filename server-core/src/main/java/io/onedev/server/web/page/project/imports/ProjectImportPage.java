@@ -25,7 +25,7 @@ import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.wizard.WizardPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.server.web.page.project.children.ProjectChildrenPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 
 public class ProjectImportPage extends LayoutPage {
 
@@ -73,8 +73,8 @@ public class ProjectImportPage extends LayoutPage {
 
 						if (successful) {
 							if (importer.getParentProjectPath() != null) {
-								throw new RestartResponseException(ProjectChildrenPage.class, 
-										ProjectChildrenPage.paramsOf(importer.getParentProjectPath()));
+								throw new RestartResponseException(ProjectOverviewPage.class, 
+										ProjectOverviewPage.paramsOf(importer.getParentProjectPath()));
 							} else {
 								ProjectQuery query = new ProjectQuery();
 								PageParameters params = ProjectListPage.paramsOf(query.toString(), 0, 0);

@@ -1,0 +1,31 @@
+.project-overview .summary > .avatar {
+	width: 64px;
+	height: 64px;
+	border-radius: 0.75rem;
+}
+.project-overview .summary .details {
+	min-width: 0;
+}
+.project-overview .summary .h2 {
+	font-weight: 600;
+	line-height: 1.3;
+}
+.project-overview .section {
+	padding-top: 1.25rem;
+	margin-top: 1.25rem;
+	border-top: 1px solid var(--light-gray);
+}
+.dark-mode .project-overview .section {
+	border-top-color: var(--dark-mode-light-dark);
+}
+.project-overview .section:empty {
+	display: none;
+}
+.project-overview .children .project-list.card {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+}
+.project-overview .children .project-list > .card-body {
+	padding: 0;
+}

@@ -26,7 +26,7 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 public class WorkspaceSpecsPage extends ProjectSettingPage {
@@ -196,7 +196,7 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 		if (SecurityUtils.canManageProject(project))
 			return new ViewStateAwarePageLink<Void>(componentId, WorkspaceSpecsPage.class, paramsOf(project.getId()));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectPage.paramsOf(project.getId()));
 	}
 
 }

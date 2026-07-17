@@ -40,7 +40,7 @@ import io.onedev.server.util.ComponentHierarchical;
 import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.component.modal.message.MessageModal;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.builds.detail.BuildDefaultPage;
 import io.onedev.server.xodus.CommitInfoService;
 
 public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizationContextAware {
@@ -125,7 +125,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 										paramMap, refName, getPullRequest(), null, _T("Submitted manually")));
 							}
 							if (builds.size() == 1)
-								setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
+								setResponsePage(BuildDefaultPage.class, BuildDefaultPage.paramsOf(builds.iterator().next()));
 							else
 								close();
 								
@@ -156,7 +156,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 					Build build = jobService.submit(user, getProject(), commitId, job.getName(),
 							new HashMap<>(), refNames.iterator().next(), getPullRequest(), null, 
 							_T("Submitted manually"));
-					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
+					setResponsePage(BuildDefaultPage.class, BuildDefaultPage.paramsOf(build));
 					if (build.isFinished())
 						jobService.resubmit(SecurityUtils.getUser(), build, _T("Rebuild manually"));
 				}

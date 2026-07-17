@@ -38,7 +38,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.xodus.CommitInfoService;
 
 public class CodeContribsPage extends ProjectPage {
@@ -195,7 +195,7 @@ public class CodeContribsPage extends ProjectPage {
 		if (project.isCodeManagement() && SecurityUtils.canReadCode(project))
 			return new ViewStateAwarePageLink<>(componentId, getPageClass(), paramsOf(project));
 		else
-			return new ViewStateAwarePageLink<>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<>(componentId, ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project.getId()));
 	}
 	
 	public static PageParameters paramsOf(Project project, ContributionPeriod period) {

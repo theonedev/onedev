@@ -84,12 +84,11 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
 import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
@@ -184,7 +183,7 @@ public abstract class BuildDetailPage extends ProjectPage
 		if (project.isCodeManagement()) 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(project, 0));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project.getId()));
 	}
 
 	private ChangeObserver newBuildObserver(Long buildId) {
@@ -267,7 +266,7 @@ public abstract class BuildDetailPage extends ProjectPage
 					private void resubmit(Serializable paramBean) {
 						var user = SecurityUtils.getUser();
 						jobService.resubmit(user, getBuild(), _T("Resubmitted manually"));
-						setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
+						setResponsePage(BuildDefaultPage.class, BuildDefaultPage.paramsOf(getBuild()));
 					}
 
 					@Override

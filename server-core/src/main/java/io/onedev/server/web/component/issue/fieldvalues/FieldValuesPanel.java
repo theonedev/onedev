@@ -72,7 +72,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.builds.detail.BuildDefaultPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
@@ -292,7 +292,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 					if (build != null) {
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 						Link<Void> buildLink = new BookmarkablePageLink<Void>("link", 
-								BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
+								BuildDefaultPage.class, BuildDefaultPage.paramsOf(build));
 						buildLink.add(new Label("label", build.getReference().toString(getProject())));
 						linkFrag.add(buildLink);
 						valueContainer.add(linkFrag);

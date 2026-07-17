@@ -19,7 +19,7 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 
 public class ProjectChildrenTree extends NestedTree<ProjectFacade> {
 
@@ -133,8 +133,8 @@ public class ProjectChildrenTree extends NestedTree<ProjectFacade> {
 	}
 	
 	protected WebMarkupContainer newChildLink(String componentId, Long childId) {
-		return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, 
-				ProjectDashboardPage.paramsOf(childId));		
+		return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, 
+				ProjectOverviewPage.paramsOf(childId));		
 	}
 	
 }

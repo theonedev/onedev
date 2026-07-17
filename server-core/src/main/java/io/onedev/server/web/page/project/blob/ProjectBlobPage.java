@@ -136,7 +136,7 @@ import io.onedev.server.web.page.project.blob.search.advanced.AdvancedSearchPane
 import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.upload.FileUpload;
@@ -1723,8 +1723,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) {
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));
 		} else {
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, 
-					ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, 
+					ProjectOverviewPage.paramsOf(project.getId()));
 		}
 	}
 	

@@ -50,7 +50,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.xodus.CommitInfoService;
 import org.apache.wicket.Component;
@@ -977,7 +977,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(project.getId()));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project.getId()));
 	}
 	
 	@Nullable

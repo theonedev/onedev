@@ -45,7 +45,11 @@ public class IssueStatsPanel extends Panel {
 		this.statsModel = statsModel;
 	}
 	
-	private long getTotalCount() {
+	protected boolean isShowTotal() {
+		return true;
+	}
+
+	public long getTotalCount() {
 		return getStats().values().stream().collect(Collectors.summingLong(Long::longValue));
 	}
 	
@@ -59,7 +63,15 @@ public class IssueStatsPanel extends Panel {
 
 		IssueQuery query = new IssueQuery(new ProjectIsCurrentCriteria());
 		PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), 0);
-		Link<Void> issuesLink = new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, params);
+		Link<Void> issuesLink = new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, params) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(isShowTotal());
+			}
+
+		};
 		issuesLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override

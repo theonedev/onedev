@@ -111,9 +111,8 @@ import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.NewProjectPage;
-import io.onedev.server.web.page.project.children.ProjectChildrenPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.WicketUtils;
@@ -1210,7 +1209,7 @@ public class ProjectListPanel extends Panel {
 				Long projectId = project.getId();
 				
 				ActionablePageLink projectLink = new ActionablePageLink("path", 
-						ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project)) {
+						ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
@@ -1345,8 +1344,8 @@ public class ProjectListPanel extends Panel {
 				if (!children.isEmpty()) {
 					Fragment childrenFrag = new Fragment("children", "childrenFrag", ProjectListPanel.this);
 					
- 					childrenFrag.add(new BookmarkablePageLink<Void>("link", ProjectChildrenPage.class, 
- 							ProjectChildrenPage.paramsOf(projectId)) {
+ 					childrenFrag.add(new BookmarkablePageLink<Void>("link", ProjectOverviewPage.class, 
+ 							ProjectOverviewPage.paramsOf(projectId)) {
 
 						@Override
 						protected void onInitialize() {

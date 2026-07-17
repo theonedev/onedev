@@ -108,7 +108,7 @@ import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.builds.detail.BuildDefaultPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
@@ -1108,7 +1108,7 @@ public abstract class BuildListPanel extends Panel {
 				Long buildId = build.getId();
 
 				WebMarkupContainer link = new ActionablePageLink("link",
-						BuildDashboardPage.class, BuildDashboardPage.paramsOf(build)) {
+						BuildDefaultPage.class, BuildDefaultPage.paramsOf(build)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {

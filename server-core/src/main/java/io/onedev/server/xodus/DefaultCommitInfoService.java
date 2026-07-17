@@ -3,7 +3,6 @@ package io.onedev.server.xodus;
 import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.util.stream.Collectors.toSet;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -95,7 +94,6 @@ import io.onedev.server.service.IssueService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.ElementPumper;
-import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProgrammingLanguageDetector;
@@ -662,47 +660,25 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 		});
 
 		PatternSet filePatterns = PatternSet.parse(project.findCodeAnalysisFiles());
-		if (lastCommitId == null) {
-			Map<String, Integer> lineStats = new HashMap<>();
-			for (String path : GitUtils.getBlobPaths(repository, commitId)) {
-				String language = getLanguage(path, filePatterns);
-				if (language != null) {
-					try (InputStream input = GitUtils.getInputStream(repository, commitId, path)) {
-						int lines = countLines(input);
-						if (lines > 0)
-							lineStats.merge(language, lines, Integer::sum);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
+		String fromRev = lastCommitId != null ? lastCommitId.name() : Constants.EMPTY_TREE_ID.name();
+		env.executeInTransaction(txn -> {
+			Map<String, Integer> lineStats;
+			byte[] bytesOfLineStats = lastCommitId != null ? readBytes(defaultStore, txn, LINE_STATS_KEY) : null;
+			if (bytesOfLineStats != null)
+				lineStats = SerializationUtils.deserialize(bytesOfLineStats);
+			else
+				lineStats = new HashMap<>();
 
-			env.executeInTransaction(txn -> {
-				byte[] bytesOfLineStats = SerializationUtils.serialize((Serializable) lineStats);
-				defaultStore.put(txn, LINE_STATS_KEY, new ArrayByteIterable(bytesOfLineStats));
+			ListNumStatsCommand command = new ListNumStatsCommand(
+					projectService.getGitDir(project.getId()),
+					fromRev, commitId.name(), true);
+			updateLineStats(lineStats, command.run(), filePatterns);
 
-				defaultStore.put(txn, LAST_COMMIT_OF_LINE_STATS_KEY, new CommitByteIterable(commitId));
-			});
-		} else {
-			env.executeInTransaction(txn -> {
-				Map<String, Integer> lineStats;
-				byte[] bytesOfLineStats = readBytes(defaultStore, txn, LINE_STATS_KEY);
-				if (bytesOfLineStats != null) 
-					lineStats = SerializationUtils.deserialize(bytesOfLineStats);
-				else 
-					lineStats = new HashMap<>();
+			bytesOfLineStats = SerializationUtils.serialize((Serializable) lineStats);
+			defaultStore.put(txn, LINE_STATS_KEY, new ArrayByteIterable(bytesOfLineStats));
 
-				ListNumStatsCommand command = new ListNumStatsCommand(
-						projectService.getGitDir(project.getId()),
-						lastCommitId.name(), commitId.name(), true);
-				updateLineStats(lineStats, command.run(), filePatterns);
-
-				bytesOfLineStats = SerializationUtils.serialize((Serializable) lineStats);
-				defaultStore.put(txn, LINE_STATS_KEY, new ArrayByteIterable(bytesOfLineStats));
-
-				defaultStore.put(txn, LAST_COMMIT_OF_LINE_STATS_KEY, new CommitByteIterable(commitId));
-			});
-		}
+			defaultStore.put(txn, LAST_COMMIT_OF_LINE_STATS_KEY, new CommitByteIterable(commitId));
+		});
 	}
 
 	private void processCommitRange(Project project, ObjectId untilCommitId,
@@ -777,37 +753,6 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 				}
 			}
 		}
-	}
-
-	@Nullable
-	private String getLanguage(String path, PatternSet filePatterns) {
-		if (new FileChange(null, path, 0, 0).matches(filePatterns)) {
-			String extension = FileExtension.getExtension(path);
-			if (StringUtils.isNotBlank(extension))
-				return ProgrammingLanguageDetector.getLanguageForExtension(extension);
-		}
-		return null;
-	}
-
-	static int countLines(InputStream input) throws IOException {
-		int lines = 0;
-		int lastByte = -1;
-		try (var bufferedInput = new BufferedInputStream(input)) {
-			byte[] buffer = new byte[8192];
-			int bytesRead;
-			while ((bytesRead = bufferedInput.read(buffer)) != -1) {
-				for (int i = 0; i < bytesRead; i++) {
-					if (buffer[i] == 0)
-						return -1;
-					if (buffer[i] == '\n')
-						lines++;
-				}
-				lastByte = buffer[bytesRead - 1];
-			}
-		}
-		if (lastByte != -1 && lastByte != '\n')
-			lines++;
-		return lines;
 	}
 
 	private int getPathIndex(Store pathToIndexStore, Store indexToPathStore, Transaction txn,

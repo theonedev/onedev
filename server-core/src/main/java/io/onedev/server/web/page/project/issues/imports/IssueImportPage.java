@@ -32,8 +32,8 @@ import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.wizard.WizardPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 
 public class IssueImportPage<Where extends Serializable, What extends Serializable, How extends Serializable> extends ProjectPage {
 
@@ -151,7 +151,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 		if (project.isIssueManagement()) 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, 0));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project.getId()));
 	}
 	
 }

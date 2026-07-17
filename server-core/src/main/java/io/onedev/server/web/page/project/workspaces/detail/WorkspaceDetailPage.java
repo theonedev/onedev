@@ -61,10 +61,9 @@ import io.onedev.server.web.component.workspace.invalidspec.InvalidWorkspaceSpec
 import io.onedev.server.web.component.workspace.on.WorkspaceOnPanel;
 import io.onedev.server.web.component.workspace.status.WorkspaceStatusIcon;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
 import io.onedev.server.web.page.project.workspaces.detail.changes.WorkspaceChangesPage;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
 import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
 import io.onedev.server.web.page.project.workspaces.detail.terminal.TerminalTab;
 import io.onedev.server.web.page.project.workspaces.detail.terminal.WorkspaceTerminalPage;
@@ -97,7 +96,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 		String workspaceNumberString = params.get(PARAM_WOPKSPACE).toString();
 		if (StringUtils.isBlank(workspaceNumberString))
-			throw new RestartResponseException(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(getProject().getId()));
+			throw new RestartResponseException(ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(getProject().getId()));
 
 		workspaceModel = new LoadableDetachableModel<Workspace>() {
 
@@ -108,7 +107,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 				if (workspace == null)
 					throw new EntityNotFoundException(_T("Workspace not found"));
 				if (!workspace.getProject().equals(getProject()))
-					throw new RestartResponseException(WorkspaceDashboardPage.class, paramsOf(workspace));
+					throw new RestartResponseException(WorkspaceDefaultPage.class, paramsOf(workspace));
 				return workspace;
 			}
 
@@ -132,8 +131,8 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		return new ViewStateAwarePageLink<>(componentId, ProjectDashboardPage.class,
-				ProjectDashboardPage.paramsOf(project.getId()));
+		return new ViewStateAwarePageLink<>(componentId, ProjectOverviewPage.class,
+				ProjectOverviewPage.paramsOf(project.getId()));
 	}
 
 	@Override
@@ -336,7 +335,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 					@Override
 					public void navTo(AjaxRequestTarget target, Workspace entity, Cursor cursor) {
 						WebSession.get().setWorkspaceCursor(cursor);
-						setResponsePage(WorkspaceDashboardPage.class, WorkspaceDetailPage.paramsOf(entity));
+						setResponsePage(WorkspaceDefaultPage.class, WorkspaceDetailPage.paramsOf(entity));
 					}
 				};
 			}
@@ -398,7 +397,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				if ((shellCount == 0 && workspaceService.getShellLabels(getWorkspace()).size() != 0) 
 						|| (workspaceStatus == Workspace.Status.ACTIVE) != (getWorkspace().getStatus() == Workspace.Status.ACTIVE)) {
-					setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(getWorkspace()));
+					setResponsePage(WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(getWorkspace()));
 				}
 			}
 

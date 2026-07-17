@@ -18,7 +18,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 public class ProjectAiSettingPage extends ProjectSettingPage {
@@ -63,7 +63,7 @@ public class ProjectAiSettingPage extends ProjectSettingPage {
 		if (SecurityUtils.canManageProject(project)) 
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectAiSettingPage.class, paramsOf(project.getId()));
 		else 
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectPage.paramsOf(project.getId()));
 	}
 	
 }

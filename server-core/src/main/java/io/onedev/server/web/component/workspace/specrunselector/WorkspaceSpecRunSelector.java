@@ -29,7 +29,7 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.behavior.InputChangeBehavior;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.workspace.WorkspaceService;
 
 public abstract class WorkspaceSpecRunSelector extends Panel {
@@ -146,7 +146,7 @@ public abstract class WorkspaceSpecRunSelector extends Panel {
 				var commitId = getProject().getObjectId(branch, true);
 				var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), commitId, branch, spec.getName(), false);
 				onSelect(target, spec);
-				setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));
+				setResponsePage(WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(workspace));
 			}
 
 		};

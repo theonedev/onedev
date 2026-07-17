@@ -38,7 +38,7 @@ import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
 import io.onedev.server.web.page.user.UserPage;
@@ -187,8 +187,8 @@ class PullRequestQueryWatchesPanel extends GenericPanel<User> {
                 if (projectId != null) {
                     var project = getProjectService().load(projectId);
                     var fragment = new Fragment(componentId, "linkFrag", PullRequestQueryWatchesPanel.this);
-                    var link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, 
-                            ProjectDashboardPage.paramsOf(project));
+                    var link = new BookmarkablePageLink<Void>("link", ProjectOverviewPage.class, 
+                            ProjectOverviewPage.paramsOf(project));
                     link.add(new Label("label", project.getPath()));
                     fragment.add(link);
                     cellItem.add(fragment);

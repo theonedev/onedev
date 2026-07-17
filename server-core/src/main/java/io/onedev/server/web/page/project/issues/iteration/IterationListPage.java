@@ -16,7 +16,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.IterationSort;
 import io.onedev.server.web.component.iteration.list.IterationListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 public class IterationListPage extends ProjectPage {
@@ -108,7 +108,7 @@ public class IterationListPage extends ProjectPage {
 		if (project.isIssueManagement()) 
 			return new ViewStateAwarePageLink<Void>(componentId, IterationListPage.class, IterationListPage.paramsOf(project, false, null));
 		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project.getId()));
 	}
 	
 }

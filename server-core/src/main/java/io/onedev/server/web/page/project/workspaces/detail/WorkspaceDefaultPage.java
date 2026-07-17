@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.workspaces.detail.dashboard;
+package io.onedev.server.web.page.project.workspaces.detail;
 
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.core.request.handler.PageProvider;
@@ -7,13 +7,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
-import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
 import io.onedev.server.web.page.project.workspaces.detail.terminal.WorkspaceTerminalPage;
 
-public class WorkspaceDashboardPage extends WorkspaceDetailPage {
+public class WorkspaceDefaultPage extends WorkspaceDetailPage {
 
-	public WorkspaceDashboardPage(PageParameters params) {
+	public WorkspaceDefaultPage(PageParameters params) {
 		super(params);
 
 		PageProvider pageProvider;

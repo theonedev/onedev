@@ -34,7 +34,7 @@ import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.component.workspace.list.WorkspaceListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.util.NamedWorkspaceQueriesBean;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
@@ -278,8 +278,8 @@ public class ProjectWorkspacesPage extends ProjectPage {
 
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		return new ViewStateAwarePageLink<>(componentId, ProjectDashboardPage.class,
-				ProjectDashboardPage.paramsOf(project.getId()));
+		return new ViewStateAwarePageLink<>(componentId, ProjectOverviewPage.class,
+				ProjectOverviewPage.paramsOf(project.getId()));
 	}
 
 	@Override

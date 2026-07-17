@@ -80,7 +80,7 @@ import io.onedev.server.web.component.workspace.invalidspec.InvalidWorkspaceSpec
 import io.onedev.server.web.component.workspace.on.WorkspaceOnPanel;
 import io.onedev.server.web.component.workspace.specrunselector.WorkspaceSpecRunSelector;
 import io.onedev.server.web.component.workspace.status.WorkspaceStatusIcon;
-import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -635,8 +635,8 @@ public abstract class WorkspaceListPanel extends Panel {
                                      IModel<Workspace> rowModel) {
 				Fragment fragment = new Fragment(componentId, "workspaceFrag", WorkspaceListPanel.this);
 				Workspace workspace = rowModel.getObject();
-				var link = new ActionablePageLink("link", WorkspaceDashboardPage.class,
-						WorkspaceDashboardPage.paramsOf(workspace)) {
+				var link = new ActionablePageLink("link", WorkspaceDefaultPage.class,
+						WorkspaceDefaultPage.paramsOf(workspace)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
