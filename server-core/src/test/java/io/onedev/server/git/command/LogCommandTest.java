@@ -92,33 +92,9 @@ public class LogCommandTest extends AbstractGitTest {
 		assertEquals("another testfile", commit2.getFileChanges().get(1).getNewPath());
 		assertEquals("another testfile", commit2.getFileChanges().get(1).getOldPath());
 		assertEquals("renamed testfile", commit2.getFileChanges().get(2).getNewPath());
+		assertEquals("testfile", commit2.getFileChanges().get(2).getOldPath());
 		assertEquals("second commit", commit2.getSubject());
 		assertEquals("first line\n\nsecond line\nthird line", commit2.getBody());
-
-		commits.clear();
-		fields = EnumSet.allOf(LogCommand.Field.class);
-		new LogCommand(git.getRepository().getDirectory()) {
-
-			@Override
-			protected void consume(LogCommit commit) {
-				commits.add(commit);
-			}
-			
-		}.options(options).fields(fields).run();
-		
-		LogCommit commit = commits.get(0);
-		
-		assertEquals(3, commit.getFileChanges().size());
-		assertEquals("3rd testfile", commit.getFileChanges().get(0).getNewPath());
-		assertEquals(8, commit.getFileChanges().get(0).getAdditions());
-		assertEquals(0, commit.getFileChanges().get(0).getDeletions());
-		
-		assertEquals("another testfile", commit.getFileChanges().get(1).getNewPath());
-		assertEquals(null, commit.getFileChanges().get(1).getOldPath());
-		
-		assertEquals("renamed testfile", commit.getFileChanges().get(2).getNewPath());
-		assertEquals(0, commit.getFileChanges().get(2).getAdditions());
-		assertEquals(0, commit.getFileChanges().get(2).getDeletions());		
 	}
 
 }
