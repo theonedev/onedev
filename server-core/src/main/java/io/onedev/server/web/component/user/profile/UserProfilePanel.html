@@ -19,8 +19,10 @@
         </div>
         <div class="activities p-5">
             <div class="d-flex mb-4 align-items-center">
-                <div class="date-range mr-4">
-                    <input wicket:id="dateRange" class="form-control form-control-sm">
+                <div class="year-nav d-flex align-items-center mr-4">
+                    <a wicket:id="prevYear" class="prev"><wicket:svg href="arrow2" class="icon icon-lg rotate-180"/></a>
+                    <span wicket:id="year" class="year-label"></span>
+                    <a wicket:id="nextYear" class="next"><wicket:svg href="arrow2" class="icon icon-lg"/></a>
                 </div>
                 <div class="ml-auto mb-0"><wicket:t><span wicket:id="activityCount"></span> activities</wicket:t></div>
             </div>

@@ -31,8 +31,26 @@
     width: fit-content;
 }
 
-.user-profile .date-range {
-    width: 200px;
+.user-profile .year-nav .year-label {
+    min-width: 4rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.user-profile .year-nav .prev,
+.user-profile .year-nav .next {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+}
+
+.user-profile .year-nav .prev {
+    margin-right: 0.5rem;
+}
+
+.user-profile .year-nav .next {
+    margin-left: 0.5rem;
 }
 
 /* Contribution Calendar Styles */
