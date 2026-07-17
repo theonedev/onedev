@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.model.User;
 import io.onedev.server.util.NameAndEmail;
@@ -40,18 +39,16 @@ public interface CommitInfoService {
 	Collection<ObjectId> getDescendants(Long projectId, Collection<ObjectId> ancestors);
 	
 	void cloneInfo(Long sourceProjectId, Long targetProjectId);
-	
-	Collection<String> getHistoryPaths(Long projectId, String path);
-	
+		
 	/**
 	 * Get overall contributions
 	 * 
 	 * @param projectId
 	 * 			project to get daily commits for
 	 * @return
-	 * 			map of day to contribution
+	 * 			map of day to commit count
 	 */
-	Map<Integer, GitContribution> getOverallContributions(Long projectId);
+	Map<Integer, Integer> getOverallContributions(Long projectId);
 	
 	/**
 	 * Get list of top contributors
@@ -60,29 +57,26 @@ public interface CommitInfoService {
 	 * 			project to get top contributors for
 	 * @param top
 	 * 			number of top contributors to get
-	 * @param type
-	 * 			type of contribution to order by
 	 * @param fromDay
 	 * 			from day
 	 * @param toDay
 	 * 			to day
 	 * @return
-	 * 			list of top user contributors, reversely ordered by number of contributions 
+	 * 			list of top user contributors, reversely ordered by number of commits 
 	 */
-	List<GitContributor> getTopContributors(Long projectId, int top, 
-			GitContribution.Type type, int fromDay, int toDay);
+	List<GitContributor> getTopContributors(Long projectId, int top, int fromDay, int toDay);
 
 	Map<Long, Map<ObjectId, Long>> getUserCommits(User user, Date fromDate, Date toDate);
 
 	/**
-	 * Get source code line statistics over time
+	 * Get source code line statistics of default branch head
 	 * 
 	 * @param projectId
 	 * 			project to get line stats for
 	 * @return
-	 * 			line statistics data
+	 * 			map of programming language to line count
 	 */
-	Map<Integer, Map<String, Integer>> getLineIncrements(Long projectId);
+	Map<String, Integer> getLineStats(Long projectId);
 
 	Collection<ObjectId> getFixCommits(Long projectId, Long issueId, boolean headOnly);
 	

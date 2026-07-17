@@ -1,20 +1,19 @@
 <wicket:extend>
-	<div class="code-contribs">
-		<wicket:enclosure child="note">
-		<div class="alert alert-light alert-notice mb-5">
-			<wicket:svg href="bulb" class="icon mr-2"/><span wicket:id="note"></span>
+	<div class="code-contribs p-2 p-sm-5 d-flex flex-column flex-grow-1">
+		<div class="card d-flex flex-column flex-grow-1">
+			<div class="card-body d-flex flex-column flex-grow-1">
+				<div class="alert alert-light alert-notice mb-4 d-flex align-items-center flex-wrap">
+					<div class="mr-auto d-flex align-items-center">
+						<wicket:enclosure child="note">
+						<wicket:svg href="bulb" class="icon mr-2"/><span wicket:id="note"></span>
+						</wicket:enclosure>
+					</div>
+					<select wicket:id="period" class="form-control form-control-sm period"></select>
+				</div>
+				<div class="overall chart border p-4 rounded mb-4"></div>
+				<div class="top-contributors"></div>
+			</div>
 		</div>
-		</wicket:enclosure>
-		<div class="d-flex align-items-center mb-4">
-			<span class="date-range mr-3 font-size-h5"></span>
-			<select class="contrib-type custom-select form-control ml-auto">
-				<option value="Commits"><wicket:t>Commits</wicket:t></option>
-				<option value="Additions"><wicket:t>Additions</wicket:t></option>
-				<option value="Deletions"><wicket:t>Deletions</wicket:t></option>
-			</select>
-		</div>
-		<div class="overall chart border p-4 rounded mb-4"></div>
-		<div class="top-contributors"></div>
 	</div>
 	<div wicket:id="userCard" class="user-card-content"></div>
 </wicket:extend>	

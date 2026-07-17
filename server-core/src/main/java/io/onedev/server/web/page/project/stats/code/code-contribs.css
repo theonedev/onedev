@@ -1,5 +1,5 @@
-.code-contribs select {
-	width: 120px;
+.code-contribs .alert .period {
+	width: 10rem;
 }
 .code-contribs .overall {
 	height: 360px;
@@ -20,13 +20,6 @@
 	background: url(/~img/dark-ajax-indicator-big.png) no-repeat scroll center center;
 }
 
-.code-contribs .top-contributors .head .total-contribution span.additions {
-	color: green;
-}
-.code-contribs .top-contributors .head .total-contribution span.deletions {
-	color: red;
-}
-
 .code-contribs .top-contributors .avatar {
 	width: 36px;
 	height: 36px;
@@ -39,13 +32,4 @@
 }
 .code-contribs .top-contributors .col-xl-6.right {
 	padding-left: 1rem;
-}
-
-.source-lines .chart {
-	min-height: 400px;
-}
-.source-lines .no-data {
-	text-align: center;
-	font-size: 3rem;
-	font-style: italic;
 }

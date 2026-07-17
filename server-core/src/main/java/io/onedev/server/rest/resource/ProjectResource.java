@@ -43,7 +43,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.model.BaseAuthorization;
 import io.onedev.server.model.GroupAuthorization;
@@ -262,7 +261,6 @@ public class ProjectResource {
 	@Path("/{projectId}/top-contributors")
 	@GET
     public List<GitContributor> getTopContributors(@PathParam("projectId") Long projectId, 
-    		@QueryParam("type") @NotNull GitContribution.Type type, 
     		@QueryParam("sinceDate") @NotEmpty @Api(description="Since date of format <i>yyyy-MM-dd</i>") String since, 
     		@QueryParam("untilDate") @NotEmpty @Api(description="Until date of format <i>yyyy-MM-dd</i>") String until, 
     		@QueryParam("count") int count) {
@@ -276,7 +274,7 @@ public class ProjectResource {
     	int sinceDay = (int) LocalDate.parse(since).toEpochDay();
     	int untilDay = (int) LocalDate.parse(until).toEpochDay();
     	
-    	return commitInfoService.getTopContributors(project.getId(), count, type, sinceDay, untilDay);
+    	return commitInfoService.getTopContributors(project.getId(), count, sinceDay, untilDay);
     }
 	
 	@SuppressWarnings("unused")

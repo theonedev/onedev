@@ -11,13 +11,13 @@ public class GitContributor implements Serializable {
 
 	private final PersonIdent author;
 	
-	private final GitContribution totalContribution;
+	private final int totalCommits;
 	
 	private final Map<Integer, Integer> dailyContributions;
 	
-	public GitContributor(PersonIdent author, GitContribution totalContribution, Map<Integer, Integer> dailyContributions) {
+	public GitContributor(PersonIdent author, int totalCommits, Map<Integer, Integer> dailyContributions) {
 		this.author = author;
-		this.totalContribution = totalContribution;
+		this.totalCommits = totalCommits;
 		this.dailyContributions = dailyContributions;
 	}
 
@@ -25,8 +25,8 @@ public class GitContributor implements Serializable {
 		return author;
 	}
 
-	public GitContribution getTotalContribution() {
-		return totalContribution;
+	public int getTotalCommits() {
+		return totalCommits;
 	}
 
 	public Map<Integer, Integer> getDailyContributions() {

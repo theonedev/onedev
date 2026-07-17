@@ -71,7 +71,6 @@ public class LogCommandTest extends AbstractGitTest {
 
 		var options = new RevListOptions().revisions(newArrayList("main"));
 		EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
-		fields.remove(LogCommand.Field.LINE_CHANGES);
 		new LogCommand(git.getRepository().getDirectory()) {
 
 			@Override

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -33,10 +32,10 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
@@ -70,7 +69,6 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.xodus.CommitInfoService;
 
 @Singleton
 public class DefaultCodeCommentService extends BaseEntityService<CodeComment> implements CodeCommentService {
@@ -81,9 +79,6 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 
 	@Inject
 	private ListenerRegistry listenerRegistry;
-
-	@Inject
-	private CommitInfoService commitInfoService;
 
 	@Transactional
 	@Override
@@ -154,12 +149,10 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 		Map<CodeComment, PlanarRange> comments = new HashMap<>();
 		
 		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();
-		Collection<String> possiblePaths = Sets.newHashSet(path);
-		possiblePaths.addAll(commitInfoService.getHistoryPaths(project.getId(), path));
 		
 		EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
 		criteria.add(Restrictions.eq(CodeComment.PROP_PROJECT, project));
-		criteria.add(Restrictions.in(CodeComment.PROP_MARK + "." + Mark.PROP_PATH, possiblePaths));
+		criteria.add(Restrictions.eq(CodeComment.PROP_MARK + "." + Mark.PROP_PATH, path));
 		
 		for (CodeComment comment: query(criteria)) {
 			String possiblePath = comment.getMark().getPath();

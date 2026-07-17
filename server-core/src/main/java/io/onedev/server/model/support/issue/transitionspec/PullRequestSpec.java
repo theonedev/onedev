@@ -38,7 +38,7 @@ public abstract class PullRequestSpec extends AutoSpec {
 	}
 
 	@Editable(order=9900, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
-			+ "applicable for this transition. Leave empty for all issues")
+			+ "applicable for this transition in same project as the pull request. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentPullRequestCriteria = true)
 	@Override
 	public String getIssueQuery() {

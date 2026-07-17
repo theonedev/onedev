@@ -161,7 +161,6 @@ import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingP
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.setting.workspacespec.WorkspaceSpecsPage;
 import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
-import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
 import io.onedev.server.web.page.project.workspaces.detail.changes.WorkspaceChangesPage;
@@ -435,7 +434,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~commits/${commit}", CommitDetailPage.class));
 		add(new ProjectPageMapper("${project}/~compare", RevisionComparePage.class));
 		add(new ProjectPageMapper("${project}/~stats/code/contribs", CodeContribsPage.class));
-		add(new ProjectPageMapper("${project}/~stats/code/lines", SourceLinesPage.class));
 
 		add(new ProjectPageMapper("${project}/~branches", ProjectBranchesPage.class));
 		add(new ProjectPageMapper("${project}/~tags", ProjectTagsPage.class));

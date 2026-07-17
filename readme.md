@@ -203,14 +203,6 @@ Search anything and jump to it without digging through menus.
 
 ![command palette](./doc/images/command-palette.gif)
 
-## 📈 SLOC trend by language
-
-Inspects git history of main branch to calculate trend of
-source lines of code by language efficiently.
-[**See It In Action**](https://code.onedev.io/onedev/server/~stats/lines)
-
-![SLOC trends](./doc/images/line-stats.png)
-
 ## 🕊️ Fast, lightweight, and reliable
 
 Crafted with resource usage and performance in mind. Get all features above with a 1 core 2G mem box

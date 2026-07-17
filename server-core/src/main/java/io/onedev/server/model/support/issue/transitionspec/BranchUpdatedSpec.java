@@ -61,7 +61,7 @@ public class BranchUpdatedSpec extends AutoSpec {
 	}
 
 	@Editable(order=9900, name="Applicable Issues", placeholder="All", description="Optionally specify issues applicable "
-			+ "for this transition. Leave empty for all issues")
+			+ "for this transition in same project as the branch. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentCommitCriteria = true)
 	@Override
 	public String getIssueQuery() {

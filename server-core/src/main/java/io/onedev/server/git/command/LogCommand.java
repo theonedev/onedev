@@ -23,7 +23,7 @@ public abstract class LogCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogCommand.class); 
 	
-	public enum Field {PARENTS, AUTHOR, COMMITTER, COMMIT_DATE, SUBJECT, BODY, FILE_CHANGES, LINE_CHANGES};
+	public enum Field {PARENTS, AUTHOR, COMMITTER, COMMIT_DATE, SUBJECT, BODY, FILE_CHANGES};
 	
  	private static final String BODY_END = "$<#BodyEnd#>$";
 	
@@ -110,23 +110,19 @@ public abstract class LogCommand {
         	format += "body:%b" + BODY_END + "%n";
 
         if (noRenames) {
-            if (fields.contains(Field.LINE_CHANGES)) 
-    	        git.addArgs("log", "--numstat", "--no-renames");
-            else if (fields.contains(Field.FILE_CHANGES))
+            if (fields.contains(Field.FILE_CHANGES))
                 git.addArgs("log", "--name-status", "--no-renames");
             else 
     	        git.addArgs("log");
         } else {
-            if (fields.contains(Field.LINE_CHANGES)) 
-    	        git.addArgs("-c", "diff.renameLimit=1000", "log", "--numstat", "--find-renames=100%");
-            else if (fields.contains(Field.FILE_CHANGES))
-                git.addArgs("-c", "diff.renameLimit=1000", "log", "--name-status", "--find-renames=100%");
+            if (fields.contains(Field.FILE_CHANGES))
+                git.addArgs("log", "--name-status", "--find-renames=100%");
             else 
     	        git.addArgs("log");
         }
 		
         git.addArgs("--format=" + format, "--date=raw");
-        if (options.firstParent() && (fields.contains(Field.LINE_CHANGES) || fields.contains(Field.FILE_CHANGES)))
+        if (options.firstParent() && fields.contains(Field.FILE_CHANGES))
         	git.addArgs("-m");
 
 		options.configure(git);
@@ -159,7 +155,7 @@ public abstract class LogCommand {
             		commitBuilderRef.set(new LogCommit.Builder());
             		if (fields.contains(Field.PARENTS))
             			commitBuilderRef.get().parentHashes = new ArrayList<>();
-            		if (fields.contains(Field.FILE_CHANGES) || fields.contains(Field.LINE_CHANGES))
+            		if (fields.contains(Field.FILE_CHANGES))
             			commitBuilderRef.get().fileChanges = new ArrayList<>();
                 	commitBuilderRef.get().hash = line.substring("hash:".length()).trim();
             	} else if (line.startsWith("parents:")) {
@@ -187,28 +183,24 @@ public abstract class LogCommand {
             		commitBuilderRef.get().subject = line.substring("subject:".length()).trim();
             	} else if (line.trim().length() != 0 && line.contains("\t")) {
             		FileChange change;
-            		if (fields.contains(Field.LINE_CHANGES)) {
-            			change = GitUtils.parseNumStats(line);
-            		} else {
-                		StringTokenizer tokenizer = new StringTokenizer(line, "\t");
-                		String statusCode = tokenizer.nextToken();
-                		if (statusCode.startsWith("R")) {
-                			String oldPath = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
-                			String newPath = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
-                			change = new FileChange(oldPath, newPath, -1, -1);
-                		} else if (statusCode.equals("M") || statusCode.equals("T")) {
-                			String path = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
-                			change = new FileChange(path, path, -1, -1);
-                		} else if (statusCode.equals("D")) {
-                			String oldPath = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
-                			change = new FileChange(oldPath, null, -1, -1);
-                		} else if (statusCode.equals("A")) {
-                			String newPath = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
-                			change = new FileChange(null, newPath, -1, -1);
-                		} else {
-                			change = null;
-                		}
-            		}
+					StringTokenizer tokenizer = new StringTokenizer(line, "\t");
+					String statusCode = tokenizer.nextToken();
+					if (statusCode.startsWith("R")) {
+						String oldPath = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
+						String newPath = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
+						change = new FileChange(oldPath, newPath, -1, -1);
+					} else if (statusCode.equals("M") || statusCode.equals("T")) {
+						String path = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
+						change = new FileChange(path, path, -1, -1);
+					} else if (statusCode.equals("D")) {
+						String oldPath = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
+						change = new FileChange(oldPath, null, -1, -1);
+					} else if (statusCode.equals("A")) {
+						String newPath = QuotedString.GIT_PATH.dequote(tokenizer.nextToken("\t"));
+						change = new FileChange(null, newPath, -1, -1);
+					} else {
+						change = null;
+					}
             		if (change != null)
             			commitBuilderRef.get().fileChanges.add(change);
             	}
@@ -218,12 +210,7 @@ public abstract class LogCommand {
 
 			@Override
 			public void consume(String line) {
-				if (line.contains("inexact rename detection was skipped") 
-						|| line.contains("you may want to set your diff.renameLimit variable")) {
-					logger.trace(line);
-				} else {
-					logger.error(line);
-				}
+				logger.error(line);
 			}
         	
         }).checkReturnCode();

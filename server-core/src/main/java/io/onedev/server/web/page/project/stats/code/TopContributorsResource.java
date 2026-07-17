@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
@@ -46,8 +45,6 @@ class TopContributorsResource extends AbstractResource {
 	
 	private static final String PARAM_TO = "to";
 	
-	private static final String PARAM_TYPE = "type";
-	
 	private static final int TOP_CONTRIBUTORS = 100;
 	
 	@Override
@@ -56,7 +53,6 @@ class TopContributorsResource extends AbstractResource {
 		Long projectId = params.get(PARAM_PROJECT).toLong();
 		int fromDay = params.get(PARAM_FROM).toInteger();
 		int toDay = params.get(PARAM_TO).toInteger();
-		GitContribution.Type type = GitContribution.Type.valueOf(params.get(PARAM_TYPE).toString());
 
 		ResourceResponse response = new ResourceResponse();
 		response.setContentType("application/json");
@@ -73,7 +69,7 @@ class TopContributorsResource extends AbstractResource {
 				String toDate = formatISO8601Date(toDate(ofEpochDay(toDay).plusDays(1).atStartOfDay()));
 				
 				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoService.class)
-						.getTopContributors(project.getId(), TOP_CONTRIBUTORS, type, fromDay, toDay);
+						.getTopContributors(project.getId(), TOP_CONTRIBUTORS, fromDay, toDay);
 				
 				AvatarService avatarService = OneDev.getInstance(AvatarService.class);
 				EmailAddressService emailAddressService = OneDev.getInstance(EmailAddressService.class);
@@ -85,9 +81,7 @@ class TopContributorsResource extends AbstractResource {
 					contributorData.put("authorName", author.getName());
 					contributorData.put("authorEmailAddress", author.getEmailAddress());
 					contributorData.put("authorAvatarUrl", avatarService.getPersonAvatarUrl(author));
-					contributorData.put("totalCommits", contributor.getTotalContribution().getCommits());
-					contributorData.put("totalAdditions", contributor.getTotalContribution().getAdditions());
-					contributorData.put("totalDeletions", contributor.getTotalContribution().getDeletions());
+					contributorData.put("totalCommits", contributor.getTotalCommits());
 
 					AuthorCriteria authorCriteria;
 					EmailAddress emailAddress = emailAddressService.findByValue(author.getEmailAddress());

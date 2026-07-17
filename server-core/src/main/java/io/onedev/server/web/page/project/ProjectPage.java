@@ -111,7 +111,6 @@ import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingP
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.setting.workspacespec.WorkspaceSpecsPage;
 import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
-import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
@@ -267,9 +266,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 		
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
-			statsMenuItems.add(new SidebarMenuItem.Page(null, _T("Code"), 
-					CodeContribsPage.class, CodeContribsPage.paramsOf(getProject()), 
-					Lists.newArrayList(SourceLinesPage.class)));
+			statsMenuItems.add(new SidebarMenuItem.Page(null, _T("Code Contributions"), 
+					CodeContribsPage.class, CodeContribsPage.paramsOf(getProject())));
 		}
 
 		// Add the sub menu even if it is empty as we need to place stats menu in the right place.
