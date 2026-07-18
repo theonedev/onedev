@@ -9129,4 +9129,12 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate233(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("GitLfsLocks.xml")) {
+				FileUtils.deleteFile(file);
+			}
+		}
+	}
+
 }

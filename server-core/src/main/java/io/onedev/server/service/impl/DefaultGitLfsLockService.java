@@ -7,6 +7,7 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.model.GitLfsLock;
+import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.service.GitLfsLockService;
@@ -15,8 +16,9 @@ import io.onedev.server.service.GitLfsLockService;
 public class DefaultGitLfsLockService extends BaseEntityService<GitLfsLock> implements GitLfsLockService {
 
 	@Override
-	public GitLfsLock find(String path) {
+	public GitLfsLock find(Project project, String path) {
 		EntityCriteria<GitLfsLock> criteria = newCriteria();
+		criteria.add(Restrictions.eq(GitLfsLock.PROP_PROJECT, project));
 		criteria.add(Restrictions.ilike(GitLfsLock.PROP_PATH, path));
 		criteria.setCacheable(true);
 		return find(criteria);
