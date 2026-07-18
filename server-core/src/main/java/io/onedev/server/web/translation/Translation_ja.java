@@ -324,6 +324,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("An issue already linked for {0}. Unlink it first", "{0}に既にリンクされた課題があります。まずリンクを解除してください");
 		m.put("An unexpected exception occurred", "予期しない例外が発生しました");
 		m.put("And configure auth token of the registry", "そしてレジストリの認証トークンを設定");
+		m.put("And login to the registry", "そしてレジストリにログインします");
 		m.put("Another pull request already open for this change", "この変更に対するプルリクエストはすでに開かれています");
 		m.put("Another workspace spec with the same name already exists", "同じ名前の別のワークスペーススペックが既に存在します");
 		m.put("Any agent", "任意のエージェント");
@@ -584,6 +585,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"デフォルトではコードは自動生成された資格情報を介してクローンされ、現在のプロジェクトに対して読み取り権限のみを持ちます。ジョブが<a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>コードをサーバーにプッシュ</a>する必要がある場合は、適切な権限を持つカスタム資格情報をここで提供してください");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"デフォルトでは親プロジェクトと子プロジェクトの課題もリストされます。クエリ<code>&quot;Project&quot; is current</code>を使用して、このプロジェクトにのみ属する課題を表示してください");
+		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
+			"デフォルトでは、ユーザーは自分が提出した課題に対して上記で指定されたフィールドのみ編集できます。\nこのオプションを有効にすると、他の人が提出した課題のフィールドも編集できるようになります。");
 		m.put("By month", "月別");
 		m.put("By week", "週別");
 		m.put("Bypass Certificate Check", "証明書チェックをバイパス");
@@ -612,6 +615,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "ワークスペースで使用可能");
 		m.put("Can Create Root Projects", "ルートプロジェクトを作成可能");
 		m.put("Can Edit Estimated Time", "推定時間を編集可能");
+		m.put("Can Edit Fields Of Other Issues", "他の課題のフィールドを編集可能");
 		m.put("Can only compare with common ancestor when different projects are involved", "異なるプロジェクトが関与している場合、共通の祖先との比較のみ可能です");
 		m.put("Cancel", "キャンセル");
 		m.put("Cancel All Queried Builds", "クエリされたすべてのビルドをキャンセル");
@@ -625,6 +629,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Cannot convert yourself to service account", "自分自身をサービスアカウントに変換できません");
 		m.put("Cannot delete branch as it has workspaces", "ブランチにワークスペースがあるため削除できません");
 		m.put("Cannot delete default branch", "デフォルトブランチを削除できません");
+		m.put("Cannot delete issue as it has workspaces", "ワークスペースがあるため、課題を削除できません");
+		m.put("Cannot delete pull request as it has workspaces", "ワークスペースがあるため、プルリクエストを削除できません");
 		m.put("Cannot delete root account", "ルートアカウントを削除できません");
 		m.put("Cannot delete source branch as it has workspaces", "ソースブランチにワークスペースがあるため削除できません");
 		m.put("Cannot delete yourself", "自分自身を削除できません");
@@ -741,6 +747,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Choose users...", "ユーザーを選択...");
 		m.put("Choose...", "選択...");
 		m.put("Circular build spec imports ({0})", "循環ビルド仕様インポート ({0})");
+		m.put("Click to copy", "クリックしてコピー");
 		m.put("Click to select a commit, or shift-click to select multiple commit", "クリックしてコミットを選択、またはシフトクリックして複数のコミットを選択");
 		m.put("Click to show comment of marked text", "クリックしてマークされたテキストのコメントを表示");
 		m.put("Click to show issue details", "クリックして課題の詳細を表示");
@@ -776,14 +783,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Code Comment Management", "コードコメント管理");
 		m.put("Code Comments", "コードコメント");
 		m.put("Code Compare", "コード比較");
-		m.put("Code Contribution Statistics", "コード貢献統計");
 		m.put("Code Coverage", "コードカバレッジ");
-		m.put("Code Line Statistics", "コード行統計");
 		m.put("Code Management", "コード管理");
 		m.put("Code Privilege", "コード権限");
 		m.put("Code Problem Statistics", "コード問題統計");
 		m.put("Code Search", "コード検索");
-		m.put("Code Statistics", "コード統計");
 		m.put("Code analysis settings updated", "コード分析設定が更新されました");
 		m.put("Code changes since...", "以降のコード変更...");
 		m.put("Code clone or download", "コードのクローンまたはダウンロード");
@@ -890,7 +894,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Content is identical", "コンテンツは同一です");
 		m.put("Continue to add other user after create", "作成後に他のユーザーを追加し続ける");
 		m.put("Contributed settings", "寄与された設定");
-		m.put("Contributions", "寄与");
 		m.put("Contributions to {0} branch, excluding merge commits", "マージコミットを除く{0}ブランチへの寄与");
 		m.put("Conventional Commit", "従来のコミット");
 		m.put("Convert All Queried to Service Accounts", "すべてのクエリをサービスアカウントに変換");
@@ -1030,6 +1033,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ここでカスタム課題状態をすべて定義します。最初の状態は作成された課題の初期状態として使用されます");
 		m.put("Define branch protection rules. Rules defined in parent project are considered to be defined after rules defined here. For a given branch and user, the first matching rule will take effect", 
 			"ブランチ保護ルールを定義します。親プロジェクトで定義されたルールはここで定義されたルールの後に考慮されます。特定のブランチとユーザーに対して最初に一致するルールが適用されます");
+		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
+			"<a href='https://groovy-lang.org' target='_blank'>groovyスクリプト</a>の内容を定義します");
 		m.put("Define default issue boards for all projects here. A certain project can override this setting to define its own issue boards.", 
 			"すべてのプロジェクトに対するデフォルトの課題ボードをここで定義します。特定のプロジェクトはこの設定を上書きして独自の課題ボードを定義できます");
 		m.put("Define how issues may move from one state to another in this project. At evaluation time, rules from this project, each ancestor project up to the root, and the global rules are merged in that order; the first matching rule applies.", 
@@ -1243,6 +1248,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Durations", "期間");
 		m.put("ESLint Report", "ESLint レポート");
 		m.put("Edit", "編集");
+		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "以下のようにレジストリを追加するために<code>$HOME/.cargo/config.toml</code>を編集します");
 		m.put("Edit <code>$HOME/.gem/credentials</code> to add a source", "ソースを追加するには <code>$HOME/.gem/credentials</code> を編集してください");
 		m.put("Edit <code>$HOME/.pypirc</code> to add a package repository like below", "以下のようにパッケージリポジトリを追加するには <code>$HOME/.pypirc</code> を編集してください");
 		m.put("Edit Avatar", "アバターを編集");
@@ -1526,10 +1532,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"以下の手順に従って、リモートマシンにエージェントをインストールしてください（Linux/Windows/Mac OS X/FreeBSD対応）:");
 		m.put("For CI/CD job, add this gem to Gemfile like below", "CI/CDジョブの場合、以下のようにGemfileにこのgemを追加してください");
+		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
+			"CI/CDジョブの場合、このパッケージをCargo.tomlに追加し、コマンドステップで以下を実行してパッケージをインストールします");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"CI/CDジョブの場合、requirements.txtにこのパッケージを追加し、以下のコマンドステップでパッケージをインストールしてください");
 		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"CI/CDジョブでは、カスタムsettings.xmlを使用する方が便利です。例えば、コマンドステップで以下のコードを使用します：");
+		m.put("For CI/CD job, run below to add package registry via command step", "CI/CDジョブの場合、コマンドステップで以下を実行してパッケージレジストリを追加します");
 		m.put("For CI/CD job, run below to add package repository via command step", "CI/CDジョブの場合、以下のコマンドステップでパッケージリポジトリを追加してください");
 		m.put("For CI/CD job, run below to add package source via command step", "CI/CDジョブの場合、以下のコマンドステップでパッケージソースを追加してください");
 		m.put("For CI/CD job, run below to add source via command step", "CI/CDジョブの場合、以下のコマンドステップでソースを追加してください");
@@ -1969,7 +1978,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Job Param", "ジョブパラメータ");
 		m.put("Job Parameters", "ジョブパラメータ");
 		m.put("Job Privilege", "ジョブ権限");
-		m.put("Job Privileges", "ジョブ権限一覧");
 		m.put("Job Properties", "ジョブプロパティ");
 		m.put("Job Properties Bean", "ジョブプロパティビーン");
 		m.put("Job Property", "ジョブプロパティ");
@@ -2050,7 +2058,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Licensed To", "ライセンス対象");
 		m.put("Licensed To:", "ライセンス対象:");
 		m.put("Line", "行");
-		m.put("Line changes", "行の変更");
 		m.put("Line: ", "行:");
 		m.put("Lines", "行数");
 		m.put("Link", "リンク");
@@ -2324,7 +2331,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No current commit in query context", "クエリコンテキストに現在のコミットなし");
 		m.put("No current pull request in query context", "クエリコンテキストに現在のプルリクエストなし");
 		m.put("No data", "データなし");
-		m.put("No default branch", "デフォルトブランチなし");
 		m.put("No default fork root", "デフォルトのフォークルートがありません");
 		m.put("No default group", "デフォルトグループなし");
 		m.put("No default roles", "デフォルトの役割なし");
@@ -2464,6 +2470,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ok", "OK");
 		m.put("Old Name", "旧名称");
 		m.put("Old Password", "旧パスワード");
+		m.put("On", "オン");
 		m.put("On Behalf Of", "代理として");
 		m.put("On Branches", "ブランチ上");
 		m.put("OneDev Issue Field", "OneDev課題フィールド");
@@ -2635,6 +2642,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、このエグゼキューターを使用する各ジョブ/サービスのCPU制限を指定してください。これは関連するコンテナのオプション<a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a>として使用されます。");
 		m.put("Optionally specify criteria of issues which can be linked", "オプションで、リンク可能な課題の基準を指定してください。");
 		m.put("Optionally specify criteria of issues which can be linked on the other side", "オプションで、他の側でリンク可能な課題の基準を指定してください。");
+		m.put("Optionally specify custom fields allowed to edit", "編集を許可するカスタムフィールドを任意で指定します");
 		m.put("Optionally specify depth for a shallow clone in order to speed up source retrieval", 
 			"オプションで、ソース取得を高速化するための浅いクローンの深さを指定してください。");
 		m.put("Optionally specify description of the issue", "オプションで、課題の説明を指定してください。");
@@ -3033,7 +3041,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"Office 365メールサーバーにログインしてメールを送受信するためのアカウントのプリンシパル名。このアカウントが上記のアプリケーションIDで示される登録アプリケーションを<b>所有</b>していることを確認してください");
 		m.put("Private Key Secret", "秘密鍵のシークレット");
 		m.put("Private key regenerated and SSH server restarted", "秘密鍵が再生成され、SSHサーバーが再起動されました");
-		m.put("Privilege", "権限");
 		m.put("Product Version", "製品バージョン");
 		m.put("Profile", "プロフィール");
 		m.put("Programming language", "プログラミング言語");
@@ -3389,7 +3396,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Run via Docker Container", "Dockerコンテナ経由で実行");
 		m.put("Running", "実行中");
 		m.put("Running Takes", "実行時間");
-		m.put("SLOC on {0}", "{0}のSLOC");
 		m.put("SMTP Host", "SMTPホスト");
 		m.put("SMTP Password", "SMTPパスワード");
 		m.put("SMTP User", "SMTPユーザー");
@@ -3635,7 +3641,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Source", "ソース");
 		m.put("Source Branch", "ソースブランチ");
 		m.put("Source Docker Image", "ソース Docker イメージ");
-		m.put("Source Lines", "ソース行");
 		m.put("Source Path", "ソースパス");
 		m.put("Source branch already exists", "ソースブランチはすでに存在します");
 		m.put("Source branch already merged into target branch", "ソースブランチはターゲットブランチにすでにマージされています");
@@ -3987,8 +3992,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"保護するスペース区切りのブランチを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'、または'?'を使用してください。'-'で始めると除外されます。");
 		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude", 
 			"スペース区切りのジョブを指定してください。ワイルドカードマッチには'*'または'?'を使用してください。'-'で始めると除外されます。");
-		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. <b class='text-danger'>NOTE: </b> Permission to access build artifacts will be granted implicitly in matched jobs even if no other permissions are specified here", 
-			"スペース区切りのジョブを指定してください。ワイルドカードマッチには'*'または'?'を使用してください。'-'で始めると除外されます。<b class='text-danger'>注意:</b> ここで一致したジョブでは、他の権限が指定されていなくてもビルド成果物へのアクセス権が暗黙的に付与されます。");
 		m.put("Specify space-separated paths to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
 			"保護するスペース区切りのパスを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'、または'?'を使用してください。'-'で始めると除外されます。");
 		m.put("Specify space-separated projects applicable for this entry. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all projects", 
@@ -4227,8 +4230,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"POSTリクエストがOneDevから送信されたことを確認するための秘密鍵。秘密鍵を設定すると、WebhookのPOSTリクエストでX-OneDev-Signatureヘッダーを受け取ります");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
 			"サービスデスク機能により、ユーザーはOneDevにメールを送信して課題を作成できます。課題は完全にメールで議論することができ、OneDevにログインする必要はありません。");
+		m.put("Then add the package", "次にパッケージを追加します");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "TOTP認証アプリに表示されるパスコードを入力して確認してください");
 		m.put("Then publish package from project directory like below", "以下のようにプロジェクトディレクトリからパッケージを公開してください");
+		m.put("Then publish package to the registry", "次にパッケージをレジストリに公開します");
 		m.put("Then push gem to the source", "ソースにgemをプッシュしてください");
 		m.put("Then push image to desired repository under specified project", "指定されたプロジェクトの下で希望するリポジトリにイメージをプッシュしてください");
 		m.put("Then push package to the source", "ソースにパッケージをプッシュしてください");
@@ -4401,6 +4406,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
 			"このターミナルでスクロールするには、ctrl+bを押してから[を押し、矢印キーまたはページアップ/ダウンを使用してください。終了するにはqを押してください。");
 		m.put("To use this package, add below to project pom.xml", "このパッケージを使用するには、以下をプロジェクトのpom.xmlに追加してください");
+		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
+			"このパッケージを使用するには、以下のようにレジストリを追加するために<code>$HOME/.cargo/config.toml</code>を編集します");
 		m.put("Toggle change history", "変更履歴を切り替える");
 		m.put("Toggle comments", "コメントを切り替える");
 		m.put("Toggle commits", "コミットを切り替える");
@@ -4509,6 +4516,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unable to connect to server", "サーバーに接続できません");
 		m.put("Unable to create protected branch", "保護されたブランチを作成できません");
 		m.put("Unable to create protected tag", "保護されたタグを作成できません");
+		m.put("Unable to delete issue \"{0}\" as it has workspaces", "ワークスペースがあるため、課題「{0}」を削除できません");
+		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "ワークスペースがあるため、プルリクエスト「{0}」を削除できません");
 		m.put("Unable to diff as some line is too long.", "一部の行が長すぎるため、差分を表示できません");
 		m.put("Unable to diff as the file is too large.", "ファイルが大きすぎるため、差分を表示できません");
 		m.put("Unable to find SSO provider: ", "SSOプロバイダーが見つかりません:");
@@ -4876,7 +4885,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("a string representing summary of the event", "イベントの概要を表す文字列");
 		m.put("abort merge", "マージを中止");
 		m.put("access [{0}]", "アクセス[{0}]");
-		m.put("active", "アクティブ");
 		m.put("add another order", "別の注文を追加");
 		m.put("adding .onedev-buildspec.yml", ".onedev-buildspec.ymlを追加中");
 		m.put("after specified date", "指定された日付以降");
@@ -4884,7 +4892,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"通知解除情報を保持する<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>オブジェクト</a>。<code>null</code>値は通知を解除できないことを意味します");
 		m.put("and more", "さらに多く");
 		m.put("archived", "アーカイブ済み");
-		m.put("artifacts", "アーティファクト");
 		m.put("assign to me", "自分に割り当てる");
 		m.put("authored by", "作成者");
 		m.put("backlog ", "バックログ");
@@ -5072,7 +5079,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("true", "true");
 		m.put("true for html version, false for text version", "HTMLバージョンの場合はtrue、テキストバージョンの場合はfalse");
 		m.put("type", "タイプ");
-		m.put("up to date", "最新");
 		m.put("url following which to verify email address", "メールアドレスを確認するためのURL");
 		m.put("url to reset password", "パスワードをリセットするためのURL");
 		m.put("value needs to be enclosed in brackets", "値は角括弧で囲む必要があります");
@@ -5123,27 +5129,34 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("And login to the registry", "そしてレジストリにログインします");
-		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
-			"デフォルトでは、ユーザーは自分が提出した課題に対して上記で指定されたフィールドのみ編集できます。\nこのオプションを有効にすると、他の人が提出した課題のフィールドも編集できるようになります。");
-		m.put("Can Edit Fields Of Other Issues", "他の課題のフィールドを編集可能");
-		m.put("Cannot delete issue as it has workspaces", "ワークスペースがあるため、課題を削除できません");
-		m.put("Cannot delete pull request as it has workspaces", "ワークスペースがあるため、プルリクエストを削除できません");
-		m.put("Click to copy", "クリックしてコピー");
-		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
-			"<a href='https://groovy-lang.org' target='_blank'>groovyスクリプト</a>の内容を定義します");
-		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "以下のようにレジストリを追加するために<code>$HOME/.cargo/config.toml</code>を編集します");
-		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
-			"CI/CDジョブの場合、このパッケージをCargo.tomlに追加し、コマンドステップで以下を実行してパッケージをインストールします");
-		m.put("For CI/CD job, run below to add package registry via command step", "CI/CDジョブの場合、コマンドステップで以下を実行してパッケージレジストリを追加します");
-		m.put("On", "オン");
-		m.put("Optionally specify custom fields allowed to edit", "編集を許可するカスタムフィールドを任意で指定します");
-		m.put("Then add the package", "次にパッケージを追加します");
-		m.put("Then publish package to the registry", "次にパッケージをレジストリに公開します");
-		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
-			"このパッケージを使用するには、以下のようにレジストリを追加するために<code>$HOME/.cargo/config.toml</code>を編集します");
-		m.put("Unable to delete issue \"{0}\" as it has workspaces", "ワークスペースがあるため、課題「{0}」を削除できません");
-		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "ワークスペースがあるため、プルリクエスト「{0}」を削除できません");
+		m.put("1 Year", "1年");
+		m.put("5 Years", "5年");
+		m.put("6 Months", "6ヶ月");
+		m.put("<i>None</i>", "<i>なし</i>");
+		m.put("Additional Job Privileges", "追加のジョブ特権");
+		m.put("Additional Privileges", "追加の特権");
+		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
+			"デフォルトでは、ユーザーはすべてのジョブのアーティファクトにアクセスできます。特定のジョブに追加の特権を割り当てるには、ここで指定してください。");
+		m.put("Code Contributions", "コード貢献");
+		m.put("Five years", "5年");
+		m.put("Next Iteration ({0})", "次のイテレーション ({0})");
+		m.put("Next year", "来年");
+		m.put("One year", "1年");
+		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
+			"ブランチと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
+		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
+			"ビルドと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
+		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
+			"プルリクエストと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
+		m.put("Previous year", "前年");
+		m.put("Show Language Stats", "言語統計を表示");
+		m.put("Show Next Iteration", "次のイテレーションを表示");
+		m.put("Show Workspace Stats", "ワークスペース統計を表示");
+		m.put("Six months", "6ヶ月");
+		m.put("active replica", "アクティブなレプリカ");
+		m.put("outdated replica", "古いレプリカ");
+		m.put("up to date replica", "最新のレプリカ");
+		m.put("{0} Lines", "{0} 行");
 	}
 		
 	@Override

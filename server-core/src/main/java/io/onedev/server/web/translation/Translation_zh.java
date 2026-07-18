@@ -350,6 +350,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("An issue already linked for {0}. Unlink it first", "已链接到 {0}。先取消链接");
 		m.put("An unexpected exception occurred", "发生意外异常");
 		m.put("And configure auth token of the registry", "并配置注册表的授权令牌");
+		m.put("And login to the registry", "并登录到注册表");
 		m.put("Another pull request already open for this change", "另一个合并请求已为此更改打开");
 		m.put("Another workspace spec with the same name already exists", "具有相同名称的另一个工作区规格已存在");
 		m.put("Any agent", "任何代理");
@@ -610,6 +611,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"默认情况下，代码通过自动生成的凭证进行克隆，该凭证仅对当前项目具有读取权限。如需让任务<a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>推送代码到服务器</a>，请在此提供具有相应权限的自定义凭证");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"默认情况下，父项目和子项目的工单也会被列出。使用查询 <code>&quot;Project&quot; is current</code> 来只显示属于此项目的工单");
+		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
+			"默认情况下，用户只能编辑自己提交的工单中指定的字段。\n启用此选项以允许编辑他人提交的工单中的字段。");
 		m.put("By month", "按月");
 		m.put("By week", "按周");
 		m.put("Bypass Certificate Check", "绕过证书检查");
@@ -638,6 +641,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "可用于工作区");
 		m.put("Can Create Root Projects", "可以创建根项目");
 		m.put("Can Edit Estimated Time", "可以编辑预估时间");
+		m.put("Can Edit Fields Of Other Issues", "可以编辑其他工单的字段");
 		m.put("Can only compare with common ancestor when different projects are involved", "跨项目比较时只能使用共同祖先");
 		m.put("Cancel", "取消");
 		m.put("Cancel All Queried Builds", "取消所有查询的构建");
@@ -651,6 +655,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Cannot convert yourself to service account", "无法将自己转换为服务账户");
 		m.put("Cannot delete branch as it has workspaces", "无法删除分支，因为它有工作区");
 		m.put("Cannot delete default branch", "不能删除默认分支");
+		m.put("Cannot delete issue as it has workspaces", "无法删除工单，因为它包含工作区");
+		m.put("Cannot delete pull request as it has workspaces", "无法删除合并请求，因为它包含工作区");
 		m.put("Cannot delete root account", "不能删除根账户");
 		m.put("Cannot delete source branch as it has workspaces", "无法删除源分支，因为它有工作区");
 		m.put("Cannot delete yourself", "不能删除自己");
@@ -767,6 +773,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Choose users...", "选择用户...");
 		m.put("Choose...", "选择...");
 		m.put("Circular build spec imports ({0})", "循环构建规范导入（{0}）");
+		m.put("Click to copy", "点击复制");
 		m.put("Click to select a commit, or shift-click to select multiple commit", "点击选择一个提交，或按住 Shift 点击选择多个提交");
 		m.put("Click to show comment of marked text", "点击显示标记文本的评论");
 		m.put("Click to show issue details", "点击显示工单详情");
@@ -802,14 +809,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Code Comment Management", "代码评论管理");
 		m.put("Code Comments", "代码评论");
 		m.put("Code Compare", "代码比较");
-		m.put("Code Contribution Statistics", "代码贡献统计");
 		m.put("Code Coverage", "代码覆盖率");
-		m.put("Code Line Statistics", "代码行统计");
 		m.put("Code Management", "代码管理");
 		m.put("Code Privilege", "代码权限");
 		m.put("Code Problem Statistics", "代码问题统计");
 		m.put("Code Search", "代码搜索");
-		m.put("Code Statistics", "代码统计");
 		m.put("Code analysis settings updated", "代码分析设置已更新");
 		m.put("Code changes since...", "代码变更自...");
 		m.put("Code clone or download", "克隆或下载代码");
@@ -916,7 +920,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Content is identical", "内容相同");
 		m.put("Continue to add other user after create", "创建后继续添加其他用户");
 		m.put("Contributed settings", "贡献的设置");
-		m.put("Contributions", "贡献");
 		m.put("Contributions to {0} branch, excluding merge commits", "在 {0} 分支上的贡献，不包括合并提交");
 		m.put("Conventional Commit", "约定式提交");
 		m.put("Convert All Queried to Service Accounts", "将所有查询的用户转换为服务账户");
@@ -1056,6 +1059,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"在此定义所有自定义工单状态。第一个状态将用作创建的工单的初始状态");
 		m.put("Define branch protection rules. Rules defined in parent project are considered to be defined after rules defined here. For a given branch and user, the first matching rule will take effect", 
 			"定义分支保护规则。父项目中定义的规则被视为在此处定义的规则之后定义的规则。对于给定的分支和用户，第一个匹配的规则将生效");
+		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
+			"定义<a href='https://groovy-lang.org' target='_blank'>groovy 脚本</a>的内容");
 		m.put("Define default issue boards for all projects here. A certain project can override this setting to define its own issue boards.", 
 			"在此定义所有项目的默认工单看板。特定项目可以覆盖此设置以定义其自己的工单看板。");
 		m.put("Define how issues may move from one state to another in this project. At evaluation time, rules from this project, each ancestor project up to the root, and the global rules are merged in that order; the first matching rule applies.", 
@@ -1269,6 +1274,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Durations", "持续时间");
 		m.put("ESLint Report", "ESLint 报告");
 		m.put("Edit", "编辑");
+		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "编辑 <code>$HOME/.cargo/config.toml</code> 以添加如下注册表");
 		m.put("Edit <code>$HOME/.gem/credentials</code> to add a source", "编辑 <code>$HOME/.gem/credentials</code> 以添加一个源");
 		m.put("Edit <code>$HOME/.pypirc</code> to add a package repository like below", "编辑 <code>$HOME/.pypirc</code> 以添加一个包仓库，如下所示");
 		m.put("Edit Avatar", "编辑头像");
@@ -1552,10 +1558,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"按照以下步骤在远程机器上安装代理（支持 Linux/Windows/Mac OS X/FreeBSD）：");
 		m.put("For CI/CD job, add this gem to Gemfile like below", "对于 CI/CD 任务，将此 gem 添加到 Gemfile 中，如下所示");
+		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
+			"对于 CI/CD 任务，将此包添加到 Cargo.toml 并运行以下命令步骤安装该包");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"对于 CI/CD 任务，将此包添加到 requirements.txt 中，并运行以下命令通过命令步骤安装包");
 		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"对于 CI/CD 任务，使用自定义 settings.xml 更方便，例如通过在命令步骤中使用以下代码：");
+		m.put("For CI/CD job, run below to add package registry via command step", "对于 CI/CD 任务，运行以下命令步骤添加包注册表");
 		m.put("For CI/CD job, run below to add package repository via command step", "对于 CI/CD 任务，运行以下命令通过命令步骤添加包仓库");
 		m.put("For CI/CD job, run below to add package source via command step", "对于 CI/CD 任务，运行以下命令通过命令步骤添加包源");
 		m.put("For CI/CD job, run below to add source via command step", "对于 CI/CD 任务，运行以下命令通过命令步骤添加源");
@@ -1995,7 +2004,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Job Param", "任务参数");
 		m.put("Job Parameters", "任务参数");
 		m.put("Job Privilege", "任务权限");
-		m.put("Job Privileges", "任务权限");
 		m.put("Job Properties", "任务属性");
 		m.put("Job Properties Bean", "任务属性Bean");
 		m.put("Job Property", "任务属性");
@@ -2076,7 +2084,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Licensed To", "授权给");
 		m.put("Licensed To:", "授权给：");
 		m.put("Line", "行");
-		m.put("Line changes", "行变化");
 		m.put("Line: ", "行：");
 		m.put("Lines", "行");
 		m.put("Link", "链接");
@@ -2350,7 +2357,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No current commit in query context", "在查询上下文中没有当前提交");
 		m.put("No current pull request in query context", "在查询上下文中没有当前合并请求");
 		m.put("No data", "没有数据");
-		m.put("No default branch", "没有默认分支");
 		m.put("No default fork root", "没有默认的 fork 根目录");
 		m.put("No default group", "无默认组");
 		m.put("No default roles", "没有默认角色");
@@ -2490,6 +2496,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Ok", "确定");
 		m.put("Old Name", "旧名称");
 		m.put("Old Password", "旧密码");
+		m.put("On", "开启");
 		m.put("On Behalf Of", "发起");
 		m.put("On Branches", "在分支上");
 		m.put("OneDev Issue Field", "OneDev 工单字段");
@@ -2661,6 +2668,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择为使用此执行器的每个任务/服务指定 CPU 限制。这将用作相关容器的选项 <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a>");
 		m.put("Optionally specify criteria of issues which can be linked", "可选择指定可以链接的工单的条件");
 		m.put("Optionally specify criteria of issues which can be linked on the other side", "可选择指定可以在另一端链接的工单的条件");
+		m.put("Optionally specify custom fields allowed to edit", "可选地指定允许编辑的自定义字段");
 		m.put("Optionally specify depth for a shallow clone in order to speed up source retrieval", 
 			"可选择指定浅克隆的深度，以加快源代码获取速度");
 		m.put("Optionally specify description of the issue", "可选择指定工单的描述");
@@ -3059,7 +3067,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"登录到 office 365 邮件服务器发送/接收电子邮件的帐户的主名称。确保此帐户 <b>拥有</b> 上述应用程序 ID 指示的注册应用程序");
 		m.put("Private Key Secret", "私钥密钥");
 		m.put("Private key regenerated and SSH server restarted", "私钥已重新生成并重启 SSH 服务器");
-		m.put("Privilege", "权限");
 		m.put("Product Version", "产品版本");
 		m.put("Profile", "个人资料");
 		m.put("Programming language", "编程语言");
@@ -3415,7 +3422,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Run via Docker Container", "通过 Docker 容器运行");
 		m.put("Running", "运行中");
 		m.put("Running Takes", "运行中");
-		m.put("SLOC on {0}", "在 {0} 上的源代码行数");
 		m.put("SMTP Host", "SMTP 主机");
 		m.put("SMTP Password", "SMTP 密码");
 		m.put("SMTP User", "SMTP 用户");
@@ -3661,7 +3667,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Source", "源");
 		m.put("Source Branch", "源分支");
 		m.put("Source Docker Image", "Docker 镜像源");
-		m.put("Source Lines", "源代码行");
 		m.put("Source Path", "源路径");
 		m.put("Source branch already exists", "源分支已存在");
 		m.put("Source branch already merged into target branch", "源分支已合并到目标分支");
@@ -4013,8 +4018,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定要保护的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除");
 		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude", 
 			"指定以空格分隔的任务。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀表示排除");
-		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. <b class='text-danger'>NOTE: </b> Permission to access build artifacts will be granted implicitly in matched jobs even if no other permissions are specified here", 
-			"指定以空格分隔的任务。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀表示排除。<b class='text-danger'>注意：</b> 即使此处未指定其他权限，匹配的任务也将隐式授予访问构建产物的权限");
 		m.put("Specify space-separated paths to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
 			"指定要保护的以空格分隔的路径。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除");
 		m.put("Specify space-separated projects applicable for this entry. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all projects", 
@@ -4253,8 +4256,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"确保发送到有效负载 URL 的 POST 请求来自 OneDev 的密钥。设置密钥后，您将在 Webhook POST 请求中收到 X-OneDev-Signature 头部");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
 			"服务台功能使用户能够通过向 OneDev 发送邮件来创建工单。工单可以完全通过邮件进行讨论，无需登录 OneDev。");
+		m.put("Then add the package", "然后添加该包");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "然后输入 TOTP 认证器中显示的验证码进行验证");
 		m.put("Then publish package from project directory like below", "然后从项目目录中发布包，如下所示");
+		m.put("Then publish package to the registry", "然后将包发布到注册表");
 		m.put("Then push gem to the source", "然后推送 Gem 到源");
 		m.put("Then push image to desired repository under specified project", "然后推送镜像到指定项目下的目标仓库");
 		m.put("Then push package to the source", "然后推送包到源");
@@ -4427,6 +4432,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
 			"要在此终端中滚动，请按 ctrl+b 然后 [，并使用箭头键或向上/向下翻页键。按 q 退出。");
 		m.put("To use this package, add below to project pom.xml", "要使用此包，请将以下内容添加到项目 pom.xml");
+		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
+			"要使用此包，请编辑 <code>$HOME/.cargo/config.toml</code> 以添加如下注册表");
 		m.put("Toggle change history", "切换更改历史");
 		m.put("Toggle comments", "切换评论");
 		m.put("Toggle commits", "切换提交");
@@ -4535,6 +4542,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unable to connect to server", "无法连接到服务器");
 		m.put("Unable to create protected branch", "无法创建受保护的分支");
 		m.put("Unable to create protected tag", "无法创建受保护的标签");
+		m.put("Unable to delete issue \"{0}\" as it has workspaces", "无法删除工单 \"{0}\"，因为它包含工作区");
+		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "无法删除合并请求 \"{0}\"，因为它包含工作区");
 		m.put("Unable to diff as some line is too long.", "无法比较，因为某些行太长");
 		m.put("Unable to diff as the file is too large.", "无法比较，因为文件太大");
 		m.put("Unable to find SSO provider: ", "无法找到 SSO 提供方：");
@@ -4902,7 +4911,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("a string representing summary of the event", "表示事件摘要的字符串");
 		m.put("abort merge", "中止合并");
 		m.put("access [{0}]", "访问 [{0}]");
-		m.put("active", "活跃");
 		m.put("add another order", "添加另一个排序");
 		m.put("adding .onedev-buildspec.yml", "添加 .onedev-buildspec.yml");
 		m.put("after specified date", "在指定日期之后");
@@ -4910,7 +4918,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"一个包含取消订阅信息的 <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>对象</a>。<code>null</code> 值表示该通知无法取消订阅");
 		m.put("and more", "更多");
 		m.put("archived", "已归档");
-		m.put("artifacts", "制品");
 		m.put("assign to me", "分配给我");
 		m.put("authored by", "作者是");
 		m.put("backlog ", "待办");
@@ -5098,7 +5105,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("true", "真");
 		m.put("true for html version, false for text version", "HTML 版本时为真，文本版本时为假");
 		m.put("type", "类型");
-		m.put("up to date", "最新");
 		m.put("url following which to verify email address", "验证邮箱地址的 URL");
 		m.put("url to reset password", "重置密码的 URL");
 		m.put("value needs to be enclosed in brackets", "值需要用括号包围");
@@ -5149,27 +5155,34 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("And login to the registry", "并登录到注册表");
-		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
-			"默认情况下，用户只能编辑自己提交的工单中指定的字段。\n启用此选项以允许编辑他人提交的工单中的字段。");
-		m.put("Can Edit Fields Of Other Issues", "可以编辑其他工单的字段");
-		m.put("Cannot delete issue as it has workspaces", "无法删除工单，因为它包含工作区");
-		m.put("Cannot delete pull request as it has workspaces", "无法删除合并请求，因为它包含工作区");
-		m.put("Click to copy", "点击复制");
-		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
-			"定义<a href='https://groovy-lang.org' target='_blank'>groovy 脚本</a>的内容");
-		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "编辑 <code>$HOME/.cargo/config.toml</code> 以添加如下注册表");
-		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
-			"对于 CI/CD 任务，将此包添加到 Cargo.toml 并运行以下命令步骤安装该包");
-		m.put("For CI/CD job, run below to add package registry via command step", "对于 CI/CD 任务，运行以下命令步骤添加包注册表");
-		m.put("On", "开启");
-		m.put("Optionally specify custom fields allowed to edit", "可选地指定允许编辑的自定义字段");
-		m.put("Then add the package", "然后添加该包");
-		m.put("Then publish package to the registry", "然后将包发布到注册表");
-		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
-			"要使用此包，请编辑 <code>$HOME/.cargo/config.toml</code> 以添加如下注册表");
-		m.put("Unable to delete issue \"{0}\" as it has workspaces", "无法删除工单 \"{0}\"，因为它包含工作区");
-		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "无法删除合并请求 \"{0}\"，因为它包含工作区");
+		m.put("1 Year", "1 年");
+		m.put("5 Years", "5 年");
+		m.put("6 Months", "6 个月");
+		m.put("<i>None</i>", "<i>无</i>");
+		m.put("Additional Job Privileges", "额外的任务权限");
+		m.put("Additional Privileges", "额外的权限");
+		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
+			"默认情况下，用户可以访问所有任务的制品。要为特定任务分配额外权限，请在此处指定。");
+		m.put("Code Contributions", "代码贡献");
+		m.put("Five years", "五年");
+		m.put("Next Iteration ({0})", "下一次迭代 ({0})");
+		m.put("Next year", "明年");
+		m.put("One year", "一年");
+		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
+			"可选地指定适用于此转换的工单，与分支在同一项目中。留空表示所有工单");
+		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
+			"可选地指定适用于此转换的工单，与构建在同一项目中。留空表示所有工单");
+		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
+			"可选地指定适用于此转换的工单，与合并请求在同一项目中。留空表示所有工单");
+		m.put("Previous year", "去年");
+		m.put("Show Language Stats", "显示语言统计");
+		m.put("Show Next Iteration", "显示下一次迭代");
+		m.put("Show Workspace Stats", "显示工作区统计");
+		m.put("Six months", "六个月");
+		m.put("active replica", "有效副本");
+		m.put("outdated replica", "过时副本");
+		m.put("up to date replica", "最新副本");
+		m.put("{0} Lines", "{0} 行");
 	}
 		
 	@Override

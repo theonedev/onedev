@@ -324,6 +324,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("An issue already linked for {0}. Unlink it first", "{0}에 대해 이미 연결된 이슈가 있습니다. 먼저 연결을 해제하세요");
 		m.put("An unexpected exception occurred", "예기치 않은 예외가 발생했습니다");
 		m.put("And configure auth token of the registry", "레지스트리의 인증 토큰을 구성하세요");
+		m.put("And login to the registry", "그리고 레지스트리에 로그인하세요");
 		m.put("Another pull request already open for this change", "이 변경에 대한 다른 풀 요청이 이미 열려 있습니다");
 		m.put("Another workspace spec with the same name already exists", "같은 이름의 다른 워크스페이스 사양이 이미 존재합니다");
 		m.put("Any agent", "모든 에이전트");
@@ -584,6 +585,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"기본적으로 코드는 자동 생성된 자격 증명을 통해 클론되며, 현재 프로젝트에 대한 읽기 권한만 있습니다. 작업이 <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>코드를 서버에 푸시</a>해야 하는 경우 적절한 권한을 가진 사용자 정의 자격 증명을 제공해야 합니다");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"기본적으로 부모 및 자식 프로젝트의 문제도 나열됩니다. 이 프로젝트에만 속한 문제를 표시하려면 쿼리 <code>&quot;Project&quot; is current</code>를 사용하세요");
+		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
+			"기본적으로 사용자는 자신이 제출한 이슈에 대해 위에서 지정된 필드만 편집할 수 있습니다.\n이 옵션을 활성화하면 다른 사람이 제출한 이슈의 필드를 편집할 수 있습니다.");
 		m.put("By month", "월별");
 		m.put("By week", "주별");
 		m.put("Bypass Certificate Check", "인증서 확인 건너뛰기");
@@ -612,6 +615,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "워크스페이스에서 사용할 수 있음");
 		m.put("Can Create Root Projects", "루트 프로젝트 생성 가능");
 		m.put("Can Edit Estimated Time", "예상 시간 수정 가능");
+		m.put("Can Edit Fields Of Other Issues", "다른 이슈의 필드를 편집할 수 있음");
 		m.put("Can only compare with common ancestor when different projects are involved", "다른 프로젝트가 포함된 경우 공통 조상과만 비교할 수 있습니다");
 		m.put("Cancel", "취소");
 		m.put("Cancel All Queried Builds", "쿼리된 모든 빌드 취소");
@@ -625,6 +629,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Cannot convert yourself to service account", "자신을 서비스 계정으로 변환할 수 없습니다");
 		m.put("Cannot delete branch as it has workspaces", "작업공간이 있어 브랜치를 삭제할 수 없습니다.");
 		m.put("Cannot delete default branch", "기본 브랜치를 삭제할 수 없습니다");
+		m.put("Cannot delete issue as it has workspaces", "워크스페이스가 있어서 이슈를 삭제할 수 없습니다");
+		m.put("Cannot delete pull request as it has workspaces", "워크스페이스가 있어서 풀 리퀘스트를 삭제할 수 없습니다");
 		m.put("Cannot delete root account", "루트 계정을 삭제할 수 없습니다");
 		m.put("Cannot delete source branch as it has workspaces", "작업공간이 있어 소스 브랜치를 삭제할 수 없습니다.");
 		m.put("Cannot delete yourself", "자신을 삭제할 수 없습니다");
@@ -741,6 +747,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Choose users...", "사용자들을 선택하세요...");
 		m.put("Choose...", "선택...");
 		m.put("Circular build spec imports ({0})", "순환 빌드 사양 가져오기 ({0})");
+		m.put("Click to copy", "클릭하여 복사");
 		m.put("Click to select a commit, or shift-click to select multiple commit", "커밋을 선택하려면 클릭하세요, 여러 커밋을 선택하려면 Shift-클릭하세요.");
 		m.put("Click to show comment of marked text", "표시된 텍스트의 주석을 보려면 클릭하세요.");
 		m.put("Click to show issue details", "이슈 세부 정보를 보려면 클릭하세요.");
@@ -776,14 +783,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Code Comment Management", "코드 주석 관리");
 		m.put("Code Comments", "코드 주석들");
 		m.put("Code Compare", "코드 비교");
-		m.put("Code Contribution Statistics", "코드 기여 통계");
 		m.put("Code Coverage", "코드 커버리지");
-		m.put("Code Line Statistics", "코드 라인 통계");
 		m.put("Code Management", "코드 관리");
 		m.put("Code Privilege", "코드 권한");
 		m.put("Code Problem Statistics", "코드 문제 통계");
 		m.put("Code Search", "코드 검색");
-		m.put("Code Statistics", "코드 통계");
 		m.put("Code analysis settings updated", "코드 분석 설정이 업데이트되었습니다.");
 		m.put("Code changes since...", "이후 코드 변경 사항...");
 		m.put("Code clone or download", "코드 클론 또는 다운로드");
@@ -890,7 +894,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Content is identical", "내용이 동일합니다");
 		m.put("Continue to add other user after create", "생성 후 다른 사용자를 계속 추가하세요");
 		m.put("Contributed settings", "기여된 설정");
-		m.put("Contributions", "기여");
 		m.put("Contributions to {0} branch, excluding merge commits", "머지 커밋을 제외한 {0} 브랜치에 대한 기여");
 		m.put("Conventional Commit", "전통적인 커밋");
 		m.put("Convert All Queried to Service Accounts", "모든 조회된 항목을 서비스 계정으로 변환");
@@ -1030,6 +1033,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"여기에서 모든 사용자 정의 이슈 상태를 정의하세요. 첫 번째 상태는 생성된 이슈의 초기 상태로 사용됩니다");
 		m.put("Define branch protection rules. Rules defined in parent project are considered to be defined after rules defined here. For a given branch and user, the first matching rule will take effect", 
 			"브랜치 보호 규칙을 정의하세요. 상위 프로젝트에서 정의된 규칙은 여기에서 정의된 규칙 뒤에 정의된 것으로 간주됩니다. 특정 브랜치와 사용자에 대해 첫 번째 일치하는 규칙이 적용됩니다");
+		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
+			"<a href='https://groovy-lang.org' target='_blank'>groovy 스크립트</a>의 내용을 정의하세요");
 		m.put("Define default issue boards for all projects here. A certain project can override this setting to define its own issue boards.", 
 			"모든 프로젝트에 대한 기본 이슈 보드를 여기에서 정의하세요. 특정 프로젝트는 이 설정을 재정의하여 자체 이슈 보드를 정의할 수 있습니다");
 		m.put("Define how issues may move from one state to another in this project. At evaluation time, rules from this project, each ancestor project up to the root, and the global rules are merged in that order; the first matching rule applies.", 
@@ -1243,6 +1248,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Durations", "기간들");
 		m.put("ESLint Report", "ESLint 보고서");
 		m.put("Edit", "편집");
+		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "아래와 같이 레지스트리를 추가하려면 <code>$HOME/.cargo/config.toml</code>을 편집하세요");
 		m.put("Edit <code>$HOME/.gem/credentials</code> to add a source", "<code>$HOME/.gem/credentials</code>를 편집하여 소스를 추가하세요.");
 		m.put("Edit <code>$HOME/.pypirc</code> to add a package repository like below", "<code>$HOME/.pypirc</code>를 편집하여 아래와 같은 패키지 저장소를 추가하세요.");
 		m.put("Edit Avatar", "아바타 편집");
@@ -1526,10 +1532,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"원격 머신에 에이전트를 설치하려면 아래 단계를 따르세요 (Linux/Windows/Mac OS X/FreeBSD 지원):");
 		m.put("For CI/CD job, add this gem to Gemfile like below", "CI/CD 작업의 경우, 아래와 같이 Gemfile에 이 gem을 추가하세요");
+		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
+			"CI/CD 작업의 경우, 이 패키지를 Cargo.toml에 추가하고 아래 명령 단계를 실행하여 패키지를 설치하세요");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"CI/CD 작업의 경우, requirements.txt에 이 패키지를 추가하고 아래 명령 단계를 실행하여 패키지를 설치하세요");
 		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"CI/CD 작업의 경우, 아래 코드와 같이 명령 단계에서 사용자 정의 settings.xml을 사용하는 것이 더 편리합니다:");
+		m.put("For CI/CD job, run below to add package registry via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 패키지 레지스트리를 추가하세요");
 		m.put("For CI/CD job, run below to add package repository via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 패키지 저장소를 추가하세요");
 		m.put("For CI/CD job, run below to add package source via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 패키지 소스를 추가하세요");
 		m.put("For CI/CD job, run below to add source via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 소스를 추가하세요");
@@ -1969,7 +1978,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Job Param", "작업 매개변수");
 		m.put("Job Parameters", "작업 매개변수들");
 		m.put("Job Privilege", "작업 권한");
-		m.put("Job Privileges", "작업 권한들");
 		m.put("Job Properties", "작업 속성들");
 		m.put("Job Properties Bean", "작업 속성 빈");
 		m.put("Job Property", "작업 속성");
@@ -2050,7 +2058,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Licensed To", "라이선스 사용자");
 		m.put("Licensed To:", "라이선스 사용자:");
 		m.put("Line", "라인");
-		m.put("Line changes", "라인 변경");
 		m.put("Line: ", "라인:");
 		m.put("Lines", "라인들");
 		m.put("Link", "링크");
@@ -2324,7 +2331,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No current commit in query context", "쿼리 컨텍스트에 현재 커밋 없음");
 		m.put("No current pull request in query context", "쿼리 컨텍스트에 현재 풀 리퀘스트 없음");
 		m.put("No data", "데이터 없음");
-		m.put("No default branch", "기본 브랜치 없음");
 		m.put("No default fork root", "기본 포크 루트가 없습니다.");
 		m.put("No default group", "기본 그룹 없음");
 		m.put("No default roles", "기본 역할 없음");
@@ -2464,6 +2470,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Ok", "확인");
 		m.put("Old Name", "이전 이름");
 		m.put("Old Password", "이전 비밀번호");
+		m.put("On", "켜짐");
 		m.put("On Behalf Of", "대신하여");
 		m.put("On Branches", "브랜치에서");
 		m.put("OneDev Issue Field", "OneDev 이슈 필드");
@@ -2635,6 +2642,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 이 실행자를 사용하는 각 작업/서비스의 CPU 제한을 지정하세요. 이는 관련 컨테이너의 옵션 <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a>로 사용됩니다.");
 		m.put("Optionally specify criteria of issues which can be linked", "선택적으로 연결할 수 있는 문제의 기준을 지정하세요.");
 		m.put("Optionally specify criteria of issues which can be linked on the other side", "선택적으로 다른 쪽에서 연결할 수 있는 문제의 기준을 지정하세요.");
+		m.put("Optionally specify custom fields allowed to edit", "편집이 허용된 사용자 지정 필드를 선택적으로 지정하세요");
 		m.put("Optionally specify depth for a shallow clone in order to speed up source retrieval", 
 			"소스 검색 속도를 높이기 위해 얕은 클론의 깊이를 선택적으로 지정하세요.");
 		m.put("Optionally specify description of the issue", "선택적으로 문제의 설명을 지정하세요.");
@@ -3033,7 +3041,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"Office 365 메일 서버에 로그인하여 이메일을 송수신하기 위한 계정의 주 이름입니다. 이 계정이 위의 애플리케이션 ID로 표시된 등록된 애플리케이션을 <b>소유</b>하고 있는지 확인하세요");
 		m.put("Private Key Secret", "개인 키 비밀");
 		m.put("Private key regenerated and SSH server restarted", "개인 키가 재생성되고 SSH 서버가 재시작되었습니다");
-		m.put("Privilege", "권한");
 		m.put("Product Version", "제품 버전");
 		m.put("Profile", "프로필");
 		m.put("Programming language", "프로그래밍 언어");
@@ -3389,7 +3396,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Run via Docker Container", "Docker 컨테이너를 통해 실행");
 		m.put("Running", "실행 중");
 		m.put("Running Takes", "실행 소요 시간");
-		m.put("SLOC on {0}", "{0}의 SLOC");
 		m.put("SMTP Host", "SMTP 호스트");
 		m.put("SMTP Password", "SMTP 비밀번호");
 		m.put("SMTP User", "SMTP 사용자");
@@ -3635,7 +3641,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Source", "소스");
 		m.put("Source Branch", "소스 브랜치");
 		m.put("Source Docker Image", "소스 Docker 이미지");
-		m.put("Source Lines", "소스 라인");
 		m.put("Source Path", "소스 경로");
 		m.put("Source branch already exists", "소스 브랜치가 이미 존재합니다");
 		m.put("Source branch already merged into target branch", "소스 브랜치가 대상 브랜치에 이미 병합되었습니다");
@@ -3987,8 +3992,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"보호할 공백으로 구분된 브랜치를 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 위해 '**', '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요.");
 		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude", 
 			"공백으로 구분된 작업을 지정하세요. 와일드카드 매칭을 위해 '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요.");
-		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. <b class='text-danger'>NOTE: </b> Permission to access build artifacts will be granted implicitly in matched jobs even if no other permissions are specified here", 
-			"공백으로 구분된 작업을 지정하세요. 와일드카드 매칭을 위해 '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요. <b class='text-danger'>참고:</b> 여기에서 다른 권한이 지정되지 않은 경우에도 일치하는 작업에서 빌드 아티팩트에 액세스할 권한이 암시적으로 부여됩니다.");
 		m.put("Specify space-separated paths to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
 			"보호할 공백으로 구분된 경로를 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 위해 '**', '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요.");
 		m.put("Specify space-separated projects applicable for this entry. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all projects", 
@@ -4227,8 +4230,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"POST 요청이 OneDev에서 페이로드 URL로 전송되었는지 확인할 수 있는 비밀 키입니다. 비밀 키를 설정하면 웹훅 POST 요청에서 X-OneDev-Signature 헤더를 받게 됩니다");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
 			"서비스 데스크 기능을 사용하면 사용자가 이메일을 통해 OneDev에 이슈를 생성할 수 있습니다. 이슈는 OneDev에 로그인하지 않고도 이메일로 완전히 논의될 수 있습니다.");
+		m.put("Then add the package", "그런 다음 패키지를 추가하세요");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "TOTP 인증기에 표시된 패스코드를 입력하여 확인하세요");
 		m.put("Then publish package from project directory like below", "아래와 같이 프로젝트 디렉토리에서 패키지를 게시하세요");
+		m.put("Then publish package to the registry", "그런 다음 패키지를 레지스트리에 게시하세요");
 		m.put("Then push gem to the source", "소스에 gem을 푸시하세요");
 		m.put("Then push image to desired repository under specified project", "지정된 프로젝트 아래 원하는 저장소로 이미지를 푸시하세요");
 		m.put("Then push package to the source", "소스에 패키지를 푸시하세요");
@@ -4401,6 +4406,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
 			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [, 화살표 키 또는 페이지 업/다운을 사용하세요. 종료하려면 q를 누르세요.");
 		m.put("To use this package, add below to project pom.xml", "이 패키지를 사용하려면 아래 내용을 프로젝트 pom.xml에 추가하세요");
+		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
+			"이 패키지를 사용하려면, 아래와 같이 레지스트리를 추가하기 위해 <code>$HOME/.cargo/config.toml</code>을 편집하세요");
 		m.put("Toggle change history", "변경 기록 토글");
 		m.put("Toggle comments", "댓글 토글");
 		m.put("Toggle commits", "커밋 토글");
@@ -4509,6 +4516,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unable to connect to server", "서버에 연결할 수 없습니다");
 		m.put("Unable to create protected branch", "보호된 브랜치를 생성할 수 없습니다");
 		m.put("Unable to create protected tag", "보호된 태그를 생성할 수 없습니다");
+		m.put("Unable to delete issue \"{0}\" as it has workspaces", "워크스페이스가 있어서 \"{0}\" 이슈를 삭제할 수 없습니다");
+		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "워크스페이스가 있어서 \"{0}\" 풀 리퀘스트를 삭제할 수 없습니다");
 		m.put("Unable to diff as some line is too long.", "일부 줄이 너무 길어 차이를 표시할 수 없습니다.");
 		m.put("Unable to diff as the file is too large.", "파일이 너무 커서 차이를 표시할 수 없습니다.");
 		m.put("Unable to find SSO provider: ", "SSO 제공자를 찾을 수 없습니다:");
@@ -4876,7 +4885,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("a string representing summary of the event", "이벤트 요약을 나타내는 문자열");
 		m.put("abort merge", "병합 중단");
 		m.put("access [{0}]", "액세스 [{0}]");
-		m.put("active", "활성");
 		m.put("add another order", "다른 주문 추가");
 		m.put("adding .onedev-buildspec.yml", ".onedev-buildspec.yml 추가 중");
 		m.put("after specified date", "지정된 날짜 이후");
@@ -4884,7 +4892,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"구독 취소 정보를 보유한 <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>객체</a>. <code>null</code> 값은 알림을 구독 취소할 수 없음을 의미합니다");
 		m.put("and more", "그리고 더 많은 것");
 		m.put("archived", "보관됨");
-		m.put("artifacts", "아티팩트");
 		m.put("assign to me", "나에게 할당");
 		m.put("authored by", "작성자");
 		m.put("backlog ", "백로그");
@@ -5072,7 +5079,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("true", "참");
 		m.put("true for html version, false for text version", "HTML 버전은 참, 텍스트 버전은 거짓");
 		m.put("type", "유형");
-		m.put("up to date", "최신 상태");
 		m.put("url following which to verify email address", "이메일 주소를 확인하기 위한 URL");
 		m.put("url to reset password", "비밀번호를 재설정하기 위한 URL");
 		m.put("value needs to be enclosed in brackets", "값은 대괄호로 감싸야 합니다");
@@ -5123,27 +5129,34 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("And login to the registry", "그리고 레지스트리에 로그인하세요");
-		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
-			"기본적으로 사용자는 자신이 제출한 이슈에 대해 위에서 지정된 필드만 편집할 수 있습니다.\n이 옵션을 활성화하면 다른 사람이 제출한 이슈의 필드를 편집할 수 있습니다.");
-		m.put("Can Edit Fields Of Other Issues", "다른 이슈의 필드를 편집할 수 있음");
-		m.put("Cannot delete issue as it has workspaces", "워크스페이스가 있어서 이슈를 삭제할 수 없습니다");
-		m.put("Cannot delete pull request as it has workspaces", "워크스페이스가 있어서 풀 리퀘스트를 삭제할 수 없습니다");
-		m.put("Click to copy", "클릭하여 복사");
-		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
-			"<a href='https://groovy-lang.org' target='_blank'>groovy 스크립트</a>의 내용을 정의하세요");
-		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "아래와 같이 레지스트리를 추가하려면 <code>$HOME/.cargo/config.toml</code>을 편집하세요");
-		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
-			"CI/CD 작업의 경우, 이 패키지를 Cargo.toml에 추가하고 아래 명령 단계를 실행하여 패키지를 설치하세요");
-		m.put("For CI/CD job, run below to add package registry via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 패키지 레지스트리를 추가하세요");
-		m.put("On", "켜짐");
-		m.put("Optionally specify custom fields allowed to edit", "편집이 허용된 사용자 지정 필드를 선택적으로 지정하세요");
-		m.put("Then add the package", "그런 다음 패키지를 추가하세요");
-		m.put("Then publish package to the registry", "그런 다음 패키지를 레지스트리에 게시하세요");
-		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
-			"이 패키지를 사용하려면, 아래와 같이 레지스트리를 추가하기 위해 <code>$HOME/.cargo/config.toml</code>을 편집하세요");
-		m.put("Unable to delete issue \"{0}\" as it has workspaces", "워크스페이스가 있어서 \"{0}\" 이슈를 삭제할 수 없습니다");
-		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "워크스페이스가 있어서 \"{0}\" 풀 리퀘스트를 삭제할 수 없습니다");
+		m.put("1 Year", "1년");
+		m.put("5 Years", "5년");
+		m.put("6 Months", "6개월");
+		m.put("<i>None</i>", "<i>없음</i>");
+		m.put("Additional Job Privileges", "추가 작업 권한");
+		m.put("Additional Privileges", "추가 권한");
+		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
+			"기본적으로 사용자는 모든 작업의 아티팩트에 접근할 수 있습니다. 특정 작업에 추가 권한을 할당하려면 여기에 지정하십시오.");
+		m.put("Code Contributions", "코드 기여");
+		m.put("Five years", "5년");
+		m.put("Next Iteration ({0})", "다음 반복 ({0})");
+		m.put("Next year", "내년");
+		m.put("One year", "1년");
+		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
+			"브랜치와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
+		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
+			"빌드와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
+		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
+			"풀 리퀘스트와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
+		m.put("Previous year", "작년");
+		m.put("Show Language Stats", "언어 통계 표시");
+		m.put("Show Next Iteration", "다음 반복 표시");
+		m.put("Show Workspace Stats", "작업 공간 통계 표시");
+		m.put("Six months", "6개월");
+		m.put("active replica", "활성 복제본");
+		m.put("outdated replica", "구식 복제본");
+		m.put("up to date replica", "최신 복제본");
+		m.put("{0} Lines", "{0} 줄");
 	}
 		
 	@Override

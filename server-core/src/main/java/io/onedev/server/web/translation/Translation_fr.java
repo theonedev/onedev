@@ -324,6 +324,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("An issue already linked for {0}. Unlink it first", "Un problème est déjà lié pour {0}. Dissociez-le d'abord");
 		m.put("An unexpected exception occurred", "Une exception inattendue s'est produite");
 		m.put("And configure auth token of the registry", "Et configurez le jeton d'authentification du registre");
+		m.put("And login to the registry", "Et connectez-vous au registre");
 		m.put("Another pull request already open for this change", "Une autre pull request est déjà ouverte pour ce changement");
 		m.put("Another workspace spec with the same name already exists", "Une autre spécification d'espace de travail avec le même nom existe déjà");
 		m.put("Any agent", "N'importe quel agent");
@@ -584,6 +585,8 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Par défaut, le code est cloné via un identifiant auto-généré, qui n'a que des permissions de lecture sur le projet actuel. Si le travail nécessite de <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>pousser du code vers le serveur</a>, vous devez fournir ici un identifiant personnalisé avec les permissions appropriées");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"Par défaut, les problèmes des projets parent et enfant seront également listés. Utilisez la requête <code>&quot;Project&quot; is current</code> pour afficher uniquement les problèmes appartenant à ce projet");
+		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
+			"Par défaut, les utilisateurs ne sont autorisés à modifier que les champs spécifiés ci-dessus pour les problèmes qu'ils ont eux-mêmes soumis.\nActivez cette option pour permettre de modifier les champs pour les problèmes soumis par d'autres.");
 		m.put("By month", "Par mois");
 		m.put("By week", "Par semaine");
 		m.put("Bypass Certificate Check", "Contourner la vérification des certificats");
@@ -612,6 +615,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Can Be Used By Workspaces", "Peut être utilisé par les espaces de travail");
 		m.put("Can Create Root Projects", "Peut créer des projets racine");
 		m.put("Can Edit Estimated Time", "Peut modifier le temps estimé");
+		m.put("Can Edit Fields Of Other Issues", "Peut modifier les champs d'autres problèmes");
 		m.put("Can only compare with common ancestor when different projects are involved", "Peut seulement comparer avec un ancêtre commun lorsque différents projets sont impliqués");
 		m.put("Cancel", "Annuler");
 		m.put("Cancel All Queried Builds", "Annuler toutes les constructions interrogées");
@@ -625,6 +629,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Cannot convert yourself to service account", "Impossible de vous convertir en compte de service");
 		m.put("Cannot delete branch as it has workspaces", "Impossible de supprimer la branche car elle contient des espaces de travail");
 		m.put("Cannot delete default branch", "Impossible de supprimer la branche par défaut");
+		m.put("Cannot delete issue as it has workspaces", "Impossible de supprimer le problème car il contient des espaces de travail");
+		m.put("Cannot delete pull request as it has workspaces", "Impossible de supprimer la demande de tirage car elle contient des espaces de travail");
 		m.put("Cannot delete root account", "Impossible de supprimer le compte racine");
 		m.put("Cannot delete source branch as it has workspaces", "Impossible de supprimer la branche source car elle contient des espaces de travail");
 		m.put("Cannot delete yourself", "Impossible de vous supprimer");
@@ -741,6 +747,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Choose users...", "Choisissez des utilisateurs...");
 		m.put("Choose...", "Choisissez...");
 		m.put("Circular build spec imports ({0})", "Importations circulaires de spécifications de construction ({0})");
+		m.put("Click to copy", "Cliquez pour copier");
 		m.put("Click to select a commit, or shift-click to select multiple commit", "Cliquez pour sélectionner un commit, ou maj-clic pour sélectionner plusieurs commits");
 		m.put("Click to show comment of marked text", "Cliquez pour afficher le commentaire du texte marqué");
 		m.put("Click to show issue details", "Cliquez pour afficher les détails du problème");
@@ -776,14 +783,11 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Code Comment Management", "Gestion des commentaires de code");
 		m.put("Code Comments", "Commentaires de code");
 		m.put("Code Compare", "Comparaison de code");
-		m.put("Code Contribution Statistics", "Statistiques de contribution de code");
 		m.put("Code Coverage", "Couverture de code");
-		m.put("Code Line Statistics", "Statistiques de lignes de code");
 		m.put("Code Management", "Gestion du code");
 		m.put("Code Privilege", "Privilège de code");
 		m.put("Code Problem Statistics", "Statistiques des problèmes de code");
 		m.put("Code Search", "Recherche de code");
-		m.put("Code Statistics", "Statistiques de code");
 		m.put("Code analysis settings updated", "Paramètres d'analyse de code mis à jour");
 		m.put("Code changes since...", "Modifications de code depuis...");
 		m.put("Code clone or download", "Cloner ou télécharger le code");
@@ -890,7 +894,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Content is identical", "Le contenu est identique");
 		m.put("Continue to add other user after create", "Continuer à ajouter d'autres utilisateurs après la création");
 		m.put("Contributed settings", "Paramètres contribué");
-		m.put("Contributions", "Contributions");
 		m.put("Contributions to {0} branch, excluding merge commits", "Contributions à la branche {0}, en excluant les commits de fusion");
 		m.put("Conventional Commit", "Commit conventionnel");
 		m.put("Convert All Queried to Service Accounts", "Convertir tous les interrogés en comptes de service");
@@ -1030,6 +1033,8 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Définissez tous les états de problème personnalisés ici. Le premier état sera utilisé comme état initial des problèmes créés");
 		m.put("Define branch protection rules. Rules defined in parent project are considered to be defined after rules defined here. For a given branch and user, the first matching rule will take effect", 
 			"Définissez les règles de protection des branches. Les règles définies dans le projet parent sont considérées comme définies après les règles définies ici. Pour une branche et un utilisateur donnés, la première règle correspondante prendra effet");
+		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
+			"Définir le contenu du <a href='https://groovy-lang.org' target='_blank'>script groovy</a>");
 		m.put("Define default issue boards for all projects here. A certain project can override this setting to define its own issue boards.", 
 			"Définissez les tableaux de problèmes par défaut pour tous les projets ici. Un certain projet peut remplacer ce paramètre pour définir ses propres tableaux de problèmes.");
 		m.put("Define how issues may move from one state to another in this project. At evaluation time, rules from this project, each ancestor project up to the root, and the global rules are merged in that order; the first matching rule applies.", 
@@ -1243,6 +1248,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Durations", "Durées");
 		m.put("ESLint Report", "Rapport ESLint");
 		m.put("Edit", "Modifier");
+		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "Modifiez <code>$HOME/.cargo/config.toml</code> pour ajouter un registre comme ci-dessous");
 		m.put("Edit <code>$HOME/.gem/credentials</code> to add a source", "Modifiez <code>$HOME/.gem/credentials</code> pour ajouter une source");
 		m.put("Edit <code>$HOME/.pypirc</code> to add a package repository like below", "Modifiez <code>$HOME/.pypirc</code> pour ajouter un dépôt de packages comme ci-dessous");
 		m.put("Edit Avatar", "Modifier l'avatar");
@@ -1526,10 +1532,13 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"Suivez les étapes ci-dessous pour installer l'agent sur une machine distante (compatible Linux/Windows/Mac OS X/FreeBSD) :");
 		m.put("For CI/CD job, add this gem to Gemfile like below", "Pour un travail CI/CD, ajoutez ce gem au Gemfile comme ci-dessous");
+		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
+			"Pour un travail CI/CD, ajoutez ce package à Cargo.toml et exécutez la commande ci-dessous pour installer le package via une étape de commande");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"Pour un travail CI/CD, ajoutez ce package à requirements.txt et exécutez la commande ci-dessous pour installer le package via une étape de commande");
 		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"Pour un travail CI/CD, il est plus pratique d'utiliser un settings.xml personnalisé, par exemple via le code ci-dessous dans une étape de commande :");
+		m.put("For CI/CD job, run below to add package registry via command step", "Pour un travail CI/CD, exécutez la commande ci-dessous pour ajouter un registre de packages via une étape de commande");
 		m.put("For CI/CD job, run below to add package repository via command step", "Pour un travail CI/CD, exécutez la commande ci-dessous pour ajouter le dépôt de packages via une étape de commande");
 		m.put("For CI/CD job, run below to add package source via command step", "Pour un travail CI/CD, exécutez la commande ci-dessous pour ajouter la source du package via une étape de commande");
 		m.put("For CI/CD job, run below to add source via command step", "Pour un travail CI/CD, exécutez la commande ci-dessous pour ajouter la source via une étape de commande");
@@ -1969,7 +1978,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Job Param", "Paramètre de travail");
 		m.put("Job Parameters", "Paramètres de travail");
 		m.put("Job Privilege", "Privilège de tâche");
-		m.put("Job Privileges", "Privilèges de tâche");
 		m.put("Job Properties", "Propriétés de tâche");
 		m.put("Job Properties Bean", "Propriétés de tâche Bean");
 		m.put("Job Property", "Propriété de tâche");
@@ -2050,7 +2058,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Licensed To", "Licencié À");
 		m.put("Licensed To:", "Licencié À :");
 		m.put("Line", "Ligne");
-		m.put("Line changes", "Modifications de Ligne");
 		m.put("Line: ", "Ligne :");
 		m.put("Lines", "Lignes");
 		m.put("Link", "Lien");
@@ -2324,7 +2331,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("No current commit in query context", "Aucun commit actuel dans le contexte de la requête");
 		m.put("No current pull request in query context", "Aucune pull request actuelle dans le contexte de la requête");
 		m.put("No data", "Aucune donnée");
-		m.put("No default branch", "Aucune branche par défaut");
 		m.put("No default fork root", "Aucune racine de fork par défaut");
 		m.put("No default group", "Aucun groupe par défaut");
 		m.put("No default roles", "Aucun rôle par défaut");
@@ -2464,6 +2470,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Ok", "Ok");
 		m.put("Old Name", "Ancien nom");
 		m.put("Old Password", "Ancien mot de passe");
+		m.put("On", "Activé");
 		m.put("On Behalf Of", "Au nom de");
 		m.put("On Branches", "Sur les branches");
 		m.put("OneDev Issue Field", "Champ de problème OneDev");
@@ -2635,6 +2642,7 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Spécifiez éventuellement la limite de CPU de chaque tâche/service utilisant cet exécuteur. Cela sera utilisé comme option <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a> des conteneurs concernés.");
 		m.put("Optionally specify criteria of issues which can be linked", "Spécifiez éventuellement les critères des problèmes qui peuvent être liés.");
 		m.put("Optionally specify criteria of issues which can be linked on the other side", "Spécifiez éventuellement les critères des problèmes qui peuvent être liés de l'autre côté.");
+		m.put("Optionally specify custom fields allowed to edit", "Spécifiez éventuellement des champs personnalisés autorisés à être modifiés");
 		m.put("Optionally specify depth for a shallow clone in order to speed up source retrieval", 
 			"Spécifiez éventuellement la profondeur pour un clonage superficiel afin d'accélérer la récupération des sources.");
 		m.put("Optionally specify description of the issue", "Spécifiez éventuellement la description du problème.");
@@ -3033,7 +3041,6 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Nom principal du compte pour se connecter au serveur de messagerie Office 365 afin d'envoyer/recevoir des e-mails. Assurez-vous que ce compte <b>possède</b> l'application enregistrée indiquée par l'identifiant de l'application ci-dessus");
 		m.put("Private Key Secret", "Clé secrète privée");
 		m.put("Private key regenerated and SSH server restarted", "Clé privée régénérée et serveur SSH redémarré");
-		m.put("Privilege", "Privilège");
 		m.put("Product Version", "Version du produit");
 		m.put("Profile", "Profil");
 		m.put("Programming language", "Langage de programmation");
@@ -3389,7 +3396,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Run via Docker Container", "Exécuter via un conteneur Docker");
 		m.put("Running", "En cours d'exécution");
 		m.put("Running Takes", "Exécution prend");
-		m.put("SLOC on {0}", "SLOC sur {0}");
 		m.put("SMTP Host", "Hôte SMTP");
 		m.put("SMTP Password", "Mot de passe SMTP");
 		m.put("SMTP User", "Utilisateur SMTP");
@@ -3635,7 +3641,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Source", "Source");
 		m.put("Source Branch", "Branche source");
 		m.put("Source Docker Image", "Image Docker Source");
-		m.put("Source Lines", "Lignes Source");
 		m.put("Source Path", "Chemin Source");
 		m.put("Source branch already exists", "La branche source existe déjà");
 		m.put("Source branch already merged into target branch", "La branche source est déjà fusionnée dans la branche cible");
@@ -3987,8 +3992,6 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Spécifiez les branches séparées par des espaces à protéger. Utilisez '**', '*' ou '?' pour une <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>correspondance par wildcard de chemin</a>. Préfixez avec '-' pour exclure");
 		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude", 
 			"Spécifiez les jobs séparés par des espaces. Utilisez '*' ou '?' pour une correspondance par wildcard. Préfixez avec '-' pour exclure");
-		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. <b class='text-danger'>NOTE: </b> Permission to access build artifacts will be granted implicitly in matched jobs even if no other permissions are specified here", 
-			"Spécifiez les jobs séparés par des espaces. Utilisez '*' ou '?' pour une correspondance par wildcard. Préfixez avec '-' pour exclure. <b class='text-danger'>REMARQUE :</b> La permission d'accéder aux artefacts de construction sera accordée implicitement dans les jobs correspondants même si aucune autre permission n'est spécifiée ici");
 		m.put("Specify space-separated paths to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
 			"Spécifiez les chemins séparés par des espaces à protéger. Utilisez '**', '*' ou '?' pour une <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>correspondance par wildcard de chemin</a>. Préfixez avec '-' pour exclure");
 		m.put("Specify space-separated projects applicable for this entry. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all projects", 
@@ -4227,8 +4230,10 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Le secret qui vous permet de garantir que les requêtes POST envoyées à l'URL de charge utile proviennent de OneDev. Lorsque vous définissez un secret, vous recevrez l'en-tête X-OneDev-Signature dans la requête POST du webhook");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
 			"La fonctionnalité de service desk permet à l'utilisateur de créer des issues en envoyant des emails à OneDev. Les issues peuvent être discutées entièrement par email, sans avoir besoin de se connecter à OneDev.");
+		m.put("Then add the package", "Ajoutez ensuite le package");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "Ensuite, entrez le code affiché dans l'authentificateur TOTP pour vérifier");
 		m.put("Then publish package from project directory like below", "Ensuite, publiez le package depuis le répertoire du projet comme ci-dessous");
+		m.put("Then publish package to the registry", "Publiez ensuite le package dans le registre");
 		m.put("Then push gem to the source", "Ensuite, poussez le gem vers la source");
 		m.put("Then push image to desired repository under specified project", "Ensuite, poussez l'image vers le dépôt souhaité sous le projet spécifié");
 		m.put("Then push package to the source", "Ensuite, poussez le package vers la source");
@@ -4401,6 +4406,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
 			"Pour faire défiler dans ce terminal, appuyez sur ctrl+b puis [, et utilisez les flèches ou page haut/bas. Appuyez sur q pour quitter.");
 		m.put("To use this package, add below to project pom.xml", "Pour utiliser ce package, ajoutez ci-dessous au pom.xml du projet");
+		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
+			"Pour utiliser ce package, modifiez <code>$HOME/.cargo/config.toml</code> pour ajouter un registre comme ci-dessous");
 		m.put("Toggle change history", "Basculer l'historique des modifications");
 		m.put("Toggle comments", "Basculer les commentaires");
 		m.put("Toggle commits", "Basculer les commits");
@@ -4509,6 +4516,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Unable to connect to server", "Impossible de se connecter au serveur");
 		m.put("Unable to create protected branch", "Impossible de créer une branche protégée");
 		m.put("Unable to create protected tag", "Impossible de créer une balise protégée");
+		m.put("Unable to delete issue \"{0}\" as it has workspaces", "Impossible de supprimer le problème \"{0}\" car il contient des espaces de travail");
+		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "Impossible de supprimer la demande de tirage \"{0}\" car elle contient des espaces de travail");
 		m.put("Unable to diff as some line is too long.", "Impossible de différencier car une ligne est trop longue.");
 		m.put("Unable to diff as the file is too large.", "Impossible de différencier car le fichier est trop volumineux.");
 		m.put("Unable to find SSO provider: ", "Impossible de trouver le fournisseur SSO :");
@@ -4876,7 +4885,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("a string representing summary of the event", "une chaîne représentant le résumé de l'événement");
 		m.put("abort merge", "abandonner la fusion");
 		m.put("access [{0}]", "accès [{0}]");
-		m.put("active", "actif");
 		m.put("add another order", "ajouter une autre commande");
 		m.put("adding .onedev-buildspec.yml", "ajout de .onedev-buildspec.yml");
 		m.put("after specified date", "après la date spécifiée");
@@ -4884,7 +4892,6 @@ public class Translation_fr extends TranslationResourceBundle {
 			"un <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>objet</a> contenant des informations de désabonnement. Une valeur <code>null</code> signifie que la notification ne peut pas être désabonnée");
 		m.put("and more", "et plus");
 		m.put("archived", "archivé");
-		m.put("artifacts", "artéfacts");
 		m.put("assign to me", "assigner à moi");
 		m.put("authored by", "rédigé par");
 		m.put("backlog ", "arriéré");
@@ -5072,7 +5079,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("true", "vrai");
 		m.put("true for html version, false for text version", "vrai pour la version HTML, faux pour la version texte");
 		m.put("type", "type");
-		m.put("up to date", "à jour");
 		m.put("url following which to verify email address", "URL permettant de vérifier l'adresse e-mail");
 		m.put("url to reset password", "URL pour réinitialiser le mot de passe");
 		m.put("value needs to be enclosed in brackets", "la valeur doit être entourée de crochets");
@@ -5123,27 +5129,34 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("And login to the registry", "Et connectez-vous au registre");
-		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
-			"Par défaut, les utilisateurs ne sont autorisés à modifier que les champs spécifiés ci-dessus pour les problèmes qu'ils ont eux-mêmes soumis.\nActivez cette option pour permettre de modifier les champs pour les problèmes soumis par d'autres.");
-		m.put("Can Edit Fields Of Other Issues", "Peut modifier les champs d'autres problèmes");
-		m.put("Cannot delete issue as it has workspaces", "Impossible de supprimer le problème car il contient des espaces de travail");
-		m.put("Cannot delete pull request as it has workspaces", "Impossible de supprimer la demande de tirage car elle contient des espaces de travail");
-		m.put("Click to copy", "Cliquez pour copier");
-		m.put("Define content of the <a href='https://groovy-lang.org' target='_blank'>groovy script</a>", 
-			"Définir le contenu du <a href='https://groovy-lang.org' target='_blank'>script groovy</a>");
-		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "Modifiez <code>$HOME/.cargo/config.toml</code> pour ajouter un registre comme ci-dessous");
-		m.put("For CI/CD job, add this package to Cargo.toml and run below to install the package via command step", 
-			"Pour un travail CI/CD, ajoutez ce package à Cargo.toml et exécutez la commande ci-dessous pour installer le package via une étape de commande");
-		m.put("For CI/CD job, run below to add package registry via command step", "Pour un travail CI/CD, exécutez la commande ci-dessous pour ajouter un registre de packages via une étape de commande");
-		m.put("On", "Activé");
-		m.put("Optionally specify custom fields allowed to edit", "Spécifiez éventuellement des champs personnalisés autorisés à être modifiés");
-		m.put("Then add the package", "Ajoutez ensuite le package");
-		m.put("Then publish package to the registry", "Publiez ensuite le package dans le registre");
-		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
-			"Pour utiliser ce package, modifiez <code>$HOME/.cargo/config.toml</code> pour ajouter un registre comme ci-dessous");
-		m.put("Unable to delete issue \"{0}\" as it has workspaces", "Impossible de supprimer le problème \"{0}\" car il contient des espaces de travail");
-		m.put("Unable to delete pull request \"{0}\" as it has workspaces", "Impossible de supprimer la demande de tirage \"{0}\" car elle contient des espaces de travail");
+		m.put("1 Year", "1 An");
+		m.put("5 Years", "5 Ans");
+		m.put("6 Months", "6 Mois");
+		m.put("<i>None</i>", "<i>Aucun</i>");
+		m.put("Additional Job Privileges", "Privilèges de Travail Supplémentaires");
+		m.put("Additional Privileges", "Privilèges Supplémentaires");
+		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
+			"Par défaut, les utilisateurs peuvent accéder aux artefacts de tous les travaux. Pour attribuer des privilèges supplémentaires à des travaux spécifiques, spécifiez-les ici.");
+		m.put("Code Contributions", "Contributions de Code");
+		m.put("Five years", "Cinq ans");
+		m.put("Next Iteration ({0})", "Prochaine Itération ({0})");
+		m.put("Next year", "L'année prochaine");
+		m.put("One year", "Un an");
+		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
+			"Spécifiez éventuellement les problèmes applicables à cette transition dans le même projet que la branche. Laissez vide pour tous les problèmes");
+		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
+			"Spécifiez éventuellement les problèmes applicables à cette transition dans le même projet que la construction. Laissez vide pour tous les problèmes");
+		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
+			"Spécifiez éventuellement les problèmes applicables à cette transition dans le même projet que la demande de tirage. Laissez vide pour tous les problèmes");
+		m.put("Previous year", "L'année précédente");
+		m.put("Show Language Stats", "Afficher les Statistiques de Langue");
+		m.put("Show Next Iteration", "Afficher la Prochaine Itération");
+		m.put("Show Workspace Stats", "Afficher les Statistiques de l'Espace de Travail");
+		m.put("Six months", "Six mois");
+		m.put("active replica", "réplique active");
+		m.put("outdated replica", "réplique obsolète");
+		m.put("up to date replica", "réplique à jour");
+		m.put("{0} Lines", "{0} Lignes");
 	}
 		
 	@Override
