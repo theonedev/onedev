@@ -11,6 +11,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -23,24 +24,39 @@ import io.onedev.server.annotation.Editable;
  */
 @Entity
 @Table(
-		indexes={@Index(columnList="o_owner_id"), @Index(columnList=PROP_PATH)})
+		indexes={@Index(columnList="o_owner_id"), @Index(columnList="o_project_id"), @Index(columnList=PROP_PATH)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_PATH})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class GitLfsLock extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_PROJECT = "project";
+	
 	public static final String PROP_PATH = "path";
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
+	private Project project;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User owner;
 	
-	@Column(nullable=false, unique=true)
+	@Column(nullable=false)
 	private String path;
 	
 	@Column(nullable=false)
 	private Date date = new Date();
+
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
+	}
 
 	public User getOwner() {
 		return owner;

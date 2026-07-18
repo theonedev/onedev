@@ -1,3 +1,9 @@
+# 16.1.1
+
+### Git LFS
+
+Existing Git LFS file locks will be removed during upgrade. Previously locks were not scoped per repository and cannot be migrated reliably. Recreate locks after upgrade as needed.
+
 # 16.1.0
 
 ### CI/CD

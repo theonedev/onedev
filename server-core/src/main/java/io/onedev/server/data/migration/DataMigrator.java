@@ -9145,6 +9145,8 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("GitLfsLocks.xml")) {
+				FileUtils.deleteFile(file);
 			}
 		}
 	}
