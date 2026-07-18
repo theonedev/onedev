@@ -286,6 +286,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Pack> packs = new ArrayList<>();
+
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<GitLfsLock> gitLfsLocks = new ArrayList<>();
 		
 	@Lob
 	@Column(nullable=false, length=65535)

@@ -340,9 +340,10 @@ public class GitLfsFilter implements Filter {
 										lockRequestNode = objectMapper.readTree(is);
 									}
 									String path = lockRequestNode.get("path").asText();
-									GitLfsLock lock = lockService.find(path);
+									GitLfsLock lock = lockService.find(project, path);
 									if (lock == null) {
 										lock = new GitLfsLock();
+										lock.setProject(project);
 										lock.setPath(path);
 										lock.setOwner(SecurityUtils.getUser());
 										lockService.create(lock);
@@ -379,6 +380,7 @@ public class GitLfsFilter implements Filter {
 										limit = MAX_PAGE_SIZE;
 									
 									EntityCriteria<GitLfsLock> criteria = EntityCriteria.of(GitLfsLock.class);
+									criteria.add(Restrictions.eq(GitLfsLock.PROP_PROJECT, project));
 									if (path != null)
 										criteria.add(Restrictions.eq(GitLfsLock.PROP_PATH, path));
 									if (id != null)
@@ -425,6 +427,7 @@ public class GitLfsFilter implements Filter {
 									limit = MAX_PAGE_SIZE;
 								
 								EntityCriteria<GitLfsLock> criteria = EntityCriteria.of(GitLfsLock.class);
+								criteria.add(Restrictions.eq(GitLfsLock.PROP_PROJECT, project));
 								if (path != null)
 									criteria.add(Restrictions.eq(GitLfsLock.PROP_PATH, path));
 								if (id != null)
@@ -463,8 +466,10 @@ public class GitLfsFilter implements Filter {
 								if (forceNode != null)
 									force = forceNode.asBoolean();
 
-								GitLfsLock lock = lockService.load(id);
-								if (lock.getOwner().equals(SecurityUtils.getUser())) {
+								GitLfsLock lock = lockService.get(id);
+								if (lock == null || !lock.getProject().equals(project)) {
+									sendBatchError(httpResponse, SC_NOT_FOUND, "Lock not found");
+								} else if (lock.getOwner().equals(SecurityUtils.getUser())) {
 									lockService.delete(lock);
 									writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 								} else if (force) {
