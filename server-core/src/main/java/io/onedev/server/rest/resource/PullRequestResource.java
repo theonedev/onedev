@@ -59,6 +59,7 @@ import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
+import io.onedev.server.service.PullRequestAssignmentService;
 import io.onedev.server.service.PullRequestChangeService;
 import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.service.PullRequestService;
@@ -83,6 +84,9 @@ public class PullRequestResource {
 
 	@Inject
 	private PullRequestReviewService pullRequestReviewService;
+
+	@Inject
+	private PullRequestAssignmentService pullRequestAssignmentService;
 	
 	@Inject
 	private UserService userService;
@@ -135,11 +139,18 @@ public class PullRequestResource {
 	@Api(order=300)
 	@Path("/{requestId}/assignments")
     @GET
-    public Collection<PullRequestAssignment> getAssignments(@PathParam("requestId") Long requestId) {
+    public Collection<Map<String, Object>> getAssignments(@PathParam("requestId") Long requestId) {
 		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
-    	return pullRequest.getAssignments();
+
+		var typeReference = new TypeReference<HashMap<String, Object>>() {};
+    	return pullRequest.getAssignments().stream()
+				.map(it-> {
+					var map = objectMapper.convertValue(it, typeReference); 
+					map.remove("id"); 
+					return map;
+				}).collect(toList());
     }
 	
 	@Api(order=400)
@@ -379,7 +390,7 @@ public class PullRequestResource {
 		var request = pullRequestService.load(requestId);
 		var user = SecurityUtils.getUser();
 		note = StringUtils.trimToNull(note);
-		
+
 		if (user == null)
 			throw new UnauthorizedException();
 
@@ -412,6 +423,50 @@ public class PullRequestResource {
 	
 			return Response.ok().build();	
 		});
+	}
+
+	@Api(order=1480)
+	@Path("/{requestId}/assignees/{userId}")
+	@POST
+	public Response addAssignee(@PathParam("requestId") Long requestId, @PathParam("userId") Long userId) {
+		var request = pullRequestService.load(requestId);
+		var user = userService.load(userId);
+
+		if (!SecurityUtils.canModifyPullRequest(request))
+			throw new UnauthorizedException();
+
+		if (!SecurityUtils.canWriteCode(user.asSubject(), request.getProject()))
+			throw new NotAcceptableException("Assignee needs to have write code permission to the project");
+
+		if (request.getAssignees().contains(user))
+			return Response.ok().build();
+
+		var assignment = new PullRequestAssignment();
+		assignment.setRequest(request);
+		assignment.setUser(user);
+		pullRequestAssignmentService.create(assignment);
+
+		return Response.ok().build();
+	}
+
+	@Api(order=1490)
+	@Path("/{requestId}/assignees/{userId}")
+	@DELETE
+	public Response removeAssignee(@PathParam("requestId") Long requestId, @PathParam("userId") Long userId) {
+		var request = pullRequestService.load(requestId);
+		var user = userService.load(userId);
+
+		if (!SecurityUtils.canModifyPullRequest(request))
+			throw new UnauthorizedException();
+
+		var assignment = request.getAssignments().stream()
+				.filter(it -> it.getUser().equals(user))
+				.findFirst()
+				.orElse(null);
+		if (assignment != null)
+			pullRequestAssignmentService.delete(assignment);
+
+		return Response.ok().build();
 	}
 	
 	@Api(order=1500)
