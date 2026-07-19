@@ -1158,7 +1158,7 @@ onedev.server.markdown = {
 			
 			if (!$this.parent().hasClass("suggestion")) {
 				var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg>";
-				var $copy = $("<a class='pressable' data-tippy-content='" + onedev.server.markdown.translations["copy-to-clipboard"] + "'>" + icon + "</a>");
+				var $copy = $("<a class='pressable link-gray' data-tippy-content='" + onedev.server.markdown.translations["copy-to-clipboard"] + "'>" + icon + "</a>");
 				$actions.append($copy);
 				var options = {
 					text: function() {

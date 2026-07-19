@@ -526,7 +526,8 @@ public class ChatPanel extends Panel {
 			messageContainer.add(new MarkdownViewer("content", Model.of(message.getContent()), null));
 		}
 		messageContainer.add(new CopyToClipboardLink("copy", Model.of(message.getContent()))
-				.setVisible(!message.isError() && !message.isRequest()));
+				.setVisible(!message.isError() && !message.isRequest() 
+						&& !message.getContent().contains("Conversation cancelled")));
 
 		if (message.isError()) 
 			messageContainer.add(AttributeAppender.append("class", "error"));

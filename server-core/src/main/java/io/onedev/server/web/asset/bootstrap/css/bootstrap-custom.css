@@ -173,7 +173,7 @@ a.link-gray:hover, a.link-gray:focus {
 	color: var(--gray-dark) !important;
 }
 .dark-mode a.link-gray:hover, .dark-mode a.link-gray:focus {
-	color: var(--primary) !important;
+	color: var(--muted) !important;
 }
 .text-muted, a.link-muted {
 	color: var(--muted) !important;
