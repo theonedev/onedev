@@ -1,3 +1,9 @@
+# 16.3.0
+
+### RESTful API
+
+Pull request review/assignment resources are removed. Use add/remove reviewer/assignee, approve and request for changes operations of [pull request resource](/~help/api/io.onedev.server.rest.resource.PullRequestResource) instead. Also get reviews/assignments no longer return review/assignment id
+
 # 16.1.1
 
 ### Git LFS
