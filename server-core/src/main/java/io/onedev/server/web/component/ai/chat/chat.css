@@ -74,6 +74,14 @@
 	display: flex;
 	justify-content: flex-start;
 }
+.chat>.body>.messages>.response {
+	position: relative;
+}
+.chat>.body>.messages>.response>.copy {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
 .chat>.body>.messages>.response>div, .chat>.body>.messages>.error>div {
 	margin-right: 3rem;
 }

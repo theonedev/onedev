@@ -58,6 +58,7 @@ import io.onedev.server.web.behavior.DisplayNoneBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
@@ -524,6 +525,8 @@ public class ChatPanel extends Panel {
 		} else {
 			messageContainer.add(new MarkdownViewer("content", Model.of(message.getContent()), null));
 		}
+		messageContainer.add(new CopyToClipboardLink("copy", Model.of(message.getContent()))
+				.setVisible(!message.isError() && !message.isRequest()));
 
 		if (message.isError()) 
 			messageContainer.add(AttributeAppender.append("class", "error"));
