@@ -52,7 +52,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -90,9 +89,6 @@ public class PullRequestResource {
 	
 	@Inject
 	private UserService userService;
-
-	@Inject
-	private TransactionService transactionService;
 
 	@Inject
 	private ObjectMapper objectMapper;
@@ -403,26 +399,24 @@ public class PullRequestResource {
 	@Path("/{requestId}/reviewers/{userId}")
 	@DELETE
 	public Response removeReviewer(@PathParam("requestId") Long requestId, @PathParam("userId") Long userId) {		
-		return transactionService.call(() -> {
-			var request = pullRequestService.load(requestId);
-			var user = userService.load(userId);
-	
-			var subject = SecurityUtils.getSubject();
-			
-			if (!SecurityUtils.canModifyPullRequest(subject, request))
-				throw new UnauthorizedException();
-	
-			var review = request.getReview(user);
-			if (review != null) {
-				review.setStatus(EXCLUDED);
-				pullRequestService.checkReviews(request, false);
-				if (review.getStatus() != EXCLUDED) 
-					throw new NotAcceptableException("This reviewer is mandatory and cannot be removed");
-				pullRequestReviewService.createOrUpdate(user, review);
-			}
-	
-			return Response.ok().build();	
-		});
+		var request = pullRequestService.load(requestId);
+		var user = userService.load(userId);
+
+		var subject = SecurityUtils.getSubject();
+		
+		if (!SecurityUtils.canModifyPullRequest(subject, request))
+			throw new UnauthorizedException();
+
+		var review = request.getReview(user);
+		if (review != null) {
+			review.setStatus(EXCLUDED);
+			pullRequestService.checkReviews(request, false);
+			if (review.getStatus() != EXCLUDED) 
+				throw new NotAcceptableException("This reviewer is mandatory and cannot be removed");
+			pullRequestReviewService.createOrUpdate(user, review);
+		}
+
+		return Response.ok().build();	
 	}
 
 	@Api(order=1480)

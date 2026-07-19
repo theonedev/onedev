@@ -849,7 +849,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public void checkReviews(PullRequest request, boolean sourceUpdated) {
 		if (request.isOpen()) {
