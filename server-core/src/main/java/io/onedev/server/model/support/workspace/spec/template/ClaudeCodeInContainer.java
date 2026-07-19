@@ -36,7 +36,7 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 
         var userData = new UserData();
         userData.setKey("claudecode");
-        userData.getEntries().add(UserDataEntry.of("/home/claude/.claude", "backups cache downloads file-history plans plugins sessions session-env shell-snapshots **/*.log"));
+        userData.getEntries().add(UserDataEntry.of("/home/claude/.claude", "skills backups cache downloads file-history plans plugins sessions session-env shell-snapshots **/*.log"));
         userData.getEntries().add(UserDataEntry.of("/home/claude/.claude.json", null));
         workspaceSpec.getUserDatas().add(userData);
 
