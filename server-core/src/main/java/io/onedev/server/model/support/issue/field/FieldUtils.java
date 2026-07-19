@@ -38,6 +38,7 @@ import io.onedev.server.util.Hierarchical;
 import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.util.ProjectAware;
 
 public class FieldUtils {
 	
@@ -106,8 +107,8 @@ public class FieldUtils {
 		return null;
 	}
 	
-	public static Map<String, Object> getFieldValues(Serializable fieldBean, Collection<String> fieldNames) {
-		HierarchicalContext.push(newHierarchicalContext(new BeanDescriptor(fieldBean.getClass()), fieldBean));
+	public static Map<String, Object> getFieldValues(Project project, Serializable fieldBean, Collection<String> fieldNames) {
+		HierarchicalContext.push(newHierarchicalContext(project, new BeanDescriptor(fieldBean.getClass()), fieldBean));
 		try {
 			Map<String, Object> fieldValues = new HashMap<>();
 			BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
@@ -208,7 +209,7 @@ public class FieldUtils {
 	public static Map<String, HierarchicalContext> newPropertyHierarchicalContexts(BeanDescriptor beanDescriptor, Serializable fieldBean) {
 		Map<String, HierarchicalContext> hierarchicalContexts = new HashMap<>();
 
-		HierarchicalContext hierarchicalContext = new HierarchicalContext(newContextHierarchical(beanDescriptor, fieldBean));
+		HierarchicalContext hierarchicalContext = new HierarchicalContext(newContextHierarchical(null, beanDescriptor, fieldBean));
 		for (List<PropertyDescriptor> group: beanDescriptor.getProperties().values()) {
 			for (PropertyDescriptor property: group) 
 				hierarchicalContexts.put(property.getPropertyName(), hierarchicalContext);
@@ -217,7 +218,7 @@ public class FieldUtils {
 		return hierarchicalContexts;
 	}
 	
-	private static Hierarchical newContextHierarchical(BeanDescriptor beanDescriptor, Serializable fieldBean) {
+	private static Hierarchical newContextHierarchical(@Nullable Project project, BeanDescriptor beanDescriptor, Serializable fieldBean) {
 		class BeanHierarchical implements Hierarchical {
 			
 			@Override
@@ -254,6 +255,8 @@ public class FieldUtils {
 						}
 						
 					});
+				} else if (project != null && clazz == ProjectAware.class) {
+					return clazz.cast((ProjectAware) () -> project);
 				} else {
 					return null;
 				}
@@ -263,14 +266,14 @@ public class FieldUtils {
 		return new BeanHierarchical();
 	}
 	
-	public static HierarchicalContext newHierarchicalContext(BeanDescriptor beanDescriptor, Serializable fieldBean) {
-		return new HierarchicalContext(newContextHierarchical(beanDescriptor, fieldBean)) {
+	public static HierarchicalContext newHierarchicalContext(Project project, BeanDescriptor beanDescriptor, Serializable fieldBean) {
+		return new HierarchicalContext(newContextHierarchical(project, beanDescriptor, fieldBean)) {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public HierarchicalContext getChildContext(String childName) {
-				return new HierarchicalContext(newContextHierarchical(beanDescriptor, fieldBean));
+				return new HierarchicalContext(newContextHierarchical(project, beanDescriptor, fieldBean));
 			}
 			
 		};

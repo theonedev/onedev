@@ -107,7 +107,7 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 
 				Collection<String> editableFields = FieldUtils.getEditableFields(
 						getIssue().getProject(), getTransition().getPromptFields()); 
-				Map<String, Object> fieldValues = FieldUtils.getFieldValues(fieldBean, editableFields);
+				Map<String, Object> fieldValues = FieldUtils.getFieldValues(getIssue().getProject(), fieldBean, editableFields);
 				onTransit(target, fieldValues, comment);
 			}
 			

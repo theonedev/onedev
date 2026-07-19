@@ -1096,18 +1096,13 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		if (existingFieldNames.containsAll(fieldNames))
 			return;
 		
-		Project.push(getProject());
-		try {
-			Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
-			var fieldBean = getFieldBean(fieldBeanClass, true); 
-	
-			var fieldValues = FieldUtils.getFieldValues(fieldBean, fieldNames);
-			for (var entry: fieldValues.entrySet()) {
-				if (!existingFieldNames.contains(entry.getKey())) 
-					setFieldValue(entry.getKey(), entry.getValue());
-			}			
-		} finally {
-			Project.pop();
+		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
+		var fieldBean = getFieldBean(fieldBeanClass, true); 
+
+		var fieldValues = FieldUtils.getFieldValues(getProject(), fieldBean, fieldNames);
+		for (var entry: fieldValues.entrySet()) {
+			if (!existingFieldNames.contains(entry.getKey())) 
+				setFieldValue(entry.getKey(), entry.getValue());
 		}
 	}
 

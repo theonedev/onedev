@@ -107,7 +107,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 		
 		var fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
-		issue.setFieldValues(FieldUtils.getFieldValues(fieldBean, 
+		issue.setFieldValues(FieldUtils.getFieldValues(getProject(), fieldBean, 
 				FieldUtils.getEditableFields(getProject(), fieldNames)));
 		
 		titleInput = new TextField<>("title", Model.of("")); 
@@ -409,7 +409,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		fieldEditor.convertInput();
 		
 		var fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
-		issue.setFieldValues(FieldUtils.getFieldValues(fieldEditor.getConvertedInput(), fieldNames));
+		issue.setFieldValues(FieldUtils.getFieldValues(getProject(), fieldEditor.getConvertedInput(), fieldNames));
 		
 		iterationChoice.convertInput();
 		issue.getSchedules().clear();
