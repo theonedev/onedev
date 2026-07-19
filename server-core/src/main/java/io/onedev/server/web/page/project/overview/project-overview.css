@@ -6,9 +6,15 @@
 .project-overview .summary .details {
 	min-width: 0;
 }
-.project-overview .summary .h2 {
+.project-overview .summary .path {
 	font-weight: 600;
 	line-height: 1.3;
+	min-width: 0;
+	flex: 1 1 12rem;
+	max-width: 100%;
+}
+.project-overview .fork-info > .btn {
+	flex: 0 0 auto;
 }
 .project-overview .section {
 	padding-top: 1.25rem;

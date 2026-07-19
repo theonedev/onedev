@@ -21,6 +21,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -514,7 +515,11 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			}
 			
 		});
-		
+
+		WebMarkupContainer compactProjectPath = navToProject("compactProjectPath", getProject());
+		compactProjectPath.add(new Label("label", getProject().getPath()));
+		fragment.add(compactProjectPath);
+
 		fragment.add(newProjectTitle("projectTitle"));
 		return fragment;
 	}
@@ -539,6 +544,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 		response.render(CssHeaderItem.forReference(new ProjectCssResourceReference()));
 		response.render(CssHeaderItem.forReference(new DropdownTriangleIndicatorCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new ProjectResourceReference()));
 	}
 
 	@Override

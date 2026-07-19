@@ -5,32 +5,26 @@
 				<div wicket:id="summary" class="summary d-flex">
 					<img wicket:id="avatar" class="mr-3 flex-shrink-0">
 					<div class="details flex-grow-1">
-						<div class="d-flex justify-content-between align-items-start">
-							<div class="mr-4">
-								<div class="d-flex flex-wrap align-items-center">
-									<span wicket:id="path" class="mb-0 mr-2 h2"></span>
-									<span wicket:id="labels"></span>
-								</div>
-								<div wicket:id="description" class="text-muted mt-2"></div>
-								<div class="font-size-lg font-weight-bold mt-3">
-									<span wicket:id="id"></span><span wicket:id="key"></span><wicket:enclosure child="forkedFrom"> · <wicket:t>forked from <a wicket:id="forkedFrom"></a></wicket:t></wicket:enclosure>
-								</div>
-								<wicket:enclosure child="serviceDesk">
-								<div class="mt-3">
-									<a wicket:id="serviceDesk" t:data-tippy-content="Issues can be created in this project by sending email to this address"><wicket:svg href="mail" class="icon"></wicket:svg> <span wicket:id="label"></span></a>
-								</div>
-								</wicket:enclosure>
-								<div wicket:id="replicas"></div>
-							</div>
+						<div class="d-flex flex-wrap align-items-center row-gap-1">
+							<span wicket:id="path" class="path mb-0 mr-2 h2 text-truncate"></span>
 							<wicket:enclosure child="forkInfo">
-							<div class="flex-shrink-0">
-								<span wicket:id="forkInfo" class="btn-group fork-info">
-								    <a wicket:id="forks" class="btn btn-sm btn-outline-secondary btn-hover-primary"><span wicket:id="label"></span></a>
-									<a wicket:id="forkNow" class="btn btn-sm btn-outline-secondary btn-hover-primary btn-icon" t:data-tippy-content="Fork now"><wicket:svg href="fork" class="icon"/></a>
-								</span>
-							</div>
+							<span wicket:id="forkInfo" class="btn-group fork-info flex-shrink-0 ml-sm-auto">
+							    <a wicket:id="forks" class="btn btn-sm btn-outline-secondary btn-hover-primary"><span wicket:id="label"></span></a>
+								<a wicket:id="forkNow" class="btn btn-sm btn-outline-secondary btn-hover-primary btn-icon" t:data-tippy-content="Fork now"><wicket:svg href="fork" class="icon"/></a>
+							</span>
 							</wicket:enclosure>
 						</div>
+						<span wicket:id="labels" class="mt-2"></span>
+						<div wicket:id="description" class="text-muted mt-2"></div>
+						<div class="font-size-lg font-weight-bold mt-2">
+							<span wicket:id="id"></span><span wicket:id="key"></span><wicket:enclosure child="forkedFrom"> · <wicket:t>forked from <a wicket:id="forkedFrom"></a></wicket:t></wicket:enclosure>
+						</div>
+						<wicket:enclosure child="serviceDesk">
+						<div class="mt-2">
+							<a wicket:id="serviceDesk" t:data-tippy-content="Issues can be created in this project by sending email to this address"><wicket:svg href="mail" class="icon"></wicket:svg> <span wicket:id="label"></span></a>
+						</div>
+						</wicket:enclosure>
+						<div wicket:id="replicas"></div>
 						<div wicket:id="entityStats"></div>
 					</div>
 				</div>

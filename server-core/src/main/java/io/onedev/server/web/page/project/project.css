@@ -4,3 +4,32 @@
 .favorite-projects li:last-child {
 	margin-bottom: 0;
 }
+
+.topbar-title .project-path-compact,
+.topbar-title .project-path-compact-separator {
+	display: none;
+}
+
+.topbar-title.project-path-compact-mode .project-path-full {
+	display: none !important;
+}
+.topbar-title.project-path-compact-mode .project-path-compact {
+	display: block;
+	flex-shrink: 0;
+}
+.topbar-title.project-path-compact-mode .project-path-compact-separator {
+	display: inline-block;
+	flex-shrink: 0;
+}
+
+.topbar-title.project-path-truncated-mode .project-path-compact {
+	min-width: 0;
+	flex-shrink: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.topbar-title.project-path-hidden-mode .project-path-compact,
+.topbar-title.project-path-hidden-mode .project-path-compact-separator {
+	display: none;
+}
