@@ -8,7 +8,10 @@
 		<ul wicket:id="specs" class="list-unstyled specs overflow-auto mb-0 mt-3">
 			<li wicket:id="specs" class="spec selectable">
 				<a wicket:id="link" class="d-block">
-					<span wicket:id="label"></span>
+					<span class="d-flex align-items-center">
+						<span wicket:id="label"></span>
+						<span wicket:id="task" class="badge badge-info badge-sm ml-2" t:data-tippy-content="for AI task automation"><wicket:t>task</wicket:t></span>
+					</span>
 					<div wicket:id="description" class="description text-muted font-size-sm"></div>
 				</a>
 			</li>

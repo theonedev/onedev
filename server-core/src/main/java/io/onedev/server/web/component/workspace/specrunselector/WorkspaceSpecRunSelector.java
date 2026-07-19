@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.workspace.specrunselector;
 
+import static io.onedev.server.model.User.Type.AI;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +23,10 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
@@ -151,10 +155,18 @@ public abstract class WorkspaceSpecRunSelector extends Panel {
 
 		};
 		link.add(new Label("label", spec.getName()));
+		link.add(new WebMarkupContainer("task").setVisible(isTaskSpecFor(SecurityUtils.getUser(), spec)));
 		link.add(new Label("description", spec.getDescription()).setVisible(spec.getDescription() != null));
 		item.add(link);
 
 		return item;
+	}
+
+	private boolean isTaskSpecFor(@Nullable User user, WorkspaceSpec spec) {
+		if (user == null || user.getType() != AI || spec.getTaskAutomation() == null)
+			return false;
+		var applicableAis = spec.getTaskAutomation().getApplicableAis();
+		return applicableAis.isEmpty() || applicableAis.contains(user.getName());
 	}
 
 	@Override

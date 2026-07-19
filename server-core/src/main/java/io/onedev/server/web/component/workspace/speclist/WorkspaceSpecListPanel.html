@@ -3,7 +3,10 @@
 		<div wicket:id="specs" class="spec">
 			<div class="head px-3 py-2 bg-light border-top">
 				<div class="d-flex text-nowrap align-items-center">
-					<b wicket:id="name" class="mr-auto"></b>
+					<span class="d-flex align-items-center mr-auto">
+						<b wicket:id="name"></b>
+						<span wicket:id="task" class="badge badge-info badge-sm ml-2" t:data-tippy-content="for AI task automation"><wicket:t>task</wicket:t></span>
+					</span>
 					<a wicket:id="showInList" class="ml-2 d-flex align-items-center" t:data-tippy-content="Show in workspace list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
 					<a wicket:id="create" class="ml-2 d-flex align-items-center" t:data-tippy-content="Create workspace with this spec"><wicket:svg href="plus" class="icon"></wicket:svg></a>	
 				</div>

@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.workspace.speclist;
 
+import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryLexer.Is;
 import static io.onedev.server.web.translation.Translation._T;
 
@@ -32,6 +33,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Workspace.Status;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
@@ -86,9 +88,11 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 		
 		RepeatingView specsView = new RepeatingView("specs");
 		add(specsView);
+		User user = SecurityUtils.getUser();
 		for (WorkspaceSpec spec : getProject().getHierarchyWorkspaceSpecs()) {
 			WebMarkupContainer specItem = new WebMarkupContainer(specsView.newChildId());
 			specItem.add(new Label("name", spec.getName()));
+			specItem.add(new WebMarkupContainer("task").setVisible(isTaskSpecFor(user, spec)));
 
 			var workspacesModel = new LoadableDetachableModel<List<Workspace>>() {
 
@@ -188,6 +192,13 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 			return new Label(componentId, _T("No workspaces"))
 					.add(AttributeAppender.append("class", "workspace-spec-workspaces no-workspaces font-italic text-nowrap"));
 		}
+	}
+
+	private boolean isTaskSpecFor(@Nullable User user, WorkspaceSpec spec) {
+		if (user == null || user.getType() != AI || spec.getTaskAutomation() == null)
+			return false;
+		var applicableAis = spec.getTaskAutomation().getApplicableAis();
+		return applicableAis.isEmpty() || applicableAis.contains(user.getName());
 	}
 
 	private Criteria<Workspace> buildWorkspaceCriteria(String specName) {
