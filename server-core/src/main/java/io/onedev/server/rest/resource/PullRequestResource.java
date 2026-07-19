@@ -1,13 +1,17 @@
 package io.onedev.server.rest.resource;
 
+import static io.onedev.server.model.PullRequestReview.Status.EXCLUDED;
+import static io.onedev.server.model.PullRequestReview.Status.PENDING;
+import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,6 +32,10 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.jspecify.annotations.Nullable;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Build;
@@ -44,6 +52,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -51,6 +60,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
@@ -65,31 +75,33 @@ import io.onedev.server.util.ProjectAndBranch;
 @Singleton
 public class PullRequestResource {
 
-	private final PullRequestService pullRequestService;
-	
-	private final PullRequestChangeService pullRequestChangeService;
-	
-	private final UserService userService;
-
-	private final AuditService auditService;
-
-	private final AttachmentService attachmentService;
-
-	private final UrlService urlService;
+	@Inject
+	private PullRequestService pullRequestService;
 	
 	@Inject
-	public PullRequestResource(PullRequestService pullRequestService,
-                               PullRequestChangeService pullRequestChangeService,
-                               UserService userService, AuditService auditService,
-                               AttachmentService attachmentService, UrlService urlService) {
-		this.pullRequestService = pullRequestService;
-		this.pullRequestChangeService = pullRequestChangeService;
-		this.userService = userService;
-		this.auditService = auditService;
-		this.attachmentService = attachmentService;
-		this.urlService = urlService;
-	}
+	private PullRequestChangeService pullRequestChangeService;
 
+	@Inject
+	private PullRequestReviewService pullRequestReviewService;
+	
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private TransactionService transactionService;
+
+	@Inject
+	private ObjectMapper objectMapper;
+
+	@Inject
+	private AuditService auditService;
+
+	@Inject
+	private AttachmentService attachmentService;
+
+	@Inject
+	private UrlService urlService;
+	
 	@Api(order=100)
 	@Path("/{requestId}")
     @GET
@@ -133,13 +145,19 @@ public class PullRequestResource {
 	@Api(order=400)
 	@Path("/{requestId}/reviews")
     @GET
-    public Collection<PullRequestReview> getReviews(@PathParam("requestId") Long requestId) {
+    public Collection<Map<String, Object>> getReviews(@PathParam("requestId") Long requestId) {
 		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
+
+        var typeReference = new TypeReference<HashMap<String, Object>>() {};
     	return pullRequest.getReviews().stream()
     			.filter(it-> it.getStatus() != Status.EXCLUDED)
-    			.collect(Collectors.toList());
+				.map(it-> {
+					var map = objectMapper.convertValue(it, typeReference); 
+					map.remove("id"); 
+					return map;
+				}).collect(toList());
     }
 	
 	@Api(order=500)
@@ -302,6 +320,99 @@ public class PullRequestResource {
 		pullRequestChangeService.changeDescription(user, request, description);
 		return Response.ok().build();
     }
+
+	@Api(order=1410)
+	@Path("/{requestId}/reviewers/{userId}")
+	@POST
+	public Response addReviewer(@PathParam("requestId") Long requestId, @PathParam("userId") Long userId) {		
+		var request = pullRequestService.load(requestId);
+		var user = userService.load(userId);
+
+		var currentUser = SecurityUtils.getUser();
+		if (!SecurityUtils.canModifyPullRequest(currentUser.asSubject(), request)) 
+			throw new UnauthorizedException();
+
+		if (user.equals(request.getSubmitter()))
+			throw new NotAcceptableException("Pull request submitter cannot be reviewer");
+
+		if (!SecurityUtils.canReadCode(user.asSubject(), request.getProject()))
+			throw new NotAcceptableException("Reviewer needs to have read code permission to the project");
+			
+		var review = request.getReview(user);
+		if (review != null) {
+			if (review.getStatus() == EXCLUDED) {
+				review.setStatus(PENDING);
+				pullRequestReviewService.createOrUpdate(currentUser, review);
+			}
+		} else {
+			review = new PullRequestReview();
+			review.setRequest(request);
+			review.setUser(user);
+			review.setStatus(PENDING);
+
+			pullRequestReviewService.createOrUpdate(currentUser, review);	
+		}
+
+		return Response.ok().build();
+	}
+
+	@Api(order=1425)
+	@Path("/{requestId}/approve")
+	@POST
+	public Response approve(@PathParam("requestId") Long requestId, String note) {
+		var request = pullRequestService.load(requestId);
+		var user = SecurityUtils.getUser();
+		note = StringUtils.trimToNull(note);
+
+		if (user == null)
+			throw new UnauthorizedException();
+
+		pullRequestReviewService.review(user, request, true, note);
+
+		return Response.ok().build();
+	}
+
+	@Api(order=1450)
+	@Path("/{requestId}/request-for-changes")
+	@POST
+	public Response requestForChanges(@PathParam("requestId") Long requestId, String note) {
+		var request = pullRequestService.load(requestId);
+		var user = SecurityUtils.getUser();
+		note = StringUtils.trimToNull(note);
+		
+		if (user == null)
+			throw new UnauthorizedException();
+
+		pullRequestReviewService.review(user, request, true, note);
+
+		return Response.ok().build();
+	}
+
+	@Api(order=1475)
+	@Path("/{requestId}/reviewers/{userId}")
+	@DELETE
+	public Response removeReviewer(@PathParam("requestId") Long requestId, @PathParam("userId") Long userId) {		
+		return transactionService.call(() -> {
+			var request = pullRequestService.load(requestId);
+			var user = userService.load(userId);
+	
+			var subject = SecurityUtils.getSubject();
+			
+			if (!SecurityUtils.canModifyPullRequest(subject, request))
+				throw new UnauthorizedException();
+	
+			var review = request.getReview(user);
+			if (review != null) {
+				review.setStatus(EXCLUDED);
+				pullRequestService.checkReviews(request, false);
+				if (review.getStatus() != EXCLUDED) 
+					throw new NotAcceptableException("This reviewer is mandatory and cannot be removed");
+				pullRequestReviewService.createOrUpdate(user, review);
+			}
+	
+			return Response.ok().build();	
+		});
+	}
 	
 	@Api(order=1500)
 	@Path("/{requestId}/merge-strategy")
