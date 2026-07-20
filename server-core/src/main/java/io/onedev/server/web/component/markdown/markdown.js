@@ -409,25 +409,12 @@ onedev.server.markdown = {
 			$help.toggle();
 		});
 
-		$head.find(".do-fullscreen").click(function() {
+		function enterScreenMode(mode) {
 			var $replacement = $container.closest("form");
 			if ($replacement.length == 0)
 				$replacement = $container;
-			
-			if ($container.hasClass("fullscreen")) {
-				$container.removeClass("fullscreen");
-				var $placeholder = $("#" + containerId + "-placeholder");
-				
-				$replacement.insertBefore($placeholder);
-				$placeholder.remove();
-				
-				$(this).removeClass("active");
-				if ($container.data("compactModePreviously")) {
-					$container.removeClass("normal-mode");
-					$container.addClass("compact-mode");
-				} 
-			} else {
-				$container.addClass("fullscreen");
+
+			if (!$container.hasClass("fullscreen") && !$container.hasClass("halfscreen")) {
 				if ($container.hasClass("compact-mode")) {
 					$container.removeClass("compact-mode");
 					$container.addClass("normal-mode");
@@ -438,11 +425,67 @@ onedev.server.markdown = {
 				var $placeholder = $("<div id='" + containerId + "-placeholder'></div>");
 				$placeholder.insertAfter($replacement);
 				$("body").append($replacement);
-				$(this).addClass("active");
 			}
-			
+
+			$container.removeClass("fullscreen halfscreen").addClass(mode);
+			$("body").addClass("markdown-editor-expanded");
+			$("body").toggleClass("markdown-editor-halfscreen", mode == "halfscreen");
+			var hasSubmit = $replacement.find(".dirty-aware").length != 0 || getSubmit().length != 0;
+			$head.find(".do-submit").toggleClass("d-none", !hasSubmit);
+			$head.find(".do-fullscreen").toggleClass("active", mode == "fullscreen");
+			$head.find(".do-halfscreen").toggleClass("active", mode == "halfscreen");
+		}
+
+		function exitScreenMode() {
+			var $replacement = $container.closest("form");
+			if ($replacement.length == 0)
+				$replacement = $container;
+
+			$container.removeClass("fullscreen halfscreen");
+			$("body").removeClass("markdown-editor-expanded markdown-editor-halfscreen");
+			var $placeholder = $("#" + containerId + "-placeholder");
+			$replacement.insertBefore($placeholder);
+			$placeholder.remove();
+
+			$head.find(".do-fullscreen, .do-halfscreen").removeClass("active");
+			$head.find(".do-submit").addClass("d-none");
+			if ($container.data("compactModePreviously")) {
+				$container.removeClass("normal-mode");
+				$container.addClass("compact-mode");
+			}
+		}
+
+		function submitForm() {
+			var $submit = getSubmit();
+			if ($submit.length != 0) {
+				if ($container.hasClass("fullscreen") || $container.hasClass("halfscreen"))
+					exitScreenMode();
+				$submit.click();
+			}
+		}
+
+		$head.find(".do-fullscreen").click(function() {
+			if ($container.hasClass("fullscreen"))
+				exitScreenMode();
+			else
+				enterScreenMode("fullscreen");
+
 			if ($input.is(":visible"))
 				$input.focus();
+		});
+
+		$head.find(".do-halfscreen").click(function() {
+			if ($container.hasClass("halfscreen"))
+				exitScreenMode();
+			else
+				enterScreenMode("halfscreen");
+
+			if ($input.is(":visible"))
+				$input.focus();
+		});
+
+		$head.find(".do-submit").click(function() {
+			submitForm();
 		});
 
 		$input.on("keydown", function(e) {
@@ -473,7 +516,7 @@ onedev.server.markdown = {
 				var $submit = getSubmit();
 				if ((e.metaKey || e.ctrlKey) && e.keyCode == 13 && $submit.length != 0) {
 					e.preventDefault();
-					$submit.click();
+					submitForm();
 				}		
 			}
 			

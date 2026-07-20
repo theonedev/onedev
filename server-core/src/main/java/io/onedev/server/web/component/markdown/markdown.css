@@ -7,18 +7,33 @@
 .markdown-editor.fixed-width {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;	
 }
-.markdown-editor.fullscreen {
+body.markdown-editor-expanded {
+	overflow: hidden;
+}
+.LayoutPage>body.markdown-editor-halfscreen>.main {
+	bottom: 50vh;
+}
+.markdown-editor.fullscreen, .markdown-editor.halfscreen {
 	position: fixed;
 	left: 0;
-	top: 0;
 	bottom: 0;
 	right: 0;
 	z-index: 1060;
 	padding: 1.6rem;
 	background: white;
 }
-.dark-mode .markdown-editor.fullscreen {
+.markdown-editor.fullscreen {
+	top: 0;
+}
+.markdown-editor.halfscreen {
+	top: 50vh;
+	box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.12);
+}
+.dark-mode .markdown-editor.fullscreen, .dark-mode .markdown-editor.halfscreen {
 	background: var(--dark-mode-darker);
+}
+.dark-mode .markdown-editor.halfscreen {
+	box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.45);
 }
 .markdown-editor>.head>.warning {
 	margin-bottom: 0;
@@ -97,7 +112,7 @@
 	background-size: 20px 20px;
 }
 
-.markdown-editor.fullscreen .ui-resizable-handle {
+.markdown-editor.fullscreen .ui-resizable-handle, .markdown-editor.halfscreen .ui-resizable-handle {
 	display: none;
 }
 
@@ -145,7 +160,7 @@
 .markdown-editor.preview-mode>.body>.edit, .markdown-editor.edit-mode>.body>.preview {
 	display: none !important;
 }
-.markdown-editor.fullscreen>.body>* {
+.markdown-editor.fullscreen>.body>*, .markdown-editor.halfscreen>.body>* {
 	height: 100% !important;
 }
 
