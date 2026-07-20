@@ -379,7 +379,7 @@ public class PullRequestNotificationManager implements Serializable {
 									&& user != null
 									&& !user.equals(mentionedUser)
 									&& canCreateWorkspace(mentionedUser, request, true)) {
-								addressConcern(mentionedUser, user, request);
+								onUserMentioned(mentionedUser, user, request);
 							}
 						}
 					}
@@ -533,7 +533,7 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 	}
 
-	private void addressConcern(User ai, User commenter, PullRequest request) {		
+	private void onUserMentioned(User ai, User commenter, PullRequest request) {		
 		List<String> prompts = new ArrayList<>();
 		if (request.getSubmitter().equals(ai)) {
 			prompts.add("Work on pull request %d as submitter to address %s's latest concern."

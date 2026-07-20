@@ -10,7 +10,6 @@ import org.json.JSONWriter;
 import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
@@ -87,9 +86,13 @@ public abstract class IssueChoiceProvider extends ChoiceProvider<Issue> {
 		var issueService = OneDev.getInstance(IssueService.class);
 		var subject = SecurityUtils.getSubject();
 		if (useNumber) {
-			Preconditions.checkState(getProject() != null);
-			var issueQuery = buildQuery(term);
-			var issues = issueService.query(subject, new ProjectScope(getProject(), false, false), issueQuery, false, 0, count);
+			List<Issue> issues;
+			if (getProject() != null) {
+				var issueQuery = buildQuery(term);
+				issues = issueService.query(subject, new ProjectScope(getProject(), false, false), issueQuery, false, 0, count);
+			} else {
+				issues = new ArrayList<>();
+			}
 			new ResponseFiller<>(response).fill(issues, page, WebConstants.PAGE_SIZE);
 		} else {
 			var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');

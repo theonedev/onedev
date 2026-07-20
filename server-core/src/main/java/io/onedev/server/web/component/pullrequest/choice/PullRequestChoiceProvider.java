@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.pullrequest.choice;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -9,7 +10,6 @@ import org.json.JSONWriter;
 import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
@@ -62,9 +62,13 @@ public abstract class PullRequestChoiceProvider extends ChoiceProvider<PullReque
 		var pullRequestService = OneDev.getInstance(PullRequestService.class);
 		var subject = SecurityUtils.getSubject();
 		if (useNumber) {
-			Preconditions.checkState(getProject() != null);
-			List<PullRequest> requests = pullRequestService.query(subject, getProject(), 
-					new PullRequestQuery(new FuzzyCriteria(term)), false, 0, count);
+			List<PullRequest> requests;
+			if (getProject() != null) {
+				requests = pullRequestService.query(subject, getProject(), 
+						new PullRequestQuery(new FuzzyCriteria(term)), false, 0, count);
+			} else {
+				requests = new ArrayList<>();
+			}
 			new ResponseFiller<>(response).fill(requests, page, WebConstants.PAGE_SIZE);
 		} else {
 			var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');

@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.build.choice;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -9,7 +10,6 @@ import org.json.JSONWriter;
 import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
@@ -60,9 +60,12 @@ public abstract class BuildChoiceProvider extends ChoiceProvider<Build> {
 		int count = (page+1) * WebConstants.PAGE_SIZE + 1;
 		var buildService = OneDev.getInstance(BuildService.class);
 		var subject = SecurityUtils.getSubject();
-		if (useNumber) {			
-			Preconditions.checkState(getProject() != null);
-			List<Build> builds = buildService.query(subject, getProject(), term, count);
+		if (useNumber) {
+			List<Build> builds;
+			if (getProject() != null) 
+				builds = buildService.query(subject, getProject(), term, count);
+			else 
+				builds = new ArrayList<>();
 			new ResponseFiller<>(response).fill(builds, page, WebConstants.PAGE_SIZE);
 		} else {
 			var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');

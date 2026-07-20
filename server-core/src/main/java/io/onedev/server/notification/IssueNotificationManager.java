@@ -322,7 +322,7 @@ public class IssueNotificationManager implements Serializable {
 								&& user != null 
 								&& !user.equals(mentionedUser) 
 								&& canCreateWorkspace(mentionedUser, issue, true)) {
-							addressConcern(mentionedUser, user, issue);
+							onAiMentioned(mentionedUser, user, issue);
 						}
 					}
 				}
@@ -348,14 +348,14 @@ public class IssueNotificationManager implements Serializable {
 					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified())
 						bccEmailAddresses.add(emailAddress.getValue());
-				} else if (event.getCommentText() instanceof MarkdownText 
+				} else if ((!user.isSystem() 
+							|| event instanceof IssueOpened issueOpened && issueOpened.getIssue().getOnBehalfOf() != null
+							|| event instanceof IssueCommentCreated issueCommentCreated && issueCommentCreated.getComment().getOnBehalfOf() != null)
+						&& !user.equals(watch.getUser()) 
 						&& watch.getUser().getAiSetting().isProactive()
 						&& isAiEntitled(user, issue, watch.getUser(), false) 
-						&& user != null 
-						&& !user.isSystem()
-						&& !user.equals(watch.getUser()) 
 						&& canCreateWorkspace(watch.getUser(), issue, false)) {
-					onUserCommented(watch.getUser(), user, issue);		
+					onAiNotified(watch.getUser(), user, issue);		
 				}
 			}
 		}
@@ -405,36 +405,39 @@ public class IssueNotificationManager implements Serializable {
 		return Pair.of(commitId, branch);
 	}
 
-	private void addressConcern(User ai, User commenter, Issue issue) {
+	private void onAiMentioned(User ai, User user, Issue issue) {
 		var branchAndCommitId = getWorkspaceCommitIdAndBranch(issue);
-		String prompt;
+		String rolesInfo;		
 		var assignedFields = getAssignedFields(ai, issue);
-		if (assignedFields.isEmpty()) {
-			prompt = """
-				Work on issue %d to address %s's latest concern. \
-				Do not switch checkout if the concern does not require you to write code. \
-				Mention the user in your comment if you expect a response. \
-				Make sure to submit work afterwards without confirmation."""
-				.formatted(issue.getNumber(), commenter.getName());
+		if (!assignedFields.isEmpty()) {
+			rolesInfo = "as roles [%s] ".formatted(StringUtils.join(assignedFields, ", "));
 		} else {
-			prompt = """
-				Work on issue %d as roles [%s] to address %s's latest concern. \
-				Do not switch checkout if the concern does not require you to write code. \
-				Mention the user in your comment if you expect a response. \
-				Make sure to submit work afterwards without confirmation.""".
-				formatted(issue.getNumber(), StringUtils.join(assignedFields, ", "), commenter.getName());
+			rolesInfo = "";
 		}
+		String prompt = """
+			Work on issue %d %sto address %s's latest concern. \
+			Do not switch checkout if the concern does not require you to write code. \
+			Mention the user in your comment if you expect a response. \
+			Make sure to submit work afterwards without confirmation.""".
+			formatted(issue.getNumber(), rolesInfo, user.getName());
 		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(), branchAndCommitId.getRight(), prompt);
 	}
 
-	private void onUserCommented(User ai, User commenter, Issue issue) {
+	private void onAiNotified(User ai, User user, Issue issue) {
 		var branchAndCommitId = getWorkspaceCommitIdAndBranch(issue);
+		String rolesInfo;		
+		var assignedFields = getAssignedFields(ai, issue);
+		if (!assignedFields.isEmpty()) {
+			rolesInfo = "as roles [%s] ".formatted(StringUtils.join(assignedFields, ", "));
+		} else {
+			rolesInfo = "";
+		}
 		String prompt = """
-				Work on issue %d to check whether you are relevant to %s's latest comment. \
-				Do not switch checkout if the comment does not require you to write code. \
+				Work on issue %d %sto check whether you are relevant to %s's latest concern. \
+				Do not switch checkout if the concern does not require you to write code. \
 				Respond only if you are relevant and a response is necessary. \
 				Make sure to submit work afterwards without confirmation."""
-				.formatted(issue.getNumber(), commenter.getName());
+				.formatted(issue.getNumber(), rolesInfo, user.getName());
 		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(), branchAndCommitId.getRight(), prompt);
 	}
 
