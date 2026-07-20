@@ -144,7 +144,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
 				Collection<String> dependentFields = fieldSpec.getTransitiveDependents();
 				boolean hasVisibleEditableDependents = dependentFields.stream()
-						.anyMatch(it->SecurityUtils.canEditIssueField(getIssue(), it) && FieldUtils.isFieldVisible(beanDescriptor, bean, it));
+						.anyMatch(it->SecurityUtils.canEditIssueField(getIssue(), it) && FieldUtils.isFieldVisible(getProject(), beanDescriptor, bean, it));
 				
 				Map<String, Object> fieldValues = new HashMap<>();
 				Object propertyValue = new PropertyDescriptor(bean.getClass(), propertyName).getPropertyValue(bean);

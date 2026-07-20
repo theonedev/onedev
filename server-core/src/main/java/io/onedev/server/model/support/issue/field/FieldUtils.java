@@ -200,16 +200,16 @@ public class FieldUtils {
 		return fieldValues;
 	}
 
-	public static boolean isFieldVisible(BeanDescriptor beanDescriptor, Serializable fieldBean, String fieldName) {
+	public static boolean isFieldVisible(Project project, BeanDescriptor beanDescriptor, Serializable fieldBean, String fieldName) {
 		String propertyName = getPropertyName(beanDescriptor, fieldName);
 		PropertyDescriptor propertyDescriptor = new PropertyDescriptor(fieldBean.getClass(), propertyName);
-		return propertyDescriptor.isPropertyVisible(newPropertyHierarchicalContexts(beanDescriptor, fieldBean), beanDescriptor);
+		return propertyDescriptor.isPropertyVisible(newPropertyHierarchicalContexts(project, beanDescriptor, fieldBean), beanDescriptor);
 	}
 	
-	public static Map<String, HierarchicalContext> newPropertyHierarchicalContexts(BeanDescriptor beanDescriptor, Serializable fieldBean) {
+	private static Map<String, HierarchicalContext> newPropertyHierarchicalContexts(Project project, BeanDescriptor beanDescriptor, Serializable fieldBean) {
 		Map<String, HierarchicalContext> hierarchicalContexts = new HashMap<>();
 
-		HierarchicalContext hierarchicalContext = new HierarchicalContext(newContextHierarchical(null, beanDescriptor, fieldBean));
+		HierarchicalContext hierarchicalContext = new HierarchicalContext(newContextHierarchical(project, beanDescriptor, fieldBean));
 		for (List<PropertyDescriptor> group: beanDescriptor.getProperties().values()) {
 			for (PropertyDescriptor property: group) 
 				hierarchicalContexts.put(property.getPropertyName(), hierarchicalContext);
@@ -218,7 +218,7 @@ public class FieldUtils {
 		return hierarchicalContexts;
 	}
 	
-	private static Hierarchical newContextHierarchical(@Nullable Project project, BeanDescriptor beanDescriptor, Serializable fieldBean) {
+	private static Hierarchical newContextHierarchical(Project project, BeanDescriptor beanDescriptor, Serializable fieldBean) {
 		class BeanHierarchical implements Hierarchical {
 			
 			@Override
@@ -255,7 +255,7 @@ public class FieldUtils {
 						}
 						
 					});
-				} else if (project != null && clazz == ProjectAware.class) {
+				} else if (clazz == ProjectAware.class) {
 					return clazz.cast((ProjectAware) () -> project);
 				} else {
 					return null;

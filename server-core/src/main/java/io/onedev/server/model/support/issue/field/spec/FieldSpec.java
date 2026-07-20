@@ -46,11 +46,7 @@ public abstract class FieldSpec extends InputSpec {
 	private boolean promptUponIssueOpen = true;
 	
 	private String applicableProjects;
-	
-	private transient Collection<String> dependencies;
-	
-	private transient Collection<String> dependents;
-	
+		
 	@Editable(order=10)
 	@FieldName
 	@NotEmpty
@@ -259,58 +255,60 @@ public abstract class FieldSpec extends InputSpec {
 		return new Usage();
 	}
 	
-	public Collection<String> getDependencies() {
-		if (dependencies == null) {
-			dependencies = new HashSet<>();
-			if (getShowCondition() != null)
-				dependencies.add(getShowCondition().getInputName());
-			
-			class PropertyHierarchical implements Hierarchical {
+	private Collection<String> getDependencies() {
+		var dependencies = new HashSet<String>();
+		if (getShowCondition() != null)
+			dependencies.add(getShowCondition().getInputName());
+		
+		var parentContext = HierarchicalContext.get();
+		class PropertyHierarchical implements Hierarchical {
 
-				@Override
-				public Hierarchical getParent() {
+			@Override
+			public Hierarchical getParent() {
+				if (parentContext != null)
+					return parentContext.getHierarchical();
+				else
+					return null;
+			}
+
+			@Override
+			public <T> T getData(Class<T> clazz) {
+				if (clazz == InputContext.class) {
+					return clazz.cast(new InputContext() {
+						
+						@Override
+						public List<String> getInputNames() {
+							return getIssueSetting().getFieldNames();
+						}
+		
+						@Override
+						public InputSpec getInputSpec(String inputName) {
+							return getIssueSetting().getFieldSpec(inputName);
+						}
+		
+					});
+				} else if (clazz == EditContext.class) {	
+					return clazz.cast(new EditContext() {
+
+						@Override
+						public Object getInputValue(String name) {
+							dependencies.add(name);
+							return null;
+						}
+
+					});
+				} else {
 					return null;
 				}
-
-				@Override
-				public <T> T getData(Class<T> clazz) {
-					if (clazz == InputContext.class) {
-						return clazz.cast(new InputContext() {
-							
-							@Override
-							public List<String> getInputNames() {
-								return getIssueSetting().getFieldNames();
-							}
-			
-							@Override
-							public InputSpec getInputSpec(String inputName) {
-								return getIssueSetting().getFieldSpec(inputName);
-							}
-			
-						});
-					} else if (clazz == EditContext.class) {	
-						return clazz.cast(new EditContext() {
-
-							@Override
-							public Object getInputValue(String name) {
-								dependencies.add(name);
-								return null;
-							}
-
-						});
-					} else {
-						return null;
-					}
-				}
-
-			}	
-			
-			HierarchicalContext.push(new HierarchicalContext(new PropertyHierarchical()));
-			try {
-				runScripts();
-			} finally {
-				HierarchicalContext.pop();
 			}
+
+		}	
+
+		HierarchicalContext.push(new HierarchicalContext(new PropertyHierarchical()));
+		try {
+			runScripts();
+		} finally {
+			HierarchicalContext.pop();
 		}
 		return dependencies;
 	}
@@ -333,13 +331,11 @@ public abstract class FieldSpec extends InputSpec {
 		return transitiveDependencies;
 	}
 	
-	public Collection<String> getDependents() {
-		if (dependents == null) {
-			dependents = new HashSet<>();
-			for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
-				if (field.getDependencies().contains(getName()))
-					dependents.add(field.getName());
-			}
+	private Collection<String> getDependents() {
+		var dependents = new HashSet<String>();
+		for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
+			if (field.getDependencies().contains(getName()))
+				dependents.add(field.getName());
 		}
 		return dependents;
 	}

@@ -398,7 +398,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 							if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
 								Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 								Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
-								if (FieldUtils.isFieldVisible(new BeanDescriptor(fieldBeanClass), fieldBean, promptField)) {
+								if (FieldUtils.isFieldVisible(getProject(), new BeanDescriptor(fieldBeanClass), fieldBean, promptField)) {
 									hasPromptFields = true;
 									break;
 								}
@@ -460,7 +460,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						Collection<String> dependentFields = fieldSpec.getTransitiveDependents();
 						boolean hasVisibleEditableDependents = dependentFields.stream()
 								.anyMatch(it -> SecurityUtils.canEditIssueField(issue.getProject(), it)
-										&& FieldUtils.isFieldVisible(beanDescriptor, fieldBean, it));
+										&& FieldUtils.isFieldVisible(issue.getProject(), beanDescriptor, fieldBean, it));
 
 						Map<String, Object> fieldValues = new HashMap<>();
 						fieldValues.put(fieldName, getColumn());
