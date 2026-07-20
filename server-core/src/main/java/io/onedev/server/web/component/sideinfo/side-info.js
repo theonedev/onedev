@@ -3,19 +3,19 @@ onedev.server.sideInfo = {
 		return window.matchMedia("(max-width: 990px)").matches
 				|| $container.closest(".hide-side-info").length != 0;
 	},
-	
+
 	close: function($container) {
 		$container.addClass("closed");
 		setTimeout(function(){$(window).resize();}, 350);
 	},
-	
+
     onDomReady: function(containerId) {
         var $container = $("#" + containerId);
-        
+
         // Wide pinned layouts start open; overlay layouts stay closed until opened
         if (!onedev.server.sideInfo.isOverlayMode($container))
-        	$container.removeClass("closed");
-        
+			$container.removeClass("closed");
+
 		$(document).on("mouseup touchstart", function(e) {
 			if (!onedev.server.sideInfo.isOverlayMode($container))
 				return;

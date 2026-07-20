@@ -30,7 +30,7 @@ public abstract class SideInfoPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				target.appendJavaScript(String.format(""
-						+ "onedev.server.sideInfo.close($('#%s'));", 
+						+ "onedev.server.sideInfo.close($('#%s'));",
 						SideInfoPanel.this.getMarkupId()));
 			}
 			
