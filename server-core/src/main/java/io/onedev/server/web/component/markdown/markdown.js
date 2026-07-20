@@ -189,7 +189,7 @@ onedev.server.markdown = {
 
 		var previewTimeout = 500;
 		$input.doneEvents("input inserted.atwho", function() {
-			if (autosaveKey) 
+			if (autosaveKey && document.body.contains($input[0]))
 				localStorage.setItem(autosaveKey, $input.val());
 			preview();
 		}, previewTimeout);
@@ -413,6 +413,10 @@ onedev.server.markdown = {
 			$help.toggle();
 		});
 
+		function notifyScreenModeLayoutChange() {
+			$(window).trigger("resize");
+		}
+
 		function enterScreenMode(mode) {
 			var $form = getForm();
 
@@ -443,6 +447,7 @@ onedev.server.markdown = {
 						$input.removeAttr("form");
 						$container.removeData("screenModeForm screenModeObserver");
 						$container.remove();
+						notifyScreenModeLayoutChange();
 					}
 				});
 				screenModeObserver.observe(document.body, {childList: true, subtree: true});
@@ -456,6 +461,7 @@ onedev.server.markdown = {
 			$head.find(".do-submit").toggleClass("d-none", !hasSubmit);
 			$head.find(".do-fullscreen").toggleClass("active", mode == "fullscreen");
 			$head.find(".do-halfscreen").toggleClass("active", mode == "halfscreen");
+			notifyScreenModeLayoutChange();
 		}
 
 		function exitScreenMode() {
@@ -478,6 +484,7 @@ onedev.server.markdown = {
 				$container.removeClass("normal-mode");
 				$container.addClass("compact-mode");
 			}
+			notifyScreenModeLayoutChange();
 		}
 
 		function submitForm() {
