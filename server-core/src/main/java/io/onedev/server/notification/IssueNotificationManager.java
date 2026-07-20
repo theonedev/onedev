@@ -224,7 +224,7 @@ public class IssueNotificationManager implements Serializable {
 		if (user != null) {
 			if (!user.isNotifyOwnEvents())
 				notifiedUsers.add(user); 
-			if (!user.isSystem() && user.getType() != AI)
+			if (!user.isSystem())
 				watchService.watch(issue, user, true);
 		}
 
@@ -252,15 +252,14 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(null, issue, member) && canCreateWorkspace(member, issue)) { 
+					} else if (isAiEntitled(null, issue, member, true) && canCreateWorkspace(member, issue, true)) { 
 						onFieldSet(member, issue, entry.getKey());
 					}
 				}
 			}
 			
 			for (User member: entry.getValue().getMembers()) {
-				if (member.getType() != AI) 
-					watchService.watch(issue, member, true);
+				watchService.watch(issue, member, true);
 				authorizationService.authorize(issue, member);
 			}
 		}
@@ -283,15 +282,14 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(null, issue, assignedUser) && canCreateWorkspace(assignedUser, issue)) { 
+					} else if (isAiEntitled(null, issue, assignedUser, true) && canCreateWorkspace(assignedUser, issue, true)) { 
 						onFieldSet(assignedUser, issue, entry.getKey());
 					}
 				} 
 			}
 
 			for (User each: entry.getValue()) {
-				if (each.getType() != AI) 
-					watchService.watch(issue, each, true);
+				watchService.watch(issue, each, true);
 				authorizationService.authorize(issue, each);
 			}
 		}
@@ -303,8 +301,7 @@ public class IssueNotificationManager implements Serializable {
 				if (mentionedUser != null) {
 					mentionService.mention(issue, mentionedUser);
 					authorizationService.authorize(issue, mentionedUser);
-					if (mentionedUser.getType() != AI) 
-						watchService.watch(issue, mentionedUser, true);
+					watchService.watch(issue, mentionedUser, true);
 					if (notifiedUsers.add(mentionedUser)) {						
 						if (mentionedUser.getType() != AI) {
 							String subject = String.format(
@@ -321,10 +318,10 @@ public class IssueNotificationManager implements Serializable {
 										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 										replyAddress, senderName, threadingReferences);
 							}
-						} else if (isAiEntitled(user, issue, mentionedUser) 
+						} else if (isAiEntitled(user, issue, mentionedUser, true) 
 								&& user != null 
 								&& !user.equals(mentionedUser) 
-								&& canCreateWorkspace(mentionedUser, issue)) {
+								&& canCreateWorkspace(mentionedUser, issue, true)) {
 							addressConcern(mentionedUser, user, issue);
 						}
 					}
@@ -347,9 +344,19 @@ public class IssueNotificationManager implements Serializable {
 						&& !notifiedUsers.contains(watch.getUser())
 						&& !isListening(listeningEmailAddresses, watch.getUser())
 						&& SecurityUtils.canAccessIssue(watch.getUser().asSubject(), issue)) {
-				EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
-				if (emailAddress != null && emailAddress.isVerified())
-					bccEmailAddresses.add(emailAddress.getValue());
+				if (watch.getUser().getType() != AI) {
+					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified())
+						bccEmailAddresses.add(emailAddress.getValue());
+				} else if (event.getCommentText() instanceof MarkdownText 
+						&& watch.getUser().getAiSetting().isProactive()
+						&& isAiEntitled(user, issue, watch.getUser(), false) 
+						&& user != null 
+						&& !user.isSystem()
+						&& !user.equals(watch.getUser()) 
+						&& canCreateWorkspace(watch.getUser(), issue, false)) {
+					onUserCommented(watch.getUser(), user, issue);		
+				}
 			}
 		}
 		
@@ -417,6 +424,17 @@ public class IssueNotificationManager implements Serializable {
 				Make sure to submit work afterwards without confirmation.""".
 				formatted(issue.getNumber(), StringUtils.join(assignedFields, ", "), commenter.getName());
 		}
+		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(), branchAndCommitId.getRight(), prompt);
+	}
+
+	private void onUserCommented(User ai, User commenter, Issue issue) {
+		var branchAndCommitId = getWorkspaceCommitIdAndBranch(issue);
+		String prompt = """
+				Work on issue %d to check whether you are relevant to %s's latest comment. \
+				Do not switch checkout if the comment does not require you to write code. \
+				Respond only if you are relevant and a response is necessary. \
+				Make sure to submit work afterwards without confirmation."""
+				.formatted(issue.getNumber(), commenter.getName());
 		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(), branchAndCommitId.getRight(), prompt);
 	}
 
@@ -548,31 +566,35 @@ public class IssueNotificationManager implements Serializable {
 		}
 	}
 	
-	private boolean canCreateWorkspace(User ai, Issue issue) {
+	private boolean canCreateWorkspace(User ai, Issue issue, boolean commentOnError) {
 		if (!SecurityUtils.canCreateWorkspaces(ai.asSubject(), issue.getProject())) {			
-			createComment(ai, issue, "I need create workspace permission in this project to do the job");				
+			if (commentOnError) 
+				createComment(ai, issue, "I need create workspace permission in this project to do the job");				
 			return false;
 		}
 		if (issue.getProject().getDefaultBranch() == null) {
-			createComment(ai, issue, "I need to create workspace to do the job, but the project doesn't have code yet");				
+			if (commentOnError) 
+				createComment(ai, issue, "I need to create workspace to do the job, but the project doesn't have code yet");				
 			return false;
 		}
 		return true;
 	}
 
-	private boolean isAiEntitled(@Nullable User user, Issue issue, User ai) {
+	private boolean isAiEntitled(@Nullable User user, Issue issue, User ai, boolean commentOnError) {
 		if (user != null && user.getId() > 0) {
 			if (user.isEntitledToAi(ai)) {
 				return true;
 			} else {
-				createComment(ai, issue, "@%s you are not entitled to interact with me".formatted(user.getName()));				
+				if (commentOnError)
+					createComment(ai, issue, "@%s you are not entitled to interact with me".formatted(user.getName()));				
 				return false;
 			}
 		} else {
 			if (issue.getProject().isEntitledToAi(ai)) {
 				return true;
 			} else {
-				createComment(ai, issue, "I'm not entitled to work on this project");				
+				if (commentOnError)
+					createComment(ai, issue, "I'm not entitled to work on this project");				
 				return false;
 			}
 		}

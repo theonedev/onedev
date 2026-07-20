@@ -4,11 +4,11 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
-import io.onedev.server.web.component.user.aisetting.SystemPromptPanel;
+import io.onedev.server.web.component.user.aisetting.BehaviorPanel;
 
-public class MySystemPromptPage extends MyAiSettingPage {
+public class MyBehaviorPage extends MyAiSettingPage {
 		
-	public MySystemPromptPage(PageParameters params) {
+	public MyBehaviorPage(PageParameters params) {
 		super(params);
 	}
 
@@ -16,7 +16,7 @@ public class MySystemPromptPage extends MyAiSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new SystemPromptPanel("systemPrompt", new AbstractReadOnlyModel<User>() {
+		add(new BehaviorPanel("behavior", new AbstractReadOnlyModel<User>() {
 
 			@Override
 			public User getObject() {

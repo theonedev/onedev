@@ -9151,4 +9151,16 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate234(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("aiSetting").addElement("proactive").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

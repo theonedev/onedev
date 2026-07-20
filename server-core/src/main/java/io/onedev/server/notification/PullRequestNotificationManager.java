@@ -183,7 +183,7 @@ public class PullRequestNotificationManager implements Serializable {
 			if (user != null) {
 				if (!user.isNotifyOwnEvents())
 					notifiedUsers.add(user); 
-				if (!user.isSystem() && user.getType() != AI)
+				if (!user.isSystem())
 					watchService.watch(request, user, true);
 			}
 	
@@ -196,7 +196,7 @@ public class PullRequestNotificationManager implements Serializable {
 					notifiedUsers.add(committer);
 				}
 				for (User each : committers) {
-					if (!each.isSystem() && each.getType() != AI)
+					if (!each.isSystem())
 						watchService.watch(request, each, true);
 				}
 			}
@@ -258,8 +258,8 @@ public class PullRequestNotificationManager implements Serializable {
 						&& request.getReviews().stream().noneMatch(it -> it.getUser().getType() == AI && it.getStatus() == PENDING)
 						&& request.getReviews().stream().anyMatch(it -> it.getUser().getType() == AI && it.getStatus() == REQUESTED_FOR_CHANGES)
 						&& notifiedUsers.add(request.getSubmitter())
-						&& isAiEntitled(null, request, request.getSubmitter())
-						&& canCreateWorkspace(request.getSubmitter(), request)) {
+						&& isAiEntitled(null, request, request.getSubmitter(), true)
+						&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
 							Work on pull request %d to address user feedbacks since your last work. \
 							If code is changed as a result of this, make sure to not mention users \
@@ -273,8 +273,8 @@ public class PullRequestNotificationManager implements Serializable {
 						&& user.getType() != AI
 						&& request.getSubmitter().getType() == AI 
 						&& notifiedUsers.add(request.getSubmitter())
-						&& isAiEntitled(null, request, request.getSubmitter())
-						&& canCreateWorkspace(request.getSubmitter(), request)) {
+						&& isAiEntitled(null, request, request.getSubmitter(), true)
+						&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
 							Work on pull request %d to address %s's latest concern. \
 							Make sure to submit work afterwards without confirmation."""
@@ -289,34 +289,31 @@ public class PullRequestNotificationManager implements Serializable {
 			}
 	
 			for (User assignee : assignees) {
-				if (assignee.getType() != AI) {
-					watchService.watch(request, assignee, true);
-					if (notifiedUsers.add(assignee)) {
-						String subject = String.format(
-								"[Pull Request %s] (Assigned) %s",
-								request.getReference(), 
-								emojis.apply(request.getTitle()));
-						String threadingReferences = String.format("<assigned-%s@onedev>", request.getUUID());
-						String assignmentSummary;
-						if (user != null)
-							assignmentSummary = user.getDisplayName() + " assigned to you";
-						else
-							assignmentSummary = "Assigned to you";
-						EmailAddress emailAddress = assignee.getPrimaryEmailAddress();
-						if (emailAddress != null && emailAddress.isVerified()) {
-							mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
-									Lists.newArrayList(), Lists.newArrayList(), subject,
-									getEmailBody(true, event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
-									getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
-									replyAddress, senderName, threadingReferences);
-						}
+				watchService.watch(request, assignee, true);
+				if (assignee.getType() != AI && notifiedUsers.add(assignee)) {
+					String subject = String.format(
+							"[Pull Request %s] (Assigned) %s",
+							request.getReference(), 
+							emojis.apply(request.getTitle()));
+					String threadingReferences = String.format("<assigned-%s@onedev>", request.getUUID());
+					String assignmentSummary;
+					if (user != null)
+						assignmentSummary = user.getDisplayName() + " assigned to you";
+					else
+						assignmentSummary = "Assigned to you";
+					EmailAddress emailAddress = assignee.getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified()) {
+						mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+								Lists.newArrayList(), Lists.newArrayList(), subject,
+								getEmailBody(true, event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
+								getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
+								replyAddress, senderName, threadingReferences);
 					}
 				}
 			}
 	
 			for (User reviewer : reviewers) {
-				if (reviewer.getType() != AI) 
-					watchService.watch(request, reviewer, true);
+				watchService.watch(request, reviewer, true);
 				if (notifiedUsers.add(reviewer)) {
 					if (reviewer.getType() != AI) {
 						String subject = String.format(
@@ -338,8 +335,8 @@ public class PullRequestNotificationManager implements Serializable {
 									getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(null, request, reviewer) 
-							&& canCreateWorkspace(reviewer, request)) {				
+					} else if (isAiEntitled(null, request, reviewer, true) 
+							&& canCreateWorkspace(reviewer, request, true)) {				
 						var prompt = """
 								Work on pull request %d to perform the review. \
 								Stay on current checkout and do not modify code. \
@@ -360,8 +357,7 @@ public class PullRequestNotificationManager implements Serializable {
 					User mentionedUser = userService.findByName(userName);
 					if (mentionedUser != null) {
 						mentionService.mention(request, mentionedUser);
-						if (mentionedUser.getType() != AI) 
-							watchService.watch(request, mentionedUser, true);
+						watchService.watch(request, mentionedUser, true);
 						if (notifiedUsers.add(mentionedUser)) {
 							if (mentionedUser.getType() != AI) {
 								String subject = String.format(
@@ -379,8 +375,10 @@ public class PullRequestNotificationManager implements Serializable {
 											replyAddress, senderName, threadingReferences);
 								}
 							} else if (!(event instanceof PullRequestCodeCommentEvent) 
-									&& isAiEntitled(user, request, mentionedUser)
-									&& canCreateWorkspace(mentionedUser, request)) {
+									&& isAiEntitled(user, request, mentionedUser, true)
+									&& user != null
+									&& !user.equals(mentionedUser)
+									&& canCreateWorkspace(mentionedUser, request, true)) {
 								addressConcern(mentionedUser, user, request);
 							}
 						}
@@ -405,9 +403,19 @@ public class PullRequestNotificationManager implements Serializable {
 							&& !notifiedUsers.contains(watch.getUser())
 							&& !isListening(listeningEmailAddresses, watch.getUser())
 							&& watch.getUser().asSubject().isPermitted(permission)) {
-						EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
-						if (emailAddress != null && emailAddress.isVerified())
-							bccEmailAddresses.add(emailAddress.getValue());
+						if (watch.getUser().getType() != AI) {
+							EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
+							if (emailAddress != null && emailAddress.isVerified())
+								bccEmailAddresses.add(emailAddress.getValue());
+						} else if (event.getCommentText() instanceof MarkdownText 
+								&& watch.getUser().getAiSetting().isProactive()
+								&& isAiEntitled(user, request, watch.getUser(), false) 
+								&& user != null 
+								&& !user.isSystem()
+								&& !user.equals(watch.getUser()) 
+								&& canCreateWorkspace(watch.getUser(), request, false)) {
+							onUserCommented(watch.getUser(), user, request);		
+						}
 					}
 				}
 	
@@ -434,8 +442,8 @@ public class PullRequestNotificationManager implements Serializable {
 							&& !pullRequestBuildEvent.getBuild().getDependencies().stream().anyMatch(it -> 
 									it.isRequireSuccessful() && it.getDependency().isFinished() && it.getDependency().getStatus() != Build.Status.SUCCESSFUL)
 							&& notifiedUsers.add(request.getSubmitter())
-							&& isAiEntitled(null, request, request.getSubmitter())
-							&& canCreateWorkspace(request.getSubmitter(), request)) {
+							&& isAiEntitled(null, request, request.getSubmitter(), true)
+							&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
 							Work on pull request %d to fix failure of build %d. \
 							Make sure to submit work afterwards without confirmation."""
@@ -446,8 +454,8 @@ public class PullRequestNotificationManager implements Serializable {
 				if (event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null 
 							&& request.getMergePreview().getMergeCommitHash() == null 
 							&& notifiedUsers.add(request.getSubmitter())
-							&& isAiEntitled(null, request, request.getSubmitter())
-							&& canCreateWorkspace(request.getSubmitter(), request)) {
+							&& isAiEntitled(null, request, request.getSubmitter(), true)
+							&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
 						Work on pull request %d to resolve merge conflict. \
 						Make sure to submit work afterwards without confirmation."""
@@ -473,7 +481,7 @@ public class PullRequestNotificationManager implements Serializable {
 			}
 			if (aiAssignee != null && request.checkMergeCondition() == null 
 					&& notifiedUsers.add(aiAssignee)
-					&& isAiEntitled(null, request, aiAssignee) 
+					&& isAiEntitled(null, request, aiAssignee, true) 
 					&& canWriteCode(aiAssignee, request, request.getTargetProject())) {
 				var prompt = """
 						Work on pull request %d to review and merge if ready. \
@@ -505,19 +513,21 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 	}
 
-	private boolean isAiEntitled(@Nullable User user, PullRequest request, User ai) {
+	private boolean isAiEntitled(@Nullable User user, PullRequest request, User ai, boolean commentOnError) {
 		if (user != null && user.getId() > 0) {
 			if (user.isEntitledToAi(ai)) {
 				return true;
 			} else {
-				createComment(ai, request, "@%s you are not entitled to interact with me".formatted(user.getName()));				
+				if (commentOnError)
+					createComment(ai, request, "@%s you are not entitled to interact with me".formatted(user.getName()));				
 				return false;
 			}
 		} else {
 			if (request.getProject().isEntitledToAi(ai)) {
 				return true;
 			} else {
-				createComment(ai, request, "I'm not entitled to work on this project");				
+				if (commentOnError)
+					createComment(ai, request, "I'm not entitled to work on this project");				
 				return false;
 			}
 		}
@@ -547,6 +557,17 @@ public class PullRequestNotificationManager implements Serializable {
 		runPrompt(ai, request, commitId, getWorkspaceBranch(request), concatenatedPrompts);					
 	}
 
+	private void onUserCommented(User ai, User commenter, PullRequest request) {
+		String prompt = """
+				Work on pull request %d to check whether you are relevant to %s's latest comment. \
+				Do not switch checkout if the comment does not require you to write code. \
+				Respond only if you are relevant and a response is necessary. \
+				Make sure to submit work afterwards without confirmation."""
+				.formatted(request.getNumber(), commenter.getName());
+		var commitId = request.getLatestUpdate().getHeadCommit().copy();
+		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt);
+	}
+
 	private void runPrompt(User ai, PullRequest request, ObjectId commitId, @Nullable String branch, String prompt) {
 		try {
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), request.getId());
@@ -570,13 +591,15 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 	}
 
-	private boolean canCreateWorkspace(User ai, PullRequest request) {
+	private boolean canCreateWorkspace(User ai, PullRequest request, boolean commentOnError) {
 		if (!SecurityUtils.canCreateWorkspaces(ai.asSubject(), request.getProject())) {			
-			createComment(ai, request, "I need create workspace permission in this project to do the job");				
+			if (commentOnError)
+				createComment(ai, request, "I need create workspace permission in this project to do the job");				
 			return false;
 		}
 		if (request.getProject().getDefaultBranch() == null) {
-			createComment(ai, request, "I need to create workspace to do the job, but the project doesn't have code yet");				
+			if (commentOnError)
+				createComment(ai, request, "I need to create workspace to do the job, but the project doesn't have code yet");				
 			return false;
 		}
 		return true;

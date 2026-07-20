@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.savedquery;
 
-import static io.onedev.server.model.User.Type.ORDINARY;
+import static io.onedev.server.model.User.Type.SERVICE;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -312,7 +312,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getAuthUser().getType() == ORDINARY && getQueryPersonalization().getQueryWatchSupport() != null);
+						setVisible(SecurityUtils.getAuthUser().getType() != SERVICE && getQueryPersonalization().getQueryWatchSupport() != null);
 					}
 					
 				});
@@ -338,7 +338,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getAuthUser().getType() == ORDINARY && getQueryPersonalization().getQuerySubscriptionSupport() != null);
+						setVisible(SecurityUtils.getAuthUser().getType() != SERVICE && getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}
 					
 				});
@@ -403,7 +403,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(SecurityUtils.getAuthUser() != null 
-								&& SecurityUtils.getAuthUser().getType() == ORDINARY
+								&& SecurityUtils.getAuthUser().getType() != SERVICE
 								&& getQueryPersonalization() != null 
 								&& getQueryPersonalization().getQueryWatchSupport() != null);
 					}
@@ -433,7 +433,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(SecurityUtils.getAuthUser() != null 
-								&& SecurityUtils.getAuthUser().getType() == ORDINARY
+								&& SecurityUtils.getAuthUser().getType() != SERVICE
 								&& getQueryPersonalization() != null
 								&& getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}

@@ -1,4 +1,4 @@
-package io.onedev.server.ai.taskchecker;
+package io.onedev.server.ai;
 
 import java.util.Set;
 
