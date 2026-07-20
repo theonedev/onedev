@@ -4,11 +4,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
-import io.onedev.server.web.component.user.aisetting.SystemPromptPanel;
+import io.onedev.server.web.component.user.aisetting.BehaviorPanel;
 
-public class UserSystemPromptPage extends UserAiSettingPage {
+public class UserBehaviorPage extends UserAiSettingPage {
 		
-	public UserSystemPromptPage(PageParameters params) {
+	public UserBehaviorPage(PageParameters params) {
 		super(params);
 	}
 
@@ -16,7 +16,7 @@ public class UserSystemPromptPage extends UserAiSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new SystemPromptPanel("systemPrompt", new LoadableDetachableModel<User>() {
+		add(new BehaviorPanel("behavior", new LoadableDetachableModel<User>() {
 
 			@Override
 			protected User load() {

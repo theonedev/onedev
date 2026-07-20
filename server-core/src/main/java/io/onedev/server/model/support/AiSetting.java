@@ -12,7 +12,9 @@ public class AiSetting implements Serializable {
 
     private boolean entitleToAll;
 
-    private String systemPrompt;
+    private String systemPrompt;    
+
+    private boolean proactive;
 
     public AiModelSetting getModelSetting() {
         return modelSetting;
@@ -37,6 +39,14 @@ public class AiSetting implements Serializable {
 
     public void setSystemPrompt(@Nullable String systemPrompt) {
         this.systemPrompt = systemPrompt;
+    }
+
+    public boolean isProactive() {
+        return proactive;
+    }
+
+    public void setProactive(boolean proactive) {
+        this.proactive = proactive;
     }
 
 }

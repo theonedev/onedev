@@ -3,6 +3,7 @@ package io.onedev.server.web.page.layout;
 import static io.onedev.server.model.Alert.PROP_DATE;
 import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.model.User.Type.ORDINARY;
+import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -159,7 +160,7 @@ import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
 import io.onedev.server.web.page.my.aisetting.MyEntitlementSettingPage;
 import io.onedev.server.web.page.my.aisetting.MyModelSettingPage;
-import io.onedev.server.web.page.my.aisetting.MySystemPromptPage;
+import io.onedev.server.web.page.my.aisetting.MyBehaviorPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.basicsetting.MyBasicSettingPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
@@ -1152,8 +1153,8 @@ public abstract class LayoutPage extends BasePage {
 
 		if (loginUser != null && loginUser.getType() == AI && !loginUser.isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myAISetting", MyModelSettingPage.class));
-			if (getPage() instanceof MyModelSettingPage 
-					|| getPage() instanceof MySystemPromptPage 
+			if (getPage() instanceof MyModelSettingPage
+					|| getPage() instanceof MyBehaviorPage
 					|| getPage() instanceof MyEntitlementSettingPage) {
 				item.add(AttributeAppender.append("class", "active"));
 			}
@@ -1207,7 +1208,7 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("mySsoAccounts").setVisible(false));
 		}
 
-		if (getLoginUser() != null && getLoginUser().getType() == ORDINARY && !getLoginUser().isDisabled()) {
+		if (getLoginUser() != null && getLoginUser().getType() != SERVICE && !getLoginUser().isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myQueryWatches", MyQueryWatchesPage.class));
 			if (getPage() instanceof MyQueryWatchesPage)
 				item.add(AttributeAppender.append("class", "active"));
