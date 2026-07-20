@@ -210,8 +210,12 @@ onedev.server.markdown = {
 			}
 		}, previewTimeout);
 		
+		function getForm() {
+			return $container.data("screenModeForm") || $input.closest("form");
+		}
+
 		function getSubmit() {
-			return $input.closest("form")
+			return getForm()
 					.find(">.btn-primary, :last-child>.btn-primary")
 					.not("[disabled=disabled]");
 		}
@@ -410,11 +414,17 @@ onedev.server.markdown = {
 		});
 
 		function enterScreenMode(mode) {
-			var $replacement = $container.closest("form");
-			if ($replacement.length == 0)
-				$replacement = $container;
+			var $form = getForm();
 
 			if (!$container.hasClass("fullscreen") && !$container.hasClass("halfscreen")) {
+				$container.data("screenModeForm", $form);
+				if ($form.length != 0) {
+					$input.attr("form", $form.attr("id"));
+					$form.on("click.markdownEditorScreenMode", ".btn-primary, .btn-secondary, .submit", function() {
+						if ($container.hasClass("fullscreen") || $container.hasClass("halfscreen"))
+							exitScreenMode();
+					});
+				}
 				if ($container.hasClass("compact-mode")) {
 					$container.removeClass("compact-mode");
 					$container.addClass("normal-mode");
@@ -423,29 +433,44 @@ onedev.server.markdown = {
 					$container.data("compactModePreviously", false);
 				}
 				var $placeholder = $("<div id='" + containerId + "-placeholder'></div>");
-				$placeholder.insertAfter($replacement);
-				$("body").append($replacement);
+				$placeholder.insertAfter($container);
+				$("body").append($container);
+				var screenModeObserver = new MutationObserver(function() {
+					if (!document.body.contains($placeholder[0])) {
+						screenModeObserver.disconnect();
+						$("body").removeClass("markdown-editor-expanded markdown-editor-halfscreen");
+						$form.off(".markdownEditorScreenMode");
+						$input.removeAttr("form");
+						$container.removeData("screenModeForm screenModeObserver");
+						$container.remove();
+					}
+				});
+				screenModeObserver.observe(document.body, {childList: true, subtree: true});
+				$container.data("screenModeObserver", screenModeObserver);
 			}
 
 			$container.removeClass("fullscreen halfscreen").addClass(mode);
 			$("body").addClass("markdown-editor-expanded");
 			$("body").toggleClass("markdown-editor-halfscreen", mode == "halfscreen");
-			var hasSubmit = $replacement.find(".dirty-aware").length != 0 || getSubmit().length != 0;
+			var hasSubmit = $form.find(".dirty-aware").length != 0 || getSubmit().length != 0;
 			$head.find(".do-submit").toggleClass("d-none", !hasSubmit);
 			$head.find(".do-fullscreen").toggleClass("active", mode == "fullscreen");
 			$head.find(".do-halfscreen").toggleClass("active", mode == "halfscreen");
 		}
 
 		function exitScreenMode() {
-			var $replacement = $container.closest("form");
-			if ($replacement.length == 0)
-				$replacement = $container;
-
+			var $form = getForm();
+			var screenModeObserver = $container.data("screenModeObserver");
+			if (screenModeObserver)
+				screenModeObserver.disconnect();
 			$container.removeClass("fullscreen halfscreen");
 			$("body").removeClass("markdown-editor-expanded markdown-editor-halfscreen");
 			var $placeholder = $("#" + containerId + "-placeholder");
-			$replacement.insertBefore($placeholder);
+			$container.insertBefore($placeholder);
 			$placeholder.remove();
+			$input.removeAttr("form");
+			$form.off(".markdownEditorScreenMode");
+			$container.removeData("screenModeForm screenModeObserver");
 
 			$head.find(".do-fullscreen, .do-halfscreen").removeClass("active");
 			$head.find(".do-submit").addClass("d-none");
@@ -1042,7 +1067,8 @@ onedev.server.markdown = {
 			$input.val($input.data("initialValue"));
 			$preview.children(".markdown-rendered").html("");
 			localStorage.removeItem(autosaveKey);
-			onedev.server.form.markClean($input.closest("form"));
+			var $form = $container.data("screenModeForm") || $input.closest("form");
+			onedev.server.form.markClean($form);
 		});
 		if ($body.find(".ui-resizable-handle:visible").length != 0) {
 			var defaultHeight = 200;

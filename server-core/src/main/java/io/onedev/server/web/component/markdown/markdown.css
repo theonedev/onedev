@@ -27,6 +27,7 @@ body.markdown-editor-expanded {
 }
 .markdown-editor.halfscreen {
 	top: 50vh;
+	z-index: 1039;
 	box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.12);
 }
 .dark-mode .markdown-editor.fullscreen, .dark-mode .markdown-editor.halfscreen {
