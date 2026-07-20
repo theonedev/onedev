@@ -21,16 +21,29 @@ div.side-info>.header .close {
 	border-left: 1px solid var(--secondary);
 	margin-left: 0.6rem;
 	padding-left: 0.6rem;
-	display: none;
+	display: flex;
 }
 .dark-mode div.side-info>.header .close {
 	border-left-color: var(--dark-mode-dark-gray);
 }
 
 a.side-info {
-	display: none;
+	display: inline-flex;
 	align-items: center;
 }
+
+/* Collapsed pinned pane on wide viewports (non-overlay layouts) */
+@media(min-width: 991px) {
+	div.side-info.closed {
+		width: 0;
+		margin-left: 0;
+		margin-right: 0;
+		border-left: none;
+		overflow: hidden;
+		pointer-events: none;
+	}
+}
+
 @media(max-width: 990px) {
 	div.side-info {
 	    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
@@ -49,14 +62,8 @@ a.side-info {
 		right: -360px;
 		box-shadow: none;
 	}
-	div.side-info>.header .close {
-		display: flex;
-	}
 	div.side-info>.body {
 		overflow: auto;
-	}
-	a.side-info {
-		display: inline-flex;
 	}
 }
 
@@ -69,6 +76,7 @@ a.side-info {
 	bottom: 0;
 	z-index: 1050;
 	margin: 0;
+	width: 360px;
 }
 .dark-mode .hide-side-info div.side-info {
 	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
@@ -77,6 +85,10 @@ a.side-info {
 .hide-side-info div.side-info.closed {
 	right: -360px;
 	box-shadow: none;
+	width: 360px;
+	margin: 0;
+	overflow: visible;
+	pointer-events: auto;
 }
 .hide-side-info div.side-info>.header .close {
 	display: flex;
