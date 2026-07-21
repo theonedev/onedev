@@ -3,7 +3,12 @@ div.side-info {
 	border-left: 1px solid var(--light-gray);
 	margin: -2rem -2.25rem -2rem 2rem; 
 	flex-shrink: 0;
-	transition: all var(--transition-duration) ease;
+	/* Avoid transitioning height: animating width+height together measures
+	   content at width 0 and can lock in a huge height */
+	transition: width var(--transition-duration) ease,
+		margin var(--transition-duration) ease,
+		right var(--transition-duration) ease,
+		box-shadow var(--transition-duration) ease;
 	width: 360px;
 	background: white;
 }
@@ -36,18 +41,20 @@ a.side-info {
 }
 
 /* Collapsed pinned pane on wide viewports (non-overlay layouts) */
-@media(min-width: 991px) {
+@media(min-width: 1199px) {
 	div.side-info.closed {
 		width: 0;
-		margin-left: 0;
-		margin-right: 0;
+		max-height: 0;
+		min-height: 0;
+		align-self: flex-start;
+		margin: 0;
 		border-left: none;
 		overflow: hidden;
 		pointer-events: none;
 	}
 }
 
-@media(max-width: 990px) {
+@media(max-width: 1198px) {
 	div.side-info {
 	    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 		border-left: none;

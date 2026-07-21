@@ -2,7 +2,7 @@ onedev.server.sideInfo = {
 	cookieKey: "sideInfo.visible",
 
 	isOverlayMode: function($container) {
-		return window.matchMedia("(max-width: 990px)").matches
+		return window.matchMedia("(max-width: 1198px)").matches
 				|| $container.closest(".hide-side-info").length != 0;
 	},
 
