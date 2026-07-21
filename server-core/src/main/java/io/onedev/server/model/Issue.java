@@ -15,6 +15,7 @@ import static io.onedev.server.model.Issue.PROP_THUMBS_DOWN_COUNT;
 import static io.onedev.server.model.Issue.PROP_THUMBS_UP_COUNT;
 import static io.onedev.server.model.Issue.PROP_TICK_COUNT;
 import static io.onedev.server.model.Issue.PROP_TITLE;
+import static io.onedev.server.model.Issue.PROP_MESSAGE_ID;
 import static io.onedev.server.model.Issue.PROP_UUID;
 import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
 import static io.onedev.server.model.IssueSchedule.NAME_ITERATION;
@@ -119,6 +120,7 @@ import io.onedev.server.xodus.VisitInfoService;
 				@Index(columnList=PROP_SMILE_COUNT), @Index(columnList=PROP_TADA_COUNT),
 				@Index(columnList=PROP_CONFUSED_COUNT), @Index(columnList=PROP_HEART_COUNT),
 				@Index(columnList=PROP_EYES_COUNT), @Index(columnList=PROP_TICK_COUNT),
+				@Index(columnList=PROP_MESSAGE_ID),
 				@Index(columnList= LastActivity.COLUMN_DATE), @Index(columnList="o_numberScope_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
@@ -209,6 +211,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public static final String PROP_SCHEDULES = "schedules";
 	
 	public static final String PROP_UUID = "uuid";
+
+	public static final String PROP_MESSAGE_ID = "messageId";
 		
 	public static final String PROP_CONFIDENTIAL = "confidential";
 	

@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+import static io.onedev.server.model.IssueComment.PROP_MESSAGE_ID;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,12 +25,15 @@ import io.onedev.server.util.facade.IssueCommentFacade;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="o_issue_id"), @Index(columnList="o_user_id")})
+		@Index(columnList="o_issue_id"), @Index(columnList="o_user_id"),
+		@Index(columnList=PROP_MESSAGE_ID)})
 public class IssueComment extends EntityComment {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_ISSUE = "issue";
+
+	public static final String PROP_MESSAGE_ID = "messageId";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -48,6 +52,8 @@ public class IssueComment extends EntityComment {
 	@Lob
 	private InternetAddress onBehalfOf;
 
+	private String messageId;
+
 	public Issue getIssue() {
 		return issue;
 	}
@@ -63,6 +69,15 @@ public class IssueComment extends EntityComment {
 
 	public void setOnBehalfOf(@Nullable InternetAddress onBehalfOf) {
 		this.onBehalfOf = onBehalfOf;
+	}
+
+	@Nullable
+	public String getMessageId() {
+		return messageId;
+	}
+
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
 	}
 
 	@Override

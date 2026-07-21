@@ -35,6 +35,9 @@ public interface IssueService extends EntityService<Issue> {
 
     @Nullable
     Issue find(String uuid);
+
+	@Nullable
+	Issue findByMessageId(String messageId);
     
 	void open(Issue issue);
 	

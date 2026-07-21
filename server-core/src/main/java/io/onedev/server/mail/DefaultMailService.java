@@ -634,6 +634,12 @@ public class DefaultMailService implements MailService, Serializable {
 	
 	private void addComment(Issue issue, Message message, InternetAddress authorInternetAddress, @Nullable User author, 
 							Collection<InternetAddress> receiverInternetAddresses) {
+		String messageId = getMessageId(message);
+		if (messageId != null && issueCommentService.findByMessageId(messageId) != null) {
+			logger.warn("Ignored creating issue comment from message as comment with same message id already exists");
+			return;
+		}
+
 		IssueComment comment = new IssueComment();
 		comment.setIssue(issue);
 		if (author == null) {
@@ -642,6 +648,8 @@ public class DefaultMailService implements MailService, Serializable {
 		} else {
 			comment.setUser(author);
 		}
+		if (messageId != null)
+			comment.setMessageId(messageId);
 		String content = parseBody(message, issue.getProject(), issue.getUUID());
 		if (content != null) {
 			// Add double line breaks in the beginning and ending as otherwise plain text content 
@@ -655,8 +663,16 @@ public class DefaultMailService implements MailService, Serializable {
 	
 	private void addComment(PullRequest pullRequest, Message message, InternetAddress authorInternetAddress, 
 							User author, Collection<InternetAddress> receiverInternetAddresses) {
+		String messageId = getMessageId(message);
+		if (messageId != null && pullRequestCommentService.findByMessageId(messageId) != null) {
+			logger.warn("Ignored creating pull request comment from message as comment with same message id already exists");
+			return;
+		}
+
 		PullRequestComment comment = new PullRequestComment();
 		comment.setUser(author);
+		if (messageId != null)
+			comment.setMessageId(messageId);
 		String content = parseBody(message, pullRequest.getProject(), pullRequest.getUUID());
 		if (content != null) {
 			comment.setContent(decorateContent(content));
@@ -669,6 +685,16 @@ public class DefaultMailService implements MailService, Serializable {
 	private Issue openIssue(Message message, Project project, InternetAddress submitterInternetAddress, 
 							@Nullable User submitter, ParsedEmailAddress parsedSystemAddress, 
 							Collection<InternetAddress> receiverInternetAddresses) {
+		String messageId = getMessageId(message);
+		if (messageId != null) {
+			var existingIssue = issueService.findByMessageId(messageId);
+			if (existingIssue != null) {
+				logger.warn("Ignored opening issue from message as issue with same message id already exists: {}", 
+						existingIssue.getReference());
+				return existingIssue;
+			}
+		}
+
 		Issue issue = new Issue();
 		issue.setProject(project);
 
@@ -685,7 +711,6 @@ public class DefaultMailService implements MailService, Serializable {
 			throw new RuntimeException(e);
 		}
 		
-		String messageId = getMessageId(message);
 		if (messageId != null)
 			issue.setMessageId(messageId);
 

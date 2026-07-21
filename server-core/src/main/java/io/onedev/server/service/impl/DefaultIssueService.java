@@ -231,6 +231,14 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		criteria.setCacheable(true);
 		return find(criteria);
 	}
+
+	@Override
+	public Issue findByMessageId(String messageId) {
+		EntityCriteria<Issue> criteria = newCriteria();
+		criteria.add(Restrictions.eq(Issue.PROP_MESSAGE_ID, messageId));
+		criteria.setCacheable(true);
+		return find(criteria);
+	}
 	
 	@Override
 	public void open(Issue issue) {

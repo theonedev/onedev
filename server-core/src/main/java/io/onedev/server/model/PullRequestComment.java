@@ -1,9 +1,12 @@
 package io.onedev.server.model;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+import static io.onedev.server.model.PullRequestComment.PROP_MESSAGE_ID;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
+import org.jspecify.annotations.Nullable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -21,12 +24,15 @@ import io.onedev.server.rest.annotation.Immutable;
 import io.onedev.server.util.facade.PullRequestCommentFacade;
 
 @Entity
-@Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id")})
+@Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id"),
+		@Index(columnList=PROP_MESSAGE_ID)})
 public class PullRequestComment extends EntityComment {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_REQUEST = "request";
+
+	public static final String PROP_MESSAGE_ID = "messageId";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -42,6 +48,8 @@ public class PullRequestComment extends EntityComment {
 	@JsonProperty(access = READ_ONLY)
 	private int revisionCount;
 
+	private String messageId;
+
 	public PullRequest getRequest() {
 		return request;
 	}
@@ -52,6 +60,15 @@ public class PullRequestComment extends EntityComment {
 
 	public Project getProject() {
 		return request.getTargetProject();
+	}
+
+	@Nullable
+	public String getMessageId() {
+		return messageId;
+	}
+
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
 	}
 
 	@Override

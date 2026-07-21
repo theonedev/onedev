@@ -12,6 +12,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
+import org.hibernate.criterion.Restrictions;
+
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.event.ListenerRegistry;
@@ -23,6 +25,7 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestCommentRemovedData;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.service.PullRequestChangeService;
 import io.onedev.server.service.PullRequestCommentService;
 
@@ -81,6 +84,14 @@ public class DefaultPullRequestCommentService extends BaseEntityService<PullRequ
 		Preconditions.checkState(!comment.isNew());
 		dao.persist(comment);
 		listenerRegistry.post(new PullRequestCommentEdited(comment));
+	}
+
+	@Override
+	public PullRequestComment findByMessageId(String messageId) {
+		EntityCriteria<PullRequestComment> criteria = newCriteria();
+		criteria.add(Restrictions.eq(PullRequestComment.PROP_MESSAGE_ID, messageId));
+		criteria.setCacheable(true);
+		return find(criteria);
 	}
 
 	@Override
