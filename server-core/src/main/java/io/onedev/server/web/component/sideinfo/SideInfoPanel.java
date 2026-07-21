@@ -29,7 +29,9 @@ public abstract class SideInfoPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				target.appendJavaScript(String.format("$('#%s').addClass('closed');", SideInfoPanel.this.getMarkupId()));
+				target.appendJavaScript(String.format(
+						"onedev.server.sideInfo.close($('#%s'));",
+						SideInfoPanel.this.getMarkupId()));
 			}
 			
 		});
@@ -44,9 +46,8 @@ public abstract class SideInfoPanel extends Panel {
 		super.onEvent(event);
 		if (event.getPayload() instanceof SideInfoOpened) {
 			SideInfoOpened sideInfoOpened = (SideInfoOpened) event.getPayload();
-			sideInfoOpened.getHandler().appendJavaScript(String.format(""
-					+ "$('#%s').removeClass('closed'); "
-					+ "setTimeout(function(){$(window).resize();}, 350);", // Wait for animation to stop 
+			sideInfoOpened.getHandler().appendJavaScript(String.format(
+					"onedev.server.sideInfo.open($('#%s'));",
 					getMarkupId()));
 		}
 	}
