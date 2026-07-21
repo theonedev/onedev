@@ -1,5 +1,8 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,6 +17,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jetbrains.annotations.Nullable;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -30,6 +34,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueCommentReactionService;
 import io.onedev.server.service.IssueCommentService;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.EmailAddressUtils;
 import io.onedev.server.web.component.comment.CommentHistoryLink;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.comment.ReactionSupport;
@@ -65,6 +70,14 @@ class IssueCommentPanel extends Panel {
 		add(new UserIdentPanel("name", getComment().getUser(), Mode.NAME));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
+		if (getComment().getOnBehalfOf() != null) {
+			var onBehalfOfInfo = HtmlEscape.escapeHtml5(EmailAddressUtils.describe(
+					getComment().getOnBehalfOf(), SecurityUtils.canManageIssues(getComment().getIssue().getProject())));
+			add(new Label("onBehalfOf", " " + MessageFormat.format(_T("(on behalf of <b>{0}</b>)"), onBehalfOfInfo))
+					.setEscapeModelStrings(false));
+		} else {
+			add(new WebMarkupContainer("onBehalfOf").setVisible(false));
+		}
 		
 		add(new WebMarkupContainer("anchor") {
 

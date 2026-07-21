@@ -64,8 +64,9 @@ public class IssueHelper {
         issue.getComments().stream().sorted(Comparator.comparing(IssueComment::getId)).forEach(comment -> {
             var commentMap = new HashMap<String, Object>();
             commentMap.put("user", comment.getUser().getName());
+            commentMap.put("onBehalfOf", comment.getOnBehalfOf());
             commentMap.put("date", comment.getDate());
-            commentMap.put("content", comment.getContent());
+            commentMap.put("content", comment.getContent());            
             comments.add(commentMap);
         });
         return comments;

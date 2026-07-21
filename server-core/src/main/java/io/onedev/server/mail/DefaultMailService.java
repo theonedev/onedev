@@ -812,9 +812,8 @@ public class DefaultMailService implements MailService, Serializable {
 				int messageCount = inbox.getMessageCount();
 				for (int i=messageNumber.get()+1; i<=messageCount; i++) {
 					Message message = inbox.getMessage(i);
-					lastPosition.setUid(inbox.getUID(message));
-					logger.trace("Processing inbox message (subject: {}, uid: {}, seq: {})", 
-							message.getSubject(), lastPosition.getUid(), i);
+					long uid = inbox.getUID(message);
+					lastPosition.setUid(uid);
 					try {
 						messageConsumer.accept(message);
 					} catch (Exception e) {
