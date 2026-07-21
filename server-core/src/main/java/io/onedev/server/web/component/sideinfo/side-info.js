@@ -31,7 +31,7 @@ onedev.server.sideInfo = {
 
         // Wide pinned layouts restore from cookie (default open); overlay stays closed until opened
         if (!onedev.server.sideInfo.isOverlayMode($container)
-        		&& Cookies.get(onedev.server.sideInfo.cookieKey) != "false")
+                && Cookies.get(onedev.server.sideInfo.cookieKey) != "false")
 			$container.removeClass("closed");
 		onedev.server.sideInfo.syncTrigger($container);
 
@@ -55,7 +55,7 @@ onedev.server.sideInfo = {
         });
         $(document).on("keydown", function(e) {
             if (onedev.server.sideInfo.isOverlayMode($container)
-            		&& e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0 
+                    && e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0
                     && $container.find(".dropdown-open").length == 0
                     && $(".select2-drop:visible").length == 0 
                     && $(".flatpickr-calendar.open").length == 0
