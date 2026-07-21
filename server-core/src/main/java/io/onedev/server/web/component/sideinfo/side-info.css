@@ -31,6 +31,9 @@ a.side-info {
 	display: inline-flex;
 	align-items: center;
 }
+.side-info-visible a.side-info {
+	display: none;
+}
 
 /* Collapsed pinned pane on wide viewports (non-overlay layouts) */
 @media(min-width: 991px) {
@@ -95,7 +98,4 @@ a.side-info {
 }
 .hide-side-info div.side-info>.body {
 	overflow: auto;
-}
-.hide-side-info a.side-info {
-	display: inline-flex;
 }

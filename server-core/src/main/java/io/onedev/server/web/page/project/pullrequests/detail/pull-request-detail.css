@@ -68,9 +68,9 @@ ul>li>a.code-comments.new .icon {
 }
 
 @media(min-width: 992px) {
-	html:not(.PullRequestChangesPage) .pull-request-detail>.card-body>.main>.primary>.summary .more-info,
-	html:not(.PullRequestChangesPage) .pull-request-detail>.card-body>.main>.primary>.summary .more-info:hover,
-	html:not(.PullRequestChangesPage) .pull-request-detail>.card-body>.main>.primary>.summary .more-info:focus {
+	html:not(.PullRequestChangesPage) body.side-info-visible .pull-request-detail>.card-body>.main>.primary>.summary .more-info,
+	html:not(.PullRequestChangesPage) body.side-info-visible .pull-request-detail>.card-body>.main>.primary>.summary .more-info:hover,
+	html:not(.PullRequestChangesPage) body.side-info-visible .pull-request-detail>.card-body>.main>.primary>.summary .more-info:focus {
 		color: inherit !important;
 		cursor: inherit !important;
 	}

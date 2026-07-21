@@ -1,20 +1,39 @@
 onedev.server.sideInfo = {
+	cookieKey: "sideInfo.visible",
+
 	isOverlayMode: function($container) {
 		return window.matchMedia("(max-width: 990px)").matches
 				|| $container.closest(".hide-side-info").length != 0;
 	},
 
+	syncTrigger: function($container) {
+		$("body").toggleClass("side-info-visible", !$container.hasClass("closed"));
+	},
+
 	close: function($container) {
 		$container.addClass("closed");
+		onedev.server.sideInfo.syncTrigger($container);
+		if (!onedev.server.sideInfo.isOverlayMode($container))
+			Cookies.set(onedev.server.sideInfo.cookieKey, false, {expires: Infinity});
+		setTimeout(function(){$(window).resize();}, 350);
+	},
+
+	open: function($container) {
+		$container.removeClass("closed");
+		onedev.server.sideInfo.syncTrigger($container);
+		if (!onedev.server.sideInfo.isOverlayMode($container))
+			Cookies.set(onedev.server.sideInfo.cookieKey, true, {expires: Infinity});
 		setTimeout(function(){$(window).resize();}, 350);
 	},
 
     onDomReady: function(containerId) {
         var $container = $("#" + containerId);
 
-        // Wide pinned layouts start open; overlay layouts stay closed until opened
-        if (!onedev.server.sideInfo.isOverlayMode($container))
+        // Wide pinned layouts restore from cookie (default open); overlay stays closed until opened
+        if (!onedev.server.sideInfo.isOverlayMode($container)
+        		&& Cookies.get(onedev.server.sideInfo.cookieKey) != "false")
 			$container.removeClass("closed");
+		onedev.server.sideInfo.syncTrigger($container);
 
 		$(document).on("mouseup touchstart", function(e) {
 			if (!onedev.server.sideInfo.isOverlayMode($container))
@@ -35,7 +54,8 @@ onedev.server.sideInfo = {
 			}            
         });
         $(document).on("keydown", function(e) {
-            if (e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0 
+            if (onedev.server.sideInfo.isOverlayMode($container)
+            		&& e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0 
                     && $container.find(".dropdown-open").length == 0
                     && $(".select2-drop:visible").length == 0 
                     && $(".flatpickr-calendar.open").length == 0
