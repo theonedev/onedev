@@ -76,8 +76,8 @@ onedev.server.sideInfo = {
 			}
 		});
 		$(document).on("keydown", function(e) {
-			// Escape closes both pinned and overlay panes; click-outside stays overlay-only
-			if (e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0
+			if (onedev.server.sideInfo.isOverlayMode($container)
+					&& e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0
 					&& $container.find(".dropdown-open").length == 0
 					&& $(".select2-drop:visible").length == 0
 					&& $(".flatpickr-calendar.open").length == 0
