@@ -548,7 +548,7 @@ public class DefaultMailService implements MailService, Serializable {
 					}
 				}
 			} else {
-				logger.warn("Ignore message as 'From' is same as system email address");
+				logger.debug("Ignore message as 'From' is same as system email address");
 			}
 		} else {
 			logger.warn("Ignore message as 'To' or 'From' header is not available");
