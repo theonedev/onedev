@@ -29,10 +29,10 @@ public class BehaviorEditBean implements Serializable {
 	}
 
 	@Editable(order=200, description="""
-			If enabled, when the AI user is involved in an issue or pull request \
-			(assigned, reviewing, or previously mentioned), it will check each comment \
-			even if not mentioned, and respond when relevant. This provides a better \
-			experience but may consume more tokens""")
+			By default, AI user only responds when assigned tasks or mentioned in issue/PR context. 
+			Enable this to have it respond as long as the comment is relevant even if not mentioned. 
+			This provides a better interaction experience, especially in case of service desks, 
+			but may consume more tokens""")
 	public boolean isProactive() {
 		return proactive;
 	}
