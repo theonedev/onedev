@@ -27,8 +27,8 @@ public class FloatParam extends ParamSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return FloatInput.getPropertyDef(this, indexes, defaultValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		return FloatInput.getPropertyDef(this, indexes, withDefaultValue?defaultValueProvider:null);
 	}
 
 	@Override

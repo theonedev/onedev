@@ -28,24 +28,24 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
+import io.onedev.server.annotation.FieldNamesProvider;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.SecretField;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.model.support.issue.field.instance.IgnoreValue;
 import io.onedev.server.model.support.issue.field.instance.ScriptingValue;
 import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
 import io.onedev.server.model.support.issue.field.instance.ValueProvider;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.SecretField;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.FieldNamesProvider;
-import io.onedev.server.annotation.Password;
 
 class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 
@@ -55,7 +55,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private final Map<String, FieldInstance> fields = new HashMap<>();
 	
-	private transient Serializable defaultFieldBean;
+	private transient Serializable fieldBean;
 	
 	private transient Map<String, FieldSpec> fieldSpecs;
 	
@@ -87,17 +87,17 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
-	private Serializable getDefaultFieldBean() {
-		if (defaultFieldBean == null) {
-			Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
+	private Serializable getFieldBean() {
+		if (fieldBean == null) {
+			Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass(false);
 			try {
-				defaultFieldBean = (Serializable) fieldBeanClass.getDeclaredConstructor().newInstance();
+				fieldBean = (Serializable) fieldBeanClass.getDeclaredConstructor().newInstance();
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		return defaultFieldBean;
+		return fieldBean;
 	}
 
 	private Component newFieldsView(Class<?> fieldBeanClass) {
@@ -113,7 +113,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 						container.add(newValueEditor("value", property, field.getValueProvider()));
 						container.setDefaultModel(Model.of(field.getValueProvider().getClass()));
 					} else {
-						container.add(newValueEditor("value", property, newSpecifiedValueProvider(property)));
+						container.add(newValueEditor("value", property, new SpecifiedValue()));
 						container.setDefaultModel(Model.of(SpecifiedValue.class));
 					}
 					
@@ -163,7 +163,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 						public void setObject(String object) {
 							ValueProvider valueProvider;
 							if (object.equals(SpecifiedValue.DISPLAY_NAME) || object.equals(SpecifiedValue.SECRET_DISPLAY_NAME))  
-								valueProvider = newSpecifiedValueProvider(property);
+								valueProvider = new SpecifiedValue();
 							else if (object.equals(ScriptingValue.DISPLAY_NAME) || object.equals(ScriptingValue.SECRET_DISPLAY_NAME))
 								valueProvider = new ScriptingValue();
 							else
@@ -202,8 +202,8 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 	protected void onBeforeRender() {
 		Component fieldsView = get("fields");
 		String fieldBeanClassName = (String) fieldsView.getDefaultModelObject();
-		if (!fieldBeanClassName.equals(getDefaultFieldBean().getClass().getName()))
-			replace(newFieldsView(getDefaultFieldBean().getClass()));
+		if (!fieldBeanClassName.equals(getFieldBean().getClass().getName()))
+			replace(newFieldsView(getFieldBean().getClass()));
 		super.onBeforeRender();
 	}
 
@@ -211,20 +211,11 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newFieldsView(getDefaultFieldBean().getClass()));
+		add(newFieldsView(getFieldBean().getClass()));
 		
 		setOutputMarkupId(true);
 	}
-	
-	private SpecifiedValue newSpecifiedValueProvider(PropertyDescriptor property) {
-		SpecifiedValue specifiedValue = new SpecifiedValue();
-		Object typedValue = property.getPropertyValue(getDefaultFieldBean());
-		FieldSpec fieldSpec = getFieldSpecs().get(property.getDisplayName());
-		Preconditions.checkNotNull(fieldSpec);
-		specifiedValue.setValue(fieldSpec.convertToStrings(typedValue));
-		return specifiedValue;
-	}
-	
+		
 	private Component newValueEditor(String componentId, PropertyDescriptor property, ValueProvider valueProvider) {
 		if (valueProvider instanceof SpecifiedValue) {
 			SpecifiedValue specifiedValue = (SpecifiedValue) valueProvider;
@@ -233,7 +224,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 			Serializable fieldBean;
 			try {
-				fieldBean = getDefaultFieldBean().getClass().getDeclaredConstructor().newInstance();
+				fieldBean = getFieldBean().getClass().getDeclaredConstructor().newInstance();
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);

@@ -107,11 +107,8 @@ public class CreateIssueAction extends PostBuildAction {
 			
 			issue.setDescription(getIssueDescription());
 			issue.setConfidential(isIssueConfidential());
-			for (FieldInstance instance: getIssueFields()) {
-				Object fieldValue = issueSetting.getFieldSpec(instance.getName())
-						.convertToObject(instance.getValueProvider().getValue());
-				issue.setFieldValue(instance.getName(), fieldValue);
-			}
+			for (var entry: FieldUtils.getFieldValues(build.getProject(), getIssueFields()).entrySet())
+				issue.setFieldValue(entry.getKey(), entry.getValue());
 			OneDev.getInstance(IssueService.class).open(issue);
 		});
 		

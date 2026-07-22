@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
@@ -50,8 +51,17 @@ public class FieldUtils {
 				private static final long serialVersionUID = 1L;
 
 			};
-	
+
+	private static final MetaDataKey<Class<? extends Serializable>> FIELD_BEAN_CLASS_WITH_DEFAULT_VALUE_KEY =
+			new MetaDataKey<>() {
+
+				private static final long serialVersionUID = 1L;
+
+			};
+			
 	public static final String FIELD_BEAN_CLASS_NAME = "IssueFieldBean";
+
+	public static final String FIELD_BEAN_CLASS_NAME_WITH_DEFAULT_VALUE = "IssueFieldBeanWithDefaultValue";
 	
 	public static void clearFields(Serializable fieldBean) {
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBean.getClass()).getProperties().values()) {
@@ -60,25 +70,26 @@ public class FieldUtils {
 		}
 	}
 	
-	public static Class<? extends Serializable> getFieldBeanClass() {
+	public static Class<? extends Serializable> getFieldBeanClass(boolean withDefaultValue) {
 		RequestCycle requestCycle = RequestCycle.get();
 		if (requestCycle != null) {
-			Class<? extends Serializable> fieldBeanClass = requestCycle.getMetaData(FIELD_BEAN_CLASS_KEY);
+			var key = withDefaultValue ? FIELD_BEAN_CLASS_WITH_DEFAULT_VALUE_KEY : FIELD_BEAN_CLASS_KEY;
+			Class<? extends Serializable> fieldBeanClass = requestCycle.getMetaData(key);
 			if (fieldBeanClass == null) {
-				fieldBeanClass = defineFieldBeanClass();
-				requestCycle.setMetaData(FIELD_BEAN_CLASS_KEY, fieldBeanClass);
+				fieldBeanClass = defineFieldBeanClass(withDefaultValue);
+				requestCycle.setMetaData(key, fieldBeanClass);
 			}
 			return fieldBeanClass;
 		} else {
-			return defineFieldBeanClass();
+			return defineFieldBeanClass(withDefaultValue);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static Class<? extends Serializable> defineFieldBeanClass() {
+	private static Class<? extends Serializable> defineFieldBeanClass(boolean withDefaultValue) {
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
-		return (Class<? extends Serializable>) FieldSpec.defineClass(FIELD_BEAN_CLASS_NAME, 
-				"Issue Fields", issueSetting.getFieldSpecs());
+		var className = withDefaultValue ? FIELD_BEAN_CLASS_NAME_WITH_DEFAULT_VALUE : FIELD_BEAN_CLASS_NAME;
+		return (Class<? extends Serializable>) FieldSpec.defineClass(className, "Issue Fields", issueSetting.getFieldSpecs(), withDefaultValue);
 	}
 	
 	public static Collection<String> getEditablePropertyNames(Project project, Class<?> fieldBeanClass, Collection<String> fieldNames) {
@@ -123,6 +134,36 @@ public class FieldUtils {
 		} finally {
 			HierarchicalContext.pop();
 		}
+	}
+
+	public static Map<String, Object> getFieldValues(Project project, List<FieldInstance> fieldInstances) {
+		Map<String, Object> fieldValues = new HashMap<>();
+		Serializable fieldBean;
+		try {
+			fieldBean = getFieldBeanClass(false).getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| java.lang.reflect.InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
+		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
+		for (FieldInstance fieldInstance : fieldInstances) {
+			FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldInstance.getName());
+			if (fieldSpec == null)
+				throw new ExplicitException("Undefined field: " + fieldInstance.getName());
+			// EditContext for scripting values that read sibling fields via getInputValue(...)
+			HierarchicalContext.push(newHierarchicalContext(project, beanDescriptor, fieldBean));
+			try {
+				Object fieldValue = fieldSpec.convertToObject(fieldInstance.getValueProvider().getValue());
+				fieldValues.put(fieldInstance.getName(), fieldValue);
+				String propertyName = getPropertyName(beanDescriptor, fieldInstance.getName());
+				if (propertyName != null)
+					beanDescriptor.getProperty(propertyName).setPropertyValue(fieldBean, fieldValue);
+			} finally {
+				HierarchicalContext.pop();
+			}
+		}
+		return fieldValues;
 	}
 	
 	private static void validateFieldValue(FieldSpec fieldSpec, String fieldName, List<String> fieldValue) {

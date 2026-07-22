@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 
 import io.onedev.server.buildspecmodel.inputspec.floatinput.defaultvalueprovider.DefaultValueProvider;
@@ -14,7 +16,7 @@ import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 public class FloatInput {
 	
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
-			DefaultValueProvider defaultValueProvider) {
+			@Nullable DefaultValueProvider defaultValueProvider) {
 		int index = indexes.get(inputSpec.getName());
 		StringBuffer buffer = new StringBuffer();
 		inputSpec.appendField(buffer, index, "Float");

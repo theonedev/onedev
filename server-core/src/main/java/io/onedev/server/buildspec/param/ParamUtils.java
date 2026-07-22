@@ -170,7 +170,7 @@ public class ParamUtils {
 			paramSpecClone.setDescription(description);
 			paramSpecsCopy.add(paramSpecClone);
 		}
-		return (Class<? extends Serializable>) ParamSpec.defineClass(className, "Parameters", paramSpecsCopy);
+		return (Class<? extends Serializable>) ParamSpec.defineClass(className, "Parameters", paramSpecsCopy, true);
 	}
 	
 	@SuppressWarnings("unchecked")

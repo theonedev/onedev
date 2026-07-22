@@ -396,8 +396,8 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						for (String promptField : transition.getPromptFields()) {
 							FieldSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
 							if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
-								Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
-								Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
+								Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass(true);
+								Serializable fieldBean = issue.getFieldBean(fieldBeanClass);
 								if (FieldUtils.isFieldVisible(getProject(), new BeanDescriptor(fieldBeanClass), fieldBean, promptField)) {
 									hasPromptFields = true;
 									break;
@@ -453,7 +453,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						if (fieldSpec == null)
 							throw new ExplicitException(_T("Undefined custom field: ") + fieldName);
 
-						Serializable fieldBean = issue.getFieldBean(FieldUtils.getFieldBeanClass(), true);
+						Serializable fieldBean = issue.getFieldBean(FieldUtils.getFieldBeanClass(true));
 						BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
 						beanDescriptor.getProperty(fieldName).setPropertyValue(fieldBean, getColumn());
 

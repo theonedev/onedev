@@ -27,8 +27,8 @@ public class DateParam extends ParamSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return DateInput.getPropertyDef(this, indexes, defaultValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		return DateInput.getPropertyDef(this, indexes, withDefaultValue?defaultValueProvider:null);
 	}
 
 	@Override

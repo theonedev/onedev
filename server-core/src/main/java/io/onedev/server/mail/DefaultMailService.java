@@ -108,7 +108,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.model.support.issue.field.instance.FieldInstance;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -733,11 +733,8 @@ public class DefaultMailService implements MailService, Serializable {
 		
 		IssueCreationSetting issueCreationSetting = settingService.getServiceDeskSetting().getIssueCreationSetting(project);
 		issue.setConfidential(issueCreationSetting.isConfidential());
-		for (FieldInstance instance: issueCreationSetting.getIssueFields()) {
-			Object fieldValue = issueSetting.getFieldSpec(instance.getName())
-					.convertToObject(instance.getValueProvider().getValue());
-			issue.setFieldValue(instance.getName(), fieldValue);
-		}
+		for (Map.Entry<String, Object> entry: FieldUtils.getFieldValues(project, issueCreationSetting.getIssueFields()).entrySet())
+			issue.setFieldValue(entry.getKey(), entry.getValue());
 
 		var notifyEmailAddresses = receiverInternetAddresses.stream().map(InternetAddress::getAddress).collect(toSet());
 		notifyEmailAddresses.add(submitterInternetAddress.getAddress());

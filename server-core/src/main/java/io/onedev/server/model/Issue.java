@@ -1029,7 +1029,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			return -1;
 	}
 	
-	public Serializable getFieldBean(Class<?> fieldBeanClass, boolean withDefaultValue) {
+	public Serializable getFieldBean(Class<?> fieldBeanClass) {
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBeanClass);
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 
@@ -1039,8 +1039,6 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 				if (input != null) {
 					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(input.getName());
 					property.setPropertyValue(fieldBean, input.getTypedValue(fieldSpec));
-				} else if (!withDefaultValue) {
-					property.setPropertyValue(fieldBean, null);
 				}
 			}
 		}
@@ -1100,8 +1098,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		if (existingFieldNames.containsAll(fieldNames))
 			return;
 		
-		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
-		var fieldBean = getFieldBean(fieldBeanClass, true); 
+		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass(true);
+		var fieldBean = getFieldBean(fieldBeanClass); 
 
 		var fieldValues = FieldUtils.getFieldValues(getProject(), fieldBean, fieldNames);
 		for (var entry: fieldValues.entrySet()) {

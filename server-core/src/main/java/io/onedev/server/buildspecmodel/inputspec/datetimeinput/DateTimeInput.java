@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
@@ -15,7 +17,7 @@ import io.onedev.server.buildspecmodel.inputspec.datetimeinput.defaultvalueprovi
 public class DateTimeInput {
 
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes,
-										DefaultValueProvider defaultValueProvider) {
+										@Nullable DefaultValueProvider defaultValueProvider) {
 		int index = indexes.get(inputSpec.getName());
 		StringBuffer buffer = new StringBuffer();
 		inputSpec.appendField(buffer, index, "Date");

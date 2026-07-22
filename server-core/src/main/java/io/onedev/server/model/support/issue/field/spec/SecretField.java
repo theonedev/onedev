@@ -24,7 +24,7 @@ public class SecretField extends FieldSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
 		return SecretInput.getPropertyDef(this, indexes);
 	}
 

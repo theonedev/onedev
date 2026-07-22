@@ -27,8 +27,8 @@ public class DateTimeField extends FieldSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return DateTimeInput.getPropertyDef(this, indexes, defaultValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		return DateTimeInput.getPropertyDef(this, indexes, withDefaultValue?defaultValueProvider:null);
 	}
 
 	@Override

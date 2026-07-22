@@ -19,7 +19,7 @@ public class TextInput {
 	public static final int MAX_LEN = 500;
 	
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
-			@Nullable String pattern, boolean multiline, DefaultValueProvider defaultValueProvider) {
+			@Nullable String pattern, boolean multiline, @Nullable DefaultValueProvider defaultValueProvider) {
 		if (pattern != null)
 			pattern = InputSpec.escape(pattern);
 		int index = indexes.get(inputSpec.getName());

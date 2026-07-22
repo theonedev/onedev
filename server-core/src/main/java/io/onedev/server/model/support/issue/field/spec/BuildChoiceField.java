@@ -12,7 +12,7 @@ public class BuildChoiceField extends FieldSpec {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
 		return BuildChoiceInput.getPropertyDef(this, indexes);
 	}
 

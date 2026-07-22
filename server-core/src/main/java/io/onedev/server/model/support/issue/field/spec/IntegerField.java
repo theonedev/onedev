@@ -49,8 +49,8 @@ public class IntegerField extends FieldSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return IntegerInput.getPropertyDef(this, indexes, minValue, maxValue, defaultValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		return IntegerInput.getPropertyDef(this, indexes, minValue, maxValue, withDefaultValue?defaultValueProvider:null);
 	}
 
 	@Override

@@ -24,7 +24,7 @@ public class SecretParam extends ParamSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
 		return SecretInput.getPropertyDef(this, indexes);
 	}
 

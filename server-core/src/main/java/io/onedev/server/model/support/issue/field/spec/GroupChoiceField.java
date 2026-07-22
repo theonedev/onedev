@@ -71,8 +71,11 @@ public class GroupChoiceField extends FieldSpec {
 	}
 	
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return GroupChoiceInput.getPropertyDef(this, indexes, choiceProvider, defaultValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		if (withDefaultValue) 
+			return GroupChoiceInput.getPropertyDef(this, indexes, choiceProvider, defaultValueProvider);
+		else 
+			return GroupChoiceInput.getPropertyDef(this, indexes, choiceProvider, null);
 	}
 
 	@Editable

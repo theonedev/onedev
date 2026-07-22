@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 
 import io.onedev.server.buildspecmodel.inputspec.integerinput.defaultvalueprovider.DefaultValueProvider;
@@ -14,7 +16,7 @@ import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 public class IntegerInput {
 	
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
-			Integer minValue, Integer maxValue, DefaultValueProvider defaultValueProvider) {
+			Integer minValue, Integer maxValue, @Nullable DefaultValueProvider defaultValueProvider) {
 		int index = indexes.get(inputSpec.getName());
 		StringBuffer buffer = new StringBuffer();
 		inputSpec.appendField(buffer, index, "Integer");

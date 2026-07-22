@@ -65,8 +65,11 @@ public class UserChoiceParam extends ParamSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return UserChoiceInput.getPropertyDef(this, indexes, choiceProvider, defaultValueProvider, defaultMultiValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		if (withDefaultValue) 
+			return UserChoiceInput.getPropertyDef(this, indexes, choiceProvider, defaultValueProvider, defaultMultiValueProvider);
+		else 
+			return UserChoiceInput.getPropertyDef(this, indexes, choiceProvider, null, null);
 	}
 
 	@Override

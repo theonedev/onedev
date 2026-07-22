@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
@@ -21,9 +23,10 @@ public class UserChoiceInput {
 				.collect(Collectors.toList());
 	}
 
-	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes,
-										ChoiceProvider choiceProvider, DefaultValueProvider defaultValueProvider,
-										DefaultMultiValueProvider defaultMultiValueProvider) {
+	public static String getPropertyDef(InputSpec inputSpec, 
+				Map<String, Integer> indexes, ChoiceProvider choiceProvider, 
+				@Nullable DefaultValueProvider defaultValueProvider,
+				@Nullable DefaultMultiValueProvider defaultMultiValueProvider) {
 		int index = indexes.get(inputSpec.getName());
 		StringBuffer buffer = new StringBuffer();
 		inputSpec.appendField(buffer, index, inputSpec.isAllowMultiple()? "List<String>": "String");

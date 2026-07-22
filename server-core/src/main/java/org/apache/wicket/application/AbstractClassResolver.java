@@ -60,7 +60,9 @@ public abstract class AbstractClassResolver implements IClassResolver
 	public final Class<?> resolveClass(final String className) throws ClassNotFoundException
 	{
 		if (className.equals(FieldUtils.FIELD_BEAN_CLASS_NAME)) 
-			return FieldUtils.getFieldBeanClass();
+			return FieldUtils.getFieldBeanClass(false);
+		else if (className.equals(FieldUtils.FIELD_BEAN_CLASS_NAME_WITH_DEFAULT_VALUE))
+			return FieldUtils.getFieldBeanClass(true);
 		
 		Class<?> clazz = ParamUtils.loadBeanClass(className);
 		

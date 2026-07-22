@@ -203,14 +203,14 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 			
 			@Override
 			protected String getPropertyName() {
-				BeanDescriptor descriptor = new BeanDescriptor(FieldUtils.getFieldBeanClass());
+				BeanDescriptor descriptor = new BeanDescriptor(FieldUtils.getFieldBeanClass(false));
 				return FieldUtils.getPropertyName(descriptor, getField().getName());
 			}
 			
 			@Override
 			protected Serializable getBean() {
-				Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
-				return getIssue().getFieldBean(fieldBeanClass, true); 
+				Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass(true);
+				return getIssue().getFieldBean(fieldBeanClass); 
 			}
 
 			@Override

@@ -48,8 +48,8 @@ public class GroupChoiceParam extends ParamSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return GroupChoiceInput.getPropertyDef(this, indexes, choiceProvider, defaultValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		return GroupChoiceInput.getPropertyDef(this, indexes, choiceProvider, withDefaultValue?defaultValueProvider:null);
 	}
 
 	@Editable

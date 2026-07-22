@@ -56,8 +56,8 @@ public class TextField extends FieldSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return TextInput.getPropertyDef(this, indexes, pattern, multiline, defaultValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		return TextInput.getPropertyDef(this, indexes, pattern, multiline, withDefaultValue?defaultValueProvider:null);
 	}
 
 	@Override

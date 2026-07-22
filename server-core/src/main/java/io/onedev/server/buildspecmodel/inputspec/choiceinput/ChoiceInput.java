@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 
+import org.jspecify.annotations.Nullable;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
@@ -21,9 +23,10 @@ public class ChoiceInput {
 		return possibleValues;
 	}
 
-	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
-			ChoiceProvider choiceProvider, DefaultValueProvider defaultValueProvider, 
-			DefaultMultiValueProvider defaultMultiValueProvider) {
+	public static String getPropertyDef(InputSpec inputSpec, 
+			Map<String, Integer> indexes, ChoiceProvider choiceProvider, 
+			@Nullable DefaultValueProvider defaultValueProvider, 
+			@Nullable DefaultMultiValueProvider defaultMultiValueProvider) {
 		int index = indexes.get(inputSpec.getName());
 		StringBuffer buffer = new StringBuffer();
 		inputSpec.appendField(buffer, index, inputSpec.isAllowMultiple()? "List<String>": "String");

@@ -47,8 +47,8 @@ public class BooleanParam extends ParamSpec {
 	}
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
-		return BooleanInput.getPropertyDef(this, indexes, defaultValueProvider);
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
+		return BooleanInput.getPropertyDef(this, indexes, withDefaultValue?defaultValueProvider:null);
 	}
 
 	@Override

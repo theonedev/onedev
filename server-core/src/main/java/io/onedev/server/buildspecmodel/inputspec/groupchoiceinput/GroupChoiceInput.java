@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
@@ -27,7 +29,7 @@ public class GroupChoiceInput {
 	}
 
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
-			ChoiceProvider choiceProvider, DefaultValueProvider defaultValueProvider) {
+			ChoiceProvider choiceProvider, @Nullable DefaultValueProvider defaultValueProvider) {
 		int index = indexes.get(inputSpec.getName());
 		StringBuffer buffer = new StringBuffer();
 		inputSpec.appendField(buffer, index, "String");

@@ -12,7 +12,7 @@ public class IterationChoiceField extends FieldSpec {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public String getPropertyDef(Map<String, Integer> indexes) {
+	public String getPropertyDef(Map<String, Integer> indexes, boolean withDefaultValue) {
 		return IterationChoiceInput.getPropertyDef(this, indexes);
 	}
 
