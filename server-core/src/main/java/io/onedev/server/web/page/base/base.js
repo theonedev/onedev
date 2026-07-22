@@ -590,6 +590,57 @@ onedev.server = {
 			var $element = $(element);
 			return ($element.is("input") || $element.is("textarea") || $element.is("select")) && !$element.hasClass("readonly");			
 		},
+		/*
+		 * Whether the element is an editable control that should consume the first
+		 * Escape to blur (two-tier Escape: blur first, then dismiss overlays).
+		 * Mirrors jQuery Hotkeys focus filters (text inputs / contenteditable)
+		 * plus readonly/disabled checks used by canInput.
+		 */
+		isEditable: function(element) {
+			if (!element || element === document.body || element === document.documentElement)
+				return false;
+			if (element.isContentEditable)
+				return true;
+			var $element = $(element);
+			if ($element.hasClass("readonly") || element.disabled || element.readOnly)
+				return false;
+			if ($element.is("textarea, select"))
+				return true;
+			if ($element.is("input")) {
+				// Same set as jQuery Hotkeys textAcceptingInputTypes
+				var type = (element.type || "text").toLowerCase();
+				return type === "text" || type === "password" || type === "number"
+						|| type === "email" || type === "url" || type === "search"
+						|| type === "tel" || type === "color" || type === "date"
+						|| type === "month" || type === "week" || type === "time"
+						|| type === "datetime" || type === "datetime-local"
+						|| type === "range";
+			}
+			return false;
+		},
+		/*
+		 * If an editable control has focus, blur it and return true so Escape
+		 * dismiss handlers can skip overlay close on this keypress.
+		 */
+		blurFocusedEditable: function() {
+			var element = document.activeElement;
+			if (!onedev.server.util.isEditable(element))
+				return false;
+			element.blur();
+			return true;
+		},
+		/*
+		 * Widgets that handle Escape themselves (close picker/hints/etc.).
+		 * When these are open, do not steal Escape for blur-first behavior.
+		 */
+		isEscapeConsumedByWidget: function() {
+			return $(".select2-drop:visible").length != 0
+					|| $(".dropdown.open").length != 0
+					|| $(".pcr-app.visible").length != 0
+					|| $(".atwho-view:visible").length != 0
+					|| $(".CodeMirror-hints:visible").length != 0
+					|| $(".flatpickr-calendar.open").length != 0;
+		},
 		isDevice: function() {
 			var ua = navigator.userAgent.toLowerCase();
 			return ua.indexOf("android") != -1 
@@ -928,11 +979,6 @@ onedev.server = {
 		onedev.server.setupTippy();
 		onedev.server.history.init(popStateCallback);
 		onedev.server.perfectScrollbar.setup();
-
-		$(document).keydown(function(e) {
-			if (e.keyCode == 27) // ESC
-				e.preventDefault();
-		});
 	},
 	
 	onWindowLoad: function() {
@@ -970,3 +1016,22 @@ onedev.server = {
 	}
 	
 };
+
+/*
+ * Register Escape handling when this script loads so it runs before dismiss
+ * handlers attached later from onDomReady / component init. Two-tier Escape:
+ * blur focused editables first; only then allow overlay dismiss on a later press.
+ * Target-level handlers that already preventDefault (CodeMirror hints, Select2,
+ * etc.) take priority; isEscapeConsumedByWidget covers remaining widget UIs.
+ */
+$(document).keydown(function(e) {
+	if (e.keyCode == 27) { // ESC
+		var alreadyHandled = e.isDefaultPrevented();
+		e.preventDefault();
+		if (!alreadyHandled
+				&& !onedev.server.util.isEscapeConsumedByWidget()
+				&& onedev.server.util.blurFocusedEditable()) {
+			e.stopImmediatePropagation();
+		}
+	}
+});
