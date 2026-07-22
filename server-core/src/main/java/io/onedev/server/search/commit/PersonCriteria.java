@@ -14,7 +14,6 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -49,8 +48,8 @@ public abstract class PersonCriteria extends CommitCriteria {
 			if (value == null) { // authored by me
 				User user = SecurityUtils.getUser();
 				if (user != null) {
-					user.getEmailAddresses().stream().filter(it->it.isVerified()).forEach(it-> {
-						persons.add("<" + it.getValue() + ">");
+					user.getVerifiedEmailAddresses().forEach(it-> {
+						persons.add("<" + it + ">");
 					});
 				} else {
 					throw new ExplicitException(_T("Please login to perform this query"));
@@ -59,9 +58,8 @@ public abstract class PersonCriteria extends CommitCriteria {
 				String userName = value.substring(1);
 				User user = getUserService().findByName(userName);
 				if (user != null) {
-					for (EmailAddress emailAddress: user.getEmailAddresses()) {
-						if (emailAddress.isVerified())
-							persons.add("<" + emailAddress.getValue() + ">");
+					for (String emailAddress: user.getVerifiedEmailAddresses()) {
+						persons.add("<" + emailAddress + ">");
 					}
 				} else {
 					persons.add(Strings.CS.replace(value, "*", ".*"));
@@ -79,16 +77,16 @@ public abstract class PersonCriteria extends CommitCriteria {
 				User user = User.get();
 				if (user == null) {
 					throw new ExplicitException(_T("Please login to perform this query"));
-				} else if (user.getEmailAddresses().stream()
-						.anyMatch(it-> it.isVerified() && it.getValue().equalsIgnoreCase(personEmail))) { 
+				} else if (user.getVerifiedEmailAddresses().stream()
+						.anyMatch(it-> it.equalsIgnoreCase(personEmail))) { 
 					return true;
 				}
 			} else if (value.startsWith("@")) {
 				String userName = value.substring(1);
 				User user = getUserService().findByName(userName);
 				if (user != null) {
-					if (user.getEmailAddresses().stream()
-							.anyMatch(it-> it.isVerified() && it.getValue().equalsIgnoreCase(personEmail))) {
+					if (user.getVerifiedEmailAddresses().stream()
+							.anyMatch(it-> it.equalsIgnoreCase(personEmail))) {
 						return true;
 					}
 				} else if (matches("*" + value + "*", person)) {

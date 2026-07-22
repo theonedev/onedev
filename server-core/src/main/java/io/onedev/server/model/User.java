@@ -14,10 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -910,6 +912,21 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setEmailAddresses(Collection<EmailAddress> emailAddresses) {
 		this.emailAddresses = emailAddresses;
+	}
+
+	/**
+	 * Returns verified email address values of this user, including the synthetic
+	 * address used by service and AI accounts for git operations.
+	 */
+	public Set<String> getVerifiedEmailAddresses() {
+		var emails = getEmailAddresses().stream()
+				.filter(EmailAddress::isVerified)
+				.map(EmailAddress::getValue)
+				.collect(Collectors.toCollection(HashSet::new));
+		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
+		if (serviceOrAiAccountEmailAddress != null)
+			emails.add(serviceOrAiAccountEmailAddress.getValue());
+		return emails;
 	}
 
 	public Collection<GpgKey> getGpgKeys() {

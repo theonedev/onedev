@@ -1,7 +1,6 @@
 package io.onedev.server.xodus;
 
 import static io.onedev.server.util.DateUtils.toLocalDate;
-import static java.util.stream.Collectors.toSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -1311,10 +1310,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	@Sessional
 	@Override
 	public Map<Long, Map<ObjectId, Long>> getUserCommits(User user, Date fromDate, Date toDate) {		
-		var emailAddresses = user.getEmailAddresses().stream()
-				.filter(it -> it.isVerified())
-				.map(it -> it.getValue())
-				.collect(toSet());
+		var emailAddresses = user.getVerifiedEmailAddresses();
 						
 		var userCommits = new HashMap<Long, Map<ObjectId, Long>>();
 		Map<String, Map<Long, Map<ObjectId, Long>>> result = clusterService.runOnAllServers(new ClusterTask<>() {

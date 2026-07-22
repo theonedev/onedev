@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -223,10 +222,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	@Nullable
 	private String suggestSourceBranch() {
 		User user = getLoginUser();
-		Collection<String> verifiedEmailAddresses = user.getEmailAddresses().stream()
-				.filter(it->it.isVerified())
-				.map(it->it.getValue())
-				.collect(Collectors.toSet());
+		Collection<String> verifiedEmailAddresses = user.getVerifiedEmailAddresses();
 		List<Pair<String, Integer>> branchUpdates = new ArrayList<>(); 
 		for (RefFacade ref: getProject().getBranchRefs()) {
 			RevCommit commit = (RevCommit) ref.getPeeledObj();
