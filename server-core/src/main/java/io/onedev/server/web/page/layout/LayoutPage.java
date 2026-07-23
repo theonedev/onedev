@@ -1230,7 +1230,7 @@ public abstract class LayoutPage extends BasePage {
 				@Override
 				public void onClick() {
 					SecurityUtils.getSubject().releaseRunAs();
-					Session.get().warn(_T("Exited impersonation"));
+					Session.get().warn(_T("Exited run as"));
 					throw new RestartResponseException(HomePage.class);
 				}
 
