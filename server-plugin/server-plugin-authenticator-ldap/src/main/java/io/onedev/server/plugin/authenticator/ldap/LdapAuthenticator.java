@@ -24,6 +24,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.Strings;
+import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.jspecify.annotations.Nullable;
@@ -278,7 +279,7 @@ public class LdapAuthenticator extends Authenticator {
                 userCtx = new InitialDirContext(ldapEnv);
             } catch (AuthenticationException e) {
                 logger.error("Unable to bind as '" + userDN + "'", e);
-            	throw new org.apache.shiro.authc.AuthenticationException("Invalid credentials");
+            	throw new IncorrectCredentialsException("Invalid credentials");
             } finally {
                 if (userCtx != null) {
                     try {
