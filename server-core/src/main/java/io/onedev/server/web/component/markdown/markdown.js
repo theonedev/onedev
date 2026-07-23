@@ -353,7 +353,16 @@ onedev.server.markdown = {
 						$input.range(selection.start, selection.start + tabbedContent.length);
 						return false;
 					} 
-				}	
+				} else if (e.key === "`" && !e.altKey && !e.ctrlKey && !e.metaKey) {
+					var selection = $input.range();
+					if (selection.length != 0) {
+						e.preventDefault();
+						document.execCommand("insertText", false, "`" + selection.text + "`");
+						$input.range(selection.start + 1, selection.start + 1 + selection.length);
+						onedev.server.markdown.fireInputEvent($input);
+						return false;
+					}
+				}
 			}
 		});
 
