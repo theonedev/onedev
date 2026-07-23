@@ -98,10 +98,6 @@ public class Role extends AbstractEntity implements BasePermission {
 	private boolean managePullRequests;
 	
 	private boolean manageCodeComments;
-
-	private boolean manageWorkspaces;
-
-	private boolean createWorkspaces;
 	
 	private CodePrivilege codePrivilege = CodePrivilege.NONE;
 	
@@ -132,6 +128,10 @@ public class Role extends AbstractEntity implements BasePermission {
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ArrayList<JobPrivilege> jobPrivileges = new ArrayList<>();
+
+	private boolean manageWorkspaces;
+
+	private boolean createWorkspaces;
 	
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -198,7 +198,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	}
 
 	@Editable(order=300, description="Specify the code privilege for the role. The Write permission implies CreateWorkspaces permission")
-	@ShowCondition("isCodePrivilegeVisible")
+	@DependsOn(property="managePullRequests", value="false")
+	@DependsOn(property="manageCodeComments", value="false")
 	@NotNull
 	public CodePrivilege getCodePrivilege() {
 		return codePrivilege;
@@ -225,32 +226,6 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.managePullRequests = managePullRequests;
 	}
 	
-	@Editable(order=255, name="Workspace Management", description="""
-			Workspace administrative permission inside a project, including batch operations 
-			over multiple workspaces including batch operations over multiple workspaces. 
-			This permission implies WriteCode permission.""")
-	@DependsOn(property="manageProject", value="false")
-	public boolean isManageWorkspaces() {
-		return manageWorkspaces;
-	}	
-
-	public void setManageWorkspaces(boolean manageWorkspaces) {
-		this.manageWorkspaces = manageWorkspaces;
-	}
-
-	@Editable(order=257, name="Create Workspaces", description="""
-			Create workspaces on any commit or branch under a project. 
-			This permission implies the permission to read code.
-			""")
-	@DependsOn(property="manageWorkspaces", value="false")
-	public boolean isCreateWorkspaces() {
-		return createWorkspaces;
-	}
-
-	public void setCreateWorkspaces(boolean createWorkspaces) {
-		this.createWorkspaces = createWorkspaces;
-	}
-
 	@Editable(order=260, name="Code Comment Management", description="Code comment administrative permission inside a project, "
 			+ "including batch operations over multiple code comments")
 	@DependsOn(property="manageProject", value="false")
@@ -398,6 +373,33 @@ public class Role extends AbstractEntity implements BasePermission {
 
 	public void setJobPrivileges(List<JobPrivilege> jobPrivileges) {
 		this.jobPrivileges = (ArrayList<JobPrivilege>) jobPrivileges;
+	}
+
+	@Editable(order=800, name="Workspace Management", description="""
+			Workspace administrative permission inside a project, including batch operations 
+			over multiple workspaces including batch operations over multiple workspaces. 
+			This permission implies WriteCode permission.""")
+	@DependsOn(property="manageProject", value="false")
+	public boolean isManageWorkspaces() {
+		return manageWorkspaces;
+	}	
+
+	public void setManageWorkspaces(boolean manageWorkspaces) {
+		this.manageWorkspaces = manageWorkspaces;
+	}
+
+	@Editable(order=900, name="Create Workspaces", description="""
+			Create workspaces on any commit or branch under a project. 
+			This permission implies the permission to read code.
+			""")
+	@DependsOn(property="manageWorkspaces", value="false")
+	@DependsOn(property="codePrivilege", value="WRITE", inverse=true)
+	public boolean isCreateWorkspaces() {
+		return createWorkspaces;
+	}
+
+	public void setCreateWorkspaces(boolean createWorkspaces) {
+		this.createWorkspaces = createWorkspaces;
 	}
 
 	public Collection<BaseAuthorization> getBaseAuthorizations() {

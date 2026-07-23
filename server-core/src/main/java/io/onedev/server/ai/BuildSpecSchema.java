@@ -213,15 +213,15 @@ public class BuildSpecSchema {
             bean = newBean(beanClass);
         }
         
-        var dependents = new ArrayList<Pair<PropertyDescriptor, DependsOn>>();
+        var dependents = new ArrayList<Pair<PropertyDescriptor, DependsOn[]>>();
         for (var groupProperties: beanDescriptor.getProperties().values()) {
             for (var property: groupProperties) {
                 if (!excludedProperties.contains(property.getPropertyName()) && processedProperties.add(property.getPropertyName())) {
                     if (property.getPropertyName().equals("type"))
                         throw new ExplicitException("Property 'type' is reserved (class: " + beanClass.getName() + ")");
-                    var dependsOn = property.getPropertyGetter().getAnnotation(DependsOn.class);
-                    if (dependsOn != null) {
-                        dependents.add(new Pair<>(property, dependsOn));
+                    var dependsOns = property.getPropertyGetter().getAnnotationsByType(DependsOn.class);
+                    if (dependsOns.length != 0) {
+                        dependents.add(new Pair<>(property, dependsOns));
                     } else {
                         if (property.isPropertyRequired())
                             requiredNode.add(property.getPropertyName()); 
@@ -238,61 +238,21 @@ public class BuildSpecSchema {
             for (var dependent: dependents) {
                 var allOfItemNode = new HashMap<String, Object>();
                 allOfNode.add(allOfItemNode);
-                var dependsOn = dependent.getRight();
-                var dependencyProperty = propertyMap.get(dependsOn.property());
-                if (dependencyProperty == null) 
-                    throw new ExplicitException("Dependency property not found: " + dependsOn.property());
+                var dependsOns = dependent.getRight();
                 
                 var ifNode = new HashMap<String, Object>();
                 allOfItemNode.put("if", ifNode);
-                var ifPropsNode = new HashMap<String, Object>();
-                ifNode.put("properties", ifPropsNode);
-                var dependencyPropertyNode = new HashMap<String, Object>();
-                ifPropsNode.put(dependencyProperty.getPropertyName(), dependencyPropertyNode);
-                
-                var inverse = dependsOn.inverse();
-                var dependencyPropertyClass = dependencyProperty.getPropertyClass();
-                if (dependencyPropertyClass == boolean.class) {
-                    if (dependsOn.value().length() != 0) {
-                        dependencyPropertyNode.put("const", Boolean.parseBoolean(dependsOn.value()));
-                    } else {
-                        dependencyPropertyNode.put("const", true);
-                    }
-                } else if (dependencyPropertyClass == int.class || dependencyPropertyClass == long.class 
-                        || dependencyPropertyClass == double.class || dependencyPropertyClass == float.class) {
-                    if (dependsOn.value().length() != 0) {
-                        dependencyPropertyNode.put("const", Integer.parseInt(dependsOn.value()));
-                    } else {
-                        dependencyPropertyNode.put("const", 0);
-                        inverse = !inverse;
-                    }
-                } else {
-                    if (dependsOn.value().length() != 0) {
-                        if (dependencyPropertyClass == Boolean.class) 
-                            dependencyPropertyNode.put("const", Boolean.parseBoolean(dependsOn.value()));
-                        else if (dependencyPropertyClass == Integer.class || dependencyPropertyClass == Long.class || dependencyPropertyClass == Double.class || dependencyPropertyClass == Float.class) 
-                            dependencyPropertyNode.put("const", Integer.parseInt(dependsOn.value()));
-                        else
-                            dependencyPropertyNode.put("const", dependsOn.value());
-                    } else {
-                        var typeList = new ArrayList<String>();
-                        typeList.add("object");
-                        typeList.add("string");
-                        typeList.add("integer");
-                        typeList.add("number");
-                        typeList.add("boolean");
-                        dependencyPropertyNode.put("type", typeList);
-                    }
+                var ifAllOfNode = new ArrayList<Map<String, Object>>();
+                ifNode.put("allOf", ifAllOfNode);
+                for (var dependsOn: dependsOns) {
+                    var dependencyProperty = propertyMap.get(dependsOn.property());
+                    if (dependencyProperty == null) 
+                        throw new ExplicitException("Dependency property not found: " + dependsOn.property());
+                    ifAllOfNode.add(buildDependsOnCondition(dependsOn, dependencyProperty));
                 }
 
-                Map<String, Object> branchNode;
-                if (!inverse) {
-                    branchNode = new HashMap<>();
-                    allOfItemNode.put("then", branchNode);
-                } else {
-                    branchNode = new HashMap<>();
-                    allOfItemNode.put("else", branchNode);
-                }
+                var branchNode = new HashMap<String, Object>();
+                allOfItemNode.put("then", branchNode);
 
                 var property = dependent.getLeft();
                 var branchPropsNode = new HashMap<String, Object>();
@@ -312,6 +272,56 @@ public class BuildSpecSchema {
             currentNode.put("properties", propsNode);
         if (!requiredNode.isEmpty())
             currentNode.put("required", requiredNode);
+    }
+
+    private static Map<String, Object> buildDependsOnCondition(DependsOn dependsOn, PropertyDescriptor dependencyProperty) {
+        var dependencyPropertyNode = new HashMap<String, Object>();
+        var inverse = dependsOn.inverse();
+        var dependencyPropertyClass = dependencyProperty.getPropertyClass();
+        if (dependencyPropertyClass == boolean.class) {
+            if (dependsOn.value().length() != 0) {
+                dependencyPropertyNode.put("const", Boolean.parseBoolean(dependsOn.value()));
+            } else {
+                dependencyPropertyNode.put("const", true);
+            }
+        } else if (dependencyPropertyClass == int.class || dependencyPropertyClass == long.class 
+                || dependencyPropertyClass == double.class || dependencyPropertyClass == float.class) {
+            if (dependsOn.value().length() != 0) {
+                dependencyPropertyNode.put("const", Integer.parseInt(dependsOn.value()));
+            } else {
+                dependencyPropertyNode.put("const", 0);
+                inverse = !inverse;
+            }
+        } else {
+            if (dependsOn.value().length() != 0) {
+                if (dependencyPropertyClass == Boolean.class) 
+                    dependencyPropertyNode.put("const", Boolean.parseBoolean(dependsOn.value()));
+                else if (dependencyPropertyClass == Integer.class || dependencyPropertyClass == Long.class || dependencyPropertyClass == Double.class || dependencyPropertyClass == Float.class) 
+                    dependencyPropertyNode.put("const", Integer.parseInt(dependsOn.value()));
+                else
+                    dependencyPropertyNode.put("const", dependsOn.value());
+            } else {
+                var typeList = new ArrayList<String>();
+                typeList.add("object");
+                typeList.add("string");
+                typeList.add("integer");
+                typeList.add("number");
+                typeList.add("boolean");
+                dependencyPropertyNode.put("type", typeList);
+            }
+        }
+
+        var matchNode = new HashMap<String, Object>();
+        var ifPropsNode = new HashMap<String, Object>();
+        matchNode.put("properties", ifPropsNode);
+        ifPropsNode.put(dependencyProperty.getPropertyName(), dependencyPropertyNode);
+        if (!inverse) {
+            return matchNode;
+        } else {
+            var notNode = new HashMap<String, Object>();
+            notNode.put("not", matchNode);
+            return notNode;
+        }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

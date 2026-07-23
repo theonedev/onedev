@@ -171,8 +171,7 @@ public class PropertyDescriptor implements Serializable {
 			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
 			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
 				return false;
-			DependsOn dependsOn = getPropertyGetter().getAnnotation(DependsOn.class);
-			if (dependsOn != null) {
+			for (DependsOn dependsOn : getPropertyGetter().getAnnotationsByType(DependsOn.class)) {
 				var dependencyProperty = beanDescriptor.getProperty(dependsOn.property());
 				if (dependencyProperty == null) {
 					throw new ExplicitException("Dependency property not found: " + dependsOn.property());

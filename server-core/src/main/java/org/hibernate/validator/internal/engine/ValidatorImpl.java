@@ -1349,8 +1349,7 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 			if (getter == null) {
 				throw new ExplicitException("Getter not found for property: " + propertyName);
 			}
-			var dependsOn = getter.getAnnotation(DependsOn.class);
-			if (dependsOn != null) {
+			for (var dependsOn : getter.getAnnotationsByType(DependsOn.class)) {
 				var dependencyGetter = BeanUtils.findGetter(bean.getClass(), dependsOn.property());
 				if (dependencyGetter == null) {
 					throw new ExplicitException("Getter not found for property: " + dependsOn.property());
@@ -1478,8 +1477,7 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 				if (getter == null) {
 					throw new ExplicitException("Getter not found for property: " + propertyName);
 				}
-				DependsOn dependsOn = getter.getAnnotation(DependsOn.class);
-				if (dependsOn != null) {
+				for (DependsOn dependsOn : getter.getAnnotationsByType(DependsOn.class)) {
 					Method dependencyGetter = BeanUtils.findGetter(bean.getClass(), dependsOn.property());
 					if (dependencyGetter == null) {
 						throw new ExplicitException("Getter not found for property: " + dependsOn.property());
@@ -1504,7 +1502,7 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 							try {
 								return getter.invoke(bean);
 							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-								throw new ExplicitException("Error invoking getter for property: " + dependsOn.property(), e);
+								throw new ExplicitException("Error invoking getter for property: " + name, e);
 							}
 						}
 					});
