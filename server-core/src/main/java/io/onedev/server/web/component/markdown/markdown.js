@@ -358,7 +358,7 @@ onedev.server.markdown = {
 					if (selection.length != 0) {
 						e.preventDefault();
 						document.execCommand("insertText", false, "`" + selection.text + "`");
-						$input.range(selection.start + 1, selection.start + 1 + selection.length);
+						$input.caret(selection.start + selection.length + 2);
 						onedev.server.markdown.fireInputEvent($input);
 						return false;
 					}
