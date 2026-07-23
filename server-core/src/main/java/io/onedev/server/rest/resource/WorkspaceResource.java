@@ -118,18 +118,24 @@ public class WorkspaceResource {
 		}
 
 		ObjectId commitId = ObjectId.fromString(data.getCommitHash());
-		project.getRevCommit(commitId, true);
+		var commit = project.getRevCommit(commitId, false);
+		if (commit == null) 
+			throw new NotAcceptableException("Commit not found: " + data.getCommitHash());
 
 		Issue issue = null;
 		if (data.getIssueId() != null) {
-			issue = issueService.load(data.getIssueId());
+			issue = issueService.get(data.getIssueId());
+			if (issue == null)
+				throw new NotAcceptableException("Issue not found by id: " + data.getIssueId());
 			if (!issue.getProject().equals(project))
 				throw new NotAcceptableException("Issue does not belong to specified project");
 		}
 
 		PullRequest request = null;
 		if (data.getPullRequestId() != null) {
-			request = pullRequestService.load(data.getPullRequestId());
+			request = pullRequestService.get(data.getPullRequestId());
+			if (request == null)
+				throw new NotAcceptableException("Pull request not found by id: " + data.getPullRequestId());
 			if (!request.getProject().equals(project))
 				throw new NotAcceptableException("Pull request does not belong to specified project");
 		}
