@@ -252,7 +252,7 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(null, issue, member, true) && canCreateWorkspace(member, issue, true)) { 
+					} else if (isAiEligible(null, issue, member, true) && canCreateWorkspace(member, issue, true)) { 
 						onFieldSet(member, issue, entry.getKey());
 					}
 				}
@@ -282,7 +282,7 @@ public class IssueNotificationManager implements Serializable {
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(null, issue, assignedUser, true) && canCreateWorkspace(assignedUser, issue, true)) { 
+					} else if (isAiEligible(null, issue, assignedUser, true) && canCreateWorkspace(assignedUser, issue, true)) { 
 						onFieldSet(assignedUser, issue, entry.getKey());
 					}
 				} 
@@ -318,7 +318,7 @@ public class IssueNotificationManager implements Serializable {
 										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 										replyAddress, senderName, threadingReferences);
 							}
-						} else if (isAiEntitled(user, issue, mentionedUser, true) 
+						} else if (isAiEligible(user, issue, mentionedUser, true) 
 								&& user != null 
 								&& !user.equals(mentionedUser) 
 								&& canCreateWorkspace(mentionedUser, issue, true)) {
@@ -353,7 +353,7 @@ public class IssueNotificationManager implements Serializable {
 							|| event instanceof IssueCommentCreated issueCommentCreated && issueCommentCreated.getComment().getOnBehalfOf() != null)
 						&& !user.equals(watch.getUser()) 
 						&& watch.getUser().getAiSetting().isProactive()
-						&& isAiEntitled(user, issue, watch.getUser(), false) 
+						&& isAiEligible(user, issue, watch.getUser(), false) 
 						&& canCreateWorkspace(watch.getUser(), issue, false)) {
 					onAiNotified(watch.getUser(), user, issue);		
 				}
@@ -583,13 +583,17 @@ public class IssueNotificationManager implements Serializable {
 		return true;
 	}
 
-	private boolean isAiEntitled(@Nullable User user, Issue issue, User ai, boolean commentOnError) {
-		if (user != null && user.getId() > 0) {
+	private boolean isAiEligible(@Nullable User user, Issue issue, User ai, boolean commentOnError) {
+		if (ai.isDisabled()) {
+			if (commentOnError) 
+				createComment(ai, issue, "I'm disabled, and cannot do the job");				
+			return false;
+		} else if (user != null && user.getId() > 0) {
 			if (user.isEntitledToAi(ai)) {
 				return true;
 			} else {
 				if (commentOnError)
-					createComment(ai, issue, "@%s you are not entitled to interact with me".formatted(user.getName()));				
+					createComment(ai, issue, "%s is not entitled to interact with me".formatted(user.getName()));				
 				return false;
 			}
 		} else {

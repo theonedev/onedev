@@ -258,7 +258,7 @@ public class PullRequestNotificationManager implements Serializable {
 						&& request.getReviews().stream().noneMatch(it -> it.getUser().getType() == AI && it.getStatus() == PENDING)
 						&& request.getReviews().stream().anyMatch(it -> it.getUser().getType() == AI && it.getStatus() == REQUESTED_FOR_CHANGES)
 						&& notifiedUsers.add(request.getSubmitter())
-						&& isAiEntitled(null, request, request.getSubmitter(), true)
+						&& isAiEligible(null, request, request.getSubmitter(), true)
 						&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
 							Work on pull request %d to address user feedbacks since your last work. \
@@ -273,7 +273,7 @@ public class PullRequestNotificationManager implements Serializable {
 						&& user.getType() != AI
 						&& request.getSubmitter().getType() == AI 
 						&& notifiedUsers.add(request.getSubmitter())
-						&& isAiEntitled(null, request, request.getSubmitter(), true)
+						&& isAiEligible(null, request, request.getSubmitter(), true)
 						&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
 							Work on pull request %d to address %s's latest concern. \
@@ -335,7 +335,7 @@ public class PullRequestNotificationManager implements Serializable {
 									getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
 									replyAddress, senderName, threadingReferences);
 						}
-					} else if (isAiEntitled(null, request, reviewer, true) 
+					} else if (isAiEligible(null, request, reviewer, true) 
 							&& canCreateWorkspace(reviewer, request, true)) {				
 						var prompt = """
 								Work on pull request %d to perform the review. \
@@ -375,7 +375,7 @@ public class PullRequestNotificationManager implements Serializable {
 											replyAddress, senderName, threadingReferences);
 								}
 							} else if (!(event instanceof PullRequestCodeCommentEvent) 
-									&& isAiEntitled(user, request, mentionedUser, true)
+									&& isAiEligible(user, request, mentionedUser, true)
 									&& user != null
 									&& !user.equals(mentionedUser)
 									&& canCreateWorkspace(mentionedUser, request, true)) {
@@ -409,7 +409,7 @@ public class PullRequestNotificationManager implements Serializable {
 								bccEmailAddresses.add(emailAddress.getValue());
 						} else if (event.getCommentText() instanceof MarkdownText 
 								&& watch.getUser().getAiSetting().isProactive()
-								&& isAiEntitled(user, request, watch.getUser(), false) 
+								&& isAiEligible(user, request, watch.getUser(), false) 
 								&& user != null 
 								&& !user.isSystem()
 								&& !user.equals(watch.getUser()) 
@@ -442,7 +442,7 @@ public class PullRequestNotificationManager implements Serializable {
 							&& !pullRequestBuildEvent.getBuild().getDependencies().stream().anyMatch(it -> 
 									it.isRequireSuccessful() && it.getDependency().isFinished() && it.getDependency().getStatus() != Build.Status.SUCCESSFUL)
 							&& notifiedUsers.add(request.getSubmitter())
-							&& isAiEntitled(null, request, request.getSubmitter(), true)
+							&& isAiEligible(null, request, request.getSubmitter(), true)
 							&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
 							Work on pull request %d to fix failure of build %d. \
@@ -454,7 +454,7 @@ public class PullRequestNotificationManager implements Serializable {
 				if (event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null 
 							&& request.getMergePreview().getMergeCommitHash() == null 
 							&& notifiedUsers.add(request.getSubmitter())
-							&& isAiEntitled(null, request, request.getSubmitter(), true)
+							&& isAiEligible(null, request, request.getSubmitter(), true)
 							&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
 						Work on pull request %d to resolve merge conflict. \
@@ -481,7 +481,7 @@ public class PullRequestNotificationManager implements Serializable {
 			}
 			if (aiAssignee != null && request.checkMergeCondition() == null 
 					&& notifiedUsers.add(aiAssignee)
-					&& isAiEntitled(null, request, aiAssignee, true) 
+					&& isAiEligible(null, request, aiAssignee, true) 
 					&& canWriteCode(aiAssignee, request, request.getTargetProject())) {
 				var prompt = """
 						Work on pull request %d to review and merge if ready. \
@@ -513,13 +513,17 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 	}
 
-	private boolean isAiEntitled(@Nullable User user, PullRequest request, User ai, boolean commentOnError) {
-		if (user != null && user.getId() > 0) {
+	private boolean isAiEligible(@Nullable User user, PullRequest request, User ai, boolean commentOnError) {
+		if (ai.isDisabled()) {
+			if (commentOnError) 
+				createComment(ai, request, "I'm disabled, and cannot do the job");				
+			return false;
+		} else if (user != null && user.getId() > 0) {
 			if (user.isEntitledToAi(ai)) {
 				return true;
 			} else {
 				if (commentOnError)
-					createComment(ai, request, "@%s you are not entitled to interact with me".formatted(user.getName()));				
+					createComment(ai, request, "%s is not entitled to interact with me".formatted(user.getName()));				
 				return false;
 			}
 		} else {
