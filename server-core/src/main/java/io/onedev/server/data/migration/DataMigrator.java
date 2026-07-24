@@ -9164,6 +9164,22 @@ public class DataMigrator {
 	}
 
 	private void migrate235(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var aiSettingElement = element.element("aiSetting");
+					aiSettingElement.addElement("maxLoopCount").setText("3");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Workspaces.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("participatingUserIds");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
 	}
 
 }

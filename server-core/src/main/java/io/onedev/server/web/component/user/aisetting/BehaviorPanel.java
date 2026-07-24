@@ -33,6 +33,7 @@ public class BehaviorPanel extends GenericPanel<User> {
 		var bean = new BehaviorEditBean();
 		bean.setSystemPrompt(getUser().getAiSetting().getSystemPrompt());
 		bean.setProactive(getUser().getAiSetting().isProactive());
+		bean.setMaxLoopCount(getUser().getAiSetting().getMaxLoopCount());
 		var oldAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 
 		Form<?> form = new Form<Void>("form") {
@@ -43,6 +44,7 @@ public class BehaviorPanel extends GenericPanel<User> {
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getUser().getAiSetting().setSystemPrompt(bean.getSystemPrompt());
 				getUser().getAiSetting().setProactive(bean.isProactive());
+				getUser().getAiSetting().setMaxLoopCount(bean.getMaxLoopCount());
 				userService.update(getUser(), null);
 				auditService.audit(null, "changed AI behavior settings", oldAuditContent, newAuditContent);
 				getSession().success(_T("AI behavior settings have been saved"));

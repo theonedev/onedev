@@ -86,6 +86,6 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	void runPrompt(User ai, Project project, @Nullable Issue issue, @Nullable PullRequest request,
 			@Nullable ObjectId commitId, @Nullable String branch, String prompt,
-			TaskFailedCallback taskFailedCallback);
+			List<Long> participatingUserIds, TaskFailedCallback taskFailedCallback);
 	
 }

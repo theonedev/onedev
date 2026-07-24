@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -189,6 +191,10 @@ public class Workspace extends AbstractEntity {
 	private String serverAddress;
 
 	private boolean forTaskAutomation;
+
+	@JsonIgnore
+	@Lob
+	private ArrayList<Long> participatingUserIds = new ArrayList<>();
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
@@ -430,6 +436,14 @@ public class Workspace extends AbstractEntity {
 
 	public void setForTaskAutomation(boolean forTaskAutomation) {
 		this.forTaskAutomation = forTaskAutomation;
+	}
+
+	public ArrayList<Long> getParticipatingUserIds() {
+		return participatingUserIds;
+	}
+
+	public void setParticipatingUserIds(ArrayList<Long> participatingUserIds) {
+		this.participatingUserIds = participatingUserIds;
 	}
 
 	public WorkspaceReference getReference() {

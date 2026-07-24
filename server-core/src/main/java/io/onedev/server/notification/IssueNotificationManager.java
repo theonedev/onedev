@@ -8,9 +8,11 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -187,7 +189,7 @@ public class IssueNotificationManager implements Serializable {
 	public void on(IssueEvent event) {
 		if (event.isMinor() || !event.isSendNotifications())
 			return;
-		
+
 		Issue issue = event.getIssue();
 		User user = event.getUser();
 
@@ -253,7 +255,7 @@ public class IssueNotificationManager implements Serializable {
 									replyAddress, senderName, threadingReferences);
 						}
 					} else if (isAiEligible(null, issue, member, true) && canCreateWorkspace(member, issue, true)) { 
-						onFieldSet(member, issue, entry.getKey());
+						onFieldSet(member, issue, entry.getKey(), event.getParticipatingUserIds());
 					}
 				}
 			}
@@ -283,7 +285,7 @@ public class IssueNotificationManager implements Serializable {
 									replyAddress, senderName, threadingReferences);
 						}
 					} else if (isAiEligible(null, issue, assignedUser, true) && canCreateWorkspace(assignedUser, issue, true)) { 
-						onFieldSet(assignedUser, issue, entry.getKey());
+						onFieldSet(assignedUser, issue, entry.getKey(), event.getParticipatingUserIds());
 					}
 				} 
 			}
@@ -318,11 +320,14 @@ public class IssueNotificationManager implements Serializable {
 										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 										replyAddress, senderName, threadingReferences);
 							}
-						} else if (isAiEligible(user, issue, mentionedUser, true) 
-								&& user != null 
+						} else if (user != null
+								&& (!user.isSystem()
+									|| event instanceof IssueOpened issueOpened && issueOpened.getIssue().getOnBehalfOf() != null
+									|| event instanceof IssueCommentCreated issueCommentCreated && issueCommentCreated.getComment().getOnBehalfOf() != null)
 								&& !user.equals(mentionedUser) 
+								&& isAiEligible(user, issue, mentionedUser, true)
 								&& canCreateWorkspace(mentionedUser, issue, true)) {
-							onAiMentioned(mentionedUser, user, issue);
+							onAiMentioned(mentionedUser, user, issue, event.getParticipatingUserIds());
 						}
 					}
 				}
@@ -348,14 +353,15 @@ public class IssueNotificationManager implements Serializable {
 					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified())
 						bccEmailAddresses.add(emailAddress.getValue());
-				} else if ((!user.isSystem() 
+				} else if (user != null
+						&& (!user.isSystem()
 							|| event instanceof IssueOpened issueOpened && issueOpened.getIssue().getOnBehalfOf() != null
 							|| event instanceof IssueCommentCreated issueCommentCreated && issueCommentCreated.getComment().getOnBehalfOf() != null)
 						&& !user.equals(watch.getUser()) 
 						&& watch.getUser().getAiSetting().isProactive()
 						&& isAiEligible(user, issue, watch.getUser(), false) 
 						&& canCreateWorkspace(watch.getUser(), issue, false)) {
-					onAiNotified(watch.getUser(), user, issue);		
+					onAiNotified(watch.getUser(), user, issue, event.getParticipatingUserIds());
 				}
 			}
 		}
@@ -405,7 +411,7 @@ public class IssueNotificationManager implements Serializable {
 		return Pair.of(commitId, branch);
 	}
 
-	private void onAiMentioned(User ai, User user, Issue issue) {
+	private void onAiMentioned(User ai, User user, Issue issue, List<Long> participatingUserIds) {
 		var branchAndCommitId = getWorkspaceCommitIdAndBranch(issue);
 		String rolesInfo;		
 		var assignedFields = getAssignedFields(ai, issue);
@@ -420,10 +426,11 @@ public class IssueNotificationManager implements Serializable {
 			Mention the user in your comment if you expect a response. \
 			Make sure to submit work afterwards without confirmation.""".
 			formatted(issue.getNumber(), rolesInfo, user.getName());
-		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(), branchAndCommitId.getRight(), prompt);
+		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(),
+				branchAndCommitId.getRight(), prompt, participatingUserIds);
 	}
 
-	private void onAiNotified(User ai, User user, Issue issue) {
+	private void onAiNotified(User ai, User user, Issue issue, List<Long> participatingUserIds) {
 		var branchAndCommitId = getWorkspaceCommitIdAndBranch(issue);
 		String rolesInfo;		
 		var assignedFields = getAssignedFields(ai, issue);
@@ -438,14 +445,25 @@ public class IssueNotificationManager implements Serializable {
 				Respond only if you are relevant and a response is necessary. \
 				Make sure to submit work afterwards without confirmation."""
 				.formatted(issue.getNumber(), rolesInfo, user.getName());
-		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(), branchAndCommitId.getRight(), prompt);
+		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(),
+				branchAndCommitId.getRight(), prompt, participatingUserIds);
 	}
 
 	private void runPrompt(User ai, Issue issue, Project project, 
-		ObjectId commitId, @Nullable String branch, String prompt) {
+				ObjectId commitId, @Nullable String branch, String prompt,
+				List<Long> eventParticipatingUserIds) {
+		var participatingUserIds = new ArrayList<>(eventParticipatingUserIds);
+		var awakenCount = participatingUserIds.stream().filter(ai.getId()::equals).count();
+		if (awakenCount >= ai.getAiSetting().getMaxLoopCount()) {
+			var message = "I reached the maximum awaken count of %d in the current event chain"
+							.formatted(ai.getAiSetting().getMaxLoopCount());
+			createComment(ai, issue, message);
+			return;
+		}
 		try {
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), issue.getId());
-			workspaceService.runPrompt(ai, project, issue, null, commitId, branch, prompt, taskFailedCallback);
+			workspaceService.runPrompt(ai, project, issue, null, commitId, branch, prompt,
+					participatingUserIds, taskFailedCallback);
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {
@@ -458,11 +476,8 @@ public class IssueNotificationManager implements Serializable {
 	}
 
 	private void createComment(User ai, Issue issue, String comment) {
-		if (SecurityUtils.canAccessIssue(ai.asSubject(), issue)) {
-			issueCommentService.create(ai, issue, comment);
-		} else {
-			issueCommentService.create(userService.getSystem(), issue, "_Commenting on behalf of **%s** as the user does not even have permission to post here._\n\n%s".formatted(ai.getName(), comment));
-		}
+		issueCommentService.create(userService.getSystem(), issue,
+				"On behalf of AI user \"%s\": %s".formatted(ai.getDisplayName(), comment));
 	}
 
 	private Set<String> getAssignedFields(User ai, Issue issue) {
@@ -483,21 +498,23 @@ public class IssueNotificationManager implements Serializable {
 		return assignedFieldNames;
 	}
 
-	private void onFieldSet(User ai, Issue issue, String field) {
+	private void onFieldSet(User ai, Issue issue, String field, List<Long> participatingUserIds) {
 		var commitIdAndBranch = getWorkspaceCommitIdAndBranch(issue);
 		var prompt = """
 				Work on issue %d as role '%s'. \
 				Do not switch checkout if your role does not need to write code. \
 				Make sure to submit work afterwards without confirmation."""
 				.formatted(issue.getNumber(), field);
-		runPrompt(ai, issue, issue.getProject(), commitIdAndBranch.getLeft(), commitIdAndBranch.getRight(), prompt);						
+		runPrompt(ai, issue, issue.getProject(), commitIdAndBranch.getLeft(),
+				commitIdAndBranch.getRight(), prompt, participatingUserIds);
 	}
 
 	private TaskFailedCallback newTaskFailedCallback(Long aiId, Long issueId) {
 		return new TaskFailedCallback() {
 		
-			public void onTaskFailed(String workspaceReference) {							
-				createComment(userService.load(aiId), issueService.load(issueId), "Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
+			public void onTaskFailed(String workspaceReference) {
+				createComment(userService.load(aiId), issueService.load(issueId),
+						"Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
 			}
 
 		};
@@ -593,7 +610,7 @@ public class IssueNotificationManager implements Serializable {
 				return true;
 			} else {
 				if (commentOnError)
-					createComment(ai, issue, "%s is not entitled to interact with me".formatted(user.getName()));				
+					createComment(ai, issue, "@%s is not entitled to interact with me".formatted(user.getName()));				
 				return false;
 			}
 		} else {

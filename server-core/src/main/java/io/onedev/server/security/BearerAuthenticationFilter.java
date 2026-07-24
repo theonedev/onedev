@@ -1,6 +1,7 @@
 package io.onedev.server.security;
 
 import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.AgentTokenService;
 import io.onedev.server.service.UserService;
@@ -11,8 +12,11 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -56,6 +60,7 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 						if (workspaceContext != null) {
 							var workspace = workspaceService.load(workspaceContext.getWorkspaceId());
 							ThreadContext.bind(workspace.getUser().asSubject());
+							ProjectEvent.setContextualParticipatingUserIds(workspace.getParticipatingUserIds());
 						} else if (agentTokenService.find(bearerToken) == null 
 								&& jobService.getJobContext(bearerToken, false) == null) {
 							throw new IncorrectCredentialsException("Invalid or expired access token");
@@ -65,6 +70,16 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 	        } 
 		}
 		return true;
+	}
+
+	@Override
+	protected void cleanup(ServletRequest request, ServletResponse response, Exception existing)
+			throws ServletException, IOException {
+		try {
+			super.cleanup(request, response, existing);
+		} finally {
+			ProjectEvent.clearContextualParticipatingUserIds();
+		}
 	}
 
 }

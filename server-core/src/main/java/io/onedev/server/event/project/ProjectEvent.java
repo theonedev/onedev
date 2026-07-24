@@ -1,7 +1,9 @@
 package io.onedev.server.event.project;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
@@ -22,12 +24,16 @@ import io.onedev.server.util.commenttext.CommentText;
 public abstract class ProjectEvent extends Event implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final ThreadLocal<List<Long>> participatingUserIdsHolder = new ThreadLocal<>();
 	
 	private final Long projectId;
 	
 	private final Long userId;
 	
 	private final Date date;
+
+	private final List<Long> participatingUserIds;
 	
 	private transient Optional<CommentText> commentText;
 	
@@ -35,6 +41,21 @@ public abstract class ProjectEvent extends Event implements Serializable {
 		userId = User.idOf(user);
 		this.date = date;
 		projectId = project.getId();
+		var inheritedParticipatingUserIds = participatingUserIdsHolder.get();
+		if (inheritedParticipatingUserIds != null)
+			participatingUserIds = new ArrayList<>(inheritedParticipatingUserIds);
+		else
+			participatingUserIds = new ArrayList<>();
+		if (userId != null)
+			participatingUserIds.add(userId);
+	}
+
+	public static void setContextualParticipatingUserIds(List<Long> participatingUserIds) {
+		participatingUserIdsHolder.set(participatingUserIds);
+	}
+
+	public static void clearContextualParticipatingUserIds() {
+		participatingUserIdsHolder.remove();
 	}
 	
 	public Project getProject() {
@@ -48,6 +69,10 @@ public abstract class ProjectEvent extends Event implements Serializable {
 
 	public Date getDate() {
 		return date;
+	}
+
+	public List<Long> getParticipatingUserIds() {
+		return participatingUserIds;
 	}
 	
 	public abstract String getActivity();

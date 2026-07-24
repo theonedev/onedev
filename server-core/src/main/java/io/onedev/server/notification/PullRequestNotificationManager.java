@@ -267,7 +267,8 @@ public class PullRequestNotificationManager implements Serializable {
 							Make sure to submit work afterwards without confirmation."""
 							.formatted(request.getNumber());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
-					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request), prompt);
+					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
+							prompt, event.getParticipatingUserIds());
 				}
 				if ((changeData instanceof PullRequestRequestedForChangesData) 
 						&& user.getType() != AI
@@ -280,7 +281,8 @@ public class PullRequestNotificationManager implements Serializable {
 							Make sure to submit work afterwards without confirmation."""
 							.formatted(request.getNumber(), user.getName());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
-					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request), prompt);
+					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
+							prompt, event.getParticipatingUserIds());
 				}
 		} else if (event instanceof PullRequestAssigned) {
 				assignees.add(((PullRequestAssigned) event).getAssignee());
@@ -346,7 +348,8 @@ public class PullRequestNotificationManager implements Serializable {
 								Make sure to submit work afterwards without confirmation."""
 								.formatted(request.getNumber(), request.getSubmitter().getName());
 						var commitId = request.getLatestUpdate().getHeadCommit().copy();						
-						runPrompt(reviewer, request, commitId, getWorkspaceBranch(request), prompt);
+						runPrompt(reviewer, request, commitId, getWorkspaceBranch(request),
+								prompt, event.getParticipatingUserIds());
 					}
 				}
 			}
@@ -374,12 +377,13 @@ public class PullRequestNotificationManager implements Serializable {
 											getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 											replyAddress, senderName, threadingReferences);
 								}
-							} else if (!(event instanceof PullRequestCodeCommentEvent) 
-									&& isAiEligible(user, request, mentionedUser, true)
+							} else if (!(event instanceof PullRequestCodeCommentEvent)
 									&& user != null
+									&& !user.isSystem()
 									&& !user.equals(mentionedUser)
+									&& isAiEligible(user, request, mentionedUser, true)
 									&& canCreateWorkspace(mentionedUser, request, true)) {
-								onUserMentioned(mentionedUser, user, request);
+								onAiMentioned(mentionedUser, user, request, event.getParticipatingUserIds());
 							}
 						}
 					}
@@ -409,12 +413,13 @@ public class PullRequestNotificationManager implements Serializable {
 								bccEmailAddresses.add(emailAddress.getValue());
 						} else if (event.getCommentText() instanceof MarkdownText 
 								&& watch.getUser().getAiSetting().isProactive()
-								&& isAiEligible(user, request, watch.getUser(), false) 
 								&& user != null 
 								&& !user.isSystem()
 								&& !user.equals(watch.getUser()) 
+								&& isAiEligible(user, request, watch.getUser(), false)
 								&& canCreateWorkspace(watch.getUser(), request, false)) {
-							onUserCommented(watch.getUser(), user, request);		
+							onAiNotified(watch.getUser(), user, request,
+									event.getParticipatingUserIds());
 						}
 					}
 				}
@@ -449,7 +454,8 @@ public class PullRequestNotificationManager implements Serializable {
 							Make sure to submit work afterwards without confirmation."""
 							.formatted(request.getNumber(), pullRequestBuildEvent.getBuild().getNumber());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
-					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request), prompt);
+					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
+							prompt, event.getParticipatingUserIds());
 				}
 				if (event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null 
 							&& request.getMergePreview().getMergeCommitHash() == null 
@@ -461,7 +467,8 @@ public class PullRequestNotificationManager implements Serializable {
 						Make sure to submit work afterwards without confirmation."""
 						.formatted(request.getNumber());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
-					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request), prompt);					
+					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
+							prompt, event.getParticipatingUserIds());
 				}
 			}
 			
@@ -490,7 +497,8 @@ public class PullRequestNotificationManager implements Serializable {
 						Make sure to submit work afterwards without confirmation."""
 						.formatted(request.getNumber(), request.getSubmitter().getName());
 				var commitId = request.getLatestUpdate().getHeadCommit().copy();
-				runPrompt(aiAssignee, request, commitId, getWorkspaceBranch(request), prompt);								
+				runPrompt(aiAssignee, request, commitId, getWorkspaceBranch(request),
+						prompt, event.getParticipatingUserIds());
 			}
 		}
 	}
@@ -523,7 +531,7 @@ public class PullRequestNotificationManager implements Serializable {
 				return true;
 			} else {
 				if (commentOnError)
-					createComment(ai, request, "%s is not entitled to interact with me".formatted(user.getName()));				
+					createComment(ai, request, "@%s is not entitled to interact with me".formatted(user.getName()));				
 				return false;
 			}
 		} else {
@@ -537,7 +545,8 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 	}
 
-	private void onUserMentioned(User ai, User commenter, PullRequest request) {		
+	private void onAiMentioned(User ai, User commenter, PullRequest request,
+			Collection<Long> participatingUserIds) {
 		List<String> prompts = new ArrayList<>();
 		if (request.getSubmitter().equals(ai)) {
 			prompts.add("Work on pull request %d as submitter to address %s's latest concern."
@@ -558,10 +567,12 @@ public class PullRequestNotificationManager implements Serializable {
 		
 		var concatenatedPrompts = String.join(" ", prompts);
 		var commitId = request.getLatestUpdate().getHeadCommit().copy();
-		runPrompt(ai, request, commitId, getWorkspaceBranch(request), concatenatedPrompts);					
+		runPrompt(ai, request, commitId, getWorkspaceBranch(request),
+				concatenatedPrompts, participatingUserIds);
 	}
 
-	private void onUserCommented(User ai, User commenter, PullRequest request) {
+	private void onAiNotified(User ai, User commenter, PullRequest request,
+			Collection<Long> participatingUserIds) {
 		String prompt = """
 				Work on pull request %d to check whether you are relevant to %s's latest comment. \
 				Do not switch checkout if the comment does not require you to write code. \
@@ -569,13 +580,23 @@ public class PullRequestNotificationManager implements Serializable {
 				Make sure to submit work afterwards without confirmation."""
 				.formatted(request.getNumber(), commenter.getName());
 		var commitId = request.getLatestUpdate().getHeadCommit().copy();
-		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt);
+		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt, participatingUserIds);
 	}
 
-	private void runPrompt(User ai, PullRequest request, ObjectId commitId, @Nullable String branch, String prompt) {
+	private void runPrompt(User ai, PullRequest request, ObjectId commitId,
+			@Nullable String branch, String prompt, Collection<Long> eventParticipatingUserIds) {
+		var participatingUserIds = new ArrayList<>(eventParticipatingUserIds);
+		var awakenCount = participatingUserIds.stream().filter(ai.getId()::equals).count();
+		if (awakenCount >= ai.getAiSetting().getMaxLoopCount()) {
+			var message = "I reached the maximum awaken count of %d in the current event chain"
+							.formatted(ai.getAiSetting().getMaxLoopCount());
+			createComment(ai, request, message);
+			return;
+		}
 		try {
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), request.getId());
-			workspaceService.runPrompt(ai, request.getProject(), null, request, commitId, branch, prompt, taskFailedCallback);
+			workspaceService.runPrompt(ai, request.getProject(), null, request, commitId, branch, prompt,
+					participatingUserIds, taskFailedCallback);
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {
@@ -588,11 +609,8 @@ public class PullRequestNotificationManager implements Serializable {
 	}
 
 	private void createComment(User ai, PullRequest request, String comment) {
-		if (SecurityUtils.canReadCode(ai.asSubject(), request.getProject())) {
-			pullRequestCommentService.create(ai, request, comment);
-		} else {
-			pullRequestCommentService.create(userService.getSystem(), request, "_Commenting on behalf of **%s** as the user does not even have permission to post here._\n\n%s".formatted(ai.getName(), comment));
-		}
+		pullRequestCommentService.create(userService.getSystem(), request,
+				"On behalf of AI user \"%s\": %s".formatted(ai.getDisplayName(), comment));
 	}
 
 	private boolean canCreateWorkspace(User ai, PullRequest request, boolean commentOnError) {
@@ -612,8 +630,9 @@ public class PullRequestNotificationManager implements Serializable {
 	private TaskFailedCallback newTaskFailedCallback(Long aiId, Long requestId) {
 		return new TaskFailedCallback() {
 		
-			public void onTaskFailed(String workspaceReference) {							
-				createComment(userService.load(aiId), pullRequestService.load(requestId), "Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
+			public void onTaskFailed(String workspaceReference) {
+				createComment(userService.load(aiId), pullRequestService.load(requestId),
+						"Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
 			}
 
 		};
