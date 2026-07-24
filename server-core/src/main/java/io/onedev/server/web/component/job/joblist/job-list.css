@@ -1,3 +1,9 @@
 .job-list .no-builds {
 	margin: 0.5rem 1rem !important;
 }
+.job-list input {
+	padding-right: 2rem;
+}
+.job-list input+.icon {
+	margin-left: -1.8rem;
+}
