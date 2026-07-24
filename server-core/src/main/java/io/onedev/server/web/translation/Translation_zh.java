@@ -58,12 +58,15 @@ public class Translation_zh extends TranslationResourceBundle {
 			"** 企业版已禁用，因为试用订阅已过期，订购订阅以启用或联系 support@onedev.io 如果您需要延长试用期 **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 企业版已禁用，因为没有剩余的用户月数。订购更多以启用 **");
+		m.put("1 Year", "1 年");
 		m.put("1. Use below repositories in project pom.xml", "1. 在项目 pom.xml 中使用以下仓库");
 		m.put("1w 1d 1h 1m", "1w 1d 1h 1m");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. 如果要从命令行部署，请将以下内容添加到 <code>$HOME/.m2/settings.xml</code>");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. 对于 CI/CD 任务，使用自定义 settings.xml 更方便，例如在命令步骤中使用以下代码");
+		m.put("5 Years", "5 年");
+		m.put("6 Months", "6 个月");
 		m.put("6-digits passcode", "6 位数代码");
 		m.put("7 days", "7 天");
 		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
@@ -127,6 +130,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("<div><span>Search Text</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>搜索文本</span> <span class='font-size-sm text-muted'>在默认分支中</span></div>");
 		m.put("<i>No Name</i>", "<i>无名称</i>");
+		m.put("<i>None</i>", "<i>无</i>");
 		m.put("<span class=\"keycap ml-3 mr-1\">esc</span> to close", "<span class=\"keycap ml-3 mr-1\">esc</span> 关闭");
 		m.put("<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> to move", 
 			"<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> 移动");
@@ -174,7 +178,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("AI entitlement settings have been saved", "AI 权限设置已保存");
 		m.put("AI model settings have been saved", "AI 模型设置已保存");
 		m.put("AI settings updated", "AI 设置已更新");
-		m.put("AI system prompt has been saved", "AI 系统提示已保存");
 		m.put("API Key", "API 密钥");
 		m.put("API Token", "API 令牌");
 		m.put("API token should be generated with permission to read your account and repositories", 
@@ -287,6 +290,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "代码提交 \"{0}\"（<i class='text-danger'>仓库中不存在</i>）");
 		m.put("Added commit \"{0}\" ({1})", "代码提交 \"{0}\"（{1}）");
 		m.put("Added to group", "已添加到组");
+		m.put("Additional Job Privileges", "额外的任务权限");
+		m.put("Additional Privileges", "额外的权限");
 		m.put("Additions", "新增");
 		m.put("Administration", "管理");
 		m.put("Administrative permission over a project", "项目的管理权限");
@@ -613,6 +618,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"默认情况下，父项目和子项目的工单也会被列出。使用查询 <code>&quot;Project&quot; is current</code> 来只显示属于此项目的工单");
 		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
 			"默认情况下，用户只能编辑自己提交的工单中指定的字段。\n启用此选项以允许编辑他人提交的工单中的字段。");
+		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
+			"默认情况下，用户可以访问所有任务的制品。要为特定任务分配额外权限，请在此处指定。");
 		m.put("By month", "按月");
 		m.put("By week", "按周");
 		m.put("Bypass Certificate Check", "绕过证书检查");
@@ -809,6 +816,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Code Comment Management", "代码评论管理");
 		m.put("Code Comments", "代码评论");
 		m.put("Code Compare", "代码比较");
+		m.put("Code Contributions", "代码贡献");
 		m.put("Code Coverage", "代码覆盖率");
 		m.put("Code Management", "代码管理");
 		m.put("Code Privilege", "代码权限");
@@ -1160,7 +1168,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "禁用仪表盘");
 		m.put("Disable Selected Users", "禁用选定的用户");
 		m.put("Disabled", "已禁用");
-		m.put("Disabled users and service accounts are excluded from user-month calculation", "禁用的用户和服务账户不计入用户月计算");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"禁用账户将重置密码，清除访问令牌，并删除除过去活动外的所有其他实体的引用。您真的要继续吗？");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1445,7 +1452,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Execute Commands", "执行命令");
 		m.put("Execute Commands via SSH", "通过 SSH 执行命令");
 		m.put("Exit Run As", "退出以运行身份");
-		m.put("Exited impersonation", "退出假装");
 		m.put("Expand all", "展开所有");
 		m.put("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute", 
 			"需要一个或多个 <tt>&lt;数字&gt;(h|m)</tt>。例如 <tt>1h 1m</tt> 表示 1 小时 1 分钟");
@@ -1539,6 +1545,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Fingerprint", "指纹");
 		m.put("Finish", "完成");
 		m.put("First applicable executor", "第一个适用的执行器");
+		m.put("Five years", "五年");
 		m.put("Fix", "修复");
 		m.put("Fix Detection", "修复检测");
 		m.put("Fix Pattern", "修复模式");
@@ -2315,7 +2322,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"新版本可用。红色表示安全/关键更新，黄色表示错误修复，蓝色表示功能更新。点击查看更改。可在系统设置中禁用");
 		m.put("Next", "下一步");
+		m.put("Next Iteration ({0})", "下一次迭代 ({0})");
 		m.put("Next commit", "下一个提交");
+		m.put("Next year", "明年");
 		m.put("Next {0}", "后一个{0}");
 		m.put("No", "否");
 		m.put("No Activity Days", "无活动天数");
@@ -2499,6 +2508,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("On", "开启");
 		m.put("On Behalf Of", "发起");
 		m.put("On Branches", "在分支上");
+		m.put("One year", "一年");
 		m.put("OneDev Issue Field", "OneDev 工单字段");
 		m.put("OneDev Issue Link", "OneDev 工单链接");
 		m.put("OneDev Issue State", "OneDev 工单状态");
@@ -2708,6 +2718,12 @@ public class Translation_zh extends TranslationResourceBundle {
 			"如果要获取用户的组成员资格信息，可选择指定组搜索根节点。例如：<i>cn=Users, dc=example, dc=com</i>。要给 Active Directory 组适当的权限，应定义一个同名的 OneDev 组。留空则在 OneDev 端管理组成员资格");
 		m.put("Optionally specify issue links allowed to edit", "可选择指定允许编辑的工单链接");
 		m.put("Optionally specify issues applicable for this template. Leave empty for all", "可选择指定适用于此模板的工单。留空则适用于所有工单");
+		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
+			"可选地指定适用于此转换的工单，与分支在同一项目中。留空表示所有工单");
+		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
+			"可选地指定适用于此转换的工单，与构建在同一项目中。留空表示所有工单");
+		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
+			"可选地指定适用于此转换的工单，与合并请求在同一项目中。留空表示所有工单");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues", 
 			"可选择指定适用于此转换的工单。留空则适用于所有工单");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
@@ -3053,6 +3069,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Previous", "上一步");
 		m.put("Previous Value", "前值");
 		m.put("Previous commit", "上一个提交");
+		m.put("Previous year", "去年");
 		m.put("Previous {0}", "前一个{0}");
 		m.put("Primary", "主要");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "未指定主 <a wicket:id=\"noPrimaryAddressLink\">电子邮件地址</a>");
@@ -3600,11 +3617,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Show Duration", "显示持续时间");
 		m.put("Show Emojis", "显示表情符号");
 		m.put("Show Issue Status", "显示问题状态");
+		m.put("Show Language Stats", "显示语言统计");
+		m.put("Show Next Iteration", "显示下一次迭代");
 		m.put("Show Package Stats", "显示包统计");
 		m.put("Show Pull Request Stats", "显示合并请求统计");
 		m.put("Show Saved Queries", "显示保存的查询");
 		m.put("Show States By", "显示状态");
 		m.put("Show Works Of", "显示工作量");
+		m.put("Show Workspace Stats", "显示工作区统计");
 		m.put("Show changes", "显示变更");
 		m.put("Show commented code snippet", "显示评论的代码片段");
 		m.put("Show commit of this parent", "显示此父节点的提交");
@@ -3646,6 +3666,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Single sign on via discord.com", "通过 discord.com 单点登录");
 		m.put("Single sign on via twitch.tv", "通过 twitch.tv 单点登录");
 		m.put("Site", "站点");
+		m.put("Six months", "六个月");
 		m.put("Size", "大小");
 		m.put("Size invalid", "大小无效");
 		m.put("Slack Notifications", "Slack 通知");
@@ -4911,6 +4932,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("a string representing summary of the event", "表示事件摘要的字符串");
 		m.put("abort merge", "中止合并");
 		m.put("access [{0}]", "访问 [{0}]");
+		m.put("active replica", "有效副本");
 		m.put("add another order", "添加另一个排序");
 		m.put("adding .onedev-buildspec.yml", "添加 .onedev-buildspec.yml");
 		m.put("after specified date", "在指定日期之后");
@@ -5036,6 +5058,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("or match another value", "或匹配另一个值");
 		m.put("order more", "订购更多");
 		m.put("outdated", "过时");
+		m.put("outdated replica", "过时副本");
 		m.put("pack", "包");
 		m.put("package", "包");
 		m.put("packages", "包");
@@ -5105,6 +5128,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("true", "真");
 		m.put("true for html version, false for text version", "HTML 版本时为真，文本版本时为假");
 		m.put("type", "类型");
+		m.put("up to date replica", "最新副本");
 		m.put("url following which to verify email address", "验证邮箱地址的 URL");
 		m.put("url to reset password", "重置密码的 URL");
 		m.put("value needs to be enclosed in brackets", "值需要用括号包围");
@@ -5121,6 +5145,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("widget:Tabs", "标签页");
 		m.put("workspaces", "工作区");
 		m.put("you may show this page later via incompatibilities link in help menu", "您可以稍后通过帮助菜单中的不兼容性链接显示此页面");
+		m.put("{0} Lines", "{0} 行");
 		m.put("{0} Month(s)", "{0} 个月");
 		m.put("{0} activities on {1}", "{1} 有 {0} 个活动");
 		m.put("{0} additions & {1} deletions", "{0} 个添加，{1} 个删除");
@@ -5155,34 +5180,25 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("1 Year", "1 年");
-		m.put("5 Years", "5 年");
-		m.put("6 Months", "6 个月");
-		m.put("<i>None</i>", "<i>无</i>");
-		m.put("Additional Job Privileges", "额外的任务权限");
-		m.put("Additional Privileges", "额外的权限");
-		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
-			"默认情况下，用户可以访问所有任务的制品。要为特定任务分配额外权限，请在此处指定。");
-		m.put("Code Contributions", "代码贡献");
-		m.put("Five years", "五年");
-		m.put("Next Iteration ({0})", "下一次迭代 ({0})");
-		m.put("Next year", "明年");
-		m.put("One year", "一年");
-		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
-			"可选地指定适用于此转换的工单，与分支在同一项目中。留空表示所有工单");
-		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
-			"可选地指定适用于此转换的工单，与构建在同一项目中。留空表示所有工单");
-		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
-			"可选地指定适用于此转换的工单，与合并请求在同一项目中。留空表示所有工单");
-		m.put("Previous year", "去年");
-		m.put("Show Language Stats", "显示语言统计");
-		m.put("Show Next Iteration", "显示下一次迭代");
-		m.put("Show Workspace Stats", "显示工作区统计");
-		m.put("Six months", "六个月");
-		m.put("active replica", "有效副本");
-		m.put("outdated replica", "过时副本");
-		m.put("up to date replica", "最新副本");
-		m.put("{0} Lines", "{0} 行");
+		m.put("AI behavior settings have been saved", "AI 行为设置已保存");
+		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
+			"也接受以 <code>projectpath#100</code> 或 <code>PROJECTKEY-100</code> 形式的跨项目链接");
+		m.put("Behavior", "行为");
+		m.put("Behavior Edit Bean", "行为编辑 Bean");
+		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
+			"默认情况下，AI 用户仅在被分配任务或在 工单/合并请求 上下文中被提及时响应。\n启用此功能后，只要评论相关，即使未被提及也会响应。\n这提供了更好的交互体验，特别是在服务台的情况下，\n但可能会消耗更多的令牌");
+		m.put("Copy as Markdown", "复制为 Markdown");
+		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
+			"禁用的用户、服务账户和 AI 用户不计入用户月计算");
+		m.put("Exited run as", "退出以...身份运行");
+		m.put("Max Loop Count", "最大循环次数");
+		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"此 AI 用户在单个事件链中可被唤醒的最大次数。当达到限制时，AI 用户将不会运行，而是发布一条系统评论");
+		m.put("Optional instructions that define how the AI user should behave", "定义 AI 用户应如何行为的可选指令");
+		m.put("Proactive", "主动");
+		m.put("Toggle half screen", "切换半屏");
+		m.put("for AI task automation", "用于 AI 任务自动化");
+		m.put("task", "任务");
 	}
 		
 	@Override

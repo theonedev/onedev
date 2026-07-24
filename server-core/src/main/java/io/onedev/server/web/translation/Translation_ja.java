@@ -32,12 +32,15 @@ public class Translation_ja extends TranslationResourceBundle {
 			"** トライアルサブスクリプションが期限切れのため、エンタープライズ版は無効化されています。有効化するにはサブスクリプションを注文するか、トライアル延長が必要な場合は support@onedev.io にお問い合わせください **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 残りのユーザ月がないため、エンタープライズ版は無効化されています。有効化するには追加注文してください **");
+		m.put("1 Year", "1年");
 		m.put("1. Use below repositories in project pom.xml", "1. プロジェクトの pom.xml に以下のリポジトリを使用してください");
 		m.put("1w 1d 1h 1m", "1w 1d 1h 1m");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. コマンドラインからデプロイする場合、<code>$HOME/.m2/settings.xml</code> に以下を追加してください");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. CI/CD ジョブでは、カスタム settings.xml を使用する方が便利です。例えば、以下のコードをコマンドステップで使用してください:");
+		m.put("5 Years", "5年");
+		m.put("6 Months", "6ヶ月");
 		m.put("6-digits passcode", "6桁のパスコード");
 		m.put("7 days", "7日間");
 		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
@@ -101,6 +104,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("<div><span>Search Text</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>テキストを検索</span> <span class='font-size-sm text-muted'>デフォルトブランチ内</span></div>");
 		m.put("<i>No Name</i>", "<i>名前なし</i>");
+		m.put("<i>None</i>", "<i>なし</i>");
 		m.put("<span class=\"keycap ml-3 mr-1\">esc</span> to close", "<span class=\"keycap ml-3 mr-1\">esc</span> で閉じる");
 		m.put("<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> to move", 
 			"<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> で移動");
@@ -148,7 +152,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("AI entitlement settings have been saved", "AI権限設定が保存されました");
 		m.put("AI model settings have been saved", "AIモデル設定が保存されました");
 		m.put("AI settings updated", "AI設定が更新されました");
-		m.put("AI system prompt has been saved", "AIシステムプロンプトが保存されました");
 		m.put("API Key", "APIキー");
 		m.put("API Token", "APIトークン");
 		m.put("API token should be generated with permission to read your account and repositories", 
@@ -261,6 +264,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "コミット \"{0}\" を追加 (<i class='text-danger'>リポジトリに存在しない</i>)");
 		m.put("Added commit \"{0}\" ({1})", "コミット \"{0}\" を追加 ({1})");
 		m.put("Added to group", "グループに追加されました");
+		m.put("Additional Job Privileges", "追加のジョブ特権");
+		m.put("Additional Privileges", "追加の特権");
 		m.put("Additions", "追加");
 		m.put("Administration", "管理");
 		m.put("Administrative permission over a project", "プロジェクトに対する管理権限");
@@ -587,6 +592,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"デフォルトでは親プロジェクトと子プロジェクトの課題もリストされます。クエリ<code>&quot;Project&quot; is current</code>を使用して、このプロジェクトにのみ属する課題を表示してください");
 		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
 			"デフォルトでは、ユーザーは自分が提出した課題に対して上記で指定されたフィールドのみ編集できます。\nこのオプションを有効にすると、他の人が提出した課題のフィールドも編集できるようになります。");
+		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
+			"デフォルトでは、ユーザーはすべてのジョブのアーティファクトにアクセスできます。特定のジョブに追加の特権を割り当てるには、ここで指定してください。");
 		m.put("By month", "月別");
 		m.put("By week", "週別");
 		m.put("Bypass Certificate Check", "証明書チェックをバイパス");
@@ -783,6 +790,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Code Comment Management", "コードコメント管理");
 		m.put("Code Comments", "コードコメント");
 		m.put("Code Compare", "コード比較");
+		m.put("Code Contributions", "コード貢献");
 		m.put("Code Coverage", "コードカバレッジ");
 		m.put("Code Management", "コード管理");
 		m.put("Code Privilege", "コード権限");
@@ -1134,7 +1142,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "ダッシュボードを無効化");
 		m.put("Disable Selected Users", "選択したユーザーを無効化");
 		m.put("Disabled", "無効化済み");
-		m.put("Disabled users and service accounts are excluded from user-month calculation", "無効なユーザーとサービスアカウントはユーザーマンス計算から除外されます");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"アカウントを無効化すると、パスワードがリセットされ、アクセストークンがクリアされ、過去の活動を除く他のエンティティからのすべての参照が削除されます。本当に続行しますか？");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1419,7 +1426,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Execute Commands", "コマンドを実行する");
 		m.put("Execute Commands via SSH", "SSH経由でコマンドを実行する");
 		m.put("Exit Run As", "実行ユーザーを終了");
-		m.put("Exited impersonation", "なりすましを終了しました");
 		m.put("Expand all", "すべて展開する");
 		m.put("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute", 
 			"1つ以上の<tt>&lt;number&gt;(h|m)</tt>を期待します。例えば<tt>1h 1m</tt>は1時間と1分を表します");
@@ -1513,6 +1519,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Fingerprint", "フィンガープリント");
 		m.put("Finish", "終了");
 		m.put("First applicable executor", "最初に適用可能なエグゼキューター");
+		m.put("Five years", "5年");
 		m.put("Fix", "修正");
 		m.put("Fix Detection", "修正検出");
 		m.put("Fix Pattern", "修正パターン");
@@ -2289,7 +2296,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"新しいバージョンが利用可能です。セキュリティ/重要な更新は赤、バグ修正は黄色、機能更新は青です。変更を表示するにはクリックしてください。システム設定で無効化できます。");
 		m.put("Next", "次へ");
+		m.put("Next Iteration ({0})", "次のイテレーション ({0})");
 		m.put("Next commit", "次のコミット");
+		m.put("Next year", "来年");
 		m.put("Next {0}", "次の{0}");
 		m.put("No", "いいえ");
 		m.put("No Activity Days", "アクティビティなしの日数");
@@ -2473,6 +2482,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("On", "オン");
 		m.put("On Behalf Of", "代理として");
 		m.put("On Branches", "ブランチ上");
+		m.put("One year", "1年");
 		m.put("OneDev Issue Field", "OneDev課題フィールド");
 		m.put("OneDev Issue Link", "OneDev課題リンク");
 		m.put("OneDev Issue State", "OneDev課題状態");
@@ -2682,6 +2692,12 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、ユーザーのグループメンバーシップ情報を取得する場合のグループ検索ベースを指定してください。例: <i>cn=Users, dc=example, dc=com</i>。Active Directoryグループに適切な権限を付与するには、同じ名前のOneDevグループを定義する必要があります。OneDev側でグループメンバーシップを管理する場合は空のままにしてください。");
 		m.put("Optionally specify issue links allowed to edit", "オプションで、編集を許可する課題リンクを指定してください。");
 		m.put("Optionally specify issues applicable for this template. Leave empty for all", "オプションで、このテンプレートに適用される課題を指定してください。すべてに適用する場合は空のままにしてください。");
+		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
+			"ブランチと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
+		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
+			"ビルドと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
+		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
+			"プルリクエストと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues", 
 			"オプションで、この遷移に適用される課題を指定してください。すべての課題に適用する場合は空のままにしてください。");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
@@ -3027,6 +3043,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Previous", "前へ");
 		m.put("Previous Value", "以前の値");
 		m.put("Previous commit", "以前のコミット");
+		m.put("Previous year", "前年");
 		m.put("Previous {0}", "以前の{0}");
 		m.put("Primary", "プライマリ");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "プライマリ<a wicket:id=\"noPrimaryAddressLink\">メールアドレス</a>が指定されていません");
@@ -3574,11 +3591,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Show Duration", "期間を表示");
 		m.put("Show Emojis", "絵文字を表示");
 		m.put("Show Issue Status", "課題ステータスを表示");
+		m.put("Show Language Stats", "言語統計を表示");
+		m.put("Show Next Iteration", "次のイテレーションを表示");
 		m.put("Show Package Stats", "パッケージ統計を表示");
 		m.put("Show Pull Request Stats", "プルリクエスト統計を表示");
 		m.put("Show Saved Queries", "保存されたクエリを表示");
 		m.put("Show States By", "状態を表示");
 		m.put("Show Works Of", "作業を表示");
+		m.put("Show Workspace Stats", "ワークスペース統計を表示");
 		m.put("Show changes", "変更を表示");
 		m.put("Show commented code snippet", "コメントされたコードスニペットを表示");
 		m.put("Show commit of this parent", "この親のコミットを表示");
@@ -3620,6 +3640,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Single sign on via discord.com", "discord.comを介したシングルサインオン");
 		m.put("Single sign on via twitch.tv", "twitch.tvを介したシングルサインオン");
 		m.put("Site", "サイト");
+		m.put("Six months", "6ヶ月");
 		m.put("Size", "サイズ");
 		m.put("Size invalid", "サイズが無効");
 		m.put("Slack Notifications", "Slack通知");
@@ -4885,6 +4906,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("a string representing summary of the event", "イベントの概要を表す文字列");
 		m.put("abort merge", "マージを中止");
 		m.put("access [{0}]", "アクセス[{0}]");
+		m.put("active replica", "アクティブなレプリカ");
 		m.put("add another order", "別の注文を追加");
 		m.put("adding .onedev-buildspec.yml", ".onedev-buildspec.ymlを追加中");
 		m.put("after specified date", "指定された日付以降");
@@ -5010,6 +5032,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("or match another value", "または別の値に一致");
 		m.put("order more", "さらに注文");
 		m.put("outdated", "古い情報");
+		m.put("outdated replica", "古いレプリカ");
 		m.put("pack", "パック");
 		m.put("package", "パッケージ");
 		m.put("packages", "パッケージ");
@@ -5079,6 +5102,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("true", "true");
 		m.put("true for html version, false for text version", "HTMLバージョンの場合はtrue、テキストバージョンの場合はfalse");
 		m.put("type", "タイプ");
+		m.put("up to date replica", "最新のレプリカ");
 		m.put("url following which to verify email address", "メールアドレスを確認するためのURL");
 		m.put("url to reset password", "パスワードをリセットするためのURL");
 		m.put("value needs to be enclosed in brackets", "値は角括弧で囲む必要があります");
@@ -5095,6 +5119,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("widget:Tabs", "タブ");
 		m.put("workspaces", "ワークスペース");
 		m.put("you may show this page later via incompatibilities link in help menu", "ヘルプメニューの互換性リンクから後でこのページを表示できます");
+		m.put("{0} Lines", "{0} 行");
 		m.put("{0} Month(s)", "{0} ヶ月");
 		m.put("{0} activities on {1}", "{0} の活動 {1} において");
 		m.put("{0} additions & {1} deletions", "{0} 追加 & {1} 削除");
@@ -5129,34 +5154,25 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("1 Year", "1年");
-		m.put("5 Years", "5年");
-		m.put("6 Months", "6ヶ月");
-		m.put("<i>None</i>", "<i>なし</i>");
-		m.put("Additional Job Privileges", "追加のジョブ特権");
-		m.put("Additional Privileges", "追加の特権");
-		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
-			"デフォルトでは、ユーザーはすべてのジョブのアーティファクトにアクセスできます。特定のジョブに追加の特権を割り当てるには、ここで指定してください。");
-		m.put("Code Contributions", "コード貢献");
-		m.put("Five years", "5年");
-		m.put("Next Iteration ({0})", "次のイテレーション ({0})");
-		m.put("Next year", "来年");
-		m.put("One year", "1年");
-		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
-			"ブランチと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
-		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
-			"ビルドと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
-		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
-			"プルリクエストと同じプロジェクトでこの遷移に適用される課題を任意で指定します。すべての課題の場合は空白のままにしてください。");
-		m.put("Previous year", "前年");
-		m.put("Show Language Stats", "言語統計を表示");
-		m.put("Show Next Iteration", "次のイテレーションを表示");
-		m.put("Show Workspace Stats", "ワークスペース統計を表示");
-		m.put("Six months", "6ヶ月");
-		m.put("active replica", "アクティブなレプリカ");
-		m.put("outdated replica", "古いレプリカ");
-		m.put("up to date replica", "最新のレプリカ");
-		m.put("{0} Lines", "{0} 行");
+		m.put("AI behavior settings have been saved", "AIの動作設定が保存されました");
+		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
+			"<code>projectpath#100</code> または <code>PROJECTKEY-100</code> の形式でクロスプロジェクトリンクも受け付けます");
+		m.put("Behavior", "動作");
+		m.put("Behavior Edit Bean", "動作編集ビーン");
+		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
+			"デフォルトでは、AIユーザーはタスクが割り当てられた場合や、課題/PRのコンテキストで言及された場合にのみ応答します。\nこれを有効にすると、言及されていなくてもコメントが関連している限り応答します。\n特にサービスデスクの場合により良い対話体験を提供しますが、トークンを多く消費する可能性があります");
+		m.put("Copy as Markdown", "Markdownとしてコピー");
+		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
+			"無効化されたユーザー、サービスアカウント、およびAIユーザーはユーザーマンス計算から除外されます");
+		m.put("Exited run as", "「として実行」を終了しました");
+		m.put("Max Loop Count", "最大ループ回数");
+		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"このAIユーザーが単一のイベントチェーンで起動される最大回数。この制限に達すると、AIユーザーは実行されず、代わりにシステムコメントが投稿されます");
+		m.put("Optional instructions that define how the AI user should behave", "AIユーザーがどのように動作すべきかを定義するオプションの指示");
+		m.put("Proactive", "プロアクティブ");
+		m.put("Toggle half screen", "ハーフスクリーンを切り替え");
+		m.put("for AI task automation", "AIタスク自動化用");
+		m.put("task", "タスク");
 	}
 		
 	@Override

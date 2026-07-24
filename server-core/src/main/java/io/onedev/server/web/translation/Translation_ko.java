@@ -32,12 +32,15 @@ public class Translation_ko extends TranslationResourceBundle {
 			"** 엔터프라이즈 에디션은 체험 구독이 만료되어 비활성화되었습니다. 활성화하려면 구독을 주문하거나 체험 연장을 원하시면 support@onedev.io로 문의하세요 **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 엔터프라이즈 에디션은 남은 사용자 월이 없어 비활성화되었습니다. 활성화하려면 추가 주문하세요 **");
+		m.put("1 Year", "1년");
 		m.put("1. Use below repositories in project pom.xml", "1. 프로젝트 pom.xml에 아래 저장소를 사용하세요");
 		m.put("1w 1d 1h 1m", "1주 1일 1시간 1분");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. 명령줄에서 배포하려면 <code>$HOME/.m2/settings.xml</code>에 아래 내용을 추가하세요");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. CI/CD 작업에서는 사용자 정의 settings.xml을 사용하는 것이 더 편리합니다. 예를 들어 명령 단계에서 아래 코드를 통해 가능합니다:");
+		m.put("5 Years", "5년");
+		m.put("6 Months", "6개월");
 		m.put("6-digits passcode", "6자리 인증 코드");
 		m.put("7 days", "7일");
 		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
@@ -101,6 +104,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("<div><span>Search Text</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>텍스트 검색</span> <span class='font-size-sm text-muted'>기본 브랜치에서</span></div>");
 		m.put("<i>No Name</i>", "<i>이름 없음</i>");
+		m.put("<i>None</i>", "<i>없음</i>");
 		m.put("<span class=\"keycap ml-3 mr-1\">esc</span> to close", "<span class=\"keycap ml-3 mr-1\">esc</span> 닫기");
 		m.put("<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> to move", 
 			"<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> 이동");
@@ -148,7 +152,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("AI entitlement settings have been saved", "AI 권한 설정이 저장되었습니다");
 		m.put("AI model settings have been saved", "AI 모델 설정이 저장되었습니다");
 		m.put("AI settings updated", "AI 설정 업데이트됨");
-		m.put("AI system prompt has been saved", "AI 시스템 프롬프트가 저장되었습니다");
 		m.put("API Key", "API 키");
 		m.put("API Token", "API 토큰");
 		m.put("API token should be generated with permission to read your account and repositories", 
@@ -261,6 +264,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "커밋 \"{0}\" 추가 (<i class='text-danger'>저장소에 없음</i>)");
 		m.put("Added commit \"{0}\" ({1})", "커밋 \"{0}\" 추가 ({1})");
 		m.put("Added to group", "그룹에 추가됨");
+		m.put("Additional Job Privileges", "추가 작업 권한");
+		m.put("Additional Privileges", "추가 권한");
 		m.put("Additions", "추가 사항");
 		m.put("Administration", "관리");
 		m.put("Administrative permission over a project", "프로젝트에 대한 관리 권한");
@@ -587,6 +592,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"기본적으로 부모 및 자식 프로젝트의 문제도 나열됩니다. 이 프로젝트에만 속한 문제를 표시하려면 쿼리 <code>&quot;Project&quot; is current</code>를 사용하세요");
 		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
 			"기본적으로 사용자는 자신이 제출한 이슈에 대해 위에서 지정된 필드만 편집할 수 있습니다.\n이 옵션을 활성화하면 다른 사람이 제출한 이슈의 필드를 편집할 수 있습니다.");
+		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
+			"기본적으로 사용자는 모든 작업의 아티팩트에 접근할 수 있습니다. 특정 작업에 추가 권한을 할당하려면 여기에 지정하십시오.");
 		m.put("By month", "월별");
 		m.put("By week", "주별");
 		m.put("Bypass Certificate Check", "인증서 확인 건너뛰기");
@@ -783,6 +790,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Code Comment Management", "코드 주석 관리");
 		m.put("Code Comments", "코드 주석들");
 		m.put("Code Compare", "코드 비교");
+		m.put("Code Contributions", "코드 기여");
 		m.put("Code Coverage", "코드 커버리지");
 		m.put("Code Management", "코드 관리");
 		m.put("Code Privilege", "코드 권한");
@@ -1134,7 +1142,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "대시보드 비활성화");
 		m.put("Disable Selected Users", "선택한 사용자 비활성화");
 		m.put("Disabled", "비활성화됨");
-		m.put("Disabled users and service accounts are excluded from user-month calculation", "비활성화된 사용자 및 서비스 계정은 사용자-월 계산에서 제외됩니다");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"계정을 비활성화하면 비밀번호가 재설정되고, 액세스 토큰이 삭제되며, 과거 활동을 제외한 다른 엔티티에서 모든 참조가 제거됩니다. 계속하시겠습니까?");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1419,7 +1426,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Execute Commands", "명령 실행");
 		m.put("Execute Commands via SSH", "SSH를 통해 명령 실행");
 		m.put("Exit Run As", "Run As 종료");
-		m.put("Exited impersonation", "가장 역할 종료됨");
 		m.put("Expand all", "모두 확장");
 		m.put("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute", 
 			"하나 이상의 <tt>&lt;number&gt;(h|m)</tt>을 기대합니다. 예를 들어 <tt>1h 1m</tt>은 1시간과 1분을 나타냅니다");
@@ -1513,6 +1519,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Fingerprint", "지문");
 		m.put("Finish", "완료");
 		m.put("First applicable executor", "첫 번째 적용 가능한 실행기");
+		m.put("Five years", "5년");
 		m.put("Fix", "수정");
 		m.put("Fix Detection", "수정 감지");
 		m.put("Fix Pattern", "수정 패턴");
@@ -2289,7 +2296,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"새 버전이 사용 가능합니다. 보안/중요 업데이트는 빨간색, 버그 수정은 노란색, 기능 업데이트는 파란색으로 표시됩니다. 변경 사항을 보려면 클릭하세요. 시스템 설정에서 비활성화할 수 있습니다.");
 		m.put("Next", "다음");
+		m.put("Next Iteration ({0})", "다음 반복 ({0})");
 		m.put("Next commit", "다음 커밋");
+		m.put("Next year", "내년");
 		m.put("Next {0}", "다음 {0}");
 		m.put("No", "아니요");
 		m.put("No Activity Days", "활동 없음 일수");
@@ -2473,6 +2482,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("On", "켜짐");
 		m.put("On Behalf Of", "대신하여");
 		m.put("On Branches", "브랜치에서");
+		m.put("One year", "1년");
 		m.put("OneDev Issue Field", "OneDev 이슈 필드");
 		m.put("OneDev Issue Link", "OneDev 이슈 링크");
 		m.put("OneDev Issue State", "OneDev 이슈 상태");
@@ -2682,6 +2692,12 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 사용자의 그룹 멤버십 정보를 검색하려면 그룹 검색 기준을 지정하세요. 예를 들어: <i>cn=Users, dc=example, dc=com</i>. Active Directory 그룹에 적절한 권한을 부여하려면 동일한 이름의 OneDev 그룹이 정의되어야 합니다. 그룹 멤버십을 OneDev 측에서 관리하려면 비워 두세요.");
 		m.put("Optionally specify issue links allowed to edit", "선택적으로 편집할 수 있는 문제 링크를 지정하세요.");
 		m.put("Optionally specify issues applicable for this template. Leave empty for all", "선택적으로 이 템플릿에 적용 가능한 문제를 지정하세요. 모든 문제를 지정하려면 비워 두세요.");
+		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
+			"브랜치와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
+		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
+			"빌드와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
+		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
+			"풀 리퀘스트와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues", 
 			"선택적으로 이 전환에 적용 가능한 문제를 지정하세요. 모든 문제를 지정하려면 비워 두세요.");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
@@ -3027,6 +3043,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Previous", "이전");
 		m.put("Previous Value", "이전 값");
 		m.put("Previous commit", "이전 커밋");
+		m.put("Previous year", "작년");
 		m.put("Previous {0}", "이전 {0}");
 		m.put("Primary", "기본");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "기본 <a wicket:id=\"noPrimaryAddressLink\">이메일 주소</a>가 지정되지 않았습니다");
@@ -3574,11 +3591,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Show Duration", "기간 보기");
 		m.put("Show Emojis", "이모지 보기");
 		m.put("Show Issue Status", "이슈 상태 보기");
+		m.put("Show Language Stats", "언어 통계 표시");
+		m.put("Show Next Iteration", "다음 반복 표시");
 		m.put("Show Package Stats", "패키지 통계 보기");
 		m.put("Show Pull Request Stats", "풀 리퀘스트 통계 보기");
 		m.put("Show Saved Queries", "저장된 쿼리 보기");
 		m.put("Show States By", "상태별 보기");
 		m.put("Show Works Of", "작업 보기");
+		m.put("Show Workspace Stats", "작업 공간 통계 표시");
 		m.put("Show changes", "변경 사항 보기");
 		m.put("Show commented code snippet", "댓글이 달린 코드 스니펫 보기");
 		m.put("Show commit of this parent", "상위 커밋 보기");
@@ -3620,6 +3640,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Single sign on via discord.com", "discord.com을 통한 싱글 사인온");
 		m.put("Single sign on via twitch.tv", "twitch.tv를 통한 싱글 사인온");
 		m.put("Site", "사이트");
+		m.put("Six months", "6개월");
 		m.put("Size", "크기");
 		m.put("Size invalid", "크기가 유효하지 않음");
 		m.put("Slack Notifications", "Slack 알림");
@@ -4885,6 +4906,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("a string representing summary of the event", "이벤트 요약을 나타내는 문자열");
 		m.put("abort merge", "병합 중단");
 		m.put("access [{0}]", "액세스 [{0}]");
+		m.put("active replica", "활성 복제본");
 		m.put("add another order", "다른 주문 추가");
 		m.put("adding .onedev-buildspec.yml", ".onedev-buildspec.yml 추가 중");
 		m.put("after specified date", "지정된 날짜 이후");
@@ -5010,6 +5032,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("or match another value", "또는 다른 값과 일치");
 		m.put("order more", "더 주문하기");
 		m.put("outdated", "구식");
+		m.put("outdated replica", "구식 복제본");
 		m.put("pack", "팩");
 		m.put("package", "패키지");
 		m.put("packages", "패키지들");
@@ -5079,6 +5102,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("true", "참");
 		m.put("true for html version, false for text version", "HTML 버전은 참, 텍스트 버전은 거짓");
 		m.put("type", "유형");
+		m.put("up to date replica", "최신 복제본");
 		m.put("url following which to verify email address", "이메일 주소를 확인하기 위한 URL");
 		m.put("url to reset password", "비밀번호를 재설정하기 위한 URL");
 		m.put("value needs to be enclosed in brackets", "값은 대괄호로 감싸야 합니다");
@@ -5095,6 +5119,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("widget:Tabs", "탭");
 		m.put("workspaces", "워크스페이스들");
 		m.put("you may show this page later via incompatibilities link in help menu", "도움말 메뉴의 호환성 링크를 통해 나중에 이 페이지를 표시할 수 있습니다");
+		m.put("{0} Lines", "{0} 줄");
 		m.put("{0} Month(s)", "{0} 개월");
 		m.put("{0} activities on {1}", "{1}에서 {0} 활동");
 		m.put("{0} additions & {1} deletions", "{0} 추가 및 {1} 삭제");
@@ -5129,34 +5154,25 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("1 Year", "1년");
-		m.put("5 Years", "5년");
-		m.put("6 Months", "6개월");
-		m.put("<i>None</i>", "<i>없음</i>");
-		m.put("Additional Job Privileges", "추가 작업 권한");
-		m.put("Additional Privileges", "추가 권한");
-		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
-			"기본적으로 사용자는 모든 작업의 아티팩트에 접근할 수 있습니다. 특정 작업에 추가 권한을 할당하려면 여기에 지정하십시오.");
-		m.put("Code Contributions", "코드 기여");
-		m.put("Five years", "5년");
-		m.put("Next Iteration ({0})", "다음 반복 ({0})");
-		m.put("Next year", "내년");
-		m.put("One year", "1년");
-		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
-			"브랜치와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
-		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
-			"빌드와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
-		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
-			"풀 리퀘스트와 동일한 프로젝트에서 이 전환에 적용 가능한 이슈를 선택적으로 지정하십시오. 모든 이슈를 위해 비워 두십시오.");
-		m.put("Previous year", "작년");
-		m.put("Show Language Stats", "언어 통계 표시");
-		m.put("Show Next Iteration", "다음 반복 표시");
-		m.put("Show Workspace Stats", "작업 공간 통계 표시");
-		m.put("Six months", "6개월");
-		m.put("active replica", "활성 복제본");
-		m.put("outdated replica", "구식 복제본");
-		m.put("up to date replica", "최신 복제본");
-		m.put("{0} Lines", "{0} 줄");
+		m.put("AI behavior settings have been saved", "AI 동작 설정이 저장되었습니다");
+		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
+			"<code>projectpath#100</code> 또는 <code>PROJECTKEY-100</code> 형식의 프로젝트 간 링크도 허용됩니다");
+		m.put("Behavior", "동작");
+		m.put("Behavior Edit Bean", "동작 편집 빈");
+		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
+			"기본적으로 AI 사용자는 할당된 작업이나 이슈/PR 컨텍스트에서 언급될 때만 응답합니다.\n이 설정을 활성화하면 언급되지 않아도 댓글이 관련이 있는 한 응답합니다.\n이는 특히 서비스 데스크의 경우 더 나은 상호작용 경험을 제공하지만,\n더 많은 토큰을 소비할 수 있습니다");
+		m.put("Copy as Markdown", "Markdown으로 복사");
+		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
+			"비활성 사용자, 서비스 계정 및 AI 사용자는 사용자-월 계산에서 제외됩니다");
+		m.put("Exited run as", "실행 종료됨");
+		m.put("Max Loop Count", "최대 반복 횟수");
+		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"단일 이벤트 체인에서 이 AI 사용자가 깨울 수 있는 최대 횟수입니다. 제한에 도달하면 AI 사용자는 실행되지 않으며 대신 시스템 댓글이 게시됩니다");
+		m.put("Optional instructions that define how the AI user should behave", "AI 사용자가 어떻게 동작해야 하는지 정의하는 선택적 지침");
+		m.put("Proactive", "능동적");
+		m.put("Toggle half screen", "반 화면 전환");
+		m.put("for AI task automation", "AI 작업 자동화를 위해");
+		m.put("task", "작업");
 	}
 		
 	@Override

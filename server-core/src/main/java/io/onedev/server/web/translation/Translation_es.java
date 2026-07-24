@@ -32,12 +32,15 @@ public class Translation_es extends TranslationResourceBundle {
 			"** La edición empresarial está deshabilitada porque la suscripción de prueba expiró, ordene una suscripción para habilitarla o contacte a support@onedev.io si necesita extender su prueba **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** La edición empresarial está deshabilitada porque no hay meses de usuario restantes. Ordene más para habilitarla **");
+		m.put("1 Year", "1 Año");
 		m.put("1. Use below repositories in project pom.xml", "1. Use los siguientes repositorios en el archivo pom.xml del proyecto");
 		m.put("1w 1d 1h 1m", "1s 1d 1h 1m");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. Agregue lo siguiente a <code>$HOME/.m2/settings.xml</code> si desea desplegar desde la línea de comandos");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. Para trabajos de CI/CD, es más conveniente usar un settings.xml personalizado, por ejemplo, mediante el siguiente código en un paso de comando:");
+		m.put("5 Years", "5 Años");
+		m.put("6 Months", "6 Meses");
 		m.put("6-digits passcode", "Código de acceso de 6 dígitos");
 		m.put("7 days", "7 días");
 		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
@@ -101,6 +104,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("<div><span>Search Text</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>Buscar Texto</span> <span class='font-size-sm text-muted'>en la rama predeterminada</span></div>");
 		m.put("<i>No Name</i>", "<i>Sin Nombre</i>");
+		m.put("<i>None</i>", "<i>Ninguno</i>");
 		m.put("<span class=\"keycap ml-3 mr-1\">esc</span> to close", "<span class=\"keycap ml-3 mr-1\">esc</span> para cerrar");
 		m.put("<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> to move", 
 			"<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> para mover");
@@ -148,7 +152,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("AI entitlement settings have been saved", "Se han guardado las configuraciones de derechos de IA");
 		m.put("AI model settings have been saved", "Se han guardado las configuraciones del modelo de IA");
 		m.put("AI settings updated", "Configuraciones de IA actualizadas");
-		m.put("AI system prompt has been saved", "El aviso del sistema de IA ha sido guardado");
 		m.put("API Key", "Clave API");
 		m.put("API Token", "Token de API");
 		m.put("API token should be generated with permission to read your account and repositories", 
@@ -261,6 +264,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "Commit añadido \"{0}\" (<i class='text-danger'>faltante en el repositorio</i>)");
 		m.put("Added commit \"{0}\" ({1})", "Commit añadido \"{0}\" ({1})");
 		m.put("Added to group", "Añadido al grupo");
+		m.put("Additional Job Privileges", "Privilegios Adicionales de Trabajo");
+		m.put("Additional Privileges", "Privilegios Adicionales");
 		m.put("Additions", "Adiciones");
 		m.put("Administration", "Administración");
 		m.put("Administrative permission over a project", "Permiso administrativo sobre un proyecto");
@@ -587,6 +592,8 @@ public class Translation_es extends TranslationResourceBundle {
 			"Por defecto, también se enumerarán los problemas de los proyectos padre e hijo. Use la consulta <code>&quot;Project&quot; is current</code> para mostrar solo los problemas que pertenecen a este proyecto");
 		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
 			"De forma predeterminada, los usuarios solo pueden editar los campos especificados anteriormente para los problemas que hayan enviado ellos mismos.\nHabilita esta opción para permitir la edición de campos en problemas enviados por otros.");
+		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
+			"De forma predeterminada, los usuarios pueden acceder a artefactos de todos los trabajos. Para asignar privilegios adicionales a trabajos específicos, especifíquelos aquí.");
 		m.put("By month", "Por mes");
 		m.put("By week", "Por semana");
 		m.put("Bypass Certificate Check", "Omitir Verificación de Certificado");
@@ -783,6 +790,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Code Comment Management", "Gestión de Comentarios de Código");
 		m.put("Code Comments", "Comentarios de Código");
 		m.put("Code Compare", "Comparación de Código");
+		m.put("Code Contributions", "Contribuciones de Código");
 		m.put("Code Coverage", "Cobertura de Código");
 		m.put("Code Management", "Gestión de Código");
 		m.put("Code Privilege", "Privilegio de Código");
@@ -1134,7 +1142,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "Deshabilitar tablero");
 		m.put("Disable Selected Users", "Deshabilitar usuarios seleccionados");
 		m.put("Disabled", "Deshabilitado");
-		m.put("Disabled users and service accounts are excluded from user-month calculation", "Los usuarios deshabilitados y las cuentas de servicio están excluidos del cálculo de usuario-mes");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"Deshabilitar la cuenta restablecerá la contraseña, eliminará los tokens de acceso y eliminará todas las referencias de otras entidades excepto las actividades pasadas. ¿Realmente desea continuar?");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1419,7 +1426,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Execute Commands", "Ejecutar Comandos");
 		m.put("Execute Commands via SSH", "Ejecutar Comandos vía SSH");
 		m.put("Exit Run As", "Salir de Ejecutar Como");
-		m.put("Exited impersonation", "Suplantación terminada");
 		m.put("Expand all", "Expandir todo");
 		m.put("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute", 
 			"Se espera uno o más <tt>&lt;número&gt;(h|m)</tt>. Por ejemplo, <tt>1h 1m</tt> representa 1 hora y 1 minuto");
@@ -1513,6 +1519,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Fingerprint", "Huella Digital");
 		m.put("Finish", "Finalizar");
 		m.put("First applicable executor", "Primer ejecutor aplicable");
+		m.put("Five years", "Cinco años");
 		m.put("Fix", "Corregir");
 		m.put("Fix Detection", "Detección de Corrección");
 		m.put("Fix Pattern", "Patrón de Corrección");
@@ -2289,7 +2296,9 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"Nueva versión disponible. Rojo para actualización de seguridad/crítica, amarillo para corrección de errores, azul para actualización de características. Haga clic para mostrar los cambios. Deshabilitar en la configuración del sistema");
 		m.put("Next", "Siguiente");
+		m.put("Next Iteration ({0})", "Siguiente Iteración ({0})");
 		m.put("Next commit", "Siguiente commit");
+		m.put("Next year", "El próximo año");
 		m.put("Next {0}", "Siguiente {0}");
 		m.put("No", "No");
 		m.put("No Activity Days", "Días sin actividad");
@@ -2473,6 +2482,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("On", "Activado");
 		m.put("On Behalf Of", "En Nombre De");
 		m.put("On Branches", "En Ramas");
+		m.put("One year", "Un año");
 		m.put("OneDev Issue Field", "Campo de Problema de OneDev");
 		m.put("OneDev Issue Link", "Enlace de Problema de OneDev");
 		m.put("OneDev Issue State", "Estado de Problema de OneDev");
@@ -2682,6 +2692,12 @@ public class Translation_es extends TranslationResourceBundle {
 			"Opcionalmente especifique la base de búsqueda de grupos si desea recuperar información de membresía de grupo del usuario. Por ejemplo: <i>cn=Users, dc=example, dc=com</i>. Para otorgar permisos apropiados a un grupo de Active Directory, se debe definir un grupo de OneDev con el mismo nombre. Déjelo vacío para gestionar las membresías de grupo en el lado de OneDev.");
 		m.put("Optionally specify issue links allowed to edit", "Opcionalmente especifique enlaces de problemas permitidos para editar.");
 		m.put("Optionally specify issues applicable for this template. Leave empty for all", "Opcionalmente especifique problemas aplicables para esta plantilla. Déjelo vacío para todos.");
+		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
+			"Opcionalmente, especifique los problemas aplicables para esta transición en el mismo proyecto que la rama. Déjelo vacío para todos los problemas");
+		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
+			"Opcionalmente, especifique los problemas aplicables para esta transición en el mismo proyecto que la compilación. Déjelo vacío para todos los problemas");
+		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
+			"Opcionalmente, especifique los problemas aplicables para esta transición en el mismo proyecto que la solicitud de extracción. Déjelo vacío para todos los problemas");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues", 
 			"Opcionalmente especifique problemas aplicables para esta transición. Déjelo vacío para todos los problemas.");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
@@ -3027,6 +3043,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Previous", "Anterior");
 		m.put("Previous Value", "Valor anterior");
 		m.put("Previous commit", "Confirmación anterior");
+		m.put("Previous year", "Año anterior");
 		m.put("Previous {0}", "Anterior {0}");
 		m.put("Primary", "Primario");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "Dirección de correo electrónico <a wicket:id=\"noPrimaryAddressLink\">principal</a> no especificada");
@@ -3574,11 +3591,14 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Show Duration", "Mostrar duración");
 		m.put("Show Emojis", "Mostrar emojis");
 		m.put("Show Issue Status", "Mostrar estado de problemas");
+		m.put("Show Language Stats", "Mostrar Estadísticas de Idioma");
+		m.put("Show Next Iteration", "Mostrar Siguiente Iteración");
 		m.put("Show Package Stats", "Mostrar estadísticas de paquetes");
 		m.put("Show Pull Request Stats", "Mostrar estadísticas de solicitudes de extracción");
 		m.put("Show Saved Queries", "Mostrar consultas guardadas");
 		m.put("Show States By", "Mostrar estados por");
 		m.put("Show Works Of", "Mostrar trabajos de");
+		m.put("Show Workspace Stats", "Mostrar Estadísticas del Espacio de Trabajo");
 		m.put("Show changes", "Mostrar cambios");
 		m.put("Show commented code snippet", "Mostrar fragmento de código comentado");
 		m.put("Show commit of this parent", "Mostrar commit de este padre");
@@ -3620,6 +3640,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Single sign on via discord.com", "Inicio de sesión único a través de discord.com");
 		m.put("Single sign on via twitch.tv", "Inicio de sesión único a través de twitch.tv");
 		m.put("Site", "Sitio");
+		m.put("Six months", "Seis meses");
 		m.put("Size", "Tamaño");
 		m.put("Size invalid", "Tamaño inválido");
 		m.put("Slack Notifications", "Notificaciones de Slack");
@@ -4885,6 +4906,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("a string representing summary of the event", "una cadena que representa el resumen del evento");
 		m.put("abort merge", "abortar fusión");
 		m.put("access [{0}]", "acceso [{0}]");
+		m.put("active replica", "réplica activa");
 		m.put("add another order", "agregar otro pedido");
 		m.put("adding .onedev-buildspec.yml", "agregando .onedev-buildspec.yml");
 		m.put("after specified date", "después de la fecha especificada");
@@ -5010,6 +5032,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("or match another value", "o coincidir con otro valor");
 		m.put("order more", "ordenar más");
 		m.put("outdated", "desactualizado");
+		m.put("outdated replica", "réplica desactualizada");
 		m.put("pack", "paquete");
 		m.put("package", "paquete");
 		m.put("packages", "paquetes");
@@ -5079,6 +5102,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("true", "verdadero");
 		m.put("true for html version, false for text version", "verdadero para la versión HTML, falso para la versión de texto");
 		m.put("type", "tipo");
+		m.put("up to date replica", "réplica actualizada");
 		m.put("url following which to verify email address", "URL para verificar la dirección de correo electrónico");
 		m.put("url to reset password", "URL para restablecer la contraseña");
 		m.put("value needs to be enclosed in brackets", "el valor debe estar entre corchetes");
@@ -5095,6 +5119,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("widget:Tabs", "Pestañas");
 		m.put("workspaces", "espacios de trabajo");
 		m.put("you may show this page later via incompatibilities link in help menu", "puede mostrar esta página más tarde a través del enlace de incompatibilidades en el menú de ayuda");
+		m.put("{0} Lines", "{0} Líneas");
 		m.put("{0} Month(s)", "{0} Mes(es)");
 		m.put("{0} activities on {1}", "{0} actividades en {1}");
 		m.put("{0} additions & {1} deletions", "{0} adiciones & {1} eliminaciones");
@@ -5129,34 +5154,25 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("1 Year", "1 Año");
-		m.put("5 Years", "5 Años");
-		m.put("6 Months", "6 Meses");
-		m.put("<i>None</i>", "<i>Ninguno</i>");
-		m.put("Additional Job Privileges", "Privilegios Adicionales de Trabajo");
-		m.put("Additional Privileges", "Privilegios Adicionales");
-		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
-			"De forma predeterminada, los usuarios pueden acceder a artefactos de todos los trabajos. Para asignar privilegios adicionales a trabajos específicos, especifíquelos aquí.");
-		m.put("Code Contributions", "Contribuciones de Código");
-		m.put("Five years", "Cinco años");
-		m.put("Next Iteration ({0})", "Siguiente Iteración ({0})");
-		m.put("Next year", "El próximo año");
-		m.put("One year", "Un año");
-		m.put("Optionally specify issues applicable for this transition in same project as the branch. Leave empty for all issues", 
-			"Opcionalmente, especifique los problemas aplicables para esta transición en el mismo proyecto que la rama. Déjelo vacío para todos los problemas");
-		m.put("Optionally specify issues applicable for this transition in same project as the build. Leave empty for all issues", 
-			"Opcionalmente, especifique los problemas aplicables para esta transición en el mismo proyecto que la compilación. Déjelo vacío para todos los problemas");
-		m.put("Optionally specify issues applicable for this transition in same project as the pull request. Leave empty for all issues", 
-			"Opcionalmente, especifique los problemas aplicables para esta transición en el mismo proyecto que la solicitud de extracción. Déjelo vacío para todos los problemas");
-		m.put("Previous year", "Año anterior");
-		m.put("Show Language Stats", "Mostrar Estadísticas de Idioma");
-		m.put("Show Next Iteration", "Mostrar Siguiente Iteración");
-		m.put("Show Workspace Stats", "Mostrar Estadísticas del Espacio de Trabajo");
-		m.put("Six months", "Seis meses");
-		m.put("active replica", "réplica activa");
-		m.put("outdated replica", "réplica desactualizada");
-		m.put("up to date replica", "réplica actualizada");
-		m.put("{0} Lines", "{0} Líneas");
+		m.put("AI behavior settings have been saved", "La configuración del comportamiento de la IA ha sido guardada");
+		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
+			"También acepta enlaces entre proyectos en forma de <code>projectpath#100</code> o <code>PROJECTKEY-100</code>");
+		m.put("Behavior", "Comportamiento");
+		m.put("Behavior Edit Bean", "Editar Comportamiento Bean");
+		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
+			"Por defecto, el usuario de IA solo responde cuando se le asignan tareas o se le menciona en el contexto de un problema/PR.\nHabilita esto para que responda siempre que el comentario sea relevante, incluso si no se le menciona.\nEsto proporciona una mejor experiencia de interacción, especialmente en el caso de mesas de servicio,\npero puede consumir más tokens");
+		m.put("Copy as Markdown", "Copiar como Markdown");
+		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
+			"Los usuarios deshabilitados, cuentas de servicio y usuarios de IA están excluidos del cálculo de usuarios por mes");
+		m.put("Exited run as", "Salió de ejecutar como");
+		m.put("Max Loop Count", "Conteo Máximo de Bucles");
+		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"Número máximo de veces que este usuario de IA puede ser activado en una sola cadena de eventos. Cuando se alcanza el límite, el usuario de IA no se ejecutará y se publicará un comentario del sistema en su lugar");
+		m.put("Optional instructions that define how the AI user should behave", "Instrucciones opcionales que definen cómo debe comportarse el usuario de IA");
+		m.put("Proactive", "Proactivo");
+		m.put("Toggle half screen", "Alternar media pantalla");
+		m.put("for AI task automation", "para la automatización de tareas de IA");
+		m.put("task", "tarea");
 	}
 		
 	@Override
