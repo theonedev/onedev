@@ -390,7 +390,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								target.add(menuFragment);
 							}
 							
-						}.items(".board"));
+						}.items(".board").handle(".drag-indicator"));
 					}
 					
 					menuFragment.add(new CreateBoardLink("newBoard", new BoardSpec()) {

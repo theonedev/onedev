@@ -306,7 +306,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 				target.add(StepListEditPanel.this);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 
 	@Override

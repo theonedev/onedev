@@ -100,7 +100,7 @@ public class JobExecutorsPage extends AdministrationPage {
 				target.add(container);
 			}
 			
-		}.items("li.executor").handle(".card-header"));
+		}.items("li.executor").handle(".drag-indicator"));
 		
 		container.add(newAddNewFrag());
 		container.add(new WebMarkupContainer("noExecutors") {

@@ -191,7 +191,7 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 				target.add(IssueCreationSettingListEditPanel.this);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 
 	@Override

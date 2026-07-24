@@ -101,7 +101,7 @@ public class WorkspaceProvisionersPage extends AdministrationPage {
 				target.add(container);
 			}
 
-		}.items("li.provisioner").handle(".card-header"));
+		}.items("li.provisioner").handle(".drag-indicator"));
 
 		container.add(newAddNewFrag());
 		container.add(new WebMarkupContainer("noProvisioners") {

@@ -255,7 +255,7 @@ public class IssueStateListPage extends IssueSettingPage {
 				send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 
 	@Override

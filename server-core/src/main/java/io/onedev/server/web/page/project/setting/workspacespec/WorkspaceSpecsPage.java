@@ -103,7 +103,7 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 				target.add(container);
 			}
 
-		}.items("li.spec").handle(".card-header"));
+		}.items("li.spec").handle(".drag-indicator"));
 
 		container.add(newAddNewLinksFrag());
 	}

@@ -225,7 +225,7 @@ public class LinkSpecListPage extends IssueSettingPage {
 				target.add(linksTable);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 
 	private LinkSpecService getLinkSpecService() {

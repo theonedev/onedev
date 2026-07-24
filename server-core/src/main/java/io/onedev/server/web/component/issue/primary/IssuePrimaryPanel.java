@@ -417,7 +417,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 							});
 						}
 						
-					}.sortable("ul"));
+					}.sortable("ul").handle(".drag-indicator"));
 				}
 
 				boolean applicable;
