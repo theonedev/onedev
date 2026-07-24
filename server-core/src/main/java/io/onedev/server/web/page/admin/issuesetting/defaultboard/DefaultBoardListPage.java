@@ -235,7 +235,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 				target.add(boardsTable);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 
 	@Override

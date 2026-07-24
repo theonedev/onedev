@@ -165,7 +165,7 @@ public class InterpolativeStringListPropertyEditor extends PropertyEditor<List<S
 				onPropertyUpdating(target);
 			}
 
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 		
 		add(validatable -> {
 			var index = 0;

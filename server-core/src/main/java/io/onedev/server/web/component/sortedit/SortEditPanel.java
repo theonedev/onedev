@@ -70,7 +70,7 @@ public class SortEditPanel<T extends AbstractEntity> extends GenericPanel<List<E
 				target.add(selectedContainer);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 		
 		add(selectedContainer.setOutputMarkupId(true));
 		

@@ -194,7 +194,7 @@ public abstract class StateTransitionListPanel extends Panel {
 				target.add(transitionsTable);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 		
 		setOutputMarkupId(true);
 	}

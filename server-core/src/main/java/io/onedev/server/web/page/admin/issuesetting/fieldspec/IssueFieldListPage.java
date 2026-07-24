@@ -199,7 +199,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 				target.add(fieldsTable);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 	
 	private WebMarkupContainer newEditLink(String componentId, int fieldIndex) {

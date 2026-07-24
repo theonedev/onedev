@@ -295,7 +295,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 				target.add(secretsTable);
 			}
 
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 		
 	}
 

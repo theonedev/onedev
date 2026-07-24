@@ -233,7 +233,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				onPropertyUpdating(target);
 			}
 			
-		}.sortable("tbody"));	
+		}.sortable("tbody").handle(".drag-indicator"));	
 		
 		setOutputMarkupId(true);
 	}

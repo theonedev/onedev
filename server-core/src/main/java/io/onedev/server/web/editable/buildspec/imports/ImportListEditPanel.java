@@ -88,7 +88,7 @@ class ImportListEditPanel extends PropertyEditor<List<Serializable>> {
 				}
 			}
 			
-		}.sortable(">.imports").items(".import").handle(".import-head"));
+		}.sortable(">.imports").items(".import").handle(".drag-indicator"));
 		
 	}
 	

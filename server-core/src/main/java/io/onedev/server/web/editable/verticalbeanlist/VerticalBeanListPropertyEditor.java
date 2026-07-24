@@ -166,7 +166,7 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 				onPropertyUpdating(target);
 			}
 
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 		
 		add(validatable -> {
 			var index = 0;

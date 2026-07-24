@@ -220,7 +220,7 @@ public class IssueTemplateListPage extends IssueSettingPage {
 				target.add(templatesTable);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 	
 	@Override
