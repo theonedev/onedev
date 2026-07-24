@@ -98,7 +98,7 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 
 			@Override
 			protected void onBeforeRender() {
-				RepeatingView jobsView = new RepeatingView("jobs");
+				RepeatingView jobsView = new RepeatingView("job");
 				for (Job job: getFilteredJobs()) {
 					WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
 					Status status = getProject().getCommitStatuses(commitId, getPullRequest(), refName).get(job.getName());
@@ -173,7 +173,7 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 			}
 			
 		};
-		jobsContainer.setOutputMarkupId(true);
+		jobsContainer.setOutputMarkupPlaceholderTag(true);
 		add(jobsContainer);
 
 		noJobsContainer = new WebMarkupContainer("noJobs") {
