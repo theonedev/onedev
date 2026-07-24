@@ -1,14 +1,21 @@
 <wicket:panel>
-	<div class="job-list">
-    	<div wicket:id="jobs" class="job">
-        	<div class="head text-nowrap d-flex align-items-center px-3 py-2 bg-light border-top">
-            	<a wicket:id="name" class="name d-flex align-items-center mr-auto"><b wicket:id="label"></b></a>
-                <a wicket:id="showInList" class="ml-2 d-flex align-items-center" t:data-tippy-content="Show in build list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
-                <a wicket:id="run" class="run ml-2 d-flex align-items-center" t:data-tippy-content="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
-            </div>
-            <div class="body">
-				<div wicket:id="detail"></div>
+	<div class="job-list py-3 px-3">
+		<div class="d-flex align-items-center mb-3">
+			<input wicket:id="search" class="form-control form-control-sm" t:placeholder="Search job"/>
+			<wicket:svg href="magnify" class="icon text-muted icon-magnify"/>
+		</div>
+		<div wicket:id="jobs">
+			<div wicket:id="job" class="job">
+				<div class="head text-nowrap d-flex align-items-center px-3 py-2 bg-light border-top">
+					<a wicket:id="name" class="name d-flex align-items-center mr-auto"><b wicket:id="label"></b></a>
+					<a wicket:id="showInList" class="ml-2 d-flex align-items-center" t:data-tippy-content="Show in build list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
+					<a wicket:id="run" class="run ml-2 d-flex align-items-center" t:data-tippy-content="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
+				</div>
+				<div class="body">
+					<div wicket:id="detail"></div>
+				</div>
 			</div>
 		</div>
+		<div wicket:id="noJobs" class="no-jobs mb-0 mt-2"><div class="alert alert-notice alert-light-warning">No jobs found</div></div>
 	</div>
 </wicket:panel>
