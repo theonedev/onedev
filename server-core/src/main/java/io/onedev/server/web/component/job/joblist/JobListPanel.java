@@ -81,6 +81,7 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 		super.onInitialize();
 
 		searchField = new TextField<>("search", Model.of(""));
+		searchField.setOutputMarkupId(true);
 		add(searchField);
 		searchField.add(new InputChangeBehavior() {
 
