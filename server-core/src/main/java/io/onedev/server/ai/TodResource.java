@@ -10,7 +10,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,8 +39,6 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
@@ -100,6 +97,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
@@ -134,9 +132,6 @@ import io.onedev.server.util.ProjectScope;
 public class TodResource {
 
     private static final Logger logger = LoggerFactory.getLogger(TodResource.class);
-
-    @Inject
-    private ObjectMapper objectMapper;
 
     @Inject
     private SettingService settingService;
@@ -405,6 +400,14 @@ public class TodResource {
         return escapeHtml5(QueryDescriptions.getPullRequestQueryDescription());
     }
 
+    @Path("/get-project-query-description")
+    @GET
+    public String getProjectQueryDescription() {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+        return escapeHtml5(QueryDescriptions.getProjectQueryDescription());
+    }
+
     @Path("/get-valid-issue-fields")
     @GET
     public Map<String, Object> getValidIssueFields() {
@@ -562,35 +565,41 @@ public class TodResource {
         return IssueHelper.getDetail(subject, currentProject, issue);
     }
 
+    @Path("/query-projects")
+    @GET
+    public List<Map<String, Object>> queryProjects(
+                @QueryParam("query") String query,
+                @QueryParam("offset") int offset,
+                @QueryParam("count") int count) {
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
+            throw new UnauthenticatedException();
+
+        if (count > RestConstants.MAX_PAGE_SIZE)
+            throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+
+        EntityQuery<Project> parsedQuery;
+        try {
+            parsedQuery = ProjectQuery.parse(query);
+        } catch (Exception e) {
+            logger.error("Error parsing query", e);
+            throw new NotAcceptableException("Invalid project query, check server log for details");
+        }
+
+        var summaries = new ArrayList<Map<String, Object>>();
+        for (var project : projectService.query(subject, parsedQuery, true, offset, count))
+            summaries.add(ProjectHelper.getSummary(project));
+        return summaries;
+    }
+
     @Path("/get-project")
     @GET
     @Nullable
     public Map<String, Object> getProjectDetail(@QueryParam("project") @NotNull String projectPath) {
-        if (SecurityUtils.getUser() == null)
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
-
-        Map<String, Object> projectDetail;
-        var project = getProject(projectPath);
-        if (SecurityUtils.canManageProject(project)) {
-            var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
-            projectDetail = objectMapper.convertValue(project, typeReference);
-            projectDetail.remove("lastActivityDateId");
-            projectDetail.remove("pathLen");
-        } else {
-            projectDetail = new HashMap<String, Object>();
-            projectDetail.put("id", project.getId());
-            projectDetail.put("key", project.getKey());
-            projectDetail.put("name", project.getName());
-            projectDetail.put("path", project.getPath());
-            projectDetail.put("description", project.getDescription());
-            projectDetail.put("codeManagement", project.isCodeManagement());
-            projectDetail.put("packManagement", project.isPackManagement());
-            projectDetail.put("issueManagement", project.isIssueManagement());
-            projectDetail.put("timeTracking", project.isTimeTracking());
-        }
-        projectDetail.put("defaultBranch", project.getDefaultBranch());
-        projectDetail.put("link", urlService.urlFor(project, true));
-        return projectDetail;
+        return ProjectHelper.getDetail(getProject(projectPath));
     }
 
     @Path("/get-issue-comments")

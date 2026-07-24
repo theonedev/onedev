@@ -575,7 +575,7 @@ public class QueryDescriptions {
                     | 'fork roots'
                     | '"Name"' 'is' ('not')? '"'ProjectNameOrPattern'"'
                     | '"Key"' 'is' ('not')? '"'ProjectKeyOrPattern'"'
-                    | '"Path"' 'is' ('not')? '"'ProjectPathOrPattern'"'
+                    | '"Path"' 'is' ('not')? '"'ProjectPathOrPattern'"' 
                     | '"Label"' 'is' ('not')? '"'LabelName'"'
                     | '"Description"' 'contains' '"'Text'"'
                     | '"Id"' 'is' ('not')? '"'Number'"'
