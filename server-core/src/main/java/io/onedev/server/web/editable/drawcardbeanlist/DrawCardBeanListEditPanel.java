@@ -106,7 +106,7 @@ public abstract class DrawCardBeanListEditPanel<T extends Serializable> extends 
 				target.add(DrawCardBeanListEditPanel.this);
 			}
 
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 
 	private IColumn<T, Void> newGripColumn() {

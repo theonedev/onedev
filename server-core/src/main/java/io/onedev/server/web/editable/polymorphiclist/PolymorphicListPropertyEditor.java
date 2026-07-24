@@ -173,7 +173,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				onPropertyUpdating(target);
 			}
 
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 		
 		add(validatable -> {
 			var index = 0;

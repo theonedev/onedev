@@ -226,7 +226,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 				target.add(scriptsTable);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 	
 	@Override

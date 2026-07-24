@@ -1179,7 +1179,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					resizeWindow(target);
 				}
 				
-			}.sortable(null));
+			}.sortable(null).handle(".drag-indicator"));
 			
 			add(navs.setOutputMarkupId(true));
 			

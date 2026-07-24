@@ -220,7 +220,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 				target.add(JobPrivilegeListEditPanel.this);
 			}
 			
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 
 	@Override

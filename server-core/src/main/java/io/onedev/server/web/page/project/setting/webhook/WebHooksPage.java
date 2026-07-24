@@ -201,7 +201,7 @@ public class WebHooksPage extends ProjectSettingPage {
 				target.add(hooksTable);
 			}
 
-		}.sortable("tbody"));
+		}.sortable("tbody").handle(".drag-indicator"));
 	}
 
 	private WebMarkupContainer newEditLink(String componentId, int hookIndex) {
