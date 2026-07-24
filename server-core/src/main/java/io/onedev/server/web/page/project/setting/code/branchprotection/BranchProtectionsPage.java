@@ -92,7 +92,7 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 				target.add(container);
 			}
 			
-		}.items("li.protection").handle(".card-header"));
+		}.items("li.protection").handle(".drag-indicator"));
 		
 		container.add(newAddNewFrag());
 	}
