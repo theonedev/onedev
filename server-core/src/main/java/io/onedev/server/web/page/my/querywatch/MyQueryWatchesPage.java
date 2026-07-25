@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.my.querywatch;
 
-import static io.onedev.server.model.User.Type.ORDINARY;
+import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
@@ -21,7 +21,7 @@ public class MyQueryWatchesPage extends MyPage {
 
     public MyQueryWatchesPage(PageParameters params) {
         super(params);
-        if (getUser().getType() != ORDINARY || getUser().isDisabled())
+        if (getUser().getType() == SERVICE || getUser().isDisabled())
             throw new IllegalStateException();
         tabName = params.get(PARAM_TAB).toString(QueryWatchesPanel.TAB_ISSUE);
     }
