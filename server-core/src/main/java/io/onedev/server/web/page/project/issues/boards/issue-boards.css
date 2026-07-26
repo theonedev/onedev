@@ -154,6 +154,13 @@
 	margin-right: 36px;
 }
 
+@media(min-width: 1199px) {
+	.board-card-detail>.modal-body>div.side-info {
+		position: static;
+		align-self: stretch;
+	}
+}
+
 .board-card-detail .issue-operations .new-issue {
 	display: none;
 }
@@ -168,4 +175,3 @@
 .board-card .issue-item .dropdown-aware-open .workspaces {
 	display: inline-flex !important;
 }
-
