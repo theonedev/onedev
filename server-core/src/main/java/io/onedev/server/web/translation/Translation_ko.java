@@ -149,6 +149,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("AI", "AI");
 		m.put("AI Model Settings", "AI 모델 설정");
 		m.put("AI Settings", "AI 설정");
+		m.put("AI behavior settings have been saved", "AI 동작 설정이 저장되었습니다");
 		m.put("AI entitlement settings have been saved", "AI 권한 설정이 저장되었습니다");
 		m.put("AI model settings have been saved", "AI 모델 설정이 저장되었습니다");
 		m.put("AI settings updated", "AI 설정 업데이트됨");
@@ -321,6 +322,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Allow Multiple", "다중 허용");
 		m.put("Allowed Licenses", "허용된 라이선스");
 		m.put("Allowed Self Sign-Up Email Domain", "허용된 자체 가입 이메일 도메인");
+		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
+			"<code>projectpath#100</code> 또는 <code>PROJECTKEY-100</code> 형식의 프로젝트 간 링크도 허용됩니다");
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"프로젝트를 명령줄에서 컴파일하려면 아래 내용을 $HOME/.m2/settings.xml에 추가하세요");
 		m.put("Always", "항상");
@@ -471,6 +474,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Batch Editing {0} Issues", "{0}개의 이슈를 일괄 편집 중");
 		m.put("Batched suggestions", "일괄 제안");
 		m.put("Before modification", "수정 전");
+		m.put("Behavior", "동작");
+		m.put("Behavior Edit Bean", "동작 편집 빈");
 		m.put("Belonging Groups", "소속 그룹");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"아래는 일반적인 기준입니다. 위의 검색 상자에 입력하여 전체 목록과 사용 가능한 조합을 확인하세요.");
@@ -590,6 +595,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"기본적으로 코드는 자동 생성된 자격 증명을 통해 클론되며, 현재 프로젝트에 대한 읽기 권한만 있습니다. 작업이 <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>코드를 서버에 푸시</a>해야 하는 경우 적절한 권한을 가진 사용자 정의 자격 증명을 제공해야 합니다");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"기본적으로 부모 및 자식 프로젝트의 문제도 나열됩니다. 이 프로젝트에만 속한 문제를 표시하려면 쿼리 <code>&quot;Project&quot; is current</code>를 사용하세요");
+		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
+			"기본적으로 AI 사용자는 할당된 작업이나 이슈/PR 컨텍스트에서 언급될 때만 응답합니다.\n이 설정을 활성화하면 언급되지 않아도 댓글이 관련이 있는 한 응답합니다.\n이는 특히 서비스 데스크의 경우 더 나은 상호작용 경험을 제공하지만,\n더 많은 토큰을 소비할 수 있습니다");
 		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
 			"기본적으로 사용자는 자신이 제출한 이슈에 대해 위에서 지정된 필드만 편집할 수 있습니다.\n이 옵션을 활성화하면 다른 사람이 제출한 이슈의 필드를 편집할 수 있습니다.");
 		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
@@ -912,6 +919,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy All Queried Issues To...", "쿼리된 모든 이슈를 복사하여...");
 		m.put("Copy Files with SCP", "SCP로 파일 복사");
 		m.put("Copy Selected Issues To...", "선택된 이슈를 복사하여...");
+		m.put("Copy as Markdown", "Markdown으로 복사");
 		m.put("Copy dashboard", "대시보드 복사");
 		m.put("Copy issue number and title", "이슈 번호와 제목 복사");
 		m.put("Copy public key", "공개 키 복사");
@@ -1142,6 +1150,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "대시보드 비활성화");
 		m.put("Disable Selected Users", "선택한 사용자 비활성화");
 		m.put("Disabled", "비활성화됨");
+		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
+			"비활성 사용자, 서비스 계정 및 AI 사용자는 사용자-월 계산에서 제외됩니다");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"계정을 비활성화하면 비밀번호가 재설정되고, 액세스 토큰이 삭제되며, 과거 활동을 제외한 다른 엔티티에서 모든 참조가 제거됩니다. 계속하시겠습니까?");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1426,6 +1436,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Execute Commands", "명령 실행");
 		m.put("Execute Commands via SSH", "SSH를 통해 명령 실행");
 		m.put("Exit Run As", "Run As 종료");
+		m.put("Exited run as", "실행 종료됨");
 		m.put("Expand all", "모두 확장");
 		m.put("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute", 
 			"하나 이상의 <tt>&lt;number&gt;(h|m)</tt>을 기대합니다. 예를 들어 <tt>1h 1m</tt>은 1시간과 1분을 나타냅니다");
@@ -2172,10 +2183,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Max Code Search Entries", "최대 코드 검색 항목");
 		m.put("Max Commit Message Line Length", "최대 커밋 메시지 라인 길이");
 		m.put("Max Git LFS File Size (MB)", "최대 Git LFS 파일 크기 (MB)");
+		m.put("Max Loop Count", "최대 반복 횟수");
 		m.put("Max Retries", "최대 재시도 횟수");
 		m.put("Max Upload File Size (MB)", "최대 업로드 파일 크기 (MB)");
 		m.put("Max Value", "최대 값");
 		m.put("Maximum number of entries to return when search code in repository", "저장소에서 코드 검색 시 반환할 최대 항목 수");
+		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"단일 이벤트 체인에서 이 AI 사용자가 깨울 수 있는 최대 횟수입니다. 제한에 도달하면 AI 사용자는 실행되지 않으며 대신 시스템 댓글이 게시됩니다");
 		m.put("Maximum of retries before giving up", "포기하기 전에 최대 재시도 횟수");
 		m.put("May not be empty", "비어 있을 수 없습니다");
 		m.put("Medium", "중간");
@@ -2519,6 +2533,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Operation Successful", "작업 성공");
 		m.put("Operations", "작업");
 		m.put("Optional", "선택 사항");
+		m.put("Optional instructions that define how the AI user should behave", "AI 사용자가 어떻게 동작해야 하는지 정의하는 선택적 지침");
 		m.put("Optionally add new users to specified default group", "선택적으로 새 사용자를 지정된 기본 그룹에 추가하십시오");
 		m.put("Optionally add newly authenticated user to specified group if membership information is not available", 
 			"선택적으로 인증된 새 사용자를 지정된 그룹에 추가하십시오. 멤버십 정보가 없는 경우");
@@ -3058,6 +3073,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"Office 365 메일 서버에 로그인하여 이메일을 송수신하기 위한 계정의 주 이름입니다. 이 계정이 위의 애플리케이션 ID로 표시된 등록된 애플리케이션을 <b>소유</b>하고 있는지 확인하세요");
 		m.put("Private Key Secret", "개인 키 비밀");
 		m.put("Private key regenerated and SSH server restarted", "개인 키가 재생성되고 SSH 서버가 재시작되었습니다");
+		m.put("Proactive", "능동적");
 		m.put("Product Version", "제품 버전");
 		m.put("Profile", "프로필");
 		m.put("Programming language", "프로그래밍 언어");
@@ -4436,6 +4452,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Toggle detail message", "상세 메시지 토글");
 		m.put("Toggle fixed width font", "고정 폭 글꼴 토글");
 		m.put("Toggle full screen", "전체 화면 토글");
+		m.put("Toggle half screen", "반 화면 전환");
 		m.put("Toggle matched contents", "일치하는 내용 토글");
 		m.put("Toggle navigation", "탐색 토글");
 		m.put("Toggle work log", "작업 로그 토글");
@@ -4970,6 +4987,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("files with ext \"{0}\"", "확장자가 \"{0}\"인 파일들");
 		m.put("find by id", "ID로 찾기");
 		m.put("find by number", "번호로 찾기");
+		m.put("for AI task automation", "AI 작업 자동화를 위해");
 		m.put("forked from <a wicket:id=\"forkedFrom\"></a>", "<a wicket:id=\"forkedFrom\"></a>에서 포크됨");
 		m.put("found 1 agent", "1개의 에이전트를 찾았습니다");
 		m.put("found 1 build", "1개의 빌드를 찾았습니다");
@@ -5093,6 +5111,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("tag the job is running against", "작업이 실행 중인 태그");
 		m.put("tag {0}", "tag {0}");
 		m.put("tags", "태그");
+		m.put("task", "작업");
 		m.put("the url to set up user account", "사용자 계정을 설정하기 위한 URL");
 		m.put("time aggregation link", "시간 집계 링크");
 		m.put("tmux Executable", "tmux 실행 파일");
@@ -5154,25 +5173,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI behavior settings have been saved", "AI 동작 설정이 저장되었습니다");
-		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
-			"<code>projectpath#100</code> 또는 <code>PROJECTKEY-100</code> 형식의 프로젝트 간 링크도 허용됩니다");
-		m.put("Behavior", "동작");
-		m.put("Behavior Edit Bean", "동작 편집 빈");
-		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
-			"기본적으로 AI 사용자는 할당된 작업이나 이슈/PR 컨텍스트에서 언급될 때만 응답합니다.\n이 설정을 활성화하면 언급되지 않아도 댓글이 관련이 있는 한 응답합니다.\n이는 특히 서비스 데스크의 경우 더 나은 상호작용 경험을 제공하지만,\n더 많은 토큰을 소비할 수 있습니다");
-		m.put("Copy as Markdown", "Markdown으로 복사");
-		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
-			"비활성 사용자, 서비스 계정 및 AI 사용자는 사용자-월 계산에서 제외됩니다");
-		m.put("Exited run as", "실행 종료됨");
-		m.put("Max Loop Count", "최대 반복 횟수");
-		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"단일 이벤트 체인에서 이 AI 사용자가 깨울 수 있는 최대 횟수입니다. 제한에 도달하면 AI 사용자는 실행되지 않으며 대신 시스템 댓글이 게시됩니다");
-		m.put("Optional instructions that define how the AI user should behave", "AI 사용자가 어떻게 동작해야 하는지 정의하는 선택적 지침");
-		m.put("Proactive", "능동적");
-		m.put("Toggle half screen", "반 화면 전환");
-		m.put("for AI task automation", "AI 작업 자동화를 위해");
-		m.put("task", "작업");
+		m.put("Copied", "복사됨");
+		m.put("Copied to clipboard", "클립보드에 복사됨");
+		m.put("Copy permanent link", "영구 링크 복사");
 	}
 		
 	@Override

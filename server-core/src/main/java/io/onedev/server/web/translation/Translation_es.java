@@ -149,6 +149,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("AI", "IA");
 		m.put("AI Model Settings", "Configuración del Modelo de IA");
 		m.put("AI Settings", "Configuraciones de IA");
+		m.put("AI behavior settings have been saved", "La configuración del comportamiento de la IA ha sido guardada");
 		m.put("AI entitlement settings have been saved", "Se han guardado las configuraciones de derechos de IA");
 		m.put("AI model settings have been saved", "Se han guardado las configuraciones del modelo de IA");
 		m.put("AI settings updated", "Configuraciones de IA actualizadas");
@@ -321,6 +322,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Allow Multiple", "Permitir múltiples");
 		m.put("Allowed Licenses", "Licencias permitidas");
 		m.put("Allowed Self Sign-Up Email Domain", "Dominio de correo electrónico permitido para auto registro");
+		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
+			"También acepta enlaces entre proyectos en forma de <code>projectpath#100</code> o <code>PROJECTKEY-100</code>");
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"También agregue lo siguiente a $HOME/.m2/settings.xml si desea compilar el proyecto desde la línea de comandos");
 		m.put("Always", "Siempre");
@@ -471,6 +474,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Batch Editing {0} Issues", "Editando en lote {0} problemas");
 		m.put("Batched suggestions", "Sugerencias agrupadas");
 		m.put("Before modification", "Antes de la modificación");
+		m.put("Behavior", "Comportamiento");
+		m.put("Behavior Edit Bean", "Editar Comportamiento Bean");
 		m.put("Belonging Groups", "Grupos pertenecientes");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"A continuación se muestran algunos criterios comunes. Escriba en el cuadro de búsqueda arriba para ver la lista completa y las combinaciones disponibles.");
@@ -590,6 +595,8 @@ public class Translation_es extends TranslationResourceBundle {
 			"Por defecto, el código se clona mediante una credencial generada automáticamente, que solo tiene permiso de lectura sobre el proyecto actual. En caso de que el trabajo necesite <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>enviar código al servidor</a>, debe proporcionar una credencial personalizada con los permisos adecuados aquí");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"Por defecto, también se enumerarán los problemas de los proyectos padre e hijo. Use la consulta <code>&quot;Project&quot; is current</code> para mostrar solo los problemas que pertenecen a este proyecto");
+		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
+			"Por defecto, el usuario de IA solo responde cuando se le asignan tareas o se le menciona en el contexto de un problema/PR.\nHabilita esto para que responda siempre que el comentario sea relevante, incluso si no se le menciona.\nEsto proporciona una mejor experiencia de interacción, especialmente en el caso de mesas de servicio,\npero puede consumir más tokens");
 		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
 			"De forma predeterminada, los usuarios solo pueden editar los campos especificados anteriormente para los problemas que hayan enviado ellos mismos.\nHabilita esta opción para permitir la edición de campos en problemas enviados por otros.");
 		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
@@ -912,6 +919,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Copy All Queried Issues To...", "Copiar Todos los Problemas Consultados A...");
 		m.put("Copy Files with SCP", "Copiar Archivos con SCP");
 		m.put("Copy Selected Issues To...", "Copiar Problemas Seleccionados A...");
+		m.put("Copy as Markdown", "Copiar como Markdown");
 		m.put("Copy dashboard", "Copiar tablero");
 		m.put("Copy issue number and title", "Copiar número y título del problema");
 		m.put("Copy public key", "Copiar clave pública");
@@ -1142,6 +1150,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "Deshabilitar tablero");
 		m.put("Disable Selected Users", "Deshabilitar usuarios seleccionados");
 		m.put("Disabled", "Deshabilitado");
+		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
+			"Los usuarios deshabilitados, cuentas de servicio y usuarios de IA están excluidos del cálculo de usuarios por mes");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"Deshabilitar la cuenta restablecerá la contraseña, eliminará los tokens de acceso y eliminará todas las referencias de otras entidades excepto las actividades pasadas. ¿Realmente desea continuar?");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1426,6 +1436,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Execute Commands", "Ejecutar Comandos");
 		m.put("Execute Commands via SSH", "Ejecutar Comandos vía SSH");
 		m.put("Exit Run As", "Salir de Ejecutar Como");
+		m.put("Exited run as", "Salió de ejecutar como");
 		m.put("Expand all", "Expandir todo");
 		m.put("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute", 
 			"Se espera uno o más <tt>&lt;número&gt;(h|m)</tt>. Por ejemplo, <tt>1h 1m</tt> representa 1 hora y 1 minuto");
@@ -2172,10 +2183,13 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Max Code Search Entries", "Máximo de Entradas de Búsqueda de Código");
 		m.put("Max Commit Message Line Length", "Longitud Máxima de Línea de Mensaje de Confirmación");
 		m.put("Max Git LFS File Size (MB)", "Tamaño Máximo de Archivo Git LFS (MB)");
+		m.put("Max Loop Count", "Conteo Máximo de Bucles");
 		m.put("Max Retries", "Máximos Reintentos");
 		m.put("Max Upload File Size (MB)", "Tamaño Máximo de Archivo de Carga (MB)");
 		m.put("Max Value", "Valor Máximo");
 		m.put("Maximum number of entries to return when search code in repository", "Número máximo de entradas a devolver al buscar código en el repositorio");
+		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"Número máximo de veces que este usuario de IA puede ser activado en una sola cadena de eventos. Cuando se alcanza el límite, el usuario de IA no se ejecutará y se publicará un comentario del sistema en su lugar");
 		m.put("Maximum of retries before giving up", "Máximo de reintentos antes de rendirse");
 		m.put("May not be empty", "No puede estar vacío");
 		m.put("Medium", "Medio");
@@ -2519,6 +2533,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Operation Successful", "Operación exitosa");
 		m.put("Operations", "Operaciones");
 		m.put("Optional", "Opcional");
+		m.put("Optional instructions that define how the AI user should behave", "Instrucciones opcionales que definen cómo debe comportarse el usuario de IA");
 		m.put("Optionally add new users to specified default group", "Opcionalmente agregue nuevos usuarios al grupo predeterminado especificado");
 		m.put("Optionally add newly authenticated user to specified group if membership information is not available", 
 			"Opcionalmente agregue al usuario autenticado recientemente al grupo especificado si la información de membresía no está disponible");
@@ -3058,6 +3073,7 @@ public class Translation_es extends TranslationResourceBundle {
 			"Nombre principal de la cuenta para iniciar sesión en el servidor de correo de Office 365 para enviar/recibir correos electrónicos. Asegúrate de que esta cuenta <b>posea</b> la aplicación registrada indicada por el id de aplicación anterior");
 		m.put("Private Key Secret", "Clave privada secreta");
 		m.put("Private key regenerated and SSH server restarted", "Clave privada regenerada y servidor SSH reiniciado");
+		m.put("Proactive", "Proactivo");
 		m.put("Product Version", "Versión del producto");
 		m.put("Profile", "Perfil");
 		m.put("Programming language", "Lenguaje de programación");
@@ -4436,6 +4452,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Toggle detail message", "Alternar mensaje detallado");
 		m.put("Toggle fixed width font", "Alternar fuente de ancho fijo");
 		m.put("Toggle full screen", "Alternar pantalla completa");
+		m.put("Toggle half screen", "Alternar media pantalla");
 		m.put("Toggle matched contents", "Alternar contenidos coincidentes");
 		m.put("Toggle navigation", "Alternar navegación");
 		m.put("Toggle work log", "Alternar registro de trabajo");
@@ -4970,6 +4987,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("files with ext \"{0}\"", "archivos con extensión \"{0}\"");
 		m.put("find by id", "buscar por id");
 		m.put("find by number", "buscar por número");
+		m.put("for AI task automation", "para la automatización de tareas de IA");
 		m.put("forked from <a wicket:id=\"forkedFrom\"></a>", "bifurcado de <a wicket:id=\"forkedFrom\"></a>");
 		m.put("found 1 agent", "encontrado 1 agente");
 		m.put("found 1 build", "encontrada 1 compilación");
@@ -5093,6 +5111,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("tag the job is running against", "etiquetar el trabajo que se está ejecutando");
 		m.put("tag {0}", "etiqueta {0}");
 		m.put("tags", "etiquetas");
+		m.put("task", "tarea");
 		m.put("the url to set up user account", "la URL para configurar la cuenta de usuario");
 		m.put("time aggregation link", "enlace de agregación de tiempo");
 		m.put("tmux Executable", "Ejecutable de tmux");
@@ -5154,25 +5173,9 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI behavior settings have been saved", "La configuración del comportamiento de la IA ha sido guardada");
-		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
-			"También acepta enlaces entre proyectos en forma de <code>projectpath#100</code> o <code>PROJECTKEY-100</code>");
-		m.put("Behavior", "Comportamiento");
-		m.put("Behavior Edit Bean", "Editar Comportamiento Bean");
-		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
-			"Por defecto, el usuario de IA solo responde cuando se le asignan tareas o se le menciona en el contexto de un problema/PR.\nHabilita esto para que responda siempre que el comentario sea relevante, incluso si no se le menciona.\nEsto proporciona una mejor experiencia de interacción, especialmente en el caso de mesas de servicio,\npero puede consumir más tokens");
-		m.put("Copy as Markdown", "Copiar como Markdown");
-		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
-			"Los usuarios deshabilitados, cuentas de servicio y usuarios de IA están excluidos del cálculo de usuarios por mes");
-		m.put("Exited run as", "Salió de ejecutar como");
-		m.put("Max Loop Count", "Conteo Máximo de Bucles");
-		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"Número máximo de veces que este usuario de IA puede ser activado en una sola cadena de eventos. Cuando se alcanza el límite, el usuario de IA no se ejecutará y se publicará un comentario del sistema en su lugar");
-		m.put("Optional instructions that define how the AI user should behave", "Instrucciones opcionales que definen cómo debe comportarse el usuario de IA");
-		m.put("Proactive", "Proactivo");
-		m.put("Toggle half screen", "Alternar media pantalla");
-		m.put("for AI task automation", "para la automatización de tareas de IA");
-		m.put("task", "tarea");
+		m.put("Copied", "Copiado");
+		m.put("Copied to clipboard", "Copiado al portapapeles");
+		m.put("Copy permanent link", "Copiar enlace permanente");
 	}
 		
 	@Override

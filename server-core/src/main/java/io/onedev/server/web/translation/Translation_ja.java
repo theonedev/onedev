@@ -149,6 +149,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("AI", "AI");
 		m.put("AI Model Settings", "AIモデル設定");
 		m.put("AI Settings", "AI設定");
+		m.put("AI behavior settings have been saved", "AIの動作設定が保存されました");
 		m.put("AI entitlement settings have been saved", "AI権限設定が保存されました");
 		m.put("AI model settings have been saved", "AIモデル設定が保存されました");
 		m.put("AI settings updated", "AI設定が更新されました");
@@ -321,6 +322,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Allow Multiple", "複数を許可");
 		m.put("Allowed Licenses", "許可されたライセンス");
 		m.put("Allowed Self Sign-Up Email Domain", "許可されたセルフサインアップメールドメイン");
+		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
+			"<code>projectpath#100</code> または <code>PROJECTKEY-100</code> の形式でクロスプロジェクトリンクも受け付けます");
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を$HOME/.m2/settings.xmlに追加してください");
 		m.put("Always", "常に");
@@ -471,6 +474,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Batch Editing {0} Issues", "{0}件の課題を一括編集中");
 		m.put("Batched suggestions", "一括提案");
 		m.put("Before modification", "変更前");
+		m.put("Behavior", "動作");
+		m.put("Behavior Edit Bean", "動作編集ビーン");
 		m.put("Belonging Groups", "所属グループ");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"以下は一般的な条件です。上の検索ボックスに入力して完全なリストと利用可能な組み合わせを表示してください。");
@@ -590,6 +595,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"デフォルトではコードは自動生成された資格情報を介してクローンされ、現在のプロジェクトに対して読み取り権限のみを持ちます。ジョブが<a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>コードをサーバーにプッシュ</a>する必要がある場合は、適切な権限を持つカスタム資格情報をここで提供してください");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"デフォルトでは親プロジェクトと子プロジェクトの課題もリストされます。クエリ<code>&quot;Project&quot; is current</code>を使用して、このプロジェクトにのみ属する課題を表示してください");
+		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
+			"デフォルトでは、AIユーザーはタスクが割り当てられた場合や、課題/PRのコンテキストで言及された場合にのみ応答します。\nこれを有効にすると、言及されていなくてもコメントが関連している限り応答します。\n特にサービスデスクの場合により良い対話体験を提供しますが、トークンを多く消費する可能性があります");
 		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
 			"デフォルトでは、ユーザーは自分が提出した課題に対して上記で指定されたフィールドのみ編集できます。\nこのオプションを有効にすると、他の人が提出した課題のフィールドも編集できるようになります。");
 		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
@@ -912,6 +919,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy All Queried Issues To...", "クエリされたすべての課題を...にコピー");
 		m.put("Copy Files with SCP", "SCPでファイルをコピー");
 		m.put("Copy Selected Issues To...", "選択された課題を...にコピー");
+		m.put("Copy as Markdown", "Markdownとしてコピー");
 		m.put("Copy dashboard", "ダッシュボードをコピー");
 		m.put("Copy issue number and title", "課題番号とタイトルをコピー");
 		m.put("Copy public key", "公開鍵をコピー");
@@ -1142,6 +1150,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "ダッシュボードを無効化");
 		m.put("Disable Selected Users", "選択したユーザーを無効化");
 		m.put("Disabled", "無効化済み");
+		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
+			"無効化されたユーザー、サービスアカウント、およびAIユーザーはユーザーマンス計算から除外されます");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"アカウントを無効化すると、パスワードがリセットされ、アクセストークンがクリアされ、過去の活動を除く他のエンティティからのすべての参照が削除されます。本当に続行しますか？");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1426,6 +1436,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Execute Commands", "コマンドを実行する");
 		m.put("Execute Commands via SSH", "SSH経由でコマンドを実行する");
 		m.put("Exit Run As", "実行ユーザーを終了");
+		m.put("Exited run as", "「として実行」を終了しました");
 		m.put("Expand all", "すべて展開する");
 		m.put("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute", 
 			"1つ以上の<tt>&lt;number&gt;(h|m)</tt>を期待します。例えば<tt>1h 1m</tt>は1時間と1分を表します");
@@ -2172,10 +2183,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Max Code Search Entries", "最大コード検索エントリ数");
 		m.put("Max Commit Message Line Length", "最大コミットメッセージ行長");
 		m.put("Max Git LFS File Size (MB)", "最大Git LFSファイルサイズ（MB）");
+		m.put("Max Loop Count", "最大ループ回数");
 		m.put("Max Retries", "最大リトライ回数");
 		m.put("Max Upload File Size (MB)", "最大アップロードファイルサイズ（MB）");
 		m.put("Max Value", "最大値");
 		m.put("Maximum number of entries to return when search code in repository", "リポジトリ内のコード検索時に返されるエントリの最大数");
+		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"このAIユーザーが単一のイベントチェーンで起動される最大回数。この制限に達すると、AIユーザーは実行されず、代わりにシステムコメントが投稿されます");
 		m.put("Maximum of retries before giving up", "諦める前の最大リトライ回数");
 		m.put("May not be empty", "空であってはなりません");
 		m.put("Medium", "中程度");
@@ -2519,6 +2533,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Operation Successful", "操作が成功しました");
 		m.put("Operations", "操作");
 		m.put("Optional", "オプション");
+		m.put("Optional instructions that define how the AI user should behave", "AIユーザーがどのように動作すべきかを定義するオプションの指示");
 		m.put("Optionally add new users to specified default group", "新しいユーザーを指定されたデフォルトグループに任意で追加");
 		m.put("Optionally add newly authenticated user to specified group if membership information is not available", 
 			"認証された新しいユーザーを、メンバーシップ情報が利用できない場合に指定されたグループに任意で追加");
@@ -3058,6 +3073,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"Office 365メールサーバーにログインしてメールを送受信するためのアカウントのプリンシパル名。このアカウントが上記のアプリケーションIDで示される登録アプリケーションを<b>所有</b>していることを確認してください");
 		m.put("Private Key Secret", "秘密鍵のシークレット");
 		m.put("Private key regenerated and SSH server restarted", "秘密鍵が再生成され、SSHサーバーが再起動されました");
+		m.put("Proactive", "プロアクティブ");
 		m.put("Product Version", "製品バージョン");
 		m.put("Profile", "プロフィール");
 		m.put("Programming language", "プログラミング言語");
@@ -4436,6 +4452,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Toggle detail message", "詳細メッセージを切り替える");
 		m.put("Toggle fixed width font", "固定幅フォントを切り替える");
 		m.put("Toggle full screen", "全画面表示を切り替える");
+		m.put("Toggle half screen", "ハーフスクリーンを切り替え");
 		m.put("Toggle matched contents", "一致した内容を切り替える");
 		m.put("Toggle navigation", "ナビゲーションを切り替える");
 		m.put("Toggle work log", "作業ログを切り替える");
@@ -4970,6 +4987,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("files with ext \"{0}\"", "拡張子「{0}」のファイル");
 		m.put("find by id", "IDで検索");
 		m.put("find by number", "番号で検索");
+		m.put("for AI task automation", "AIタスク自動化用");
 		m.put("forked from <a wicket:id=\"forkedFrom\"></a>", "<a wicket:id=\"forkedFrom\"></a>からフォークされました");
 		m.put("found 1 agent", "1 エージェントが見つかりました");
 		m.put("found 1 build", "1 ビルドが見つかりました");
@@ -5093,6 +5111,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("tag the job is running against", "ジョブが実行されているタグ");
 		m.put("tag {0}", "tag {0}");
 		m.put("tags", "タグ");
+		m.put("task", "タスク");
 		m.put("the url to set up user account", "ユーザーアカウントを設定するためのURL");
 		m.put("time aggregation link", "時間集計リンク");
 		m.put("tmux Executable", "tmux 実行可能ファイル");
@@ -5154,25 +5173,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI behavior settings have been saved", "AIの動作設定が保存されました");
-		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
-			"<code>projectpath#100</code> または <code>PROJECTKEY-100</code> の形式でクロスプロジェクトリンクも受け付けます");
-		m.put("Behavior", "動作");
-		m.put("Behavior Edit Bean", "動作編集ビーン");
-		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
-			"デフォルトでは、AIユーザーはタスクが割り当てられた場合や、課題/PRのコンテキストで言及された場合にのみ応答します。\nこれを有効にすると、言及されていなくてもコメントが関連している限り応答します。\n特にサービスデスクの場合により良い対話体験を提供しますが、トークンを多く消費する可能性があります");
-		m.put("Copy as Markdown", "Markdownとしてコピー");
-		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
-			"無効化されたユーザー、サービスアカウント、およびAIユーザーはユーザーマンス計算から除外されます");
-		m.put("Exited run as", "「として実行」を終了しました");
-		m.put("Max Loop Count", "最大ループ回数");
-		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"このAIユーザーが単一のイベントチェーンで起動される最大回数。この制限に達すると、AIユーザーは実行されず、代わりにシステムコメントが投稿されます");
-		m.put("Optional instructions that define how the AI user should behave", "AIユーザーがどのように動作すべきかを定義するオプションの指示");
-		m.put("Proactive", "プロアクティブ");
-		m.put("Toggle half screen", "ハーフスクリーンを切り替え");
-		m.put("for AI task automation", "AIタスク自動化用");
-		m.put("task", "タスク");
+		m.put("Copied", "コピー済み");
+		m.put("Copied to clipboard", "クリップボードにコピー済み");
+		m.put("Copy permanent link", "永久リンクをコピー");
 	}
 		
 	@Override

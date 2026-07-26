@@ -175,6 +175,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("AI", "AI");
 		m.put("AI Model Settings", "AI 模型设置");
 		m.put("AI Settings", "AI 设置");
+		m.put("AI behavior settings have been saved", "AI 行为设置已保存");
 		m.put("AI entitlement settings have been saved", "AI 权限设置已保存");
 		m.put("AI model settings have been saved", "AI 模型设置已保存");
 		m.put("AI settings updated", "AI 设置已更新");
@@ -347,6 +348,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Allow Multiple", "允许多个");
 		m.put("Allowed Licenses", "允许的许可证");
 		m.put("Allowed Self Sign-Up Email Domain", "允许自助注册的邮箱域名");
+		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
+			"也接受以 <code>projectpath#100</code> 或 <code>PROJECTKEY-100</code> 形式的跨项目链接");
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"如果您想从命令行编译项目，请将以下内容添加到 $HOME/.m2/settings.xml");
 		m.put("Always", "总是");
@@ -497,6 +500,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Batch Editing {0} Issues", "批量编辑 {0} 个工单");
 		m.put("Batched suggestions", "批量建议");
 		m.put("Before modification", "修改前");
+		m.put("Behavior", "行为");
+		m.put("Behavior Edit Bean", "行为编辑 Bean");
 		m.put("Belonging Groups", "所属组");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"以下是一些常见的条件。在搜索框中输入以查看完整列表和可用组合。");
@@ -616,6 +621,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"默认情况下，代码通过自动生成的凭证进行克隆，该凭证仅对当前项目具有读取权限。如需让任务<a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>推送代码到服务器</a>，请在此提供具有相应权限的自定义凭证");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"默认情况下，父项目和子项目的工单也会被列出。使用查询 <code>&quot;Project&quot; is current</code> 来只显示属于此项目的工单");
+		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
+			"默认情况下，AI 用户仅在被分配任务或在 工单/合并请求 上下文中被提及时响应。\n启用此功能后，只要评论相关，即使未被提及也会响应。\n这提供了更好的交互体验，特别是在服务台的情况下，\n但可能会消耗更多的令牌");
 		m.put("By default, users are only allowed to edit fields specified above for issues submitted by themselves.\nEnable this option to allow to edit fields for issues submitted by others.", 
 			"默认情况下，用户只能编辑自己提交的工单中指定的字段。\n启用此选项以允许编辑他人提交的工单中的字段。");
 		m.put("By default, users can access artifacts from all jobs. To assign additional privileges to specific jobs, specify them here.", 
@@ -938,6 +945,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy All Queried Issues To...", "复制所有查询的工单到...");
 		m.put("Copy Files with SCP", "使用 SCP 复制文件");
 		m.put("Copy Selected Issues To...", "复制选定的工单到...");
+		m.put("Copy as Markdown", "复制为 Markdown");
 		m.put("Copy dashboard", "复制仪表板");
 		m.put("Copy issue number and title", "复制工单编号和标题");
 		m.put("Copy public key", "复制公钥");
@@ -1168,6 +1176,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "禁用仪表盘");
 		m.put("Disable Selected Users", "禁用选定的用户");
 		m.put("Disabled", "已禁用");
+		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
+			"禁用的用户、服务账户和 AI 用户不计入用户月计算");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"禁用账户将重置密码，清除访问令牌，并删除除过去活动外的所有其他实体的引用。您真的要继续吗？");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1452,6 +1462,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Execute Commands", "执行命令");
 		m.put("Execute Commands via SSH", "通过 SSH 执行命令");
 		m.put("Exit Run As", "退出以运行身份");
+		m.put("Exited run as", "退出以...身份运行");
 		m.put("Expand all", "展开所有");
 		m.put("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute", 
 			"需要一个或多个 <tt>&lt;数字&gt;(h|m)</tt>。例如 <tt>1h 1m</tt> 表示 1 小时 1 分钟");
@@ -2198,10 +2209,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Max Code Search Entries", "最大代码搜索条目");
 		m.put("Max Commit Message Line Length", "最大提交消息行长度");
 		m.put("Max Git LFS File Size (MB)", "最大 Git LFS 文件大小 (MB)");
+		m.put("Max Loop Count", "最大循环次数");
 		m.put("Max Retries", "最大重试次数");
 		m.put("Max Upload File Size (MB)", "最大上传文件大小 (MB)");
 		m.put("Max Value", "最大值");
 		m.put("Maximum number of entries to return when search code in repository", "搜索代码库时返回的最大条目数");
+		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"此 AI 用户在单个事件链中可被唤醒的最大次数。当达到限制时，AI 用户将不会运行，而是发布一条系统评论");
 		m.put("Maximum of retries before giving up", "放弃前的最大重试次数");
 		m.put("May not be empty", "不能为空");
 		m.put("Medium", "中等");
@@ -2545,6 +2559,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Operation Successful", "操作成功");
 		m.put("Operations", "操作");
 		m.put("Optional", "可选");
+		m.put("Optional instructions that define how the AI user should behave", "定义 AI 用户应如何行为的可选指令");
 		m.put("Optionally add new users to specified default group", "可选择将新用户添加到指定的默认组");
 		m.put("Optionally add newly authenticated user to specified group if membership information is not available", 
 			"如果未查询到用户组信息，可选择将新认证的用户添加到指定组");
@@ -3084,6 +3099,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"登录到 office 365 邮件服务器发送/接收电子邮件的帐户的主名称。确保此帐户 <b>拥有</b> 上述应用程序 ID 指示的注册应用程序");
 		m.put("Private Key Secret", "私钥密钥");
 		m.put("Private key regenerated and SSH server restarted", "私钥已重新生成并重启 SSH 服务器");
+		m.put("Proactive", "主动");
 		m.put("Product Version", "产品版本");
 		m.put("Profile", "个人资料");
 		m.put("Programming language", "编程语言");
@@ -4462,6 +4478,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Toggle detail message", "切换详细信息");
 		m.put("Toggle fixed width font", "切换固定宽度字体");
 		m.put("Toggle full screen", "切换全屏");
+		m.put("Toggle half screen", "切换半屏");
 		m.put("Toggle matched contents", "切换匹配内容");
 		m.put("Toggle navigation", "切换导航");
 		m.put("Toggle work log", "切换工作日志");
@@ -4996,6 +5013,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("files with ext \"{0}\"", "具有扩展名 \"{0}\" 的文件");
 		m.put("find by id", "通过 ID 查找");
 		m.put("find by number", "通过编号查找");
+		m.put("for AI task automation", "用于 AI 任务自动化");
 		m.put("forked from <a wicket:id=\"forkedFrom\"></a>", "从 <a wicket:id=\"forkedFrom\"></a> 分叉");
 		m.put("found 1 agent", "找到 1 个代理");
 		m.put("found 1 build", "找到 1 个构建");
@@ -5119,6 +5137,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("tag the job is running against", "任务运行的标签");
 		m.put("tag {0}", "标签 {0}");
 		m.put("tags", "标签");
+		m.put("task", "任务");
 		m.put("the url to set up user account", "设置用户账户的 URL");
 		m.put("time aggregation link", "时间聚合链接");
 		m.put("tmux Executable", "tmux 可执行文件");
@@ -5180,25 +5199,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("AI behavior settings have been saved", "AI 行为设置已保存");
-		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
-			"也接受以 <code>projectpath#100</code> 或 <code>PROJECTKEY-100</code> 形式的跨项目链接");
-		m.put("Behavior", "行为");
-		m.put("Behavior Edit Bean", "行为编辑 Bean");
-		m.put("By default, AI user only responds when assigned tasks or mentioned in issue/PR context.\nEnable this to have it respond as long as the comment is relevant even if not mentioned.\nThis provides a better interaction experience, especially in case of service desks,\nbut may consume more tokens", 
-			"默认情况下，AI 用户仅在被分配任务或在 工单/合并请求 上下文中被提及时响应。\n启用此功能后，只要评论相关，即使未被提及也会响应。\n这提供了更好的交互体验，特别是在服务台的情况下，\n但可能会消耗更多的令牌");
-		m.put("Copy as Markdown", "复制为 Markdown");
-		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
-			"禁用的用户、服务账户和 AI 用户不计入用户月计算");
-		m.put("Exited run as", "退出以...身份运行");
-		m.put("Max Loop Count", "最大循环次数");
-		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"此 AI 用户在单个事件链中可被唤醒的最大次数。当达到限制时，AI 用户将不会运行，而是发布一条系统评论");
-		m.put("Optional instructions that define how the AI user should behave", "定义 AI 用户应如何行为的可选指令");
-		m.put("Proactive", "主动");
-		m.put("Toggle half screen", "切换半屏");
-		m.put("for AI task automation", "用于 AI 任务自动化");
-		m.put("task", "任务");
+		m.put("Copied", "已复制");
+		m.put("Copied to clipboard", "已复制到剪贴板");
+		m.put("Copy permanent link", "复制永久链接");
 	}
 		
 	@Override
