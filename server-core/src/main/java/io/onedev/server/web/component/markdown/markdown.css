@@ -360,11 +360,11 @@ body.markdown-editor-expanded {
 }
 
 .markdown-rendered h1 .header-link {
-	margin-left: -24px;
-	margin-top: -4px;
+	margin-left: -20px;
+	margin-top: -6px;
 }
 .markdown-rendered h2 .header-link {
-	margin-left: -22px;
+	margin-left: -20px;
 	margin-top: -4px;
 }
 .markdown-rendered h3 .header-link {
@@ -409,8 +409,8 @@ body.markdown-editor-expanded {
 	padding-left: 14px;
 }
 .markdown-rendered h1 .header-link .icon {
-	width: 20px;
-	height: 20px;
+	width: 18px;
+	height: 18px;
 }
 .markdown-rendered h2 .header-link .icon {
 	width: 18px;
@@ -421,16 +421,16 @@ body.markdown-editor-expanded {
 	height: 16px;
 }
 .markdown-rendered h4 .header-link .icon {
-	width: 14px;
-	height: 14px;
+	width: 16px;
+	height: 16px;
 }
 .markdown-rendered h5 .header-link .icon {
 	width: 14px;
 	height: 14px;
 }
 .markdown-rendered h6 .header-link .icon {
-	width: 12px;
-	height: 12px;
+	width: 14px;
+	height: 14px;
 }
 
 .markdown-rendered a.header-link {

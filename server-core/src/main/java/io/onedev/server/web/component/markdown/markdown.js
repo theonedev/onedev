@@ -1167,9 +1167,13 @@ onedev.server.markdown = {
 		$rendered.find("span.header-anchor").parent().addClass("header-anchor");
 		$rendered.find("a.header-anchor").each(function() {
 			var $headerAnchor = $(this);
-			$headerAnchor.before("<a href='" + $headerAnchor.attr("href") 
-				+ "' class='header-link'><svg class='icon'><use xlink:href='" 
+			var $headerLink = $("<a class='header-link'><svg class='icon'><use xlink:href='"
 				+ onedev.server.icons + "#link'/></svg></a>");
+			$headerAnchor.before($headerLink);
+			onedev.server.copyToClipboard.init($headerLink, function() {
+				return window.location.href.replace(/#.*$/, "") + $headerAnchor.attr("href");
+			}, onedev.server.markdown.translations["copy-permanent-link"],
+				onedev.server.markdown.translations["copied-to-clipboard"]);
 		});
 		
 		$rendered.find("a").click(function() {
@@ -1243,17 +1247,12 @@ onedev.server.markdown = {
 			
 			if (!$this.parent().hasClass("suggestion")) {
 				var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg>";
-				var $copy = $("<a class='pressable link-gray' data-tippy-content='" + onedev.server.markdown.translations["copy-to-clipboard"] + "'>" + icon + "</a>");
+				var $copy = $("<a class='link-gray'>" + icon + "</a>");
 				$actions.append($copy);
-				var options = {
-					text: function() {
-						return $this.text();
-					}
-				};
-				var $modal = $copy.closest(".modal-dialog");
-				if ($modal.length != 0) 
-					options.container = $modal[0];		
-				new ClipboardJS($copy[0], options);			
+				onedev.server.copyToClipboard.init($copy, function() {
+					return $this.text();
+				}, onedev.server.markdown.translations["copy-to-clipboard"],
+					onedev.server.markdown.translations["copied-to-clipboard"]);
 			}
 			
 			var suggestionCallback = $container.data("suggestionCallback");

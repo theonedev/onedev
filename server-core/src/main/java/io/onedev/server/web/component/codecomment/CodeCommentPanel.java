@@ -69,6 +69,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.markdown.ContentQuoted;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -788,15 +789,9 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 				viewFragment.add(new WebMarkupContainer("context").setVisible(false));
 			}
 			
-			viewFragment.add(new WebMarkupContainer("anchor") {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.put("href", "#" + getReply().getAnchor());
-				}
-				
-			});
+			viewFragment.add(new CopyToClipboardLink("anchor",
+					Model.of(OneDev.getInstance(UrlService.class).urlFor(getReply(), true)),
+					_T("Copy permanent link")));
 			
 			viewFragment.add(new MarkdownViewer("content", new IModel<String>() {
 

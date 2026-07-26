@@ -11,15 +11,16 @@ import javax.inject.Inject;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import org.jetbrains.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.model.IssueComment;
@@ -33,11 +34,13 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueCommentReactionService;
 import io.onedev.server.service.IssueCommentService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EmailAddressUtils;
 import io.onedev.server.web.component.comment.CommentHistoryLink;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.comment.ReactionSupport;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -79,15 +82,9 @@ class IssueCommentPanel extends Panel {
 			add(new WebMarkupContainer("onBehalfOf").setVisible(false));
 		}
 		
-		add(new WebMarkupContainer("anchor") {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				tag.put("href", "#" + getComment().getAnchor());
-			}
-			
-		});
+		add(new CopyToClipboardLink("anchor",
+				Model.of(OneDev.getInstance(UrlService.class).urlFor(getComment(), true)),
+				_T("Copy permanent link")));
 		
 		add(new CommentPanel("body") {
 

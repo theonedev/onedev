@@ -14,10 +14,17 @@ public class CopyToClipboardLink extends WebMarkupContainer {
 	private static final long serialVersionUID = 1L;
 
 	private final IModel<String> textModel;
+
+	private final String tooltip;
 	
 	public CopyToClipboardLink(String id, IModel<String> textModel) {
+		this(id, textModel, _T("Copy to clipboard"));
+	}
+
+	public CopyToClipboardLink(String id, IModel<String> textModel, String tooltip) {
 		super(id);
 		this.textModel = textModel;
+		this.tooltip = tooltip;
 	}
 
 	@Override
@@ -30,10 +37,11 @@ public class CopyToClipboardLink extends WebMarkupContainer {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CopyToClipboardResourceReference()));
-		String script = String.format("onedev.server.copyToClipboard.onDomReady('%s', '%s', '%s');", 
+		String script = String.format("onedev.server.copyToClipboard.onDomReady('%s', '%s', '%s', '%s');",
 				getMarkupId(true), 
 				JavaScriptEscape.escapeJavaScript(textModel.getObject()), 
-				_T("Copy to clipboard"));
+				JavaScriptEscape.escapeJavaScript(tooltip),
+				JavaScriptEscape.escapeJavaScript(_T("Copied to clipboard")));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
