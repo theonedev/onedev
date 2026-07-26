@@ -40,13 +40,19 @@ a.side-info {
 	display: none;
 }
 
-/* Collapsed pinned pane on wide viewports (non-overlay layouts) */
+/* Pinned pane on wide viewports (non-overlay layouts): stick under top
+   chrome while sharing the page scroller — no inner scrollbar / max-height.
+   top: 0 is relative to .autofit, which already sits below the fixed topbar. */
 @media(min-width: 1199px) {
+	div.side-info {
+		position: sticky;
+		top: 0;
+		align-self: flex-start;
+	}
 	div.side-info.closed {
 		width: 0;
 		max-height: 0;
 		min-height: 0;
-		align-self: flex-start;
 		margin: 0;
 		border-left: none;
 		overflow: hidden;
