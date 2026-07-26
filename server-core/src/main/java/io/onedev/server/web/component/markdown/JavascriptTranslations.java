@@ -26,6 +26,7 @@ public class JavascriptTranslations {
               map.put("copy-to-clipboard", _T("Copy to clipboard"));
               map.put("copy-permanent-link", _T("Copy permanent link"));
               map.put("copied-to-clipboard", _T("Copied to clipboard"));
+              map.put("copied", _T("Copied"));
               map.put("click-to-copy", _T("Click to copy"));
               map.put("suggestion-outdated", _T("Suggestion is outdated either due to code change or pull request close"));
               map.put("remove-from-batch", _T("Remove from batch"));

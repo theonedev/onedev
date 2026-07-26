@@ -1333,6 +1333,18 @@ onedev.server.markdown = {
 					clipboard.destroy();
 					$trigger.remove();
 					$code.addClass("copied");
+					var tooltipInstance = $code[0]._tippy;
+					if (tooltipInstance) {
+						clearTimeout($code[0].copyFeedbackTimeout);
+						tooltipInstance.setContent(onedev.server.markdown.translations["copied"]);
+						tooltipInstance.show();
+						$code[0].copyFeedbackTimeout = setTimeout(function() {
+							if (!tooltipInstance.state.isDestroyed) {
+								tooltipInstance.hide();
+								tooltipInstance.setContent(onedev.server.markdown.translations["click-to-copy"]);
+							}
+						}, 1000);
+					}
 					setTimeout(function() {
 						$code.removeClass("copied");
 					}, 150);
