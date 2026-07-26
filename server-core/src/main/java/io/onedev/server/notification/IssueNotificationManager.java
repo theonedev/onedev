@@ -353,10 +353,9 @@ public class IssueNotificationManager implements Serializable {
 					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified())
 						bccEmailAddresses.add(emailAddress.getValue());
-				} else if (user != null
-						&& (!user.isSystem()
-							|| event instanceof IssueOpened issueOpened && issueOpened.getIssue().getOnBehalfOf() != null
-							|| event instanceof IssueCommentCreated issueCommentCreated && issueCommentCreated.getComment().getOnBehalfOf() != null)
+				} else if (event instanceof IssueCommentCreated issueCommentCreated
+						&& user != null
+						&& (!user.isSystem() || issueCommentCreated.getComment().getOnBehalfOf() != null)
 						&& !user.equals(watch.getUser()) 
 						&& watch.getUser().getAiSetting().isProactive()
 						&& isAiEligible(user, issue, watch.getUser(), false) 

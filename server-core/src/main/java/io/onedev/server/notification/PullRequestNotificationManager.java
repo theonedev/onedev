@@ -411,11 +411,11 @@ public class PullRequestNotificationManager implements Serializable {
 							EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 							if (emailAddress != null && emailAddress.isVerified())
 								bccEmailAddresses.add(emailAddress.getValue());
-						} else if (event.getCommentText() instanceof MarkdownText 
-								&& watch.getUser().getAiSetting().isProactive()
+						} else if (event instanceof PullRequestCommentCreated
 								&& user != null 
 								&& !user.isSystem()
 								&& !user.equals(watch.getUser()) 
+								&& watch.getUser().getAiSetting().isProactive()
 								&& isAiEligible(user, request, watch.getUser(), false)
 								&& canCreateWorkspace(watch.getUser(), request, false)) {
 							onAiNotified(watch.getUser(), user, request,
