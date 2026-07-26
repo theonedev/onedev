@@ -30,7 +30,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -64,7 +63,6 @@ import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
@@ -227,9 +225,6 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 						});
 
-						fragment.add(new CopyToClipboardLink("copy",
-								Model.of(issue.getTitle() + " (#" + issue.getNumber() + ")")));
-						
 						var linksPanel = new IssueLinksPanel("links") {
 
 							@Override

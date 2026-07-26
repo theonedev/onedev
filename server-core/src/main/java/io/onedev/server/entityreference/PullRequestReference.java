@@ -8,7 +8,7 @@ public class PullRequestReference extends EntityReference {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String TYPE = "pull request";
+	public static final String TYPE = "pr";
 	
 	public PullRequestReference(Project project, Long number) {
 		super(project, number);

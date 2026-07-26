@@ -149,11 +149,6 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				return IssueDetailPage.this.getIssue();
 			}
 
-			@Override
-			protected Project getProject() {
-				return getIssue().getProject();
-			}
-
 		});
 		
 		add(new SideInfoLink("moreInfo"));

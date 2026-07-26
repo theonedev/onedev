@@ -92,11 +92,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 				return CardDetailPanel.this.getIssue();
 			}
 
-			@Override
-			protected Project getProject() {
-				return CardDetailPanel.this.getProject();
-			}
-
 		});
 		
 		add(new SideInfoLink("moreInfoTrigger"));

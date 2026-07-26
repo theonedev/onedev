@@ -130,7 +130,6 @@ import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.issue.workspaces.IssueWorkspacesLink;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -1978,9 +1977,6 @@ public abstract class IssueListPanel extends Panel {
 					
 				});
 				
-				fragment.add(new CopyToClipboardLink("copy",
-						Model.of(issue.getTitle() + " (" + issue.getReference().toString(getProject()) + ")")));
-
 				fragment.add(new IssueWorkspacesLink("workspaces") {
 
 					@Override

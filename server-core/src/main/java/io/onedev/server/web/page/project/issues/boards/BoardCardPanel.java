@@ -29,7 +29,6 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
@@ -54,7 +53,6 @@ import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.issue.workspaces.IssueWorkspacesLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -275,9 +273,6 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			
 		});
 		
-		fragment.add(new CopyToClipboardLink("copy", 
-				Model.of(issue.getTitle() + " (" + issue.getReference().toString(getProject()) + ")")));
-
 		fragment.add(new IssueWorkspacesLink("workspaces") {
 
 			@Override
