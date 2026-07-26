@@ -26,7 +26,8 @@ onedev.server.folderView = {
 							$author.empty().append(html);
 							$author.find(".name").text(lastCommit.authorName);
 							
-							$row.children(".last-commit.when").append("<span>" + lastCommit.when + "</span>");
+							var $when = $("<span></span>").text(lastCommit.when).attr("title", lastCommit.whenTitle);
+							$row.children(".last-commit.when").append($when);
 							var $message = $row.children(".last-commit.message");
 							$message.append(lastCommit.html);
 							

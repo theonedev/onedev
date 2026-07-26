@@ -26,16 +26,24 @@ public abstract class BlameMessageBehavior extends AbstractPostAjaxBehavior {
 		String commitHash = params.getParameterValue("commit").toString();
 		RevCommit commit = getProject().getRevCommit(commitHash, true);
 		String authoring;
+		String authoringTitle;
 		if (commit.getAuthorIdent() != null) {
 			authoring = commit.getAuthorIdent().getName();
-			if (commit.getCommitterIdent() != null)
+			if (commit.getCommitterIdent() != null) {
 				authoring += " " + DateUtils.formatAge(commit.getCommitterIdent().getWhen());
+				authoringTitle = "'" + JavaScriptEscape.escapeJavaScript(
+						DateUtils.formatDateTime(commit.getCommitterIdent().getWhen())) + "'";
+			} else {
+				authoringTitle = "undefined";
+			}
 			authoring = "'" + JavaScriptEscape.escapeJavaScript(authoring) + "'";
 		} else {
 			authoring = "undefined";
+			authoringTitle = "undefined";
 		}
 		String message = JavaScriptEscape.escapeJavaScript(commit.getFullMessage());
-		String script = String.format("onedev.server.blameMessage.show('%s', %s, '%s');", tooltipId, authoring, message); 
+		String script = String.format("onedev.server.blameMessage.show('%s', %s, %s, '%s');",
+				tooltipId, authoring, authoringTitle, message);
 		target.appendJavaScript(script);
 	}
 

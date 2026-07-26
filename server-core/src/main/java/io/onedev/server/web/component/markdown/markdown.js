@@ -1494,14 +1494,14 @@ onedev.server.markdown = {
 		$tooltip.find(".name").text(name);
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
-	renderCommitTooltip: function(author, date, commitMessage) {
+	renderCommitTooltip: function(author, date, dateTitle, commitMessage) {
 		var $tooltip = $("#reference-tooltip");
 		if (commitMessage) {
 			$tooltip.empty().append("" +
 					"  <div class='font-weight-bolder mb-2'><span class='author'></span> <span class='date'></span></div>" +
 					"  <pre class='body mb-0'></pre>");
 			$tooltip.find(".author").text(author);
-			$tooltip.find(".date").text(date);
+			$tooltip.find(".date").text(date).attr("title", dateTitle);
 			$tooltip.find(".body").text(commitMessage);
 		} else {
 			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["commit-not-exist-or-access-denied"] + "</i>");			

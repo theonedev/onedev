@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -257,7 +258,14 @@ public abstract class BuildSidePanel extends Panel {
 				return DateUtils.formatAge(getBuild().getSubmitDate());
 			}
 			
-		}));
+		}).add(new AttributeAppender("title", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return DateUtils.formatDateTime(getBuild().getSubmitDate());
+			}
+
+		})));
 		general.add(new Label("submitReason", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -289,7 +297,14 @@ public abstract class BuildSidePanel extends Panel {
 				setVisible(getBuild().getRetryDate() != null);
 			}
 			
-		});
+		}.add(new AttributeAppender("title", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return DateUtils.formatDateTime(getBuild().getRetryDate());
+			}
+
+		})));
 		
 		general.add(new Label("queueingTakes", new LoadableDetachableModel<String>() {
 

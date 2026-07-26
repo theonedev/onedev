@@ -722,7 +722,8 @@ public abstract class WorkspaceListPanel extends Panel {
 			@Override
 			public void populateItem(Item<ICellPopulator<Workspace>> cellItem, String componentId,
                                      IModel<Workspace> rowModel) {
-				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getCreateDate())));
+				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getCreateDate()))
+						.add(new AttributeAppender("title", DateUtils.formatDateTime(rowModel.getObject().getCreateDate()))));
 			}
 		});
 

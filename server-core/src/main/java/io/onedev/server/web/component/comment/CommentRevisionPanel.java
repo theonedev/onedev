@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssReferenceHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -32,7 +33,8 @@ abstract class CommentRevisionPanel extends Panel {
 
         var revision = getCommentRevision();
 
-        add(new Label("title", MessageFormat.format(_T("Edited by {0} {1}"), revision.getUser().getDisplayName(), DateUtils.formatAge(revision.getDate()))));
+        add(new Label("title", MessageFormat.format(_T("Edited by {0} {1}"), revision.getUser().getDisplayName(), DateUtils.formatAge(revision.getDate())))
+                .add(new AttributeAppender("title", DateUtils.formatDateTime(revision.getDate()))));
 
         List<String> oldLines;
         if (revision.getOldContent() != null) 

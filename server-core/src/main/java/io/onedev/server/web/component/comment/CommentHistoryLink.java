@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.hibernate.proxy.HibernateProxyHelper;
 
@@ -53,7 +54,8 @@ public abstract class CommentHistoryLink extends MenuLink {
 
                 @Override
                 public WebMarkupContainer newLink(String id) {
-                    return new ModalLink(id) {
+                    var revision = (CommentRevision) getDao().load(revisionClass, revisionId);
+                    var link = new ModalLink(id) {
 
                         @Override
                         public void onClick(AjaxRequestTarget target) {
@@ -80,6 +82,8 @@ public abstract class CommentHistoryLink extends MenuLink {
                         }
 
                     };
+                    link.add(new AttributeAppender("title", DateUtils.formatDateTime(revision.getDate())));
+                    return link;
                 }
 
             });

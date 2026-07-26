@@ -78,6 +78,7 @@ class LastCommitsResource extends AbstractResource {
 					var transformed = transformReferences(value.getSummary(), project, new LinkTransformer(url));
 					info.html = Emojis.getInstance().apply(transformed);
 					info.when = DateUtils.formatAge(value.getCommitDate());
+					info.whenTitle = DateUtils.formatDateTime(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
 					EmailAddress emailAddress = emailAddressService.findByValue(author.getEmailAddress());
@@ -125,6 +126,8 @@ class LastCommitsResource extends AbstractResource {
 		String html;
 		
 		String when;
+
+		String whenTitle;
 		
 		String authorAvatarUrl;
 		
