@@ -22,6 +22,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -96,6 +97,16 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		Fragment fragment = new Fragment(componentId, "contentFrag", this);
 		
 		BoardSpec board = ((IssueBoardsPage)getPage()).getBoard();
+
+		fragment.add(new WebMarkupContainer("dragHandle") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(displayedIssueIds.isEmpty() && getAuthUser() != null);
+			}
+
+		});
 
 		RepeatingView fieldsView = new RepeatingView("fields");
 		for (String fieldName: board.getDisplayFields()) {
@@ -344,9 +355,6 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		add(newContent("content", getModel(), new HashSet<>()));
 		
 		add(AttributeAppender.append("data-issue", getIssue().getId()));
-		
-		if (getAuthUser() != null)
-			add(AttributeAppender.append("style", "cursor:move;"));
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
 			

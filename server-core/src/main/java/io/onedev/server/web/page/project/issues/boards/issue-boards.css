@@ -74,7 +74,14 @@
 }
 .board-card .primary {
 	position: relative;
+	padding-left: 20px;
 	padding-right: 20px;
+}
+.board-card .drag-handle {
+	cursor: move;
+	position: absolute;
+	left: 0;
+	top: 3px;
 }
 .board-card .primary .title {
 	word-break: break-word !important;

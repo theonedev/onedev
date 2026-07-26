@@ -3,6 +3,7 @@
 	<wicket:fragment wicket:id="contentFrag">
 		<div class="issue-item">
 			<div class="primary d-flex align-items-center flex-wrap dropdown-aware row-gap-2 mb-3">
+				<span wicket:id="dragHandle" class="drag-indicator drag-handle flex-shrink-0 mr-1"><wicket:svg href="grip" class="icon"/></span>
 				<span wicket:id="numberAndTitle" class="font-weight-bold mr-1"></span>
 				<div wicket:id="progress" class="d-flex align-items-center mr-2"></div>
 				<a wicket:id="workspaces" class="btn btn-xs btn-icon btn-light btn-hover-primary workspaces flex-shrink-0 mr-2" t:data-tippy-content="Workspaces on this issue"><wicket:svg href="workspace" class="icon"></wicket:svg></a>

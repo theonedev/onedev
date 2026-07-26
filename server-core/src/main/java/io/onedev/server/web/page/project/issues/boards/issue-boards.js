@@ -36,6 +36,7 @@ onedev.server.issueBoards = {
 			}
 			$card.draggable({
 				helper: "clone", 
+				handle: ".drag-handle",
 				appendTo: $container,
 				scroll: false,
 				start: function(event, ui) {
