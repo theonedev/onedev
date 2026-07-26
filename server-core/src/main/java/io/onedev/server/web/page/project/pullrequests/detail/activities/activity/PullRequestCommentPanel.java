@@ -71,7 +71,7 @@ class PullRequestCommentPanel extends Panel {
 		add(new UserIdentPanel("avatar", getComment().getUser(), Mode.AVATAR));
 		add(new UserIdentPanel("name", getComment().getUser(), Mode.NAME));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
-			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
+			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(getComment().getDate()))));
 		
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
 

@@ -691,7 +691,7 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			public void populateItem(Item<ICellPopulator<Pack>> cellItem, String componentId, IModel<Pack> rowModel) {
 				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getPublishDate()))
-						.add(new AttributeAppender("title", DateUtils.formatDateTime(rowModel.getObject().getPublishDate()))));
+						.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(rowModel.getObject().getPublishDate()))));
 			}
 		});
 

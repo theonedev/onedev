@@ -258,7 +258,7 @@ public abstract class BuildSidePanel extends Panel {
 				return DateUtils.formatAge(getBuild().getSubmitDate());
 			}
 			
-		}).add(new AttributeAppender("title", new LoadableDetachableModel<String>() {
+		}).add(new AttributeAppender("data-tippy-content", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
@@ -297,7 +297,7 @@ public abstract class BuildSidePanel extends Panel {
 				setVisible(getBuild().getRetryDate() != null);
 			}
 			
-		}.add(new AttributeAppender("title", new LoadableDetachableModel<String>() {
+		}.add(new AttributeAppender("data-tippy-content", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {

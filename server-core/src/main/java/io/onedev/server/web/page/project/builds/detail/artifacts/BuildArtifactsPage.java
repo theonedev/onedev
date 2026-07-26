@@ -84,7 +84,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 				ArtifactInfo artifact = rowModel.getObject().getRight();
 				var lastModified = new Date(artifact.getLastModified());
 				cellItem.add(new Label(componentId, DateUtils.formatAge(lastModified))
-						.add(new AttributeAppender("title", DateUtils.formatDateTime(lastModified))));
+						.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(lastModified))));
 			}
 
 		});

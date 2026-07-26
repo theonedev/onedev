@@ -34,7 +34,7 @@ abstract class CommentRevisionPanel extends Panel {
         var revision = getCommentRevision();
 
         add(new Label("title", MessageFormat.format(_T("Edited by {0} {1}"), revision.getUser().getDisplayName(), DateUtils.formatAge(revision.getDate())))
-                .add(new AttributeAppender("title", DateUtils.formatDateTime(revision.getDate()))));
+                .add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(revision.getDate()))));
 
         List<String> oldLines;
         if (revision.getOldContent() != null) 

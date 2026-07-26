@@ -36,7 +36,7 @@ public class ContributorPanel extends Panel {
 		}
 		fragment.add(new PersonIdentPanel("author", author, "Author", Mode.NAME));
 		fragment.add(new Label("date", DateUtils.formatAge(committer.getWhen()))
-			.add(new AttributeAppender("title", DateUtils.formatDateTime(committer.getWhen()))));
+			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(committer.getWhen()))));
 		add(fragment);
 	}
 

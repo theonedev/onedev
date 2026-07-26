@@ -4,8 +4,12 @@ onedev.server.blameMessage = {
 		$blameTooltip.empty();
 		if (authoring) {
 			$blameTooltip.html("<div class='authoring'></div><div class='message'></div>");
-			$blameTooltip.children(".authoring").text(authoring);
-			$blameTooltip.children(".authoring").attr("title", authoringTitle);
+			var $authoring = $blameTooltip.children(".authoring");
+			$authoring.text(authoring).attr("data-tippy-content", authoringTitle);
+			tippy($authoring[0], {
+				delay: [500, 0],
+				placement: "auto"
+			});
 			$blameTooltip.children(".message").text(message);
 		} else {
 			$blameTooltip.text(message);

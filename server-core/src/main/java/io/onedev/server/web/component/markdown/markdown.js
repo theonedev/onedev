@@ -1501,7 +1501,12 @@ onedev.server.markdown = {
 					"  <div class='font-weight-bolder mb-2'><span class='author'></span> <span class='date'></span></div>" +
 					"  <pre class='body mb-0'></pre>");
 			$tooltip.find(".author").text(author);
-			$tooltip.find(".date").text(date).attr("title", dateTitle);
+			var $date = $tooltip.find(".date");
+			$date.text(date).attr("data-tippy-content", dateTitle);
+			tippy($date[0], {
+				delay: [500, 0],
+				placement: "auto"
+			});
 			$tooltip.find(".body").text(commitMessage);
 		} else {
 			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["commit-not-exist-or-access-denied"] + "</i>");			

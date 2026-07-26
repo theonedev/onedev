@@ -26,8 +26,13 @@ onedev.server.folderView = {
 							$author.empty().append(html);
 							$author.find(".name").text(lastCommit.authorName);
 							
-							var $when = $("<span></span>").text(lastCommit.when).attr("title", lastCommit.whenTitle);
+							var $when = $("<span></span>").text(lastCommit.when)
+									.attr("data-tippy-content", lastCommit.whenTitle);
 							$row.children(".last-commit.when").append($when);
+							tippy($when[0], {
+								delay: [500, 0],
+								placement: "auto"
+							});
 							var $message = $row.children(".last-commit.message");
 							$message.append(lastCommit.html);
 							

@@ -27,7 +27,7 @@ class IssueChangePanel extends Panel {
 		add(new Label("description", change.getData().getActivity()));
 		
 		add(new Label("age", DateUtils.formatAge(change.getDate()))
-			.add(new AttributeAppender("title", DateUtils.formatDateTime(change.getDate()))));
+			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(change.getDate()))));
 		
 		ActivityDetail detail = getChange().getData().getActivityDetail();
 		if (detail != null) 

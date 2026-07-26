@@ -125,7 +125,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 		viewFragment.add(new Label("userName", getComment().getUser().getDisplayName()));
 		viewFragment.add(new Label("action", "commented"));
 		viewFragment.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
-				.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
+				.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(getComment().getCreateDate()))));
 		if (isContextDifferent(getComment().getCompareContext())) {
 			String url = OneDev.getInstance(UrlService.class).urlFor(getComment(), false);
 			viewFragment.add(new ExternalLink("context", url) {
@@ -701,7 +701,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			else
 				fragment.add(new Label("action", "unresolved"));
 			fragment.add(new Label("date", DateUtils.formatAge(getChange().getDate()))
-					.add(new AttributeAppender("title", DateUtils.formatDateTime(getChange().getDate()))));
+					.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(getChange().getDate()))));
 			if (isContextDifferent(getChange().getCompareContext())) {
 				String url = OneDev.getInstance(UrlService.class).urlFor(getChange(), false);
 				fragment.add(new ExternalLink("context", url) {
@@ -773,7 +773,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			viewFragment.add(new Label("userName", reply.getUser().getDisplayName()));
 			viewFragment.add(new Label("action", "replied"));
 			viewFragment.add(new Label("date", DateUtils.formatAge(reply.getDate()))
-					.add(new AttributeAppender("title", DateUtils.formatDateTime(reply.getDate()))));
+					.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(reply.getDate()))));
 			if (isContextDifferent(reply.getCompareContext())) {
 				String url = OneDev.getInstance(UrlService.class).urlFor(reply, false);
 				viewFragment.add(new ExternalLink("context", url) {

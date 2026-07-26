@@ -125,7 +125,7 @@ public class WorkspaceDataPanel extends Panel {
 				if (lastModified > 0) {
 					var date = new Date(lastModified);
 					cellItem.add(new Label(componentId, DateUtils.formatAge(date))
-							.add(new AttributeAppender("title", DateUtils.formatDateTime(date))));
+							.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(date))));
 				}
 				else
 					cellItem.add(new Label(componentId, "N/A"));

@@ -100,7 +100,7 @@ public abstract class PackSidePanel extends Panel {
 				return DateUtils.formatAge(getPack().getPublishDate());
 			}
 
-		}).add(new AttributeAppender("title", DateUtils.formatDateTime(getPack().getPublishDate()))));
+		}).add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(getPack().getPublishDate()))));
 		
 		add(new Label("totalSize", new LoadableDetachableModel<String>() {
 			@Override

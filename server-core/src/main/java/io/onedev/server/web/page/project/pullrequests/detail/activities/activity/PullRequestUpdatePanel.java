@@ -90,7 +90,7 @@ class PullRequestUpdatePanel extends Panel {
 
 				var committer = commit.getCommitterIdent();
 				item.add(new Label("date", DateUtils.formatAge(committer.getWhen()))
-						.add(new AttributeAppender("title", DateUtils.formatDateTime(committer.getWhen()))));
+						.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(committer.getWhen()))));
 
 				item.add(new SignatureStatusPanel("signature") {
 					

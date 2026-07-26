@@ -82,7 +82,7 @@ public abstract class CommentHistoryLink extends MenuLink {
                         }
 
                     };
-                    link.add(new AttributeAppender("title", DateUtils.formatDateTime(revision.getDate())));
+                    link.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(revision.getDate())));
                     return link;
                 }
 
