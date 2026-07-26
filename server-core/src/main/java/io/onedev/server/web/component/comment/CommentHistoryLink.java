@@ -54,6 +54,7 @@ public abstract class CommentHistoryLink extends MenuLink {
 
                 @Override
                 public WebMarkupContainer newLink(String id) {
+                    @SuppressWarnings("unchecked")
                     var revision = (CommentRevision) getDao().load(revisionClass, revisionId);
                     var link = new ModalLink(id) {
 
