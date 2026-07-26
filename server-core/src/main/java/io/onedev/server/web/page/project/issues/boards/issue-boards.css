@@ -149,6 +149,10 @@
 	height: 19px !important;
 }
 
+.board-card .avatars>.avatar:last-child .value {
+	margin-right: 0 !important;
+}
+
 .board-card-detail .modal-header h5 {
 	width: 100%;
 	margin-right: 36px;
