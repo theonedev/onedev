@@ -2103,7 +2103,7 @@ public abstract class IssueListPanel extends Panel {
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
 				fragment.add(new Label("activity", lastActivity.getDescription()));
 				fragment.add(new Label("date", DateUtils.formatAge(lastActivity.getDate()))
-						.add(new AttributeAppender("title", DateUtils.formatDateTime(lastActivity.getDate()))));
+						.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(lastActivity.getDate()))));
 
 				fragment.add(new ListView<Issue>("linkedIssues", new LoadableDetachableModel<>() {
 

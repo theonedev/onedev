@@ -1300,7 +1300,14 @@ public abstract class BuildListPanel extends Panel {
 						return DateUtils.formatAge(rowModel.getObject().getStatusDate());
 					}
 
-				}));
+				}).add(new AttributeAppender("data-tippy-content", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						return DateUtils.formatDateTime(rowModel.getObject().getStatusDate());
+					}
+
+				})));
 				fragment.add(newBuildObserver(buildId));
 				fragment.setOutputMarkupId(true);
 				cellItem.add(fragment);

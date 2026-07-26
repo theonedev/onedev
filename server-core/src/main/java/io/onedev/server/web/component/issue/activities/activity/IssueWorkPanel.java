@@ -53,7 +53,7 @@ class IssueWorkPanel extends Panel {
 		var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 		add(new Label("workingPeriod", timeTrackingSetting.formatWorkingPeriod(getWork().getMinutes(), true)));	
 		add(new Label("age", DateUtils.formatAge(getWork().getDate()))
-			.add(new AttributeAppender("title", formatDateTime(getWork().getDate()))));
+			.add(new AttributeAppender("data-tippy-content", formatDateTime(getWork().getDate()))));
 		
 		add(newDetailViewer("body"));
 

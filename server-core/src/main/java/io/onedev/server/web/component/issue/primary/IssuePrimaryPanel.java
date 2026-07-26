@@ -179,7 +179,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 		Issue issue = getIssue();
 		add(new UserIdentPanel("submitter", issue.getSubmitter(), Mode.AVATAR_AND_NAME));
 		add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate()))
-			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
+			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(issue.getSubmitDate()))));
 
 		if (issue.getOnBehalfOf() != null) {
 			var onBehalfOfInfo = HtmlEscape.escapeHtml5(EmailAddressUtils.describe(issue.getOnBehalfOf(), SecurityUtils.canManageIssues(getProject())));

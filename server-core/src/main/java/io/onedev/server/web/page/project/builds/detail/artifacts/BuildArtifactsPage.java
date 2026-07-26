@@ -82,7 +82,9 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Pair<String, ArtifactInfo>>> cellItem, String componentId, IModel<Pair<String, ArtifactInfo>> rowModel) {
 				ArtifactInfo artifact = rowModel.getObject().getRight();
-				cellItem.add(new Label(componentId, DateUtils.formatAge(new Date(artifact.getLastModified()))));
+				var lastModified = new Date(artifact.getLastModified());
+				cellItem.add(new Label(componentId, DateUtils.formatAge(lastModified))
+						.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(lastModified))));
 			}
 
 		});

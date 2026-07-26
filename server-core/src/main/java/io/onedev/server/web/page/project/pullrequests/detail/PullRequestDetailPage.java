@@ -1759,7 +1759,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		var descriptionContainer = new WebMarkupContainer("description");
 		descriptionContainer.add(new UserIdentPanel("submitter", request.getSubmitter(), Mode.AVATAR_AND_NAME));
 		descriptionContainer.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate()))
-			.add(new AttributeAppender("title", DateUtils.formatDateTime(request.getSubmitDate()))));
+			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(request.getSubmitDate()))));
 		
 		descriptionContainer.add(new CommentPanel("content") {
 

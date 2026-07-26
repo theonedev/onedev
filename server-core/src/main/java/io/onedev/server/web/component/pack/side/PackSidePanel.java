@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -99,7 +100,7 @@ public abstract class PackSidePanel extends Panel {
 				return DateUtils.formatAge(getPack().getPublishDate());
 			}
 
-		}));
+		}).add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(getPack().getPublishDate()))));
 		
 		add(new Label("totalSize", new LoadableDetachableModel<String>() {
 			@Override

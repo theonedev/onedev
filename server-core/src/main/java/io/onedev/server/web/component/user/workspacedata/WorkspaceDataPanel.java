@@ -18,6 +18,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -121,8 +122,11 @@ public class WorkspaceDataPanel extends Panel {
 						maxLastModified = Math.max(maxLastModified, child.lastModified());		
 					return maxLastModified;
 				});
-				if (lastModified > 0)
-					cellItem.add(new Label(componentId, DateUtils.formatAge(new Date(lastModified))));
+				if (lastModified > 0) {
+					var date = new Date(lastModified);
+					cellItem.add(new Label(componentId, DateUtils.formatAge(date))
+							.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(date))));
+				}
 				else
 					cellItem.add(new Label(componentId, "N/A"));
 			}

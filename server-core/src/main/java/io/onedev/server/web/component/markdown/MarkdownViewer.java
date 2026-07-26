@@ -297,9 +297,10 @@ public class MarkdownViewer extends GenericPanel<String> {
 					if (commitProject != null)
 						commit = commitProject.getRevCommit(ObjectId.fromString(commitHash), false);
 					if (commit != null && SecurityUtils.canReadCode(commitProject)) {
-						String script = String.format("onedev.server.markdown.renderCommitTooltip('%s', '%s', '%s');", 
+						String script = String.format("onedev.server.markdown.renderCommitTooltip('%s', '%s', '%s', '%s');",
 								JavaScriptEscape.escapeJavaScript(commit.getAuthorIdent().getName()), 
-								JavaScriptEscape.escapeJavaScript(DateUtils.formatAge(commit.getCommitterIdent().getWhen())), 
+								JavaScriptEscape.escapeJavaScript(DateUtils.formatAge(commit.getCommitterIdent().getWhen())),
+								JavaScriptEscape.escapeJavaScript(DateUtils.formatDateTime(commit.getCommitterIdent().getWhen())),
 								JavaScriptEscape.escapeJavaScript(commit.getFullMessage()));
 						target.appendJavaScript(script);
 					} else {
