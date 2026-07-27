@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1319,7 +1320,33 @@ public class DefaultProjectService extends BaseEntityService<Project>
 								mediaType = MediaType.APPLICATION_OCTET_STREAM;
 							return new FileInfo(siteArtifactPath, siteArtifact.lastModified(), siteArtifact.length(), mediaType);
 						} else {
-							return new DirectoryInfo(siteArtifactPath, siteArtifact.lastModified(), null);
+							List<ArtifactInfo> children = new ArrayList<>();
+							File[] childFiles = siteArtifact.listFiles();
+							if (childFiles != null) {
+								int baseLen = getSiteDir(projectId).getAbsolutePath().length() + 1;
+								for (File child : childFiles) {
+									if (!SiteSyncUtils.isVersionFile(child)) {
+										String relativePath = child.getAbsolutePath().substring(baseLen);
+										if (child.isFile()) {
+											children.add(new FileInfo(relativePath, child.lastModified(),
+													child.length(), null));
+										} else {
+											children.add(new DirectoryInfo(relativePath, child.lastModified(), null));
+										}
+									}
+								}
+								children.sort((Comparator<ArtifactInfo>) (o1, o2) -> {
+									if (o1 instanceof FileInfo && o2 instanceof FileInfo
+											|| o1 instanceof DirectoryInfo && o2 instanceof DirectoryInfo) {
+										return o1.getPath().compareTo(o2.getPath());
+									} else if (o1 instanceof FileInfo) {
+										return 1;
+									} else {
+										return -1;
+									}
+								});
+							}
+							return new DirectoryInfo(siteArtifactPath, siteArtifact.lastModified(), children);
 						}
 					} else {
 						return null;

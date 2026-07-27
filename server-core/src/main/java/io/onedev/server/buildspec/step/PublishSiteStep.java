@@ -67,8 +67,8 @@ public class PublishSiteStep extends ServerSideStep {
 	}
 	
 	@Editable(order=100, description="Specify files under above directory to be published. "
-			+ "Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be "
-			+ "included in these files to be served as site start page")
+			+ "Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, "
+			+ "it will be served as the site start page; otherwise a listing of published files will be shown")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty

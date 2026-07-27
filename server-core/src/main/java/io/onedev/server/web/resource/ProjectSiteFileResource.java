@@ -2,6 +2,7 @@ package io.onedev.server.web.resource;
 
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.server.util.IOUtils.copyRange;
+import static io.onedev.server.util.SiteSyncUtils.FILE_VERSION;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
@@ -26,9 +28,11 @@ import javax.ws.rs.core.Response;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
+import org.apache.wicket.util.encoding.UrlEncoder;
 import org.eclipse.jetty.io.EofException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -76,16 +80,20 @@ public class ProjectSiteFileResource extends AbstractResource {
 		
 		FileInfo fileInfo;
 		String filePath = Joiner.on("/").join(filePathSegments);
+		if (filePathSegments.contains(FILE_VERSION))
+			return newNotFoundResponse(filePath);
 		if (filePath.length() != 0) {
 			ArtifactInfo artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
 			if (artifactInfo instanceof DirectoryInfo) {
 				if (attributes.getRequest().getUrl().getPath().endsWith("/")) {
-					filePath += "/index.html";
-					artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
+					DirectoryInfo directoryInfo = (DirectoryInfo) artifactInfo;
+					String indexFilePath = filePath + "/index.html";
+					artifactInfo = getProjectService().getSiteArtifactInfo(projectId, indexFilePath);
 					if (artifactInfo instanceof FileInfo)
 						fileInfo = (FileInfo) artifactInfo;
-					else						
-						return newNotFoundResponse(filePath);
+					else
+						return newDirectoryResponse(filePath, directoryInfo);
+					filePath = indexFilePath;
 				} else {
 					throw new RedirectToUrlException(attributes.getRequest().getUrl().getPath() + "/");
 				}
@@ -99,8 +107,13 @@ public class ProjectSiteFileResource extends AbstractResource {
 			ArtifactInfo artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
 			if (artifactInfo instanceof FileInfo)
 				fileInfo = (FileInfo) artifactInfo;
-			else
-				return newNotFoundResponse(filePath);
+			else {
+				artifactInfo = getProjectService().getSiteArtifactInfo(projectId, "");
+				if (artifactInfo instanceof DirectoryInfo)
+					return newDirectoryResponse("", (DirectoryInfo) artifactInfo);
+				else
+					return newNotFoundResponse(filePath);
+			}
 		} else {
 			throw new RedirectToUrlException(attributes.getRequest().getUrl().getPath() + "/");
 		}
@@ -172,17 +185,61 @@ public class ProjectSiteFileResource extends AbstractResource {
 
 		return response;
 	}
+
+	private ResourceResponse newDirectoryResponse(String directoryPath, DirectoryInfo directoryInfo) {
+		ResourceResponse response = new ResourceResponse();
+		response.setContentType(MediaType.TEXT_HTML + "; charset=" + StandardCharsets.UTF_8.name());
+		response.setWriteCallback(new WriteCallback() {
+
+			@Override
+			public void writeData(Attributes attributes) throws IOException {
+				String displayPath = "/" + directoryPath;
+				if (!displayPath.endsWith("/"))
+					displayPath += "/";
+				String escapedDisplayPath = HtmlEscape.escapeHtml5(displayPath);
+				StringBuilder builder = new StringBuilder();
+				builder.append("<!doctype html><html><head><meta charset=\"UTF-8\"><title>Index of ")
+						.append(escapedDisplayPath)
+						.append("</title></head><body><h1>Index of ")
+						.append(escapedDisplayPath)
+						.append("</h1><ul>");
+				if (!directoryPath.isEmpty())
+					builder.append("<li><a href=\"../\">../</a></li>");
+				for (ArtifactInfo child : directoryInfo.getChildren() != null
+						? directoryInfo.getChildren() : Collections.<ArtifactInfo>emptyList()) {
+					String childPath = child.getPath();
+					String name = childPath.substring(childPath.lastIndexOf('/') + 1);
+					if (name.equals(FILE_VERSION))
+						continue;
+					String encodedName = UrlEncoder.PATH_INSTANCE.encode(name, StandardCharsets.UTF_8);
+					if (child instanceof DirectoryInfo) {
+						name += "/";
+						encodedName += "/";
+					}
+					builder.append("<li><a href=\"")
+							.append(encodedName)
+							.append("\">")
+							.append(HtmlEscape.escapeHtml5(name))
+							.append("</a></li>");
+				}
+				attributes.getResponse().write(builder.append("</ul></body></html>").toString());
+			}
+
+		});
+		return response;
+	}
 	
 	private ResourceResponse newNotFoundResponse(String filePath) {
 		ResourceResponse response = new ResourceResponse();
 		response.setStatusCode(HttpServletResponse.SC_NOT_FOUND).setContentType(MediaType.TEXT_PLAIN);
-		return new ResourceResponse().setWriteCallback(new WriteCallback() {
+		response.setWriteCallback(new WriteCallback() {
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				attributes.getResponse().write("Site file not found: " + filePath);
 			}
 			
-		});			
+		});
+		return response;
 	}
 
 	private ProjectService getProjectService() {
