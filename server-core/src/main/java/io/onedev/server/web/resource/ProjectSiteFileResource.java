@@ -119,6 +119,7 @@ public class ProjectSiteFileResource extends AbstractResource {
 		}
 		
 		ResourceResponse response = new ResourceResponse();
+		response.disableCaching();
 		response.setAcceptRange(ContentRangeType.BYTES);
 		response.setContentType(fileInfo.getMediaType());
 		response.setContentLength(fileInfo.getLength());
@@ -188,6 +189,7 @@ public class ProjectSiteFileResource extends AbstractResource {
 
 	private ResourceResponse newDirectoryResponse(String directoryPath, DirectoryInfo directoryInfo) {
 		ResourceResponse response = new ResourceResponse();
+		response.disableCaching();
 		response.setContentType(MediaType.TEXT_HTML + "; charset=" + StandardCharsets.UTF_8.name());
 		response.setWriteCallback(new WriteCallback() {
 
@@ -231,6 +233,7 @@ public class ProjectSiteFileResource extends AbstractResource {
 	
 	private ResourceResponse newNotFoundResponse(String filePath) {
 		ResourceResponse response = new ResourceResponse();
+		response.disableCaching();
 		response.setStatusCode(HttpServletResponse.SC_NOT_FOUND).setContentType(MediaType.TEXT_PLAIN);
 		response.setWriteCallback(new WriteCallback() {
 			@Override

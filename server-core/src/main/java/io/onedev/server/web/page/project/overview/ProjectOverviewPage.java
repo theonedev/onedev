@@ -24,6 +24,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -41,6 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
@@ -52,9 +55,9 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Workspace;
-import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.replica.ProjectReplica;
+import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.StateCriteria;
@@ -72,6 +75,7 @@ import io.onedev.server.util.ProjectIssueStateStat;
 import io.onedev.server.util.ProjectPackTypeStat;
 import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.ProjectWorkspaceStatusStat;
+import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
@@ -90,18 +94,18 @@ import io.onedev.server.web.component.project.stats.issue.IssueStatsPanel;
 import io.onedev.server.web.component.project.stats.pack.PackStatsPanel;
 import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStatsPanel;
 import io.onedev.server.web.component.project.stats.workspace.WorkspaceStatsPanel;
+import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
+import io.onedev.server.web.resource.SiteFileResourceReference;
 import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.CommitInfoService;
-
-import com.google.common.collect.Lists;
 
 public class ProjectOverviewPage extends ProjectPage {
 
@@ -525,6 +529,17 @@ public class ProjectOverviewPage extends ProjectPage {
 
 		container.add(new ProjectAvatar("avatar", getProject().getId()));
 		container.add(new Label("path", getProject().getPath()));
+		var siteRoot = getProjectService().getSiteArtifactInfo(getProject().getId(), "");
+		if (siteRoot instanceof DirectoryInfo directory
+				&& directory.getChildren() != null
+				&& !directory.getChildren().isEmpty()) {
+			var siteParams = new PageParameters();
+			siteParams.set(ProjectMapperUtils.PARAM_PROJECT, getProject().getPath());
+			container.add(new ExternalLink("site", urlFor(new SiteFileResourceReference(), siteParams).toString()));
+		} else {
+			container.add(new WebMarkupContainer("site").setVisible(false));
+		}
+
 		container.add(new EntityLabelsPanel<>("labels", projectModel));
 		container.add(new Label("id", "id: " + getProject().getId()));
 		container.add(new Label("key", " · key: " + getProject().getKey())

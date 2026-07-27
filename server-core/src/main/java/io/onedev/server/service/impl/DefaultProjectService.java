@@ -1325,7 +1325,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 							if (childFiles != null) {
 								int baseLen = getSiteDir(projectId).getAbsolutePath().length() + 1;
 								for (File child : childFiles) {
-									if (!SiteSyncUtils.isVersionFile(child)) {
+									if (!SiteSyncUtils.isVersionFile(child)
+											&& !child.getName().equals(".DS_Store")) {
 										String relativePath = child.getAbsolutePath().substring(baseLen);
 										if (child.isFile()) {
 											children.add(new FileInfo(relativePath, child.lastModified(),
