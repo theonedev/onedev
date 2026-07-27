@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -32,18 +33,26 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Workspace;
+import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.replica.ProjectReplica;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -68,6 +77,7 @@ import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.ProjectAvatar;
@@ -82,7 +92,10 @@ import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStats
 import io.onedev.server.web.component.project.stats.workspace.WorkspaceStatsPanel;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
+import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import io.onedev.server.workspace.WorkspaceService;
@@ -189,6 +202,25 @@ public class ProjectOverviewPage extends ProjectPage {
 
 	};
 
+	private final IModel<Blob> readmeModel = new LoadableDetachableModel<>() {
+
+		@Override
+		protected Blob load() {
+			if (SecurityUtils.canReadCode(getProject())) {
+				var defaultBranch = getProject().getDefaultBranch();
+				if (defaultBranch != null) {
+					for (var path : new String[] {"readme.md", "README.md"}) {
+						var blob = getProject().getBlob(new BlobIdent(defaultBranch, path), false);
+						if (blob != null)
+							return blob;
+					}
+				}
+			}
+			return null;
+		}
+
+	};
+
 	public ProjectOverviewPage(PageParameters params) {
 		super(params);
 		childrenQuery = params.get(PARAM_CHILD_QUERY).toOptionalString();
@@ -204,6 +236,214 @@ public class ProjectOverviewPage extends ProjectPage {
 		summary.add(newReplicas("replicas"));
 		add(newLanguageStats("languageStats"));
 		add(newNextIteration("nextIteration"));
+
+		var readme = new WebMarkupContainer("readme") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(readmeModel.getObject() != null);
+			}
+
+		};
+		readme.add(new Label("title", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return readmeModel.getObject().getIdent().getName();
+			}
+
+		}));
+		readme.add(new MarkdownViewer("body", new LoadableDetachableModel<>() {
+
+			@Override
+			protected String load() {
+				var text = readmeModel.getObject().getText();
+				return text != null ? text.getContent() : null;
+			}
+
+		}, null) {
+
+			@Override
+			protected BlobRenderContext getRenderContext() {
+				var blobIdent = readmeModel.getObject().getIdent();
+				return new BlobRenderContext() {
+
+					@Override
+					public Project getProject() {
+						return ProjectOverviewPage.this.getProject();
+					}
+
+					@Override
+					public BlobIdent getBlobIdent() {
+						return blobIdent;
+					}
+
+					@Override
+					public String getPosition() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getCoverageReport() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getProblemReport() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onPosition(AjaxRequestTarget target, String position) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getPositionUrl(String position) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getDirectory() {
+						if (blobIdent.path.contains("/"))
+							return StringUtils.substringBeforeLast(blobIdent.path, "/");
+						else
+							return null;
+					}
+
+					@Override
+					public String getDirectoryUrl() {
+						var directoryIdent = new BlobIdent(blobIdent.revision, getDirectory(), FileMode.TREE.getBits());
+						var state = new ProjectBlobPage.State(directoryIdent);
+						return urlFor(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), state)).toString();
+					}
+
+					@Override
+					public String getRootDirectoryUrl() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public Mode getMode() {
+						return Mode.VIEW;
+					}
+
+					@Override
+					public boolean isViewPlain() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getUrlBeforeEdit() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getUrlAfterEdit() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public boolean isOnBranch() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getRefName() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void pushState(AjaxRequestTarget target, BlobIdent blobIdent, String position) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void replaceState(AjaxRequestTarget target, BlobIdent blobIdent, String position) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, String position) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onModeChange(AjaxRequestTarget target, Mode mode, String newPath) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, String newPath) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onCommitted(AjaxRequestTarget target, ObjectId commitId) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, PlanarRange range) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onCommentClosed(AjaxRequestTarget target) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public ObjectId uploadFiles(FileUpload upload, String directory, String commitMessage) {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public CodeComment getOpenComment() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public RevCommit getCommit() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getNewPath() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String getInitialNewPath() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override
+					public String appendRaw(String url) {
+						return ProjectBlobPage.doAppendRaw(url);
+					}
+
+					@Override
+					public PullRequest getPullRequest() {
+						throw new UnsupportedOperationException();
+					}
+
+				};
+			}
+
+		});
+		add(readme);
 
 		WebMarkupContainer children = new WebMarkupContainer("children") {
 
@@ -708,6 +948,7 @@ public class ProjectOverviewPage extends ProjectPage {
 		workspaceStatsModel.detach();
 		packStatsModel.detach();
 		nextIterationModel.detach();
+		readmeModel.detach();
 		super.onDetach();
 	}
 
