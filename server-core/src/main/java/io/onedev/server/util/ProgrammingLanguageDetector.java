@@ -51,6 +51,7 @@ public class ProgrammingLanguageDetector {
 		PROGRAMMING_LANGUAGES.put("f90", "Fortran");
 		
 		PROGRAMMING_LANGUAGES.put("go", "Go");
+		PROGRAMMING_LANGUAGES.put("gleam", "Gleam");
 		PROGRAMMING_LANGUAGES.put("groovy", "Groovy");
 		PROGRAMMING_LANGUAGES.put("gradle", "Groovy");
 		
