@@ -25,6 +25,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -46,6 +47,10 @@ public abstract class CommitInfoPanel extends GenericPanel<ProjectScopedCommit> 
 		
 		add(new ContributorAvatars("avatar", revCommit.getAuthorIdent(), revCommit.getCommitterIdent()));
 
+		BlobIdent blobIdent = new BlobIdent(commitHash, null, FileMode.TYPE_TREE);
+		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
+		PageParameters browseParams = ProjectBlobPage.paramsOf(project, browseState);
+
 		add(new CommitMessagePanel("message", new LoadableDetachableModel<RevCommit>() {
 
 			@Override
@@ -58,6 +63,11 @@ public abstract class CommitInfoPanel extends GenericPanel<ProjectScopedCommit> 
 			@Override
 			protected Project getProject() {
 				return getCommit().getProject();
+			}
+
+			@Override
+			protected String getCommitUrl() {
+				return RequestCycle.get().urlFor(ProjectBlobPage.class, browseParams).toString();
 			}
 
 		});
@@ -111,11 +121,6 @@ public abstract class CommitInfoPanel extends GenericPanel<ProjectScopedCommit> 
 		add(hashLink);
 		hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commitHash)));
 		add(new CopyToClipboardLink("copyHash", Model.of(commitHash)));
-
-		BlobIdent blobIdent = new BlobIdent(commitHash, null, FileMode.TYPE_TREE);
-		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
-		params = ProjectBlobPage.paramsOf(project, browseState);
-		add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));		
 	}
 
 	@Override

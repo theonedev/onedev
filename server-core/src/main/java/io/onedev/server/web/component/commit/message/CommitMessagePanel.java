@@ -74,13 +74,17 @@ public abstract class CommitMessagePanel extends Panel {
 	private RevCommit getCommit() {
 		return commitModel.getObject();
 	}
+
+	protected String getCommitUrl() {
+		PageParameters params = CommitDetailPage.paramsOf(getProject(), getCommit().name());
+		return RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
+	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		PageParameters params = CommitDetailPage.paramsOf(getProject(), getCommit().name()); 
-		String commitUrl = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
+		String commitUrl = getCommitUrl();
 		
 		add(new Label("summary", new LoadableDetachableModel<String>() {
 

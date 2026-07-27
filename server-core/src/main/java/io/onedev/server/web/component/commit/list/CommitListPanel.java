@@ -89,6 +89,7 @@ import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars
 import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 public abstract class CommitListPanel extends Panel {
@@ -587,6 +588,34 @@ public abstract class CommitListPanel extends Panel {
 			item = new Fragment(itemId, "commitFrag", this);
 			item.add(new ContributorAvatars("avatar", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
+			/*
+			 * If we query a single definitive path, let's record it to be used for
+			 * diff comparison and code browsing
+			 */
+			String path = null;
+
+			for (CommitCriteria criteria: queryModel.getObject().getCriterias()) {
+				if (criteria instanceof PathCriteria) {
+					for (String value: ((PathCriteria) criteria).getValues()) {
+						if (value.contains("*") || path != null) {
+							path = null;
+							break;
+						} else {
+							path = value;
+						}
+					}
+				}
+			}
+
+			BlobIdent blobIdent;
+			if (path != null) {
+				blobIdent = new BlobIdent(commit.name(), path, null);
+			} else {
+				blobIdent = new BlobIdent(commit.name(), null, FileMode.TREE.getBits());
+			}
+			ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
+			PageParameters browseParams = ProjectBlobPage.paramsOf(getProject(), browseState);
+
 			item.add(new CommitMessagePanel("message", new LoadableDetachableModel<RevCommit>() {
 
 				@Override
@@ -619,6 +648,11 @@ public abstract class CommitListPanel extends Panel {
 				@Override
 				protected Project getProject() {
 					return CommitListPanel.this.getProject();
+				}
+
+				@Override
+				protected String getCommitUrl() {
+					return RequestCycle.get().urlFor(ProjectBlobPage.class, browseParams).toString();
 				}
 				
 			});
@@ -688,25 +722,6 @@ public abstract class CommitListPanel extends Panel {
 			
 			item.add(new ContributorPanel("contribution", commit.getAuthorIdent(), commit.getCommitterIdent()));
 			
-			/*
-			 * If we query a single definitive path, let's record it to be used for 
-			 * diff comparison and code browsing  
-			 */
-			String path = null;
-			
-			for (CommitCriteria criteria: queryModel.getObject().getCriterias()) {
-				if (criteria instanceof PathCriteria) {
-					for (String value: ((PathCriteria) criteria).getValues()) {
-						if (value.contains("*") || path != null) {
-							path = null;
-							break;
-						} else {
-							path = value;
-						}
-					}
-				}
-			}
-			
 			if (getCompareWith() != null) {
 				RevisionComparePage.State compareState = new RevisionComparePage.State();
 				compareState.leftSide = new ProjectAndRevision(getProject(), commit.name());
@@ -721,16 +736,8 @@ public abstract class CommitListPanel extends Panel {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}
 
-			BlobIdent blobIdent;
-			if (path != null) {
-				blobIdent = new BlobIdent(commit.name(), path, null);
-			} else {
-				blobIdent = new BlobIdent(commit.name(), null, FileMode.TREE.getBits());
-			}
-			ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
-			PageParameters params = ProjectBlobPage.paramsOf(getProject(), browseState);
-
-			var hashLink = new ViewStateAwarePageLink<Void>("hashLink", ProjectBlobPage.class, params);
+			PageParameters commitParams = CommitDetailPage.paramsOf(getProject(), commit.name());
+			var hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, commitParams);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 			item.add(hashLink);
 			
