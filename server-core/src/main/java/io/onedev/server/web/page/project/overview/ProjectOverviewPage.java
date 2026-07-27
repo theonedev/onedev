@@ -5,9 +5,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -666,16 +664,15 @@ public class ProjectOverviewPage extends ProjectPage {
 
 			@Override
 			protected List<Map.Entry<String, ProjectReplica>> load() {
-				var replicas = new ArrayList<>(replicasModel.getObject().entrySet());
-				var orders = new HashMap<String, Integer>();
-				var index = 0;
-				for (var server : getClusterService().getServerAddresses())
-					orders.put(server, index++);
-				return replicas.stream()
-						.filter(it -> orders.containsKey(it.getKey())
-								&& (it.getValue().getType() != ProjectReplica.Type.REDUNDANT
-								|| it.getKey().equals(activeServerFinal)))
-						.sorted(Comparator.comparingInt(o -> orders.get(o.getKey())))
+				var servers = getClusterService().getServerAddresses();
+				return replicasModel.getObject().entrySet().stream()
+						.filter(it -> servers.contains(it.getKey()) && (it.getValue().getType() != ProjectReplica.Type.REDUNDANT || it.getKey().equals(activeServerFinal)))
+						.sorted(Comparator
+								.comparing((Map.Entry<String, ProjectReplica> o) -> !o.getKey().equals(activeServerFinal))
+								.thenComparing(o -> {
+									var name = getClusterService().getServerName(o.getKey());
+									return name != null ? name : o.getKey();
+								}))
 						.collect(Collectors.toList());
 			}
 
