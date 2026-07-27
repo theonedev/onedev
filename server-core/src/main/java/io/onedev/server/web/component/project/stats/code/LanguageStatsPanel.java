@@ -36,6 +36,7 @@ public class LanguageStatsPanel extends GenericPanel<Project> {
 		LANGUAGE_COLORS.put("JSX", "#f1e05a");
 		LANGUAGE_COLORS.put("Python", "#3572A5");
 		LANGUAGE_COLORS.put("Go", "#00ADD8");
+		LANGUAGE_COLORS.put("Gleam", "#ffaff3");
 		LANGUAGE_COLORS.put("Rust", "#dea584");
 		LANGUAGE_COLORS.put("C", "#555555");
 		LANGUAGE_COLORS.put("C++", "#f34b7d");
