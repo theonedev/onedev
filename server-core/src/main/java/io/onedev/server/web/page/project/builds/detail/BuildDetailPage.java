@@ -431,11 +431,11 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				});
 
-				add(new AjaxLink<Void>("fix") {
+				add(new AjaxLink<Void>("createIssue") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getAssistant().show(target, "Create an issue to fix this build and assign to yourself. Display in " + getSession().getLocale().getDisplayLanguage());
+						getAssistant().show(target, "Create an issue for the build failure. Display in " + getSession().getLocale().getDisplayLanguage());
 					}
 		
 					@Override
