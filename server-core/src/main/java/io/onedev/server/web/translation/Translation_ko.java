@@ -915,6 +915,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Convert Selected to Service Accounts", "선택된 항목을 서비스 계정으로 변환");
 		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
 			"서비스 계정으로 변환하면 비밀번호, 이메일 주소, 모든 할당 및 감시가 제거됩니다. 확인하려면 <code>yes</code>를 입력하세요");
+		m.put("Copied", "복사됨");
+		m.put("Copied to clipboard", "클립보드에 복사됨");
 		m.put("Copy", "복사");
 		m.put("Copy All Queried Issues To...", "쿼리된 모든 이슈를 복사하여...");
 		m.put("Copy Files with SCP", "SCP로 파일 복사");
@@ -922,6 +924,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy as Markdown", "Markdown으로 복사");
 		m.put("Copy dashboard", "대시보드 복사");
 		m.put("Copy issue number and title", "이슈 번호와 제목 복사");
+		m.put("Copy permanent link", "영구 링크 복사");
 		m.put("Copy public key", "공개 키 복사");
 		m.put("Copy selected text to clipboard", "선택된 텍스트를 클립보드에 복사");
 		m.put("Copy to clipboard", "클립보드에 복사");
@@ -3903,8 +3906,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
 		m.put("Specify files under above directory to be published", "위 디렉토리 아래에 게시할 파일 지정");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
-			"위 디렉터리 아래에서 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요. <b>참고:</b> <code>index.html</code>은 사이트 시작 페이지로 제공되기 위해 이러한 파일에 포함되어야 합니다.");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"가져올 그룹을 지정하세요. 현재 계정 아래 프로젝트에서 가져오려면 비워 두세요.");
 		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
@@ -5173,9 +5174,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Copied", "복사됨");
-		m.put("Copied to clipboard", "클립보드에 복사됨");
-		m.put("Copy permanent link", "영구 링크 복사");
+		m.put("Commit detail", "커밋 세부 정보");
+		m.put("Published site", "게시된 사이트");
+		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
+			"위 디렉토리 아래에서 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요. <b>참고:</b> <code>index.html</code>이 포함된 경우, 사이트 시작 페이지로 제공됩니다. 그렇지 않으면 게시된 파일 목록이 표시됩니다.");
 	}
 		
 	@Override

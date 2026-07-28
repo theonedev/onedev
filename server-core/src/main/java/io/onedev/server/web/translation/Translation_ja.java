@@ -915,6 +915,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Convert Selected to Service Accounts", "選択したものをサービスアカウントに変換");
 		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
 			"サービスアカウントに変換すると、パスワード、メールアドレス、すべての割り当てとウォッチが削除されます。確認するには<code>yes</code>と入力してください");
+		m.put("Copied", "コピー済み");
+		m.put("Copied to clipboard", "クリップボードにコピー済み");
 		m.put("Copy", "コピー");
 		m.put("Copy All Queried Issues To...", "クエリされたすべての課題を...にコピー");
 		m.put("Copy Files with SCP", "SCPでファイルをコピー");
@@ -922,6 +924,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy as Markdown", "Markdownとしてコピー");
 		m.put("Copy dashboard", "ダッシュボードをコピー");
 		m.put("Copy issue number and title", "課題番号とタイトルをコピー");
+		m.put("Copy permanent link", "永久リンクをコピー");
 		m.put("Copy public key", "公開鍵をコピー");
 		m.put("Copy selected text to clipboard", "選択されたテキストをクリップボードにコピー");
 		m.put("Copy to clipboard", "クリップボードにコピー");
@@ -3903,8 +3906,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する公開するファイルを指定してください。パターンマッチには*や?を使用してください。");
 		m.put("Specify files under above directory to be published", "上記のディレクトリ内で公開するファイルを指定");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
-			"上記のディレクトリ内で公開するファイルを指定してください。パターンマッチには*や?を使用してください。<b>注意:</b> サイトの開始ページとして提供される<code>index.html</code>をこれらのファイルに含める必要があります。");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"インポート元のグループを指定してください。現在のアカウント下のプロジェクトからインポートする場合は空のままにしてください。");
 		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
@@ -5173,9 +5174,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Copied", "コピー済み");
-		m.put("Copied to clipboard", "クリップボードにコピー済み");
-		m.put("Copy permanent link", "永久リンクをコピー");
+		m.put("Commit detail", "コミット詳細");
+		m.put("Published site", "公開サイト");
+		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
+			"上記ディレクトリ内で公開するファイルを指定してください。パターンマッチには * または ? を使用します。<b>注意:</b> <code>index.html</code> が含まれている場合、それがサイトの開始ページとして提供されます。それ以外の場合は公開されたファイルの一覧が表示されます");
 	}
 		
 	@Override

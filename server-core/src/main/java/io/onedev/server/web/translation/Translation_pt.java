@@ -915,6 +915,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Convert Selected to Service Accounts", "Converter Selecionados para Contas de Serviço");
 		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
 			"Converter para contas de serviço removerá senha, endereços de email, todas as atribuições e observações. Digite <code>yes</code> para confirmar");
+		m.put("Copied", "Copiado");
+		m.put("Copied to clipboard", "Copiado para a área de transferência");
 		m.put("Copy", "Copiar");
 		m.put("Copy All Queried Issues To...", "Copiar Todas as Issues Consultadas Para...");
 		m.put("Copy Files with SCP", "Copiar Arquivos com SCP");
@@ -922,6 +924,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Copy as Markdown", "Copiar como Markdown");
 		m.put("Copy dashboard", "Copiar dashboard");
 		m.put("Copy issue number and title", "Copiar número e título da issue");
+		m.put("Copy permanent link", "Copiar link permanente");
 		m.put("Copy public key", "Copiar chave pública");
 		m.put("Copy selected text to clipboard", "Copiar texto selecionado para a área de transferência");
 		m.put("Copy to clipboard", "Copiar para a área de transferência");
@@ -3903,8 +3906,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"Especifique os arquivos relativos ao <a href='https://docs.onedev.io/concepts#job-workdir'>espaço de trabalho do trabalho</a> a serem publicados. Use * ou ? para correspondência de padrão");
 		m.put("Specify files under above directory to be published", "Especifique arquivos no diretório acima para serem publicados");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
-			"Especifique os arquivos no diretório acima a serem publicados. Use * ou ? para correspondência de padrão. <b>NOTA:</b> <code>index.html</code> deve ser incluído nesses arquivos para ser servido como página inicial do site");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"Especifique o grupo para importar. Deixe vazio para importar dos projetos da conta atual");
 		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
@@ -5173,9 +5174,10 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Copied", "Copiado");
-		m.put("Copied to clipboard", "Copiado para a área de transferência");
-		m.put("Copy permanent link", "Copiar link permanente");
+		m.put("Commit detail", "Detalhe do commit");
+		m.put("Published site", "Site publicado");
+		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
+			"Especifique os arquivos no diretório acima para serem publicados. Use * ou ? para correspondência de padrões. <b>NOTA:</b> Se <code>index.html</code> estiver incluído, ele será exibido como a página inicial do site; caso contrário, será exibida uma lista de arquivos publicados");
 	}
 		
 	@Override

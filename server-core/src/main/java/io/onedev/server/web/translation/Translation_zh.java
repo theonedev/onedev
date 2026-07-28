@@ -941,6 +941,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Convert Selected to Service Accounts", "将选定的用户转换为服务账户");
 		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
 			"转换为服务账户将移除密码、电子邮件地址、所有分配和关注。输入<code>yes</code>以确认");
+		m.put("Copied", "已复制");
+		m.put("Copied to clipboard", "已复制到剪贴板");
 		m.put("Copy", "复制");
 		m.put("Copy All Queried Issues To...", "复制所有查询的工单到...");
 		m.put("Copy Files with SCP", "使用 SCP 复制文件");
@@ -948,6 +950,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy as Markdown", "复制为 Markdown");
 		m.put("Copy dashboard", "复制仪表板");
 		m.put("Copy issue number and title", "复制工单编号和标题");
+		m.put("Copy permanent link", "复制永久链接");
 		m.put("Copy public key", "复制公钥");
 		m.put("Copy selected text to clipboard", "复制选中的文本到剪贴板");
 		m.put("Copy to clipboard", "复制到剪贴板");
@@ -3929,8 +3932,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workdir'>任务工作区</a> 要发布的文件。使用 * 或 ? 进行模式匹配");
 		m.put("Specify files under above directory to be published", "指定要发布的目录下的文件");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
-			"指定要发布的上述目录下的文件。使用 * 或 ? 进行模式匹配。<b>注意：</b>这些文件中应包含 <code>index.html</code> 作为站点起始页");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"指定要从中导入的组。留空则从当前账户下的项目导入");
 		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
@@ -4387,8 +4388,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This name has already been used by another state", "此名称已被另一个状态使用");
 		m.put("This name has already been used by another workspace provisioner", "此名称已被另一个工作区配置器使用");
 		m.put("This operation is disallowed by branch protection rule", "此操作被分支保护规则禁止");
-		m.put("This page lists changes since previous build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a>", 
-			"此页面列出了自上一个构建以来的更改，在 <a href=\"https://docs.onedev.io/concepts#构建流\" class=\"link-primary\" target=\"_blank\">相同流</a> 上");
 		m.put("This page lists recent commits fixing the issue", "此页面列出了修复工单的最近提交");
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
@@ -5199,9 +5198,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Copied", "已复制");
-		m.put("Copied to clipboard", "已复制到剪贴板");
-		m.put("Copy permanent link", "复制永久链接");
+		m.put("Commit detail", "提交详情");
+		m.put("Published site", "已发布站点");
+		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
+			"指定上述目录下要发布的文件。使用 * 或 ? 进行模式匹配。<b>注意：</b>如果包含 <code>index.html</code>，它将作为站点的起始页面；否则将显示已发布文件的列表");
+		m.put("This page lists changes since previous build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a>", 
+			"此页面列出了自上次在<a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">相同流</a>构建以来的更改");
 	}
 		
 	@Override
