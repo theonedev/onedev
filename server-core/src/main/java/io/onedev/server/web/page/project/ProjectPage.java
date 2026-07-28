@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project;
 
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
@@ -41,6 +42,10 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.tools.issue.CreateIssue;
+import io.onedev.server.ai.tools.issue.GetValidFields;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -117,7 +122,7 @@ import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ProjectAware;
 
-public abstract class ProjectPage extends LayoutPage implements ProjectAware {
+public abstract class ProjectPage extends LayoutPage implements ProjectAware, ChatToolAware {
 
 	protected final IModel<Project> projectModel;
 
@@ -559,7 +564,17 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	}
 	
 	protected abstract Component newProjectTitle(String componentId);
-	
+
+	@Override
+	public List<ChatTool> getChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		if (getProject().isIssueManagement()) {
+			tools.add(wrapForChat(new CreateIssue(getProject().getId())));
+			tools.add(wrapForChat(new GetValidFields()));
+		}
+		return tools;
+	}
+
 	public static PageParameters paramsOf(Long projectId) {
 		ProjectFacade project = getProjectService().findFacadeById(projectId);
 		return paramsOf(project.getPath());

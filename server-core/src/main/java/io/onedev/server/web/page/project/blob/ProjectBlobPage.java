@@ -66,7 +66,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.tools.code.GetFileContent;
 import io.onedev.server.ai.tools.code.GetFilesAndSubfolders;
 import io.onedev.server.ai.tools.code.GetRootFilesAndFolders;
@@ -143,7 +142,7 @@ import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.EditParamsAware;
 
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
-		EditParamsAware, JobAuthorizationContextAware, ChatToolAware, ProjectScopedCommitAware {
+		EditParamsAware, JobAuthorizationContextAware, ProjectScopedCommitAware {
 
 	private static final String PARAM_INITIAL_NEW_PATH = "initial-new-path";
 	
@@ -1730,93 +1729,91 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	
 	@Override
 	public List<ChatTool> getChatTools() {
+		var tools = super.getChatTools();
 		if (getCommit() != null) {
-			var projectId = getProject().getId();		
+			var projectId = getProject().getId();
 			var commitId = getCommit().copy();
-	
-			return List.of(
-				wrapForChat(new GetRootFilesAndFolders() {
-					
-					@Override
-					protected Long getProjectId() {
-						return projectId;
-					}
-					
-					@Override
-					protected ObjectId getCommitId() {
-						return commitId;
-					}
-	
-				}), 
-				wrapForChat(new GetFilesAndSubfolders() {
-					
-					@Override
-					protected Long getProjectId() {
-						return projectId;
-					}
-					
-					@Override
-					protected ObjectId getCommitId() {
-						return commitId;
-					}
-	
-				}), 
-				wrapForChat(new GetFileContent(false) {
-	
-					@Override
-					protected Long getProjectId() {
-						return projectId;
-					}
-					
-					@Override
-					protected ObjectId getCommitId(boolean oldRevision) {
-						return commitId;
-					}
-	
-				}), 
-				wrapForChat(new QuerySymbolDefinitions(false) {
-	
-					@Override
-					protected Long getProjectId() {
-						return projectId;
-					}
-					
-					@Override
-					protected ObjectId getCommitId(boolean oldRevision) {
-						return commitId;
-					}
-	
-				}),
-				wrapForChat(new QueryCodeSnippets(false) {
-	
-					@Override
-					protected Long getProjectId() {
-						return projectId;
-					}
-					
-					@Override
-					protected ObjectId getCommitId(boolean oldRevision) {
-						return commitId;
-					}
-	
-				}),
-				wrapForChat(new QueryFilePaths() {
-					
-					@Override
-					protected Long getProjectId() {
-						return projectId;
-					}
-					
-					@Override
-					protected ObjectId getCommitId() {
-						return commitId;
-					}
-	
-				})
-			);	
-		} else {
-			return List.of();
+
+			tools.add(wrapForChat(new GetRootFilesAndFolders() {
+
+				@Override
+				protected Long getProjectId() {
+					return projectId;
+				}
+
+				@Override
+				protected ObjectId getCommitId() {
+					return commitId;
+				}
+
+			}));
+			tools.add(wrapForChat(new GetFilesAndSubfolders() {
+
+				@Override
+				protected Long getProjectId() {
+					return projectId;
+				}
+
+				@Override
+				protected ObjectId getCommitId() {
+					return commitId;
+				}
+
+			}));
+			tools.add(wrapForChat(new GetFileContent(false) {
+
+				@Override
+				protected Long getProjectId() {
+					return projectId;
+				}
+
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
+			}));
+			tools.add(wrapForChat(new QuerySymbolDefinitions(false) {
+
+				@Override
+				protected Long getProjectId() {
+					return projectId;
+				}
+
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
+			}));
+			tools.add(wrapForChat(new QueryCodeSnippets(false) {
+
+				@Override
+				protected Long getProjectId() {
+					return projectId;
+				}
+
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
+			}));
+			tools.add(wrapForChat(new QueryFilePaths() {
+
+				@Override
+				protected Long getProjectId() {
+					return projectId;
+				}
+
+				@Override
+				protected ObjectId getCommitId() {
+					return commitId;
+				}
+
+			}));
 		}
+		return tools;
 	}
 
 	@Override

@@ -191,7 +191,7 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 			messages = messages.subList(messages.size()-MAX_HISTORY_MESSAGES, messages.size());
 		
 		var langchain4jMessages = new ArrayList<dev.langchain4j.data.message.ChatMessage>();
-		langchain4jMessages.add(new SystemMessage("Your name is %s".formatted(request.getChat().getAi().getName())));
+		langchain4jMessages.add(new SystemMessage("Your user name is %s".formatted(request.getChat().getAi().getName())));
 		var systemPrompt = request.getChat().getAi().getAiSetting().getSystemPrompt();
 		if (systemPrompt != null)
 			langchain4jMessages.add(new SystemMessage(systemPrompt));

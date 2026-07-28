@@ -27,7 +27,7 @@ public final class GetPullRequestComments implements TaskTool {
 	public ToolSpecification getSpecification() {
 		return ToolSpecification.builder()
 				.name("getPullRequestComments")
-				.description("Get comments of OneDev pull request in json format")
+				.description("Get comments of pull request in json format")
 				.build();
 	}
 

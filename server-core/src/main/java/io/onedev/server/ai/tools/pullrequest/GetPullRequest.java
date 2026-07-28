@@ -27,7 +27,7 @@ public final class GetPullRequest implements TaskTool {
 	public ToolSpecification getSpecification() {
 		return ToolSpecification.builder()
 				.name("getPullRequest")
-				.description("Get info of OneDev pull request in json format")
+				.description("Get info of pull request in json format")
 				.build();
 	}
 

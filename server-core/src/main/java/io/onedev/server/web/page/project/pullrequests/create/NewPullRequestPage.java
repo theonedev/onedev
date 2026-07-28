@@ -65,7 +65,6 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.CodeProblem;
@@ -134,7 +133,7 @@ import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.editbean.LabelsBean;
 
-public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport, ChatToolAware {
+public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport {
 
 	private static final Logger logger = LoggerFactory.getLogger(NewPullRequestPage.class);
 	
@@ -1228,14 +1227,14 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 	@Override
 	public List<ChatTool> getChatTools() {
+		var tools = super.getChatTools();
 		if (!getPullRequest().isMerged()) {
 			var projectId = getProject().getId();
 			var oldCommitId = ObjectId.fromString(getPullRequest().getBaseCommitHash());
 			var newCommitId = ObjectId.fromString(getPullRequest().getLatestUpdate().getHeadCommitHash());
-			return wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null));
-		} else {
-			return new ArrayList<>();
+			tools.addAll(wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null)));
 		}
+		return tools;
 	}
 	
 }

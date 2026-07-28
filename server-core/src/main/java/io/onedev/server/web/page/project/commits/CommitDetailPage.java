@@ -7,7 +7,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.tools.code.CommitDetailTool;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
@@ -93,7 +92,7 @@ import static io.onedev.server.entityreference.ReferenceUtils.transformReference
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
-public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware, ChatToolAware {
+public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
 
@@ -1078,10 +1077,10 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 
 	@Override
 	public List<ChatTool> getChatTools() {
+		var tools = super.getChatTools();
 		var projectId = getProject().getId();
 		var oldCommitId = getCompareWith().copy();
 		var newCommitId = getCommit().copy();
-		var tools = new ArrayList<ChatTool>();
 		tools.add(wrapForChat(new CommitDetailTool() {
 
 			@Override

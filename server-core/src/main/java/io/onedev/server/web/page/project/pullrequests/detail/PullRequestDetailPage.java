@@ -70,8 +70,6 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.ChatToolAware;
-import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.ai.tools.pullrequest.GetPullRequest;
 import io.onedev.server.ai.tools.pullrequest.GetPullRequestComments;
@@ -179,7 +177,7 @@ import io.onedev.server.web.util.editbean.LabelsBean;
 import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.VisitInfoService;
 
-public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware, ChatToolAware {
+public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
 
 	public static final String PARAM_REQUEST = "request";
 
@@ -2474,16 +2472,17 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 	@Override
 	public List<ChatTool> getChatTools() {
-		var pr = getPullRequest();
-		var tools = new ArrayList<TaskTool>();
-		var requestId = pr.getId();
-		var projectId = pr.getProject().getId();
-		var oldCommitId = ObjectId.fromString(pr.getBaseCommitHash());
-		var newCommitId = ObjectId.fromString(pr.getLatestUpdate().getHeadCommitHash());
-		tools.add(new GetPullRequest(requestId));
-		tools.add(new GetPullRequestComments(requestId));
-		tools.addAll(ToolUtils.getDiffTools(projectId, oldCommitId, newCommitId, requestId));
-		return wrapForChat(tools);
+		var tools = super.getChatTools();
+		var pullRequest = getPullRequest();
+		var requestId = pullRequest.getId();
+		tools.add(wrapForChat(new GetPullRequest(requestId)));
+		tools.add(wrapForChat(new GetPullRequestComments(requestId)));
+
+		var projectId = pullRequest.getProject().getId();
+		var oldCommitId = ObjectId.fromString(pullRequest.getBaseCommitHash());
+		var newCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
+		tools.addAll(wrapForChat(ToolUtils.getDiffTools(projectId, oldCommitId, newCommitId, requestId)));
+		return tools;
 	}
 
 }

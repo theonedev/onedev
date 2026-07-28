@@ -65,7 +65,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueLink;
-import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
@@ -79,15 +78,7 @@ import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.code.ConventionalCommitChecker;
 import io.onedev.server.model.support.code.RegexpCommitChecker;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.spec.BooleanField;
-import io.onedev.server.model.support.issue.field.spec.DateField;
-import io.onedev.server.model.support.issue.field.spec.DateTimeField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.FloatField;
-import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
-import io.onedev.server.model.support.issue.field.spec.IntegerField;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -218,21 +209,6 @@ public class TodResource {
         return versionInfo;
 	}
 
-    private String getParamName(String fieldName) {
-        return fieldName.replace(" ", "-");
-    }
-
-    private String appendDescription(String description, String additionalDescription) {
-        if (description.length() > 0) {
-            if (description.endsWith("."))
-                return description + " " + additionalDescription;
-            else
-                return description + ". " + additionalDescription;
-        } else {
-            return additionalDescription;
-        }
-    }
-
     private Project getProject(String projectPath) {
         var project = projectService.findByPath(projectPath);
         if (project == null || !SecurityUtils.canAccessProject(project))
@@ -252,58 +228,9 @@ public class TodResource {
     }
 
     private Map<String, Object> getFieldProperties(FieldSpec field) {
-        String fieldDescription;
-        if (field.getDescription() != null)
-            fieldDescription = field.getDescription().replace("\n", " ");
-        else
-            fieldDescription = "";
-        if (field instanceof ChoiceField) {
-            var choiceField = (ChoiceField) field;
-            if (field.isAllowMultiple())
-                fieldDescription = appendDescription(fieldDescription,
-                        "Expects one or more of: " + String.join(", ", choiceField.getPossibleValues()));
-            else
-                fieldDescription = appendDescription(fieldDescription,
-                        "Expects one of: " + String.join(", ", choiceField.getPossibleValues()));
-        } else if (field instanceof UserChoiceField) {
-            if (field.isAllowMultiple())
-                fieldDescription = appendDescription(fieldDescription, "Expects user login names");
-            else
-                fieldDescription = appendDescription(fieldDescription, "Expects user login name");
-        } else if (field instanceof GroupChoiceField) {
-        } else if (field instanceof BooleanField) {
-            fieldDescription = appendDescription(fieldDescription, "Expects boolean value, true or false");
-        } else if (field instanceof IntegerField) {
-            fieldDescription = appendDescription(fieldDescription, "Expects integer value");
-        } else if (field instanceof FloatField) {
-            fieldDescription = appendDescription(fieldDescription, "Expects float value");
-        } else if (field instanceof DateField || field instanceof DateTimeField) {
-            if (field.isAllowMultiple())
-                fieldDescription = appendDescription(fieldDescription,
-                        "Expects unix timestamps in milliseconds since epoch");
-            else
-                fieldDescription = appendDescription(fieldDescription,
-                        "Expects unix timestamp in milliseconds since epoch");
-        }
-
-        fieldDescription = escapeHtml5(fieldDescription);
-        
-        var fieldProperties = new HashMap<String, Object>();
-        if (field.isAllowMultiple()) {
-            fieldProperties.putAll(getArrayProperties(fieldDescription));
-        } else {
-            fieldProperties.put("type", "string");
-            fieldProperties.put("description", fieldDescription);
-        }
+        var fieldProperties = new HashMap<>(IssueHelper.getFieldProperties(field));
+        fieldProperties.put("description", escapeHtml5((String) fieldProperties.get("description")));
         return fieldProperties;
-    }
-
-    private Map<String, Object> getArrayProperties(String description) {
-        return Map.of(
-            "type", "array",
-            "items", Map.of("type", "string"),
-            "uniqueItems", true,
-            "description", description);
     }
 
     @Api(description = "Get commit message requirement")
@@ -415,7 +342,7 @@ public class TodResource {
             throw new UnauthenticatedException();
         var issueFields = new HashMap<String, Object>();
         for (var field: settingService.getIssueSetting().getFieldSpecs()) {
-            var paramName = getParamName(field.getName());
+            var paramName = IssueHelper.getParamName(field.getName());
             var fieldProperties = getFieldProperties(field);
             issueFields.put(paramName, fieldProperties);
         }
@@ -562,7 +489,7 @@ public class TodResource {
         if (forWrite != null && forWrite &&!SecurityUtils.canWriteCode(issue.getProject()))
             throw new UnauthorizedException("No permission to write code in issue project");
 
-        return IssueHelper.getDetail(subject, currentProject, issue);
+        return IssueHelper.getDetail(currentProject, issue);
     }
 
     @Path("/query-projects")
@@ -652,58 +579,14 @@ public class TodResource {
 
         var projectContext = getProjectContext(projectPath, currentProjectPath);
 
-        normalizeIssueData(data);
-
-        var issueSetting = settingService.getIssueSetting();
-
-        Issue issue = new Issue();
-        var title = (String) data.remove("title");
-        if (title == null)
-            throw new NotAcceptableException("Title is required");
-        issue.setTitle(title);
-        var description = (String) data.remove("description");
-        issue.setDescription(description);
-        var confidential = (Boolean) data.remove("confidential");
-        if (confidential != null)
-            issue.setConfidential(confidential);
-
-        Integer ownEstimatedTime = (Integer) data.remove("ownEstimatedTime");
-        if (ownEstimatedTime != null) {
-            if (!subscriptionService.isSubscriptionActive())
-                throw new NotAcceptableException("An active subscription is required for this feature");
-            if (!projectContext.project.isTimeTracking())
-                throw new NotAcceptableException("Time tracking needs to be enabled for the project");
-            if (!SecurityUtils.canScheduleIssues(projectContext.project))
-                throw new UnauthorizedException("Issue schedule permission required to set own estimated time");
-            issue.setOwnEstimatedTime(ownEstimatedTime*60);
+        Issue issue;
+        try {
+            issue = IssueHelper.createIssue(subject, projectContext.project, data);
+        } catch (ExplicitException e) {
+            throw new NotAcceptableException(e.getMessage());
         }
 
-        @SuppressWarnings("unchecked")
-        List<String> iterationNames = (List<String>) data.remove("iterations");
-        if (iterationNames != null) {
-            if (!SecurityUtils.canScheduleIssues(projectContext.project))
-                throw new UnauthorizedException("Issue schedule permission required to set iterations");
-            for (var iterationName : iterationNames) {
-                var iteration = iterationService.findInHierarchy(projectContext.project, iterationName);
-                if (iteration == null)
-                    throw new NotFoundException("Iteration '" + iterationName + "' not found");
-                IssueSchedule schedule = new IssueSchedule();
-                schedule.setIssue(issue);
-                schedule.setIteration(iteration);
-                issue.getSchedules().add(schedule);
-            }
-        }
-
-        issue.setProject(projectContext.project);
-        issue.setSubmitDate(new Date());
-        issue.setSubmitter(SecurityUtils.getUser());
-        issue.setState(issueSetting.getInitialStateSpec().getName());
-
-        issue.setFieldValues(FieldUtils.getFieldValues(subject, issue.getProject(), data));
-
-        issueService.open(issue);
-
-        return IssueHelper.getDetail(subject, projectContext.currentProject, issue);
+        return IssueHelper.getDetail(projectContext.currentProject, issue);
     }
 
     @Path("/edit-issue")
@@ -722,7 +605,7 @@ public class TodResource {
 
         var issue = getIssue(currentProject, issueReference);
 
-        normalizeIssueData(data);
+        IssueHelper.normalizeData(data);
 
         var title = (String) data.remove("title");
         if (title != null) { 
@@ -777,7 +660,7 @@ public class TodResource {
             issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(subject, issue.getProject(), data));
         }
 
-        return IssueHelper.getDetail(subject, currentProject, issue);
+        return IssueHelper.getDetail(currentProject, issue);
     }
 
     @Path("/change-issue-state")
@@ -794,7 +677,7 @@ public class TodResource {
         var currentProject = getProject(currentProjectPath);
 
         var issue = getIssue(currentProject, issueReference);
-        normalizeIssueData(data);
+        IssueHelper.normalizeData(data);
         var state = (String) data.remove("state");
         if (state == null)
             throw new NotAcceptableException("State is required");
@@ -810,7 +693,7 @@ public class TodResource {
         var fieldValues = FieldUtils.getFieldValues(subject, issue.getProject(), data);
         issueChangeService.changeState(user, issue, state, fieldValues, transition.getPromptFields(),
                 transition.getRemoveFields(), comment);
-        return IssueHelper.getDetail(subject, currentProject, issue);
+        return IssueHelper.getDetail(currentProject, issue);
     }
 
     @Path("/ensure-issue-branch") 
@@ -908,19 +791,6 @@ public class TodResource {
         return workMap;
     }
 
-    private void normalizeIssueData(Map<String, Serializable> data) {
-        for (var entry: data.entrySet()) {
-            if (entry.getValue() instanceof String) 
-                entry.setValue(trimToNull((String) entry.getValue()));
-        }
-        for (var field: settingService.getIssueSetting().getFieldSpecs()) {
-            var paramName = getParamName(field.getName());
-            if (!paramName.equals(field.getName()) && data.containsKey(paramName)) {
-                data.put(field.getName(), data.get(paramName));
-                data.remove(paramName);
-            }
-        }        
-    }    
 
     @Path("/query-pull-requests")
     @GET

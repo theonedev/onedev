@@ -31,13 +31,6 @@ import io.onedev.server.ai.tools.code.GetDiffPatch;
 import io.onedev.server.ai.tools.code.GetFileContent;
 import io.onedev.server.ai.tools.code.QueryCodeSnippets;
 import io.onedev.server.ai.tools.code.QuerySymbolDefinitions;
-import io.onedev.server.ai.tools.codecomment.AddCodeCommentReply;
-import io.onedev.server.ai.tools.codecomment.ResolveCodeComment;
-import io.onedev.server.ai.tools.codecomment.UnresolveCodeComment;
-import io.onedev.server.ai.tools.pullrequest.AddPullRequestCodeComment;
-import io.onedev.server.ai.tools.pullrequest.ApprovePullRequest;
-import io.onedev.server.ai.tools.pullrequest.GetPullRequestCodeComments;
-import io.onedev.server.ai.tools.pullrequest.RequestChangesForPullRequestTool;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
@@ -205,21 +198,6 @@ public class ToolUtils {
 
 			}
 		);		
-	}
-
-	public static List<TaskTool> getPullRequestReviewTools(long pullRequestId) {
-		return List.of(
-			new ApprovePullRequest(pullRequestId),
-			new RequestChangesForPullRequestTool(pullRequestId));
-	}
-
-	public static List<TaskTool> getPullRequestCodeCommentTools(long pullRequestId) {
-		 return List.of(
-			new GetPullRequestCodeComments(pullRequestId),
-			new AddPullRequestCodeComment(pullRequestId),
-			new AddCodeCommentReply(),
-			new ResolveCodeComment(),
-			new UnresolveCodeComment());
 	}
 
 	public static void filterDuplications(List<ToolSpecification> toolSpecifications) {

@@ -1,4 +1,4 @@
-package io.onedev.server.ai.tools.issue;
+package io.onedev.server.ai.tools.build;
 
 import static io.onedev.server.ai.ToolUtils.convertToJson;
 
@@ -9,35 +9,35 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.server.OneDev;
-import io.onedev.server.ai.IssueHelper;
+import io.onedev.server.ai.BuildHelper;
 import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.service.IssueService;
+import io.onedev.server.service.BuildService;
 
-public final class GetIssue implements TaskTool {
+public final class GetBuild implements TaskTool {
 
-	private final long issueId;
+	private final long buildId;
 
-	public GetIssue(long issueId) {
-		this.issueId = issueId;
+	public GetBuild(long buildId) {
+		this.buildId = buildId;
 	}
 
 	@Override
 	public ToolSpecification getSpecification() {
 		return ToolSpecification.builder()
-				.name("getIssue")
-				.description("Get info of issue in json format")
+				.name("getBuild")
+				.description("Get info of build in json format")
 				.build();
 	}
 
 	@Override
 	public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
-		var issue = OneDev.getInstance(IssueService.class).load(issueId);
-		if (!SecurityUtils.canAccessIssue(subject, issue))
+		var build = OneDev.getInstance(BuildService.class).load(buildId);
+		var project = build.getProject();
+		if (!SecurityUtils.canAccessProject(subject, project))
 			throw new UnauthorizedException();
-
-		return new ToolExecutionResult(convertToJson(IssueHelper.getDetail(issue.getProject(), issue)), false);
+		return new ToolExecutionResult(convertToJson(BuildHelper.getDetail(project, build)), false);
 	}
-	
+
 }

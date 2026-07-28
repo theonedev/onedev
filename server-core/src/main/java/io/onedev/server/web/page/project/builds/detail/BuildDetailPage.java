@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.builds.detail;
 
 import static io.onedev.server.web.translation.Translation._T;
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
 
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -89,6 +90,8 @@ import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.tools.build.GetBuild;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
@@ -428,10 +431,27 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				});
 
+				add(new AjaxLink<Void>("fix") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						getAssistant().show(target, "Create an issue to fix this build and assign to yourself. Display in " + getSession().getLocale().getDisplayLanguage());
+					}
+		
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getBuild().isFailed() 
+								&& SecurityUtils.canWriteCode(getProject()) 
+								&& !getAssistant().getEntitledAis().isEmpty());
+					}
+		
+				});
+						
 				add(newBuildObserver(getBuild().getId()));
 			}
 		});
-		
+
 		add(new SideInfoLink("moreInfo"));
 		
 		add(new WebMarkupContainer("buildSpecNotFound") {
@@ -707,6 +727,13 @@ public abstract class BuildDetailPage extends ProjectPage
 	@Override
 	public JobAuthorizationContext getJobAuthorizationContext() {
 		return new JobAuthorizationContext(getProject(), getBuild().getCommitId(), getBuild().getRequest());
+	}
+
+	@Override
+	public List<ChatTool> getChatTools() {
+		var tools = super.getChatTools();
+		tools.add(wrapForChat(new GetBuild(getBuild().getId())));
+		return tools;
 	}
 
 }

@@ -2,42 +2,34 @@ package io.onedev.server.ai.tools.issue;
 
 import static io.onedev.server.ai.ToolUtils.convertToJson;
 
-import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.subject.Subject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
-import io.onedev.server.OneDev;
 import io.onedev.server.ai.IssueHelper;
 import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.service.IssueService;
 
-public final class GetIssue implements TaskTool {
-
-	private final long issueId;
-
-	public GetIssue(long issueId) {
-		this.issueId = issueId;
-	}
+public final class GetValidFields implements TaskTool {
 
 	@Override
 	public ToolSpecification getSpecification() {
 		return ToolSpecification.builder()
-				.name("getIssue")
-				.description("Get info of issue in json format")
+				.name("getValidFields")
+				.description("Get valid issue fields and their allowed values in json format. "
+						+ "Call this to discover field names and values accepted by the 'fields' "
+						+ "argument of createIssue tool")
 				.build();
 	}
 
 	@Override
 	public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
-		var issue = OneDev.getInstance(IssueService.class).load(issueId);
-		if (!SecurityUtils.canAccessIssue(subject, issue))
-			throw new UnauthorizedException();
-
-		return new ToolExecutionResult(convertToJson(IssueHelper.getDetail(issue.getProject(), issue)), false);
+		if (SecurityUtils.getUser(subject) == null)
+			throw new UnauthenticatedException();
+		return new ToolExecutionResult(convertToJson(IssueHelper.getValidFields()), false);
 	}
-	
+
 }

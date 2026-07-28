@@ -36,7 +36,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.tools.issue.GetIssueComments;
 import io.onedev.server.ai.tools.issue.GetIssue;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
@@ -75,7 +74,7 @@ import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.xodus.VisitInfoService;
 
-public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext, ChatToolAware {
+public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 
 	public static final String PARAM_ISSUE = "issue";
 	
@@ -453,9 +452,10 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	
 	@Override
 	public List<ChatTool> getChatTools() {
-		return wrapForChat(List.of(
-				new GetIssue(getIssue().getId()),
-				new GetIssueComments(getIssue().getId())));
+		var tools = super.getChatTools();
+		tools.add(wrapForChat(new GetIssue(getIssue().getId())));
+		tools.add(wrapForChat(new GetIssueComments(getIssue().getId())));
+		return tools;
 	}
 
 }

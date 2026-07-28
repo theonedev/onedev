@@ -40,7 +40,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
@@ -81,7 +80,7 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.EditParamsAware;
 
-public class RevisionComparePage extends ProjectPage implements RevisionAnnotationSupport, EditParamsAware, ChatToolAware {
+public class RevisionComparePage extends ProjectPage implements RevisionAnnotationSupport, EditParamsAware {
 
 	public enum TabPanel {
 		COMMITS, 
@@ -968,14 +967,14 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 
 	@Override
 	public List<ChatTool> getChatTools() {
+		var tools = super.getChatTools();
 		if (mergeBase != null) {
 			var projectId = getProject().getId();
 			var oldCommitId = state.compareWithMergeBase?mergeBase:state.leftSide.getCommit().copy();
 			var newCommitId = state.rightSide.getCommit().copy();
-			return wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null));
-		} else {
-			return new ArrayList<>();
+			tools.addAll(wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null)));
 		}
+		return tools;
 	}
 	
 }
