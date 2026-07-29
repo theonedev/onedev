@@ -470,7 +470,7 @@ public class ChatPanel extends Panel {
 				chat = chatService.get(activeChatId);
 			else
 				chat = WebSession.get().getAnonymousChats().get(activeChatId);			
-			if (chat != null && chat.getAi().equals(getActiveAI()))
+			if (chat != null && !getEntitledAis().isEmpty() && chat.getAi().equals(getActiveAI()))
 				return chat;
 		}
 		return null;		
