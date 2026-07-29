@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.AttributeModifier;
@@ -43,7 +44,6 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entityreference.ReferencedFromAware;
@@ -57,6 +57,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescript
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.PullRequestCommentService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -75,7 +76,16 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	private static final String COOKIE_SHOW_COMMITS = "onedev.server.pullRequest.showCommits";
 	
 	private static final String COOKIE_SHOW_CHANGE_HISTORY = "onedev.server.pullRequest.showChangeHistory";
-	
+
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private BuildService buildService;
+
+	@Inject
+	private PullRequestCommentService pullRequestCommentService;
+
 	private boolean showComments = true;
 	
 	private boolean showCommits = true;
@@ -163,10 +173,6 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		return row;
 	}
 
-	private BuildService getBuildService() {
-		return 	OneDev.getInstance(BuildService.class);
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -190,7 +196,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				PullRequest request = getPullRequest();
 				Project project = request.getTargetProject();
-				project.cacheCommitStatuses(getBuildService().queryStatus(project, commitIds));
+				project.cacheCommitStatuses(buildService.queryStatus(project, commitIds));
 					
 				List<PullRequestActivity> oldActivities = new ArrayList<>();
 				List<PullRequestActivity> newActivities = new ArrayList<>();
@@ -281,7 +287,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						comment.setRequest(getPullRequest());
 						comment.setUser(getLoginUser());
 						comment.setContent(input.getModelObject());
-						OneDev.getInstance(PullRequestCommentService.class).create(comment, new ArrayList<>());
+						pullRequestCommentService.create(comment, new ArrayList<>());
 						
 						if (showComments) {
 							((BasePage) getPage()).notifyObservableChange(target,
@@ -396,7 +402,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				PullRequest request = getPullRequest();
 				Project project = request.getTargetProject();
-				project.cacheCommitStatuses(getBuildService().queryStatus(project, commitIds));
+				project.cacheCommitStatuses(buildService.queryStatus(project, commitIds));
 			}
 			
 		});
@@ -416,7 +422,9 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				var page = (LayoutPage)getPage();
-				page.getAssistant().show(target, "Summarize comments of current pull request. Display in " + getSession().getLocale().getDisplayLanguage());
+				var prompt = settingService.getAiSetting().getPullRequestSummaryPrompt();
+				page.getAssistant().show(target,
+						prompt + " Display in " + getSession().getLocale().getDisplayLanguage());
 			}
 
 			@Override

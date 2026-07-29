@@ -104,6 +104,7 @@ import io.onedev.server.service.BuildService;
 import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.service.CodeCommentStatusChangeService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.diff.DiffUtils;
@@ -183,6 +184,9 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 	@Inject
 	private CodeCommentStatusChangeService codeCommentStatusChangeService;
+
+	@Inject
+	private SettingService settingService;
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
@@ -522,9 +526,9 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					range = getRange(params, "param1", "param2", "param3", "param4");					
 					context.onPosition(target, BlobRenderer.getSourcePosition(range));
 					var page = (LayoutPage) getPage();
-					page.getAssistant().show(target, 
-						"Help me understand highlighted text. Display explanation in %s"
-						.formatted(getSession().getLocale().getDisplayLanguage()));
+					var prompt = settingService.getAiSetting().getCodeExplanationPrompt();
+					page.getAssistant().show(target,
+							prompt + " Display in " + getSession().getLocale().getDisplayLanguage());
 					target.appendJavaScript(String.format("onedev.server.sourceView.mark(%s, false);", convertToJson(range)));
 					break;
 				case "addComment":

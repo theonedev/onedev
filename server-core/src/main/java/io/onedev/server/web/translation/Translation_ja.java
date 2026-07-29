@@ -539,6 +539,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Build Commit", "ビルドコミット");
 		m.put("Build Context", "ビルドコンテキスト");
 		m.put("Build Description", "ビルド説明");
+		m.put("Build Failure Issue Prompt", "ビルド失敗問題プロンプト");
 		m.put("Build Filter", "ビルドフィルター");
 		m.put("Build Image", "ビルドイメージ");
 		m.put("Build Image (Kaniko)", "ビルドイメージ（Kaniko）");
@@ -681,8 +682,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Channel Notification", "チャンネル通知");
 		m.put("Chart Metadata", "チャートメタデータ");
 		m.put("Chat Preserve Days", "チャット保存日数");
+		m.put("Chat Prompts", "チャットプロンプト");
 		m.put("Chat deleted", "チャットが削除されました");
 		m.put("Chat preserve days setting has been saved", "チャット保存日数の設定が保存されました");
+		m.put("Chat prompts have been saved", "チャットプロンプトが保存されました");
 		m.put("Chat with", "とのチャット");
 		m.put("Chat with AI", "AIとのチャット");
 		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
@@ -799,6 +802,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Code Compare", "コード比較");
 		m.put("Code Contributions", "コード貢献");
 		m.put("Code Coverage", "コードカバレッジ");
+		m.put("Code Explanation Prompt", "コード説明プロンプト");
 		m.put("Code Management", "コード管理");
 		m.put("Code Privilege", "コード権限");
 		m.put("Code Problem Statistics", "コード問題統計");
@@ -851,6 +855,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Commit Types For Footer Check", "フッターチェック用コミットタイプ");
 		m.put("Commit Your Change", "変更をコミット");
 		m.put("Commit date", "コミット日付");
+		m.put("Commit detail", "コミット詳細");
 		m.put("Commit hash", "コミットハッシュ");
 		m.put("Commit history of current path", "現在のパスのコミット履歴");
 		m.put("Commit index version", "コミットインデックスバージョン");
@@ -975,6 +980,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"Open Codeをサーバーシェル環境で直接実行するワークスペース仕様を作成します。\n作成された仕様を使用するワークスペースは、同じ環境と設定を共有します。\nこのテンプレートを使用するには、以下を確認してください:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>がOneDevサーバーにインストールされている</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>がOneDevサーバーにインストールされ、Open Code用の補助スキルがインストールされている</li>\n    <li>'管理 / ワークスペースプロビジョナー'にシェルプロビジョナーが追加され、'適用可能なプロジェクト'が適切に設定されている</li>\n</ul>");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"隔離とセキュリティのためにコンテナ内でOpen Codeを実行するワークスペックを作成します。\n必要に応じて、後で<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>コンテナイメージ</a>をカスタマイズできます");
+		m.put("Create an issue for this failure", "この失敗のための問題を作成する");
 		m.put("Create body", "本文を作成");
 		m.put("Create branch <b>{0}</b> from {1}", "{1}から<b>{0}</b>ブランチを作成");
 		m.put("Create child projects under a project", "プロジェクト内に子プロジェクトを作成");
@@ -1927,6 +1933,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Issue Status Mappings", "課題ステータスマッピング一覧");
 		m.put("Issue Stopwatch Overdue", "課題ストップウォッチ期限切れ");
 		m.put("Issue Stopwatch Overdue Notification Template", "課題ストップウォッチ期限切れ通知テンプレート");
+		m.put("Issue Summary Prompt", "問題概要プロンプト");
 		m.put("Issue Tag Mapping", "課題タグマッピング");
 		m.put("Issue Tag Mappings", "課題タグマッピング一覧");
 		m.put("Issue Template", "課題テンプレート");
@@ -3121,6 +3128,14 @@ public class Translation_ja extends TranslationResourceBundle {
 			"クラスターメンバーが追加/削除された場合、プロジェクトを再分配する必要があります。OneDevはこれを自動的に行いません。これはリソースを多く消費するため、クラスタが確定し安定した後に行うことを推奨します。");
 		m.put("Promotions", "プロモーション");
 		m.put("Prompt Fields", "プロンプトフィールド");
+		m.put("Prompt to use when creating an issue for a failed build. Display language will be appended automatically", 
+			"ビルド失敗時に問題を作成する際に使用するプロンプト。表示言語は自動的に追加されます");
+		m.put("Prompt to use when explaining highlighted code. Display language will be appended automatically", 
+			"ハイライトされたコードを説明する際に使用するプロンプト。表示言語は自動的に追加されます");
+		m.put("Prompt to use when summarizing issue comments. Display language will be appended automatically", 
+			"問題コメントを要約する際に使用するプロンプト。表示言語は自動的に追加されます");
+		m.put("Prompt to use when summarizing pull request comments. Display language will be appended automatically", 
+			"プルリクエストコメントを要約する際に使用するプロンプト。表示言語は自動的に追加されます");
 		m.put("Properties", "プロパティ");
 		m.put("Provide server id (guild id) to restrict access only to server members", "サーバーID（ギルドID）を指定して、サーバーメンバーのみのアクセスを制限します");
 		m.put("Provisioner", "プロビジョナー");
@@ -3144,6 +3159,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Published By Project", "プロジェクトによる公開");
 		m.put("Published By User", "ユーザーによる公開");
 		m.put("Published File", "公開ファイル");
+		m.put("Published site", "公開サイト");
 		m.put("Pull", "プル");
 		m.put("Pull Command", "プルコマンド");
 		m.put("Pull Image", "イメージのプル");
@@ -3159,6 +3175,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pull Request Notification Unsubscribed Template", "プルリクエスト通知購読解除テンプレート");
 		m.put("Pull Request Settings", "プルリクエスト設定");
 		m.put("Pull Request Statistics", "プルリクエスト統計");
+		m.put("Pull Request Summary Prompt", "プルリクエスト概要プロンプト");
 		m.put("Pull Request Title", "プルリクエストタイトル");
 		m.put("Pull Request Title And Description Provider", "プルリクエストのタイトルと説明プロバイダー");
 		m.put("Pull Requests", "プルリクエスト");
@@ -3906,6 +3923,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する公開するファイルを指定してください。パターンマッチには*や?を使用してください。");
 		m.put("Specify files under above directory to be published", "上記のディレクトリ内で公開するファイルを指定");
+		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
+			"上記ディレクトリ内で公開するファイルを指定してください。パターンマッチには * または ? を使用します。<b>注意:</b> <code>index.html</code> が含まれている場合、それがサイトの開始ページとして提供されます。それ以外の場合は公開されたファイルの一覧が表示されます");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"インポート元のグループを指定してください。現在のアカウント下のプロジェクトからインポートする場合は空のままにしてください。");
 		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
@@ -5174,10 +5193,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Commit detail", "コミット詳細");
-		m.put("Published site", "公開サイト");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
-			"上記ディレクトリ内で公開するファイルを指定してください。パターンマッチには * または ? を使用します。<b>注意:</b> <code>index.html</code> が含まれている場合、それがサイトの開始ページとして提供されます。それ以外の場合は公開されたファイルの一覧が表示されます");
+		m.put("Builtin Chat Prompts", "組み込みチャットプロンプト");
 	}
 		
 	@Override

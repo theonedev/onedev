@@ -539,6 +539,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Build Commit", "Commit de construction");
 		m.put("Build Context", "Contexte de construction");
 		m.put("Build Description", "Description de la construction");
+		m.put("Build Failure Issue Prompt", "Invite de problème d'échec de build");
 		m.put("Build Filter", "Filtre de construction");
 		m.put("Build Image", "Image de construction");
 		m.put("Build Image (Kaniko)", "Image de construction (Kaniko)");
@@ -681,8 +682,10 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Channel Notification", "Notification de canal");
 		m.put("Chart Metadata", "Métadonnées du graphique");
 		m.put("Chat Preserve Days", "Jours de conservation du chat");
+		m.put("Chat Prompts", "Invites de chat");
 		m.put("Chat deleted", "Chat supprimé");
 		m.put("Chat preserve days setting has been saved", "Le paramètre des jours de conservation du chat a été enregistré");
+		m.put("Chat prompts have been saved", "Les invites de chat ont été enregistrées");
 		m.put("Chat with", "Chat avec");
 		m.put("Chat with AI", "Chat avec AI");
 		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
@@ -799,6 +802,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Code Compare", "Comparaison de code");
 		m.put("Code Contributions", "Contributions de Code");
 		m.put("Code Coverage", "Couverture de code");
+		m.put("Code Explanation Prompt", "Invite d'explication de code");
 		m.put("Code Management", "Gestion du code");
 		m.put("Code Privilege", "Privilège de code");
 		m.put("Code Problem Statistics", "Statistiques des problèmes de code");
@@ -851,6 +855,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Commit Types For Footer Check", "Types de commit pour vérification du pied de page");
 		m.put("Commit Your Change", "Validez votre modification");
 		m.put("Commit date", "Date de commit");
+		m.put("Commit detail", "Détail du commit");
 		m.put("Commit hash", "Hash de commit");
 		m.put("Commit history of current path", "Historique des commits du chemin actuel");
 		m.put("Commit index version", "Version de l'index de commit");
@@ -975,6 +980,7 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Créer une spécification d'espace de travail exécutant Open Code directement avec l'environnement shell du serveur.\nLes espaces de travail utilisant la spécification créée partageront les mêmes environnements et paramètres.\nPour utiliser ce modèle, veuillez vous assurer que :\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> est installé sur le serveur OneDev</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> est installé sur le serveur OneDev et les compétences associées sont installées pour Open Code</li>\n    <li>Un provisionneur shell est ajouté dans 'Administration / Workspace Provisioners' avec les 'projets applicables' configurés correctement</li>\n</ul>");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Créer une spécification d'espace de travail exécutant Open Code à l'intérieur d'un conteneur pour des raisons d'isolation et de sécurité.\nVous pouvez personnaliser l'<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>image du conteneur</a>\nplus tard pour répondre à vos besoins si désiré");
+		m.put("Create an issue for this failure", "Créer un problème pour cet échec");
 		m.put("Create body", "Créer le corps");
 		m.put("Create branch <b>{0}</b> from {1}", "Créer une branche <b>{0}</b> à partir de {1}");
 		m.put("Create child projects under a project", "Créer des projets enfants sous un projet");
@@ -1927,6 +1933,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Issue Status Mappings", "Mappages de statut de problème");
 		m.put("Issue Stopwatch Overdue", "Chronomètre de problème en retard");
 		m.put("Issue Stopwatch Overdue Notification Template", "Modèle de notification de chronomètre de problème en retard");
+		m.put("Issue Summary Prompt", "Invite de résumé de problème");
 		m.put("Issue Tag Mapping", "Mappage de balise de problème");
 		m.put("Issue Tag Mappings", "Mappages de balise de problème");
 		m.put("Issue Template", "Modèle de problème");
@@ -3121,6 +3128,14 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Les projets doivent être redistribués lorsque des membres du cluster sont ajoutés/supprimés. OneDev ne le fait pas automatiquement car cela demande beaucoup de ressources, et vous pourriez vouloir le faire uniquement après que le cluster soit finalisé et stable.");
 		m.put("Promotions", "Promotions");
 		m.put("Prompt Fields", "Champs de saisie");
+		m.put("Prompt to use when creating an issue for a failed build. Display language will be appended automatically", 
+			"Invite à utiliser lors de la création d'un problème pour un build échoué. La langue d'affichage sera ajoutée automatiquement");
+		m.put("Prompt to use when explaining highlighted code. Display language will be appended automatically", 
+			"Invite à utiliser lors de l'explication du code surligné. La langue d'affichage sera ajoutée automatiquement");
+		m.put("Prompt to use when summarizing issue comments. Display language will be appended automatically", 
+			"Invite à utiliser lors du résumé des commentaires sur les problèmes. La langue d'affichage sera ajoutée automatiquement");
+		m.put("Prompt to use when summarizing pull request comments. Display language will be appended automatically", 
+			"Invite à utiliser lors du résumé des commentaires sur les pull requests. La langue d'affichage sera ajoutée automatiquement");
 		m.put("Properties", "Propriétés");
 		m.put("Provide server id (guild id) to restrict access only to server members", "Fournir l'identifiant du serveur (identifiant de guilde) pour restreindre l'accès uniquement aux membres du serveur");
 		m.put("Provisioner", "Provisionneur");
@@ -3144,6 +3159,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Published By Project", "Publié par le projet");
 		m.put("Published By User", "Publié par l'utilisateur");
 		m.put("Published File", "Fichier publié");
+		m.put("Published site", "Site publié");
 		m.put("Pull", "Tirer");
 		m.put("Pull Command", "Commande de tirage");
 		m.put("Pull Image", "Image de tirage");
@@ -3159,6 +3175,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Pull Request Notification Unsubscribed Template", "Modèle de notification de demande de tirage désabonnée");
 		m.put("Pull Request Settings", "Paramètres de demande de tirage");
 		m.put("Pull Request Statistics", "Statistiques de demande de tirage");
+		m.put("Pull Request Summary Prompt", "Invite de résumé de pull request");
 		m.put("Pull Request Title", "Titre de la demande de tirage");
 		m.put("Pull Request Title And Description Provider", "Fournisseur de titre et description de la demande de tirage");
 		m.put("Pull Requests", "Demandes de tirage");
@@ -3906,6 +3923,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"Spécifiez les fichiers relatifs à <a href='https://docs.onedev.io/concepts#job-workdir'>l'espace de travail du job</a> à publier. Utilisez * ou ? pour correspondre au modèle");
 		m.put("Specify files under above directory to be published", "Spécifiez les fichiers sous le répertoire ci-dessus à publier");
+		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
+			"Spécifiez les fichiers dans le répertoire ci-dessus à publier. Utilisez * ou ? pour correspondre au modèle. <b>REMARQUE :</b> Si <code>index.html</code> est inclus, il sera utilisé comme page de démarrage du site ; sinon, une liste des fichiers publiés sera affichée");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"Spécifiez le groupe à importer. Laissez vide pour importer depuis les projets sous le compte actuel");
 		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
@@ -5174,10 +5193,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Commit detail", "Détail du commit");
-		m.put("Published site", "Site publié");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
-			"Spécifiez les fichiers dans le répertoire ci-dessus à publier. Utilisez * ou ? pour correspondre au modèle. <b>REMARQUE :</b> Si <code>index.html</code> est inclus, il sera utilisé comme page de démarrage du site ; sinon, une liste des fichiers publiés sera affichée");
+		m.put("Builtin Chat Prompts", "Inviteurs de discussion intégrés");
 	}
 		
 	@Override

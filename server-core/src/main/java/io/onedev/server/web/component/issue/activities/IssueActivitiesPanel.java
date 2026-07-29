@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.AttributeModifier;
@@ -36,7 +37,6 @@ import org.apache.wicket.request.http.WebResponse;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entityreference.ReferencedFromAware;
@@ -53,6 +53,7 @@ import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeCh
 import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueCommentService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -72,6 +73,12 @@ public abstract class IssueActivitiesPanel extends Panel {
 	private static final String COOKIE_SHOW_CHANGE_HISTORY = "onedev.server.issue.showChangeHistory";
 	
 	private static final String COOKIE_SHOW_WORK_LOG = "onedev.server.issue.showWorkLog";
+
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private IssueCommentService issueCommentService;
 	
 	private RepeatingView activitiesView;
 	
@@ -277,7 +284,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 						comment.setUser(SecurityUtils.getAuthUser());
 						comment.setDate(new Date());
 						comment.setIssue(getIssue());
-						OneDev.getInstance(IssueCommentService.class).create(comment);
+						issueCommentService.create(comment);
 						
 						if (showComments) {
 							((BasePage) getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
@@ -334,7 +341,9 @@ public abstract class IssueActivitiesPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				var page = (LayoutPage)getPage();
-				page.getAssistant().show(target, "Summarize comments of current issue. Display in " + getSession().getLocale().getDisplayLanguage());
+				var prompt = settingService.getAiSetting().getIssueSummaryPrompt();
+				page.getAssistant().show(target,
+						prompt + " Display in " + getSession().getLocale().getDisplayLanguage());
 			}
 
 			@Override

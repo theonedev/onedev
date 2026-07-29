@@ -565,6 +565,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Build Commit", "构建提交");
 		m.put("Build Context", "构建上下文");
 		m.put("Build Description", "构建描述");
+		m.put("Build Failure Issue Prompt", "构建失败工单提示");
 		m.put("Build Filter", "构建筛选器");
 		m.put("Build Image", "构建镜像");
 		m.put("Build Image (Kaniko)", "构建镜像（Kaniko）");
@@ -707,8 +708,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Channel Notification", "频道通知");
 		m.put("Chart Metadata", "Chart 元数据");
 		m.put("Chat Preserve Days", "聊天保留天数");
+		m.put("Chat Prompts", "聊天提示");
 		m.put("Chat deleted", "聊天已删除");
 		m.put("Chat preserve days setting has been saved", "聊天保留天数设置已保存");
+		m.put("Chat prompts have been saved", "聊天提示已保存");
 		m.put("Chat with", "聊天对象");
 		m.put("Chat with AI", "与 AI 聊天");
 		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
@@ -825,6 +828,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Code Compare", "代码比较");
 		m.put("Code Contributions", "代码贡献");
 		m.put("Code Coverage", "代码覆盖率");
+		m.put("Code Explanation Prompt", "代码解释提示");
 		m.put("Code Management", "代码管理");
 		m.put("Code Privilege", "代码权限");
 		m.put("Code Problem Statistics", "代码问题统计");
@@ -877,6 +881,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Commit Types For Footer Check", "用于尾部检查的提交类型");
 		m.put("Commit Your Change", "提交您的更改");
 		m.put("Commit date", "提交日期");
+		m.put("Commit detail", "提交详情");
 		m.put("Commit hash", "提交哈希");
 		m.put("Commit history of current path", "当前路径的提交历史");
 		m.put("Commit index version", "提交索引版本");
@@ -1001,6 +1006,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"创建一个直接运行 Open Code 的工作区规范，使用服务器 shell 环境。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在 OneDev 服务器上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在 OneDev 服务器上，并为 Open Code 安装了配套技能</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 '适用项目'</li>\n</ul>");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Open Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Create an issue for this failure", "为此失败创建一个工单");
 		m.put("Create body", "创建正文");
 		m.put("Create branch <b>{0}</b> from {1}", "创建分支 <b>{0}</b>（基于 {1}）");
 		m.put("Create child projects under a project", "在项目下创建子项目");
@@ -1953,6 +1959,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Issue Status Mappings", "工单状态映射");
 		m.put("Issue Stopwatch Overdue", "工单计时器超时");
 		m.put("Issue Stopwatch Overdue Notification Template", "工单计时器超时通知模板");
+		m.put("Issue Summary Prompt", "工单摘要提示");
 		m.put("Issue Tag Mapping", "工单标签映射");
 		m.put("Issue Tag Mappings", "工单标签映射");
 		m.put("Issue Template", "工单模板");
@@ -3147,6 +3154,14 @@ public class Translation_zh extends TranslationResourceBundle {
 			"当添加/删除集群成员时，需要重新分配项目。OneDev 不会自动执行此操作，因为这是资源密集型的，您可能只想在集群最终确定并稳定后进行此操作。");
 		m.put("Promotions", "晋升");
 		m.put("Prompt Fields", "提示字段");
+		m.put("Prompt to use when creating an issue for a failed build. Display language will be appended automatically", 
+			"用于创建构建失败工单时的提示。显示语言将自动附加");
+		m.put("Prompt to use when explaining highlighted code. Display language will be appended automatically", 
+			"用于解释高亮代码时的提示。显示语言将自动附加");
+		m.put("Prompt to use when summarizing issue comments. Display language will be appended automatically", 
+			"用于总结工单评论时的提示。显示语言将自动附加");
+		m.put("Prompt to use when summarizing pull request comments. Display language will be appended automatically", 
+			"用于总结合并请求评论时的提示。显示语言将自动附加");
 		m.put("Properties", "属性");
 		m.put("Provide server id (guild id) to restrict access only to server members", "提供服务器 ID（公会 ID）以仅限制对服务器成员的访问");
 		m.put("Provisioner", "配置器");
@@ -3170,6 +3185,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Published By Project", "发布项目");
 		m.put("Published By User", "发布用户");
 		m.put("Published File", "已发布文件");
+		m.put("Published site", "已发布站点");
 		m.put("Pull", "拉取");
 		m.put("Pull Command", "拉取命令");
 		m.put("Pull Image", "拉取镜像");
@@ -3185,6 +3201,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pull Request Notification Unsubscribed Template", "合并请求通知取消订阅模板");
 		m.put("Pull Request Settings", "合并请求设置");
 		m.put("Pull Request Statistics", "合并请求统计");
+		m.put("Pull Request Summary Prompt", "合并请求摘要提示");
 		m.put("Pull Request Title", "合并请求标题");
 		m.put("Pull Request Title And Description Provider", "合并请求标题和描述提供者");
 		m.put("Pull Requests", "合并请求");
@@ -3932,6 +3949,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workdir'>任务工作区</a> 要发布的文件。使用 * 或 ? 进行模式匹配");
 		m.put("Specify files under above directory to be published", "指定要发布的目录下的文件");
+		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
+			"指定上述目录下要发布的文件。使用 * 或 ? 进行模式匹配。<b>注意：</b>如果包含 <code>index.html</code>，它将作为站点的起始页面；否则将显示已发布文件的列表");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"指定要从中导入的组。留空则从当前账户下的项目导入");
 		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
@@ -4388,6 +4407,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This name has already been used by another state", "此名称已被另一个状态使用");
 		m.put("This name has already been used by another workspace provisioner", "此名称已被另一个工作区配置器使用");
 		m.put("This operation is disallowed by branch protection rule", "此操作被分支保护规则禁止");
+		m.put("This page lists changes since previous build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a>", 
+			"此页面列出了自上次在<a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">相同流</a>构建以来的更改");
 		m.put("This page lists recent commits fixing the issue", "此页面列出了修复工单的最近提交");
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
@@ -5198,12 +5219,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Commit detail", "提交详情");
-		m.put("Published site", "已发布站点");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
-			"指定上述目录下要发布的文件。使用 * 或 ? 进行模式匹配。<b>注意：</b>如果包含 <code>index.html</code>，它将作为站点的起始页面；否则将显示已发布文件的列表");
-		m.put("This page lists changes since previous build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a>", 
-			"此页面列出了自上次在<a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">相同流</a>构建以来的更改");
+		m.put("Builtin Chat Prompts", "内置 Chat 提示");
 	}
 		
 	@Override

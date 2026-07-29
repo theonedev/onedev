@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.builds.detail;
 
-import static io.onedev.server.web.translation.Translation._T;
 import static io.onedev.server.ai.ToolUtils.wrapForChat;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -39,6 +39,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.tools.build.GetBuild;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
@@ -59,6 +61,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -90,8 +93,6 @@ import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
-import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.tools.build.GetBuild;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
@@ -104,6 +105,9 @@ public abstract class BuildDetailPage extends ProjectPage
 	
 	@Inject
 	protected BuildService buildService;
+
+	@Inject
+	private SettingService settingService;
 
 	@Inject
 	private JobService jobService;
@@ -435,7 +439,8 @@ public abstract class BuildDetailPage extends ProjectPage
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getAssistant().show(target, "Create an issue for the build failure. Display in " + getSession().getLocale().getDisplayLanguage());
+						var prompt = settingService.getAiSetting().getBuildFailureIssuePrompt();
+						getAssistant().show(target, prompt + " Display in " + getSession().getLocale().getDisplayLanguage());
 					}
 		
 					@Override

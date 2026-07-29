@@ -96,6 +96,7 @@ import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.aisetting.ChatPreserveDaysPage;
+import io.onedev.server.web.page.admin.aisetting.ChatPromptsPage;
 import io.onedev.server.web.page.admin.aisetting.LiteModelPage;
 import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
@@ -362,6 +363,9 @@ public abstract class LayoutPage extends BasePage {
 					aiMenuItems.add(new SidebarMenuItem.Page(null, _T("Lite Model"),
 							LiteModelPage.class, new PageParameters()));
 					
+					aiMenuItems.add(new SidebarMenuItem.Page(null, _T("Builtin Chat Prompts"),
+							ChatPromptsPage.class, new PageParameters()));
+
 					aiMenuItems.add(new SidebarMenuItem.Page(null, _T("Chat Preserve Days"),
 							ChatPreserveDaysPage.class, new PageParameters()));
 

@@ -14,6 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.Strings;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -41,7 +43,6 @@ import com.ibm.icu.text.SpoofChecker;
 
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.ToolUtils;
@@ -58,6 +59,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
@@ -81,6 +83,18 @@ import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
 
 public class BlobTextDiffPanel extends Panel implements ChatToolAware {
+
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private ObjectMapper objectMapper;
+
+	@Inject
+	private GitService gitService;
+
+	@Inject
+	private CodeCommentService codeCommentService;
 
 	private final BlobChange change;
 	
@@ -146,7 +160,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 
 	private String convertToJson(Object obj) {
 		try {
-			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(obj);
+			return objectMapper.writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -170,16 +184,12 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 	protected PullRequest getPullRequest() {
 		return null;
 	}
-	
-	private GitService getGitService() {
-		return OneDev.getInstance(GitService.class);
-	}
-	
+		
 	private BlameInfo getBlameInfo() {
 		blameInfo = new BlameInfo();
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
-			for (BlameBlock blame: getGitService().blame(change.getProject(), change.getOldCommitId(), oldPath, null)) {
+			for (BlameBlock blame: gitService.blame(change.getProject(), change.getOldCommitId(), oldPath, null)) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.oldBlame.put(i, blame.getCommit());
@@ -188,7 +198,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		}
 		String newPath = change.getNewBlobIdent().path;
 		if (newPath != null) {
-			for (BlameBlock blame: getGitService().blame(change.getProject(), change.getNewCommitId(), newPath, null)) {
+			for (BlameBlock blame: gitService.blame(change.getProject(), change.getNewCommitId(), newPath, null)) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.newBlame.put(i, blame.getCommit());
@@ -311,7 +321,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 					case "openComment": 
 						Long commentId = params.getParameterValue("param1").toLong();
 						commentRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
-						CodeComment comment = OneDev.getInstance(CodeCommentService.class).load(commentId);
+						CodeComment comment = codeCommentService.load(commentId);
 						getAnnotationSupport().onOpenComment(target, comment, commentRange);
 						script = String.format("onedev.server.blobTextDiff.onCommentOpened($('#%s'), %s);", 
 								getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));
@@ -324,7 +334,9 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 						var range = getRange(params, "param1", "param2", "param3", "param4", "param5");
 						getAnnotationSupport().onMark(target, range);
 						var page = (LayoutPage) getPage();
-						page.getAssistant().show(target, "Help me understand highlighted text. Display in " + getSession().getLocale().getDisplayLanguage());
+						var prompt = settingService.getAiSetting().getCodeExplanationPrompt();
+						page.getAssistant().show(target,
+								prompt + " Display in " + getSession().getLocale().getDisplayLanguage());
 						script = String.format("onedev.server.blobTextDiff.mark($('#%s'), %s);", 
 								getMarkupId(), convertToJson(range));
 						target.appendJavaScript(script);

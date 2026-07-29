@@ -539,6 +539,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Build Commit", "빌드 커밋");
 		m.put("Build Context", "빌드 컨텍스트");
 		m.put("Build Description", "빌드 설명");
+		m.put("Build Failure Issue Prompt", "빌드 실패 문제 프롬프트");
 		m.put("Build Filter", "빌드 필터");
 		m.put("Build Image", "빌드 이미지");
 		m.put("Build Image (Kaniko)", "빌드 이미지 (Kaniko)");
@@ -681,8 +682,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Channel Notification", "채널 알림");
 		m.put("Chart Metadata", "차트 메타데이터");
 		m.put("Chat Preserve Days", "채팅 보존 일수");
+		m.put("Chat Prompts", "채팅 프롬프트");
 		m.put("Chat deleted", "채팅이 삭제되었습니다");
 		m.put("Chat preserve days setting has been saved", "채팅 보존 일수 설정이 저장되었습니다");
+		m.put("Chat prompts have been saved", "채팅 프롬프트가 저장되었습니다");
 		m.put("Chat with", "채팅 상대");
 		m.put("Chat with AI", "AI와 채팅");
 		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
@@ -799,6 +802,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Code Compare", "코드 비교");
 		m.put("Code Contributions", "코드 기여");
 		m.put("Code Coverage", "코드 커버리지");
+		m.put("Code Explanation Prompt", "코드 설명 프롬프트");
 		m.put("Code Management", "코드 관리");
 		m.put("Code Privilege", "코드 권한");
 		m.put("Code Problem Statistics", "코드 문제 통계");
@@ -851,6 +855,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Commit Types For Footer Check", "푸터 확인을 위한 커밋 유형");
 		m.put("Commit Your Change", "변경 사항을 커밋하세요");
 		m.put("Commit date", "커밋 날짜");
+		m.put("Commit detail", "커밋 세부 정보");
 		m.put("Commit hash", "커밋 해시");
 		m.put("Commit history of current path", "현재 경로의 커밋 기록");
 		m.put("Commit index version", "커밋 인덱스 버전");
@@ -975,6 +980,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"서버 셸 환경에서 Open Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>가 OneDev 서버에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 OneDev 서버에 설치되어 있고 Open Code에 대한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 셸 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적으로 컨테이너 내에서 Open Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Create an issue for this failure", "이 실패에 대한 문제를 생성하세요");
 		m.put("Create body", "본문 생성");
 		m.put("Create branch <b>{0}</b> from {1}", "{1}에서 <b>{0}</b> 브랜치 생성");
 		m.put("Create child projects under a project", "프로젝트 아래에 하위 프로젝트 생성");
@@ -1927,6 +1933,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Issue Status Mappings", "이슈 상태 매핑들");
 		m.put("Issue Stopwatch Overdue", "이슈 스톱워치 초과");
 		m.put("Issue Stopwatch Overdue Notification Template", "이슈 스톱워치 초과 알림 템플릿");
+		m.put("Issue Summary Prompt", "문제 요약 프롬프트");
 		m.put("Issue Tag Mapping", "이슈 태그 매핑");
 		m.put("Issue Tag Mappings", "이슈 태그 매핑들");
 		m.put("Issue Template", "이슈 템플릿");
@@ -3121,6 +3128,14 @@ public class Translation_ko extends TranslationResourceBundle {
 			"클러스터 멤버가 추가/제거될 때 프로젝트를 재배포해야 합니다. OneDev는 이 작업을 자동으로 수행하지 않으며, 이는 리소스를 많이 소모하므로 클러스터가 최종화되고 안정화된 후에만 수행하는 것이 좋습니다");
 		m.put("Promotions", "프로모션");
 		m.put("Prompt Fields", "프롬프트 필드");
+		m.put("Prompt to use when creating an issue for a failed build. Display language will be appended automatically", 
+			"빌드 실패에 대한 문제를 생성할 때 사용할 프롬프트입니다. 표시 언어는 자동으로 추가됩니다");
+		m.put("Prompt to use when explaining highlighted code. Display language will be appended automatically", 
+			"강조된 코드를 설명할 때 사용할 프롬프트입니다. 표시 언어는 자동으로 추가됩니다");
+		m.put("Prompt to use when summarizing issue comments. Display language will be appended automatically", 
+			"문제 댓글을 요약할 때 사용할 프롬프트입니다. 표시 언어는 자동으로 추가됩니다");
+		m.put("Prompt to use when summarizing pull request comments. Display language will be appended automatically", 
+			"풀 리퀘스트 댓글을 요약할 때 사용할 프롬프트입니다. 표시 언어는 자동으로 추가됩니다");
 		m.put("Properties", "속성");
 		m.put("Provide server id (guild id) to restrict access only to server members", "서버 멤버만 접근할 수 있도록 서버 ID(길드 ID)를 제공하세요");
 		m.put("Provisioner", "프로비저너");
@@ -3144,6 +3159,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Published By Project", "프로젝트에 의해 게시됨");
 		m.put("Published By User", "사용자에 의해 게시됨");
 		m.put("Published File", "게시된 파일");
+		m.put("Published site", "게시된 사이트");
 		m.put("Pull", "풀");
 		m.put("Pull Command", "풀 명령");
 		m.put("Pull Image", "이미지 풀");
@@ -3159,6 +3175,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pull Request Notification Unsubscribed Template", "풀 리퀘스트 알림 구독 취소 템플릿");
 		m.put("Pull Request Settings", "풀 리퀘스트 설정");
 		m.put("Pull Request Statistics", "풀 리퀘스트 통계");
+		m.put("Pull Request Summary Prompt", "풀 리퀘스트 요약 프롬프트");
 		m.put("Pull Request Title", "풀 리퀘스트 제목");
 		m.put("Pull Request Title And Description Provider", "풀 리퀘스트 제목 및 설명 제공자");
 		m.put("Pull Requests", "풀 리퀘스트들");
@@ -3906,6 +3923,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
 		m.put("Specify files under above directory to be published", "위 디렉토리 아래에 게시할 파일 지정");
+		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
+			"위 디렉토리 아래에서 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요. <b>참고:</b> <code>index.html</code>이 포함된 경우, 사이트 시작 페이지로 제공됩니다. 그렇지 않으면 게시된 파일 목록이 표시됩니다.");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"가져올 그룹을 지정하세요. 현재 계정 아래 프로젝트에서 가져오려면 비워 두세요.");
 		m.put("Specify how coding agents should reference an issue in commit messages when the commit is intended to fix an issue", 
@@ -5174,10 +5193,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Commit detail", "커밋 세부 정보");
-		m.put("Published site", "게시된 사이트");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
-			"위 디렉토리 아래에서 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요. <b>참고:</b> <code>index.html</code>이 포함된 경우, 사이트 시작 페이지로 제공됩니다. 그렇지 않으면 게시된 파일 목록이 표시됩니다.");
+		m.put("Builtin Chat Prompts", "내장 채팅 프롬프트");
 	}
 		
 	@Override

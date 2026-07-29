@@ -73,6 +73,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TimeGroups;
+import io.onedev.server.model.support.administration.AiSetting;
 import io.onedev.server.model.support.issue.CommitMessageFixSetting;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.service.SettingService;
@@ -9176,6 +9177,30 @@ public class DataMigrator {
 				var dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("participatingUserIds");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate236(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("AI")) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("codeExplanationPrompt")
+									.setText(AiSetting.DEFAULT_CODE_EXPLANATION_PROMPT);
+							valueElement.addElement("issueSummaryPrompt")
+									.setText(AiSetting.DEFAULT_ISSUE_SUMMARY_PROMPT);
+							valueElement.addElement("pullRequestSummaryPrompt")
+									.setText(AiSetting.DEFAULT_PULL_REQUEST_SUMMARY_PROMPT);
+							valueElement.addElement("buildFailureIssuePrompt")
+									.setText(AiSetting.DEFAULT_BUILD_FAILURE_ISSUE_PROMPT);
+						}
+					}
 				}
 				dom.writeToFile(file, false);
 			}
