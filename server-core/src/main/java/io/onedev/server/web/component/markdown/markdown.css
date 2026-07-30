@@ -29,7 +29,7 @@ body.markdown-editor-expanded {
 	top: auto;
 	height: var(--markdown-editor-halfscreen-height, 50vh);
 	z-index: 1039;
-	box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.12);
+	padding-top: 4px;
 }
 .markdown-editor>.halfscreen-resize-handle {
 	display: none;
@@ -40,7 +40,7 @@ body.markdown-editor-expanded {
 	top: 0;
 	left: 0;
 	right: 0;
-	height: 8px;
+	height: 4px;
 	cursor: ns-resize;
 	touch-action: none;
 	background: var(--light-gray) url(/~icon/grip2.svg) no-repeat scroll center center;
@@ -52,9 +52,6 @@ body.markdown-editor-expanded {
 }
 .dark-mode .markdown-editor.fullscreen, .dark-mode .markdown-editor.halfscreen {
 	background: var(--dark-mode-darker);
-}
-.dark-mode .markdown-editor.halfscreen {
-	box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.45);
 }
 .markdown-editor>.head>.warning {
 	margin-bottom: 0;
