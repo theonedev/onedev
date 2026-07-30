@@ -68,6 +68,10 @@ onedev.server.markdown = {
 		onedev.server.markdown.translations = translations;
 		var $container = $("#" + containerId);
 		var useFixedWidthFontCookieName = "markdownEditor.useFixedWidthFont";
+		var halfscreenHeightStorageKey = "markdownEditor.halfscreenHeight";
+		var minHalfscreenHeight = 30;
+		var maxHalfscreenHeight = 80;
+		var defaultHalfscreenHeight = 50;
 		var useFixedWidthFont = Cookies.get(useFixedWidthFontCookieName);
 		if (useFixedWidthFont && useFixedWidthFont == "true")	
 			$container.addClass("fixed-width");
@@ -87,6 +91,77 @@ onedev.server.markdown = {
 		var $rendered = $preview.children(".markdown-rendered");
 		var $help = $head.children(".help");
 		var $suggestion = $head.find(".do-suggestion");
+		var $halfscreenResizeHandle = $container.children(".halfscreen-resize-handle");
+
+		function clampHalfscreenHeight(height) {
+			return Math.min(maxHalfscreenHeight, Math.max(minHalfscreenHeight, height));
+		}
+
+		function getHalfscreenHeight() {
+			try {
+				var height = parseFloat(localStorage.getItem(halfscreenHeightStorageKey));
+				if (!isNaN(height))
+					return clampHalfscreenHeight(height);
+			} catch (e) {
+				// Local storage can be unavailable due to browser privacy settings
+			}
+			return defaultHalfscreenHeight;
+		}
+
+		function applyHalfscreenHeight(height) {
+			height = clampHalfscreenHeight(height);
+			document.body.style.setProperty("--markdown-editor-halfscreen-height", height + "vh");
+			$halfscreenResizeHandle.attr("aria-valuenow", Math.round(height));
+			return height;
+		}
+
+		function saveHalfscreenHeight(height) {
+			try {
+				localStorage.setItem(halfscreenHeightStorageKey, height);
+			} catch (e) {
+				// Keep resizing functional even when local storage is unavailable
+			}
+		}
+
+		var halfscreenHeight = getHalfscreenHeight();
+		applyHalfscreenHeight(halfscreenHeight);
+		$halfscreenResizeHandle.on("pointerdown", function(e) {
+			if ($container.hasClass("halfscreen")) {
+				e.preventDefault();
+				this.setPointerCapture(e.originalEvent.pointerId);
+				$halfscreenResizeHandle.data("resizingPointerId", e.originalEvent.pointerId);
+			}
+		});
+		$halfscreenResizeHandle.on("pointermove", function(e) {
+			if ($halfscreenResizeHandle.data("resizingPointerId") == e.originalEvent.pointerId) {
+				halfscreenHeight = applyHalfscreenHeight(
+						(window.innerHeight - e.originalEvent.clientY) * 100 / window.innerHeight);
+				notifyScreenModeLayoutChange();
+			}
+		});
+		$halfscreenResizeHandle.on("pointerup pointercancel", function(e) {
+			if ($halfscreenResizeHandle.data("resizingPointerId") == e.originalEvent.pointerId) {
+				$halfscreenResizeHandle.removeData("resizingPointerId");
+				saveHalfscreenHeight(halfscreenHeight);
+			}
+		});
+		$halfscreenResizeHandle.on("keydown", function(e) {
+			var adjustedHeight;
+			if (e.keyCode == 38)
+				adjustedHeight = halfscreenHeight + 2;
+			else if (e.keyCode == 40)
+				adjustedHeight = halfscreenHeight - 2;
+			else if (e.keyCode == 36)
+				adjustedHeight = maxHalfscreenHeight;
+			else if (e.keyCode == 35)
+				adjustedHeight = minHalfscreenHeight;
+			if (adjustedHeight != undefined && $container.hasClass("halfscreen")) {
+				e.preventDefault();
+				halfscreenHeight = applyHalfscreenHeight(adjustedHeight);
+				saveHalfscreenHeight(halfscreenHeight);
+				notifyScreenModeLayoutChange();
+			}
+		});
 		
 		$head.find(".dropdown>a").dropdown();
 		
@@ -464,6 +539,9 @@ onedev.server.markdown = {
 			}
 
 			$container.removeClass("fullscreen halfscreen").addClass(mode);
+			if (mode == "halfscreen") {
+				halfscreenHeight = applyHalfscreenHeight(getHalfscreenHeight());
+			}
 			$("body").addClass("markdown-editor-expanded");
 			$("body").toggleClass("markdown-editor-halfscreen", mode == "halfscreen");
 			var hasSubmit = $form.find(".dirty-aware").length != 0 || getSubmit().length != 0;
