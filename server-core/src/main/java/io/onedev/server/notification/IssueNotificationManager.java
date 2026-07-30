@@ -462,7 +462,7 @@ public class IssueNotificationManager implements Serializable {
 		try {
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), issue.getId());
 			workspaceService.runPrompt(ai, project, issue, null, commitId, branch, prompt,
-					participatingUserIds, taskFailedCallback);
+					false, participatingUserIds, taskFailedCallback);
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {

@@ -192,6 +192,8 @@ public class Workspace extends AbstractEntity {
 
 	private boolean forTaskAutomation;
 
+	private boolean mergeIfAcceptable;
+
 	@JsonIgnore
 	@Lob
 	private ArrayList<Long> participatingUserIds = new ArrayList<>();
@@ -436,6 +438,14 @@ public class Workspace extends AbstractEntity {
 
 	public void setForTaskAutomation(boolean forTaskAutomation) {
 		this.forTaskAutomation = forTaskAutomation;
+	}
+
+	public boolean isMergeIfAcceptable() {
+		return mergeIfAcceptable;
+	}
+
+	public void setMergeIfAcceptable(boolean mergeIfAcceptable) {
+		this.mergeIfAcceptable = mergeIfAcceptable;
 	}
 
 	public ArrayList<Long> getParticipatingUserIds() {

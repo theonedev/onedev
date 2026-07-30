@@ -1,13 +1,17 @@
 package io.onedev.server.web.component.user.aisetting;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.Min;
 
 import org.jspecify.annotations.Nullable;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
+import io.onedev.server.model.support.AiSetting.PullRequestAssigneeResponsibility;
 
 @Editable
 public class BehaviorEditBean implements Serializable {
@@ -15,6 +19,11 @@ public class BehaviorEditBean implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String systemPrompt;
+
+	private List<PullRequestAssigneeResponsibility> pullRequestAssigneeResponsibilities = Lists.newArrayList(
+			PullRequestAssigneeResponsibility.MERGE_IF_ACCEPTABLE,
+			PullRequestAssigneeResponsibility.FIX_FAILED_BUILDS,
+			PullRequestAssigneeResponsibility.RESOLVE_MERGE_CONFLICTS);
 
 	private boolean proactive;
 
@@ -30,6 +39,15 @@ public class BehaviorEditBean implements Serializable {
 
 	public void setSystemPrompt(@Nullable String systemPrompt) {
 		this.systemPrompt = systemPrompt;
+	}
+
+	@Editable(order=150, description="Responsibilities of the AI user when assigned to a pull request")
+	public List<PullRequestAssigneeResponsibility> getPullRequestAssigneeResponsibilities() {
+		return pullRequestAssigneeResponsibilities;
+	}
+
+	public void setPullRequestAssigneeResponsibilities(List<PullRequestAssigneeResponsibility> pullRequestAssigneeResponsibilities) {
+		this.pullRequestAssigneeResponsibilities = pullRequestAssigneeResponsibilities;
 	}
 
 	@Editable(order=200, description="""

@@ -9203,6 +9203,22 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var responsibilitiesElement = element.element("aiSetting").addElement("pullRequestAssigneeResponsibilities");
+					responsibilitiesElement.addElement("io.onedev.server.model.support.AiSetting_-PullRequestAssigneeResponsibility")
+							.setText("FIX_FAILED_BUILDS");
+					responsibilitiesElement.addElement("io.onedev.server.model.support.AiSetting_-PullRequestAssigneeResponsibility")
+							.setText("RESOLVE_MERGE_CONFLICTS");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Workspaces.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("mergeIfAcceptable").setText("false");
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

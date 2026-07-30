@@ -83,9 +83,10 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	@Nullable
 	FileData readFileData(Workspace workspace, String path);
-
+	
 	void runPrompt(User ai, Project project, @Nullable Issue issue, @Nullable PullRequest request,
 			@Nullable ObjectId commitId, @Nullable String branch, String prompt,
-			List<Long> participatingUserIds, TaskFailedCallback taskFailedCallback);
+			boolean mergeIfReady, List<Long> participatingUserIds, 
+			TaskFailedCallback taskFailedCallback);
 	
 }

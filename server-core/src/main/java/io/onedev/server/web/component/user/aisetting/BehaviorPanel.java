@@ -32,6 +32,7 @@ public class BehaviorPanel extends GenericPanel<User> {
 
 		var bean = new BehaviorEditBean();
 		bean.setSystemPrompt(getUser().getAiSetting().getSystemPrompt());
+		bean.setPullRequestAssigneeResponsibilities(getUser().getAiSetting().getPullRequestAssigneeResponsibilities());
 		bean.setProactive(getUser().getAiSetting().isProactive());
 		bean.setMaxLoopCount(getUser().getAiSetting().getMaxLoopCount());
 		var oldAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
@@ -43,6 +44,7 @@ public class BehaviorPanel extends GenericPanel<User> {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getUser().getAiSetting().setSystemPrompt(bean.getSystemPrompt());
+				getUser().getAiSetting().setPullRequestAssigneeResponsibilities(bean.getPullRequestAssigneeResponsibilities());
 				getUser().getAiSetting().setProactive(bean.isProactive());
 				getUser().getAiSetting().setMaxLoopCount(bean.getMaxLoopCount());
 				userService.update(getUser(), null);

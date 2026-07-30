@@ -1,8 +1,12 @@
 package io.onedev.server.notification;
 
+import static io.onedev.server.model.Build.Status.SUCCESSFUL;
 import static io.onedev.server.model.PullRequestReview.Status.PENDING;
 import static io.onedev.server.model.PullRequestReview.Status.REQUESTED_FOR_CHANGES;
 import static io.onedev.server.model.User.Type.AI;
+import static io.onedev.server.model.support.AiSetting.PullRequestAssigneeResponsibility.FIX_FAILED_BUILDS;
+import static io.onedev.server.model.support.AiSetting.PullRequestAssigneeResponsibility.MERGE_IF_ACCEPTABLE;
+import static io.onedev.server.model.support.AiSetting.PullRequestAssigneeResponsibility.RESOLVE_MERGE_CONFLICTS;
 import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 import static io.onedev.server.notification.NotificationUtils.isListening;
 
@@ -10,6 +14,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -268,7 +273,7 @@ public class PullRequestNotificationManager implements Serializable {
 							.formatted(request.getNumber());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
 					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
-							prompt, event.getParticipatingUserIds());
+							prompt, false, event.getParticipatingUserIds());
 				}
 				if ((changeData instanceof PullRequestRequestedForChangesData) 
 						&& user.getType() != AI
@@ -282,9 +287,9 @@ public class PullRequestNotificationManager implements Serializable {
 							.formatted(request.getNumber(), user.getName());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
 					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
-							prompt, event.getParticipatingUserIds());
+							prompt, false, event.getParticipatingUserIds());
 				}
-		} else if (event instanceof PullRequestAssigned) {
+			} else if (event instanceof PullRequestAssigned) {
 				assignees.add(((PullRequestAssigned) event).getAssignee());
 			} else if (event instanceof PullRequestReviewRequested pullRequestReviewRequested) {
 				reviewers.add(pullRequestReviewRequested.getReviewer());
@@ -311,9 +316,9 @@ public class PullRequestNotificationManager implements Serializable {
 								getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
 								replyAddress, senderName, threadingReferences);
 					}
-				}
+				} 
 			}
-	
+
 			for (User reviewer : reviewers) {
 				watchService.watch(request, reviewer, true);
 				if (notifiedUsers.add(reviewer)) {
@@ -349,11 +354,11 @@ public class PullRequestNotificationManager implements Serializable {
 								.formatted(request.getNumber(), request.getSubmitter().getName());
 						var commitId = request.getLatestUpdate().getHeadCommit().copy();						
 						runPrompt(reviewer, request, commitId, getWorkspaceBranch(request),
-								prompt, event.getParticipatingUserIds());
+								prompt, false, event.getParticipatingUserIds());
 					}
 				}
 			}
-			
+				
 			if (event.getCommentText() instanceof MarkdownText) {
 				MarkdownText markdown = (MarkdownText) event.getCommentText();
 				for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
@@ -389,7 +394,7 @@ public class PullRequestNotificationManager implements Serializable {
 					}
 				}
 			}
-	
+		
 			if (!event.isMinor()) {
 				Collection<String> bccEmailAddresses = new HashSet<>();
 				if (user != null && !notifiedUsers.contains(user) 
@@ -397,7 +402,7 @@ public class PullRequestNotificationManager implements Serializable {
 						&& user.getPrimaryEmailAddress().isVerified()) {
 					bccEmailAddresses.add(user.getPrimaryEmailAddress().getValue());
 				}
-	
+
 				for (PullRequestWatch watch : request.getWatches()) {
 					Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);
 					Permission permission = new ProjectPermission(request.getProject(), new ReadCode());
@@ -423,7 +428,7 @@ public class PullRequestNotificationManager implements Serializable {
 						}
 					}
 				}
-	
+
 				if (!bccEmailAddresses.isEmpty()) {
 					String subject = String.format(
 							"[Pull Request %s] (%s) %s",
@@ -441,66 +446,120 @@ public class PullRequestNotificationManager implements Serializable {
 				}
 			}	
 
-			if (request.getSubmitter().getType() == AI) {
-				if (event instanceof PullRequestBuildEvent pullRequestBuildEvent 
-							&& pullRequestBuildEvent.getBuild().isFailed() 
-							&& !pullRequestBuildEvent.getBuild().getDependencies().stream().anyMatch(it -> 
-									it.isRequireSuccessful() && it.getDependency().isFinished() && it.getDependency().getStatus() != Build.Status.SUCCESSFUL)
-							&& notifiedUsers.add(request.getSubmitter())
-							&& isAiEligible(null, request, request.getSubmitter(), true)
-							&& canCreateWorkspace(request.getSubmitter(), request, true)) {
-					var prompt = """
-							Work on pull request %d to fix failure of build %d. \
-							Make sure to submit work afterwards without confirmation."""
-							.formatted(request.getNumber(), pullRequestBuildEvent.getBuild().getNumber());
-					var commitId = request.getLatestUpdate().getHeadCommit().copy();
-					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
-							prompt, event.getParticipatingUserIds());
-				}
-				if (event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null 
-							&& request.getMergePreview().getMergeCommitHash() == null 
-							&& notifiedUsers.add(request.getSubmitter())
-							&& isAiEligible(null, request, request.getSubmitter(), true)
-							&& canCreateWorkspace(request.getSubmitter(), request, true)) {
-					var prompt = """
-						Work on pull request %d to resolve merge conflict. \
-						Make sure to submit work afterwards without confirmation."""
-						.formatted(request.getNumber());
-					var commitId = request.getLatestUpdate().getHeadCommit().copy();
-					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
-							prompt, event.getParticipatingUserIds());
-				}
-			}
-			
-			User aiAssignee = null;
 			if (event instanceof PullRequestAssigned pullRequestAssigned) {
-				if (pullRequestAssigned.getAssignee().getType() == AI) 
-					aiAssignee = pullRequestAssigned.getAssignee();
-			} else if (event instanceof PullRequestOpened 
-					|| event instanceof PullRequestChanged pullRequestChanged && pullRequestChanged.getChange().getData() instanceof PullRequestApproveData
-					|| event instanceof PullRequestBuildEvent pullRequestBuildEvent && pullRequestBuildEvent.getBuild().isSuccessful()) {
-				for (PullRequestAssignment assignment : request.getAssignments()) {
-					if (assignment.getUser().getType() == AI) {
-						aiAssignee = assignment.getUser();
-						break;
+				var assignee = pullRequestAssigned.getAssignee();
+				if (assignee.getType() == AI) {
+					var otherAiUserFixingFailedBuilds = request.getAssignees().stream()
+							.filter(it -> it.getType() == AI && !it.equals(assignee) && shouldFixFailedBuilds(it))
+							.findFirst()
+							.orElse(request.getSubmitter().getType() == AI? request.getSubmitter() : null);
+					if (otherAiUserFixingFailedBuilds == null 
+							&& shouldFixFailedBuilds(assignee) 
+							&& request.getCurrentBuilds().stream().anyMatch(it -> shouldFix(it))
+							&& notifiedUsers.add(assignee)
+							&& isAiEligible(null, request, assignee, true)
+							&& canCreateWorkspace(assignee, request, true)) {
+						fixFailedBuilds(assignee, request, null, event.getParticipatingUserIds());
+					} 
+					var otherAiUserResolvingMergeConflicts = request.getAssignees().stream()
+							.filter(it -> it.getType() == AI && !it.equals(assignee) && shouldResolveMergeConflicts(it))
+							.findFirst()
+							.orElse(request.getSubmitter().getType() == AI? request.getSubmitter() : null);
+					if (otherAiUserResolvingMergeConflicts == null && shouldResolveMergeConflicts(assignee)
+							&& request.getMergePreview() != null 
+							&& request.getMergePreview().getMergeCommitHash() == null
+							&& notifiedUsers.add(assignee)
+							&& isAiEligible(null, request, assignee, true)
+							&& canCreateWorkspace(assignee, request, true)) {
+						resolveMergeConflicts(assignee, request, event.getParticipatingUserIds());
 					}
 				}
+			} else if (event instanceof PullRequestBuildEvent pullRequestBuildEvent && shouldFix(pullRequestBuildEvent.getBuild())) {
+				var fixFailedBuildsAiUser = request.getAssignees().stream()
+						.filter(it -> it.getType() == AI && shouldFixFailedBuilds(it))
+						.findFirst()
+						.orElse(request.getSubmitter().getType() == AI? request.getSubmitter() : null);
+				if (fixFailedBuildsAiUser != null 
+						&& notifiedUsers.add(fixFailedBuildsAiUser)
+						&& isAiEligible(null, request, fixFailedBuildsAiUser, true)
+						&& canCreateWorkspace(fixFailedBuildsAiUser, request, true)) {
+					fixFailedBuilds(fixFailedBuildsAiUser, request, pullRequestBuildEvent.getBuild(), event.getParticipatingUserIds());
+				}			
+			} else if (event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null 
+						&& request.getMergePreview().getMergeCommitHash() == null) {
+				var resolveMergeConflictAiUser = request.getAssignees().stream()
+						.filter(it -> it.getType() == AI && shouldResolveMergeConflicts(it))
+						.findFirst()
+						.orElse(request.getSubmitter().getType() == AI? request.getSubmitter() : null);
+			
+				if (resolveMergeConflictAiUser != null 
+						&& notifiedUsers.add(resolveMergeConflictAiUser)
+						&& isAiEligible(null, request, resolveMergeConflictAiUser, true)
+						&& canCreateWorkspace(resolveMergeConflictAiUser, request, true)) {
+					resolveMergeConflicts(resolveMergeConflictAiUser, request, event.getParticipatingUserIds());
+				}			
 			}
-			if (aiAssignee != null && request.checkMergeCondition() == null 
-					&& notifiedUsers.add(aiAssignee)
-					&& isAiEligible(null, request, aiAssignee, true) 
-					&& canWriteCode(aiAssignee, request, request.getTargetProject())) {
-				var prompt = """
-						Work on pull request %d to review and merge if ready. \
-						Otherwise, mention @%s in a PR comment to request changes. \
-						Stay on current checkout and do not modify code. \
-						Make sure to submit work afterwards without confirmation."""
-						.formatted(request.getNumber(), request.getSubmitter().getName());
-				var commitId = request.getLatestUpdate().getHeadCommit().copy();
-				runPrompt(aiAssignee, request, commitId, getWorkspaceBranch(request),
-						prompt, event.getParticipatingUserIds());
+
+			if (request.getWorkspaces().stream().noneMatch(it -> it.isMergeIfAcceptable())) {
+				User mergeIfAcceptableAiUser = null;
+				if (event instanceof PullRequestAssigned pullRequestAssigned) {
+					var assignee = pullRequestAssigned.getAssignee();
+					var hasOtherAiUserMergingIfReady = request.getAssignees().stream()
+						.anyMatch(it -> it.getType() == AI && !it.equals(assignee) && shouldMergeIfAcceptable(it));
+					if (!hasOtherAiUserMergingIfReady 
+							&& assignee.getType() == AI 
+							&& shouldMergeIfAcceptable(assignee)) {
+						mergeIfAcceptableAiUser = assignee;
+					}
+				} else if (event instanceof PullRequestOpened 
+						|| event instanceof PullRequestUpdated
+						|| event instanceof PullRequestChanged pullRequestChanged && pullRequestChanged.getChange().getData() instanceof PullRequestApproveData
+						|| event instanceof PullRequestBuildEvent pullRequestBuildEvent
+								&& pullRequestBuildEvent.getBuild().isSuccessful()
+								&& request.getBuildRequirement().getRequiredJobs().contains(pullRequestBuildEvent.getBuild().getJobName())
+						|| event instanceof PullRequestMergePreviewUpdated && request.getMergePreview() != null && request.getMergePreview().getMergeCommitHash() != null) {
+					mergeIfAcceptableAiUser = request.getAssignees().stream()
+							.sorted(Comparator.comparing(User::getId))
+							.filter(it -> it.getType() == AI && shouldMergeIfAcceptable(it))
+							.findFirst()
+							.orElse(null);
+				}
+
+				if (mergeIfAcceptableAiUser != null 					
+						&& request.checkMergeCondition() == null
+						&& notifiedUsers.add(mergeIfAcceptableAiUser)
+						&& isAiEligible(null, request, mergeIfAcceptableAiUser, true) 
+						&& canWriteCode(mergeIfAcceptableAiUser, request, request.getTargetProject())) {
+					var prompt = """
+							Work on pull request %d to review the pull request. \
+							Merge the pull request if changes are acceptable; \
+							otherwise, mention @%s in a PR comment to request changes. \
+							When add PR comment, check your last comment content to avoid duplication. \
+							Stay on current checkout and do not modify code. \
+							Make sure to submit the work afterwards without confirmation."""
+							.formatted(request.getNumber(), request.getSubmitter().getName());
+					var commitId = request.getLatestUpdate().getHeadCommit().copy();
+					runPrompt(mergeIfAcceptableAiUser, request, commitId, getWorkspaceBranch(request),
+							prompt, true, event.getParticipatingUserIds());
+				}
 			}
 		}
+	}
+
+	private boolean shouldFixFailedBuilds(User ai) {
+		return ai.getAiSetting().getPullRequestAssigneeResponsibilities().contains(FIX_FAILED_BUILDS);
+	}
+
+	private boolean shouldResolveMergeConflicts(User ai) {
+		return ai.getAiSetting().getPullRequestAssigneeResponsibilities().contains(RESOLVE_MERGE_CONFLICTS);
+	}
+
+	private boolean shouldMergeIfAcceptable(User ai) {
+		return ai.getAiSetting().getPullRequestAssigneeResponsibilities().contains(MERGE_IF_ACCEPTABLE);
+	}
+
+	private boolean shouldFix(Build build) {
+		return build.isFailed() && !build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful() && it.getDependency().isFinished() && it.getDependency().getStatus() != SUCCESSFUL);		
 	}
 
 	@Nullable
@@ -545,6 +604,32 @@ public class PullRequestNotificationManager implements Serializable {
 		}
 	}
 
+	private void fixFailedBuilds(User ai, PullRequest request, @Nullable Build build, Collection<Long> participatingUserIds) {
+		String prompt;
+		if (build != null) {
+			prompt = """
+				Work on pull request %d to fix failure of build %d. \
+				Make sure to submit work afterwards without confirmation."""
+				.formatted(request.getNumber(), build.getNumber());
+		} else {
+			prompt = """
+				Work on pull request %d to fix failed builds. \
+				Make sure to submit work afterwards without confirmation."""
+				.formatted(request.getNumber());
+		}
+		var commitId = request.getLatestUpdate().getHeadCommit().copy();
+		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt, false, participatingUserIds);
+	}
+
+	private void resolveMergeConflicts(User ai, PullRequest request, Collection<Long> participatingUserIds) {
+		var prompt = """
+			Work on pull request %d to resolve merge conflict. \
+			Make sure to submit work afterwards without confirmation."""
+			.formatted(request.getNumber());
+		var commitId = request.getLatestUpdate().getHeadCommit().copy();
+		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt, false, participatingUserIds);
+	}
+
 	private void onAiMentioned(User ai, User commenter, PullRequest request,
 			Collection<Long> participatingUserIds) {
 		List<String> prompts = new ArrayList<>();
@@ -568,7 +653,7 @@ public class PullRequestNotificationManager implements Serializable {
 		var concatenatedPrompts = String.join(" ", prompts);
 		var commitId = request.getLatestUpdate().getHeadCommit().copy();
 		runPrompt(ai, request, commitId, getWorkspaceBranch(request),
-				concatenatedPrompts, participatingUserIds);
+				concatenatedPrompts, false, participatingUserIds);
 	}
 
 	private void onAiNotified(User ai, User commenter, PullRequest request,
@@ -580,11 +665,12 @@ public class PullRequestNotificationManager implements Serializable {
 				Make sure to submit work afterwards without confirmation."""
 				.formatted(request.getNumber(), commenter.getName());
 		var commitId = request.getLatestUpdate().getHeadCommit().copy();
-		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt, participatingUserIds);
+		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt, false, participatingUserIds);
 	}
 
 	private void runPrompt(User ai, PullRequest request, ObjectId commitId,
-			@Nullable String branch, String prompt, Collection<Long> eventParticipatingUserIds) {
+			@Nullable String branch, String prompt, boolean mergeIfReady, 
+			Collection<Long> eventParticipatingUserIds) {
 		var participatingUserIds = new ArrayList<>(eventParticipatingUserIds);
 		var awakenCount = participatingUserIds.stream().filter(ai.getId()::equals).count();
 		if (awakenCount >= ai.getAiSetting().getMaxLoopCount()) {
@@ -596,7 +682,7 @@ public class PullRequestNotificationManager implements Serializable {
 		try {
 			var taskFailedCallback = newTaskFailedCallback(ai.getId(), request.getId());
 			workspaceService.runPrompt(ai, request.getProject(), null, request, commitId, branch, prompt,
-					participatingUserIds, taskFailedCallback);
+					mergeIfReady, participatingUserIds, taskFailedCallback);
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {

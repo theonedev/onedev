@@ -1,14 +1,21 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.Min;
 
 import org.jspecify.annotations.Nullable;
 
+import com.google.common.collect.Lists;
+
 public class AiSetting implements Serializable {
     
     private static final long serialVersionUID = 1L;
+
+    public enum PullRequestAssigneeResponsibility {
+        MERGE_IF_ACCEPTABLE, FIX_FAILED_BUILDS, RESOLVE_MERGE_CONFLICTS
+    }
 
     private static final int DEFAULT_MAX_LOOP_COUNT = 3;
 
@@ -16,7 +23,11 @@ public class AiSetting implements Serializable {
 
     private boolean entitleToAll;
 
-    private String systemPrompt;    
+    private String systemPrompt;   
+    
+    private List<PullRequestAssigneeResponsibility> pullRequestAssigneeResponsibilities = Lists.newArrayList(
+        PullRequestAssigneeResponsibility.FIX_FAILED_BUILDS,
+        PullRequestAssigneeResponsibility.RESOLVE_MERGE_CONFLICTS);
 
     private boolean proactive;
 
@@ -45,6 +56,14 @@ public class AiSetting implements Serializable {
 
     public void setSystemPrompt(@Nullable String systemPrompt) {
         this.systemPrompt = systemPrompt;
+    }
+
+    public List<PullRequestAssigneeResponsibility> getPullRequestAssigneeResponsibilities() {
+        return pullRequestAssigneeResponsibilities;
+    }
+
+    public void setPullRequestAssigneeResponsibilities(List<PullRequestAssigneeResponsibility> pullRequestAssigneeResponsibilities) {
+        this.pullRequestAssigneeResponsibilities = pullRequestAssigneeResponsibilities;
     }
 
     public boolean isProactive() {
