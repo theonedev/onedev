@@ -33,6 +33,12 @@
 	padding-top: 0 !important;
 }
 
+.project-blob .markdown-rendered {
+	max-width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
 .project-blob>.blob-content {
 	overflow: auto;
 }

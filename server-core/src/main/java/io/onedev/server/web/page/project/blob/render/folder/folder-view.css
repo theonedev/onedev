@@ -20,6 +20,11 @@
 	border-top: 1px solid var(--light-gray);
 	border-bottom: 1px solid var(--light-gray);
 }
+.folder-view>.readme>.body {
+	max-width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+}
 .dark-mode .folder-view>.readme>.head {
 	background: var(--dark-mode-light-dark);
 	border-top-color: var(--dark-mode-lighter-dark);

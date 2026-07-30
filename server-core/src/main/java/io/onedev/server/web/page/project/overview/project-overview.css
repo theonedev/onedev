@@ -39,3 +39,8 @@
 .project-overview .children .project-list > .card-body {
 	padding: 0;
 }
+.project-overview .readme .markdown-viewer {
+	max-width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+}

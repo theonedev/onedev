@@ -249,11 +249,6 @@ body.markdown-editor-expanded {
 	border: 2px solid #187DE4;
 }
 
-.markdown-rendered {
-	max-width: 900px;
-	margin-left: auto;
-	margin-right: auto;
-}
 .markdown-rendered pre {
 	white-space: pre;
 }

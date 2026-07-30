@@ -1,7 +1,9 @@
 .blob-view>.body>div>.markdown-viewer {
 	padding: 1.6rem;
+	max-width: 900px;
+	margin-left: auto;
+	margin-right: auto;
 }
-
 .blob-edit .markdown-editor .ui-resizable-handle {
 	display: none;
 }
