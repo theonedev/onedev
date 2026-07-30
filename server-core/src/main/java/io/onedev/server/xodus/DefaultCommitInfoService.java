@@ -117,7 +117,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoService.class);
 
-	private static final int INFO_VERSION = 22;
+	private static final int INFO_VERSION = 23;
 
 	private static final long LOG_FILE_SIZE = 256 * 1024;
 
