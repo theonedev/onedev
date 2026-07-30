@@ -61,6 +61,11 @@
 				<a wicket:id="vote" class="btn btn-outline-secondary btn-sm vote"><wicket:svg href="thumb-up" class="icon mr-2"></wicket:svg> <span wicket:id="label"></span></a>
 			</div>
 		</div>
+		<wicket:enclosure child="workspaces">
+			<div class="workspaces">
+				<a wicket:id="workspaces" t:data-tippy-content="Workspaces on this issue" class="btn btn-outline-secondary btn-sm"><wicket:t>Workspaces</wicket:t> <wicket:svg href="arrow" class="icon rotate-90"/></a>
+			</div>
+		</wicket:enclosure>
 		<div wicket:id="watches" class="watches"></div>
 		<div wicket:id="externalParticipants" class="external-participants">
 			<div class="head"><wicket:t>External Participants</wicket:t></div>

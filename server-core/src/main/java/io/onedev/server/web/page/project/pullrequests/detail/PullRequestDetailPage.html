@@ -22,7 +22,6 @@
 			<div class="main flex-grow-1">
 				<div wicket:id="statusBar" class="status-bar d-flex mb-4">
 					<div wicket:id="status" class="badge status mr-3"></div>
-					<a wicket:id="workspaces" t:data-tippy-content="Workspaces on source branch" class="btn btn-outline-secondary btn-sm mr-3">Workspaces <wicket:svg href="arrow" class="icon rotate-90"/></a>
 					<a wicket:id="clone" t:data-tippy-content="Check out to local directory" class="btn btn-outline-secondary btn-icon mr-3"><wicket:svg href="download2" class="icon"></wicket:svg></a>
 					<a wicket:id="newPullRequest" class="btn btn-primary btn-icon flex-shrink-0 ml-auto" t:data-tippy-content="Open new pull request"><wicket:svg href="plus" class="icon"/></a>
 				</div>
@@ -166,6 +165,11 @@
 			<div wicket:id="reviews" class="body"></div>
 			<div wicket:id="reviewerHelp" class="font-size-sm text-muted form-text"><wicket:t>Pull request can only be merged after getting approvals from all reviewers</wicket:t></div>
 		</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="workspaces">
+			<div class="workspaces">
+				<a wicket:id="workspaces" t:data-tippy-content="Workspaces on source branch" class="btn btn-outline-secondary btn-sm"><wicket:t>Workspaces</wicket:t> <wicket:svg href="arrow" class="icon rotate-90"/></a>
+			</div>
 		</wicket:enclosure>
 		<wicket:enclosure child="jobs">
 		<div class="jobs">
