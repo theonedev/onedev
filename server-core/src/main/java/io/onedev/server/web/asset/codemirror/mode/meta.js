@@ -57,6 +57,7 @@
     {name: "F#", mime: "text/x-fsharp", mode: "mllike", ext: ["fs"], alias: ["fsharp"]},
     {name: "Gas", mime: "text/x-gas", mode: "gas", ext: ["s"]},
     {name: "Gherkin", mime: "text/x-feature", mode: "gherkin", ext: ["feature"]},
+    {name: "GDScript", mime: "text/x-gdscript", mode: "gdscript", ext: ["gd"]},
     {name: "GitHub Flavored Markdown", mime: "text/x-gfm", mode: "gfm", file: /^(readme|contributing|history)\.md$/i},
     {name: "Gleam", mime: "text/x-gleam", mode: "gleam", ext: ["gleam"]},
     {name: "Go", mime: "text/x-go", mode: "go", ext: ["go"]},
