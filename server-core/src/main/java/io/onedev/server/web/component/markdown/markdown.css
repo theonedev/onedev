@@ -11,7 +11,7 @@ body.markdown-editor-expanded {
 	overflow: hidden;
 }
 .LayoutPage>body.markdown-editor-halfscreen>.main {
-	bottom: 50vh;
+	bottom: var(--markdown-editor-halfscreen-height, 50vh);
 }
 .markdown-editor.fullscreen, .markdown-editor.halfscreen {
 	position: fixed;
@@ -26,9 +26,29 @@ body.markdown-editor-expanded {
 	top: 0;
 }
 .markdown-editor.halfscreen {
-	top: 50vh;
+	top: auto;
+	height: var(--markdown-editor-halfscreen-height, 50vh);
 	z-index: 1039;
 	box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.12);
+}
+.markdown-editor>.halfscreen-resize-handle {
+	display: none;
+}
+.markdown-editor.halfscreen>.halfscreen-resize-handle {
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 8px;
+	cursor: ns-resize;
+	touch-action: none;
+	background: var(--light-gray) url(/~icon/grip2.svg) no-repeat scroll center center;
+	background-size: 20px 20px;
+}
+.dark-mode .markdown-editor.halfscreen>.halfscreen-resize-handle {
+	background-color: var(--dark-mode-light-dark);
+	background-image: url(/~icon/dark-grip2.svg);
 }
 .dark-mode .markdown-editor.fullscreen, .dark-mode .markdown-editor.halfscreen {
 	background: var(--dark-mode-darker);
