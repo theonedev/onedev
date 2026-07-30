@@ -36,6 +36,9 @@ class PullRequestChangePanel extends Panel {
 		add(new UserIdentPanel("user", change.getUser(), Mode.AVATAR_AND_NAME));
 		add(new Label("description", change.getData().getActivity()));
 
+		add(new Label("age", DateUtils.formatAge(change.getDate()))
+			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(change.getDate()))));
+
 		var mergeCommit = new WebMarkupContainer("mergeCommit");
 		var mergePreview = change.getRequest().getMergePreview();
 		if (change.getData() instanceof PullRequestMergeData
@@ -52,9 +55,7 @@ class PullRequestChangePanel extends Panel {
 			mergeCommit.setVisible(false);
 		}
 		add(mergeCommit);
-		
-		add(new Label("age", DateUtils.formatAge(change.getDate()))
-			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(change.getDate()))));
+
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
 
 			@Override
