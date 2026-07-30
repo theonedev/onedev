@@ -78,6 +78,7 @@ import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
+import io.onedev.server.web.component.issue.workspaces.IssueWorkspacesLink;
 import io.onedev.server.web.component.iteration.IterationStatusLabel;
 import io.onedev.server.web.component.iteration.choice.AbstractIterationChoiceProvider;
 import io.onedev.server.web.component.iteration.choice.IterationChoiceResourceReference;
@@ -115,6 +116,14 @@ public abstract class IssueSidePanel extends Panel {
 		addOrReplace(newIterationsContainer());
 		addOrReplace(newBranchContainer());
 		addOrReplace(newVotesContainer());
+		addOrReplace(new IssueWorkspacesLink("workspaces") {
+
+			@Override
+			protected Issue getIssue() {
+				return IssueSidePanel.this.getIssue();
+			}
+
+		});
 		
 		addOrReplace(watchesContainer = new EntityWatchesPanel("watches") {
 

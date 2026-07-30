@@ -22,7 +22,6 @@
 			<div class="main flex-grow-1">
 				<div wicket:id="statusBar" class="status-bar d-flex mb-4">
 					<div wicket:id="status" class="badge status mr-3"></div>
-					<a wicket:id="workspaces" t:data-tippy-content="Workspaces on source branch" class="btn btn-outline-secondary btn-sm mr-3">Workspaces <wicket:svg href="arrow" class="icon rotate-90"/></a>
 					<a wicket:id="clone" t:data-tippy-content="Check out to local directory" class="btn btn-outline-secondary btn-icon mr-3"><wicket:svg href="download2" class="icon"></wicket:svg></a>
 					<a wicket:id="newPullRequest" class="btn btn-primary btn-icon flex-shrink-0 ml-auto" t:data-tippy-content="Open new pull request"><wicket:svg href="plus" class="icon"/></a>
 				</div>
@@ -160,6 +159,14 @@
 				</tr>
 			</table>
 		</div>
+		<wicket:enclosure child="workspaces">
+			<div class="workspaces">
+				<div class="head"><wicket:t>Workspaces</wicket:t></div>
+				<div class="body">
+					<a wicket:id="workspaces" class="btn btn-outline-secondary btn-sm"><wicket:svg href="workspace" class="icon mr-2"/><wicket:t>Show / Create</wicket:t> <wicket:svg href="arrow" class="icon rotate-90"/></a>
+				</div>
+			</div>
+		</wicket:enclosure>
 		<wicket:enclosure child="reviews">
 		<div class="reviews">
 			<div class="head"><wicket:t>Reviewers</wicket:t></div>

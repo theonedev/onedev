@@ -1069,6 +1069,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 
 				});
+				fragment.add(newWorkspacesLink());
 				fragment.add(new PullRequestJobsPanel("jobs") {
 
 					@Override
@@ -1667,7 +1668,44 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		});
 
-		statusBarContainer.add(new DropdownLink("workspaces") {
+		statusBarContainer.add(new DropdownLink("clone") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment fragment = new Fragment(id, "cloneFrag", PullRequestDetailPage.this);
+				fragment.add(new Label("headRef", getPullRequest().getHeadRef()));
+				fragment.add(new Label("mergeRef", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return getPullRequest().getMergeRef();
+					}
+
+				}) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getPullRequest().checkMergePreview() != null
+								&& getPullRequest().checkMergePreview().getMergeCommitHash() != null);
+					}
+
+				});
+				return fragment;
+			}
+
+		});
+
+		statusBarContainer.add(new BookmarkablePageLink<Void>(
+				"newPullRequest",
+				NewPullRequestPage.class,
+				NewPullRequestPage.paramsOf(getProject())));
+
+		return statusBarContainer;
+	}
+
+	private Component newWorkspacesLink() {
+		return new DropdownLink("workspaces") {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
@@ -1713,42 +1751,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						&& SecurityUtils.canCreateWorkspaces(request.getProject()));
 			}
 
-		});
-
-		statusBarContainer.add(new DropdownLink("clone") {
-
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				Fragment fragment = new Fragment(id, "cloneFrag", PullRequestDetailPage.this);
-				fragment.add(new Label("headRef", getPullRequest().getHeadRef()));
-				fragment.add(new Label("mergeRef", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return getPullRequest().getMergeRef();
-					}
-
-				}) {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getPullRequest().checkMergePreview() != null
-								&& getPullRequest().checkMergePreview().getMergeCommitHash() != null);
-					}
-
-				});
-				return fragment;
-			}
-
-		});
-
-		statusBarContainer.add(new BookmarkablePageLink<Void>(
-				"newPullRequest",
-				NewPullRequestPage.class,
-				NewPullRequestPage.paramsOf(getProject())));
-
-		return statusBarContainer;
+		};
 	}
 
 	private WebMarkupContainer newDescriptionContainer() {
