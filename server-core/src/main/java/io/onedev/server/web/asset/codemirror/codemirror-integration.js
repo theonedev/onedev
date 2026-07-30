@@ -65,6 +65,10 @@ onedev.server.codemirror = {
 			return CodeMirror.findModeByName("jsx");
 		else if (fileName.endsWith(".ld") || fileName.endsWith(".asm")) 
 			return CodeMirror.findModeByName("gas");			
+		else if (fileName.endsWith(".gd"))
+			return CodeMirror.findModeByName("python");
+		else if (fileName.endsWith(".gdshader"))
+			return {name: "GDShader", mime: "x-shader/x-fragment", mode: "clike"};
 		else if (fileName == ".onedev-buildspec") 
 			return CodeMirror.findModeByName("xml");			
 		else 
