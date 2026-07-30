@@ -159,17 +159,20 @@
 				</tr>
 			</table>
 		</div>
+		<wicket:enclosure child="workspaces">
+			<div class="workspaces">
+				<div class="head"><wicket:t>Workspaces</wicket:t></div>
+				<div class="body">
+					<a wicket:id="workspaces" class="btn btn-outline-secondary btn-sm"><wicket:svg href="workspace" class="icon mr-2"/><wicket:t>Show / Create</wicket:t> <wicket:svg href="arrow" class="icon rotate-90"/></a>
+				</div>
+			</div>
+		</wicket:enclosure>
 		<wicket:enclosure child="reviews">
 		<div class="reviews">
 			<div class="head"><wicket:t>Reviewers</wicket:t></div>
 			<div wicket:id="reviews" class="body"></div>
 			<div wicket:id="reviewerHelp" class="font-size-sm text-muted form-text"><wicket:t>Pull request can only be merged after getting approvals from all reviewers</wicket:t></div>
 		</div>
-		</wicket:enclosure>
-		<wicket:enclosure child="workspaces">
-			<div class="workspaces">
-				<a wicket:id="workspaces" t:data-tippy-content="Workspaces on source branch" class="btn btn-outline-secondary btn-sm"><wicket:t>Workspaces</wicket:t> <wicket:svg href="arrow" class="icon rotate-90"/></a>
-			</div>
 		</wicket:enclosure>
 		<wicket:enclosure child="jobs">
 		<div class="jobs">
