@@ -3,7 +3,12 @@
 		<wicket:svg href="history" class="icon text-gray"></wicket:svg>
 		<div class="head">
 			<span wicket:id="user"></span>
-			<span wicket:id="description"></span> <span wicket:id="age"></span>
+			<span wicket:id="description"></span>
+			<span wicket:id="mergeCommit">
+				<a wicket:id="hashLink" class="hash"><span wicket:id="hash"></span></a>
+				<a wicket:id="copyHash"><wicket:svg href="copy" class="icon icon-sm"></wicket:svg></a>
+			</span>
+			<span wicket:id="age"></span>
 			<a wicket:id="changes" class="since-changes ml-2" t:data-tippy-content="Changes since this action"><wicket:svg href="diff" class="icon"></wicket:svg></a>
 		</div>
 		<div wicket:id="body" class="body mt-3"></div>		
