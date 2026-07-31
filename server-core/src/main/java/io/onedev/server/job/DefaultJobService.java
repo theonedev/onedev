@@ -865,8 +865,9 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 			var systemUser = userService.getSystem();
 			for (var dependence : build.getDependencies()) {
-				var dependency = dependence.getDependency();			
-				resubmit(systemUser, dependency, "Resubmitted by dependent build");
+				var dependency = dependence.getDependency();		
+				if (dependence.isRequireSuccessful() && !dependency.isSuccessful())
+					resubmit(systemUser, dependency, "Resubmitted by dependent build");					
 			}
 		}
 	}
