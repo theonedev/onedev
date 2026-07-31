@@ -341,6 +341,12 @@ public class WorkerResource {
 		return Response.ok().build();
 	}
 
+	@Path("workspace-active")
+	@GET
+	public boolean isWorkspaceActive(@QueryParam("token") String token) {
+		return workspaceService.getWorkspaceContext(token, false) != null;
+	}
+
 	@Path("workspace-user-data")
 	@PUT
 	public Response notifyWorkspaceUserDataUploaded(
