@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.model.support.workspace.spec.EnvVar;
 import io.onedev.server.model.support.workspace.spec.ShortcutConfig;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -29,6 +30,11 @@ public class OpenCodeInShell extends WorkspaceSpecTemplate {
         shortcutConfig.setName("Open Code");
         shortcutConfig.setCommand("opencode");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
+
+        var envVar = new EnvVar();
+        envVar.setName("OPENCODE_DANGEROUSLY_SKIP_PERMISSIONS");
+        envVar.setValue("true");
+        workspaceSpec.getEnvVars().add(envVar);
 
         configureTaskAutomation(workspaceSpec, "opencode run --dangerously-skip-permissions \"$TASK_PROMPT\"");
 
