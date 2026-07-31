@@ -20,7 +20,7 @@ onedev:
   trustCerts:
     # onedev.trustCerts.secretName -- Name of an existing secret containing trusted certificates. You may create the
     # secret with "kubectl create secret generic onedev-trustcerts -n onedev --from-file=/path/to/trust-certs",
-    # where /path/to/trust-certs is a local directory contains all certificates to be trusted. Certificate should be 
+    # where /path/to/trust-certs is a local directory contains all certificates to be trusted. Certificate should be
     # of base64 encoded PEM format beginning with "-----BEGIN CERTIFICATE-----" and ending with "-----END CERTIFICATE-----"
     secretName: "onedev-trustcerts"
   jvm:
@@ -57,7 +57,7 @@ database:
   name: "onedev"
   # database.user --  User with access to database
   user: "root"
-  # database.password -- Database password 
+  # database.password -- Database password
   password: "changeit"
   # database.maximumPoolSize -- Database maximum pool size
   maximumPoolSize: "25"
@@ -179,11 +179,11 @@ service:
     http: ""
     ssh: ""
   # service.nodePort -- Specify a nodePort for servcie
-  nodePort: ""  
+  nodePort: ""
   # service.externalTrafficPolicy -- Specify the
   # [externalTrafficPolicy](https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip).
   externalTrafficPolicy: ""
-  # service.loadBalancerIP -- Required: If service type is loadbalancer 
+  # service.loadBalancerIP -- Required: If service type is loadbalancer
   # [loadBalancerIP](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer).
   loadBalancerIP: ""
   # service.ipFamilyPolicy -- Configure
@@ -217,14 +217,6 @@ ingress:
   # ingress.className -- Specify ingress class name. Requires Kubernetes >= 1.18.
   # Refer to https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress for details
   className: ""
-  # ingress.annotations -- Specify annotations for the Ingress.
-  annotations: 
-    nginx.ingress.kubernetes.io/affinity: "cookie"
-    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
-    nginx.ingress.kubernetes.io/session-cookie-name: "session-sticky"
-    nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
-    nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
   # ingress.host -- Set the host name
   host: onedev.example.com
 
@@ -244,6 +236,28 @@ ingress:
       # rate limit while you are testing your setup
       production: false
 
+  # Nginx configuration
+  nginx:
+    annotations:
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+      nginx.ingress.kubernetes.io/session-cookie-name: "session-sticky"
+      nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+      nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  traefik:
+    enabled: false
+    entryPoint: websecure
+    sshEntryPoint: gitssh
+    # Used hostPattern if Regex matching is needed for multiple hostnames. If not set host is used.
+    #hosts:
+    #  - code.example.com
+    #  - code.int.example.com
+    # ingress.middleware -- Specify middleware for the Ingress.
+    middleware:
+      name: "buffering"
+      maxRequestBodyBytes: 1073741824
+      memRequestBodyBytes: 1073741824
 # extraVolumes -- Specify additional Volumes to use.
 extraVolumes: []
 

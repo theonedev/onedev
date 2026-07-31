@@ -1,0 +1,25 @@
+{{- $ingress := get .Values "ingress" | default dict -}}
+{{- $traefik := get $ingress "traefik" | default dict -}}
+{{- $traefikEnabled := get $traefik "enabled" | default false -}}
+
+{{- if $traefikEnabled }}
+{{- if and $.Values.ingress.tls.enabled $.Values.ingress.tls.acme.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "ods.fullname" . }}
+spec:
+  secretName: {{ .Values.ingress.tls.secretName }}
+  issuerRef:
+    name: {{ include "ods.fullname" . }}
+    kind: Issuer
+  dnsNames:
+    {{- if .Values.ingress.traefik.hosts }}
+    {{- range .Values.ingress.traefik.hosts }}
+      - {{ . | quote }}
+    {{- end }}
+    {{- else }}
+    - {{ .Values.ingress.host | quote }}
+    {{- end }}
+{{- end }}
+{{- end }}

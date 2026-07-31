@@ -1,4 +1,4 @@
-{{- if .Values.ingress.tls.acme.enabled -}}
+{{- if and $.Values.ingress.tls.enabled $.Values.ingress.tls.acme.enabled -}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
