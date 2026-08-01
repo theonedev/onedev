@@ -1,18 +1,19 @@
-{{- $ingress := get .Values "ingress" | default dict -}}
-{{- $traefik := get $ingress "traefik" | default dict -}}
-{{- $traefikEnabled := get $traefik "enabled" | default false -}}
-
+{{- $traefikEnabled := eq (include "ods.traefikEnabled" .) "true" -}}
 {{- if .Values.ingress.enabled -}}
 {{- if not $traefikEnabled }}
-
-{{- /* Default .Values.ingress.annotations to dict if nil AND reassign it */}}
-{{- if not .Values.ingress.annotations -}}
-  {{- $_ := set .Values.ingress "annotations" dict -}}
-{{- end -}}
-
+{{- $annotations := dict }}
+{{- if and .Values.ingress.tls.enabled .Values.ingress.tls.acme.enabled }}
+  {{- $_ := set $annotations "cert-manager.io/issuer" (include "ods.fullname" .) }}
+{{- end }}
+{{- with (.Values.ingress.nginx | default dict).annotations }}
+  {{- $annotations = mergeOverwrite $annotations . }}
+{{- end }}
+{{- with .Values.ingress.annotations }}
+  {{- $annotations = mergeOverwrite $annotations . }}
+{{- end }}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
-    {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className -}}
+  {{- if not (hasKey $annotations "kubernetes.io/ingress.class") }}
+    {{- $_ := set $annotations "kubernetes.io/ingress.class" .Values.ingress.className }}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -28,22 +29,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "ods.labels" . | indent 4 }}
+  {{- with $annotations }}
   annotations:
-  {{- $mergedAnnotations := dict }}
-  {{- if and $.Values.ingress.tls.enabled $.Values.ingress.tls.acme.enabled }}
-    {{- $_ := set $mergedAnnotations "cert-manager.io/issuer" (include "ods.fullname" .) }}
-  {{- end }}
-  {{- if .Values.ingress.annotations }}
-    {{- $mergedAnnotations = merge $mergedAnnotations (default dict .Values.ingress.annotations) }}
-  {{- end }}
-  {{- if get .Values.ingress "nginx" | default dict }}
-    {{- $nginx := get .Values.ingress "nginx" | default dict }}
-    {{- if $nginx.annotations }}
-      {{- $mergedAnnotations = merge $mergedAnnotations (default dict $nginx.annotations) }}
-    {{- end }}
-  {{- end }}
-  {{- if $mergedAnnotations }}
-    {{- toYaml $mergedAnnotations | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
@@ -75,6 +63,10 @@ spec:
               {{- end }}
 {{- end }}
 {{- if $traefikEnabled }}
+{{- $traefik := .Values.ingress.traefik }}
+{{- $middleware := $traefik.middleware | default dict }}
+{{- $sshEntryPoint := include "ods.traefikSshEntryPoint" . }}
+{{- if $sshEntryPoint }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRouteTCP
 metadata:
@@ -84,17 +76,19 @@ metadata:
 {{ include "ods.labels" . | indent 4 }}
 spec:
   entryPoints:
-    - {{ .Values.ingress.traefik.sshEntryPoint }}
+    - {{ $sshEntryPoint }}
   routes:
     - match: HostSNI(`*`)
       services:
-        - name: {{ include "ods.fullname" . }}{{- if .Values.service.separateSSH.enabled }}-ssh{{- end }}
         {{- if .Values.service.separateSSH.enabled }}
-          port: {{ default .Values.service.ports.ssh .Values.service.separateSSH.port | default "22" }}
+        - name: {{ include "ods.fullname" . }}-ssh
+          port: {{ default "22" .Values.service.separateSSH.port }}
         {{- else }}
+        - name: {{ include "ods.fullname" . }}
           port: {{ default "22" .Values.service.ports.ssh }}
         {{- end }}
 ---
+{{- end }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -104,21 +98,21 @@ metadata:
 {{ include "ods.labels" . | indent 4 }}
 spec:
   entryPoints:
-    - {{ .Values.ingress.traefik.entryPoint }}
+    - {{ default "websecure" $traefik.entryPoint }}
   routes:
-  {{- if .Values.ingress.traefik.hosts }}
-    {{- $hosts := list }}
-    {{- range .Values.ingress.traefik.hosts }}
-      {{- $hosts = append $hosts (regexReplaceAll "\\." . "\\.") }}
-    {{- end }}
-  - match: HostRegexp(`^({{ join "|" $hosts }})$`)
-  {{- else }}
-  - match: Host(`{{ .Values.ingress.host }}`)
+  {{- $matchers := list }}
+  {{- range $traefik.hosts | default (list .Values.ingress.host) }}
+    {{- $matchers = append $matchers (printf "`%s`" .) }}
   {{- end }}
+  - match: Host({{ join ", " $matchers }})
     kind: Rule
     middlewares:
-      - name: {{ include "ods.fullname" . }}-{{ .Values.ingress.traefik.middleware.name }}
+      - name: {{ include "ods.traefikMiddlewareName" . }}
         namespace: {{ .Release.Namespace }}
+      {{- range $traefik.extraMiddlewares }}
+      - name: {{ .name }}
+        namespace: {{ default $.Release.Namespace .namespace }}
+      {{- end }}
     services:
     - name: {{ include "ods.fullname" . }}
       port: {{ default "80" .Values.service.ports.http }}
@@ -133,13 +127,13 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: {{ include "ods.fullname" . }}-{{ .Values.ingress.traefik.middleware.name }}
+  name: {{ include "ods.traefikMiddlewareName" . }}
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "ods.labels" . | indent 4 }}
 spec:
   buffering:
-    maxRequestBodyBytes: {{ int .Values.ingress.traefik.middleware.maxRequestBodyBytes }}
-    memRequestBodyBytes: {{ int .Values.ingress.traefik.middleware.memRequestBodyBytes }}
+    maxRequestBodyBytes: {{ int64 (default 1073741824 $middleware.maxRequestBodyBytes) }}
+    memRequestBodyBytes: {{ int64 (default 1073741824 $middleware.memRequestBodyBytes) }}
 {{- end }}
 {{- end }}

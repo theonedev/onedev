@@ -67,6 +67,38 @@ Return the ServiceAccount name
 {{- end -}}
 
 {{/*
+Return "true" when routing should be done with Traefik CRDs instead of a Kubernetes Ingress
+*/}}
+{{- define "ods.traefikEnabled" -}}
+{{- if (.Values.ingress.traefik | default dict).enabled -}}
+{{- print "true" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the Traefik entry point serving ssh traffic, or empty when ssh should not be exposed.
+An absent key means values were carried over from a chart predating this setting, as happens
+with "helm upgrade --reuse-values", in which case the chart default applies so that upgrading
+matches a fresh install. An explicit empty value disables the ssh route.
+*/}}
+{{- define "ods.traefikSshEntryPoint" -}}
+{{- $traefik := .Values.ingress.traefik | default dict -}}
+{{- if hasKey $traefik "sshEntryPoint" -}}
+{{- $traefik.sshEntryPoint | default "" -}}
+{{- else -}}
+{{- print "gitssh" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the name of the buffering middleware created along with the Traefik IngressRoute
+*/}}
+{{- define "ods.traefikMiddlewareName" -}}
+{{- $middleware := .Values.ingress.traefik.middleware | default dict -}}
+{{- printf "%s-%s" (include "ods.fullname" .) (default "buffering" $middleware.name) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Return the target Kubernetes version
 */}}
 {{- define "ods.kubeVersion" -}}

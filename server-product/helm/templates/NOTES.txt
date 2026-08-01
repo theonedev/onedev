@@ -3,13 +3,6 @@ CHART VERSION: {{ .Chart.Version }}
 APP VERSION: {{ .Chart.AppVersion }}
 
 {{- if and (not .Values.command) (not .Values.args) (eq .Values.image.name "1dev/server") }}
-###################################################################
-#
-# CAUTION: If you are upgrading from version <= 9.0.0, please make
-# sure to follow https://docs.onedev.io/upgrade-guide/deploy-to-k8s
-# to migrate your data
-#
-###################################################################
 
 ** Please be patient while the chart is being deployed **
 
@@ -21,6 +14,24 @@ You can access OneDev at:
    https://{{ .Values.ingress.host }}
 {{- else }}
    http://{{ .Values.ingress.host }}
+{{- end }}
+{{- if eq (include "ods.traefikEnabled" .) "true" }}
+
+Traffic is routed by Traefik:
+
+   http entry point: {{ default "websecure" .Values.ingress.traefik.entryPoint }}
+   host names: {{ join ", " (.Values.ingress.traefik.hosts | default (list .Values.ingress.host)) }}
+{{- $sshEntryPoint := include "ods.traefikSshEntryPoint" . }}
+{{- if $sshEntryPoint }}
+   ssh entry point: {{ $sshEntryPoint }}
+
+Make sure entry point {{ $sshEntryPoint }} is declared in your Traefik installation, and update
+SSH root url as ssh://{{ .Values.ingress.host }} in menu Administration/System Setting
+{{- else }}
+   ssh: not exposed via Traefik
+
+Set ingress.traefik.sshEntryPoint if you want ssh to be routed by Traefik as well
+{{- end }}
 {{- end }}
 
 {{- else }}

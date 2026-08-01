@@ -1,11 +1,12 @@
-{{- if and $.Values.ingress.tls.enabled $.Values.ingress.tls.acme.enabled -}}
+{{- if and .Values.ingress.enabled .Values.ingress.tls.enabled .Values.ingress.tls.acme.enabled -}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ include "ods.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   acme:
-{{- if eq $.Values.ingress.tls.acme.type "letsencrypt" }}
+{{- if eq .Values.ingress.tls.acme.type "letsencrypt" }}
 {{- if .Values.ingress.tls.acme.production }}
     server: https://acme-v02.api.letsencrypt.org/directory
 {{- else }}
@@ -18,5 +19,9 @@ spec:
     solvers:
       - http01:
           ingress:
-            class: {{ .Values.ingress.className }}
+            {{- with .Values.ingress.className }}
+            class: {{ . }}
+            {{- else }}
+            {}
+            {{- end }}
 {{- end }}

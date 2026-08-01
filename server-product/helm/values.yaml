@@ -217,15 +217,20 @@ ingress:
   # ingress.className -- Specify ingress class name. Requires Kubernetes >= 1.18.
   # Refer to https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress for details
   className: ""
-  # ingress.host -- Set the host name
+  # ingress.host -- Set the host name. This also determines the server url advertised by OneDev,
+  # so it needs to be set even when additional host names are routed via ingress.traefik.hosts
   host: onedev.example.com
+  # ingress.annotations -- Specify additional annotations for the Ingress. These are merged on top
+  # of ingress.nginx.annotations and take precedence over them
+  annotations: {}
 
   # ingress.tls -- Configure TLS for the Ingress.
   tls:
     enabled: false
     secretName: "onedev-tls"
     acme:
-      # ingress.tls.acme.enabled -- If **true**, create certificate issuer resource
+      # ingress.tls.acme.enabled -- If **true**, create certificate issuer resource. Also requires
+      # ingress.tls.enabled to be **true**
       enabled: false
       # ingress.tls.acme.type -- Specify ACME type. Currently only supports letsencrypt
       type: "letsencrypt"
@@ -238,6 +243,8 @@ ingress:
 
   # Nginx configuration
   nginx:
+    # ingress.nginx.annotations -- Annotations added to the Ingress when serving traffic with the
+    # nginx ingress controller. Set to an empty map to leave them out
     annotations:
       nginx.ingress.kubernetes.io/affinity: "cookie"
       nginx.ingress.kubernetes.io/affinity-mode: "persistent"
@@ -245,19 +252,38 @@ ingress:
       nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
       nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
+
+  # Traefik configuration
   traefik:
+    # ingress.traefik.enabled -- If **true**, create Traefik IngressRoute resources instead of a
+    # Kubernetes Ingress. Requires Traefik v3 with its Kubernetes CRD provider enabled. When
+    # ingress.tls.acme.enabled is **true**, the http01 challenge is still solved through a
+    # temporary Kubernetes Ingress, so ingress.className has to point at your Traefik ingress class
+    # and Traefik's Kubernetes Ingress provider has to be enabled as well, otherwise the
+    # certificate will never be issued
     enabled: false
+    # ingress.traefik.entryPoint -- Traefik entry point serving http traffic
     entryPoint: websecure
+    # ingress.traefik.sshEntryPoint -- Traefik entry point serving ssh traffic. The entry point
+    # has to be declared in your Traefik installation. Set to an empty value to not route ssh
+    # via Traefik
     sshEntryPoint: gitssh
-    # Used hostPattern if Regex matching is needed for multiple hostnames. If not set host is used.
-    #hosts:
+    # ingress.traefik.hosts -- Host names to route to OneDev. Defaults to ingress.host if empty
+    hosts: []
     #  - code.example.com
     #  - code.int.example.com
-    # ingress.middleware -- Specify middleware for the Ingress.
+    # ingress.traefik.middleware -- Specify the buffering middleware created for the route.
+    # Body size limits need to be large enough to accommodate your biggest git push
     middleware:
       name: "buffering"
       maxRequestBodyBytes: 1073741824
       memRequestBodyBytes: 1073741824
+    # ingress.traefik.extraMiddlewares -- Additional middlewares to attach to the route. Each entry
+    # takes a "name" and an optional "namespace" defaulting to the release namespace
+    extraMiddlewares: []
+    #  - name: redirect-to-https
+    #    namespace: traefik
+
 # extraVolumes -- Specify additional Volumes to use.
 extraVolumes: []
 
