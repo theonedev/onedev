@@ -259,7 +259,7 @@ jobs:
       commands: |
         set -e
 
-        mvn -Dmaven.test.skip=true package -Pee
+        mvn -Dmaven.test.skip=true -Dmaven.source.skip=true package -Pee
 
         cd server-product/target
         cp -r ../docker docker
