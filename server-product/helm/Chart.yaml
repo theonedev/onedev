@@ -12,6 +12,4 @@ home: https://onedev.io
 maintainers:
   - name: Robin Shen
     email:  robin@onedev.io
-  - name: Abdul Khaliq
-    email: a.khaliq@outlook.my
 appVersion: ${buildVersion}

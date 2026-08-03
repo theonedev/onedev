@@ -1,9 +1,10 @@
-{{- $traefikEnabled := eq (include "ods.traefikEnabled" .) "true" -}}
-{{- if and .Values.ingress.enabled $traefikEnabled .Values.ingress.tls.enabled .Values.ingress.tls.acme.enabled }}
+{{- $controller := include "ods.ingressController" . -}}
+{{- if and .Values.ingress.enabled (eq $controller "traefik") .Values.ingress.tls.enabled .Values.ingress.tls.acme.enabled }}
+{{- $hosts := concat (list .Values.ingress.host) (.Values.ingress.additionalHosts | default (list)) }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ include "ods.fullname" . }}
+  name: {{ .Values.ingress.tls.secretName }}
   namespace: {{ .Release.Namespace }}
 spec:
   secretName: {{ .Values.ingress.tls.secretName }}
@@ -11,7 +12,7 @@ spec:
     name: {{ include "ods.fullname" . }}
     kind: Issuer
   dnsNames:
-    {{- range .Values.ingress.traefik.hosts | default (list .Values.ingress.host) }}
+    {{- range $hosts }}
     - {{ . | quote }}
     {{- end }}
 {{- end }}

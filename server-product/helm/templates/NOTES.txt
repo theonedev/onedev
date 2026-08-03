@@ -3,10 +3,20 @@ CHART VERSION: {{ .Chart.Version }}
 APP VERSION: {{ .Chart.AppVersion }}
 
 {{- if and (not .Values.command) (not .Values.args) (eq .Values.image.name "1dev/server") }}
+{{- $sshEnabled := default false ((.Values.ssh | default dict).enabled) }}
 
 ** Please be patient while the chart is being deployed **
 
+{{- if and .Release.IsUpgrade (not $sshEnabled) }}
+
+WARNING: SSH access is disabled. If the existing installation exposes SSH through
+a LoadBalancer, nginx ingress controller, or another TCP proxy, retain SSH access
+by adding --set ssh.enabled=true --reuse-values to the Helm upgrade command.
+{{- end }}
+
 {{- if .Values.ingress.enabled }}
+{{- $controller := include "ods.ingressController" . }}
+{{- $hosts := concat (list .Values.ingress.host) (.Values.ingress.additionalHosts | default (list)) }}
 
 You can access OneDev at:
 
@@ -15,22 +25,20 @@ You can access OneDev at:
 {{- else }}
    http://{{ .Values.ingress.host }}
 {{- end }}
-{{- if eq (include "ods.traefikEnabled" .) "true" }}
+Ingress controller: {{ $controller }}
+
+   host names: {{ join ", " $hosts }}
+   ssh: {{ ternary "enabled" "disabled" $sshEnabled }}
+{{- if eq $controller "traefik" }}
 
 Traffic is routed by Traefik:
 
-   http entry point: {{ default "websecure" .Values.ingress.traefik.entryPoint }}
-   host names: {{ join ", " (.Values.ingress.traefik.hosts | default (list .Values.ingress.host)) }}
-{{- $sshEntryPoint := include "ods.traefikSshEntryPoint" . }}
-{{- if $sshEntryPoint }}
-   ssh entry point: {{ $sshEntryPoint }}
+   http entry point: {{ ternary "websecure" "web" .Values.ingress.tls.enabled }}
+{{- if $sshEnabled }}
+   ssh entry point: gitssh
 
-Make sure entry point {{ $sshEntryPoint }} is declared in your Traefik installation, and update
+Make sure entry point gitssh is declared in your Traefik installation, and update
 SSH root url as ssh://{{ .Values.ingress.host }} in menu Administration/System Setting
-{{- else }}
-   ssh: not exposed via Traefik
-
-Set ingress.traefik.sshEntryPoint if you want ssh to be routed by Traefik as well
 {{- end }}
 {{- end }}
 

@@ -1,3 +1,5 @@
+{{- $ssh := .Values.ssh | default dict -}}
+{{- $separateService := $ssh.separateService | default dict -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -26,9 +28,9 @@ spec:
     port: {{ default "80" .Values.service.ports.http }}
     targetPort: http
     protocol: TCP
-{{- if not .Values.service.separateSSH.enabled }}
+{{- if and $ssh.enabled (not $separateService.enabled) }}
   - name: ssh
-    port: {{ default "22" .Values.service.ports.ssh }}
+    port: {{ default "22" $ssh.port }}
     targetPort: ssh
     protocol: TCP
 {{- end }}
@@ -41,57 +43,56 @@ spec:
   {{- end }}
   sessionAffinity: ClientIP
 ---
-{{ $ssh := .Values.service.separateSSH }}
-{{- if $ssh.enabled -}}
+{{- if and $ssh.enabled $separateService.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "ods.fullname" . }}-ssh
   namespace: {{ .Release.Namespace }}
   labels: {{ include "ods.labels" . | nindent 4 }}
-  {{- if $ssh.annotations }}
-  annotations: {{ toYaml $ssh.annotations | nindent 4 }}
+  {{- if $separateService.annotations }}
+  annotations: {{ toYaml $separateService.annotations | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ $ssh.type }}
-{{- if eq $ssh.type "LoadBalancer" }}
-{{- if $ssh.loadBalancerIP }}
-  loadBalancerIP: {{ $ssh.loadBalancerIP }}
+  type: {{ $separateService.type }}
+{{- if eq $separateService.type "LoadBalancer" }}
+{{- if $separateService.loadBalancerIP }}
+  loadBalancerIP: {{ $separateService.loadBalancerIP }}
 {{- end -}}
-{{- if $ssh.loadBalancerSourceRanges }}
+{{- if $separateService.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
-{{- range $ssh.loadBalancerSourceRanges }}
+{{- range $separateService.loadBalancerSourceRanges }}
     - {{ . }}
 {{- end }}
 {{- end }}
 {{- end }}
-{{- if and $ssh.clusterIP (eq $ssh.type "ClusterIP") }}
-  clusterIP: {{ $ssh.clusterIP }}
+{{- if and $separateService.clusterIP (eq $separateService.type "ClusterIP") }}
+  clusterIP: {{ $separateService.clusterIP }}
 {{- end }}
-{{- if $ssh.externalIPs }}
+{{- if $separateService.externalIPs }}
   externalIPs:
-    {{- toYaml $ssh.externalIPs | nindent 4 }}
+    {{- toYaml $separateService.externalIPs | nindent 4 }}
 {{- end }}
-{{- if $ssh.ipFamilyPolicy }}
-  ipFamilyPolicy: {{ $ssh.ipFamilyPolicy }}
+{{- if $separateService.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ $separateService.ipFamilyPolicy }}
 {{- end }}
-{{- with $ssh.ipFamilies }}
+{{- with $separateService.ipFamilies }}
   ipFamilies:
 {{- toYaml . | nindent 4 }}
 {{- end -}}
-{{- if $ssh.externalTrafficPolicy }}
-  externalTrafficPolicy: {{ $ssh.externalTrafficPolicy }}
+{{- if $separateService.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ $separateService.externalTrafficPolicy }}
 {{- end }}
   ports:
   - name: ssh
     port: {{ default "22" $ssh.port }}
     targetPort: ssh
     protocol: TCP
-{{- if $ssh.nodePort }}
-    nodePort: {{ $ssh.nodePort }}
+{{- if $separateService.nodePort }}
+    nodePort: {{ $separateService.nodePort }}
 {{- end }}
   selector: {{ include "ods.template-labels" . | nindent 4 }}
-{{- if $ssh.topologyKeys }}
-    topologyKeys: {{ toYaml $ssh.topologyKeys | nindent 4 }}
+{{- if $separateService.topologyKeys }}
+    topologyKeys: {{ toYaml $separateService.topologyKeys | nindent 4 }}
   {{- end }}
 {{- end -}}

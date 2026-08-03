@@ -1,3 +1,9 @@
+# 16.4.0
+
+### Helm Chart
+
+Git access via SSH is now disabled by default. Existing installations exposing SSH through a LoadBalancer, nginx ingress controller, or another TCP proxy should set `ssh.enabled=true` when upgrading; otherwise the SSH port is removed from OneDev's Kubernetes Service.
+
 # 16.2.1
 
 ### RESTful API

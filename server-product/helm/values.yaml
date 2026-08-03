@@ -162,6 +162,31 @@ affinity: {}
 # [topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/).
 topologySpreadConstraints: []
 
+# Configure Git access via SSH
+ssh:
+  # ssh.enabled -- If **true**, expose OneDev's SSH port through the Kubernetes Service and the
+  # configured ingress controller
+  enabled: false
+  # ssh.port -- Manually change the SSH Service port
+  port: ""
+  # Configure a separate Service for SSH
+  separateService:
+    # ssh.separateService.enabled -- If **true**, create a separate Service for SSH instead of
+    # adding the SSH port to the main Service
+    enabled: false
+    type: "ClusterIP"
+    clusterIP: ""
+    loadBalancerIP: ""
+    nodePort: ""
+    externalTrafficPolicy: ""
+    externalIPs: []
+    #  - 4.2.2.1
+    ipFamilyPolicy: ""
+    ipFamilies: []
+    loadBalancerSourceRanges: []
+    annotations: {}
+    topologyKeys: []
+
 service:
   # service.type -- Specify the type for the Service. ClusterIP, LoadBalancer
   type: "ClusterIP"
@@ -174,10 +199,9 @@ service:
   #  - "topology.kubernetes.io/zone"
   #  - "topology.kubernetes.io/region"
   #  - "*"
-  # service.ports -- Manually change the ServicePorts
+  # service.ports -- Manually change the HTTP Service port
   ports:
     http: ""
-    ssh: ""
   # service.nodePort -- Specify a nodePort for servcie
   nodePort: ""
   # service.externalTrafficPolicy -- Specify the
@@ -192,39 +216,29 @@ service:
   # service.ipFamilies -- Configure
   # [IPv4/IPv6 dual-stack](https://kubernetes.io/docs/concepts/services-networking/dual-stack/).
   ipFamilies: []
-  # Configure sepearte SSH service
-  separateSSH:
-  # service.separateSSH.enabled -- If separate SSH is enabled, a separate service is created for SSH
-    enabled: false
-    type: "ClusterIP"
-    port: ""
-    clusterIP: ""
-    loadBalancerIP: ""
-    nodePort: ""
-    externalTrafficPolicy: ""
-    externalIPs: []
-    #  - 4.2.2.1
-    ipFamilyPolicy: ""
-    ipFamilies: []
-    loadBalancerSourceRanges: []
-    annotations: {}
-    topologyKeys: []
-
-# Configure Ingress resource
+# Configure ingress
 ingress:
-  # ingress.enabled -- If **true**, create an Ingress resource.
+  # ingress.enabled -- If **true**, expose OneDev through the configured ingress controller
   enabled: false
-  # ingress.className -- Specify ingress class name. Requires Kubernetes >= 1.18.
+  # ingress.controller -- Specify ingress controller implementation. Supported values are nginx
+  # and traefik
+  controller: nginx
+  # ingress.className -- Specify ingress class name. Requires Kubernetes >= 1.18. This is used
+  # by the nginx Ingress and by cert-manager's http01 challenge Ingress for either controller
   # Refer to https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress for details
   className: ""
-  # ingress.host -- Set the host name. This also determines the server url advertised by OneDev,
-  # so it needs to be set even when additional host names are routed via ingress.traefik.hosts
+  # ingress.host -- Set the primary host name. This also determines the server url advertised by
+  # OneDev
   host: onedev.example.com
-  # ingress.annotations -- Specify additional annotations for the Ingress. These are merged on top
-  # of ingress.nginx.annotations and take precedence over them
+  # ingress.additionalHosts -- Specify additional host names routed to OneDev. Certificates
+  # managed by the chart cover the primary host and these additional hosts
+  additionalHosts: []
+  #  - code.int.example.com
+  # ingress.annotations -- Specify additional annotations for the nginx Ingress. These are merged
+  # on top of ingress.nginx.annotations and take precedence over them
   annotations: {}
 
-  # ingress.tls -- Configure TLS for the Ingress.
+  # ingress.tls -- Configure TLS for ingress
   tls:
     enabled: false
     secretName: "onedev-tls"
@@ -255,23 +269,10 @@ ingress:
 
   # Traefik configuration
   traefik:
-    # ingress.traefik.enabled -- If **true**, create Traefik IngressRoute resources instead of a
-    # Kubernetes Ingress. Requires Traefik v3 with its Kubernetes CRD provider enabled. When
-    # ingress.tls.acme.enabled is **true**, the http01 challenge is still solved through a
-    # temporary Kubernetes Ingress, so ingress.className has to point at your Traefik ingress class
-    # and Traefik's Kubernetes Ingress provider has to be enabled as well, otherwise the
-    # certificate will never be issued
-    enabled: false
-    # ingress.traefik.entryPoint -- Traefik entry point serving http traffic
-    entryPoint: websecure
-    # ingress.traefik.sshEntryPoint -- Traefik entry point serving ssh traffic. The entry point
-    # has to be declared in your Traefik installation. Set to an empty value to not route ssh
-    # via Traefik
-    sshEntryPoint: gitssh
-    # ingress.traefik.hosts -- Host names to route to OneDev. Defaults to ingress.host if empty
-    hosts: []
-    #  - code.example.com
-    #  - code.int.example.com
+    # Requires Traefik v3 with its Kubernetes CRD provider enabled. When ingress.tls.acme.enabled
+    # is **true**, the http01 challenge is still solved through a temporary Kubernetes Ingress, so
+    # ingress.className has to point at your Traefik ingress class and Traefik's Kubernetes Ingress
+    # provider has to be enabled as well, otherwise the certificate will never be issued
     # ingress.traefik.middleware -- Specify the buffering middleware created for the route.
     # Body size limits need to be large enough to accommodate your biggest git push
     middleware:

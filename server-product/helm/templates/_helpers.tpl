@@ -67,27 +67,14 @@ Return the ServiceAccount name
 {{- end -}}
 
 {{/*
-Return "true" when routing should be done with Traefik CRDs instead of a Kubernetes Ingress
+Return and validate the configured ingress controller
 */}}
-{{- define "ods.traefikEnabled" -}}
-{{- if (.Values.ingress.traefik | default dict).enabled -}}
-{{- print "true" -}}
+{{- define "ods.ingressController" -}}
+{{- $controller := default "nginx" .Values.ingress.controller -}}
+{{- if not (has $controller (list "nginx" "traefik")) -}}
+{{- fail (printf "unsupported ingress controller %q: expected nginx or traefik" $controller) -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Return the Traefik entry point serving ssh traffic, or empty when ssh should not be exposed.
-An absent key means values were carried over from a chart predating this setting, as happens
-with "helm upgrade --reuse-values", in which case the chart default applies so that upgrading
-matches a fresh install. An explicit empty value disables the ssh route.
-*/}}
-{{- define "ods.traefikSshEntryPoint" -}}
-{{- $traefik := .Values.ingress.traefik | default dict -}}
-{{- if hasKey $traefik "sshEntryPoint" -}}
-{{- $traefik.sshEntryPoint | default "" -}}
-{{- else -}}
-{{- print "gitssh" -}}
-{{- end -}}
+{{- $controller -}}
 {{- end -}}
 
 {{/*
