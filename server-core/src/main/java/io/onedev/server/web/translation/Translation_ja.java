@@ -586,6 +586,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Builds are {0}", "ビルドは{0}です");
 		m.put("Buildx Builder", "Buildxビルダー");
 		m.put("Built In Fields Bean", "組み込みフィールドBean");
+		m.put("Builtin Chat Prompts", "組み込みチャットプロンプト");
 		m.put("Burndown", "バーンダウン");
 		m.put("Burndown chart", "バーンダウンチャート");
 		m.put("Button Image Url", "ボタン画像URL");
@@ -5193,7 +5194,17 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Builtin Chat Prompts", "組み込みチャットプロンプト");
+		m.put("Fix failed builds", "失敗したビルドを修正");
+		m.put("Link / upload", "リンク / アップロード");
+		m.put("Merge if acceptable", "受け入れ可能であればマージ");
+		m.put("Pull Request Assignee Responsibilities", "プルリクエスト担当者の責任");
+		m.put("Resolve merge conflicts", "マージコンフリクトを解決");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "プルリクエストに割り当てられた際のAIユーザーの責任");
+		m.put("Show / Create", "表示 / 作成");
+		m.put("Unresolved comments", "未解決のコメント");
+		m.put("Unresolved comments with unviewed activity", "未閲覧のアクティビティを含む未解決のコメント");
+		m.put("Unviewed code comment activity", "未閲覧のコードコメントアクティビティ");
+		m.put("merge commit", "マージコミット");
 	}
 		
 	@Override

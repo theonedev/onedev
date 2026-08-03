@@ -612,6 +612,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Builds are {0}", "构建是 {0}");
 		m.put("Buildx Builder", "Buildx构建器");
 		m.put("Built In Fields Bean", "内建字段Bean");
+		m.put("Builtin Chat Prompts", "内置 Chat 提示");
 		m.put("Burndown", "燃尽图");
 		m.put("Burndown chart", "燃尽图");
 		m.put("Button Image Url", "按钮图像地址");
@@ -5219,7 +5220,17 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Builtin Chat Prompts", "内置 Chat 提示");
+		m.put("Fix failed builds", "修复失败的构建");
+		m.put("Link / upload", "链接 / 上传");
+		m.put("Merge if acceptable", "如果可接受则合并");
+		m.put("Pull Request Assignee Responsibilities", "合并请求分配者的职责");
+		m.put("Resolve merge conflicts", "解决合并冲突");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "AI 用户在被分配到合并请求时的职责");
+		m.put("Show / Create", "显示 / 创建");
+		m.put("Unresolved comments", "未解决的评论");
+		m.put("Unresolved comments with unviewed activity", "带有未查看活动的未解决评论");
+		m.put("Unviewed code comment activity", "未查看的代码评论活动");
+		m.put("merge commit", "合并提交");
 	}
 		
 	@Override

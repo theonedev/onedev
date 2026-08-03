@@ -586,6 +586,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Builds are {0}", "Builds sind {0}");
 		m.put("Buildx Builder", "Buildx Builder");
 		m.put("Built In Fields Bean", "Eingebaute Felder-Bean");
+		m.put("Builtin Chat Prompts", "Eingebaute Chat-Aufforderungen");
 		m.put("Burndown", "Burndown");
 		m.put("Burndown chart", "Burndown-Diagramm");
 		m.put("Button Image Url", "Button-Bild-URL");
@@ -5193,7 +5194,17 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Builtin Chat Prompts", "Eingebaute Chat-Aufforderungen");
+		m.put("Fix failed builds", "Fehlerhafte Builds beheben");
+		m.put("Link / upload", "Verknüpfen / Hochladen");
+		m.put("Merge if acceptable", "Zusammenführen, wenn akzeptabel");
+		m.put("Pull Request Assignee Responsibilities", "Verantwortlichkeiten des Pull-Request-Zuweisungsempfängers");
+		m.put("Resolve merge conflicts", "Merge-Konflikte lösen");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "Verantwortlichkeiten des KI-Nutzers bei Zuweisung zu einem Pull-Request");
+		m.put("Show / Create", "Anzeigen / Erstellen");
+		m.put("Unresolved comments", "Ungelöste Kommentare");
+		m.put("Unresolved comments with unviewed activity", "Ungelöste Kommentare mit ungesehener Aktivität");
+		m.put("Unviewed code comment activity", "Ungesehene Code-Kommentar-Aktivität");
+		m.put("merge commit", "Merge-Commit");
 	}
 			
 	@Override

@@ -586,6 +586,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Builds are {0}", "빌드는 {0} 상태입니다");
 		m.put("Buildx Builder", "Buildx 빌더");
 		m.put("Built In Fields Bean", "내장 필드 빈");
+		m.put("Builtin Chat Prompts", "내장 채팅 프롬프트");
 		m.put("Burndown", "번다운");
 		m.put("Burndown chart", "번다운 차트");
 		m.put("Button Image Url", "버튼 이미지 URL");
@@ -5193,7 +5194,17 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Builtin Chat Prompts", "내장 채팅 프롬프트");
+		m.put("Fix failed builds", "실패한 빌드 수정");
+		m.put("Link / upload", "링크 / 업로드");
+		m.put("Merge if acceptable", "허용 가능한 경우 병합");
+		m.put("Pull Request Assignee Responsibilities", "풀 리퀘스트 담당자의 책임");
+		m.put("Resolve merge conflicts", "병합 충돌 해결");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "풀 리퀘스트에 할당된 AI 사용자의 책임");
+		m.put("Show / Create", "보기 / 생성");
+		m.put("Unresolved comments", "해결되지 않은 댓글");
+		m.put("Unresolved comments with unviewed activity", "확인되지 않은 활동이 있는 해결되지 않은 댓글");
+		m.put("Unviewed code comment activity", "확인되지 않은 코드 댓글 활동");
+		m.put("merge commit", "병합 커밋");
 	}
 		
 	@Override

@@ -586,6 +586,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Builds are {0}", "Las compilaciones están {0}");
 		m.put("Buildx Builder", "Constructor Buildx");
 		m.put("Built In Fields Bean", "Bean de Campos Integrados");
+		m.put("Builtin Chat Prompts", "Indicaciones de Chat Integradas");
 		m.put("Burndown", "Burndown");
 		m.put("Burndown chart", "Gráfico de Burndown");
 		m.put("Button Image Url", "URL de Imagen del Botón");
@@ -5193,7 +5194,17 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Builtin Chat Prompts", "Indicaciones de Chat Integradas");
+		m.put("Fix failed builds", "Arreglar compilaciones fallidas");
+		m.put("Link / upload", "Enlazar / subir");
+		m.put("Merge if acceptable", "Fusionar si es aceptable");
+		m.put("Pull Request Assignee Responsibilities", "Responsabilidades del asignado al Pull Request");
+		m.put("Resolve merge conflicts", "Resolver conflictos de fusión");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "Responsabilidades del usuario de IA cuando se le asigna un pull request");
+		m.put("Show / Create", "Mostrar / Crear");
+		m.put("Unresolved comments", "Comentarios no resueltos");
+		m.put("Unresolved comments with unviewed activity", "Comentarios no resueltos con actividad no vista");
+		m.put("Unviewed code comment activity", "Actividad de comentarios de código no vista");
+		m.put("merge commit", "fusionar commit");
 	}
 		
 	@Override
