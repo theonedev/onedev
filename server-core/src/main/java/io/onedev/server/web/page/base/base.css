@@ -784,6 +784,18 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 	background-color: rgb(78, 82, 103);
 }
 
+@media print {
+	.dark-mode * {
+		scrollbar-color: white white;
+	}
+	.dark-mode ::-webkit-scrollbar,
+	.dark-mode ::-webkit-scrollbar-corner,
+	.dark-mode ::-webkit-scrollbar-thumb {
+		border-color: white;
+		background-color: white;
+	}
+}
+
 .autofit-parent {
 	overflow: hidden !important;
 	min-height: inherit !important;
