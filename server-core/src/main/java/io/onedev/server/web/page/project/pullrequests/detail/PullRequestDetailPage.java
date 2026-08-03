@@ -145,6 +145,7 @@ import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -923,8 +924,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String load() {
 						Date updateDate = getPullRequest().getCodeCommentsUpdateDate();
-						if (updateDate != null && !getPullRequest().isCodeCommentsVisitedAfter(updateDate))
+						boolean unviewed = updateDate != null
+								&& !getPullRequest().isCodeCommentsVisitedAfter(updateDate);
+						boolean unresolved = getPullRequest().getCodeComments().stream()
+								.anyMatch(it -> !it.isResolved());
+						if (unviewed && unresolved)
+							return "new unresolved";
+						else if (unviewed)
 							return "new";
+						else if (unresolved)
+							return "unresolved";
 						else
 							return "";
 					}
@@ -940,6 +949,25 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				});
 				link.setOutputMarkupId(true);
 				fragment.add(link);
+				link.add(new SpriteImage("indicator", "dot")
+						.add(AttributeAppender.replace("data-tippy-content", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						Date updateDate = getPullRequest().getCodeCommentsUpdateDate();
+						boolean unviewed = updateDate != null
+								&& !getPullRequest().isCodeCommentsVisitedAfter(updateDate);
+						boolean unresolved = getPullRequest().getCodeComments().stream()
+								.anyMatch(it -> !it.isResolved());
+						if (unviewed && unresolved)
+							return _T("Unresolved comments with unviewed activity");
+						else if (unresolved)
+							return _T("Unresolved comments");
+						else
+							return _T("Unviewed code comment activity");
+					}
+
+				})));
 				return fragment;
 			}
 		});
