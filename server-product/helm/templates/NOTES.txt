@@ -7,13 +7,6 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 ** Please be patient while the chart is being deployed **
 
-{{- if and .Release.IsUpgrade (not $sshEnabled) }}
-
-WARNING: SSH access is disabled. If the existing installation exposes SSH through
-a LoadBalancer, nginx ingress controller, or another TCP proxy, retain SSH access
-by adding --set ssh.enabled=true --reuse-values to the Helm upgrade command.
-{{- end }}
-
 {{- if .Values.ingress.enabled }}
 {{- $controller := include "ods.ingressController" . }}
 {{- $hosts := concat (list .Values.ingress.host) (.Values.ingress.additionalHosts | default (list)) }}
