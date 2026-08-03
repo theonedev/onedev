@@ -16,8 +16,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Strings;
 import org.hibernate.cfg.Environment;
 
-import com.google.common.hash.Hashing;
-
 import io.onedev.commons.utils.StringUtils;
 
 public class HibernateConfig extends Properties {
@@ -34,8 +32,6 @@ public class HibernateConfig extends Properties {
 			"hibernate.query.plan_parameter_metadata_max_size"
 	};
 	
-	private volatile String clusterCredential; 
-
 	public HibernateConfig(File installDir) {
 		File file = new File(installDir, "conf/hibernate.properties");
 		putAll(loadProperties(file));
@@ -97,15 +93,5 @@ public class HibernateConfig extends Properties {
 	public boolean isMySQLDialect() {
 		return isMySQLDialect(getDialect());
 	}
-	
-	public String getClusterCredential() {
-		if (clusterCredential == null) {
-			var dbPassword = getPassword();
-			if (dbPassword == null)
-				dbPassword = "";
-			clusterCredential = Hashing.sha256().hashString(dbPassword, UTF_8).toString();
-		}
-		return clusterCredential;
-	}
-	
+		
 }
