@@ -755,7 +755,7 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 }
 
 .dark-mode * {
-	scrollbar-color: rgb(51, 52, 75) rgb(37, 38, 55);
+	scrollbar-color: rgb(78, 82, 103) rgb(37, 38, 55);
 }
 
 .dark-mode ::-webkit-scrollbar {
@@ -766,7 +766,7 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 	background-color: rgb(37, 38, 55);
 }
 .dark-mode ::-webkit-scrollbar-thumb {
-	background-color: rgb(51, 52, 75);
+	background-color: rgb(78, 82, 103);
 }
 
 .autofit-parent {
