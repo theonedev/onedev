@@ -821,6 +821,18 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	@Transactional
 	@Override
 	public void resubmit(User user, Build build, String reason) {
+		if (doResubmit(user, build, reason)) {
+			var job = build.getJob();
+			if (job.isIncludeUpstreamWhenRebuild())
+				resubmitUpstreamBuilds(build);
+			else
+				resubmitRequiredDependencyBuilds(build);
+			if (job.isIncludeDownstreamWhenRebuild())
+				resubmitDownstreamBuilds(build);
+		}
+	}
+
+	private boolean doResubmit(User user, Build build, String reason) {
 		if (build.isFinished()) {
 			JobAuthorizationContext.push(build.getJobAuthorizationContext());
 			try {
@@ -862,12 +874,38 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			} finally {
 				JobAuthorizationContext.pop();
 			}
+			return true;
+		}
+		return false;
+	}
 
-			var systemUser = userService.getSystem();
-			for (var dependence : build.getDependencies()) {
-				var dependency = dependence.getDependency();		
-				if (dependence.isRequireSuccessful() && !dependency.isSuccessful())
-					resubmit(systemUser, dependency, "Resubmitted by dependent build");					
+	private void resubmitRequiredDependencyBuilds(Build build) {
+		var systemUser = userService.getSystem();
+		for (var dependence : build.getDependencies()) {
+			var dependency = dependence.getDependency();
+			if (dependence.isRequireSuccessful() && !dependency.isSuccessful()
+					&& doResubmit(systemUser, dependency, "Resubmitted by dependent build")) {
+				resubmitRequiredDependencyBuilds(dependency);
+			}
+		}
+	}
+
+	private void resubmitUpstreamBuilds(Build build) {
+		var systemUser = userService.getSystem();
+		for (var dependence : build.getDependencies()) {
+			var dependency = dependence.getDependency();
+			if (doResubmit(systemUser, dependency, "Resubmitted by dependent build"))
+				resubmitUpstreamBuilds(dependency);
+		}
+	}
+
+	private void resubmitDownstreamBuilds(Build build) {
+		var systemUser = userService.getSystem();
+		for (var dependence : build.getDependents()) {
+			var dependent = dependence.getDependent();
+			if (doResubmit(systemUser, dependent, "Resubmitted by dependency build")) {
+				resubmitRequiredDependencyBuilds(dependent);
+				resubmitDownstreamBuilds(dependent);
 			}
 		}
 	}
