@@ -99,7 +99,25 @@ public class GolangJobSuggestion implements JobSuggestion {
 			buildAndTest.getInterpreter().setCommands("" +
 					"set -e\n" +
 					"# Use double at to avoid being interpreted as OneDev variable substitution\n" +
-					"go install github.com/boumenot/gocover-cobertura@@v1.3.0\n" +
+					"# Pin gocover-cobertura to a release installable by the Go toolchain in the image:\n" +
+					"# v1.3.0 for Go <=1.21, v1.4.0 for Go 1.22-1.24, v1.5.0 for Go >=1.25\n" +
+					"GOVERSION=$(go env GOVERSION 2>/dev/null || true)\n" +
+					"GOVERSION=${GOVERSION#go}\n" +
+					"if [ -z \"$GOVERSION\" ]; then\n" +
+					"  GOVERSION=$(go version | awk '{print $3}')\n" +
+					"  GOVERSION=${GOVERSION#go}\n" +
+					"fi\n" +
+					"GO_MAJOR=${GOVERSION%%.*}\n" +
+					"GO_MINOR=${GOVERSION#*.}\n" +
+					"GO_MINOR=${GO_MINOR%%.*}\n" +
+					"if [ \"$GO_MAJOR\" -eq 1 ] && [ \"$GO_MINOR\" -le 21 ]; then\n" +
+					"  GOCOVER_COBERTURA_VERSION=v1.3.0\n" +
+					"elif [ \"$GO_MAJOR\" -eq 1 ] && [ \"$GO_MINOR\" -le 24 ]; then\n" +
+					"  GOCOVER_COBERTURA_VERSION=v1.4.0\n" +
+					"else\n" +
+					"  GOCOVER_COBERTURA_VERSION=v1.5.0\n" +
+					"fi\n" +
+					"go install github.com/boumenot/gocover-cobertura@@${GOCOVER_COBERTURA_VERSION}\n" +
 					"go install github.com/jstemmer/go-junit-report/v2@@latest\n" +
 					"set +e\n" +
 					"# Turn off vet as the \"check and lint\" step can do this \n" +
