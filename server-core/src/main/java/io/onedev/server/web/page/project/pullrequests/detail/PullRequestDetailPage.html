@@ -159,6 +159,20 @@
 				</tr>
 			</table>
 		</div>
+		<wicket:enclosure child="reviews">
+		<div class="reviews">
+			<div class="head"><wicket:t>Reviewers</wicket:t></div>
+			<div wicket:id="reviews" class="body"></div>
+			<div wicket:id="reviewerHelp" class="font-size-sm text-muted form-text"><wicket:t>Pull request can only be merged after getting approvals from all reviewers</wicket:t></div>
+		</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="assignments">
+		<div class="assignments">
+			<div class="head d-flex"><span class="mr-2"><wicket:t>Assignees</wicket:t></span> <a wicket:id="assignToMe" class="ml-auto font-size-sm font-weight-normal"><wicket:t>assign to me</wicket:t></a></div>
+			<div wicket:id="assignments" class="body"></div>
+			<div wicket:id="assigneeHelp" class="font-size-sm text-muted form-text"><wicket:t>Assignees are expected to merge the pull request</wicket:t></div>
+		</div>
+		</wicket:enclosure>
 		<wicket:enclosure child="workspaces">
 			<div class="workspaces">
 				<div class="head"><wicket:t>Workspaces</wicket:t></div>
@@ -167,13 +181,6 @@
 				</div>
 			</div>
 		</wicket:enclosure>
-		<wicket:enclosure child="reviews">
-		<div class="reviews">
-			<div class="head"><wicket:t>Reviewers</wicket:t></div>
-			<div wicket:id="reviews" class="body"></div>
-			<div wicket:id="reviewerHelp" class="font-size-sm text-muted form-text"><wicket:t>Pull request can only be merged after getting approvals from all reviewers</wicket:t></div>
-		</div>
-		</wicket:enclosure>
 		<wicket:enclosure child="jobs">
 		<div class="jobs">
 			<div class="head">
@@ -181,13 +188,6 @@
 			</div>
 			<div wicket:id="jobs" class="body"></div>
 			<div wicket:id="jobsHelp" class="font-size-sm text-muted form-text"><wicket:t>Jobs marked with <span class="text-danger">*</span> are required to be successful</wicket:t></div>
-		</div>
-		</wicket:enclosure>
-		<wicket:enclosure child="assignments">
-		<div class="assignments">
-			<div class="head d-flex"><span class="mr-2"><wicket:t>Assignees</wicket:t></span> <a wicket:id="assignToMe" class="ml-auto font-size-sm font-weight-normal"><wicket:t>assign to me</wicket:t></a></div>
-			<div wicket:id="assignments" class="body"></div>
-			<div wicket:id="assigneeHelp" class="font-size-sm text-muted form-text"><wicket:t>Assignees are expected to merge the pull request</wicket:t></div>
 		</div>
 		</wicket:enclosure>
 		<div wicket:id="mergeStrategy" class="merge-strategy">
