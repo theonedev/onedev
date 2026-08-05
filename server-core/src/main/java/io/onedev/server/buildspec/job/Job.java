@@ -110,6 +110,10 @@ public class Job implements NamedElement, Validatable {
 	private int maxRetries = 3;
 	
 	private int retryDelay = 30;
+
+	private boolean includeUpstreamWhenRebuild;
+
+	private boolean includeDownstreamWhenRebuild;
 	
 	private transient Map<String, ParamSpec> paramSpecMap;
 	
@@ -306,6 +310,24 @@ public class Job implements NamedElement, Validatable {
 
 	public void setRetryDelay(int retryDelay) {
 		this.retryDelay = retryDelay;
+	}
+
+	@Editable(order=9430, group="More Settings", description="Whether or not to also rebuild upstream jobs when rebuilding this job")
+	public boolean isIncludeUpstreamWhenRebuild() {
+		return includeUpstreamWhenRebuild;
+	}
+
+	public void setIncludeUpstreamWhenRebuild(boolean includeUpstreamWhenRebuild) {
+		this.includeUpstreamWhenRebuild = includeUpstreamWhenRebuild;
+	}
+
+	@Editable(order=9440, group="More Settings", description="Whether or not to also rebuild downstream jobs when rebuilding this job")
+	public boolean isIncludeDownstreamWhenRebuild() {
+		return includeDownstreamWhenRebuild;
+	}
+
+	public void setIncludeDownstreamWhenRebuild(boolean includeDownstreamWhenRebuild) {
+		this.includeDownstreamWhenRebuild = includeDownstreamWhenRebuild;
 	}
 	
 	@Editable(order=10500, group="More Settings", description="Specify timeout in seconds. It counts from " +
