@@ -99,7 +99,7 @@ public class GolangJobSuggestion implements JobSuggestion {
 			buildAndTest.getInterpreter().setCommands("" +
 					"set -e\n" +
 					"# Use double at to avoid being interpreted as OneDev variable substitution\n" +
-					"go install github.com/boumenot/gocover-cobertura@@latest\n" +
+					"go install github.com/boumenot/gocover-cobertura@@v1.3.0\n" +
 					"go install github.com/jstemmer/go-junit-report/v2@@latest\n" +
 					"set +e\n" +
 					"# Turn off vet as the \"check and lint\" step can do this \n" +
