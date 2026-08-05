@@ -11,6 +11,7 @@ import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.util.FS;
@@ -48,6 +49,12 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 				public FileBasedConfig getConfig() {
 					// avoid loading user config
 					return new FileBasedConfig(new File(getDirectory(), "config"), FS.DETECTED);
+				}
+
+				@Override
+				public void autoGC(ProgressMonitor monitor) {
+					// MergeCommand triggers autoGC; default background gc can unlock
+					// gc.log.lock after teardown deletes the temp repo.
 				}
 				
 			});
