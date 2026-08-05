@@ -786,7 +786,13 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						var volumeMounts = buildVolumeMounts(cacheMounts);
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
-						stepContainerSpec.put("env", SerializationUtils.clone(commonEnvs));
+						var envs = SerializationUtils.clone(commonEnvs);
+						for (var entry: commandFacade.getEnvMap().entrySet()) {
+							envs.add(newLinkedHashMap(
+									"name", entry.getKey(),
+									"value", entry.getValue()));
+						}
+						stepContainerSpec.put("env", envs);
 						var runAs = commandFacade.getRunAs();
 						setupSecurityContext(stepContainerSpec, runAs);
 					} else if (facade instanceof BuildImageFacade) {
