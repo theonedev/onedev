@@ -99,8 +99,7 @@ public class GolangJobSuggestion implements JobSuggestion {
 			buildAndTest.getInterpreter().setCommands("" +
 					"set -e\n" +
 					"# Use double at to avoid being interpreted as OneDev variable substitution\n" +
-					"go install github.com/axw/gocov/gocov@@latest\n" + 
-					"go install github.com/AlekSi/gocov-xml@@latest\n" +
+					"go install github.com/boumenot/gocover-cobertura@@latest\n" +
 					"go install github.com/jstemmer/go-junit-report/v2@@latest\n" +
 					"set +e\n" +
 					"# Turn off vet as the \"check and lint\" step can do this \n" +
@@ -109,14 +108,14 @@ public class GolangJobSuggestion implements JobSuggestion {
 					"go-junit-report -in test-result.out -out test-result.xml -set-exit-code\n" +
 					"if [ $? -ne 0 ]; then echo \"\\033[1;31mThere are test failures. Check test report for details\\033[0m\"; exit 1; fi\n" +
 					"if [ $TEST_STATUS -ne 0 ]; then exit 1; fi\n" +
-					"gocov convert coverage.out | gocov-xml > coverage.xml");
+					"gocover-cobertura < coverage.out > coverage.xml");
 			job.getSteps().add(buildAndTest);
 			
 			var checkAndLint = new CommandStep();
 			checkAndLint.setName("check and lint");
 			checkAndLint.setImage("golangci/golangci-lint");
 			checkAndLint.setCondition(ExecuteCondition.NEVER);
-			checkAndLint.getInterpreter().setCommands("golangci-lint run --timeout=10m --issues-exit-code=0 --out-format=checkstyle > lint-result.xml");
+			checkAndLint.getInterpreter().setCommands("golangci-lint run --timeout=10m --issues-exit-code=0 --output.checkstyle.path lint-result.xml");
 			job.getSteps().add(checkAndLint);
 			
 			addCommonJobsAndTriggers(job);
