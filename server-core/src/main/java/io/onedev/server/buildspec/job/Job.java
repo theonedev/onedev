@@ -312,7 +312,7 @@ public class Job implements NamedElement, Validatable {
 		this.retryDelay = retryDelay;
 	}
 
-	@Editable(order=9430, group="More Settings", description="Whether or not to also rebuild upstream jobs when rebuilding this job")
+	@Editable(order=9430, group="More Settings", description="Whether or not to also rebuild direct upstream jobs when rebuilding this job")
 	public boolean isIncludeUpstreamWhenRebuild() {
 		return includeUpstreamWhenRebuild;
 	}
@@ -321,7 +321,7 @@ public class Job implements NamedElement, Validatable {
 		this.includeUpstreamWhenRebuild = includeUpstreamWhenRebuild;
 	}
 
-	@Editable(order=9440, group="More Settings", description="Whether or not to also rebuild downstream jobs when rebuilding this job")
+	@Editable(order=9440, group="More Settings", description="Whether or not to also rebuild direct downstream jobs when rebuilding this job")
 	public boolean isIncludeDownstreamWhenRebuild() {
 		return includeDownstreamWhenRebuild;
 	}
