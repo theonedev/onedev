@@ -40,6 +40,8 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
  	private volatile Map<Long, Chat> anonymousChats = new ConcurrentHashMap<>();
 
 	private volatile String chatInput;
+
+	private volatile String ssoLogoutUrl;
 	
 	public WebSession(Request request) {
 		super(request);
@@ -68,7 +70,17 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		activeChatId = null;
 		anonymousChats.clear();
 		chatInput = null;
+		ssoLogoutUrl = null;
 	}	
+
+	@Nullable
+	public String getSsoLogoutUrl() {
+		return ssoLogoutUrl;
+	}
+
+	public void setSsoLogoutUrl(@Nullable String ssoLogoutUrl) {
+		this.ssoLogoutUrl = ssoLogoutUrl;
+	}
 
 	@Nullable
 	public Cursor getIssueCursor() {

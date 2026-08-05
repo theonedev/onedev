@@ -51,6 +51,7 @@ import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.tabbable.ActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -232,6 +233,8 @@ public class SsoProcessPage extends SimplePage {
 			throw new AuthenticationException(_T("Unsolicited OIDC authentication response"));
 
 		SecurityUtils.getSubject().runAs(user.getPrincipals());
+		WebSession.get().setSsoLogoutUrl(
+				getProvider().getConnector().buildLogoutUrl(getProvider().getName()));
 
 		throw new RedirectToUrlException(redirectUrlAfterLogin);	
 	}

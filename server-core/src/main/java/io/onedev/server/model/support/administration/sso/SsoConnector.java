@@ -8,6 +8,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.web.page.security.SsoProcessPage;
+import org.jspecify.annotations.Nullable;
 
 @Editable
 public abstract class SsoConnector implements Serializable {
@@ -29,5 +30,10 @@ public abstract class SsoConnector implements Serializable {
 	public abstract SsoAuthenticated handleAuthResponse(String providerName);
 	
 	public abstract String buildAuthUrl(String providerName);
+
+	@Nullable
+	public String buildLogoutUrl(String providerName) {
+		return null;
+	}
 
 }

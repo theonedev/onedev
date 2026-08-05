@@ -2,6 +2,8 @@ package io.onedev.server.plugin.sso.openid;
 
 import java.io.Serializable;
 
+import org.jspecify.annotations.Nullable;
+
 public class ProviderMetadata implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -13,13 +15,17 @@ public class ProviderMetadata implements Serializable {
 	private final String tokenEndpoint;
 	
 	private final String userInfoEndpoint;
+
+	@Nullable
+	private final String endSessionEndpoint;
 	
 	public ProviderMetadata(String issuer, String authorizationEndpoint, 
-			String tokenEndpoint, String userInfoEndpoint) {
+			String tokenEndpoint, String userInfoEndpoint, @Nullable String endSessionEndpoint) {
 		this.issuer = issuer;
 		this.authorizationEndpoint = authorizationEndpoint;
 		this.tokenEndpoint = tokenEndpoint;
 		this.userInfoEndpoint = userInfoEndpoint;
+		this.endSessionEndpoint = endSessionEndpoint;
 	}
 
 	public String getIssuer() {
@@ -36,6 +42,11 @@ public class ProviderMetadata implements Serializable {
 
 	public String getUserInfoEndpoint() {
 		return userInfoEndpoint;
+	}
+
+	@Nullable
+	public String getEndSessionEndpoint() {
+		return endSessionEndpoint;
 	}
 	
 }
