@@ -35,6 +35,7 @@ import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.markdown.ContentQuoted;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -214,6 +215,23 @@ public abstract class CommentPanel extends Panel {
 			}
 			
 		});
+
+		viewer.add(new CopyToClipboardLink("copy", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getComment();
+			}
+
+		}, _T("Copy Markdown")) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(isCopyEnabled() && StringUtils.isNotBlank(getComment()));
+			}
+
+		});
 		
 		viewer.add(new AjaxLink<Void>("delete") {
 
@@ -307,6 +325,10 @@ public abstract class CommentPanel extends Panel {
 	protected abstract ReactionSupport getReactionSupport();
 	
 	protected boolean isQuoteEnabled() {
+		return true;
+	}
+
+	protected boolean isCopyEnabled() {
 		return true;
 	}
 
