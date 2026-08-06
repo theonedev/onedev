@@ -167,7 +167,7 @@ Work on any branch with preconfigured dev containers on server. Use OpenCode, Cl
 ## 🤹 Skills and CLI to interact with OneDev in AI agents
 
 TOD CLI to query and edit issues, pull requests, and builds, run CI/CD jobs against local changes, and check out pull requests locally. Shipped skills to drive OneDev workflows in coding agents.
-[**Skills and CLI**](https://code.onedev.io/onedev/tod/~files/main/readme.md)
+[**Skills and CLI**](https://onedev.io/blogs/onedev-cli-and-agent-skills)
 
 ![mcp](./doc/images/skills-and-cli.png)
 
