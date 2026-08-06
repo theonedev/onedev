@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.Session;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.joda.time.DateTime;
@@ -61,6 +62,7 @@ import io.onedev.server.annotation.Password;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.security.TrustCertsSSLSocketFactory;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.oauth.OAuthUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -75,6 +77,8 @@ public class OpenIdConnector extends SsoConnector {
 	private static final String SESSION_ATTR_PROVIDER_METADATA = "endpoints";
 	
 	private static final String SESSION_ATTR_STATE = "state";
+
+	private static final String SESSION_ATTR_ID_TOKEN = "idToken";
 	
 	private String configurationDiscoveryUrl;
 	
@@ -87,6 +91,8 @@ public class OpenIdConnector extends SsoConnector {
 	private String groupsClaim;
 	
 	private String buttonImageUrl;
+
+	private boolean useOpenIdLogout;
 	
 	public OpenIdConnector() {
 		buttonImageUrl = "/wicket/resource/" + OpenIdConnector.class.getName() + "/openid.png";
@@ -210,6 +216,7 @@ public class OpenIdConnector extends SsoConnector {
 	protected SsoAuthenticated processTokenResponse(OIDCTokenResponse tokenResponse) {
 		try {
 			JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+			Session.get().setAttribute(SESSION_ATTR_ID_TOKEN, idToken.serialize());
 			JWTClaimsSet claims = idToken.getJWTClaimsSet();
 			
 			if (!claims.getIssuer().equals(getCachedProviderMetadata().getIssuer()))
@@ -358,16 +365,48 @@ public class OpenIdConnector extends SsoConnector {
 	public void setButtonImageUrl(String buttonImageUrl) {
 		this.buttonImageUrl = buttonImageUrl;
 	}
+
+	@Editable(name="Use OpenID Sign Out", order=10300, group="More Settings", description="Check to sign out from OpenID provider when logging out of OneDev. The provider discovery metadata must advertise an end session endpoint")
+	public boolean isUseOpenIdLogout() {
+		return useOpenIdLogout;
+	}
+
+	public void setUseOpenIdLogout(boolean useOpenIdLogout) {
+		this.useOpenIdLogout = useOpenIdLogout;
+	}
+
+	@Override
+	public String buildLogoutUrl(String providerName) {
+		if (isUseOpenIdLogout()) {
+			var metadata = getCachedProviderMetadata();
+			var idToken = (String) Session.get().getAttribute(SESSION_ATTR_ID_TOKEN);
+			if (metadata.getEndSessionEndpoint() != null && idToken != null) {
+				try {
+					var serverUrl = OneDev.getInstance(SettingService.class)
+							.getSystemSetting().getServerUrl();
+					return new URIBuilder(metadata.getEndSessionEndpoint())
+							.addParameter("id_token_hint", idToken)
+							.addParameter("post_logout_redirect_uri", serverUrl)
+							.build().toString();
+				} catch (URISyntaxException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return null;
+	}
 	
 	protected ProviderMetadata discoverProviderMetadata() {
 		try {
 			JsonNode json = OneDev.getInstance(ObjectMapper.class).readTree(
 					new URI(getConfigurationDiscoveryUrl()).toURL());
+			var endSessionEndpointNode = json.get("end_session_endpoint");
 			return new ProviderMetadata(
 					json.get("issuer").asText(),
 					json.get("authorization_endpoint").asText(),
 					json.get("token_endpoint").asText(), 
-					json.get("userinfo_endpoint").asText());
+					json.get("userinfo_endpoint").asText(),
+					endSessionEndpointNode != null ? endSessionEndpointNode.asText() : null);
 		} catch (IOException | URISyntaxException e) {
 			if (e.getMessage() != null) {
 				logger.error(_T("Error discovering OIDC metadata"), e);

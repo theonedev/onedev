@@ -35,7 +35,8 @@ public class TwitchConnector extends OpenIdConnector {
 				"https://id.twitch.tv/oauth2",
 				"https://id.twitch.tv/oauth2/authorize?claims=" + URLEncoder.encode("{\"id_token\":{}, \"userinfo\":{\"email\": null,\"preferred_username\": null}}", StandardCharsets.UTF_8), 
 				"https://id.twitch.tv/oauth2/token", 
-				"https://id.twitch.tv/oauth2/userinfo");
+				"https://id.twitch.tv/oauth2/userinfo",
+				null);
 	}
 
 	@Override
