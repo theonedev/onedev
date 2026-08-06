@@ -13,8 +13,8 @@ import org.jspecify.annotations.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Session;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.joda.time.DateTime;
@@ -216,7 +216,6 @@ public class OpenIdConnector extends SsoConnector {
 	protected SsoAuthenticated processTokenResponse(OIDCTokenResponse tokenResponse) {
 		try {
 			JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
-			Session.get().setAttribute(SESSION_ATTR_ID_TOKEN, idToken.serialize());
 			JWTClaimsSet claims = idToken.getJWTClaimsSet();
 			
 			if (!claims.getIssuer().equals(getCachedProviderMetadata().getIssuer()))
@@ -229,6 +228,9 @@ public class OpenIdConnector extends SsoConnector {
 			
 			if (claims.getExpirationTime() != null && now.toDate().after(claims.getExpirationTime()))
 				throw new AuthenticationException(_T("ID token was expired"));
+
+			if (isUseOpenIdLogout())
+				Session.get().setAttribute(SESSION_ATTR_ID_TOKEN, idToken.serialize());
 
 			String subject = claims.getSubject();
 			String email = StringUtils.trimToNull(claims.getStringClaim("email"));
@@ -366,7 +368,9 @@ public class OpenIdConnector extends SsoConnector {
 		this.buttonImageUrl = buttonImageUrl;
 	}
 
-	@Editable(name="Use OpenID Sign Out", order=10300, group="More Settings", description="Check to sign out from OpenID provider when logging out of OneDev. The provider discovery metadata must advertise an end session endpoint")
+	@Editable(name="Use OpenID Sign Out", order=10300, group="More Settings", description="Check this to " +
+			"also sign out from OpenID provider when signing out of OneDev. This requires provider " +
+			"metadata to advertise an end session endpoint")
 	public boolean isUseOpenIdLogout() {
 		return useOpenIdLogout;
 	}
@@ -375,25 +379,28 @@ public class OpenIdConnector extends SsoConnector {
 		this.useOpenIdLogout = useOpenIdLogout;
 	}
 
+	@Nullable
 	@Override
 	public String buildLogoutUrl(String providerName) {
-		if (isUseOpenIdLogout()) {
-			var metadata = getCachedProviderMetadata();
-			var idToken = (String) Session.get().getAttribute(SESSION_ATTR_ID_TOKEN);
-			if (metadata.getEndSessionEndpoint() != null && idToken != null) {
-				try {
-					var serverUrl = OneDev.getInstance(SettingService.class)
-							.getSystemSetting().getServerUrl();
-					return new URIBuilder(metadata.getEndSessionEndpoint())
-							.addParameter("id_token_hint", idToken)
-							.addParameter("post_logout_redirect_uri", serverUrl)
-							.build().toString();
-				} catch (URISyntaxException e) {
-					throw new RuntimeException(e);
-				}
-			}
+		if (!isUseOpenIdLogout())
+			return null;
+
+		var endSessionEndpoint = getCachedProviderMetadata().getEndSessionEndpoint();
+		var idToken = (String) Session.get().getAttribute(SESSION_ATTR_ID_TOKEN);
+		if (endSessionEndpoint == null || idToken == null)
+			return null;
+
+		try {
+			var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
+			return new URIBuilder(endSessionEndpoint)
+					.addParameter("id_token_hint", idToken)
+					.addParameter("post_logout_redirect_uri", serverUrl)
+					.build().toString();
+		} catch (URISyntaxException e) {
+			// Do not fail the login just because sign out url can not be built
+			logger.error("Error building OIDC sign out url", e);
+			return null;
 		}
-		return null;
 	}
 	
 	protected ProviderMetadata discoverProviderMetadata() {
