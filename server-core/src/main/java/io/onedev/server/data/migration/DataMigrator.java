@@ -74,6 +74,7 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.model.support.administration.AiSetting;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.issue.CommitMessageFixSetting;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.service.SettingService;
@@ -9217,6 +9218,24 @@ public class DataMigrator {
 				var dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("mergeIfAcceptable").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate237(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("SYSTEM")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("noreplyEmailDomain")
+									.setText(SystemSetting.DEFAULT_NOREPLY_EMAIL_DOMAIN);
+						}
+					}
 				}
 				dom.writeToFile(file, false);
 			}

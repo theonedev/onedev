@@ -55,6 +55,7 @@ public class GpgSetting implements Serializable {
 
 	public void setEncodedSigningKey(@Nullable byte[] encodedSigningKey) {
 		this.encodedSigningKey = encodedSigningKey;
+		signingKey = null;
 	}
 	
 	@Nullable

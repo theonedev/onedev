@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,6 +51,10 @@ public class SystemSetting implements Serializable, Validatable {
 	public static final String PROP_DISABLE_AUTO_UPDATE_CHECK = "disableAutoUpdateCheck";
 
 	public static final String PROP_DEFAULT_FORK_ROOT = "defaultForkRoot";
+
+	public static final String PROP_NOREPLY_EMAIL_DOMAIN = "noreplyEmailDomain";
+
+	public static final String DEFAULT_NOREPLY_EMAIL_DOMAIN = "noreply.onedev";
 	
 	private String serverUrl;
 	
@@ -70,6 +75,8 @@ public class SystemSetting implements Serializable, Validatable {
 	private String avatarServiceUrl = "https://secure.gravatar.com/avatar/";
 	
 	private String defaultForkRoot = "forks";
+
+	private String noreplyEmailDomain = DEFAULT_NOREPLY_EMAIL_DOMAIN;
 	
 	@Editable(name="Server URL", order=90, description="Specify root URL to access this server")
 	@NotEmpty
@@ -215,6 +222,19 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setDefaultForkRoot(String defaultForkRoot) {
 		this.defaultForkRoot = defaultForkRoot;
+	}
+
+	@Editable(order=800, name="Noreply Email Domain", description="""
+			Specify domain of various noreply email addresses for git operations if users want  
+			to keep their own email addresses private""")
+	@NotEmpty
+	@Pattern(regexp = "[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+", message = "Not a valid email domain")
+	public String getNoreplyEmailDomain() {
+		return noreplyEmailDomain;
+	}
+
+	public void setNoreplyEmailDomain(String noreplyEmailDomain) {
+		this.noreplyEmailDomain = noreplyEmailDomain;
 	}
 
 	public void onMoveProject(String oldPath, String newPath) {

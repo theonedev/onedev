@@ -66,7 +66,7 @@ public class WorkspaceNotificationManager {
 
 	@Sessional
 	public void notify(WorkspaceEvent event, Collection<String> emails) {
-		emails = emails.stream().filter(it -> !it.equals(User.SYSTEM_EMAIL_ADDRESS)).collect(toList());
+		emails = emails.stream().filter(it -> !it.equals(User.getSystemEmailAddress())).collect(toList());
 
 		if (!emails.isEmpty()) {
 			Workspace workspace = event.getWorkspace();

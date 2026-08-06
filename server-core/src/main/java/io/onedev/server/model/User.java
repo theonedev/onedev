@@ -83,15 +83,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final Long ROOT_ID = 1L;
 	
-	private static final String SERVICE_ACCOUNT_EMAIL_PREFIX = "sc-";
-
-	private static final String AI_ACCOUNT_EMAIL_PREFIX = "ai-";
-
-	private static final String SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX = "@onedev";
-
 	public static final String SYSTEM_NAME = "OneDev";
-	
-	public static final String SYSTEM_EMAIL_ADDRESS = "system@onedev";
 	
 	public static final String UNKNOWN_NAME = "unknown";
 	
@@ -781,7 +773,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		if (isUnknown()) {
 			throw new ExplicitException("Unknown user does not have git identity");
 		} else if (isSystem()) {
-			return new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
+			return new PersonIdent(User.SYSTEM_NAME, getSystemEmailAddress());
 		} else {
 			EmailAddress emailAddress = getGitEmailAddress();
 			if (emailAddress != null && emailAddress.isVerified())
@@ -1309,8 +1301,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public EmailAddress getServiceOrAiAccountEmailAddress() {
 		if (getType() == Type.SERVICE || getType() == Type.AI) {
 			var emailAddress = new EmailAddress();
-			var emailPrefix = getType() == Type.SERVICE ? SERVICE_ACCOUNT_EMAIL_PREFIX : AI_ACCOUNT_EMAIL_PREFIX;
-			emailAddress.setValue(emailPrefix + getName() + SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX);
+			emailAddress.setValue(getName() + "@" + getNoreplyEmailDomain());
 			emailAddress.setOwner(this);
 			emailAddress.setPrimary(true);
 			emailAddress.setGit(true);
@@ -1320,6 +1311,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		} else {
 			return null;
 		}
+	}
+
+	public static String getNoreplyEmailDomain() {
+		return OneDev.getInstance(SettingService.class).getSystemSetting().getNoreplyEmailDomain();
+	}
+
+	public static String getSystemEmailAddress() {
+		return "system@" + getNoreplyEmailDomain();
 	}
 
 	public void addEmailAddress(EmailAddress emailAddress) {
@@ -1367,15 +1366,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	@Nullable
 	public static String getServiceOrAiAccountName(String value) {
-		if (value.endsWith(SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX)) {
-			value = value.substring(0, value.length() - SERVICE_OR_AI_ACCOUNT_EMAIL_SUFFIX.length());
-			if (value.startsWith(SERVICE_ACCOUNT_EMAIL_PREFIX)) {
-				return value.substring(SERVICE_ACCOUNT_EMAIL_PREFIX.length());
-			} else if (value.startsWith(AI_ACCOUNT_EMAIL_PREFIX)) {
-				return value.substring(AI_ACCOUNT_EMAIL_PREFIX.length());
-			}
-		}
-		return null;
+		var noreplyEmailSuffix = "@" + getNoreplyEmailDomain();
+		if (value.endsWith(noreplyEmailSuffix)) 
+			return value.substring(0, value.length() - noreplyEmailSuffix.length());
+		else
+			return null;
 	}
 
 	public static String encodeWorkspaceDataKey(String dataKey) {

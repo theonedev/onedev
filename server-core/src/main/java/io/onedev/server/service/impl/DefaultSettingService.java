@@ -3,6 +3,8 @@ package io.onedev.server.service.impl;
 import static io.onedev.server.model.Setting.PROP_KEY;
 import static org.hibernate.criterion.Restrictions.eq;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPKeyRingGenerator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,6 +35,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.AiSetting;
 import io.onedev.server.model.support.administration.AlertSetting;
@@ -58,6 +64,7 @@ import io.onedev.server.model.support.administration.workspaceprovisioner.Worksp
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.util.GpgUtils;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -269,7 +276,29 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 	@Transactional
 	@Override
 	public void saveSystemSetting(SystemSetting systemSetting) {
+		String oldNoreplyEmailDomain = null;
+		var setting = findSetting(Key.SYSTEM);
+		if (setting != null)
+			oldNoreplyEmailDomain = ((SystemSetting) setting.getValue()).getNoreplyEmailDomain();
+
 		saveSetting(Key.SYSTEM, systemSetting);
+
+		if (oldNoreplyEmailDomain != null
+				&& !oldNoreplyEmailDomain.equals(systemSetting.getNoreplyEmailDomain())) {
+			var gpgSetting = getGpgSetting();
+			if (gpgSetting != null && gpgSetting.getEncodedSigningKey() != null) {
+				try {
+					PGPKeyRingGenerator generator = GpgUtils.generateKeyRingGenerator(
+							User.SYSTEM_NAME + "<system@" + systemSetting.getNoreplyEmailDomain() + ">");
+					var baos = new ByteArrayOutputStream();
+					generator.generateSecretKeyRing().encode(baos);
+					gpgSetting.setEncodedSigningKey(baos.toByteArray());
+					saveGpgSetting(gpgSetting);
+				} catch (PGPException | IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
 	}
 
 	@Transactional
