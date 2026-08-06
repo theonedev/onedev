@@ -91,8 +91,6 @@ public class OpenIdConnector extends SsoConnector {
 	private String groupsClaim;
 	
 	private String buttonImageUrl;
-
-	private boolean useOpenIdLogout;
 	
 	public OpenIdConnector() {
 		buttonImageUrl = "/wicket/resource/" + OpenIdConnector.class.getName() + "/openid.png";
@@ -229,8 +227,7 @@ public class OpenIdConnector extends SsoConnector {
 			if (claims.getExpirationTime() != null && now.toDate().after(claims.getExpirationTime()))
 				throw new AuthenticationException(_T("ID token was expired"));
 
-			if (isUseOpenIdLogout())
-				Session.get().setAttribute(SESSION_ATTR_ID_TOKEN, idToken.serialize());
+			Session.get().setAttribute(SESSION_ATTR_ID_TOKEN, idToken.serialize());
 
 			String subject = claims.getSubject();
 			String email = StringUtils.trimToNull(claims.getStringClaim("email"));
@@ -368,23 +365,9 @@ public class OpenIdConnector extends SsoConnector {
 		this.buttonImageUrl = buttonImageUrl;
 	}
 
-	@Editable(name="Use OpenID Sign Out", order=10300, group="More Settings", description="Check this to " +
-			"also sign out from OpenID provider when signing out of OneDev. This requires provider " +
-			"metadata to advertise an end session endpoint")
-	public boolean isUseOpenIdLogout() {
-		return useOpenIdLogout;
-	}
-
-	public void setUseOpenIdLogout(boolean useOpenIdLogout) {
-		this.useOpenIdLogout = useOpenIdLogout;
-	}
-
 	@Nullable
 	@Override
 	public String buildLogoutUrl(String providerName) {
-		if (!isUseOpenIdLogout())
-			return null;
-
 		var endSessionEndpoint = getCachedProviderMetadata().getEndSessionEndpoint();
 		var idToken = (String) Session.get().getAttribute(SESSION_ATTR_ID_TOKEN);
 		if (endSessionEndpoint == null || idToken == null)

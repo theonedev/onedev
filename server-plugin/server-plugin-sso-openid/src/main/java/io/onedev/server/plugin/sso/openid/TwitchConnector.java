@@ -55,11 +55,6 @@ public class TwitchConnector extends OpenIdConnector {
 	}
 
 	@Override
-	public boolean isUseOpenIdLogout() {
-		return false;
-	}
-
-	@Override
 	protected ClientAuthentication createTokenRequestAuthentication(ClientID id, Secret secret) {
 		return new ClientSecretPost(id, secret);
 	}

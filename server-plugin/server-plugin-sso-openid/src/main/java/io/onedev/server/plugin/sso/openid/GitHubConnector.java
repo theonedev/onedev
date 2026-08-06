@@ -54,11 +54,6 @@ public class GitHubConnector extends OpenIdConnector {
 	}
 
 	@Override
-	public boolean isUseOpenIdLogout() {
-		return false;
-	}
-
-	@Override
 	protected SsoAuthenticated processTokenResponse(OIDCTokenResponse tokenResponse) {
 		BearerAccessToken accessToken = tokenResponse.getTokens().getBearerAccessToken();
 
