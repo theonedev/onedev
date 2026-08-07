@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.my.emailaddresses;
 
-import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
@@ -16,13 +15,12 @@ public class MyEmailAddressesPage extends MyPage {
 
 	public MyEmailAddressesPage(PageParameters params) {
 		super(params);
-		if (getUser().getType() != ORDINARY)
-			throw new IllegalStateException();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
 		add(new EmailAddressesPanel("content", new AbstractReadOnlyModel<User>() {
 
 			@Override

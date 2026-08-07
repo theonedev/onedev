@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.user.emailaddresses;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
@@ -71,6 +72,17 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		var ordinaryContainer = new WebMarkupContainer("ordinary") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getUser().getType() == ORDINARY);
+			}
+
+		};
+		add(ordinaryContainer);
 
 		var backupEmailAddressesSection = new WebMarkupContainer("backupEmailAddresses") {
 			
@@ -218,7 +230,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 		primaryForm.add(unverifiedNoteContainer);
 
 		primaryForm.setOutputMarkupId(true);
-		add(primaryForm);
+		ordinaryContainer.add(primaryForm);
 
 		backupEmailAddressesSection.add(new ListView<EmailAddress>("list", new AbstractReadOnlyModel<>() {
 
@@ -278,7 +290,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 			}
 
 		});
-		add(backupEmailAddressesSection);
+		ordinaryContainer.add(backupEmailAddressesSection);
 
 		Form<Void> backupForm = new Form<>("form");
 
@@ -346,7 +358,20 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 				Model.of(getUser().getName() + "@" + User.getNoreplyEmailDomain())));
 		privacyForm.add(privateNote);
 
-		add(privacyForm);
+		ordinaryContainer.add(privacyForm);
+
+		var serviceOrAiContainer = new WebMarkupContainer("serviceOrAi") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getUser().getType() != ORDINARY);
+			}
+
+		};
+		serviceOrAiContainer.add(new Label("generatedEmailAddress",
+				Model.of(getUser().getName() + "@" + User.getNoreplyEmailDomain())));
+		add(serviceOrAiContainer);
 	}
 
 	private IValidator<String> newEmailAddressValidator() {

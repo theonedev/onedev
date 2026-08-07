@@ -1,5 +1,5 @@
 <wicket:panel>
-	<div class="email-addresses">
+	<div wicket:id="ordinary" class="email-addresses">
 		<section class="mb-5 border-bottom pb-5">
 			<h6 class="mb-3"><wicket:t>Primary Email Address</wicket:t></h6>
 			<p class="text-muted font-size-sm"><wicket:t>The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.</wicket:t></p>
@@ -52,13 +52,19 @@
 						<wicket:t>Keep my email addresses private</wicket:t>
 					</label>
 				</div>
-				<div wicket:id="privateNote">
+				<div wicket:id="privateNote" class="alert alert-notice alert-light">
 					<wicket:svg href="bulb" class="icon"/>
-					<wicket:t>If private, use the auto-generated email address</wicket:t>
+					<wicket:t>Use the auto-generated email address</wicket:t>
 					<strong wicket:id="generatedEmailAddress"></strong>
 					<wicket:t>for Git operations. All Git operations performed from the web UI will also use this address.</wicket:t>
 				</div>
 			</form>
 		</section>
+	</div>
+	<div wicket:id="serviceOrAi" class="alert alert-notice alert-light">
+		<wicket:svg href="bulb" class="icon"/>
+		<wicket:t>Service or AI user can not specify email addresses. However the auto-generated address</wicket:t>
+		<strong wicket:id="generatedEmailAddress"></strong>
+		<wicket:t>can be used to associate Git commits with the user.</wicket:t>
 	</div>
 </wicket:panel>

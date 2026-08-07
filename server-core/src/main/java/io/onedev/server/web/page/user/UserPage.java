@@ -91,8 +91,7 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 		var params = paramsOf(getUser());
 		tabs.add(new PageTab(Model.of(_T("Profile")), Model.of("profile"), UserProfilePage.class, params));
 		tabs.add(new PageTab(Model.of(_T("Basic Settings")), Model.of("info"), UserBasicSettingPage.class, params));
-		if (getUser().getType() == ORDINARY) 
-			tabs.add(new PageTab(Model.of(_T("Email Addresses")), Model.of("mail"), UserEmailAddressesPage.class, params));		
+		tabs.add(new PageTab(Model.of(_T("Email Addresses")), Model.of("mail"), UserEmailAddressesPage.class, params));		
 		tabs.add(new PageTab(Model.of(_T("Edit Avatar")), Model.of("avatar"), UserAvatarPage.class, params));
 		if (!getUser().isDisabled()) {
 			if (getUser().getType() == ORDINARY)

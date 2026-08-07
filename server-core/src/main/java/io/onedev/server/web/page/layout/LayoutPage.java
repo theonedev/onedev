@@ -1135,7 +1135,7 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyBasicSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		if (getLoginUser() != null && getLoginUser().getType() == ORDINARY) {
+		if (getLoginUser() != null) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myEmailSetting", MyEmailAddressesPage.class));
 			if (getPage() instanceof MyEmailAddressesPage)
 				item.add(AttributeAppender.append("class", "active"));
