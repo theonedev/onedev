@@ -32,6 +32,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
@@ -94,6 +95,16 @@ public class LoginPage extends SimplePage {
 
 		// replace session to avoid session fixation attack
 		getSession().replaceSession();
+
+		String serverUrl = settingService.getSystemSetting().getServerUrl();
+		var ssoProviders = ssoProviderService.query();
+		boolean disableInternalLogin = settingService.getSecuritySetting().isDisableInternalLogin()
+				&& !ssoProviders.isEmpty();
+		if (disableInternalLogin && ssoProviders.size() == 1) {
+			var provider = ssoProviders.iterator().next();
+			throw new RedirectToUrlException(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE
+					+ "/" + provider.getName());
+		}
 				
 		Fragment fragment = new Fragment("content", "passwordCheckFrag", this);
 		
@@ -185,15 +196,12 @@ public class LoginPage extends SimplePage {
 		}));
 		
 		form.add(new ViewStateAwarePageLink<Void>("forgetPassword", PasswordResetPage.class));
-		fragment.add(form);
+		fragment.add(form.setVisible(!disableInternalLogin));
 				
 		boolean enableSelfRegister = settingService.getSecuritySetting().isEnableSelfRegister();
 		fragment.add(new ViewStateAwarePageLink<Void>("registerUser", SignUpPage.class).setVisible(enableSelfRegister));
 
-		String serverUrl = settingService.getSystemSetting().getServerUrl();
-		
 		RepeatingView ssoButtonsView = new RepeatingView("ssoButtons");
-		var ssoProviders = ssoProviderService.query();
 		for (SsoProvider provider: ssoProviders) {
 			ExternalLink ssoButton = new ExternalLink(ssoButtonsView.newChildId(), 
 					Model.of(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + provider.getName()));
