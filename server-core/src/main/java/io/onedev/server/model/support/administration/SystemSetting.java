@@ -54,7 +54,7 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public static final String PROP_NOREPLY_EMAIL_DOMAIN = "noreplyEmailDomain";
 
-	public static final String DEFAULT_NOREPLY_EMAIL_DOMAIN = "noreply.onedev";
+	public static final String DEFAULT_NOREPLY_EMAIL_DOMAIN = "noreply.localhost";
 	
 	private String serverUrl;
 	

@@ -385,6 +385,13 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 							return _T("Malformed email address");
 						}
 					});
+				} else if (User.getLoginName(validatable.getValue()) != null) {
+					validatable.error(new IValidationError() {
+						@Override
+						public Serializable getErrorMessage(IErrorMessageSource messageSource) {
+							return _T("Email address with noreply domain is not allowed");
+						}
+					});
 				}
 			}
 		};

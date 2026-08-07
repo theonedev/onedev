@@ -1340,7 +1340,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Nullable
 	public static String getLoginName(String noReplyEmailAddress) {
 		var noreplyEmailSuffix = "@" + getNoreplyEmailDomain();
-		if (noReplyEmailAddress.endsWith(noreplyEmailSuffix)) 
+		if (noReplyEmailAddress.toLowerCase().endsWith(noreplyEmailSuffix.toLowerCase())) 
 			return noReplyEmailAddress.substring(0, noReplyEmailAddress.length() - noreplyEmailSuffix.length());
 		else
 			return null;

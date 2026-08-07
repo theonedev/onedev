@@ -289,7 +289,7 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 			if (gpgSetting != null && gpgSetting.getEncodedSigningKey() != null) {
 				try {
 					PGPKeyRingGenerator generator = GpgUtils.generateKeyRingGenerator(
-							User.SYSTEM_NAME + "<system@" + systemSetting.getNoreplyEmailDomain() + ">");
+							User.SYSTEM_NAME + "<" + User.getSystemNoreplyEmailAddress() + ">");
 					var baos = new ByteArrayOutputStream();
 					generator.generateSecretKeyRing().encode(baos);
 					gpgSetting.setEncodedSigningKey(baos.toByteArray());

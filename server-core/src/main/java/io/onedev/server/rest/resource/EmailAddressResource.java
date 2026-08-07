@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.rest.annotation.Api;
@@ -73,11 +74,13 @@ public class EmailAddressResource {
 		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 		else if (owner.isDisabled())
-			throw new ExplicitException("Cannot set email address for disabled user");
+			throw new NotAcceptableException("Cannot set email address for disabled user");
 		else if (owner.getType() != User.Type.ORDINARY)
-			throw new ExplicitException("Cannot set email address for service or ai user");
+			throw new NotAcceptableException("Cannot set email address for service or ai user");
+		else if (User.getLoginName(emailAddress.getValue()) != null)
+			throw new NotAcceptableException("Email address with noreply domain is not allowed");
 		else if (emailAddressService.findByValue(emailAddress.getValue()) != null)
-			throw new ExplicitException("This email address is already used by another user");
+			throw new NotAcceptableException("This email address is already used by another user");
 		
 		if (SecurityUtils.isAdministrator()) 
 			emailAddress.setVerificationCode(null);
