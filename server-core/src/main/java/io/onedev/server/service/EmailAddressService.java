@@ -24,22 +24,10 @@ public interface EmailAddressService extends EntityService<EmailAddress> {
 	EmailAddress findPrimary(User user);
 
 	@Nullable
-	EmailAddress findGit(User user);
-
-	@Nullable
-	EmailAddress findPublic(User user);
-	
-	@Nullable
 	EmailAddress findByPersonIdent(PersonIdent personIdent);
 	
 	void setAsPrimary(EmailAddress emailAddress);
 
-	void setAsPublic(EmailAddress emailAddress);
-
-	void setAsPrivate(EmailAddress emailAddress);
-
-	void useForGitOperations(EmailAddress emailAddress);
-	
 	void sendVerificationEmail(EmailAddress emailAddress);
 
 	EmailAddressCache cloneCache();

@@ -18,7 +18,7 @@ public enum MergeStrategy {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {
-			PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.getSystemEmailAddress());
+			PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.getSystemNoreplyEmailAddress());
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
 			return getGitService().merge(request.getTargetProject(), targetHead, requestHead, 
@@ -36,7 +36,7 @@ public enum MergeStrategy {
 			if (getGitService().isMergedInto(project, null, targetHead, requestHead)) {
 				return requestHead;
 			} else {
-				PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.getSystemEmailAddress());
+				PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.getSystemNoreplyEmailAddress());
 				return getGitService().merge(project, targetHead, requestHead, false, user, user,
 							commitMessage, false);
 			}
@@ -49,7 +49,7 @@ public enum MergeStrategy {
 		public ObjectId merge(PullRequest request, String commitMessage) {
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			PersonIdent committer = new PersonIdent(User.SYSTEM_NAME, User.getSystemEmailAddress());
+			PersonIdent committer = new PersonIdent(User.SYSTEM_NAME, User.getSystemNoreplyEmailAddress());
 			return getGitService().merge(request.getTargetProject(), targetHead, requestHead, true, 
 					committer, request.getSubmitter().asPerson(), commitMessage, false);
 		}
@@ -61,7 +61,7 @@ public enum MergeStrategy {
 		public ObjectId merge(PullRequest request, String commitMessage) {
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.getSystemEmailAddress());
+			PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.getSystemNoreplyEmailAddress());
 			return getGitService().rebase(request.getTargetProject(), requestHead, targetHead, user);
 		}
 		

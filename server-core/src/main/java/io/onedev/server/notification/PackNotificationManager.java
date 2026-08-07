@@ -60,7 +60,7 @@ public class PackNotificationManager {
 	
 	@Sessional
 	public void notify(PackEvent event, Collection<String> emails) {
-		emails = emails.stream().filter(it -> !it.equals(User.getSystemEmailAddress())).collect(toList());
+		emails = emails.stream().filter(it -> !it.equals(User.getSystemNoreplyEmailAddress())).collect(toList());
 		
 		if (!emails.isEmpty()) {
 			Pack pack = event.getPack();

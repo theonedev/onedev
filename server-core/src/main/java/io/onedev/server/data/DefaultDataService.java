@@ -625,7 +625,6 @@ public class DefaultDataService implements DataService, Serializable {
 		if (primaryEmailAddress == null) {
     		primaryEmailAddress = new EmailAddress();
     		primaryEmailAddress.setPrimary(true);
-    		primaryEmailAddress.setGit(true);
     		primaryEmailAddress.setVerificationCode(null);
     		primaryEmailAddress.setOwner(user);
 		}

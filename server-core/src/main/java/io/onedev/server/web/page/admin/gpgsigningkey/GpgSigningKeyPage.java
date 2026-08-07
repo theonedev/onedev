@@ -96,7 +96,7 @@ public class GpgSigningKeyPage extends AdministrationPage {
 					ByteArrayOutputStream baos;
 					try {
 						PGPKeyRingGenerator generator = GpgUtils.generateKeyRingGenerator(
-								User.SYSTEM_NAME + "<" + User.getSystemEmailAddress() + ">");
+								User.SYSTEM_NAME + "<" + User.getSystemNoreplyEmailAddress() + ">");
 						
 						PGPSecretKeyRing secretKeyRing = generator.generateSecretKeyRing();
 						baos = new ByteArrayOutputStream();

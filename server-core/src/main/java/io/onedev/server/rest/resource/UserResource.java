@@ -375,7 +375,6 @@ public class UserResource {
 			user.setPassword(passwordService.encryptPassword(data.getPassword()));
 			userService.create(user);
 			EmailAddress emailAddress = new EmailAddress();
-			emailAddress.setGit(true);
 			emailAddress.setPrimary(true);
 			emailAddress.setOwner(user);
 			emailAddress.setValue(data.getEmailAddress());
@@ -405,6 +404,7 @@ public class UserResource {
 		oldData.setName(user.getName());
 		oldData.setFullName(user.getFullName());
 		oldData.setNotifyOwnEvents(user.isNotifyOwnEvents());
+		oldData.setKeepEmailAddressesPrivate(user.isKeepEmailAddressesPrivate());
 
 		var oldAuditContent = VersionedXmlDoc.fromBean(oldData).toXML();			
 
@@ -413,6 +413,8 @@ public class UserResource {
 		user.setFullName(data.getFullName());
 		if (user.getType() != SERVICE)
 			user.setNotifyOwnEvents(data.isNotifyOwnEvents());
+		if (data.isKeepEmailAddressesPrivate() != null)
+			user.setKeepEmailAddressesPrivate(data.isKeepEmailAddressesPrivate());
 		userService.update(user, oldName);
 
 		if (!getAuthUser().equals(user)) {
@@ -830,6 +832,9 @@ public class UserResource {
 
 		@Api(order=300, description = "Whether or not to notify user on own events. Required for ordinary user")
 		private boolean notifyOwnEvents;
+
+		@Api(order=400, description = "Whether or not to keep email addresses private")
+		private Boolean keepEmailAddressesPrivate;
 		
 		@UserName
 		@NotEmpty
@@ -855,6 +860,14 @@ public class UserResource {
 
 		public void setNotifyOwnEvents(boolean notifyOwnEvents) {
 			this.notifyOwnEvents = notifyOwnEvents;
+		}
+
+		public Boolean isKeepEmailAddressesPrivate() {
+			return keepEmailAddressesPrivate;
+		}
+
+		public void setKeepEmailAddressesPrivate(Boolean keepEmailAddressesPrivate) {
+			this.keepEmailAddressesPrivate = keepEmailAddressesPrivate;
 		}
 	}
 	

@@ -95,7 +95,6 @@ public class CommitQueryTest extends AbstractGitTest {
 		
 		User user = new User();
 		EmailAddress emailAddress = new EmailAddress();
-		emailAddress.setGit(true);
 		emailAddress.setPrimary(true);
 		emailAddress.setOwner(user);
 		emailAddress.setVerificationCode(null);

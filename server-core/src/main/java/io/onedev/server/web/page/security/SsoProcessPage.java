@@ -310,7 +310,6 @@ public class SsoProcessPage extends SimplePage {
 							emailAddress.setValue(bean.getEmailAddress());
 						}
 						emailAddress.setPrimary(true);
-						emailAddress.setGit(true);
 						emailAddress.setOwner(user);
 
 						var ssoAccount = new SsoAccount();

@@ -26,11 +26,11 @@ public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 	@Nullable
 	public EmailAddressFacade findByValue(String value) {
 		value = value.toLowerCase();
-		var serviceOrAiAccountName = User.getServiceOrAiAccountName(value);
-		if (serviceOrAiAccountName != null) {
-			var serviceOrAiAccount = OneDev.getInstance(UserService.class).findFacadeByName(serviceOrAiAccountName);
-			if (serviceOrAiAccount != null) 
-				return new EmailAddressFacade(null, serviceOrAiAccount.getId(), value, true, true, true, null);
+		var loginName = User.getLoginName(value);
+		if (loginName != null) {
+			var user = OneDev.getInstance(UserService.class).findFacadeByName(loginName);
+			if (user != null)
+				return new EmailAddressFacade(null, user.getId(), value, false, null);
 			else
 				return null;
 		}
@@ -51,21 +51,4 @@ public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 		return null;
 	}
 	
-	@Nullable
-	public EmailAddressFacade findGit(User user) {
-		for (EmailAddressFacade facade: values()) {
-			if (facade.isGit() && facade.getOwnerId().equals(user.getId())) 
-				return facade;
-		}
-		return null;
-	}
-	
-	@Nullable
-	public EmailAddressFacade findPublic(User user) {
-		for (EmailAddressFacade facade: values()) {
-			if (facade.isOpen() && facade.getOwnerId().equals(user.getId())) 
-				return facade;
-		}
-		return null;
-	}
 }

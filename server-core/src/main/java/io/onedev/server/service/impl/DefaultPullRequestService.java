@@ -1272,7 +1272,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 							comparisonBase = mergeBase1;
 							break;
 						} else {
-							PersonIdent person = new PersonIdent(User.SYSTEM_NAME, User.getSystemEmailAddress());
+							PersonIdent person = new PersonIdent(User.SYSTEM_NAME, User.getSystemNoreplyEmailAddress());
 							comparisonBase = getGitService().merge(targetProject, oldCommitId, mergeBase1,
 									false, person, person, "helper commit", true);
 							break;

@@ -85,7 +85,6 @@ public class DefaultAuthenticatingService extends AuthenticatingRealm implements
 			emailAddress.setVerificationCode(null);
 			emailAddress.setOwner(user);
 			emailAddress.setPrimary(true);
-			emailAddress.setGit(true);
 			emailAddressService.create(emailAddress);
 
 			user.getEmailAddresses().add(emailAddress);

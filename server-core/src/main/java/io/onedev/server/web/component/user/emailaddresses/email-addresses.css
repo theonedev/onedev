@@ -1,0 +1,8 @@
+.email-addresses ul.feedbackPanel {
+    margin-bottom: 0 !important;
+}
+.email-addresses ul.feedbackPanel li {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}

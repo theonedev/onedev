@@ -188,8 +188,8 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
         add(new Label("name", "@" + user.getName()));
         add(new Label("fullName", user.getFullName()).setVisible(user.getFullName() != null));
 
-        var emailAddress = user.getPublicEmailAddress();
-        if (emailAddress != null) {
+        var emailAddress = user.getPrimaryEmailAddress();
+        if (emailAddress != null && emailAddress.isVerified() && !user.isKeepEmailAddressesPrivate()) {
             add(new WebMarkupContainer("emailAddress") {
 
                 @Override

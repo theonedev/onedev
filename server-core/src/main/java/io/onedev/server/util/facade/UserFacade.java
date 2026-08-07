@@ -17,15 +17,18 @@ public class UserFacade extends EntityFacade {
 	private final boolean disabled;
 
 	private final boolean entitleToAll;
+
+	private final boolean keepEmailAddressesPrivate;
 	
 	public UserFacade(Long id, String name, @Nullable String fullName, User.Type type, 
-				boolean disabled, boolean entitleToAll) {
+				boolean disabled, boolean entitleToAll, boolean keepEmailAddressesPrivate) {
 		super(id);
 		this.name = name;
 		this.fullName = fullName;
 		this.type = type;
 		this.disabled = disabled;
 		this.entitleToAll = entitleToAll;
+		this.keepEmailAddressesPrivate = keepEmailAddressesPrivate;
 	}
 
 	public String getName() {
@@ -72,6 +75,10 @@ public class UserFacade extends EntityFacade {
 
 	public boolean isEntitleToAll() {
 		return entitleToAll;
+	}
+
+	public boolean isKeepEmailAddressesPrivate() {
+		return keepEmailAddressesPrivate;
 	}
 	
 }

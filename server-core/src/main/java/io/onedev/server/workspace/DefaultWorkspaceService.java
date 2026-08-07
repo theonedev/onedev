@@ -791,8 +791,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var provisioner = getProvisioner(workspace, spec, workspaceLogger);
 
 			var gitEmail = workspace.getUser().getGitEmailAddress();
-			if (gitEmail == null)
-				throw new ExplicitException("No email address for git operations configured");
 			
 			String cloneUrl;
 			if (workspace.getRequest() != null && workspace.getBranch() != null) {

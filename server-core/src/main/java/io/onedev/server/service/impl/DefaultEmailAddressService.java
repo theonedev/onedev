@@ -19,6 +19,7 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
@@ -76,7 +77,7 @@ public class DefaultEmailAddressService extends BaseEntityService<EmailAddress> 
 			if (facade.getId() != null) {
 				return load(facade.getId());
 			} else {
-				return userService.load(facade.getOwnerId()).getServiceOrAiAccountEmailAddress();
+				return userService.load(facade.getOwnerId()).newNoreplyEmailAddress();
 			}
 		} else {
 			return null;
@@ -106,55 +107,19 @@ public class DefaultEmailAddressService extends BaseEntityService<EmailAddress> 
     		dao.persist(each);
     	}
     	emailAddress.setPrimary(true);
-    	dao.persist(emailAddress);
-	}
-
-    @Transactional
-	@Override
-	public void setAsPublic(EmailAddress emailAddress) {
-    	for (EmailAddress each: emailAddress.getOwner().getEmailAddresses()) {
-    		each.setOpen(false);
-    		dao.persist(each);
-    	}
-    	emailAddress.setOpen(true);
-    	dao.persist(emailAddress);
-	}
-
-    @Transactional
-	@Override
-	public void setAsPrivate(EmailAddress emailAddress) {
-    	emailAddress.setOpen(false);
-    	dao.persist(emailAddress);
-	}
-
-    @Transactional
-	@Override
-	public void useForGitOperations(EmailAddress emailAddress) {
-    	for (EmailAddress each: emailAddress.getOwner().getEmailAddresses()) {
-    		each.setGit(false);
-    		dao.persist(each);
-    	}
-    	emailAddress.setGit(true);
+		emailAddress.getOwner().cachePrimaryEmailAddress(emailAddress);
     	dao.persist(emailAddress);
 	}
 
     @Transactional
     @Override
 	public void delete(EmailAddress emailAddress) {
-		super.delete(emailAddress);
+		if (emailAddress.isPrimary())
+			throw new NotAcceptableException("Cannot delete primary email address");
 
-		if (emailAddress.isPrimary() || emailAddress.isGit()) {
-			User user = emailAddress.getOwner();
-			user.getEmailAddresses().remove(emailAddress);
-			if (!user.getSortedEmailAddresses().isEmpty()) {
-				EmailAddress firstEmailAddress = user.getSortedEmailAddresses().iterator().next();
-				if (emailAddress.isPrimary()) 
-					firstEmailAddress.setPrimary(true);
-				if (emailAddress.isGit())
-					firstEmailAddress.setGit(true);
-				dao.persist(firstEmailAddress);
-			}
-		}
+		super.delete(emailAddress);
+		User user = emailAddress.getOwner();
+		user.getEmailAddresses().remove(emailAddress);
 	}
 
 	@Transactional
@@ -166,7 +131,6 @@ public class DefaultEmailAddressService extends BaseEntityService<EmailAddress> 
 		User user = emailAddress.getOwner();
 		if (user.getEmailAddresses().isEmpty()) {
 			emailAddress.setPrimary(true);
-			emailAddress.setGit(true);
 		}
 		dao.persist(emailAddress);
 		
@@ -255,24 +219,6 @@ public class DefaultEmailAddressService extends BaseEntityService<EmailAddress> 
    		return cache.findPrimary(userId);
 	}
 	
-	@Override
-	public EmailAddress findGit(User user) {
-		EmailAddressFacade facade = cache.findGit(user);
-		if (facade != null)
-			return load(facade.getId());
-		else
-			return null;
-	}
-
-	@Override
-	public EmailAddress findPublic(User user) {
-		EmailAddressFacade facade = cache.findPublic(user);
-		if (facade != null)
-			return load(facade.getId());
-		else
-			return null;
-	}
-
 	@Override
 	public EmailAddressCache cloneCache() {
 		return cache.clone();

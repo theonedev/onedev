@@ -66,6 +66,7 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
+import io.onedev.server.exception.NotAcceptableException;
 
 @Entity
 @Table(indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_FULL_NAME)})
@@ -118,6 +119,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private String fullName;
 			
 	private boolean notifyOwnEvents;
+
+	@Column(name="PRIVATE_EMAILS")
+	private boolean keepEmailAddressesPrivate;
 
 	@Lob
 	@Column(length=65535)
@@ -330,14 +334,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
     private transient Collection<Group> groups;
     
-    private transient List<EmailAddress> sortedEmailAddresses;
-    
     private transient Optional<EmailAddress> primaryEmailAddress;
     
-    private transient Optional<EmailAddress> gitEmailAddress;
-
-    private transient Optional<EmailAddress> publicEmailAddress;
-
 	private transient List<User> entitledAis;
 	
 	public QueryPersonalization<NamedProjectQuery> getProjectQueryPersonalization() {
@@ -717,6 +715,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.notifyOwnEvents = sendOwnEvents;
 	}
 
+	public boolean isKeepEmailAddressesPrivate() {
+		return keepEmailAddressesPrivate;
+	}
+
+	public void setKeepEmailAddressesPrivate(boolean keepEmailAddressesPrivate) {
+		this.keepEmailAddressesPrivate = keepEmailAddressesPrivate;
+	}
+
 	public AiSetting getAiSetting() {
 		return aiSetting;
 	}
@@ -766,21 +772,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 	
 	public PersonIdent asPerson() {
-		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
-		if (serviceOrAiAccountEmailAddress != null) 
-			return new PersonIdent(getName(), serviceOrAiAccountEmailAddress.getValue());
-
-		if (isUnknown()) {
+		if (isUnknown()) 
 			throw new ExplicitException("Unknown user does not have git identity");
-		} else if (isSystem()) {
-			return new PersonIdent(User.SYSTEM_NAME, getSystemEmailAddress());
-		} else {
-			EmailAddress emailAddress = getGitEmailAddress();
-			if (emailAddress != null && emailAddress.isVerified())
-				return new PersonIdent(getDisplayName(), emailAddress.getValue());
-			else
-		        throw new ExplicitException("No verified email for git operations");
-		}
+		else if (isSystem())
+			return new PersonIdent(User.SYSTEM_NAME, getSystemNoreplyEmailAddress());
+		else 
+			return new PersonIdent(getDisplayName(), getGitEmailAddress().getValue());		
 	}
 	
 	public String getDisplayName() {
@@ -907,17 +904,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	/**
-	 * Returns verified email address values of this user, including the synthetic
-	 * address used by service and AI accounts for git operations.
+	 * Returns verified email address values of this user, including the noreply addresses
 	 */
 	public Set<String> getVerifiedEmailAddresses() {
 		var emails = getEmailAddresses().stream()
 				.filter(EmailAddress::isVerified)
 				.map(EmailAddress::getValue)
 				.collect(Collectors.toCollection(HashSet::new));
-		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
-		if (serviceOrAiAccountEmailAddress != null)
-			emails.add(serviceOrAiAccountEmailAddress.getValue());
+		emails.add(newNoreplyEmailAddress().getValue());
 		return emails;
 	}
 
@@ -1253,78 +1247,57 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	public List<EmailAddress> getSortedEmailAddresses() {
-		if (sortedEmailAddresses == null) {
-			sortedEmailAddresses = new ArrayList<>(getEmailAddresses());
-			Collections.sort(sortedEmailAddresses);
-		}
+		var sortedEmailAddresses = new ArrayList<>(getEmailAddresses());
+		Collections.sort(sortedEmailAddresses);
 		return sortedEmailAddresses;
 	}
 	
 	private EmailAddressService getEmailAddressService() {
 		return OneDev.getInstance(EmailAddressService.class);
 	}
-	
+
 	@Nullable
 	public EmailAddress getPrimaryEmailAddress() {		
-		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
-		if (serviceOrAiAccountEmailAddress != null)
-			return serviceOrAiAccountEmailAddress;
-
 		if (primaryEmailAddress == null)
 			primaryEmailAddress = Optional.ofNullable(getEmailAddressService().findPrimary(this));
 		return primaryEmailAddress.orElse(null);
 	}
 
-	@Nullable
+	public void cachePrimaryEmailAddress(EmailAddress primaryEmailAddress) {
+		this.primaryEmailAddress = Optional.ofNullable(primaryEmailAddress);
+	}
+
 	public EmailAddress getGitEmailAddress() {
-		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
-		if (serviceOrAiAccountEmailAddress != null)
-			return serviceOrAiAccountEmailAddress;
-
-		if (gitEmailAddress == null)
-			gitEmailAddress = Optional.ofNullable(getEmailAddressService().findGit(this));
-		return gitEmailAddress.orElse(null);
-	}
-
-	@Nullable
-	public EmailAddress getPublicEmailAddress() {
-		var serviceOrAiAccountEmailAddress = getServiceOrAiAccountEmailAddress();
-		if (serviceOrAiAccountEmailAddress != null)
-			return serviceOrAiAccountEmailAddress;
-
-		if (publicEmailAddress == null)
-			publicEmailAddress = Optional.ofNullable(getEmailAddressService().findPublic(this));
-		return publicEmailAddress.orElse(null);
-	}
-
-	@Nullable
-	public EmailAddress getServiceOrAiAccountEmailAddress() {
-		if (getType() == Type.SERVICE || getType() == Type.AI) {
-			var emailAddress = new EmailAddress();
-			emailAddress.setValue(getName() + "@" + getNoreplyEmailDomain());
-			emailAddress.setOwner(this);
-			emailAddress.setPrimary(true);
-			emailAddress.setGit(true);
-			emailAddress.setOpen(true);
-			emailAddress.setVerificationCode(null);
-			return emailAddress;
+		if (isKeepEmailAddressesPrivate() || getType() == Type.SERVICE || getType() == Type.AI) {
+			return newNoreplyEmailAddress();
 		} else {
-			return null;
+			var primaryEmailAddress = getPrimaryEmailAddress();
+			if (primaryEmailAddress != null && primaryEmailAddress.isVerified())
+				return primaryEmailAddress;
+			else
+				throw new NotAcceptableException("Primary email address not set or not verified for user: " + getName());
 		}
+	}
+
+	public EmailAddress newNoreplyEmailAddress() {
+		var emailAddress = new EmailAddress();
+		emailAddress.setValue(getName() + "@" + getNoreplyEmailDomain());
+		emailAddress.setOwner(this);
+		emailAddress.setVerificationCode(null);
+		return emailAddress;
 	}
 
 	public static String getNoreplyEmailDomain() {
 		return OneDev.getInstance(SettingService.class).getSystemSetting().getNoreplyEmailDomain();
 	}
 
-	public static String getSystemEmailAddress() {
-		return "system@" + getNoreplyEmailDomain();
+	public static String getSystemNoreplyEmailAddress() {
+		return User.SYSTEM_NAME.toLowerCase() + "@" + getNoreplyEmailDomain();
 	}
 
 	public void addEmailAddress(EmailAddress emailAddress) {
 		emailAddress.setOwner(this);
 		emailAddress.setPrimary(getEmailAddresses().stream().noneMatch(it->it.isPrimary()));		
-		emailAddress.setGit(getEmailAddresses().stream().noneMatch(it->it.isGit()));
 		getEmailAddresses().add(emailAddress);
 	}
 	
@@ -1365,10 +1338,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	@Nullable
-	public static String getServiceOrAiAccountName(String value) {
+	public static String getLoginName(String noReplyEmailAddress) {
 		var noreplyEmailSuffix = "@" + getNoreplyEmailDomain();
-		if (value.endsWith(noreplyEmailSuffix)) 
-			return value.substring(0, value.length() - noreplyEmailSuffix.length());
+		if (noReplyEmailAddress.endsWith(noreplyEmailSuffix)) 
+			return noReplyEmailAddress.substring(0, noReplyEmailAddress.length() - noreplyEmailSuffix.length());
 		else
 			return null;
 	}
@@ -1401,7 +1374,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	public UserFacade getFacade() {
-		return new UserFacade(getId(), getName(), getFullName(), getType(), isDisabled(), getAiSetting().isEntitleToAll());
+		return new UserFacade(getId(), getName(), getFullName(), getType(), isDisabled(),
+				getAiSetting().isEntitleToAll(), isKeepEmailAddressesPrivate());
 	}
 	
 }

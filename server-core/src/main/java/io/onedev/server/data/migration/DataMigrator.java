@@ -9225,8 +9225,30 @@ public class DataMigrator {
 	}
 
 	private void migrate237(File dataDir, Stack<Integer> versions) {
+		var keepEmailAddressesPrivateMap = new HashMap<String, Boolean>();
 		for (File file : dataDir.listFiles()) {
-			if (file.getName().startsWith("Settings.xml")) {
+			if (file.getName().startsWith("EmailAddresss.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (Boolean.parseBoolean(element.elementTextTrim("primary"))) {
+						var open = Boolean.parseBoolean(element.elementTextTrim("open"));
+						keepEmailAddressesPrivateMap.put(element.elementTextTrim("owner"), !open);
+					}					
+					element.element("git").detach();
+					element.element("open").detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var isPrivate = keepEmailAddressesPrivateMap.getOrDefault(element.elementTextTrim("id"), false);
+					element.addElement("keepEmailAddressesPrivate").setText(String.valueOf(isPrivate));
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("SYSTEM")) {
