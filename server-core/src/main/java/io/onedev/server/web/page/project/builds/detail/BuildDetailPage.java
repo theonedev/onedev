@@ -25,6 +25,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -458,6 +459,7 @@ public abstract class BuildDetailPage extends ProjectPage
 		});
 
 		add(new SideInfoLink("moreInfo"));
+		add(new SideInfoLink("moreInfoDock"));
 		
 		add(new WebMarkupContainer("buildSpecNotFound") {
 
@@ -678,6 +680,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new BuildDetailResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.buildDetail.onDomReady();"));
 	}
 
 	@Override

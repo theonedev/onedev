@@ -128,7 +128,11 @@
 					<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary"><wicket:t>Delete Source Branch</wicket:t></a>
 					<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary"><wicket:t>Restore Source Branch</wicket:t></a>
 				</div>
-				<ul wicket:id="requestTabs" class="tabs nav nav-tabs nav-tabs-line nav-tabs-sticky nav-bold mb-5 mt-3 align-items-center"></ul>
+				<div class="sticky-tabs-sentinel mt-3"></div>
+				<div class="sticky-tabs-row d-flex align-items-center mb-5">
+					<ul wicket:id="requestTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold flex-grow-1 mb-0 align-items-center"></ul>
+					<a wicket:id="moreInfoDock" class="more-info side-info more-info-dock flex-shrink-0 ml-3" t:data-tippy-content="More info"><wicket:svg href="ellipsis" class="icon"></wicket:svg></a>
+				</div>
 				<wicket:child></wicket:child>
 			</div>
 			<div wicket:id="moreInfo" class="more-info"></div>

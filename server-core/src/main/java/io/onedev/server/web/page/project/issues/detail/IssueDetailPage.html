@@ -8,7 +8,11 @@
 			<div class="main flex-grow-1">
 				<div wicket:id="operations" class="mb-5"></div>
 				<div wicket:id="primary" class="mb-5"></div>
-				<ul wicket:id="issueTabs" class="tabs nav nav-tabs nav-tabs-line nav-tabs-sticky nav-bold mb-5"></ul>
+				<div class="sticky-tabs-sentinel"></div>
+				<div class="sticky-tabs-row d-flex align-items-center mb-5">
+					<ul wicket:id="issueTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold flex-grow-1 mb-0"></ul>
+					<a wicket:id="moreInfoDock" class="more-info side-info more-info-dock flex-shrink-0 ml-3" t:data-tippy-content="More info"><wicket:svg href="ellipsis" class="icon"></wicket:svg></a>
+				</div>
 				<wicket:child></wicket:child>
 			</div>
 			<div wicket:id="side"></div>

@@ -1,4 +1,11 @@
 onedev.server.buildDetail = {
+	onDomReady: function() {
+		onedev.server.sideInfo.dockMoreInfoWithStickyTabs({
+			root: ".build-detail",
+			stickySentinel: ".sticky-tabs-sentinel",
+			stickyRow: ".sticky-tabs-row"
+		});
+	},
 	openTerminal: function(terminalUrl) {
 		var width = 900;
 		var height = 600;

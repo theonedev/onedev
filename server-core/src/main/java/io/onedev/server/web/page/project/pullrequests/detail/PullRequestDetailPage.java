@@ -973,6 +973,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
+		add(new SideInfoLink("moreInfoDock"));
 
 		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
 

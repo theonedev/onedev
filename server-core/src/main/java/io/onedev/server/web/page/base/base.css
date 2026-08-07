@@ -684,6 +684,45 @@ html:has(.revision-diff) .nav-tabs-line.nav-tabs-sticky {
 	position: static;
 }
 
+.sticky-tabs-sentinel {
+	height: 1px;
+	margin-bottom: -1px;
+	flex-shrink: 0;
+}
+.sticky-tabs-row {
+	position: sticky;
+	top: 0;
+	z-index: 990;
+	border-bottom: 1px solid var(--secondary);
+	background: rgba(255, 255, 255, 0.88);
+	-webkit-backdrop-filter: blur(8px);
+	backdrop-filter: blur(8px);
+}
+.sticky-tabs-row>.nav-tabs-line {
+	min-width: 0;
+	flex-wrap: wrap;
+	border-bottom: 0;
+}
+.dark-mode .sticky-tabs-row {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+	background: rgba(35, 35, 45, 0.88);
+}
+.sticky-tabs-row>.more-info-dock {
+	display: none;
+}
+.sticky-tabs-row.is-docked>.more-info-dock {
+	display: inline-flex;
+}
+.side-info-visible .sticky-tabs-row.is-docked>.more-info-dock {
+	display: none;
+}
+html:has(.revision-diff) .sticky-tabs-row {
+	position: static;
+}
+html:has(.revision-diff) .sticky-tabs-row.is-docked>.more-info-dock {
+	display: none;
+}
+
 tr.ui-sortable-helper {
 	box-shadow: 2px 2px 6px 2px rgba(0, 0, 0, 0.3);	
 	border: none !important;
