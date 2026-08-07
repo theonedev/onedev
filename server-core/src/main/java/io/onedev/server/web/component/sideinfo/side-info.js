@@ -10,6 +10,28 @@ onedev.server.sideInfo = {
 		$("body").toggleClass("side-info-visible", !$container.hasClass("closed"));
 	},
 
+	dockMoreInfoWithStickyTabs: function(options) {
+		var $root = $(options.root);
+		var sentinel = $root.find(options.stickySentinel)[0];
+		var $row = $root.find(options.stickyRow);
+		if (!$root.length || !sentinel || !$row.length)
+			return;
+
+		var oldObserver = $row.data("moreInfoDockObserver");
+		if (oldObserver)
+			oldObserver.disconnect();
+
+		var scrollRoot = $row.closest(".autofit")[0] || null;
+		var intersectionObserver = new IntersectionObserver(function(entries) {
+			var entry = entries[0];
+			var aboveScrollport = entry.rootBounds
+				&& entry.boundingClientRect.bottom <= entry.rootBounds.top;
+			$row.toggleClass("is-docked", !entry.isIntersecting && aboveScrollport);
+		}, {root: scrollRoot, threshold: 0});
+		intersectionObserver.observe(sentinel);
+		$row.data("moreInfoDockObserver", intersectionObserver);
+	},
+
 	close: function($container) {
 		$container.addClass("closed");
 		onedev.server.sideInfo.syncTrigger($container);

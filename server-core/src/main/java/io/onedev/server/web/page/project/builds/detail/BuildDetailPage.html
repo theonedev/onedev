@@ -30,7 +30,11 @@
 					<wicket:t>Most probably there are import errors in the <a wicket:id="buildSpec">build spec</a></wicket:t>
 				</div>
 				<div wicket:id="description" class="border border-dashed border-primary rounded p-3 mb-3"></div>
-				<ul wicket:id="buildTabs" class="tabs nav nav-tabs nav-tabs-line nav-tabs-sticky nav-bold mb-5 flex-shrink-0"></ul>
+				<div class="sticky-tabs-sentinel"></div>
+				<div class="sticky-tabs-row d-flex align-items-center flex-shrink-0 mb-5">
+					<ul wicket:id="buildTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold flex-grow-1 mb-0"></ul>
+					<a wicket:id="moreInfoDock" class="more-info side-info more-info-dock flex-shrink-0 ml-3" t:data-tippy-content="More info"><wicket:svg href="ellipsis" class="icon"/></a>
+				</div>
 				<wicket:child></wicket:child>
 			</div>
 			<div wicket:id="side" class="more-info"></div>

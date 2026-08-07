@@ -5,5 +5,10 @@ onedev.server.issueDetail = {
 			$(".issue-detail").closest(".autofit").scrollTop(parseInt(scrollTop));
 			localStorage.removeItem(scrollTopKey);
 		}
+		onedev.server.sideInfo.dockMoreInfoWithStickyTabs({
+			root: ".issue-detail",
+			stickySentinel: ".sticky-tabs-sentinel",
+			stickyRow: ".sticky-tabs-row"
+		});
 	}
 };

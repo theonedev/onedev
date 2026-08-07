@@ -151,6 +151,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 		});
 		
 		add(new SideInfoLink("moreInfo"));
+		add(new SideInfoLink("moreInfoDock"));
 		
 		Component operationsPanel;
 		add(operationsPanel = new IssueOperationsPanel("operations") {
