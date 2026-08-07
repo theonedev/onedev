@@ -88,6 +88,7 @@ import io.onedev.server.commandhandler.BackupDatabase;
 import io.onedev.server.commandhandler.CheckDataVersion;
 import io.onedev.server.commandhandler.CleanDatabase;
 import io.onedev.server.commandhandler.ResetAdminPassword;
+import io.onedev.server.commandhandler.EnableInternalLogin;
 import io.onedev.server.commandhandler.RestoreDatabase;
 import io.onedev.server.commandhandler.Translate;
 import io.onedev.server.commandhandler.Upgrade;
@@ -951,6 +952,8 @@ public class CoreModule extends AbstractPluginModule {
 				return CleanDatabase.class;
 			else if (ResetAdminPassword.COMMAND.equals(Bootstrap.command.getName()))
 				return ResetAdminPassword.class;
+			else if (EnableInternalLogin.COMMAND.equals(Bootstrap.command.getName()))
+				return EnableInternalLogin.class;
 			else if (Translate.COMMAND.equals(Bootstrap.command.getName()))
 				return Translate.class;
 			else

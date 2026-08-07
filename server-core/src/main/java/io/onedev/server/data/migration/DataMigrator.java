@@ -9251,7 +9251,11 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Settings.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					if (element.elementTextTrim("key").equals("SYSTEM")) {
+					if (element.elementTextTrim("key").equals("SECURITY")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.addElement("disableInternalLogin").setText("false");
+					} else if (element.elementTextTrim("key").equals("SYSTEM")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							valueElement.addElement("noreplyEmailDomain")

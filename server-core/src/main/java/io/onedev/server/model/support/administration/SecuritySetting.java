@@ -27,6 +27,8 @@ public class SecuritySetting implements Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(SecuritySetting.class);
 
 	private boolean enableAnonymousAccess = false;
+
+	private boolean disableInternalLogin;
 	
 	private boolean enableSelfRegister = true;
 	
@@ -49,6 +51,15 @@ public class SecuritySetting implements Serializable {
 
 	public void setEnableAnonymousAccess(boolean enableAnonymousAccess) {
 		this.enableAnonymousAccess = enableAnonymousAccess;
+	}
+
+	@Editable(order=150, description="Whether or not to disable the internal password login form when SSO providers are configured")
+	public boolean isDisableInternalLogin() {
+		return disableInternalLogin;
+	}
+
+	public void setDisableInternalLogin(boolean disableInternalLogin) {
+		this.disableInternalLogin = disableInternalLogin;
 	}
 
 	@Editable(order=200, name="Enable Account Self Sign-Up", description="User can sign up if this option is enabled")
