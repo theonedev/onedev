@@ -26,6 +26,8 @@ import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.SystemSetting;
+import io.onedev.server.service.SettingService;
 
 public class CommitQueryTest extends AbstractGitTest {
 
@@ -52,6 +54,12 @@ public class CommitQueryTest extends AbstractGitTest {
 			}
 			
 		});
+
+		SettingService settingService = mock(SettingService.class);
+		SystemSetting systemSetting = mock(SystemSetting.class);
+		when(OneDev.getInstance(SettingService.class)).thenReturn(settingService);
+		when(settingService.getSystemSetting()).thenReturn(systemSetting);
+		when(systemSetting.getNoreplyEmailDomain()).thenReturn(SystemSetting.DEFAULT_NOREPLY_EMAIL_DOMAIN);
 		
 		Project project = new Project() {
 
