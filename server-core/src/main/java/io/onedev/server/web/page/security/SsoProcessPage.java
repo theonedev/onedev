@@ -107,6 +107,14 @@ public class SsoProcessPage extends SimplePage {
 	
 	public SsoProcessPage(PageParameters params) {
 		super(params);
+
+		if (getLoginUser() != null) {
+			String redirectUrlAfterLogin = (String) getSession().getAttribute(SESSION_ATTR_REDIRECT_URL);
+			if (StringUtils.isBlank(redirectUrlAfterLogin))		
+				throw new RedirectToUrlException(redirectUrlAfterLogin);		
+			else
+				throw new RestartResponseException(HomePage.class);
+		}
 		
 		stage = params.get(PARAM_STAGE).toString();
 		

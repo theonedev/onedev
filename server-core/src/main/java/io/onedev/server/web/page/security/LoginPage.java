@@ -100,7 +100,7 @@ public class LoginPage extends SimplePage {
 		var ssoProviders = ssoProviderService.query();
 		boolean disableInternalLogin = settingService.getSecuritySetting().isDisableInternalLogin()
 				&& !ssoProviders.isEmpty();
-		if (disableInternalLogin && ssoProviders.size() == 1) {
+		if (disableInternalLogin && ssoProviders.size() == 1) {			
 			var provider = ssoProviders.iterator().next();
 			throw new RedirectToUrlException(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE
 					+ "/" + provider.getName());
