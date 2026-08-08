@@ -10,7 +10,7 @@
 <h2>
 <a href="https://docs.onedev.io">Get Started</a> 
 &nbsp;&nbsp;
-<a href="https://onedev.io/blogs/33">AI Teammates</a> 
+<a href="https://onedev.io/blogs/ai-teammates">AI Teammates</a> 
 </h2>
 
 <p style="margin-bottom: 20px;">
