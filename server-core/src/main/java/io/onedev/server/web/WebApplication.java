@@ -108,6 +108,8 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 	protected void init() {
 		super.init();
 
+		getDebugSettings().setAjaxDebugModeEnabled(false);
+
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);

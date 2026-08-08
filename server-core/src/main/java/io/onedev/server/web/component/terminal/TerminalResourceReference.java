@@ -2,10 +2,12 @@ package io.onedev.server.web.component.terminal;
 
 import java.util.List;
 
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.web.asset.xterm.XtermResourceReference;
+import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class TerminalResourceReference extends BaseDependentResourceReference {
@@ -20,6 +22,8 @@ public class TerminalResourceReference extends BaseDependentResourceReference {
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new XtermResourceReference()));
+		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
+				TerminalResourceReference.class, "terminal.css")));
 		return dependencies;
 	}
 

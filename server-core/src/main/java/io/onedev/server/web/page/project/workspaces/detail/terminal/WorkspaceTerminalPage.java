@@ -71,6 +71,18 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 			}
 
 			@Override
+			protected boolean disableScrollback() {
+				// Tmux owns scrollback for workspace terminals. Keeping another history in
+				// xterm records tmux screen redraws and makes old content appear duplicated.
+				return true;
+			}
+
+			@Override
+			protected boolean isTmuxTerminal() {
+				return true;
+			}
+
+			@Override
 			protected void onShellExit(IPartialPageRequestHandler handler) {
 				setResponsePage(WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(getWorkspace()));	
 			}

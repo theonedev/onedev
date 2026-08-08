@@ -1,3 +1,24 @@
 <wicket:panel>
 	<div class="terminal d-flex flex-column flex-grow-1 h-100 resize-aware bg-black"></div>
+	<div wicket:id="mobileKeys" class="terminal-mobile-keys" role="toolbar" aria-label="Terminal keys">
+		<div class="terminal-mobile-key-scroll">
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="escape" aria-label="Escape">Esc</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="ctrl-c" aria-label="Control C">Ctrl-C</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="tab">Tab</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="shift-tab" aria-label="Shift Tab">Shift-Tab</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key terminal-mobile-modifier" data-terminal-modifier="ctrl" aria-label="Control" aria-pressed="false">Ctrl</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key terminal-mobile-modifier" data-terminal-modifier="alt" aria-label="Alt" aria-pressed="false">Alt</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key terminal-mobile-key-arrow" data-terminal-key="left" aria-label="Left arrow">&#8592;</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key terminal-mobile-key-arrow" data-terminal-key="up" aria-label="Up arrow">&#8593;</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key terminal-mobile-key-arrow" data-terminal-key="down" aria-label="Down arrow">&#8595;</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key terminal-mobile-key-arrow" data-terminal-key="right" aria-label="Right arrow">&#8594;</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="enter" aria-label="Enter">Enter</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="delete" aria-label="Forward delete">Del</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="page-up" aria-label="Page up">PgUp</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="page-down" aria-label="Page down">PgDn</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="tmux-copy" aria-label="tmux copy mode">tmux [</button>
+			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="tmux-prefix" aria-label="tmux prefix">tmux</button>
+		</div>
+		<button type="button" tabindex="-1" class="terminal-mobile-key terminal-mobile-keyboard" data-terminal-action="keyboard" aria-label="Show keyboard">&#9000;</button>
+	</div>
 </wicket:panel>

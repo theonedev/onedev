@@ -7,6 +7,7 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
@@ -70,6 +71,7 @@ public abstract class TerminalPanel extends Panel {
 			}
 
 		});
+		add(new WebMarkupContainer("mobileKeys").setVisible(isTmuxTerminal()));
 
 		setOutputMarkupId(true);
 	}
@@ -89,7 +91,16 @@ public abstract class TerminalPanel extends Panel {
 		response.render(JavaScriptHeaderItem.forReference(new TerminalResourceReference()));
 
 		response.render(OnDomReadyHeaderItem.forScript(String.format(
-			"onedev.server.terminal.onDomReady('%s');", getMarkupId())));
+			"onedev.server.terminal.onDomReady('%s', %s, %s);", getMarkupId(),
+				disableScrollback(), isTmuxTerminal())));
+	}
+
+	protected boolean disableScrollback() {
+		return false;
+	}
+
+	protected boolean isTmuxTerminal() {
+		return false;
 	}
 
 	protected abstract void onConnectionOpen(IWebSocketConnection connection);

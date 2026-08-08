@@ -1,0 +1,91 @@
+.terminal-container {
+	min-height: 0;
+}
+
+.terminal-container > .terminal {
+	height: auto !important;
+	min-height: 0;
+}
+
+.terminal-mobile-keys {
+	display: none;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.375rem max(0.375rem, env(safe-area-inset-right)) max(0.375rem, env(safe-area-inset-bottom)) max(0.375rem, env(safe-area-inset-left));
+	background: #171717;
+	border-top: 1px solid #363636;
+	overflow: hidden;
+}
+
+.terminal-mobile-key-scroll {
+	display: flex;
+	flex: 1 1 auto;
+	align-items: center;
+	gap: 0.375rem;
+	min-width: 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior-x: contain;
+	scrollbar-width: none;
+}
+
+.terminal-mobile-key-scroll::-webkit-scrollbar {
+	display: none;
+}
+
+.terminal-mobile-key {
+	flex: 0 0 auto;
+	min-width: 44px;
+	height: 40px;
+	padding: 0 0.625rem;
+	border: 1px solid #4a4a4a;
+	border-radius: 0.375rem;
+	background: #292929;
+	color: #f4f4f4;
+	font: 600 0.8125rem/1 monospace;
+	touch-action: manipulation;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.terminal-mobile-key:active,
+.terminal-mobile-key.active {
+	background: var(--primary);
+	border-color: var(--primary);
+	color: white;
+}
+
+.terminal-mobile-key-arrow {
+	font-size: 1.125rem;
+}
+
+.terminal-mobile-keyboard {
+	flex: 0 0 44px;
+	border-color: #626262;
+	font-size: 1.125rem;
+}
+
+.terminal-scroll-help-mobile {
+	display: none;
+}
+
+@media (max-width: 767.98px), (hover: none) and (pointer: coarse) {
+	.terminal-scroll-help-desktop {
+		display: none;
+	}
+
+	.terminal-scroll-help-mobile {
+		display: inline;
+	}
+
+	.terminal-container.terminal-tmux-copy-mode > .terminal {
+		touch-action: none;
+		overscroll-behavior: none;
+	}
+
+	.terminal-container > .terminal-mobile-keys {
+		display: flex;
+	}
+}
