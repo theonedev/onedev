@@ -13,15 +13,12 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -35,7 +32,6 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.PersonIdentPanel;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
 class PullRequestUpdatePanel extends Panel {
@@ -82,20 +78,12 @@ class PullRequestUpdatePanel extends Panel {
 				item.add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));
 
 				Project project = getUpdate().getRequest().getTarget().getProject();
-				BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TREE.getBits());
-				ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
-				PageParameters browseParams = ProjectBlobPage.paramsOf(project, browseState);
 
 				item.add(new CommitMessagePanel("message", item.getModel()) {
 
 					@Override
 					protected Project getProject() {
 						return getUpdate().getRequest().getTarget().getProject(); 
-					}
-
-					@Override
-					protected String getCommitUrl() {
-						return RequestCycle.get().urlFor(ProjectBlobPage.class, browseParams).toString();
 					}
 					
 				});

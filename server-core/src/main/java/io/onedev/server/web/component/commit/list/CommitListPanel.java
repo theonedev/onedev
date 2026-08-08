@@ -41,7 +41,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -55,7 +54,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.service.GitService;
@@ -87,7 +85,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -590,7 +587,7 @@ public abstract class CommitListPanel extends Panel {
 
 			/*
 			 * If we query a single definitive path, let's record it to be used for
-			 * diff comparison and code browsing
+			 * diff comparison
 			 */
 			String path = null;
 
@@ -606,15 +603,6 @@ public abstract class CommitListPanel extends Panel {
 					}
 				}
 			}
-
-			BlobIdent blobIdent;
-			if (path != null) {
-				blobIdent = new BlobIdent(commit.name(), path, null);
-			} else {
-				blobIdent = new BlobIdent(commit.name(), null, FileMode.TREE.getBits());
-			}
-			ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
-			PageParameters browseParams = ProjectBlobPage.paramsOf(getProject(), browseState);
 
 			item.add(new CommitMessagePanel("message", new LoadableDetachableModel<RevCommit>() {
 
@@ -648,11 +636,6 @@ public abstract class CommitListPanel extends Panel {
 				@Override
 				protected Project getProject() {
 					return CommitListPanel.this.getProject();
-				}
-
-				@Override
-				protected String getCommitUrl() {
-					return RequestCycle.get().urlFor(ProjectBlobPage.class, browseParams).toString();
 				}
 				
 			});
