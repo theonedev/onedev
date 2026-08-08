@@ -7,6 +7,7 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.annotation.ShowCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.GroupChoice;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.service.GroupService;
+import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.usage.Usage;
 
@@ -53,13 +55,22 @@ public class SecuritySetting implements Serializable {
 		this.enableAnonymousAccess = enableAnonymousAccess;
 	}
 
-	@Editable(order=150, description="Whether or not to disable the internal password login form when SSO providers are configured")
+	@Editable(order=150, description="""
+		Whether or not to disable the internal password login form and use SSO login only.
+		<b class="text-info">TIPS:</b> If you are locked out, internal login can be re-enabled from command 
+		line by running <code>bin/enable-internal-login</code>""")
+	@ShowCondition("hasSSOProviders")
 	public boolean isDisableInternalLogin() {
 		return disableInternalLogin;
 	}
 
 	public void setDisableInternalLogin(boolean disableInternalLogin) {
 		this.disableInternalLogin = disableInternalLogin;
+	}
+
+	@SuppressWarnings("unused")
+	private static boolean hasSSOProviders() {
+		return OneDev.getInstance(SsoProviderService.class).count() > 0;
 	}
 
 	@Editable(order=200, name="Enable Account Self Sign-Up", description="User can sign up if this option is enabled")

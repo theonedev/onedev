@@ -22,6 +22,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
@@ -74,6 +75,7 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AlertService;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.updatecheck.UpdateCheckService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
@@ -83,6 +85,7 @@ import io.onedev.server.web.component.ai.chat.ChatPanel;
 import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
 import io.onedev.server.web.component.commandpalette.CommandPalettePanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -1104,154 +1107,131 @@ public abstract class LayoutPage extends BasePage {
 
 		});
 
-		WebMarkupContainer userInfo = new WebMarkupContainer("userInfo");
+		MenuLink userInfo = new MenuLink("userInfo", new AlignPlacement(100, 100, 100, 0)) {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment fragment = new Fragment(id, "userMenuFrag", LayoutPage.this);
+				User user = getLoginUser();
+				if (user.getType() != ORDINARY || user.isDisabled()) {
+					fragment.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
+					fragment.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
+				} else if (user.getEmailAddresses().isEmpty()) {
+					fragment.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
+					fragment.add(new ViewStateAwarePageLink<Void>("noPrimaryAddressLink", MyEmailAddressesPage.class));
+				} else if (user.getEmailAddresses().stream().anyMatch(it -> !it.isVerified())) {
+					fragment.add(new ViewStateAwarePageLink<Void>("hasUnverifiedLink", MyEmailAddressesPage.class));
+					fragment.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
+				} else {
+					fragment.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
+					fragment.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
+				}
+				fragment.add(super.newContent("items", dropdown));
+				return fragment;
+			}
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				User user = getLoginUser();
+				var menuItems = new ArrayList<MenuItem>();
+				menuItems.add(newPageMenuItem(_T("Profile"), "profile", MyProfilePage.class,
+						getPage() instanceof MyProfilePage));
+				menuItems.add(newPageMenuItem(_T("Basic Settings"), "info", MyBasicSettingPage.class,
+						getPage() instanceof MyBasicSettingPage));
+				menuItems.add(newPageMenuItem(_T("Email Addresses"), "mail", MyEmailAddressesPage.class,
+						getPage() instanceof MyEmailAddressesPage));
+				menuItems.add(newPageMenuItem(_T("Edit Avatar"), "avatar", MyAvatarPage.class,
+						getPage() instanceof MyAvatarPage));
+				if (user.getPassword() != null && user.getType() == ORDINARY && !user.isDisabled()) {
+					menuItems.add(newPageMenuItem(_T("Password"), "password", MyPasswordPage.class,
+							getPage() instanceof MyPasswordPage));
+				}
+				if (user.getType() == AI && !user.isDisabled()) {
+					menuItems.add(newPageMenuItem(_T("AI Settings"), "ai-setting", MyModelSettingPage.class,
+							getPage() instanceof MyModelSettingPage
+									|| getPage() instanceof MyBehaviorPage
+									|| getPage() instanceof MyEntitlementSettingPage));
+				}
+				if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0 && !user.isDisabled()) {
+					menuItems.add(newPageMenuItem(_T("SSH Keys"), "key", MySshKeysPage.class,
+							getPage() instanceof MySshKeysPage));
+				}
+				if (!user.isDisabled()) {
+					menuItems.add(newPageMenuItem(_T("GPG Keys"), "key", MyGpgKeysPage.class,
+							getPage() instanceof MyGpgKeysPage));
+					menuItems.add(newPageMenuItem(_T("Access Tokens"), "token", MyAccessTokensPage.class,
+							getPage() instanceof MyAccessTokensPage));
+				}
+				if (user.getType() == ORDINARY && !user.isDisabled() && user.isEnforce2FA()) {
+					menuItems.add(newPageMenuItem(_T("Two-factor Authentication"), "shield",
+							MyTwoFactorAuthenticationPage.class,
+							getPage() instanceof MyTwoFactorAuthenticationPage));
+				}
+				if (!user.isDisabled() && user.getType() == ORDINARY) {
+					menuItems.add(newPageMenuItem(_T("SSO Accounts"), "user", MySsoAccountsPage.class,
+							getPage() instanceof MySsoAccountsPage));
+				}
+				if (user.getType() != SERVICE && !user.isDisabled()) {
+					menuItems.add(newPageMenuItem(_T("Query Watches"), "bell", MyQueryWatchesPage.class,
+							getPage() instanceof MyQueryWatchesPage));
+				}
+				if (!user.isDisabled()) {
+					menuItems.add(newPageMenuItem(_T("Workspace Data"), "workspace", MyWorkspaceDataPage.class,
+							getPage() instanceof MyWorkspaceDataPage));
+				}
+				boolean exitRunAs = !SecurityUtils.isAnonymous(SecurityUtils.getPrevPrincipal());
+				var securitySetting = getSettingService().getSecuritySetting();
+				boolean hideSignOut = !exitRunAs
+						&& securitySetting.isDisableInternalLogin()
+						&& !securitySetting.isEnableAnonymousAccess()
+						&& OneDev.getInstance(SsoProviderService.class).count() == 1;
+				if (!hideSignOut) {
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return exitRunAs ? _T("Exit Run As") : _T("Sign Out");
+						}
+
+						@Override
+						public String getIconHref() {
+							return "logout";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							if (exitRunAs) {
+								return new Link<Void>(id) {
+
+									@Override
+									public void onClick() {
+										SecurityUtils.getSubject().releaseRunAs();
+										Session.get().warn(_T("Exited run as"));
+										throw new RestartResponseException(HomePage.class);
+									}
+
+								};
+							} else {
+								return new ViewStateAwarePageLink<Void>(id, LogoutPage.class);
+							}
+						}
+
+					});
+				}
+				return menuItems;
+			}
+
+		};
 		if (loginUser != null) {
 			userInfo.add(new UserAvatar("avatar", loginUser));
 			userInfo.add(new Label("name", loginUser.getDisplayName()));
-			if (loginUser.getType() != ORDINARY || loginUser.isDisabled()) {
-				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
-				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
-			} else if (loginUser.getEmailAddresses().isEmpty()) {
-				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
-				userInfo.add(new ViewStateAwarePageLink<Void>("noPrimaryAddressLink", MyEmailAddressesPage.class));
-			} else if (loginUser.getEmailAddresses().stream().anyMatch(it->!it.isVerified())) {
-				userInfo.add(new ViewStateAwarePageLink<Void>("hasUnverifiedLink", MyEmailAddressesPage.class));
-				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
-			} else {
-				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
-				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
-			}
 		} else {
 			userInfo.add(new WebMarkupContainer("avatar"));
 			userInfo.add(new WebMarkupContainer("name"));
 		}
-
-		WebMarkupContainer item;
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myProfile", MyProfilePage.class));
-		if (getPage() instanceof MyProfilePage)
-			item.add(AttributeAppender.append("class", "active"));
-
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myBasicSetting", MyBasicSettingPage.class));
-		if (getPage() instanceof MyBasicSettingPage)
-			item.add(AttributeAppender.append("class", "active"));
-
-		if (getLoginUser() != null) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("myEmailSetting", MyEmailAddressesPage.class));
-			if (getPage() instanceof MyEmailAddressesPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("myEmailSetting").setVisible(false));
-		}
-
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAvatar", MyAvatarPage.class));
-		if (getPage() instanceof MyAvatarPage)
-			item.add(AttributeAppender.append("class", "active"));
-
-		if (loginUser != null && loginUser.getPassword() != null && loginUser.getType() == ORDINARY && !loginUser.isDisabled()) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("myPassword", MyPasswordPage.class));
-			if (getPage() instanceof MyPasswordPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("myPassword").setVisible(false));
-		}
-
-		if (loginUser != null && loginUser.getType() == AI && !loginUser.isDisabled()) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("myAISetting", MyModelSettingPage.class));
-			if (getPage() instanceof MyModelSettingPage
-					|| getPage() instanceof MyBehaviorPage
-					|| getPage() instanceof MyEntitlementSettingPage) {
-				item.add(AttributeAppender.append("class", "active"));
-			}
-		} else {
-			userInfo.add(new WebMarkupContainer("myAISetting").setVisible(false));
-		}
-
-		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0 && loginUser != null && !loginUser.isDisabled()) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
-			if (getPage() instanceof MySshKeysPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("mySshKeys").setVisible(false));
-		}
-
-		if (loginUser != null && !loginUser.isDisabled()) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("myGpgKeys", MyGpgKeysPage.class));
-			if (getPage() instanceof MyGpgKeysPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("myGpgKeys").setVisible(false));
-		}
-
-		if (loginUser != null && !loginUser.isDisabled()) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("myAccessTokens", MyAccessTokensPage.class));
-			if (getPage() instanceof MyAccessTokensPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("myAccessTokens").setVisible(false));
-		}
-
-		if (getLoginUser() != null && getLoginUser().getType() == ORDINARY && !getLoginUser().isDisabled()) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class) {
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(getLoginUser().isEnforce2FA());
-				}
-			});
-			if (getPage() instanceof MyTwoFactorAuthenticationPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("myTwoFactorAuthentication").setVisible(false));
-		}
-
-		if (loginUser != null && !loginUser.isDisabled() && loginUser.getType() == ORDINARY) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("mySsoAccounts", MySsoAccountsPage.class));
-			if (getPage() instanceof MySsoAccountsPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("mySsoAccounts").setVisible(false));
-		}
-
-		if (getLoginUser() != null && getLoginUser().getType() != SERVICE && !getLoginUser().isDisabled()) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("myQueryWatches", MyQueryWatchesPage.class));
-			if (getPage() instanceof MyQueryWatchesPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("myQueryWatches").setVisible(false));
-		}
-
-		if (loginUser != null && !loginUser.isDisabled()) {
-			userInfo.add(item = new ViewStateAwarePageLink<Void>("myWorkspaceData", MyWorkspaceDataPage.class));
-			if (getPage() instanceof MyWorkspaceDataPage)
-				item.add(AttributeAppender.append("class", "active"));
-		} else {
-			userInfo.add(new WebMarkupContainer("myWorkspaceData").setVisible(false));
-		}
-
-		if (!SecurityUtils.isAnonymous(SecurityUtils.getPrevPrincipal())) {
-			Link<Void> signOutLink = new Link<Void>("signOut") {
-
-				@Override
-				public void onClick() {
-					SecurityUtils.getSubject().releaseRunAs();
-					Session.get().warn(_T("Exited run as"));
-					throw new RestartResponseException(HomePage.class);
-				}
-
-			};
-			signOutLink.add(new Label("label", _T("Exit Run As")));
-			userInfo.add(signOutLink);
-		} else {
-			ViewStateAwarePageLink<Void> signOutLink = new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class);
-			signOutLink.add(new Label("label", _T("Sign Out")));
-			userInfo.add(signOutLink);
-		}
-
 		userInfo.setVisible(loginUser != null);
-
 		if (getPage() instanceof MyPage)
 			userInfo.add(AttributeAppender.append("class", "active"));
-
 		topbar.add(userInfo);
 
 		add(commandPaletteBehavior = new AbstractDefaultAjaxBehavior() {
@@ -1293,6 +1273,33 @@ public abstract class LayoutPage extends BasePage {
 
 	private AlertService getAlertService() {
 		return OneDev.getInstance(AlertService.class);
+	}
+
+	private MenuItem newPageMenuItem(String label, String iconHref, Class<? extends Page> pageClass,
+			boolean selected) {
+		return new MenuItem() {
+
+			@Override
+			public String getLabel() {
+				return label;
+			}
+
+			@Override
+			public String getIconHref() {
+				return iconHref;
+			}
+
+			@Override
+			public boolean isSelected() {
+				return selected;
+			}
+
+			@Override
+			public WebMarkupContainer newLink(String id) {
+				return new ViewStateAwarePageLink<Void>(id, pageClass);
+			}
+
+		};
 	}
 
 	private ClusterService getClusterService() {

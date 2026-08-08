@@ -47,7 +47,15 @@
 	margin-top: 2.5rem;
 }
 .SimplePage .main .sso {
-	margin-top: 6rem;
+	margin-top: 4rem;
+}
+.SimplePage.LoginPage.internal-login-disabled .main .title,
+.SimplePage.LoginPage.internal-login-disabled .main form,
+.SimplePage.LoginPage.internal-login-disabled .main .signup {
+	display: none;
+}
+.SimplePage.LoginPage.internal-login-disabled .main .sso {
+	margin-top: 2rem;
 }
 .SimplePage .main .sso img {
 	width: 24px;

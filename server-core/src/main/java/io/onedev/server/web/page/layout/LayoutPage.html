@@ -52,76 +52,10 @@
 			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>			
 			<a wicket:id="languageSelector" t:data-tippy-content="Language" class="topbar-link language-selector"><wicket:svg href="globe" class="icon"></wicket:svg></a>
 			<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline"><wicket:t>Sign In</wicket:t></span></a>
-			<div wicket:id="userInfo" class="dropdown user-info">
-				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">
-					<img wicket:id="avatar">
-					<span wicket:id="name" class="ml-1 d-none d-lg-inline"></span>
-				</a>
-				<div class="dropdown-menu">
-					<wicket:enclosure child="hasUnverifiedLink">
-						<div class="mx-3 my-2 alert alert-light-warning">
-							<wicket:t>You have unverified <a wicket:id="hasUnverifiedLink">email addresses</a></wicket:t>
-						</div>
-					</wicket:enclosure>
-					<wicket:enclosure child="noPrimaryAddressLink">
-						<div class="mx-3 my-2 alert alert-light-warning">
-							<wicket:t>Primary <a wicket:id="noPrimaryAddressLink">email address</a> not specified</wicket:t>
-						</div>
-					</wicket:enclosure>
-					<a wicket:id="myProfile" class="dropdown-item">
-						<wicket:svg href="profile" class="icon mr-2"></wicket:svg>
-						<wicket:t>Profile</wicket:t>
-					</a>
-					<a wicket:id="myBasicSetting" class="dropdown-item">
-						<wicket:svg href="info" class="icon mr-2"></wicket:svg>
-						<wicket:t>Basic Settings</wicket:t>
-					</a>
-					<a wicket:id="myEmailSetting" class="dropdown-item">
-						<wicket:svg href="mail" class="icon mr-2"></wicket:svg>
-						<wicket:t>Email Addresses</wicket:t>
-					</a>
-					<a wicket:id="myAvatar" class="dropdown-item">
-						<wicket:svg href="avatar" class="icon mr-2"></wicket:svg>
-						<wicket:t>Edit Avatar</wicket:t>
-					</a>
-					<a wicket:id="myPassword" class="dropdown-item">
-						<wicket:svg href="password" class="icon mr-2"></wicket:svg>
-						<wicket:t>Password</wicket:t>
-					</a>
-					<a wicket:id="myAISetting" class="dropdown-item">
-						<wicket:svg href="ai-setting" class="icon mr-2"></wicket:svg>
-						<wicket:t>AI Settings</wicket:t>
-					</a>
-					<a wicket:id="mySshKeys" class="dropdown-item">
-						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
-						<wicket:t>SSH Keys</wicket:t>
-					</a>
-					<a wicket:id="myGpgKeys" class="dropdown-item">
-						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
-						<wicket:t>GPG Keys</wicket:t>
-					</a>
-					<a wicket:id="myAccessTokens" class="dropdown-item">
-						<wicket:svg href="token" class="icon mr-2"></wicket:svg>
-						<wicket:t>Access Tokens</wicket:t>
-					</a>
-					<a wicket:id="myTwoFactorAuthentication" class="dropdown-item">
-						<wicket:svg href="shield" class="icon mr-2"></wicket:svg>
-						<wicket:t>Two-factor Authentication</wicket:t>
-					</a>
-					<a wicket:id="mySsoAccounts" class="dropdown-item">
-						<wicket:svg href="user" class="icon mr-2"></wicket:svg>
-						<wicket:t>SSO Accounts</wicket:t>
-					</a>
-					<a wicket:id="myWorkspaceData" class="dropdown-item">
-						<wicket:svg href="workspace" class="icon mr-2"></wicket:svg>
-						<wicket:t>Workspace Data</wicket:t>
-					</a>
-					<a wicket:id="signOut" class="dropdown-item">
-						<wicket:svg href="logout" class="icon mr-2"></wicket:svg>
-						<span wicket:id="label"></span>
-					</a>
-				</div>
-			</div>
+			<a wicket:id="userInfo" class="user-info topbar-link">
+				<img wicket:id="avatar">
+				<span wicket:id="name" class="ml-1 d-none d-lg-inline"></span>
+			</a>
 		</div>
 	</div>
 	<div class="main autofit d-flex flex-column resize-aware">
@@ -146,6 +80,19 @@
 			</a>
 			<div wicket:id="subMenu" class="menu-body"></div>
 		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="userMenuFrag">
+		<wicket:enclosure child="hasUnverifiedLink">
+			<div class="mx-3 my-2 alert alert-light-warning">
+				<wicket:t>You have unverified <a wicket:id="hasUnverifiedLink">email addresses</a></wicket:t>
+			</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="noPrimaryAddressLink">
+			<div class="mx-3 my-2 alert alert-light-warning">
+				<wicket:t>Primary <a wicket:id="noPrimaryAddressLink">email address</a> not specified</wicket:t>
+			</div>
+		</wicket:enclosure>
+		<div wicket:id="items"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="alertsFrag">
 		<div class="alerts">

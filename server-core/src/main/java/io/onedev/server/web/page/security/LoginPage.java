@@ -5,6 +5,7 @@ import static io.onedev.server.web.page.security.SsoProcessPage.STAGE_INITIATE;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -76,6 +77,8 @@ public class LoginPage extends SimplePage {
 	private String errorMessage;
 	
 	private String subTitle = _T("Enter your details to login to your account");
+
+	private boolean disableInternalLogin;
 	
 	public LoginPage(PageParameters params) {
 		super(params);
@@ -98,7 +101,7 @@ public class LoginPage extends SimplePage {
 
 		String serverUrl = settingService.getSystemSetting().getServerUrl();
 		var ssoProviders = ssoProviderService.query();
-		boolean disableInternalLogin = settingService.getSecuritySetting().isDisableInternalLogin()
+		disableInternalLogin = settingService.getSecuritySetting().isDisableInternalLogin()
 				&& !ssoProviders.isEmpty();
 		if (disableInternalLogin && ssoProviders.size() == 1) {			
 			var provider = ssoProviders.iterator().next();
@@ -196,7 +199,7 @@ public class LoginPage extends SimplePage {
 		}));
 		
 		form.add(new ViewStateAwarePageLink<Void>("forgetPassword", PasswordResetPage.class));
-		fragment.add(form.setVisible(!disableInternalLogin));
+		fragment.add(form);
 				
 		boolean enableSelfRegister = settingService.getSecuritySetting().isEnableSelfRegister();
 		fragment.add(new ViewStateAwarePageLink<Void>("registerUser", SignUpPage.class).setVisible(enableSelfRegister));
@@ -344,6 +347,14 @@ public class LoginPage extends SimplePage {
 	@Override
 	protected String getSubTitle() {
 		return subTitle;
+	}
+
+	@Override
+	protected Collection<String> getCssClasses() {
+		var cssClasses = super.getCssClasses();
+		if (disableInternalLogin)
+			cssClasses.add("internal-login-disabled");
+		return cssClasses;
 	}
 	
 }
