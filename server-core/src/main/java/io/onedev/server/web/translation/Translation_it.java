@@ -393,7 +393,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Asymmetric", "Asimmetrico");
 		m.put("At least one branch or tag should be selected", "Almeno un branch o tag deve essere selezionato");
 		m.put("At least one choice need to be specified", "Almeno una scelta deve essere specificata");
-		m.put("At least one email address should be configured, please add a new one first", "Almeno un indirizzo email deve essere configurato, aggiungine uno nuovo prima");
 		m.put("At least one email address should be specified", "Almeno un indirizzo email deve essere specificato");
 		m.put("At least one entry should be specified", "Almeno un elemento deve essere specificato");
 		m.put("At least one event type needs to be selected", "Almeno un tipo di evento deve essere selezionato");
@@ -856,7 +855,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Commit Types For Footer Check", "Tipi di Commit per Verifica del Footer");
 		m.put("Commit Your Change", "Committa la tua Modifica");
 		m.put("Commit date", "Data del Commit");
-		m.put("Commit detail", "Dettaglio del commit");
 		m.put("Commit hash", "Hash del Commit");
 		m.put("Commit history of current path", "Storico dei Commit del percorso corrente");
 		m.put("Commit index version", "Versione dell'indice del Commit");
@@ -1549,6 +1547,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Fix Undefined Field Values", "Correggi Valori di Campo Non Definiti");
 		m.put("Fix Undefined Fields", "Correggi Campi Non Definiti");
 		m.put("Fix Undefined States", "Correggi Stati Non Definiti");
+		m.put("Fix failed builds", "Correggi build fallite");
 		m.put("Fixed Issues", "Problemi Risolti");
 		m.put("Fixed issues since...", "Problemi risolti da...");
 		m.put("Fixing Builds", "Correzione Build");
@@ -2090,6 +2089,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Line: ", "Linea:");
 		m.put("Lines", "Linee");
 		m.put("Link", "Collegamento");
+		m.put("Link / upload", "Collega / carica");
 		m.put("Link Existing User", "Collega Utente Esistente");
 		m.put("Link Spec", "Specifica del Collegamento");
 		m.put("Link Spec Opposite", "Specifica del Collegamento Opposto");
@@ -2218,6 +2218,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Merge aborted", "Unione interrotta");
 		m.put("Merge branch \"{0}\" into branch \"{1}\"", "Unisci il branch \"{0}\" nel branch \"{1}\"");
 		m.put("Merge branch \"{0}\" of project \"{1}\" into branch \"{2}\"", "Unisci il branch \"{0}\" del progetto \"{1}\" nel branch \"{2}\"");
+		m.put("Merge if acceptable", "Unisci se accettabile");
 		m.put("Merge preview not calculated yet", "Anteprima di unione non ancora calcolata");
 		m.put("Merged", "Unito");
 		m.put("Merged pull request \"{0}\" ({1})", "Pull request unita \"{0}\" ({1})");
@@ -3165,6 +3166,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Pull Command", "Comando di pull");
 		m.put("Pull Image", "Immagine di pull");
 		m.put("Pull Request", "Richiesta di pull");
+		m.put("Pull Request Assignee Responsibilities", "Responsabilità dell'assegnatario della Pull Request");
 		m.put("Pull Request Branches", "Branch delle richieste di pull");
 		m.put("Pull Request Description", "Descrizione della richiesta di pull");
 		m.put("Pull Request Filter", "Filtro delle richieste di pull");
@@ -3363,10 +3365,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Required Builds", "Build richieste");
 		m.put("Required Reviewers", "Revisori richiesti");
 		m.put("Required Services", "Servizi richiesti");
-		m.put("Resend Verification Email", "Reinvia email di verifica");
 		m.put("Resend invitation", "Reinvia invito");
 		m.put("Reset", "Reimposta");
 		m.put("Resolution", "Risoluzione");
+		m.put("Resolve merge conflicts", "Risolvi conflitti di merge");
 		m.put("Resolved", "Risolto");
 		m.put("Resolved comment on file \"{0}\" in project \"{1}\"", "Commento risolto sul file \"{0}\" nel progetto \"{1}\"");
 		m.put("Resource", "Risorsa");
@@ -3374,6 +3376,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Resources", "Risorse");
 		m.put("Response", "Risposta");
 		m.put("Response Body", "Corpo della Risposta");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "Responsabilità dell'utente AI quando assegnato a una pull request");
 		m.put("Restart", "Riavvia");
 		m.put("Restart All Queried Agents", "Riavvia tutti gli agenti richiesti");
 		m.put("Restart Selected Agents", "Riavvia gli agenti selezionati");
@@ -3573,7 +3576,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Set All Queried Comments as Unresolved", "Imposta tutti i commenti interrogati come non risolti");
 		m.put("Set All Queried Issues as Read", "Imposta tutte le problematiche interrogate come lette");
 		m.put("Set All Queried Pull Requests as Read", "Imposta tutte le pull request interrogate come lette");
-		m.put("Set As Primary", "Imposta come principale");
 		m.put("Set Build Description", "Imposta descrizione build");
 		m.put("Set Build Version", "Imposta versione build");
 		m.put("Set Resolved", "Imposta come risolto");
@@ -3585,8 +3587,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Set Up Renovate Cache", "Configura cache di Renovate");
 		m.put("Set Up Trivy Cache", "Configura cache di Trivy");
 		m.put("Set Up Your Account", "Configura il Tuo Account");
-		m.put("Set as Private", "Imposta come privato");
-		m.put("Set as Public", "Imposta come pubblico");
 		m.put("Set description", "Imposta descrizione");
 		m.put("Set reviewed", "Imposta come revisionato");
 		m.put("Set unreviewed", "Imposta come non revisionato");
@@ -3616,6 +3616,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Shell Executable", "Eseguibile Shell");
 		m.put("Shortcut Config", "Configurazione Collegamenti Rapidi");
 		m.put("Shortcuts", "Collegamenti Rapidi");
+		m.put("Show / Create", "Mostra / Crea");
 		m.put("Show Archived", "Mostra archiviati");
 		m.put("Show Branch/Tag", "Mostra branch/tag");
 		m.put("Show Build Status", "Mostra stato build");
@@ -4617,6 +4618,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Unpin this issue", "Rimuovi il pin da questo problema");
 		m.put("Unresolved", "Non risolto");
 		m.put("Unresolved comment on file \"{0}\" in project \"{1}\"", "Commento non risolto sul file \"{0}\" nel progetto \"{1}\"");
+		m.put("Unresolved comments", "Commenti non risolti");
+		m.put("Unresolved comments with unviewed activity", "Commenti non risolti con attività non visualizzata");
 		m.put("Unscheduled", "Non programmato");
 		m.put("Unscheduled Issues", "Problemi non programmati");
 		m.put("Unsolicited OIDC authentication response", "Risposta di autenticazione OIDC non richiesta");
@@ -4630,6 +4633,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Unsupported ssh signature version: ", "Versione della firma ssh non supportata:");
 		m.put("Unverified", "Non verificato");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "L'indirizzo email non verificato <b>NON</b> è applicabile per le funzionalità sopra");
+		m.put("Unviewed code comment activity", "Attività di commento al codice non visualizzata");
 		m.put("Unvote", "Rimuovi voto");
 		m.put("Unwatched. Click to watch", "Non osservato. Clicca per osservare");
 		m.put("Update", "Aggiorna");
@@ -4667,7 +4671,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Use Avatar Service", "Usa il servizio Avatar");
 		m.put("Use Default", "Usa predefinito");
 		m.put("Use Default Boards", "Usa le bacheche predefinite");
-		m.put("Use For Git Operations", "Usa per operazioni Git");
 		m.put("Use Git in System Path", "Usa Git nel percorso di sistema");
 		m.put("Use Hours And Minutes Only", "Usa solo ore e minuti");
 		m.put("Use Specified Git", "Usa Git specificato");
@@ -5049,6 +5052,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("markdown:heading", "Intestazione");
 		m.put("markdown:image", "Immagine");
 		m.put("may not be empty", "non può essere vuoto");
+		m.put("merge commit", "commit di merge");
 		m.put("merged", "unito");
 		m.put("month:Apr", "Apr");
 		m.put("month:Aug", "Ago");
@@ -5194,17 +5198,45 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Fix failed builds", "Correggi build fallite");
-		m.put("Link / upload", "Collega / carica");
-		m.put("Merge if acceptable", "Unisci se accettabile");
-		m.put("Pull Request Assignee Responsibilities", "Responsabilità dell'assegnatario della Pull Request");
-		m.put("Resolve merge conflicts", "Risolvi conflitti di merge");
-		m.put("Responsibilities of the AI user when assigned to a pull request", "Responsabilità dell'utente AI quando assegnato a una pull request");
-		m.put("Show / Create", "Mostra / Crea");
-		m.put("Unresolved comments", "Commenti non risolti");
-		m.put("Unresolved comments with unviewed activity", "Commenti non risolti con attività non visualizzata");
-		m.put("Unviewed code comment activity", "Attività di commento al codice non visualizzata");
-		m.put("merge commit", "commit di merge");
+		m.put("Backup Email Addresses", "Indirizzi Email di Backup");
+		m.put("Cannot move issue as it has workspaces", "Impossibile spostare il problema poiché ha workspace");
+		m.put("Copy Markdown", "Copia Markdown");
+		m.put("Disable Internal Login", "Disabilita Login Interno");
+		m.put("Do you really want to move this issue to project \"{0}\"", "Vuoi davvero spostare questo problema nel progetto \"{0}\"");
+		m.put("Email Address Privacy", "Privacy Indirizzo Email");
+		m.put("Email address with noreply domain is not allowed", "Indirizzi email con dominio noreply non sono consentiti");
+		m.put("Email addresses privacy updated", "Privacy degli indirizzi email aggiornata");
+		m.put("Include Downstream When Rebuild", "Includi Downstream Durante la Ricostruzione");
+		m.put("Include Upstream When Rebuild", "Includi Upstream Durante la Ricostruzione");
+		m.put("Issue moved", "Problema spostato");
+		m.put("Keep my email addresses private", "Mantieni privati i miei indirizzi email");
+		m.put("Move", "Sposta");
+		m.put("Noreply Email Domain", "Dominio Email Noreply");
+		m.put("Primary Email Address", "Indirizzo Email Primario");
+		m.put("Primary email address added", "Indirizzo email primario aggiunto");
+		m.put("Primary email address changed", "Indirizzo email primario modificato");
+		m.put("Resend verification email", "Reinvia email di verifica");
+		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
+			"Il servizio o l'utente AI non può specificare indirizzi email. Tuttavia, l'indirizzo generato automaticamente");
+		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
+			"Specifica il dominio di vari indirizzi email noreply per operazioni git se gli utenti vogliono\nmantenere privati i propri indirizzi email");
+		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
+			"L'indirizzo email primario viene utilizzato per ricevere notifiche e mostrare il tuo gravatar (se abilitato). Viene anche utilizzato per operazioni Git basate sul web a meno che gli indirizzi email non siano mantenuti privati.");
+		m.put("This email address is not verified", "Questo indirizzo email non è verificato");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, arrow keys, or page up/down, and press q to exit.", 
+			"Per scorrere in questo terminale, premi ctrl+b poi [. Usa la rotella del mouse, i tasti freccia o pagina su/giù, e premi q per uscire.");
+		m.put("To scroll in this terminal, tap tmux [, swipe the terminal, and tap tmux [ again to exit.", 
+			"Per scorrere in questo terminale, tocca tmux [, scorri il terminale e tocca di nuovo tmux [ per uscire.");
+		m.put("Use the auto-generated email address", "Usa l'indirizzo email generato automaticamente");
+		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
+			"Gli indirizzi email di backup verificati possono essere utilizzati per il recupero della password e per identificare i tuoi commit.");
+		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "Se ricostruire o meno anche i job downstream diretti durante la ricostruzione di questo job");
+		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "Se ricostruire o meno anche i job upstream diretti durante la ricostruzione di questo job");
+		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
+			"Se disabilitare o meno il modulo di login con password interno e utilizzare solo il login SSO.\n<b class=\"text-info\">CONSIGLI:</b> Se sei bloccato, il login interno può essere riabilitato dalla riga\ndi comando eseguendo <code>bin/enable-internal-login</code>");
+		m.put("can be used to associate Git commits with the user.", "può essere utilizzato per associare i commit Git all'utente.");
+		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
+			"per operazioni Git. Tutte le operazioni Git eseguite dall'interfaccia web utilizzeranno anche questo indirizzo.");
 	}
 		
 	@Override

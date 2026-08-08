@@ -393,7 +393,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Asymmetric", "비대칭");
 		m.put("At least one branch or tag should be selected", "최소한 하나의 브랜치 또는 태그를 선택해야 합니다");
 		m.put("At least one choice need to be specified", "최소한 하나의 선택 항목을 지정해야 합니다");
-		m.put("At least one email address should be configured, please add a new one first", "최소한 하나의 이메일 주소를 구성해야 합니다. 먼저 새 이메일 주소를 추가하세요");
 		m.put("At least one email address should be specified", "최소한 하나의 이메일 주소를 지정해야 합니다");
 		m.put("At least one entry should be specified", "최소한 하나의 항목을 지정해야 합니다");
 		m.put("At least one event type needs to be selected", "최소한 하나의 이벤트 유형을 선택해야 합니다");
@@ -856,7 +855,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Commit Types For Footer Check", "푸터 확인을 위한 커밋 유형");
 		m.put("Commit Your Change", "변경 사항을 커밋하세요");
 		m.put("Commit date", "커밋 날짜");
-		m.put("Commit detail", "커밋 세부 정보");
 		m.put("Commit hash", "커밋 해시");
 		m.put("Commit history of current path", "현재 경로의 커밋 기록");
 		m.put("Commit index version", "커밋 인덱스 버전");
@@ -1549,6 +1547,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Fix Undefined Field Values", "정의되지 않은 필드 값 수정");
 		m.put("Fix Undefined Fields", "정의되지 않은 필드 수정");
 		m.put("Fix Undefined States", "정의되지 않은 상태 수정");
+		m.put("Fix failed builds", "실패한 빌드 수정");
 		m.put("Fixed Issues", "수정된 문제들");
 		m.put("Fixed issues since...", "이후 수정된 문제들...");
 		m.put("Fixing Builds", "빌드 수정 중");
@@ -2090,6 +2089,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Line: ", "라인:");
 		m.put("Lines", "라인들");
 		m.put("Link", "링크");
+		m.put("Link / upload", "링크 / 업로드");
 		m.put("Link Existing User", "기존 사용자 연결");
 		m.put("Link Spec", "링크 사양");
 		m.put("Link Spec Opposite", "반대 링크 사양");
@@ -2218,6 +2218,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Merge aborted", "병합 중단됨");
 		m.put("Merge branch \"{0}\" into branch \"{1}\"", "브랜치 \"{0}\"를 브랜치 \"{1}\"로 병합");
 		m.put("Merge branch \"{0}\" of project \"{1}\" into branch \"{2}\"", "프로젝트 \"{1}\"의 브랜치 \"{0}\"를 브랜치 \"{2}\"로 병합");
+		m.put("Merge if acceptable", "허용 가능한 경우 병합");
 		m.put("Merge preview not calculated yet", "병합 미리보기가 아직 계산되지 않음");
 		m.put("Merged", "병합됨");
 		m.put("Merged pull request \"{0}\" ({1})", "병합된 풀 리퀘스트 \"{0}\" ({1})");
@@ -3165,6 +3166,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pull Command", "풀 명령");
 		m.put("Pull Image", "이미지 풀");
 		m.put("Pull Request", "풀 리퀘스트");
+		m.put("Pull Request Assignee Responsibilities", "풀 리퀘스트 담당자의 책임");
 		m.put("Pull Request Branches", "풀 리퀘스트 브랜치");
 		m.put("Pull Request Description", "풀 리퀘스트 설명");
 		m.put("Pull Request Filter", "풀 리퀘스트 필터");
@@ -3363,10 +3365,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Required Builds", "필수 빌드");
 		m.put("Required Reviewers", "필수 리뷰어");
 		m.put("Required Services", "필수 서비스");
-		m.put("Resend Verification Email", "확인 이메일 다시 보내기");
 		m.put("Resend invitation", "초대 다시 보내기");
 		m.put("Reset", "재설정");
 		m.put("Resolution", "해결");
+		m.put("Resolve merge conflicts", "병합 충돌 해결");
 		m.put("Resolved", "해결됨");
 		m.put("Resolved comment on file \"{0}\" in project \"{1}\"", "프로젝트 \"{1}\"의 파일 \"{0}\"에 대한 댓글을 해결했습니다");
 		m.put("Resource", "리소스");
@@ -3374,6 +3376,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Resources", "리소스들");
 		m.put("Response", "응답");
 		m.put("Response Body", "응답 본문");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "풀 리퀘스트에 할당된 AI 사용자의 책임");
 		m.put("Restart", "재시작");
 		m.put("Restart All Queried Agents", "모든 조회된 에이전트 재시작");
 		m.put("Restart Selected Agents", "선택된 에이전트 재시작");
@@ -3573,7 +3576,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Set All Queried Comments as Unresolved", "쿼리된 모든 댓글을 미해결로 설정");
 		m.put("Set All Queried Issues as Read", "쿼리된 모든 이슈를 읽음으로 설정");
 		m.put("Set All Queried Pull Requests as Read", "쿼리된 모든 풀 리퀘스트를 읽음으로 설정");
-		m.put("Set As Primary", "기본값으로 설정");
 		m.put("Set Build Description", "빌드 설명 설정");
 		m.put("Set Build Version", "빌드 버전 설정");
 		m.put("Set Resolved", "해결됨으로 설정");
@@ -3585,8 +3587,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Set Up Renovate Cache", "Renovate 캐시 설정");
 		m.put("Set Up Trivy Cache", "Trivy 캐시 설정");
 		m.put("Set Up Your Account", "계정을 설정하세요");
-		m.put("Set as Private", "비공개로 설정");
-		m.put("Set as Public", "공개로 설정");
 		m.put("Set description", "설명 설정");
 		m.put("Set reviewed", "검토됨으로 설정");
 		m.put("Set unreviewed", "미검토로 설정");
@@ -3616,6 +3616,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Shell Executable", "셸 실행 파일");
 		m.put("Shortcut Config", "바로가기 구성");
 		m.put("Shortcuts", "바로가기");
+		m.put("Show / Create", "보기 / 생성");
 		m.put("Show Archived", "보관된 항목 보기");
 		m.put("Show Branch/Tag", "브랜치/태그 보기");
 		m.put("Show Build Status", "빌드 상태 보기");
@@ -4617,6 +4618,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unpin this issue", "이 이슈 고정 해제");
 		m.put("Unresolved", "미해결");
 		m.put("Unresolved comment on file \"{0}\" in project \"{1}\"", "프로젝트 \"{1}\"의 파일 \"{0}\"에 대한 미해결 댓글");
+		m.put("Unresolved comments", "해결되지 않은 댓글");
+		m.put("Unresolved comments with unviewed activity", "확인되지 않은 활동이 있는 해결되지 않은 댓글");
 		m.put("Unscheduled", "일정 미지정");
 		m.put("Unscheduled Issues", "일정 미지정 이슈");
 		m.put("Unsolicited OIDC authentication response", "요청되지 않은 OIDC 인증 응답");
@@ -4630,6 +4633,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unsupported ssh signature version: ", "지원되지 않는 ssh 서명 버전:");
 		m.put("Unverified", "검증되지 않음");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "검증되지 않은 이메일 주소는 위 기능에 <b>적용되지 않습니다</b>");
+		m.put("Unviewed code comment activity", "확인되지 않은 코드 댓글 활동");
 		m.put("Unvote", "투표 취소");
 		m.put("Unwatched. Click to watch", "관찰 취소됨. 클릭하여 관찰");
 		m.put("Update", "업데이트");
@@ -4667,7 +4671,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Use Avatar Service", "아바타 서비스 사용");
 		m.put("Use Default", "기본값 사용");
 		m.put("Use Default Boards", "기본 보드 사용");
-		m.put("Use For Git Operations", "Git 작업에 사용");
 		m.put("Use Git in System Path", "시스템 경로에서 Git 사용");
 		m.put("Use Hours And Minutes Only", "시간과 분만 사용");
 		m.put("Use Specified Git", "지정된 Git 사용");
@@ -5049,6 +5052,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("markdown:heading", "헤딩");
 		m.put("markdown:image", "이미지");
 		m.put("may not be empty", "비어 있을 수 없습니다");
+		m.put("merge commit", "병합 커밋");
 		m.put("merged", "병합됨");
 		m.put("month:Apr", "4월");
 		m.put("month:Aug", "8월");
@@ -5194,17 +5198,45 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Fix failed builds", "실패한 빌드 수정");
-		m.put("Link / upload", "링크 / 업로드");
-		m.put("Merge if acceptable", "허용 가능한 경우 병합");
-		m.put("Pull Request Assignee Responsibilities", "풀 리퀘스트 담당자의 책임");
-		m.put("Resolve merge conflicts", "병합 충돌 해결");
-		m.put("Responsibilities of the AI user when assigned to a pull request", "풀 리퀘스트에 할당된 AI 사용자의 책임");
-		m.put("Show / Create", "보기 / 생성");
-		m.put("Unresolved comments", "해결되지 않은 댓글");
-		m.put("Unresolved comments with unviewed activity", "확인되지 않은 활동이 있는 해결되지 않은 댓글");
-		m.put("Unviewed code comment activity", "확인되지 않은 코드 댓글 활동");
-		m.put("merge commit", "병합 커밋");
+		m.put("Backup Email Addresses", "백업 이메일 주소");
+		m.put("Cannot move issue as it has workspaces", "작업 공간이 있어 이슈를 이동할 수 없습니다");
+		m.put("Copy Markdown", "마크다운 복사");
+		m.put("Disable Internal Login", "내부 로그인 비활성화");
+		m.put("Do you really want to move this issue to project \"{0}\"", "이 이슈를 프로젝트 \"{0}\"로 이동하시겠습니까?");
+		m.put("Email Address Privacy", "이메일 주소 개인정보 보호");
+		m.put("Email address with noreply domain is not allowed", "noreply 도메인의 이메일 주소는 허용되지 않습니다");
+		m.put("Email addresses privacy updated", "이메일 주소 개인정보 보호가 업데이트되었습니다");
+		m.put("Include Downstream When Rebuild", "재빌드 시 다운스트림 포함");
+		m.put("Include Upstream When Rebuild", "재빌드 시 업스트림 포함");
+		m.put("Issue moved", "이슈가 이동되었습니다");
+		m.put("Keep my email addresses private", "내 이메일 주소를 비공개로 유지");
+		m.put("Move", "이동");
+		m.put("Noreply Email Domain", "Noreply 이메일 도메인");
+		m.put("Primary Email Address", "기본 이메일 주소");
+		m.put("Primary email address added", "기본 이메일 주소가 추가되었습니다");
+		m.put("Primary email address changed", "기본 이메일 주소가 변경되었습니다");
+		m.put("Resend verification email", "인증 이메일 다시 보내기");
+		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
+			"서비스 또는 AI 사용자는 이메일 주소를 지정할 수 없습니다. 그러나 자동 생성된 주소는");
+		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
+			"사용자가 자신의 이메일 주소를 비공개로 유지하려는 경우 Git 작업을 위한 다양한 noreply 이메일 주소의 도메인을 지정하십시오\n");
+		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
+			"기본 이메일 주소는 알림을 받고 Gravatar(활성화된 경우)를 표시하는 데 사용됩니다. 또한 이메일 주소가 비공개로 유지되지 않는 한 웹 기반 Git 작업에도 사용됩니다.");
+		m.put("This email address is not verified", "이 이메일 주소는 인증되지 않았습니다");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, arrow keys, or page up/down, and press q to exit.", 
+			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [를 누르세요. 마우스 휠, 화살표 키 또는 페이지 업/다운을 사용하고, 종료하려면 q를 누르세요.");
+		m.put("To scroll in this terminal, tap tmux [, swipe the terminal, and tap tmux [ again to exit.", 
+			"이 터미널에서 스크롤하려면 tmux [를 누르고 터미널을 스와이프한 후 다시 tmux [를 누르세요.");
+		m.put("Use the auto-generated email address", "자동 생성된 이메일 주소 사용");
+		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
+			"인증된 백업 이메일 주소는 비밀번호 복구 및 커밋 식별에 사용할 수 있습니다.");
+		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "이 작업을 재빌드할 때 직접적인 다운스트림 작업도 재빌드할지 여부");
+		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "이 작업을 재빌드할 때 직접적인 업스트림 작업도 재빌드할지 여부");
+		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
+			"내부 비밀번호 로그인 양식을 비활성화하고 SSO 로그인만 사용할지 여부.\n<b class=\"text-info\">팁:</b> 잠금 해제된 경우, 명령줄에서 <code>bin/enable-internal-login</code>을 실행하여 내부 로그인을 다시 활성화할 수 있습니다");
+		m.put("can be used to associate Git commits with the user.", "Git 커밋을 사용자와 연결하는 데 사용할 수 있습니다.");
+		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
+			"Git 작업을 위해. 웹 UI에서 수행된 모든 Git 작업도 이 주소를 사용합니다.");
 	}
 		
 	@Override

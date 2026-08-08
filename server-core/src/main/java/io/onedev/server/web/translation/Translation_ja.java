@@ -393,7 +393,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Asymmetric", "非対称");
 		m.put("At least one branch or tag should be selected", "少なくとも1つのブランチまたはタグを選択する必要があります");
 		m.put("At least one choice need to be specified", "少なくとも1つの選択肢を指定する必要があります");
-		m.put("At least one email address should be configured, please add a new one first", "少なくとも1つのメールアドレスを設定する必要があります。まず新しいものを追加してください");
 		m.put("At least one email address should be specified", "少なくとも1つのメールアドレスを指定する必要があります");
 		m.put("At least one entry should be specified", "少なくとも1つのエントリを指定する必要があります");
 		m.put("At least one event type needs to be selected", "少なくとも1つのイベントタイプを選択する必要があります");
@@ -856,7 +855,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Commit Types For Footer Check", "フッターチェック用コミットタイプ");
 		m.put("Commit Your Change", "変更をコミット");
 		m.put("Commit date", "コミット日付");
-		m.put("Commit detail", "コミット詳細");
 		m.put("Commit hash", "コミットハッシュ");
 		m.put("Commit history of current path", "現在のパスのコミット履歴");
 		m.put("Commit index version", "コミットインデックスバージョン");
@@ -1549,6 +1547,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Fix Undefined Field Values", "未定義フィールド値を修正");
 		m.put("Fix Undefined Fields", "未定義フィールドを修正");
 		m.put("Fix Undefined States", "未定義状態を修正");
+		m.put("Fix failed builds", "失敗したビルドを修正");
 		m.put("Fixed Issues", "修正済みの問題");
 		m.put("Fixed issues since...", "修正済みの問題（...以降）");
 		m.put("Fixing Builds", "ビルドの修正");
@@ -2090,6 +2089,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Line: ", "行:");
 		m.put("Lines", "行数");
 		m.put("Link", "リンク");
+		m.put("Link / upload", "リンク / アップロード");
 		m.put("Link Existing User", "既存ユーザーをリンク");
 		m.put("Link Spec", "リンク仕様");
 		m.put("Link Spec Opposite", "リンク仕様の反対");
@@ -2218,6 +2218,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Merge aborted", "マージが中止されました");
 		m.put("Merge branch \"{0}\" into branch \"{1}\"", "ブランチ「{0}」をブランチ「{1}」にマージ");
 		m.put("Merge branch \"{0}\" of project \"{1}\" into branch \"{2}\"", "プロジェクト「{1}」のブランチ「{0}」をブランチ「{2}」にマージ");
+		m.put("Merge if acceptable", "受け入れ可能であればマージ");
 		m.put("Merge preview not calculated yet", "マージプレビューはまだ計算されていません");
 		m.put("Merged", "マージ済み");
 		m.put("Merged pull request \"{0}\" ({1})", "プルリクエスト「{0}」({1})がマージされました");
@@ -3165,6 +3166,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pull Command", "プルコマンド");
 		m.put("Pull Image", "イメージのプル");
 		m.put("Pull Request", "プルリクエスト");
+		m.put("Pull Request Assignee Responsibilities", "プルリクエスト担当者の責任");
 		m.put("Pull Request Branches", "プルリクエストブランチ");
 		m.put("Pull Request Description", "プルリクエスト説明");
 		m.put("Pull Request Filter", "プルリクエストフィルター");
@@ -3363,10 +3365,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Required Builds", "必要なビルド");
 		m.put("Required Reviewers", "必要なレビュアー");
 		m.put("Required Services", "必要なサービス");
-		m.put("Resend Verification Email", "確認メールを再送信");
 		m.put("Resend invitation", "招待を再送信");
 		m.put("Reset", "リセット");
 		m.put("Resolution", "解決");
+		m.put("Resolve merge conflicts", "マージコンフリクトを解決");
 		m.put("Resolved", "解決済み");
 		m.put("Resolved comment on file \"{0}\" in project \"{1}\"", "プロジェクト\"{1}\"のファイル\"{0}\"に対するコメントを解決しました");
 		m.put("Resource", "リソース");
@@ -3374,6 +3376,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Resources", "リソース");
 		m.put("Response", "レスポンス");
 		m.put("Response Body", "レスポンスボディ");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "プルリクエストに割り当てられた際のAIユーザーの責任");
 		m.put("Restart", "再起動");
 		m.put("Restart All Queried Agents", "すべてのクエリ済みエージェントを再起動");
 		m.put("Restart Selected Agents", "選択したエージェントを再起動");
@@ -3573,7 +3576,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Set All Queried Comments as Unresolved", "すべてのクエリされたコメントを未解決として設定");
 		m.put("Set All Queried Issues as Read", "すべてのクエリされた課題を既読として設定");
 		m.put("Set All Queried Pull Requests as Read", "すべてのクエリされたプルリクエストを既読として設定");
-		m.put("Set As Primary", "プライマリとして設定");
 		m.put("Set Build Description", "ビルド説明を設定");
 		m.put("Set Build Version", "ビルドバージョンを設定");
 		m.put("Set Resolved", "解決済みとして設定");
@@ -3585,8 +3587,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Set Up Renovate Cache", "Renovateキャッシュを設定");
 		m.put("Set Up Trivy Cache", "Trivyキャッシュを設定");
 		m.put("Set Up Your Account", "アカウントを設定する");
-		m.put("Set as Private", "非公開として設定");
-		m.put("Set as Public", "公開として設定");
 		m.put("Set description", "説明を設定");
 		m.put("Set reviewed", "レビュー済みとして設定");
 		m.put("Set unreviewed", "未レビューとして設定");
@@ -3616,6 +3616,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Shell Executable", "シェル実行可能ファイル");
 		m.put("Shortcut Config", "ショートカット設定");
 		m.put("Shortcuts", "ショートカット");
+		m.put("Show / Create", "表示 / 作成");
 		m.put("Show Archived", "アーカイブを表示");
 		m.put("Show Branch/Tag", "ブランチ/タグを表示");
 		m.put("Show Build Status", "ビルドステータスを表示");
@@ -4617,6 +4618,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unpin this issue", "この課題のピンを解除");
 		m.put("Unresolved", "未解決");
 		m.put("Unresolved comment on file \"{0}\" in project \"{1}\"", "プロジェクト \"{1}\" のファイル \"{0}\" に未解決のコメント");
+		m.put("Unresolved comments", "未解決のコメント");
+		m.put("Unresolved comments with unviewed activity", "未閲覧のアクティビティを含む未解決のコメント");
 		m.put("Unscheduled", "未スケジュール");
 		m.put("Unscheduled Issues", "未スケジュールの課題");
 		m.put("Unsolicited OIDC authentication response", "未承諾のOIDC認証応答");
@@ -4630,6 +4633,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unsupported ssh signature version: ", "サポートされていないssh署名バージョン:");
 		m.put("Unverified", "未確認");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未確認のメールアドレスは上記の機能には<b>適用されません</b>");
+		m.put("Unviewed code comment activity", "未閲覧のコードコメントアクティビティ");
 		m.put("Unvote", "投票を取り消す");
 		m.put("Unwatched. Click to watch", "ウォッチ解除。クリックしてウォッチ");
 		m.put("Update", "更新");
@@ -4667,7 +4671,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Use Avatar Service", "アバターサービスを使用");
 		m.put("Use Default", "デフォルトを使用");
 		m.put("Use Default Boards", "デフォルトボードを使用");
-		m.put("Use For Git Operations", "Git操作に使用");
 		m.put("Use Git in System Path", "システムパス内のGitを使用");
 		m.put("Use Hours And Minutes Only", "時間と分のみを使用");
 		m.put("Use Specified Git", "指定されたGitを使用");
@@ -5049,6 +5052,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("markdown:heading", "見出し");
 		m.put("markdown:image", "画像");
 		m.put("may not be empty", "空であってはなりません");
+		m.put("merge commit", "マージコミット");
 		m.put("merged", "マージ済み");
 		m.put("month:Apr", "4月");
 		m.put("month:Aug", "8月");
@@ -5194,17 +5198,45 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Fix failed builds", "失敗したビルドを修正");
-		m.put("Link / upload", "リンク / アップロード");
-		m.put("Merge if acceptable", "受け入れ可能であればマージ");
-		m.put("Pull Request Assignee Responsibilities", "プルリクエスト担当者の責任");
-		m.put("Resolve merge conflicts", "マージコンフリクトを解決");
-		m.put("Responsibilities of the AI user when assigned to a pull request", "プルリクエストに割り当てられた際のAIユーザーの責任");
-		m.put("Show / Create", "表示 / 作成");
-		m.put("Unresolved comments", "未解決のコメント");
-		m.put("Unresolved comments with unviewed activity", "未閲覧のアクティビティを含む未解決のコメント");
-		m.put("Unviewed code comment activity", "未閲覧のコードコメントアクティビティ");
-		m.put("merge commit", "マージコミット");
+		m.put("Backup Email Addresses", "バックアップメールアドレス");
+		m.put("Cannot move issue as it has workspaces", "ワークスペースがあるため、課題を移動できません");
+		m.put("Copy Markdown", "Markdownをコピー");
+		m.put("Disable Internal Login", "内部ログインを無効化");
+		m.put("Do you really want to move this issue to project \"{0}\"", "本当にこの課題をプロジェクト「{0}」に移動しますか");
+		m.put("Email Address Privacy", "メールアドレスのプライバシー");
+		m.put("Email address with noreply domain is not allowed", "noreplyドメインのメールアドレスは許可されていません");
+		m.put("Email addresses privacy updated", "メールアドレスのプライバシーが更新されました");
+		m.put("Include Downstream When Rebuild", "再ビルド時に下流を含める");
+		m.put("Include Upstream When Rebuild", "再ビルド時に上流を含める");
+		m.put("Issue moved", "課題が移動されました");
+		m.put("Keep my email addresses private", "メールアドレスを非公開にする");
+		m.put("Move", "移動");
+		m.put("Noreply Email Domain", "Noreplyメールドメイン");
+		m.put("Primary Email Address", "プライマリメールアドレス");
+		m.put("Primary email address added", "プライマリメールアドレスが追加されました");
+		m.put("Primary email address changed", "プライマリメールアドレスが変更されました");
+		m.put("Resend verification email", "確認メールを再送信");
+		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
+			"サービスまたはAIユーザーはメールアドレスを指定できません。ただし、自動生成されたアドレス");
+		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
+			"ユーザーが自身のメールアドレスを非公開にしたい場合、Git操作用のさまざまなnoreplyメールアドレスのドメインを指定してください\n");
+		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
+			"プライマリメールアドレスは通知を受け取るためや、Gravatar（有効化されている場合）を表示するために使用されます。また、メールアドレスが非公開でない限り、WebベースのGit操作にも使用されます。");
+		m.put("This email address is not verified", "このメールアドレスは確認されていません");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, arrow keys, or page up/down, and press q to exit.", 
+			"このターミナルでスクロールするには、ctrl+bを押してから[を押します。マウスホイール、矢印キー、またはページアップ/ダウンを使用し、終了するにはqを押してください。");
+		m.put("To scroll in this terminal, tap tmux [, swipe the terminal, and tap tmux [ again to exit.", 
+			"このターミナルでスクロールするには、tmux [をタップし、ターミナルをスワイプして、再度tmux [をタップして終了します。");
+		m.put("Use the auto-generated email address", "自動生成されたメールアドレスを使用");
+		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
+			"確認済みのバックアップメールアドレスは、パスワードの回復やコミットの識別に使用できます。");
+		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "このジョブを再ビルドする際に、直接の下流ジョブも再ビルドするかどうか");
+		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "このジョブを再ビルドする際に、直接の上流ジョブも再ビルドするかどうか");
+		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
+			"内部パスワードログインフォームを無効化し、SSOログインのみを使用するかどうか。\n<b class=\"text-info\">TIPS:</b> ロックアウトされた場合、コマンドラインで<code>bin/enable-internal-login</code>を実行することで内部ログインを再有効化できます。");
+		m.put("can be used to associate Git commits with the user.", "Gitコミットをユーザーに関連付けるために使用できます。");
+		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
+			"Git操作用です。Web UIから実行されるすべてのGit操作もこのアドレスを使用します。");
 	}
 		
 	@Override

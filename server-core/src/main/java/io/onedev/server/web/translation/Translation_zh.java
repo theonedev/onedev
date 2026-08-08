@@ -419,7 +419,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Asymmetric", "非对称");
 		m.put("At least one branch or tag should be selected", "至少选择一个分支或标签");
 		m.put("At least one choice need to be specified", "至少需要指定一个选项");
-		m.put("At least one email address should be configured, please add a new one first", "至少应配置一个电子邮件地址，请先添加一个新地址");
 		m.put("At least one email address should be specified", "至少需要指定一个电子邮件地址");
 		m.put("At least one entry should be specified", "至少需要指定一个条目");
 		m.put("At least one event type needs to be selected", "至少需要选择一个事件类型");
@@ -882,7 +881,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Commit Types For Footer Check", "用于尾部检查的提交类型");
 		m.put("Commit Your Change", "提交您的更改");
 		m.put("Commit date", "提交日期");
-		m.put("Commit detail", "提交详情");
 		m.put("Commit hash", "提交哈希");
 		m.put("Commit history of current path", "当前路径的提交历史");
 		m.put("Commit index version", "提交索引版本");
@@ -1575,6 +1573,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Fix Undefined Field Values", "修复未定义的字段值");
 		m.put("Fix Undefined Fields", "修复未定义的字段");
 		m.put("Fix Undefined States", "修复未定义的状态");
+		m.put("Fix failed builds", "修复失败的构建");
 		m.put("Fixed Issues", "修复的工单");
 		m.put("Fixed issues since...", "修复工单自...");
 		m.put("Fixing Builds", "修复构建");
@@ -2116,6 +2115,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Line: ", "行：");
 		m.put("Lines", "行");
 		m.put("Link", "链接");
+		m.put("Link / upload", "链接 / 上传");
 		m.put("Link Existing User", "链接现有用户");
 		m.put("Link Spec", "链接规范");
 		m.put("Link Spec Opposite", "链接规范相反");
@@ -2244,6 +2244,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Merge aborted", "合并中止");
 		m.put("Merge branch \"{0}\" into branch \"{1}\"", "将分支 \"{0}\" 合并到分支 \"{1}\"");
 		m.put("Merge branch \"{0}\" of project \"{1}\" into branch \"{2}\"", "将项目 \"{1}\" 的分支 \"{0}\" 合并到分支 \"{2}\"");
+		m.put("Merge if acceptable", "如果可接受则合并");
 		m.put("Merge preview not calculated yet", "合并预览尚未计算完成");
 		m.put("Merged", "合并");
 		m.put("Merged pull request \"{0}\" ({1})", "合并合并请求 \"{0}\"（{1}）");
@@ -3191,6 +3192,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pull Command", "拉取命令");
 		m.put("Pull Image", "拉取镜像");
 		m.put("Pull Request", "合并请求");
+		m.put("Pull Request Assignee Responsibilities", "合并请求分配者的职责");
 		m.put("Pull Request Branches", "合并请求分支");
 		m.put("Pull Request Description", "合并请求描述");
 		m.put("Pull Request Filter", "合并请求过滤");
@@ -3389,10 +3391,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Required Builds", "要求构建");
 		m.put("Required Reviewers", "要求审查者");
 		m.put("Required Services", "所需服务");
-		m.put("Resend Verification Email", "重新发送验证电子邮件");
 		m.put("Resend invitation", "重新发送邀请");
 		m.put("Reset", "重置");
 		m.put("Resolution", "解决");
+		m.put("Resolve merge conflicts", "解决合并冲突");
 		m.put("Resolved", "已解决");
 		m.put("Resolved comment on file \"{0}\" in project \"{1}\"", "将项目 \"{1}\" 的文件 \"{0}\" 上的评论标记为已解决");
 		m.put("Resource", "资源");
@@ -3400,6 +3402,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Resources", "资源");
 		m.put("Response", "响应");
 		m.put("Response Body", "响应体");
+		m.put("Responsibilities of the AI user when assigned to a pull request", "AI 用户在被分配到合并请求时的职责");
 		m.put("Restart", "重启");
 		m.put("Restart All Queried Agents", "重启所有查询的代理");
 		m.put("Restart Selected Agents", "重启选定的代理");
@@ -3599,7 +3602,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Set All Queried Comments as Unresolved", "设置所有选中的评论为未解决");
 		m.put("Set All Queried Issues as Read", "将所有查询的工单设置为已读");
 		m.put("Set All Queried Pull Requests as Read", "设置所有查询的合并请求为已读");
-		m.put("Set As Primary", "设置为主要");
 		m.put("Set Build Description", "设置构建描述");
 		m.put("Set Build Version", "设置构建版本");
 		m.put("Set Resolved", "设置为已解决");
@@ -3611,8 +3613,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Set Up Renovate Cache", "设置 Renovate 缓存");
 		m.put("Set Up Trivy Cache", "设置 Trivy 缓存");
 		m.put("Set Up Your Account", "设置您的账户");
-		m.put("Set as Private", "设为私有");
-		m.put("Set as Public", "设为公开");
 		m.put("Set description", "设置描述");
 		m.put("Set reviewed", "设置为已审阅");
 		m.put("Set unreviewed", "设置为未审阅");
@@ -3642,6 +3642,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Shell Executable", "Shell 可执行文件");
 		m.put("Shortcut Config", "快捷方式配置");
 		m.put("Shortcuts", "快捷方式");
+		m.put("Show / Create", "显示 / 创建");
 		m.put("Show Archived", "显示已归档");
 		m.put("Show Branch/Tag", "显示分支/标签");
 		m.put("Show Build Status", "显示构建状态");
@@ -4643,6 +4644,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unpin this issue", "取消置顶此工单");
 		m.put("Unresolved", "未解决");
 		m.put("Unresolved comment on file \"{0}\" in project \"{1}\"", "将项目 \"{1}\" 的文件 \"{0}\" 上的评论标记为未解决");
+		m.put("Unresolved comments", "未解决的评论");
+		m.put("Unresolved comments with unviewed activity", "带有未查看活动的未解决评论");
 		m.put("Unscheduled", "未计划");
 		m.put("Unscheduled Issues", "未计划工单");
 		m.put("Unsolicited OIDC authentication response", "未主动请求的 OIDC 认证响应");
@@ -4656,6 +4659,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unsupported ssh signature version: ", "不支持的 ssh 签名版本：");
 		m.put("Unverified", "未验证");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未验证的电子邮件地址不适用于上述功能");
+		m.put("Unviewed code comment activity", "未查看的代码评论活动");
 		m.put("Unvote", "取消投票");
 		m.put("Unwatched. Click to watch", "未关注。点击关注");
 		m.put("Update", "更新");
@@ -4693,7 +4697,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Use Avatar Service", "使用头像服务");
 		m.put("Use Default", "使用默认");
 		m.put("Use Default Boards", "使用默认看板");
-		m.put("Use For Git Operations", "用于 Git 操作");
 		m.put("Use Git in System Path", "使用系统路径中的 Git");
 		m.put("Use Hours And Minutes Only", "仅使用小时和分钟");
 		m.put("Use Specified Git", "使用指定的 Git");
@@ -5075,6 +5078,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("markdown:heading", "标题");
 		m.put("markdown:image", "图片");
 		m.put("may not be empty", "不能为空");
+		m.put("merge commit", "合并提交");
 		m.put("merged", "已合并");
 		m.put("month:Apr", "四月");
 		m.put("month:Aug", "八月");
@@ -5220,17 +5224,45 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Fix failed builds", "修复失败的构建");
-		m.put("Link / upload", "链接 / 上传");
-		m.put("Merge if acceptable", "如果可接受则合并");
-		m.put("Pull Request Assignee Responsibilities", "合并请求分配者的职责");
-		m.put("Resolve merge conflicts", "解决合并冲突");
-		m.put("Responsibilities of the AI user when assigned to a pull request", "AI 用户在被分配到合并请求时的职责");
-		m.put("Show / Create", "显示 / 创建");
-		m.put("Unresolved comments", "未解决的评论");
-		m.put("Unresolved comments with unviewed activity", "带有未查看活动的未解决评论");
-		m.put("Unviewed code comment activity", "未查看的代码评论活动");
-		m.put("merge commit", "合并提交");
+		m.put("Backup Email Addresses", "备份邮箱地址");
+		m.put("Cannot move issue as it has workspaces", "无法移动工单，因为它有工作区");
+		m.put("Copy Markdown", "复制 Markdown");
+		m.put("Disable Internal Login", "禁用内部登录");
+		m.put("Do you really want to move this issue to project \"{0}\"", "您确定要将此工单移动到项目 \"{0}\" 吗");
+		m.put("Email Address Privacy", "邮箱地址隐私");
+		m.put("Email address with noreply domain is not allowed", "不允许使用 noreply 域的邮箱地址");
+		m.put("Email addresses privacy updated", "邮箱地址隐私已更新");
+		m.put("Include Downstream When Rebuild", "重建时包含下游");
+		m.put("Include Upstream When Rebuild", "重建时包含上游");
+		m.put("Issue moved", "工单已移动");
+		m.put("Keep my email addresses private", "保持我的邮箱地址私密");
+		m.put("Move", "移动");
+		m.put("Noreply Email Domain", "Noreply 邮箱域");
+		m.put("Primary Email Address", "主邮箱地址");
+		m.put("Primary email address added", "主邮箱地址已添加");
+		m.put("Primary email address changed", "主邮箱地址已更改");
+		m.put("Resend verification email", "重新发送验证邮件");
+		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
+			"服务或 AI 用户无法指定邮箱地址。但是自动生成的地址");
+		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
+			"指定用于 Git 操作的各种 noreply 邮箱地址的域，如果用户希望\n保持自己的邮箱地址私密");
+		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
+			"主邮箱地址用于接收通知并显示您的 gravatar（如果启用）。除非邮箱地址保持私密，否则它也用于基于 Web 的 Git 操作。");
+		m.put("This email address is not verified", "此邮箱地址未验证");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, arrow keys, or page up/down, and press q to exit.", 
+			"要在此终端中滚动，请按 ctrl+b 然后 [。使用鼠标滚轮、箭头键或 page up/down，然后按 q 退出。");
+		m.put("To scroll in this terminal, tap tmux [, swipe the terminal, and tap tmux [ again to exit.", 
+			"要在此终端中滚动，请点击 tmux [，滑动终端，然后再次点击 tmux [ 退出。");
+		m.put("Use the auto-generated email address", "使用自动生成的邮箱地址");
+		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
+			"已验证的备份邮箱地址可用于密码恢复和识别您的提交。");
+		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "在重建此任务时是否也重建直接下游任务");
+		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "在重建此任务时是否也重建直接上游任务");
+		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
+			"是否禁用内部密码登录表单并仅使用 SSO 登录。\n<b class=\"text-info\">提示：</b>如果您被锁定，可以通过运行 <code>bin/enable-internal-login</code> 从命令\n行重新启用内部登录");
+		m.put("can be used to associate Git commits with the user.", "可用于将 Git 提交与用户关联。");
+		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
+			"用于 Git 操作。从 Web UI 执行的所有 Git 操作也将使用此地址。");
 	}
 		
 	@Override
