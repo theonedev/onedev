@@ -3,7 +3,7 @@ onedev.server.terminal = {
 		var $terminal = $("#" + containerId).children(".terminal");
 		var xterm = new Terminal({
 			fontSize: 14,
-			fontFamily: "Consolas, 'Liberation Mono', 'Menlo, Courier', monospace"
+			fontFamily: "LocalNerdFont, Consolas, 'Liberation Mono', Menlo, Courier, monospace"
 		});
 		var fitAddon = new window.FitAddon.FitAddon();
 		xterm.loadAddon(fitAddon);
