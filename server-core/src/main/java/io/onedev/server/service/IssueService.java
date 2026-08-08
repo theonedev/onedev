@@ -38,7 +38,7 @@ public interface IssueService extends EntityService<Issue> {
 
 	@Nullable
 	Issue findByMessageId(String messageId);
-    
+
 	void open(Issue issue);
 	
 	void open(Issue issue, Collection<String> listeningEmailAddresses);

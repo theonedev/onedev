@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -463,6 +464,8 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		}
 		if (criteria != null)
 			predicates.add(criteria.getPredicate(projectScope, query, issue, builder));
+
+		predicates.add(builder.isNull(issue.get(Issue.PROP_MOVED_TO)));
 
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
@@ -1014,6 +1017,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		
 		criteriaQuery.where(builder.and(
 				buildSubtreePredicate(builder, issueJoin.get(Issue.PROP_PROJECT), project),
+				builder.isNull(issueJoin.get(Issue.PROP_MOVED_TO)),
 				builder.or(iterationPredicates.toArray(new Predicate[0]))));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
@@ -1135,8 +1139,32 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		Map<Long, Long> numberMapping = new HashMap<>();
 		List<Issue> sortedIssues = new ArrayList<>(issues);
 		Collections.sort(sortedIssues);
-		for (Issue issue: sortedIssues)
+		for (Issue issue: sortedIssues) {
 			checkNoWorkspaces(issue, "move");
+			if (issue.getMovedTo() != null) {
+				throw new NotAcceptableException(MessageFormat.format(
+						"Cannot move issue \"{0}\" as it has already been moved",
+						issue.getReference().toString(issue.getProject())));
+			}
+		}
+
+		// Remember source identity so we can leave a bare stub after the move
+		Map<Long, Issue> stubInfos = new LinkedHashMap<>();
+		for (Issue issue: sortedIssues) {
+			Issue stubInfo = new Issue();
+			stubInfo.setTitle(issue.getTitle());
+			stubInfo.setState(issue.getState());
+			stubInfo.setStateOrdinal(issue.getStateOrdinal());
+			stubInfo.setProject(issue.getProject());
+			stubInfo.setNumberScope(issue.getNumberScope());
+			stubInfo.setNumber(issue.getNumber());
+			stubInfo.setSubmitter(issue.getSubmitter());
+			stubInfo.setSubmitDate(issue.getSubmitDate());
+			stubInfo.setConfidential(issue.isConfidential());
+			stubInfos.put(issue.getId(), stubInfo);
+		}
+
+		// Original move logic: relocate the issue together with its belongings
 		for (Issue issue: sortedIssues) {
 			if (issue.getDescription() != null) {
 				issue.setDescription(issue.getDescription().replace(
@@ -1184,6 +1212,31 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 				dao.persist(comment);
 			}
 			dao.persist(issue);
+		}
+		// Flush so old (numberScope, number) is freed before stub insert
+		getSession().flush();
+
+		// Leave a bare stub at the old number (issue entity only, no belongings)
+		for (Issue movedIssue: sortedIssues) {
+			Issue stubInfo = stubInfos.get(movedIssue.getId());
+			Issue stub = new Issue();
+			stub.setTitle(stubInfo.getTitle());
+			stub.setState(stubInfo.getState());
+			stub.setStateOrdinal(stubInfo.getStateOrdinal());
+			stub.setProject(stubInfo.getProject());
+			stub.setNumberScope(stubInfo.getNumberScope());
+			stub.setNumber(stubInfo.getNumber());
+			stub.setSubmitter(stubInfo.getSubmitter());
+			stub.setSubmitDate(stubInfo.getSubmitDate());
+			stub.setConfidential(stubInfo.isConfidential());
+			LastActivity stubLastActivity = new LastActivity();
+			stubLastActivity.setUser(user);
+			stubLastActivity.setDescription("moved");
+			stubLastActivity.setDate(new Date());
+			stub.setLastActivity(stubLastActivity);
+			stub.setMovedTo(movedIssue);
+			movedIssue.getMovedFrom().add(stub);
+			dao.persist(stub);
 		}
 
 		touchService.touch(sourceProject, issues.stream().map(Issue::getId).collect(toList()), false);
@@ -1270,7 +1323,9 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			}
 			predicates.add(buildAuthorizationPredicate(subject, criteriaQuery, builder, root, projectIds));
 			
-			criteriaQuery.where(builder.or(predicates.toArray(new Predicate[0])));
+			criteriaQuery.where(
+					builder.or(predicates.toArray(new Predicate[0])),
+					builder.isNull(root.get(Issue.PROP_MOVED_TO)));
 			criteriaQuery.orderBy(builder.asc(root.get(Issue.PROP_STATE_ORDINAL)));
 			
 			return getSession().createQuery(criteriaQuery).getResultList();
@@ -1310,7 +1365,8 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		criteriaQuery.where(
 				builder.equal(root.get(Issue.PROP_PROJECT), project), 
-				builder.isNotNull(root.get(Issue.PROP_PIN_DATE)));
+				builder.isNotNull(root.get(Issue.PROP_PIN_DATE)),
+				builder.isNull(root.get(Issue.PROP_MOVED_TO)));
 		criteriaQuery.orderBy(builder.desc(root.get(Issue.PROP_PIN_DATE)));
 
 		Query<Issue> query = getSession().createQuery(criteriaQuery);

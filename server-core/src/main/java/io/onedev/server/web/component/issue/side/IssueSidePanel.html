@@ -87,7 +87,8 @@
 		</div>
 		<div wicket:id="reference"></div>
 		<wicket:enclosure child="delete">
-			<div>
+			<div class="d-flex justify-content-between">
+				<a wicket:id="move" class="btn btn-light-primary"><wicket:t>Move</wicket:t> <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a>
 				<a wicket:id="delete" class="delete btn btn-light-danger"><wicket:t>Delete</wicket:t></a>
 			</div>
 		</wicket:enclosure>

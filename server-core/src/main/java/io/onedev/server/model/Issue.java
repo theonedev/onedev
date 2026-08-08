@@ -121,7 +121,8 @@ import io.onedev.server.xodus.VisitInfoService;
 				@Index(columnList=PROP_CONFUSED_COUNT), @Index(columnList=PROP_HEART_COUNT),
 				@Index(columnList=PROP_EYES_COUNT), @Index(columnList=PROP_TICK_COUNT),
 				@Index(columnList=PROP_MESSAGE_ID),
-				@Index(columnList= LastActivity.COLUMN_DATE), @Index(columnList="o_numberScope_id")}, 
+				@Index(columnList= LastActivity.COLUMN_DATE), @Index(columnList="o_numberScope_id"),
+				@Index(columnList="o_movedTo_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -147,6 +148,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	public static final String NAME_TITLE = "Title";
 	
 	public static final String PROP_TITLE = "title";
+	
+	public static final String PROP_MOVED_TO = "movedTo";
 	
 	public static final String NAME_DESCRIPTION = "Description";
 	
@@ -302,6 +305,20 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Project project;
+
+	/**
+	 * If not null, this issue is a stub left after the issue was moved, and
+	 * {@code movedTo} points to the issue it was moved to.
+	 */
+	@ManyToOne(fetch=FetchType.LAZY)
+	private Issue movedTo;
+
+	/**
+	 * Issues that were moved to this issue (stubs). Deleting this issue also
+	 * deletes those stubs via cascade.
+	 */
+	@OneToMany(mappedBy="movedTo", cascade=CascadeType.REMOVE)
+	private Collection<Issue> movedFrom = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueSchedule> schedules = new ArrayList<>();
@@ -502,6 +519,23 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	public void setProject(Project project) {
 		this.project = project;
+	}
+
+	@Nullable
+	public Issue getMovedTo() {
+		return movedTo;
+	}
+
+	public void setMovedTo(@Nullable Issue movedTo) {
+		this.movedTo = movedTo;
+	}
+
+	public Collection<Issue> getMovedFrom() {
+		return movedFrom;
+	}
+
+	public void setMovedFrom(Collection<Issue> movedFrom) {
+		this.movedFrom = movedFrom;
 	}
 
 	public String getUUID() {
@@ -1470,6 +1504,14 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			fieldBuildOptional = Optional.ofNullable(build);
 		}
 		return fieldBuildOptional.orElse(null);
+	}
+	
+	public Issue resolveMovedTo() {
+		Issue current = this;
+		while (current.getMovedTo() != null) {
+			current = current.getMovedTo();
+		}
+		return current;
 	}
 	
 }

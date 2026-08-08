@@ -196,9 +196,10 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	public static Issue getIssue(@Nullable Project project, String value) {
 		var reference = IssueReference.of(value, project);
-		var issue = OneDev.getInstance(IssueService.class).find(reference.getProject(), reference.getNumber());
+		var issueService = OneDev.getInstance(IssueService.class);
+		var issue = issueService.find(reference.getProject(), reference.getNumber());
 		if (issue != null)
-			return issue;
+			return issue.resolveMovedTo();
 		else
 			throw new NotFoundException("Unable to find issue: " + value);
 	}

@@ -28,7 +28,6 @@ body.markdown-editor-expanded {
 .markdown-editor.halfscreen {
 	top: auto;
 	height: var(--markdown-editor-halfscreen-height, 50vh);
-	z-index: 1039;
 	padding-top: 4px;
 }
 .markdown-editor>.halfscreen-resize-handle {

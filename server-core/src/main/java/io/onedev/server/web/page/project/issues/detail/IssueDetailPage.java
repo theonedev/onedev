@@ -118,6 +118,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				if (issue == null) { 
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find issue #{0} in project {1}"), issueNumber, getProject()));
 				} else {
+					issue = issue.resolveMovedTo();
 					issueLinkService.loadDeepLinks(issue);
 					if (!issue.getProject().equals(getProject())) 
 						throw new RestartResponseException(getPageClass(), paramsOf(issue));
