@@ -89,3 +89,19 @@
 		display: flex;
 	}
 }
+
+@font-face {
+	font-family: "LocalNerdFont";
+	src: local("JetBrainsMono NF Regular"),
+		 local("JetBrainsMonoNF-Regular"),
+		 local("JetBrainsMono Nerd Font"),
+		 local("JetBrainsMono NF"),
+		 local("FiraCode Nerd Font"),
+		 local("FiraCode NF"),
+		 local("Hack Nerd Font"),
+		 local("Hack NF"),
+		 local("MesloLGS Nerd Font"),
+		 local("MesloLGS NF"),
+		 local("CaskaydiaCove Nerd Font"),
+		 local("Symbols Nerd Font");
+}

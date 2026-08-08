@@ -7,7 +7,7 @@ onedev.server.terminal = {
 			$container.addClass("terminal-container");
 		var options = {
 			fontSize: 14,
-			fontFamily: "Consolas, 'Liberation Mono', 'Menlo, Courier', monospace"
+			fontFamily: "LocalNerdFont, Consolas, 'Liberation Mono', Menlo, Courier, monospace"
 		};
 		if (disableScrollback)
 			options.scrollback = 0;
