@@ -67,7 +67,8 @@ public interface ClusterService {
 
 	@NoDBAccess
 	String getLocalServerAddress();
-	
+
+	@NoDBAccess
 	String getCredential();
 
 	@Nullable
