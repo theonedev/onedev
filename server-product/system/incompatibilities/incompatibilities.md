@@ -1,3 +1,9 @@
+# 16.5.0
+
+### GPG Signing
+
+Default system GPG signing email changed from `system@onedev` to `onedev@noreply.localhost`. The system GPG signing key is regenerated as a result; previously signed commits will show as unverified.
+
 # 16.4.0
 
 ### Helm Chart

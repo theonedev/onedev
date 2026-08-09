@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div wicket:id="ordinary" class="email-addresses">
-		<section class="mb-5 border-bottom pb-5">
-			<h6 class="mb-3"><wicket:t>Primary Email Address</wicket:t></h6>
+		<section class="mb-4 border-bottom pb-4">
+			<div class="font-weight-boldest mb-2"><wicket:t>Primary Email Address</wicket:t></div>
 			<p class="text-muted font-size-sm"><wicket:t>The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.</wicket:t></p>
 			<form wicket:id="primaryForm">
 				<div class="form-inline">
@@ -17,8 +17,8 @@
 			</form>
 		</section>
 
-		<section wicket:id="backupEmailAddresses" class="mb-5 border-bottom pb-5">
-			<h6 class="mb-3"><wicket:t>Backup Email Addresses</wicket:t></h6>
+		<section wicket:id="backupEmailAddresses" class="mb-4 border-bottom pb-4">
+			<div class="font-weight-boldest mb-3"><wicket:t>Backup Email Addresses</wicket:t></div>
 			<p class="text-muted font-size-sm"><wicket:t>Verified backup email addresses can be used for password recovery and to identify your commits.</wicket:t></p>
 			<wicket:enclosure child="list">
 				<table class="table table-borderless w-auto mb-3">
@@ -44,7 +44,7 @@
 		</section>
 
 		<section>
-			<h6 class="mb-3"><wicket:t>Email Address Privacy</wicket:t></h6>
+			<div class="font-weight-boldest mb-3"><wicket:t>Email Address Privacy</wicket:t></div>
 			<form wicket:id="privacyForm">
 				<div class="checkbox-inline mb-3">
 					<label wicket:id="label" class="checkbox">

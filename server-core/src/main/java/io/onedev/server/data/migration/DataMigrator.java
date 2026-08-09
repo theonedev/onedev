@@ -5,6 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,6 +82,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.GpgUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.SiteSyncUtils;
@@ -9260,6 +9262,24 @@ public class DataMigrator {
 						if (valueElement != null) {
 							valueElement.addElement("noreplyEmailDomain")
 									.setText(SystemSetting.DEFAULT_NOREPLY_EMAIL_DOMAIN);
+						}
+					} else if (element.elementTextTrim("key").equals("GPG")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element encodedSigningKeyElement = valueElement.element("encodedSigningKey");
+							if (encodedSigningKeyElement != null) {
+								try {
+									var generator = GpgUtils.generateKeyRingGenerator(
+											User.SYSTEM_NAME + "<" + User.SYSTEM_NAME.toLowerCase() + "@"
+													+ SystemSetting.DEFAULT_NOREPLY_EMAIL_DOMAIN + ">");
+									var baos = new ByteArrayOutputStream();
+									generator.generateSecretKeyRing().encode(baos);
+									encodedSigningKeyElement.setText(
+											JVM.getBase64Codec().encode(baos.toByteArray()));
+								} catch (Exception e) {
+									throw new RuntimeException(e);
+								}
+							}
 						}
 					}
 				}
