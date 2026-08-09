@@ -166,14 +166,14 @@ onedev.server.layout = {
 		var height = $newVersionStatusIcon[0].height;
 
 		var newVersionStatus;
-		if (width == 17 && height == 17)
-			newVersionStatus = "none";
-		else if (width == 16 && height == 16)
+		if (width == 16 && height == 16)
 			newVersionStatus = "normal";
 		else if (width == 17 && height == 16)
 			newVersionStatus = "warning";
-		else
+		else if (width == 16 && height == 17)
 			newVersionStatus = "danger";
+		else
+			newVersionStatus = "none";
 
 		if (newVersionStatus == "none") {
 			$newVersionStatusIcon.parent().hide();
