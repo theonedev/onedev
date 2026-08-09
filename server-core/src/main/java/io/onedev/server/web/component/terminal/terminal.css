@@ -80,11 +80,6 @@
 		display: inline;
 	}
 
-	.terminal-container.terminal-tmux-copy-mode > .terminal {
-		touch-action: none;
-		overscroll-behavior: none;
-	}
-
 	.terminal-container > .terminal-mobile-keys {
 		display: flex;
 	}
