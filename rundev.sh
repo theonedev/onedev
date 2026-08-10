@@ -7,7 +7,7 @@ cd "$ROOT"
 
 export MAVEN_OPTS="--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED --add-modules=java.se --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens=java.base/sun.nio.fs=ALL-UNNAMED"
 
-mvn -pl server-product -am -q compile
+#mvn -pl server-product -am -q compile
 mvn -pl server-product -q dependency:build-classpath -Dmdep.outputFile=target/deps-classpath.txt
 
 module_cp=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' | tr '\n' ':' | sed 's/:$//')
