@@ -40,7 +40,7 @@ jobs:
 
         projectDir=`pwd`
 
-        curl -H "Authorization: Bearer @secret:onedev-token@" -f -G -X DELETE https://code.onedev.io/~api/packages --data-urlencode 'query="Name" is "io.onedev:server*" and "Version" is "@build_version@"'
+        curl -H "Authorization: Bearer @secret:onedev-token@" -f -G -X DELETE https://code.onedev.io/~api/packages --data-urlencode 'query="Type" is "Maven" and "Name" is "io.onedev:server*" and "Version" is "@build_version@"'
 
         mvn -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
 
@@ -127,6 +127,8 @@ jobs:
 
         cd $projectDir/server-product/helm
         ./prepare.sh
+
+        curl -H "Authorization: Bearer @secret:onedev-token@" -f -G -X DELETE https://code.onedev.io/~api/packages --data-urlencode 'query="Type" is "Helm" and "Name" is "onedev" and "Version" is "@build_version@"'
 
         cd $projectDir/server-product/target/helm-chart
         curl -u @job_token@:@secret:onedev-token@ -X POST --upload-file ./onedev-${buildVersion}.tgz https://code.onedev.io/onedev/~helm
