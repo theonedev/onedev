@@ -9,3 +9,9 @@ Never modify generated translation files, including any `Translation_*.java`
 files and files under
 `server-core/src/main/java/io/onedev/server/web/translation/`. Translation
 files are generated automatically.
+
+For local development, start the OneDev server with `./dev.sh run` from the
+repository root. The server can hot-load changed classes. Use `./dev.sh build`
+to compile them; the first run performs a full compile, while subsequent runs
+compile only the changes. Watch the server console for reload errors and
+restart the server if one occurs.
