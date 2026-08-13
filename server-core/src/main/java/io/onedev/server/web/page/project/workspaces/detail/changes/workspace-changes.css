@@ -9,10 +9,17 @@
 		min-width: 320px !important;
 	}
 }
-@media (max-width: 767.98px) {
+/* Keep in sync with NARROW_MEDIA_QUERY in WorkspaceChangesPage.java: the diff pane is too
+   cramped to be useful here, so diffs are shown in a dropdown instead */
+@media (max-width: 991.98px) {
 	.workspace-changes>.changes-sidebar {
-		max-width: 240px !important;
-		min-width: 240px !important;
+		max-width: none !important;
+		min-width: 0 !important;
+		border-right: none !important;
+	}
+	.workspace-changes>.diff-content,
+	.workspace-changes>.no-selection {
+		display: none !important;
 	}
 }
 .dark-mode .workspace-changes>.changes-sidebar {
@@ -167,4 +174,21 @@
 .dark-mode .workspace-changes>.diff-content>.diff-header {
 	background: var(--dark-mode-light-dark);
 	border-bottom-color: var(--dark-mode-lighter-dark) !important;
+}
+.floating>.content>.diff-dropdown {
+	width: 92vw;
+	max-width: 800px;
+	max-height: 70vh;
+}
+.floating>.content>.diff-dropdown>.diff-header {
+	background: var(--light);
+	border-bottom-color: var(--light-gray) !important;
+	border-radius: 0.42rem 0.42rem 0 0;
+}
+.dark-mode .floating>.content>.diff-dropdown>.diff-header {
+	background: var(--dark-mode-light-dark);
+	border-bottom-color: var(--dark-mode-lighter-dark) !important;
+}
+.floating>.content>.diff-dropdown>.diff-panel {
+	min-height: 0;
 }

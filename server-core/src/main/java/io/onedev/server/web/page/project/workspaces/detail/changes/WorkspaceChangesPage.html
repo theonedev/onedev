@@ -107,4 +107,15 @@
 			<wicket:t>Select a file to view changes</wicket:t>
 		</div>
 	</div>	
+	<wicket:fragment wicket:id="diffDropdownFrag">
+		<div class="diff-dropdown d-flex flex-column">
+			<div class="diff-header d-flex align-items-center px-3 py-2 border-bottom">
+				<span wicket:id="diffFileName" class="font-weight-bold text-truncate"></span>
+				<a wicket:id="close" class="btn btn-xs btn-icon btn-hover-primary flex-shrink-0 ml-auto" t:data-tippy-content="Close">
+					<wicket:svg href="times" class="icon"/>
+				</a>
+			</div>
+			<div wicket:id="diffPanel" class="diff-panel flex-grow-1 overflow-auto"></div>
+		</div>
+	</wicket:fragment>
 </wicket:extend>

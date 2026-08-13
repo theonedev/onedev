@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -25,6 +26,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -42,6 +44,8 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 import io.onedev.server.web.component.fileview.FileViewPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
 import io.onedev.agent.workspace.GitExecutionResult;
@@ -51,6 +55,12 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_FILE = "file";
+
+	/**
+	 * Matches viewports on which the diff pane is hidden by css and diffs are shown in a
+	 * dropdown instead. Keep in sync with workspace-changes.css.
+	 */
+	private static final String NARROW_MEDIA_QUERY = "(max-width: 991.98px)";
 
 	private String commitMessage;
 
@@ -470,18 +480,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			item.add(new AttributeAppender("class", " active"));
 		}
 
-		AjaxLink<Void> fileLink = new AjaxLink<>("fileLink") {
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				selectedFile = entry.path;
-				selectedConflicted = true;
-				showDiff(target, entry);
-				pushState(target);
-				target.appendJavaScript(
-						"$('.file-list > li').removeClass('active');"
-						+ "$('#" + item.getMarkupId() + "').addClass('active');");
-			}
-		};
+		DropdownLink fileLink = newFileLink(item, entry);
 		item.add(fileLink);
 
 		String fileName = entry.path;
@@ -531,19 +530,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			item.add(new AttributeAppender("class", " active"));
 		}
 
-		AjaxLink<Void> fileLink = new AjaxLink<>("fileLink") {
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				selectedFile = entry.path;
-				selectedStaged = entry.staged;
-				selectedConflicted = false;
-				showDiff(target, entry);
-				pushState(target);
-				target.appendJavaScript(
-						"$('.file-list > li').removeClass('active');"
-						+ "$('#" + item.getMarkupId() + "').addClass('active');");
-			}
-		};
+		DropdownLink fileLink = newFileLink(item, entry);
 		item.add(fileLink);
 
 		Label statusLabel = new Label("status", String.valueOf(entry.displayStatus));
@@ -630,21 +617,61 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		}
 	}
 
-	private void showDiff(AjaxRequestTarget target, FileEntry entry) {
-		diffContent.setVisible(true);
-		noSelection.setVisible(false);
+	/**
+	 * Clicking a file shows its diff in the side pane, except on narrow viewports where the
+	 * pane is hidden by css and the diff is shown in a dropdown instead. Only the browser
+	 * knows which of the two applies, hence the extra ajax parameter.
+	 */
+	private DropdownLink newFileLink(ListItem<FileEntry> item, FileEntry entry) {
+		return new DropdownLink("fileLink") {
 
-		if (entry.conflicted) {
-			diffContent.replace(new Label("diffFileName", entry.path
-					+ " \u2014 " + getConflictDescription(entry.indexStatus, entry.workTreeStatus)));
-			showConflictDiff(entry);
-		} else {
-			diffContent.replace(new Label("diffFileName", entry.path));
-			showRegularDiff(entry);
-		}
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getDynamicExtraParameters().add(
+						"return {narrow: window.matchMedia(\"" + NARROW_MEDIA_QUERY + "\").matches};");
+			}
 
-		target.add(diffContent);
-		target.add(noSelection);
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				if (isNarrow()) {
+					super.onClick(target);
+				} else {
+					selectedFile = entry.path;
+					selectedStaged = entry.staged;
+					selectedConflicted = entry.conflicted;
+					showDiffContent(entry);
+					target.add(diffContent);
+					target.add(noSelection);
+					pushState(target);
+					target.appendJavaScript(
+							"$('.file-list > li').removeClass('active');"
+							+ "$('#" + item.getMarkupId() + "').addClass('active');");
+				}
+			}
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment fragment = new Fragment(id, "diffDropdownFrag", WorkspaceChangesPage.this);
+				fragment.add(new Label("diffFileName", getDiffTitle(entry)));
+				fragment.add(new AjaxLink<Void>("close") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						dropdown.close();
+					}
+
+				});
+				fragment.add(newDiffPanel("diffPanel", entry));
+				return fragment;
+			}
+
+		};
+	}
+
+	private boolean isNarrow() {
+		return RequestCycle.get().getRequest().getRequestParameters()
+				.getParameterValue("narrow").toBoolean(false);
 	}
 
 	private void refreshAll(AjaxRequestTarget target) {
@@ -688,54 +715,61 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		diffContent.setVisible(true);
 		noSelection.setVisible(false);
 
+		diffContent.replace(new Label("diffFileName", getDiffTitle(entry)));
+		diffContent.replace(newDiffPanel("diffPanel", entry));
+	}
+
+	private String getDiffTitle(FileEntry entry) {
 		if (entry.conflicted) {
-			diffContent.replace(new Label("diffFileName", entry.path
-					+ " \u2014 " + getConflictDescription(entry.indexStatus, entry.workTreeStatus)));
-			showConflictDiff(entry);
+			return entry.path + " \u2014 "
+					+ getConflictDescription(entry.indexStatus, entry.workTreeStatus);
 		} else {
-			diffContent.replace(new Label("diffFileName", entry.path));
-			showRegularDiff(entry);
+			return entry.path;
 		}
 	}
 
-	private void showRegularDiff(FileEntry entry) {
+	private Component newDiffPanel(String id, FileEntry entry) {
+		if (entry.conflicted)
+			return newConflictDiffPanel(id, entry);
+		else
+			return newRegularDiffPanel(id, entry);
+	}
+
+	private Component newMessagePanel(String id, String message) {
+		return new Label(id, message).add(AttributeModifier.replace("class",
+				"d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center"));
+	}
+
+	private Component newRegularDiffPanel(String id, FileEntry entry) {
 		if (entry.displayStatus == 'U') {
 			FileData fileData = workspaceService.readFileData(getWorkspace(), entry.path);
-			if (fileData != null) {
-				diffContent.replace(new FileViewPanel("diffPanel", Model.of(fileData)));
-			} else {
-				diffContent.replace(new Label("diffPanel", _T("File not found"))
-					.add(AttributeModifier.replace("class", "d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center")));			
-			}
-			return;
+			if (fileData != null)
+				return new FileViewPanel(id, Model.of(fileData));
+			else
+				return newMessagePanel(id, _T("File not found"));
 		}
 
 		String diffOutput = getDiffOutput(entry);
 		if (isBinaryDiff(diffOutput)) {
-			diffContent.replace(new Label("diffPanel", _T("Binary file"))
-					.add(AttributeModifier.replace("class", "d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center")));
+			return newMessagePanel(id, _T("Binary file"));
 		} else {
 			List<List<String>> parsed = parseDiffToOldNewLines(diffOutput);
-			diffContent.replace(new PlainTextDiffPanel("diffPanel",
-					parsed.get(0), parsed.get(1), true, entry.path));
+			return new PlainTextDiffPanel(id, parsed.get(0), parsed.get(1), true, entry.path);
 		}
 	}
 
-	private void showConflictDiff(FileEntry entry) {
+	private Component newConflictDiffPanel(String id, FileEntry entry) {
 		if (entry.indexStatus == 'D' && entry.workTreeStatus == 'D') {
-			diffContent.replace(new Label("diffPanel",
-					_T("Both sides deleted this file") + ". "
-					+ _T("Mark as resolved to confirm the deletion, or restore the file in terminal."))
-					.add(AttributeModifier.replace("class", "d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center")));
-			return;
+			return newMessagePanel(id, _T("Both sides deleted this file") + ". "
+					+ _T("Mark as resolved to confirm the deletion, or restore the file in terminal."));
 		}
 
 		var fileData = workspaceService.readFileData(getWorkspace(), entry.path);
 		if (fileData != null) {
-			diffContent.replace(new FileViewPanel("diffPanel", Model.of(fileData)));
+			return new FileViewPanel(id, Model.of(fileData));
 		} else {
-			diffContent.replace(new Label("diffPanel", getConflictDescription(entry.indexStatus, entry.workTreeStatus) + ". " + _T("Unable to read file from the working directory. Please resolve this conflict in the terminal and then mark as resolved."))
-					.add(AttributeModifier.replace("class", "d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center")));
+			return newMessagePanel(id, getConflictDescription(entry.indexStatus, entry.workTreeStatus)
+					+ ". " + _T("Unable to read file from the working directory. Please resolve this conflict in the terminal and then mark as resolved."));
 		}
 	}
 
