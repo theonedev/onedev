@@ -2,6 +2,7 @@ package io.onedev.server.plugin.provisioner.servershell;
 
 import static io.onedev.agent.AgentUtils.testCommands;
 import static io.onedev.agent.workspace.WorkspaceUtils.setupShellProvisioned;
+import static io.onedev.agent.workspace.WorkspaceUtils.teardownShellProvisioned;
 import static io.onedev.agent.workspace.WorkspaceUtils.testTmuxAvailability;
 import static io.onedev.k8shelper.WorkspaceHelper.buildEnvVars;
 import static io.onedev.server.workspace.ServerProvisionerUtils.getWorkDir;
@@ -170,8 +171,8 @@ public class ServerShellProvisioner extends WorkspaceProvisioner implements Test
 			cacheProvisioners.add(cacheProvisioner);
 		}
 
-		if (context.getSetupScriptConfig() != null)
-			setupShellProvisioned(context.getSetupScriptConfig(), workspaceDir, envVars, workspaceLogger);
+		var scriptConfig = context.getScriptConfig();
+		setupShellProvisioned(scriptConfig, workspaceDir, envVars, workspaceLogger);
 
 		return new WorkspaceRuntime() {
 
@@ -217,9 +218,10 @@ public class ServerShellProvisioner extends WorkspaceProvisioner implements Test
 					new CountDownLatch(1).await();
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
-				} finally {					
+				} finally {
 					try {
-						for (var cacheProvisioner : cacheProvisioners) 
+						teardownShellProvisioned(scriptConfig, workspaceDir, envVars, workspaceLogger);
+						for (var cacheProvisioner : cacheProvisioners)
 							cacheProvisioner.upload(workspaceDir, workspaceLogger);
 					} finally {
 						for (var shellId : getShellLabels().keySet())

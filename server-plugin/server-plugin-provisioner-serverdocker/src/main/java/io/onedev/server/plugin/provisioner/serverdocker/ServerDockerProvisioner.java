@@ -37,6 +37,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.agent.AgentUtils;
+import io.onedev.agent.AwaitableFutureTask;
 import io.onedev.agent.workspace.FileData;
 import io.onedev.agent.workspace.GitExecutionResult;
 import io.onedev.agent.workspace.WorkspaceUtils;
@@ -346,10 +347,9 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 
 		var containerWorkspacePath = WORKSPACE_PATH;
 
-		var setupScriptConfig = context.getSetupScriptConfig();
-		var entrypointArgs = WorkspaceHelper.buildEntrypointArgs(setupScriptConfig, true);
-		if (setupScriptConfig != null)
-			WorkspaceHelper.writeSetupScript(workspaceDir, setupScriptConfig);
+		var scriptConfig = context.getScriptConfig();
+		var entrypointArgs = WorkspaceHelper.buildEntrypointArgs(scriptConfig, true);
+		WorkspaceHelper.writeScripts(workspaceDir, scriptConfig);
 
 		var containerReadyFile = new File(workspaceDir, CONTAINER_READY_FILE);
 		if (containerReadyFile.exists())
@@ -386,7 +386,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 				});
 			}		
 
-			var future = OneDev.getInstance(ExecutorService.class).submit(() -> {
+			var future = new AwaitableFutureTask<Void>(() -> {
 				workspaceLogger.log("Starting docker container...");
 
 				callWithRegistryLogins(docker, allRegistryLogins, () -> {
@@ -430,7 +430,9 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 						throw new ExplicitException("Docker container exited with code " + executeResult.getReturnCode());
 					return null;
 				});
+				return null;
 			});
+			OneDev.getInstance(ExecutorService.class).execute(future);
 
 			try {
 				awaitContainerReady(future, containerReadyFile);
@@ -477,6 +479,11 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 							future.get();
 						} catch (InterruptedException e) {
 							future.cancel(true);
+							/*
+							 * Wait for the container to stop, so that teardown commands defined in 
+							 * its entrypoint finish before cache and user data are uploaded below
+							 */
+							future.await();
 							throw new RuntimeException(e);
 						} catch (ExecutionException e) {
 							throw new RuntimeException(e);

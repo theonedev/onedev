@@ -39,6 +39,19 @@ public class PosixShell extends WorkspaceShell {
 		super.setSetupCommands(setupCommands);
 	}
 
+	@Editable(order=300, descriptionProvider="getTeardownCommandDescription")
+	@Interpolative
+	@Code(language=Code.SHELL, variableProvider="suggestVariables")
+	@Override
+	public String getTeardownCommands() {
+		return super.getTeardownCommands();
+	}
+
+	@Override
+	public void setTeardownCommands(String teardownCommands) {
+		super.setTeardownCommands(teardownCommands);
+	}
+
 	@Override
 	public ShellFacility getFacility() {
 		return new PosixFacility(shell);

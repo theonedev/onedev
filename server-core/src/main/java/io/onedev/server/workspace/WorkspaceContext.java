@@ -12,7 +12,7 @@ import org.jspecify.annotations.Nullable;
 import io.onedev.k8shelper.CacheConfigFacade;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.ConfigFileFacade;
-import io.onedev.k8shelper.SetupScriptConfig;
+import io.onedev.k8shelper.ScriptConfig;
 import io.onedev.k8shelper.UserDataFacade;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.model.support.workspace.spec.CacheConfig;
@@ -161,18 +161,20 @@ public class WorkspaceContext implements Serializable {
 				.collect(toList());
 	}
 
-	@Nullable
-	public SetupScriptConfig getSetupScriptConfig() {
+	public ScriptConfig getScriptConfig() {
 		var shell = spec.getShell();
-		if (shell.getSetupCommands() != null) {
-			return new SetupScriptConfig(
-					shell.getFacility().normalizeCommands(shell.getSetupCommands()),
-					shell.getFacility().getScriptExtension(),
-					shell.getFacility().getExecutable(),
-					shell.getFacility().getScriptOptions());
-		} else {
-			return null;
-		}
+		var facility = shell.getFacility();
+		return new ScriptConfig(
+				normalizeCommands(shell.getSetupCommands()),
+				normalizeCommands(shell.getTeardownCommands()),
+				facility.getScriptExtension(),
+				facility.getExecutable(),
+				facility.getScriptOptions());
+	}
+
+	@Nullable
+	private String normalizeCommands(@Nullable String commands) {
+		return commands != null ? spec.getShell().getFacility().normalizeCommands(commands) : null;
 	}
 
 }

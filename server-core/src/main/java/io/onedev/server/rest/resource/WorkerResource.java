@@ -286,7 +286,7 @@ public class WorkerResource {
 				context.getCacheConfigFacades(),
 				context.getUserDataFacades(),
 				context.getConfigFileFacades(),
-				context.getSetupScriptConfig());
+				context.getScriptConfig());
 		return SerializationUtils.serialize(data);
 	}
 

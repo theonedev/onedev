@@ -39,6 +39,19 @@ public class PowerShell extends WorkspaceShell {
 		super.setSetupCommands(setupCommands);
 	}
 
+	@Editable(order=200, descriptionProvider="getTeardownCommandDescription")
+	@Code(language=Code.POWER_SHELL, variableProvider="suggestVariables")
+	@Interpolative
+	@Override
+	public String getTeardownCommands() {
+		return super.getTeardownCommands();
+	}
+
+	@Override
+	public void setTeardownCommands(String teardownCommands) {
+		super.setTeardownCommands(teardownCommands);
+	}
+
 	@Override
 	public ShellFacility getFacility() {
 		return new PowerShellFacility(powershell);
