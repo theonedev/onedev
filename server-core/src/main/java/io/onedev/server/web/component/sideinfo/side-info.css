@@ -16,19 +16,19 @@ div.side-info {
 	border-left: 1px solid var(--dark-mode-light-dark);
 	background: var(--dark-mode-dark);
 }
-div.side-info>.header, div.side-info>.footer {
+div.side-info>.content>.header, div.side-info>.content>.footer {
 	padding: 1.5rem 2rem;
 }
-div.side-info>.body {
+div.side-info>.content>.body {
 	padding: 2rem 2.25rem;
 }
-div.side-info>.header .close {
+div.side-info>.content>.header .close {
 	border-left: 1px solid var(--secondary);
 	margin-left: 0.6rem;
 	padding-left: 0.6rem;
 	display: flex;
 }
-.dark-mode div.side-info>.header .close {
+.dark-mode div.side-info>.content>.header .close {
 	border-left-color: var(--dark-mode-dark-gray);
 }
 
@@ -40,14 +40,12 @@ a.side-info {
 	display: none;
 }
 
-/* Pinned pane on wide viewports (non-overlay layouts): stick under top
-   chrome while sharing the page scroller — no inner scrollbar / max-height.
-   top: 0 is relative to .autofit, which already sits below the fixed topbar. */
+/* Stretch the pane so its border spans the full content height, while keeping
+   its content pinned under the top chrome in the shared page scroller. */
 @media(min-width: 1199px) {
-	div.side-info {
+	div.side-info>.content {
 		position: sticky;
 		top: 0;
-		align-self: flex-start;
 	}
 	div.side-info.closed {
 		width: 0;
@@ -71,6 +69,9 @@ a.side-info {
 		z-index: 1050;
 		margin: 0;
 	}
+	div.side-info>.content {
+		height: 100%;
+	}
 	.dark-mode div.side-info {
 		box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
 	}
@@ -78,7 +79,7 @@ a.side-info {
 		right: -360px;
 		box-shadow: none;
 	}
-	div.side-info>.body {
+	div.side-info>.content>.body {
 		overflow: auto;
 	}
 }
@@ -94,6 +95,9 @@ a.side-info {
 	margin: 0;
 	width: 360px;
 }
+.hide-side-info div.side-info>.content {
+	height: 100%;
+}
 .dark-mode .hide-side-info div.side-info {
 	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
 }
@@ -106,9 +110,9 @@ a.side-info {
 	overflow: visible;
 	pointer-events: auto;
 }
-.hide-side-info div.side-info>.header .close {
+.hide-side-info div.side-info>.content>.header .close {
 	display: flex;
 }
-.hide-side-info div.side-info>.body {
+.hide-side-info div.side-info>.content>.body {
 	overflow: auto;
 }

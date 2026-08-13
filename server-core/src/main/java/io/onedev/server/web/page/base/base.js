@@ -960,6 +960,31 @@ onedev.server = {
 			var $parents = $autofit.css("overflow", "auto").parents().not("html").not("body");
 			$parents.addClass("autofit-parent");
 			$(".autofit-parent").not($parents).removeClass("autofit-parent");
+
+			/*
+			 * An inner autofit normally clips all ancestors so it is the only scroll container.
+			 * Each autofit-outer boundary keeps that inner sizing behavior below the boundary,
+			 * while allowing sibling overflow to propagate to its nearest outer autofit scroller.
+			 * Processing all ancestor boundaries makes this work at multiple nested scroll levels.
+			 */
+			var $outerScrollParents = $();
+			var $overflowParents = $();
+			$autofit.each(function() {
+				$(this).parents(".autofit-outer").each(function() {
+					var $boundary = $(this);
+					var $outerScrollParent = $boundary.parents(".autofit").first();
+					if ($outerScrollParent.length != 0) {
+						$outerScrollParents = $outerScrollParents.add($outerScrollParent);
+						$overflowParents = $overflowParents
+								.add($boundary)
+								.add($boundary.parentsUntil($outerScrollParent));
+					}
+				});
+			});
+			$outerScrollParents.addClass("autofit-scroll-parent");
+			$(".autofit-scroll-parent").not($outerScrollParents).removeClass("autofit-scroll-parent");
+			$overflowParents.addClass("autofit-overflow-parent");
+			$(".autofit-overflow-parent").not($overflowParents).removeClass("autofit-overflow-parent");
 			$(document).find(".resize-aware").trigger("resized");
 		});
 		

@@ -839,6 +839,13 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 	overflow: hidden !important;
 	min-height: inherit !important;
 }
+/* Applied dynamically for an autofit-outer boundary */
+.autofit-scroll-parent {
+	overflow: auto !important;
+}
+.autofit-overflow-parent {
+	overflow: visible !important;
+}
 span.keycap {
 	white-space: nowrap;
 	border: 1px outset var(--muted);
