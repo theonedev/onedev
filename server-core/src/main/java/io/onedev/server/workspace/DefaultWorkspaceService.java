@@ -1151,14 +1151,14 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 							var workspaceReference = workspace.getReference().toString(project);
 							if (workspace.getStatus() == Workspace.Status.ACTIVE) {
-								String fullPrompt = "### Rules\nYou are talking to an AI user.\n"
+								String systemPrompt = "You are talking to an AI user.\n"
 										+ "When you use sub-agents, do not pause or output 'waiting' messages after they complete. Immediately process their results, write any required changes, and continue the work in this session.\n";
 								if (ai.getAiSetting().getSystemPrompt() != null)
-									fullPrompt += ai.getAiSetting().getSystemPrompt().trim() + "\n";
-								fullPrompt += "\n### User\n" + prompt;
+									systemPrompt += ai.getAiSetting().getSystemPrompt().trim() + "\n";
 								
 								var command = finalApplicableSpec.getShell().decorateRunPromptCommand(
-										finalApplicableSpec.getTaskAutomation().getRunTaskCmd(), fullPrompt.trim(),
+										finalApplicableSpec.getTaskAutomation().getRunTaskCmd(),
+										systemPrompt.trim(), prompt,
 										RUN_PROMPT_SUCCESS_MARKER, RUN_PROMPT_FAILURE_MARKER);
 								var buffer = new StringBuilder();
 								var commandCompleted = new AtomicBoolean(false);

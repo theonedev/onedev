@@ -29,7 +29,7 @@ public class ClaudeCodeInShell extends WorkspaceSpecTemplate {
         shortcutConfig.setCommand("claude");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
 
-        configureTaskAutomation(workspaceSpec, "claude --dangerously-skip-permissions -p --verbose \"$TASK_PROMPT\"");
+        configureTaskAutomation(workspaceSpec, "claude --dangerously-skip-permissions --system-prompt \"$TASK_SYSTEM_PROMPT\" -p --verbose \"$TASK_USER_PROMPT\"");
 
         return workspaceSpec;
     }

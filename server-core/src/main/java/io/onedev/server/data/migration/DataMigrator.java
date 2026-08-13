@@ -9288,4 +9288,26 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate238(File dataDir, Stack<Integer> versions) {
+		var oldClaudeRunTaskCmd = "claude --dangerously-skip-permissions -p --verbose \"$TASK_PROMPT\"";
+		var newClaudeRunTaskCmd = "claude --dangerously-skip-permissions --system-prompt \"$TASK_SYSTEM_PROMPT\" -p --verbose \"$TASK_USER_PROMPT\"";
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element projectElement : dom.getRootElement().elements()) {
+					var workspaceSpecsElement = projectElement.element("workspaceSpecs");
+					for (Element workspaceSpecElement : workspaceSpecsElement.elements()) {
+						var taskAutomationElement = workspaceSpecElement.element("taskAutomation");
+						if (taskAutomationElement != null) {
+							var runTaskCmdElement = taskAutomationElement.element("runTaskCmd");
+							if (runTaskCmdElement != null && oldClaudeRunTaskCmd.equals(runTaskCmdElement.getText()))
+								runTaskCmdElement.setText(newClaudeRunTaskCmd);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

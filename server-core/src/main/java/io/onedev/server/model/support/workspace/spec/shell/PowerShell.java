@@ -45,9 +45,11 @@ public class PowerShell extends WorkspaceShell {
 	}
 
 	@Override
-	public String decorateRunPromptCommand(String command, String prompt,
+	public String decorateRunPromptCommand(String command, String systemPrompt, String userPrompt,
 										   String successMarker, String failureMarker) {
-		return "$env:TASK_PROMPT = " + quote(prompt) + "\n"
+		return "$env:TASK_SYSTEM_PROMPT = " + quote(systemPrompt) + "\n"
+				+ "$env:TASK_USER_PROMPT = " + quote(userPrompt) + "\n"
+				+ "$env:TASK_PROMPT = " + quote(getCombinedTaskPrompt(systemPrompt, userPrompt)) + "\n"
 				+ "$taskSucceeded = $false\n"
 				+ CHECK_TOD_VERSION_COMMAND + "\n"
 				+ "if ($?) { " + command + "; $taskSucceeded = $? }\n"

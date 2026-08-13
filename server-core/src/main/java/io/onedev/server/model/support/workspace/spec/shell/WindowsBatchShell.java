@@ -30,10 +30,12 @@ public class WindowsBatchShell extends WorkspaceShell {
 	}
 
 	@Override
-	public String decorateRunPromptCommand(String command, String prompt,
+	public String decorateRunPromptCommand(String command, String systemPrompt, String userPrompt,
 										   String successMarker, String failureMarker) {
 		return "@setlocal DisableDelayedExpansion\n"
-				+ "@set \"TASK_PROMPT=" + escape(prompt) + "\"\n"
+				+ "@set \"TASK_SYSTEM_PROMPT=" + escape(systemPrompt) + "\"\n"
+				+ "@set \"TASK_USER_PROMPT=" + escape(userPrompt) + "\"\n"
+				+ "@set \"TASK_PROMPT=" + escape(getCombinedTaskPrompt(systemPrompt, userPrompt)) + "\"\n"
 				+ "@" + CHECK_TOD_VERSION_COMMAND + " && ( " + command + " )\n"
 				+ "@if errorlevel 1 (@" + printMarker(failureMarker)
 				+ ") else (@" + printMarker(successMarker) + ")";

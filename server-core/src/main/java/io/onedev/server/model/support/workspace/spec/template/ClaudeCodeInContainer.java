@@ -40,7 +40,7 @@ public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
         userData.getEntries().add(UserDataEntry.of("/home/claude/.claude.json", null));
         workspaceSpec.getUserDatas().add(userData);
 
-        configureTaskAutomation(workspaceSpec, "claude --dangerously-skip-permissions -p --verbose \"$TASK_PROMPT\"");
+        configureTaskAutomation(workspaceSpec, "claude --dangerously-skip-permissions --system-prompt \"$TASK_SYSTEM_PROMPT\" -p --verbose \"$TASK_USER_PROMPT\"");
 
         return workspaceSpec;
     }
