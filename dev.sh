@@ -12,6 +12,14 @@ HOTSWAP_AGENT_VERSION=2.0.3
 ECJ_VERSION=3.38.0
 MAVEN_REPOSITORY="${MAVEN_REPOSITORY:-$HOME/.m2/repository}"
 
+run_maven() {
+	if [ -f server-ee/pom.xml ]; then
+		mvn "$@"
+	else
+		mvn -Pce "$@"
+	fi
+}
+
 artifact_path() {
 	group_path=$(echo "$1" | tr . /)
 	echo "$MAVEN_REPOSITORY/$group_path/$2/$3/$2-$3.jar"
@@ -21,7 +29,7 @@ ensure_artifact() {
 	artifact=$(artifact_path "$1" "$2" "$3")
 	if [ ! -f "$artifact" ]; then
 		echo "Downloading $1:$2:$3..." >&2
-		mvn -q -U dependency:get -Dmaven.repo.local="$MAVEN_REPOSITORY" \
+		run_maven -U dependency:get -Dmaven.repo.local="$MAVEN_REPOSITORY" \
 			-Dartifact="$1:$2:$3:jar" -Dtransitive=false
 	fi
 	if [ ! -f "$artifact" ]; then
@@ -32,7 +40,7 @@ ensure_artifact() {
 }
 
 build_classpath() {
-	mvn -pl server-product -q dependency:build-classpath \
+	run_maven -pl server-product dependency:build-classpath \
 		-Dmdep.outputFile=target/deps-classpath.txt
 
 	module_cp=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
@@ -107,7 +115,7 @@ build_project() {
 
 	if [ ! -d "$build_reference" ]; then
 		echo "Development sandbox not found. Running: mvn compile"
-		mvn compile
+		run_maven compile
 		if [ ! -d "$build_reference" ]; then
 			echo "Maven compile did not create $build_reference" >&2
 			exit 1
@@ -121,13 +129,13 @@ build_project() {
 	if [ -n "$changed_poms" ]; then
 		if echo "$changed_poms" | grep -qx './pom.xml'; then
 			echo "Root pom.xml changed. Running: mvn compile"
-			mvn compile
+			run_maven compile
 		else
 			modules=$(echo "$changed_poms" | while read -r pom; do
 				dirname "${pom#./}"
 			done | sort -u | paste -sd, -)
 			echo "Module POM changes detected. Running: mvn -pl $modules -am -amd compile"
-			mvn -pl "$modules" -am -amd compile
+			run_maven -pl "$modules" -am -amd compile
 		fi
 		touch "$build_reference"
 		return
@@ -159,7 +167,7 @@ case "$1" in
 		;;
 	clean)
 		shift
-		mvn clean "$@"
+		run_maven clean "$@"
 		exit
 		;;
 	run)
