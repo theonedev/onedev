@@ -44,6 +44,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.DataMigrator;
 import io.onedev.server.data.migration.MigrationHelper;
 import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.jetty.MaintenanceProbeServer;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
 
@@ -514,6 +515,7 @@ public class Upgrade extends AbstractPlugin {
 					
 					var maintenanceFile = OneDev.getMaintenanceFile(upgradeDir);
 					FileUtils.touchFile(maintenanceFile);
+					MaintenanceProbeServer.start(upgradeDir);
 					try {
 						var hibernateConfig = new HibernateConfig(upgradeDir);
 						if (!hibernateConfig.isHSQLDialect()) {

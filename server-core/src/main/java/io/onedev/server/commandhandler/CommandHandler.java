@@ -4,6 +4,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.jetty.MaintenanceProbeServer;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -29,14 +30,14 @@ public abstract class CommandHandler extends AbstractPlugin {
 			var maintenanceFile = OneDev.getMaintenanceFile(Bootstrap.installDir);
 			if (maintenanceFile.exists()) {
 				waitForServerStop();
-				return callable.call();
+				return callWithProbe(callable);
 			} else if (!hibernateConfig.isHSQLDialect()) {
 				try (var conn = openConnection(hibernateConfig, Thread.currentThread().getContextClassLoader())) {
 					return callWithLock(conn, () -> {
 						FileUtils.touchFile(maintenanceFile);
 						try {
 							waitForServerStop();
-							return callable.call();
+							return callWithProbe(callable);
 						} finally {
 							FileUtils.deleteFile(maintenanceFile);
 						}
@@ -46,13 +47,19 @@ public abstract class CommandHandler extends AbstractPlugin {
 				FileUtils.touchFile(maintenanceFile);
 				try {
 					waitForServerStop();
-					return callable.call();
+					return callWithProbe(callable);
 				} finally {
 					FileUtils.deleteFile(maintenanceFile);
 				}
 			}
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
+		}
+	}
+
+	private <T> T callWithProbe(Callable<T> callable) throws Exception {
+		try (var ignored = MaintenanceProbeServer.start(Bootstrap.installDir)) {
+			return callable.call();
 		}
 	}
 

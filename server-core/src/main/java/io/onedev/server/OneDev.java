@@ -44,6 +44,7 @@ import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.jetty.JettyService;
+import io.onedev.server.jetty.MaintenanceProbeServer;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.IdService;
 import io.onedev.server.persistence.SessionFactoryService;
@@ -116,43 +117,45 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	@Override
 	public void start() {
 		var maintenanceFile = getMaintenanceFile(Bootstrap.installDir);
-		while (maintenanceFile.exists()) {
-			logger.info("Maintenance in progress, waiting...");
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+		try (var ignored = MaintenanceProbeServer.start(Bootstrap.installDir)) {
+			while (maintenanceFile.exists()) {
+				logger.info("Maintenance in progress, waiting...");
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
 			}
+
+			SecurityUtils.bindAsSystem();
+
+			System.setProperty("hsqldb.reconfig_logging", "false");
+			System.setProperty("hsqldb.method_class_names", "java.lang.Math");
+
+			clusterService.start();
+			sessionFactoryService.start();
+			taskScheduler.start();
+
+			var databasePopulated = clusterService.getHazelcastInstance().getCPSubsystem()
+					.getAtomicLong("databasePopulated");
+			// Do not use database lock as schema update will commit transaction immediately
+			// in MySQL
+			clusterService.initWithLead(databasePopulated, () -> {
+				try (var conn = dataService.openConnection()) {
+					callWithTransaction(conn, () -> {
+						dataService.populateDatabase(conn);
+						return null;
+					});
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				}
+				return 1L;
+			});
+
+			idService.init();
+
+			sessionService.run(() -> listenerRegistry.post(new SystemStarting()));
 		}
-
-		SecurityUtils.bindAsSystem();
-
-		System.setProperty("hsqldb.reconfig_logging", "false");
-		System.setProperty("hsqldb.method_class_names", "java.lang.Math");
-
-		clusterService.start();
-		sessionFactoryService.start();
-		taskScheduler.start();
-
-		var databasePopulated = clusterService.getHazelcastInstance().getCPSubsystem()
-				.getAtomicLong("databasePopulated");
-		// Do not use database lock as schema update will commit transaction immediately
-		// in MySQL
-		clusterService.initWithLead(databasePopulated, () -> {
-			try (var conn = dataService.openConnection()) {
-				callWithTransaction(conn, () -> {
-					dataService.populateDatabase(conn);
-					return null;
-				});
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
-			return 1L;
-		});
-
-		idService.init();
-
-		sessionService.run(() -> listenerRegistry.post(new SystemStarting()));
 		jettyServiceProvider.get().start();
 
 		var manualConfigs = checkData();

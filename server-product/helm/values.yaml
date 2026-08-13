@@ -326,8 +326,10 @@ dnsConfig: {}
 
 # livenessProbe -- Specify the livenessProbe
 # [configuration](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes).
+# OneDev provides `/healthz`; allow for a brief outage while it switches to maintenance mode.
 livenessProbe: {}
 
 # readinessProbe -- Specify the readinessProbe
 # [configuration](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes).
+# OneDev provides `/readyz` for readiness checks. It returns 503 during startup, shutdown, and maintenance.
 readinessProbe: {}

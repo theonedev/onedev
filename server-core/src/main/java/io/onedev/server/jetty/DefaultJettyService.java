@@ -19,6 +19,7 @@ import org.eclipse.jetty.http.HttpCookie.SameSite;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.session.DefaultSessionIdManager;
 import org.eclipse.jetty.server.session.HouseKeeper;
 import org.eclipse.jetty.server.session.SessionDataStoreFactory;
@@ -136,7 +137,12 @@ public class DefaultJettyService implements JettyService, Serializable {
 		gzipHandler.setIncludedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
 		gzipHandler.setExcludedMimeTypes(MimeTypes.OCTET_STREAM);
 
-        server.setHandler(gzipHandler);
+		var handlers = new HandlerList();
+		handlers.addHandler(new ProbeHandler(() -> OneDev.getInstance().isReady()
+				&& !OneDev.getInstance().isStopping()
+				&& !OneDev.getMaintenanceFile(Bootstrap.installDir).exists()));
+		handlers.addHandler(gzipHandler);
+        server.setHandler(handlers);
         
         for (ServerConfigurator configurator: serverConfiguratorsProvider.get()) 
         	configurator.configure(server);
