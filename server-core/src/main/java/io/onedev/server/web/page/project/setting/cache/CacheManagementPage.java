@@ -136,7 +136,7 @@ public class CacheManagementPage extends ProjectSettingPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getCacheService().deleteCache(getProject().getId(), cacheName, cacheChecksum);
+						getCacheService().deleteCache(getProject().getId(), cacheInfo.getKey(), cacheChecksum);
 						Session.get().success(MessageFormat.format(_T("Cache \"{0}\" deleted"), cacheName));
 
 						target.add(cachesTable);
