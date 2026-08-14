@@ -183,18 +183,25 @@ public final class KubernetesUtils {
 		return stoppedContainers;
 	}
 
-	public static void collectContainerLog(Supplier<Commandline> kubectlFactory, String namespace,
-			String podName, String containerName, CollectLogExitCondition exitCondition, TaskLogger taskLogger) {
+	public static Instant collectContainerLog(Supplier<Commandline> kubectlFactory, String namespace,
+		String podName, String containerName, CollectLogExitCondition exitCondition, TaskLogger taskLogger) {
+		return collectContainerLog(kubectlFactory, namespace, podName, containerName, exitCondition, null, taskLogger);
+	}
+
+	@Nullable
+	public static Instant collectContainerLog(Supplier<Commandline> kubectlFactory, String namespace,
+			String podName, String containerName, CollectLogExitCondition exitCondition, 
+			@Nullable Instant sinceInstant, TaskLogger taskLogger) {
 		Thread thread = Thread.currentThread();
 		AtomicBoolean abortError = new AtomicBoolean(false);
-		AtomicReference<Instant> lastInstantRef = new AtomicReference<>(null);
+		AtomicReference<Instant> lastInstantRef = new AtomicReference<>(sinceInstant);
 		AtomicBoolean seenMessageRef = new AtomicBoolean(false);
 
 		while (true) {
 			Commandline kubectl = kubectlFactory.get();
 			kubectl.addArgs("logs", podName, "-c", containerName, "-n", namespace,
 					"--follow", "--timestamps=true");
-			if (lastInstantRef.get() != null)
+			if (lastInstantRef.get() != null) 
 				kubectl.addArgs("--since-time=" + DateTimeFormatter.ISO_INSTANT.format(lastInstantRef.get()));
 
 			class Logger extends LineConsumer {
@@ -202,37 +209,49 @@ public final class KubernetesUtils {
 				private final String sessionId = UUID.randomUUID().toString();
 
 				@Override
-				public void consume(String line) {
+				public void consume(String line) {					
 					if (line.contains("rpc error:") && line.contains("No such container:")
 							|| line.contains("Unable to retrieve container logs for")) {
 						logger.debug(line);
-					} else if (exitCondition instanceof SeenMessage seenMessage && line.contains(seenMessage.getMessage())) {
-						String lastLogMessage = StringUtils.substringBefore(line, seenMessage.getMessage());
-						if (StringUtils.substringAfter(lastLogMessage, " ").length() != 0)
-							consume(lastLogMessage);
-						if (!seenMessageRef.get()) {
-							seenMessageRef.set(true);
-							thread.interrupt();
-						}
 					} else if (line.startsWith("Error from server") || line.startsWith("error:")) {
 						taskLogger.error(line);
 						if (!abortError.get()) {
 							abortError.set(true);
 							thread.interrupt();
 						}
-					} else if (line.contains(" ")) {
-						var timestamp = StringUtils.substringBefore(line, " ");
-						try {
-							Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestamp));
-							if (lastInstantRef.get() == null || lastInstantRef.get().isBefore(instant))
-								lastInstantRef.set(instant);
-							taskLogger.log(unescapeStartCR(StringUtils.substringAfter(line, " ")), sessionId);
-						} catch (DateTimeParseException e) {
-							taskLogger.log(unescapeStartCR(line), sessionId);
-						}
 					} else {
-						taskLogger.log(unescapeStartCR(line), sessionId);
+						var timestampAndMessage = parseTimestampAndMessage(line);
+						var timestamp = timestampAndMessage.getLeft();
+						if (timestamp == null || lastInstantRef.get() == null || timestamp.isAfter(lastInstantRef.get())) {
+							if (timestamp != null) 
+								lastInstantRef.set(timestamp);
+							var message = timestampAndMessage.getRight();
+							if (exitCondition instanceof SeenMessage seenMessage && message.contains(seenMessage.getMessage())) {
+								String lastLogMessage = StringUtils.substringBefore(message, seenMessage.getMessage());
+								if (lastLogMessage.length() != 0) 
+									taskLogger.log(unescapeStartCR(lastLogMessage), sessionId);
+								if (!seenMessageRef.get()) {
+									seenMessageRef.set(true);
+									thread.interrupt();
+								}
+							} else {
+								taskLogger.log(unescapeStartCR(message), sessionId);
+							}	
+						}
 					}
+				}
+
+				private Pair<Instant, String> parseTimestampAndMessage(String line) {
+					if (line.contains(" ")) {
+						try {
+							var timestampString = StringUtils.substringBefore(line, " ");
+							var timestamp = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestampString));
+							var message = StringUtils.substringAfter(line, " ");
+							return new Pair<>(timestamp, message);
+						} catch (DateTimeParseException ignore) {
+						}
+					}
+					return new Pair<>(null, line);
 				}
 
 			};
@@ -256,6 +275,7 @@ public final class KubernetesUtils {
 				}
 			}
 		}
+		return lastInstantRef.get();
 	}
 
 	public static void watchPod(Supplier<Commandline> kubectlFactory, String namespace,
@@ -317,9 +337,7 @@ public final class KubernetesUtils {
 								for (JsonNode containerStatusNode : containerStatusesNode)
 									containerStatusNodes.add(containerStatusNode);
 							}
-
 							abortRef.set(abortChecker.check(nodeName, containerStatusNodes));
-
 							if (abortRef.get() != null) 
 								thread.interrupt();
 						}
@@ -340,7 +358,7 @@ public final class KubernetesUtils {
 				if (abort != null) {
 					if (abort.getErrorMessage() != null)
 						throw new ExplicitException(abort.getErrorMessage());
-					else
+					else 
 						break;
 				} else if (ExceptionUtils.find(e, TimeoutException.class) == null) {
 					throw ExceptionUtils.unchecked(e);
