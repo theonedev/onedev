@@ -225,22 +225,19 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 		});
 
-		head.add(new MenuLink("portMappings") {
+		head.add(new MenuLink("portAccessors") {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				var portHost = workspaceService.getPortHost(getWorkspace());
-
 				var menuItems = new ArrayList<MenuItem>();
-				var mappings = workspaceService.getPortMappings(getWorkspace());
-				for (var entry : mappings.entrySet()) {
+				var urls = workspaceService.getPortUrls(getWorkspace());
+				for (var entry : urls.entrySet()) {
 					var containerPort = entry.getKey();
-					var hostPort = entry.getValue();
-					var url = "http://" + portHost + ":" + hostPort;
+					var url = entry.getValue();
 					menuItems.add(new MenuItem() {
 						@Override
 						public String getLabel() {
-							return "Port " + containerPort + " \u2192 " + hostPort;
+							return "Port " + containerPort;
 						}
 
 						@Override

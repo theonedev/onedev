@@ -1010,6 +1010,24 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Sessional
 	@Override
+	public Map<Integer, String> getPortUrls(Workspace workspace) {
+		var workspaceId = workspace.getId();
+		var server = workspaceServers.get(workspaceId);
+		if (server == null)
+			return Collections.emptyMap();
+
+		return clusterService.runOnServer(server, new ClusterTask<Map<Integer, String>>() {
+
+			@Override
+			public Map<Integer, String> call() throws Exception {
+				var runtime = workspaceRuntimes.get(workspaceId);
+				return runtime != null ? runtime.getPortUrls() : new HashMap<>();
+			}
+		});
+	}
+
+	@Sessional
+	@Override
 	public String getPortHost(Workspace workspace) {
 		var workspaceId = workspace.getId();
 		var server = workspaceServers.get(workspaceId);

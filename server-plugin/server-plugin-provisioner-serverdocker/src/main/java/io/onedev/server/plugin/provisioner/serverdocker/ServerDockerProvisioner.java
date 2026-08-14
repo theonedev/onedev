@@ -6,6 +6,7 @@ import static io.onedev.agent.AgentUtils.getOsIds;
 import static io.onedev.agent.AgentUtils.newDockerKiller;
 import static io.onedev.agent.workspace.WorkspaceUtils.awaitContainerReady;
 import static io.onedev.agent.workspace.WorkspaceUtils.getPublishedPorts;
+import static io.onedev.agent.workspace.WorkspaceUtils.getTailscaleIp;
 import static io.onedev.agent.workspace.WorkspaceUtils.upload;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static io.onedev.k8shelper.WorkspaceHelper.CONTAINER_READY_FILE;
@@ -444,6 +445,8 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 					portMappings = new HashMap<>();
 
 				var portHost = getPortHost();
+				var tailscaleIp = getTailscaleIp(newDocker(), containerName,
+						context.getScriptConfig(), context.getSpec().getContainerPorts());
 				
 				var containerWorkDirPath = containerWorkspacePath + "/work";
 				return new WorkspaceRuntime() {
@@ -503,6 +506,11 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 					@Override
 					public String getPortHost() {
 						return portHost;
+					}
+
+					@Override
+					protected String getTailscaleIp() {
+						return tailscaleIp;
 					}
 
 				};

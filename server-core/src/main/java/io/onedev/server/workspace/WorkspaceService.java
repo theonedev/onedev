@@ -66,6 +66,8 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	Map<Integer, Integer> getPortMappings(Workspace workspace);
 
+	Map<Integer, String> getPortUrls(Workspace workspace);
+
 	String getPortHost(Workspace workspace);
 
 	void terminateShell(Workspace workspace, String shellId);

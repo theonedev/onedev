@@ -99,4 +99,23 @@ public abstract class WorkspaceRuntime {
         return Collections.emptyMap();
     }
 
+    @Nullable
+    protected String getTailscaleIp() {
+        return null;
+    }
+
+    public Map<Integer, String> getPortUrls() {
+        var tailscaleIp = getTailscaleIp();
+        var host = tailscaleIp != null ? tailscaleIp : getPortHost();
+        if (host.contains(":"))
+            host = "[" + host + "]";
+
+        var urls = new LinkedHashMap<Integer, String>();
+        for (var entry : getPortMappings().entrySet()) {
+            var port = tailscaleIp != null ? entry.getKey() : entry.getValue();
+            urls.put(entry.getKey(), "http://" + host + ":" + port);
+        }
+        return urls;
+    }
+
 }
