@@ -172,7 +172,7 @@ public class AgentListPage extends AdministrationPage {
 					@Override
 					public boolean isSavedQueriesVisible() {
 						savedQueries.configure();
-						return savedQueries.isVisible();
+						return savedQueries.isOpen();
 					}
 
 				};

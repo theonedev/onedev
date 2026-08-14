@@ -20,6 +20,8 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -27,6 +29,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -85,6 +88,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new SavedQueriesCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new SavedQueriesResourceReference()));
 	}
 
 	@Override
@@ -100,7 +104,10 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!closed);
+	}
+
+	public boolean isOpen() {
+		return !closed;
 	}
 
 	private void toggle(IPartialPageRequestHandler handler) {
@@ -129,6 +136,12 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 		add(new AjaxLink<Void>("close") {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(SavedQueriesDropdownListener.close());
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				toggle(target);
 				send(getPage(), Broadcast.BREADTH, new SavedQueriesClosed(target));
@@ -140,6 +153,14 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 		add(new ModalLink("edit") {
 
 			private static final String TAB_PANEL_ID = "tabPanel";
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				super.onClick(target);
+				target.appendJavaScript(String.format(
+						"onedev.server.savedQueries.closeDropdown(document.getElementById('%s'));",
+						getMarkupId(true)));
+			}
 			
 			@Override
 			protected void onConfigure() {
@@ -449,6 +470,14 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			
 		});		
 		
+		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return closed ? "saved-queries-panel saved-queries-closed" : "saved-queries-panel";
+			}
+
+		}));
 		setOutputMarkupPlaceholderTag(true);
 	}
 	

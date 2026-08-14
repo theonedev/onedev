@@ -74,6 +74,7 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -201,7 +202,7 @@ public abstract class PackListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new AjaxLink<Void>("showSavedQueries") {
+		add(new SavedQueriesLink("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -214,7 +215,7 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getQuerySaveSupport() != null && !getQuerySaveSupport().isSavedQueriesVisible());
+				setVisible(getQuerySaveSupport() != null);
 			}
 
 			@Override

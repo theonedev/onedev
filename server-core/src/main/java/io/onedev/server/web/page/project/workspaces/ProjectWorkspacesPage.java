@@ -234,7 +234,7 @@ public class ProjectWorkspacesPage extends ProjectPage {
 					@Override
 					public boolean isSavedQueriesVisible() {
 						savedQueries.configure();
-						return savedQueries.isVisible();
+						return savedQueries.isOpen();
 					}
 
 				};

@@ -634,23 +634,19 @@ pre>.actions>a {
 	margin-right: 0.5rem;
 	flex: 0 0 auto;
 	max-width: 300px;
+	align-self: stretch;
+}
+.side-main>.side>* {
+	position: sticky;
+	top: 0.5rem;
+	height: fit-content;
+}
+.side-main>.side.card>.card {
+	background-color: transparent;
+	box-shadow: none;
 }
 .side-main>.main {
 	flex: 1 1 0;
-}
-
-@media(max-width: 991px) {
-	.side-main.side-main-wrap {
-		flex-wrap: wrap;
-	}
-	.side-main.side-main-wrap>* {
-		flex: 0 0 100%;
-		max-width: inherit;
-	}
-	.side-main.side-main-wrap>.side {
-		margin-right: 0;
-		margin-bottom: 2rem;
-	}
 }
 
 .card-body .card-body {

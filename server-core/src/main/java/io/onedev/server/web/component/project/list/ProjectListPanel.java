@@ -107,6 +107,7 @@ import io.onedev.server.web.component.project.stats.pack.PackStatsPanel;
 import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStatsPanel;
 import io.onedev.server.web.component.project.stats.workspace.WorkspaceStatsPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.page.base.BasePage;
@@ -295,7 +296,7 @@ public class ProjectListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new AjaxLink<Void>("showSavedQueries") {
+		add(new SavedQueriesLink("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -307,7 +308,7 @@ public class ProjectListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getQuerySaveSupport() != null && !getQuerySaveSupport().isSavedQueriesVisible());
+				setVisible(getQuerySaveSupport() != null);
 			}
 
 			@Override

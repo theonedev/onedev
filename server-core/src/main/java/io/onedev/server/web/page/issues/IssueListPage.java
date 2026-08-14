@@ -215,7 +215,7 @@ public class IssueListPage extends LayoutPage {
 					@Override
 					public boolean isSavedQueriesVisible() {
 						savedQueries.configure();
-						return savedQueries.isVisible();
+						return savedQueries.isOpen();
 					}
 
 				};

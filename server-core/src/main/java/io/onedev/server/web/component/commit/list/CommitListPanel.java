@@ -82,6 +82,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
@@ -299,7 +300,7 @@ public abstract class CommitListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new AjaxLink<Void>("showSavedQueries") {
+		add(new SavedQueriesLink("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -312,7 +313,7 @@ public abstract class CommitListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getQuerySaveSupport() != null && !getQuerySaveSupport().isSavedQueriesVisible());
+				setVisible(getQuerySaveSupport() != null);
 			}
 
 			@Override

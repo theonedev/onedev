@@ -104,6 +104,7 @@ import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewerAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -238,7 +239,7 @@ public abstract class PullRequestListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new AjaxLink<Void>("showSavedQueries") {
+		add(new SavedQueriesLink("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -251,7 +252,7 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getQuerySaveSupport() != null && !getQuerySaveSupport().isSavedQueriesVisible());
+				setVisible(getQuerySaveSupport() != null);
 			}
 
 			@Override

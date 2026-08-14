@@ -504,7 +504,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 					@Override
 					public boolean isSavedQueriesVisible() {
 						savedQueries.configure();
-						return savedQueries.isVisible();
+						return savedQueries.isOpen();
 					}
 
 				};
