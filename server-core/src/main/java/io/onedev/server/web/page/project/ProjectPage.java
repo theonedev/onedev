@@ -249,7 +249,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware, Ch
 					Lists.newArrayList(NewIterationPage.class, IterationDetailPage.class, IterationEditPage.class)));
 			if (getProject().isTimeTracking() && isSubscriptionActive() && SecurityUtils.canAccessTimeTracking(getProject())) 
 				issueMenuItems.add(OneDev.getInstance(TimeTrackingService.class).newTimesheetsMenuItem(getProject()));
-			menuItems.add(new SidebarMenuItem.SubMenu("bug", _T("Issues"), issueMenuItems));
+			menuItems.add(new SidebarMenuItem.SubMenu("issue", _T("Issues"), issueMenuItems));
 		}
 
 		if (getProject().isCodeManagement()) {
