@@ -5,10 +5,19 @@
 	--transition-duration: 0.3s;
 	--brand-size: 30px;
 }
+@view-transition {
+	navigation: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+	@view-transition {
+		navigation: none;
+	}
+}
 .LayoutPage>body {
 	position: static !important;
 }
 .sidebar {
+	view-transition-name: sidebar;
 	background-color: var(--dark-mode-dark);
 	width: var(--sidebar-width);
 	position: fixed;
@@ -211,6 +220,7 @@
 }
 
 .topbar {
+	view-transition-name: topbar;
 	position: fixed;
 	display: flex;
 	align-items: center;
@@ -223,6 +233,10 @@
 	z-index: 1030;
 	box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.1);
 	transition: all var(--transition-duration) ease;
+}
+:active-view-transition .sidebar,
+:active-view-transition .topbar {
+	transition: none;
 }
 .dark-mode .topbar {
 	background: var(--dark-mode-dark);
