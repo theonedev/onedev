@@ -1,5 +1,5 @@
 onedev.server.savedQueries = {
-	breakpoint: 992,
+	breakpoint: 1200,
 
 	showDropdown: function(link) {
 		if (window.innerWidth >= this.breakpoint)

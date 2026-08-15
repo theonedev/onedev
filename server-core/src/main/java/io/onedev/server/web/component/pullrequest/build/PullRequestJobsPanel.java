@@ -164,7 +164,7 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 			}
 			
 		});
-		
+				
 		setOutputMarkupId(true);
 	}
 	

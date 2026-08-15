@@ -1,4 +1,26 @@
-.pagination>li.active>a.btn {
+.pagination>li.active>a.btn, .pagination>li>a.btn.active {
 	color: white;
 	background-color: var(--primary);
+}
+
+.pagination>li.page-forced-visible {
+	display: list-item !important;
+}
+
+@media (max-width: 1399.98px) {
+	.pagination>li.page-distance-3-plus {
+		display: none;
+	}
+}
+
+@media (max-width: 991.98px) {
+	.pagination>li.page-distance-2-plus {
+		display: none;
+	}
+}
+
+@media (max-width: 767.98px) {
+	.pagination>li.page-distance-1-plus {
+		display: none;
+	}
 }

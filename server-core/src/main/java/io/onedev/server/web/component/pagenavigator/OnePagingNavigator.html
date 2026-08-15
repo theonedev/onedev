@@ -1,7 +1,11 @@
 <wicket:panel>
 	<li><a wicket:id="prev" class="prev btn btn-sm btn-light btn-icon mr-2"><wicket:svg href="arrow" class="icon stroke-50 flip-x"/></a></li>
+	<li><a wicket:id="first" class="first page-number btn btn-sm btn-light btn-icon mr-2"><span wicket:id="pageNumber">1</span></a></li>
+	<li class="page-ellipsis page-ellipsis-left d-none"><span class="btn btn-sm btn-light btn-icon mr-2 disabled">&hellip;</span></li>
 	<li wicket:id="navigation">
-		<a wicket:id="pageLink" href="#" class="btn btn-sm btn-light btn-icon mr-2"><span wicket:id="pageNumber">5</span></a>
+		<a wicket:id="pageLink" href="#" class="page-number btn btn-sm btn-light btn-icon mr-2"><span wicket:id="pageNumber">5</span></a>
 	</li>
+	<li class="page-ellipsis page-ellipsis-right d-none"><span class="btn btn-sm btn-light btn-icon mr-2 disabled">&hellip;</span></li>
+	<li><a wicket:id="last" class="last page-number btn btn-sm btn-light btn-icon mr-2"><span wicket:id="pageNumber">10</span></a></li>
 	<li><a wicket:id="next" class="next btn btn-sm btn-light btn-icon"><wicket:svg href="arrow" class="icon stroke-50"/></a></li>
 </wicket:panel>

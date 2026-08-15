@@ -32,13 +32,13 @@
 	max-width: none;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
 	.side-main:has(> .saved-queries-panel:not(.saved-queries-closed)) .show-saved-queries {
 		display: none !important;
 	}
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1199px) {
 	.side-main > .saved-queries-panel {
 		display: none;
 	}

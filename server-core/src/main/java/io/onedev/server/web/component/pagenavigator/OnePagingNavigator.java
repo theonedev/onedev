@@ -13,6 +13,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.DisabledAttributeLinkBehavior;
@@ -21,6 +22,8 @@ import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import org.jspecify.annotations.Nullable;
 
@@ -37,9 +40,46 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		get("first").remove();
-		get("last").remove();
+
+		getPagingNavigation().setViewSize(7);
+
+		var first = (AbstractLink) get("first");
+		first.add(new Label("pageNumber", "1"));
+		first.add(AttributeModifier.replace("data-page-index", "0"));
+		first.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPageable().getCurrentPage() == 0 ? "active" : "";
+			}
+
+		}));
+
+		var last = (AbstractLink) get("last");
+		last.add(new Label("pageNumber", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return String.valueOf(getPageable().getPageCount());
+			}
+
+		}));
+		last.add(AttributeModifier.replace("data-page-index", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return String.valueOf(getPageable().getPageCount() - 1);
+			}
+
+		}));
+		last.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPageable().getCurrentPage() == getPageable().getPageCount() - 1 ? "active" : "";
+			}
+
+		}));
 		
 		add(AttributeAppender.append("class", "pagination justify-content-center align-items-center"));
 		
@@ -62,8 +102,7 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 			@Override
 			protected Link<?> newPagingNavigationLink(String id, IPageable pageable, long pageIndex) {
 				if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
-					return new BookmarkablePageLink<Void>(id, getPage().getClass(),
-							((ParamPagingHistorySupport)pagingHistorySupport).newPageParameters((int) pageIndex));
+					return newParamPagingLink(id, (int) pageIndex, false, false);
 				} else {
 					return new AjaxPagingNavigationLink(id, pageable, pageIndex) {
 
@@ -81,7 +120,17 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 			@Override
 			protected void populateItem(final LoopItem loopItem) {
 				super.populateItem(loopItem);
-				if ((getStartIndex() + loopItem.getIndex()) == pageable.getCurrentPage()) {
+				long pageIndex = getStartIndex() + loopItem.getIndex();
+				loopItem.get("pageLink").add(AttributeModifier.replace("data-page-index", String.valueOf(pageIndex)));
+				loopItem.setVisible(pageIndex != 0 && pageIndex != pageable.getPageCount() - 1);
+				long distance = Math.abs(pageIndex - pageable.getCurrentPage());
+				if (distance >= 1)
+					loopItem.add(AttributeAppender.append("class", "page-distance-1-plus"));
+				if (distance >= 2)
+					loopItem.add(AttributeAppender.append("class", "page-distance-2-plus"));
+				if (distance >= 3)
+					loopItem.add(AttributeAppender.append("class", "page-distance-3-plus"));
+				if (pageIndex == pageable.getCurrentPage()) {
 					loopItem.add(activeAttribute);
 				}
 			}
@@ -91,24 +140,14 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 	@Override
 	protected AbstractLink newPagingNavigationIncrementLink(String id, IPageable pageable, int increment) {
 		AbstractLink link;
-		int pageNumber = (int) pageable.getCurrentPage() + increment;
 		if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
-			link = new BookmarkablePageLink<Void>(id, getPage().getClass(),
-					((ParamPagingHistorySupport)pagingHistorySupport).newPageParameters(pageNumber)) {
-
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setEnabled(pageNumber >= 0 && pageNumber < getPageable().getPageCount());
-				}
-
-			};
-			link.add(new DisabledAttributeLinkBehavior());
+			link = newParamPagingLink(id, increment, true, false);
 		} else {
 			link = new AjaxPagingNavigationIncrementLink(id, pageable, increment) {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					super.onClick(target);
+					int pageNumber = (int) getPageable().getCurrentPage();
 					if (pagingHistorySupport instanceof AjaxPagingHistorySupport)
 						((AjaxPagingHistorySupport)pagingHistorySupport).onPageNavigated(target, pageNumber);
 				}
@@ -120,23 +159,8 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 	@Override
 	protected AbstractLink newPagingNavigationLink(String id, IPageable pageable, int pageNumber) {
 		AbstractLink link;
-		int absolutePageNumber;
-		if (pageNumber == -1)
-			absolutePageNumber = (int) (getPageable().getPageCount()-1);
-		else
-			absolutePageNumber = pageNumber;
 		if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
-			link = new BookmarkablePageLink<Void>(id, getPage().getClass(),
-					((ParamPagingHistorySupport)pagingHistorySupport).newPageParameters(absolutePageNumber)) {
-				
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setEnabled(absolutePageNumber != pageable.getCurrentPage());
-				}
-				
-			};
-			link.add(new DisabledAttributeLinkBehavior());
+			link = newParamPagingLink(id, pageNumber, false, true);
 		} else {
 			link = new AjaxPagingNavigationLink(id, pageable, pageNumber) {
 				@Override
@@ -147,6 +171,42 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 				}
 			};
 		}
+		return link;
+	}
+
+	private BookmarkablePageLink<Void> newParamPagingLink(String id, int pageNumber,
+			boolean relativeToCurrent, boolean disableWhenCurrent) {
+		var link = new BookmarkablePageLink<Void>(id, getPage().getClass()) {
+
+			private int getAbsolutePageNumber() {
+				if (relativeToCurrent)
+					return (int) getPageable().getCurrentPage() + pageNumber;
+				else if (pageNumber == -1)
+					return (int) getPageable().getPageCount() - 1;
+				else
+					return pageNumber;
+			}
+
+			@Override
+			public PageParameters getPageParameters() {
+				return ((ParamPagingHistorySupport) pagingHistorySupport)
+						.newPageParameters(getAbsolutePageNumber());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				int absolutePageNumber = getAbsolutePageNumber();
+				if (relativeToCurrent) {
+					setEnabled(absolutePageNumber >= 0
+							&& absolutePageNumber < getPageable().getPageCount());
+				} else if (disableWhenCurrent) {
+					setEnabled(absolutePageNumber != getPageable().getCurrentPage());
+				}
+			}
+
+		};
+		link.add(new DisabledAttributeLinkBehavior());
 		return link;
 	}
 
