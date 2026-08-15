@@ -151,6 +151,8 @@ usage() {
 	echo "Commands:"
 	echo "  run      Start the dev server and hot-load rebuilt classes; restart if hot loading fails"
 	echo "  build    Build with Maven when needed, otherwise compile changed files with ECJ"
+	echo "  test     Run tests with Maven"
+	echo "  install  Install project artifacts with Maven"
 	echo "  clean    Clean build outputs with Maven"
 }
 
@@ -168,6 +170,16 @@ case "$1" in
 	clean)
 		shift
 		run_maven clean "$@"
+		exit
+		;;
+	install)
+		shift
+		run_maven install "$@"
+		exit
+		;;
+	test)
+		shift
+		run_maven test "$@"
 		exit
 		;;
 	run)
