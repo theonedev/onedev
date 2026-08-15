@@ -25,6 +25,12 @@ public class DefaultDataTable<T, S> extends DataTable<T, S> {
 	public DefaultDataTable(final String id, final List<? extends IColumn<T, S>> columns,
 			final ISortableDataProvider<T, S> dataProvider, final int rowsPerPage, 
 			@Nullable PagingHistorySupport pagingHistorySupport) {
+		this(id, columns, dataProvider, rowsPerPage, pagingHistorySupport, false);
+	}
+
+	public DefaultDataTable(final String id, final List<? extends IColumn<T, S>> columns,
+			final ISortableDataProvider<T, S> dataProvider, final int rowsPerPage,
+			@Nullable PagingHistorySupport pagingHistorySupport, boolean showCount) {
 		super(id, columns, dataProvider, rowsPerPage);
 
 		if (pagingHistorySupport != null)
@@ -32,14 +38,18 @@ public class DefaultDataTable<T, S> extends DataTable<T, S> {
 		
 		addTopToolbar(new AjaxFallbackHeadersToolbar<S>(this, dataProvider));
 		
-		addBottomToolbar(new NavigationToolbar(this) {
+		if (showCount) {
+			addBottomToolbar(new ListNavigationToolbar(this, pagingHistorySupport));
+		} else {
+			addBottomToolbar(new NavigationToolbar(this) {
 
-			@Override
-			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new OnePagingNavigator(navigatorId, table, pagingHistorySupport);
-			}
+				@Override
+				protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
+					return new OnePagingNavigator(navigatorId, table, pagingHistorySupport);
+				}
 
-		});
+			});
+		}
 		addBottomToolbar(new NoRecordsToolbar(this, Model.of("Unspecified")));
 	}
 

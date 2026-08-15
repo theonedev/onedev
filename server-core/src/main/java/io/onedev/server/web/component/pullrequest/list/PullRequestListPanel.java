@@ -31,7 +31,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -44,7 +43,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -90,6 +88,7 @@ import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
+import io.onedev.server.web.component.datatable.ListNavigationToolbar;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -98,7 +97,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
@@ -161,7 +159,6 @@ public abstract class PullRequestListPanel extends Panel {
 
 	};
 	
-	private Component countLabel;
 	
 	private DataTable<PullRequest, Void> requestsTable;
 	
@@ -226,7 +223,6 @@ public abstract class PullRequestListPanel extends Panel {
 
 	private void doQuery(AjaxRequestTarget target) {
 		requestsTable.setCurrentPage(0);
-		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -380,7 +376,6 @@ public abstract class PullRequestListPanel extends Panel {
 												if (pullRequest.isOpen())
 													pullRequestService.discard(user, pullRequest, null);
 											}
-											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
@@ -457,7 +452,6 @@ public abstract class PullRequestListPanel extends Panel {
 													auditService.audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
 												}													
 											});
-											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
@@ -583,7 +577,6 @@ public abstract class PullRequestListPanel extends Panel {
 													pullRequestService.discard(user, pullRequest, null);
 											}
 											dataProvider.detach();
-											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
@@ -662,7 +655,6 @@ public abstract class PullRequestListPanel extends Panel {
 												}													
 											});
 											dataProvider.detach();
-											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
@@ -1086,21 +1078,6 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 
-		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
-			@Override
-			public String getObject() {
-				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} pull requests"), String.valueOf(dataProvider.size()));
-				else
-					return _T("found 1 pull request");
-			}
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(dataProvider.size() != 0);
-			}
-		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 
@@ -1172,14 +1149,7 @@ public abstract class PullRequestListPanel extends Panel {
 		if (getPagingHistorySupport() != null)
 			requestsTable.setCurrentPage(getPagingHistorySupport().getCurrentPage());
 		
-		requestsTable.addBottomToolbar(new NavigationToolbar(requestsTable) {
-
-			@Override
-			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new OnePagingNavigator(navigatorId, table, getPagingHistorySupport());
-			}
-			
-		});
+		requestsTable.addBottomToolbar(new ListNavigationToolbar(requestsTable, getPagingHistorySupport()));
 		requestsTable.addBottomToolbar(new NoRecordsToolbar(requestsTable));
 		requestsTable.add(new NoRecordsBehavior());
 		

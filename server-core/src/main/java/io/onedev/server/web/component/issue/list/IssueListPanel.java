@@ -41,7 +41,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -56,7 +55,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -118,6 +116,7 @@ import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.datatable.ListNavigationToolbar;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
@@ -135,7 +134,6 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesLink;
@@ -168,7 +166,6 @@ public abstract class IssueListPanel extends Panel {
 		
 	};
 	
-	private Component countLabel;
 	
 	private DataTable<Issue, Void> issuesTable;
 	
@@ -261,7 +258,6 @@ public abstract class IssueListPanel extends Panel {
 	
 	private void doQuery(AjaxRequestTarget target) {
 		issuesTable.setCurrentPage(0);
-		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -934,7 +930,6 @@ public abstract class IssueListPanel extends Panel {
 										protected void onUpdated(AjaxRequestTarget target) {
 											modal.close();
 											selectionColumn.getSelections().clear();
-											target.add(countLabel);
 											target.add(body);
 											onBatchUpdated(target);
 										}
@@ -1186,7 +1181,6 @@ public abstract class IssueListPanel extends Panel {
 												}													
 											});
 											selectionColumn.getSelections().clear();
-											target.add(countLabel);
 											target.add(body);
 											onBatchDeleted(target);
 										}
@@ -1306,7 +1300,6 @@ public abstract class IssueListPanel extends Panel {
 										protected void onUpdated(AjaxRequestTarget target) {
 											modal.close();
 											selectionColumn.getSelections().clear();
-											target.add(countLabel);
 											target.add(body);
 											onBatchUpdated(target);
 										}
@@ -1562,7 +1555,6 @@ public abstract class IssueListPanel extends Panel {
 											});
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
-											target.add(countLabel);
 											target.add(body);
 											onBatchDeleted(target);
 										}
@@ -1835,22 +1827,6 @@ public abstract class IssueListPanel extends Panel {
 			add(new WebMarkupContainer("showProgress").setVisible(false));			
 		}
 		
-		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
-			@Override
-			public String getObject() {
-				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} issues"), String.valueOf(dataProvider.size()));
-				else
-					return _T("found 1 issue");
-			} 
-
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(dataProvider.size() != 0);
-			}
-		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 
@@ -2186,14 +2162,7 @@ public abstract class IssueListPanel extends Panel {
 		
 		if (getPagingHistorySupport() != null)
 			issuesTable.setCurrentPage(getPagingHistorySupport().getCurrentPage());
-		issuesTable.addBottomToolbar(new NavigationToolbar(issuesTable) {
-
-			@Override
-			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new OnePagingNavigator(navigatorId, table, getPagingHistorySupport());
-			}
-			
-		});
+		issuesTable.addBottomToolbar(new ListNavigationToolbar(issuesTable, getPagingHistorySupport()));
 		issuesTable.addBottomToolbar(new NoRecordsToolbar(issuesTable));
 		issuesTable.add(new NoRecordsBehavior());
 

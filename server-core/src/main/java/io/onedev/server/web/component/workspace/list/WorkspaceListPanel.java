@@ -3,7 +3,6 @@ package io.onedev.server.web.component.workspace.list;
 import static io.onedev.server.model.Workspace.SORT_FIELDS;
 import static io.onedev.server.web.translation.Translation._T;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -99,8 +98,6 @@ public abstract class WorkspaceListPanel extends Panel {
 		}
 	};
 
-	private Component countLabel;
-
 	private DataTable<Workspace, Void> workspacesTable;
 
 	private SelectionColumn<Workspace, Void> selectionColumn;
@@ -174,7 +171,6 @@ public abstract class WorkspaceListPanel extends Panel {
 
 	private void doQuery(AjaxRequestTarget target) {
 		workspacesTable.setCurrentPage(0);
-		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -268,7 +264,6 @@ public abstract class WorkspaceListPanel extends Panel {
 										for (IModel<Workspace> each : selectionColumn.getSelections())
 											workspaces.add(each.getObject());
 										getWorkspaceService().delete(workspaces);
-										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -332,7 +327,6 @@ public abstract class WorkspaceListPanel extends Panel {
 											workspaces.add(it.next());
 										getWorkspaceService().delete(workspaces);
 										dataProvider.detach();
-										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -556,22 +550,6 @@ public abstract class WorkspaceListPanel extends Panel {
 			});
 		}
 
-		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
-			@Override
-			public String getObject() {
-				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} workspaces"), String.valueOf(dataProvider.size()));
-				else
-					return _T("found 1 workspace");
-			}
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(dataProvider.size() != 0);
-			}
-		}.setOutputMarkupPlaceholderTag(true));
-
 		dataProvider = new LoadableDetachableDataProvider<>() {
 
 			@Override
@@ -729,7 +707,7 @@ public abstract class WorkspaceListPanel extends Panel {
 		});
 
 		body.add(workspacesTable = new DefaultDataTable<>("workspaces", columns, dataProvider,
-				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
+				WebConstants.PAGE_SIZE, getPagingHistorySupport(), true));
 
 		setOutputMarkupId(true);
 	}

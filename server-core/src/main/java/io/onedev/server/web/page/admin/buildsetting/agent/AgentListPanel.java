@@ -36,7 +36,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -110,7 +109,6 @@ class AgentListPanel extends Panel {
 		
 	};
 
-	private Component countLabel;
 	
 	private DataTable<Agent, Void> agentsTable;
 	
@@ -150,7 +148,6 @@ class AgentListPanel extends Panel {
 
 	private void doQuery(AjaxRequestTarget target) {
 		agentsTable.setCurrentPage(0);
-		target.add(countLabel);
 		target.add(body);
 		selectionColumn.getSelections().clear();
 		querySubmitted = true;
@@ -310,7 +307,6 @@ class AgentListPanel extends Panel {
 										agentService.pause(agent);	
 										auditService.audit(null, "paused agent \"" + agent.getName() + "\"", null, null);
 									}							
-									target.add(countLabel);
 									target.add(body);
 									selectionColumn.getSelections().clear();
 									Session.get().success(_T("Paused selected agents"));	
@@ -358,7 +354,6 @@ class AgentListPanel extends Panel {
 										agentService.resume(agent);
 										auditService.audit(null, "resumed agent \"" + agent.getName() + "\"", null, null);
 									}
-									target.add(countLabel);
 									target.add(body);
 									selectionColumn.getSelections().clear();
 									Session.get().success(_T("Resumed selected agents"));
@@ -411,7 +406,6 @@ class AgentListPanel extends Panel {
 												agentService.restart(agent);
 												auditService.audit(null, "restarted agent \"" + agent.getName() + "\"", null, null);
 											}
-											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 											Session.get().success(_T("Restart command issued to selected agents"));
@@ -477,7 +471,6 @@ class AgentListPanel extends Panel {
 												agents.add(model.getObject());
 											removeAgents(agents);
 											selectionColumn.getSelections().clear();
-											target.add(countLabel);
 											target.add(body);
 										});
 									}
@@ -545,7 +538,6 @@ class AgentListPanel extends Panel {
 											}
 											selectionColumn.getSelections().clear();
 											dataProvider.detach();
-											target.add(countLabel);
 											target.add(body);
 											Session.get().success(_T("Paused all queried agents"));
 										});
@@ -613,7 +605,6 @@ class AgentListPanel extends Panel {
 												auditService.audit(null, "resumed agent \"" + agent.getName() + "\"", null, null);
 											}
 											dataProvider.detach();
-											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 											Session.get().success(_T("Resumed all queried agents"));
@@ -682,7 +673,6 @@ class AgentListPanel extends Panel {
 												auditService.audit(null, "restarted agent \"" + agent.getName() + "\"", null, null);
 											}
 											dataProvider.detach();
-											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 											Session.get().success(_T("Restart command issued to all queried agents"));
@@ -750,7 +740,6 @@ class AgentListPanel extends Panel {
 												agents.add(it.next());
 											removeAgents(agents);
 											dataProvider.detach();
-											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										});
@@ -841,21 +830,6 @@ class AgentListPanel extends Panel {
 
 		});
 
-		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
-			@Override
-			public String getObject() {
-				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} agents"), String.valueOf(dataProvider.size()));
-				else
-					return _T("found 1 agent");
-			}
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(dataProvider.size() != 0);
-			}
-		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<Agent, Void>() {
 
@@ -948,7 +922,7 @@ class AgentListPanel extends Panel {
 		});
 		
 		body.add(agentsTable = new DefaultDataTable<>("agents", columns, dataProvider,
-				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
+				WebConstants.PAGE_SIZE, getPagingHistorySupport(), true));
 		
 		setOutputMarkupId(true);
 	}

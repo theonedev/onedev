@@ -6,7 +6,6 @@ import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -114,8 +113,6 @@ public class UserListPage extends AdministrationPage {
 	
 	private TextField<String> searchField;
 
-	private Component countLabel;
-
 	private AjaxLink<?> includeDisabledLink;
 	
 	private DataTable<User, Void> usersTable;
@@ -143,7 +140,6 @@ public class UserListPage extends AdministrationPage {
 		getPageParameters().set(PARAM_QUERY, state.query);
 		getPageParameters().set(PARAM_INCLUDE_DISABLED, state.includeDisabled);
 		target.add(searchField);
-		target.add(countLabel);
 		if (WicketUtils.isSubscriptionActive())
 			target.add(includeDisabledLink);
 		selectionColumn.getSelections().clear();
@@ -182,7 +178,6 @@ public class UserListPage extends AdministrationPage {
 				else
 					pushState(target, url, state);
 
-				target.add(countLabel);				
 				usersTable.setCurrentPage(0);
 				selectionColumn.getSelections().clear();
 				target.add(usersTable);
@@ -236,7 +231,6 @@ public class UserListPage extends AdministrationPage {
 										for (var user: users) {
 											auditService.audit(null, "enabled account \"" + user.getName() + "\"", null, null);
 										}
-										target.add(countLabel);
 										target.add(usersTable);
 										selectionColumn.getSelections().clear();
 										Session.get().success(_T("Users enabled successfully"));
@@ -299,7 +293,6 @@ public class UserListPage extends AdministrationPage {
 												for (var user: users) {
 													auditService.audit(null, "disabled account \"" + user.getName() + "\"", null, null);
 												}
-												target.add(countLabel);
 												target.add(usersTable);
 												selectionColumn.getSelections().clear();
 												Session.get().success(_T("Users disabled successfully"));
@@ -377,7 +370,6 @@ public class UserListPage extends AdministrationPage {
 												for (var user: users) {
 													auditService.audit(null, "converted \"" + user.getName() + "\" to service account", null, null);
 												}
-												target.add(countLabel);
 												target.add(usersTable);
 												selectionColumn.getSelections().clear();
 												Session.get().success(_T("Users converted to service accounts successfully"));
@@ -456,7 +448,6 @@ public class UserListPage extends AdministrationPage {
 												var oldAuditContent = VersionedXmlDoc.fromBean(user).toXML();
 												auditService.audit(null, "deleted account \"" + user.getName() + "\"", oldAuditContent, null);
 											}
-											target.add(countLabel);
 											target.add(usersTable);
 											selectionColumn.getSelections().clear();
 											Session.get().success(_T("Users deleted successfully"));
@@ -815,7 +806,6 @@ public class UserListPage extends AdministrationPage {
 				pushState(target, url, state);
 
 				target.add(this);
-				target.add(countLabel);
 
 				usersTable.setCurrentPage(0);
 				selectionColumn.getSelections().clear();
@@ -956,21 +946,6 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 
-		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
-			@Override
-			public String getObject() {
-				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} users"), String.valueOf(dataProvider.size()));
-				else
-					return _T("found 1 user");
-			}
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(dataProvider.size() != 0);
-			}
-		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 
@@ -1017,7 +992,7 @@ public class UserListPage extends AdministrationPage {
 		};
 		
 		add(usersTable = new DefaultDataTable<User, Void>("users", columns, dataProvider, 
-				WebConstants.PAGE_SIZE, pagingHistorySupport));
+				WebConstants.PAGE_SIZE, pagingHistorySupport, true));
 	}
 	
 	private UserService getUserService() {

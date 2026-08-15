@@ -135,7 +135,6 @@ public abstract class BuildListPanel extends Panel {
 		
 	};
 	
-	private Component countLabel;
 	
 	private DataTable<Build, Void> buildsTable;
 	
@@ -225,7 +224,6 @@ public abstract class BuildListPanel extends Panel {
 	
 	private void doQuery(AjaxRequestTarget target) {
 		buildsTable.setCurrentPage(0);
-		target.add(countLabel);
 		target.add(body);
 		if (selectionColumn != null)
 			selectionColumn.getSelections().clear();
@@ -473,7 +471,6 @@ public abstract class BuildListPanel extends Panel {
 											}												
 										});
 
-										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -692,7 +689,6 @@ public abstract class BuildListPanel extends Panel {
 											}												
 										});
 										dataProvider.detach();
-										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -1026,21 +1022,6 @@ public abstract class BuildListPanel extends Panel {
 			});
 		}
 
-		add(countLabel = new Label("count", new AbstractReadOnlyModel<String>() {
-			@Override
-			public String getObject() {
-				if (dataProvider.size() > 1)
-					return MessageFormat.format(_T("found {0} builds"), String.valueOf(dataProvider.size()));
-				else
-					return _T("found 1 build");					
-			}
-		}) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(dataProvider.size() != 0);
-			}
-		}.setOutputMarkupPlaceholderTag(true));
 		
 		dataProvider = new LoadableDetachableDataProvider<>() {
 
@@ -1316,7 +1297,7 @@ public abstract class BuildListPanel extends Panel {
 		});		
 		
 		body.add(buildsTable = new DefaultDataTable<>("builds", columns, dataProvider,
-				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
+				WebConstants.PAGE_SIZE, getPagingHistorySupport(), true));
 		
 		setOutputMarkupId(true);
 	}
