@@ -1218,12 +1218,14 @@ public class PullRequest extends ProjectBelonging
 	
 	public String getDefaultMergeCommitMessage() {
 		if (getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS) {
-			return "Merges pull request #" + getNumber() + "\n\n" + getTitle();
+			return "Merges PR #" + getNumber() + " from " + getSourceBranch()
+					+ " into " + getTargetBranch() + "\n\n" + getTitle();
 		} else {
 			var commitMessage = getTitle();
 			if (getDescription() != null)
 				commitMessage += "\n\n" + getDescription();
-			commitMessage += "\n\n" + "Merges pull request #" + getNumber();
+			commitMessage += "\n\n" + "Merges PR #" + getNumber() + " from " + getSourceBranch()
+					+ " into " + getTargetBranch();
 			return commitMessage;
 		}
 	}
