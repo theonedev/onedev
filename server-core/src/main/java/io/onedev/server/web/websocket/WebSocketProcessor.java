@@ -16,7 +16,7 @@
  */
 package io.onedev.server.web.websocket;
 
-import java.io.IOException;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
@@ -29,8 +29,8 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.persistence.SessionService;
 
 /**
@@ -97,10 +97,8 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 
 	@Override
 	public void onWebSocketError(Throwable throwable) {
-		IOException ioException = ExceptionUtils.find(throwable, IOException.class);
-		if (ioException != null && "Broken pipe".equals(ioException.getMessage())) 
-			logger.debug("WebSocket closed", throwable);
-		else 
+		var response = ExceptionUtils.buildResponse(throwable);
+		if (response == null || response.getStatus() >= SC_INTERNAL_SERVER_ERROR)
 			logger.error("An error occurred when using WebSocket.", throwable);	
 	}
 

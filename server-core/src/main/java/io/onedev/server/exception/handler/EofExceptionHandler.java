@@ -10,10 +10,10 @@ public class EofExceptionHandler extends AbstractExceptionHandler<EofException> 
 
 	@Override
     public HttpResponse getResponse(EofException exception) {
-		if (exception.getMessage() != null)
-			return new HttpResponse(499, exception.getMessage());
-		else 
-			return null;
+		var message = exception.getMessage();
+		if (message == null)
+			message = "Unexpected end of stream";
+		return new HttpResponse(499, message);
     }
     
 }

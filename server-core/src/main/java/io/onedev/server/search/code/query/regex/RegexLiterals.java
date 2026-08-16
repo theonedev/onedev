@@ -25,9 +25,12 @@ public class RegexLiterals {
 	
 	private static final Logger logger = LoggerFactory.getLogger(RegexLiterals.class);
 	
+	private final String regex;
+
 	private final List<List<LeafLiterals>> rows;
 	
 	public RegexLiterals(String regex) {
+		this.regex = regex;
 		CharStream stream = CharStreams.fromString(regex);
 		PCRELexer lexer = new PCRELexer(stream);
 		lexer.removeErrorListeners();
@@ -64,7 +67,7 @@ public class RegexLiterals {
 		if (orQuery.clauses().size() != 0)
 			return orQuery;
 		else
-			throw new TooGeneralQueryException();
+			throw new TooGeneralQueryException("Regex query is too general: " + regex);
 	}
 
 	@Override

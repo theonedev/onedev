@@ -206,7 +206,7 @@ public class TextQueryOption implements QueryOption {
 		else if (term.length() >= NGRAM_SIZE)
 			builder.add(new NGramLuceneQuery(BLOB_TEXT.name(), term, NGRAM_SIZE), BooleanClause.Occur.MUST);
 		else
-			throw new TooGeneralQueryException();
+			throw new TooGeneralQueryException("Text query is too general: " + term);
 	}
 
 	@Override

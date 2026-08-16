@@ -2,9 +2,10 @@ package io.onedev.server.web.page.project.setting.pluginsettings;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.Validator;
+import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -17,12 +18,14 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.ProjectService;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -59,7 +62,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 		}
 
 		if (settingClass == null)
-			throw new RuntimeException("Unexpected setting: " + settingName);
+			throw new NotAcceptableException(MessageFormat.format(_T("Unexpected setting: {0}"), settingName));
 	}
 	
 	@Override

@@ -21,6 +21,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -55,7 +56,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 		}
 
 		if (settingClass == null)
-			throw new RuntimeException(MessageFormat.format(_T("Unexpected setting: {0}"), settingName));
+			throw new NotAcceptableException(MessageFormat.format(_T("Unexpected setting: {0}"), settingName));
 	}
 
 	private SettingService getSettingService() {

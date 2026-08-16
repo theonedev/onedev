@@ -55,7 +55,7 @@ public class FileQueryOption implements QueryOption {
 			}
 		}
 		if (tooGeneral)
-			throw new TooGeneralQueryException();
+			throw new TooGeneralQueryException("File query is too general: " + term);
 
 		builder.add(new WildcardQuery(new Term(BLOB_NAME.name(), term.toLowerCase())), BooleanClause.Occur.MUST);
 	}

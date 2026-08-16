@@ -121,7 +121,7 @@ public class SymbolQueryOption implements QueryOption {
 			}
 		}
 		if (tooGeneral)
-			throw new TooGeneralQueryException();
+			throw new TooGeneralQueryException("Symbol query is too general: " + term);
 
 		if (primary != null) {
 			String fieldName;
