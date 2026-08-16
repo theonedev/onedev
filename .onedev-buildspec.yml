@@ -1,8 +1,7 @@
 version: 53
 imports:
-- projectPath: onedev
+- projectPath: onedev/template
   revision: main
-  accessTokenSecret: onedev-token
 jobs:
 - name: Release
   steps:
