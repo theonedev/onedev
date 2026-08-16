@@ -32,6 +32,7 @@ import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.mapper.HomePageMapper;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
+import org.apache.wicket.core.request.mapper.StalePageException;
 import org.apache.wicket.guice.GuiceComponentInjector;
 import org.apache.wicket.markup.MarkupFactory;
 import org.apache.wicket.markup.MarkupParser;
@@ -40,6 +41,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.pages.AbstractErrorPage;
 import org.apache.wicket.markup.html.pages.BrowserInfoPage;
+import org.apache.wicket.protocol.http.PageExpiredException;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.protocol.ws.WebSocketSettings;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
@@ -282,7 +284,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 			@Override
 			public IExceptionMapper get() {
 				return new DefaultExceptionMapper() {
-
+					
 					@Override
 					protected IRequestHandler mapExpectedExceptions(Exception e, Application application) {
 						RequestCycle requestCycle = RequestCycle.get();
@@ -290,10 +292,13 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 						if (isAjax && (e instanceof ListenerInvocationNotAllowedException || e instanceof ComponentNotFoundException || e instanceof InvalidBehaviorIdException))
 							return EmptyAjaxRequestHandler.getInstance();
 
-						IRequestMapper mapper = Application.get().getRootRequestMapper();
-						if (mapper.mapRequest(requestCycle.getRequest()) instanceof ResourceReferenceRequestHandler)
-							return new ResourceErrorRequestHandler(e);
-
+						// Fixes OD-22
+						if (!(e instanceof StalePageException) && !(e instanceof PageExpiredException)) {
+							IRequestMapper mapper = Application.get().getRootRequestMapper();
+							if (mapper.mapRequest(requestCycle.getRequest()) instanceof ResourceReferenceRequestHandler)
+								return new ResourceErrorRequestHandler(e);
+						}
+						
 						HttpServletResponse response = (HttpServletResponse) requestCycle.getResponse().getContainerResponse();
 						if (!response.isCommitted()) {
 							InUseException inUseException = ExceptionUtils.find(e, InUseException.class);
