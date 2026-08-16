@@ -37,14 +37,14 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.MembershipService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.MembershipService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.WebConstants;
@@ -63,7 +63,7 @@ import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
-import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
 
 public class GroupMembershipsPage extends GroupPage {
 
@@ -332,8 +332,8 @@ public class GroupMembershipsPage extends GroupPage {
 					IModel<Membership> rowModel) {
 				User user = rowModel.getObject().getUser();
 				Fragment fragment = new Fragment(componentId, "nameFrag", GroupMembershipsPage.this);
-				Link<Void> link = new BookmarkablePageLink<Void>("link", UserBasicSettingPage.class, 
-						UserBasicSettingPage.paramsOf(user));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", UserProfilePage.class, 
+						UserProfilePage.paramsOf(user));
 				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getDisplayName()));
 				fragment.add(link);

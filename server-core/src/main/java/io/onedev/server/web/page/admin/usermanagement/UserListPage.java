@@ -44,12 +44,12 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -67,7 +67,6 @@ import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.user.UserCssResourceReference;
-import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.WicketUtils;
@@ -915,7 +914,7 @@ public class UserListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionsFrag", UserListPage.this);
 				
-				fragment.add(new ActionablePageLink("edit", UserBasicSettingPage.class, UserBasicSettingPage.paramsOf(rowModel.getObject())) {
+				fragment.add(new ActionablePageLink("edit", UserProfilePage.class, UserProfilePage.paramsOf(rowModel.getObject())) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {

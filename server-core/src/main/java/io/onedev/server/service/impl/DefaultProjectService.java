@@ -713,7 +713,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 		File gitDir = getGitDir(projectId);
 		if (gitDir.listFiles().length == 0) {
 			logger.info("Initializing git repository in '" + gitDir + "'...");
-			try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
+			try (Git git = Git.init().setInitialBranch("main").setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
@@ -722,7 +722,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			logger.warn("Directory '" + gitDir + "' is not a valid git repository, reinitializing...");
 			cleanDir(gitDir);
 			storageService.initLfsDir(projectId);
-			try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
+			try (Git git = Git.init().setInitialBranch("main").setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}

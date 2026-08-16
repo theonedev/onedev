@@ -1083,8 +1083,10 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			else
 				branchSchedules.put(key, schedules);
 		} catch (BuildSpecParseException e) {
-			logger.warn("Malformed build spec (project: {}, branch: {})", project.getPath(), branch);
-		} catch (Exception e) {
+			logger.debug("Malformed build spec (project: {}, branch: {})", project.getPath(), branch);
+		} catch (ValidationException e) {
+			logger.debug(String.format("Error validating build spec (project: %s, branch: %s)", project.getPath(), branch), e);
+		} catch (Throwable e) {
 			logger.error(String.format("Error caching branch schedules (project: %s, branch: %s)", project.getPath(), branch), e);
 		} finally {
 			JobAuthorizationContext.pop();

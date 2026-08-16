@@ -46,7 +46,7 @@ public class JobSecret implements Serializable {
 	}
 
 	@Editable(order=300, placeholder="Any job", description= "" +
-			"Optionally specify branches/users/groups allowed to access this secret. If left empty, " +
+			"Optionally specify branches allowed to access this secret. If left empty, " +
 			"any job can access this secret, including those triggered via external pull requests")
 	@JobMatch
     public String getAuthorization() {
