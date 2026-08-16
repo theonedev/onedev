@@ -36,6 +36,11 @@ import static io.onedev.server.search.entity.build.BuildQueryParser.SubmittedByM
 import static io.onedev.server.search.entity.build.BuildQueryParser.Successful;
 import static io.onedev.server.search.entity.build.BuildQueryParser.TimedOut;
 import static io.onedev.server.search.entity.build.BuildQueryParser.Waiting;
+import static io.onedev.server.util.QueryUtils.getCommitId;
+import static io.onedev.server.util.QueryUtils.getLabelSpec;
+import static io.onedev.server.util.QueryUtils.getNumber;
+import static io.onedev.server.util.QueryUtils.getUser;
+import static io.onedev.server.util.QueryUtils.getValue;
 
 import java.util.ArrayList;
 import java.util.Collection;

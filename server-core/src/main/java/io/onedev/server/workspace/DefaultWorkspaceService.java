@@ -111,6 +111,7 @@ import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.ProjectWorkspaceStatusStat;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.interpolative.WorkspaceVariableInterpolator;
 import io.onedev.server.web.component.terminal.ShellExit;
@@ -472,9 +473,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		for (EntitySort sort : sessionQuery.getSorts()) {
 			var sortField = Workspace.SORT_FIELDS.get(sort.getField());
 			if (sort.getDirection() == ASCENDING)
-				orders.add(builder.asc(EntityQuery.getPath(root, sortField.getProperty())));
+				orders.add(builder.asc(QueryUtils.getPath(root, sortField.getProperty())));
 			else
-				orders.add(builder.desc(EntityQuery.getPath(root, sortField.getProperty())));
+				orders.add(builder.desc(QueryUtils.getPath(root, sortField.getProperty())));
 		}
 		if (!orders.isEmpty())
 			criteriaQuery.orderBy(orders);

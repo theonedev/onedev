@@ -147,7 +147,6 @@ import io.onedev.server.replica.ProjectReplica;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
-import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.service.AuditService;
@@ -167,6 +166,7 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.ProjectNameReservation;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
@@ -1008,9 +1008,9 @@ public class DefaultProjectService extends BaseEntityService<Project>
 
 	private Order getOrder(EntitySort sort, CriteriaBuilder builder, From<Project, Project> root) {
 		if (sort.getDirection() == ASCENDING)
-			return builder.asc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty()));
+			return builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty()));
 		else
-			return builder.desc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty()));
+			return builder.desc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty()));
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -1046,7 +1046,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			}
 		}
 		if (!found)
-			orders.add(builder.desc(ProjectQuery.getPath(root, Project.PROP_LAST_ACTIVITY_DATE + "." + ProjectLastActivityDate.PROP_VALUE)));	
+			orders.add(builder.desc(QueryUtils.getPath(root, Project.PROP_LAST_ACTIVITY_DATE + "." + ProjectLastActivityDate.PROP_VALUE)));	
 		
 		criteriaQuery.orderBy(orders);
 

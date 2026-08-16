@@ -210,12 +210,7 @@ public class ProjectResource {
 		if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
-    	ProjectQuery parsedQuery;
-		try {
-			parsedQuery = ProjectQuery.parse(query);
-		} catch (Exception e) {
-			throw new NotAcceptableException("Error parsing query", e);
-		}
+		var parsedQuery = ProjectQuery.parse(query);
     	
     	return projectService.query(subject, parsedQuery, false, offset, count).stream()
     			.map(ProjectData::from)

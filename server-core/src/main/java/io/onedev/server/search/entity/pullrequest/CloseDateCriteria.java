@@ -10,8 +10,8 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class CloseDateCriteria extends Criteria<PullRequest> {
@@ -27,7 +27,7 @@ public class CloseDateCriteria extends Criteria<PullRequest> {
 	public CloseDateCriteria(String value, int operator) {
 		this.operator = operator;
 		this.value = value;
-		date = EntityQuery.getDateValue(value);
+		date = QueryUtils.getDateValue(value);
 	}
 
 	@Override

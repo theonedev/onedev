@@ -14,8 +14,8 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser;
-import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +81,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 								else 
 									return null;
 							} else {
-								String fieldName = CodeCommentQuery.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									CodeCommentQuery.checkField(project, fieldName, operator);
 									if (fieldName.equals(CodeComment.NAME_CREATE_DATE) 
@@ -141,7 +141,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = CodeCommentQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = QueryUtils.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					CodeCommentQuery.checkField(getProject(), fieldName, CodeCommentQuery.getOperator(suggestedLiteral));
 				} catch (ExplicitException e) {
@@ -157,10 +157,10 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
-			if (criteriaValueExpect != null && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+			if (criteriaValueExpect != null && QueryUtils.isInsideQuote(terminalExpect.getUnmatchedText())) {
 				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(CodeComment.NAME_CONTENT)) {
 						hints.add(_T("Use '*' for wildcard match"));
 						hints.add(_T("Use '\\' to escape quotes"));

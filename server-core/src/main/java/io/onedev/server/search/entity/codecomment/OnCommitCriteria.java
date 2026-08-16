@@ -13,6 +13,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class OnCommitCriteria extends Criteria<CodeComment>  {
@@ -30,8 +31,8 @@ public class OnCommitCriteria extends Criteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
-		Path<?> projectAttribute = CodeCommentQuery.getPath(from, CodeComment.PROP_PROJECT);
-		Path<?> commitAttribute = CodeCommentQuery.getPath(from, CodeComment.PROP_MARK + "." + Mark.PROP_COMMIT_HASH);
+		Path<?> projectAttribute = QueryUtils.getPath(from, CodeComment.PROP_PROJECT);
+		Path<?> commitAttribute = QueryUtils.getPath(from, CodeComment.PROP_MARK + "." + Mark.PROP_COMMIT_HASH);
 		return builder.and(
 				builder.equal(projectAttribute, project),
 				builder.equal(commitAttribute, commitId.name()));

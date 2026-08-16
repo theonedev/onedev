@@ -24,6 +24,10 @@ import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsNo
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsSince;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.IsUntil;
 import static io.onedev.server.search.entity.workspace.WorkspaceQueryParser.Pending;
+import static io.onedev.server.util.QueryUtils.getCommitId;
+import static io.onedev.server.util.QueryUtils.getNumber;
+import static io.onedev.server.util.QueryUtils.getUser;
+import static io.onedev.server.util.QueryUtils.getValue;
 
 import java.util.ArrayList;
 import java.util.List;

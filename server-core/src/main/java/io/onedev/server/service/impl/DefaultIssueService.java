@@ -121,6 +121,7 @@ import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.IterationAndIssueState;
 import io.onedev.server.util.ProjectIssueStateStat;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -310,9 +311,9 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	private javax.persistence.criteria.Order getOrder(EntitySort sort, CriteriaBuilder builder, From<Issue, Issue> issue) {
 		if (Issue.SORT_FIELDS.containsKey(sort.getField())) {
 			if (sort.getDirection() == Direction.ASCENDING)
-				return builder.asc(IssueQuery.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty()));
+				return builder.asc(QueryUtils.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty()));
 			else
-				return builder.desc(IssueQuery.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty()));
+				return builder.desc(QueryUtils.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty()));
 		} else {
 			Join<Issue, IssueField> join = issue.join(Issue.PROP_FIELDS, JoinType.LEFT);
 			join.on(builder.equal(join.get(IssueField.PROP_NAME), sort.getField()));
@@ -351,7 +352,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			}
 		}
 		if (!found)
-			orders.add(builder.desc(IssueQuery.getPath(issue, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
+			orders.add(builder.desc(QueryUtils.getPath(issue, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		
 		return orders;
 	}

@@ -62,10 +62,10 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -244,7 +244,7 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 			CriteriaQuery<?> query, From<CodeComment, CodeComment> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) 
-			predicates.add(builder.equal(CodeCommentQuery.getPath(root, CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST), request));
+			predicates.add(builder.equal(QueryUtils.getPath(root, CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST), request));
 		else 
 			predicates.add(builder.equal(root.get(CodeComment.PROP_PROJECT), project));
 		if (criteria != null) {
@@ -266,9 +266,9 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: commentQuery.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
-				orders.add(builder.asc(CodeCommentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
+				orders.add(builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(CodeCommentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
+				orders.add(builder.desc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 		
 		if (commentQuery.getCriteria() != null)
@@ -287,7 +287,7 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 			}
 		}
 		if (!found)
-			orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
+			orders.add(builder.desc(QueryUtils.getPath(root, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 
 		query.orderBy(orders);
 		

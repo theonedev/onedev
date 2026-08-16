@@ -89,12 +89,7 @@ public class PackResource {
 		if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
-    	PackQuery parsedQuery;
-		try {
-			parsedQuery = PackQuery.parse(null, query, true);
-		} catch (Exception e) {
-			throw new NotAcceptableException("Error parsing query", e);
-		}
+		var parsedQuery = PackQuery.parse(null, query, true);
     	
     	return packService.query(subject, null, parsedQuery, false, offset, count);
     }

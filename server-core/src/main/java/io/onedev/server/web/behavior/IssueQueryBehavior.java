@@ -25,7 +25,6 @@ import static io.onedev.server.model.Issue.NAME_TITLE;
 import static io.onedev.server.model.Issue.NAME_VOTE_COUNT;
 import static io.onedev.server.model.Issue.QUERY_FIELDS;
 import static io.onedev.server.model.Issue.SORT_FIELDS;
-import static io.onedev.server.search.entity.EntityQuery.getValue;
 import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
 import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
@@ -48,6 +47,7 @@ import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.IgnoredBy;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.IgnoredByMe;
+import static io.onedev.server.util.QueryUtils.getValue;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
@@ -97,7 +97,6 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
-import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.service.GroupService;
 import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.service.SettingService;
@@ -401,7 +400,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			if (criteriaValueExpect != null) {
 				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = getValue(fieldElements.get(0).getMatchedText());
 					var fieldSpec = issueSetting.getFieldSpec(fieldName);
 					if (fieldName.equals(Issue.NAME_PROJECT)) {
 						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));

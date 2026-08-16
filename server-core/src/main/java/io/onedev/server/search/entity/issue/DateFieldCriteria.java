@@ -8,7 +8,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.QueryUtils;
 
 public class DateFieldCriteria extends FieldCriteria {
 
@@ -22,7 +22,7 @@ public class DateFieldCriteria extends FieldCriteria {
 	
 	public DateFieldCriteria(String name, String value, int operator) {
 		super(name);
-		date = EntityQuery.getDateValue(value);
+		date = QueryUtils.getDateValue(value);
 		this.value = value;
 		this.operator = operator;
 	}

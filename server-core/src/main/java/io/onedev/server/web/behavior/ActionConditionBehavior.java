@@ -38,7 +38,7 @@ import io.onedev.server.buildspec.job.action.condition.ActionConditionParser;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -139,7 +139,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 			if ("criteriaValue".equals(spec.getLabel())) {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(NAME_PROJECT) || fieldName.equals(NAME_BRANCH) || fieldName.equals(NAME_TAG))
 						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					else if (fieldName.equals(Build.NAME_LOG))

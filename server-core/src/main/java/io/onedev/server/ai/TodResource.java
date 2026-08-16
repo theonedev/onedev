@@ -31,13 +31,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -121,8 +118,6 @@ import io.onedev.server.util.ProjectScope;
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class TodResource {
-
-    private static final Logger logger = LoggerFactory.getLogger(TodResource.class);
 
     @Inject
     private SettingService settingService;
@@ -439,12 +434,7 @@ public class TodResource {
         if (query != null) {
             var option = new IssueQueryParseOption();
             option.withCurrentUserCriteria(true);
-            try {
-                parsedQuery = IssueQuery.parse(projectContext.project, query, option, true);
-            } catch (ParseCancellationException e) {
-                logger.error("Error parsing query", e);
-                throw new NotAcceptableException("Invalid issue query, check server log for details");
-            }
+            parsedQuery = IssueQuery.parse(projectContext.project, query, option, true);
         } else {
             parsedQuery = new IssueQuery(null, new ArrayList<>());
         }
@@ -505,13 +495,7 @@ public class TodResource {
         if (count > RestConstants.MAX_PAGE_SIZE)
             throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
-        EntityQuery<Project> parsedQuery;
-        try {
-            parsedQuery = ProjectQuery.parse(query);
-        } catch (Exception e) {
-            logger.error("Error parsing query", e);
-            throw new NotAcceptableException("Invalid project query, check server log for details");
-        }
+        var parsedQuery = ProjectQuery.parse(query);
 
         var summaries = new ArrayList<Map<String, Object>>();
         for (var project : projectService.query(subject, parsedQuery, true, offset, count))
@@ -813,16 +797,10 @@ public class TodResource {
             throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
         EntityQuery<PullRequest> parsedQuery;
-        if (query != null) {
-            try {
-                parsedQuery = PullRequestQuery.parse(projectContext.project, query, true);
-            } catch (ParseCancellationException e) {
-                logger.error("Error parsing query", e);
-                throw new NotAcceptableException("Invalid pull request query, check server log for details");
-            }
-        } else {
+        if (query != null) 
+            parsedQuery = PullRequestQuery.parse(projectContext.project, query, true);
+        else
             parsedQuery = new PullRequestQuery();
-        }
 
         var summaries = new ArrayList<Map<String, Object>>();
         for (var pullRequest : pullRequestService.query(subject, projectContext.project, parsedQuery, false, offset, count)) {
@@ -851,16 +829,10 @@ public class TodResource {
             throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
         EntityQuery<Build> parsedQuery;
-        if (query != null) {
-            try {
-                parsedQuery = BuildQuery.parse(projectContext.project, query, true, true);
-            } catch (ParseCancellationException e) {
-                logger.error("Error parsing query", e);
-                throw new NotAcceptableException("Invalid build query, check server log for details");
-            }
-        } else {
+        if (query != null) 
+            parsedQuery = BuildQuery.parse(projectContext.project, query, true, true);
+        else 
             parsedQuery = new BuildQuery();
-        }
 
         var summaries = new ArrayList<Map<String, Object>>();
         for (var build : buildService.query(subject, projectContext.project, parsedQuery, false, offset, count)) {

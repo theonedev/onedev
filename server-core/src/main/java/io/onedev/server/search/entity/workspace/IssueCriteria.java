@@ -11,8 +11,8 @@ import org.jspecify.annotations.Nullable;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class IssueCriteria extends Criteria<Workspace> {
@@ -26,7 +26,7 @@ public class IssueCriteria extends Criteria<Workspace> {
 	private final int operator;
 
 	public IssueCriteria(@Nullable Project project, String value, int operator) {
-		issue = EntityQuery.getIssue(project, value);
+		issue = QueryUtils.getIssue(project, value);
 		this.value = value;
 		this.operator = operator;
 	}

@@ -37,6 +37,7 @@ import io.onedev.server.search.entity.pack.PackQueryLexer;
 import io.onedev.server.search.entity.pack.PackQueryParser;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
@@ -113,7 +114,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 										return null;
 								}
 							} else {
-								String fieldName = PackQuery.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									PackQuery.checkField(project, fieldName, operator);
 									if (fieldName.equals(Pack.NAME_PUBLISH_DATE)) {
@@ -190,7 +191,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = PackQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = QueryUtils.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					PackQuery.checkField(getProject(), fieldName, PackQuery.getOperator(suggestedLiteral));
 				} catch (ExplicitException e) {
@@ -210,7 +211,7 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				List<Element> operatorElements = criteriaValueExpect.getState().findMatchedElementsByLabel("operator", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = PackQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Pack.NAME_PROJECT)) {
 						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					} else if (fieldName.equals(NAME_NAME) || fieldName.equals(NAME_VERSION)) {

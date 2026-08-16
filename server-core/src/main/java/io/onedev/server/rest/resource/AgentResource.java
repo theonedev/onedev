@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -20,13 +19,13 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AgentAttributeService;
-import io.onedev.server.service.AgentService;
-import io.onedev.server.service.AuditService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AgentAttributeService;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.AuditService;
 
 @Path("/agents")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -74,12 +73,7 @@ public class AgentResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 
-    	AgentQuery parsedQuery;
-		try {
-			parsedQuery = AgentQuery.parse(query, false);
-		} catch (Exception e) {
-			throw new NotAcceptableException("Error parsing query", e);
-		}
+		var parsedQuery = AgentQuery.parse(query, false);
     	
     	return agentService.query(parsedQuery, offset, count);
     }

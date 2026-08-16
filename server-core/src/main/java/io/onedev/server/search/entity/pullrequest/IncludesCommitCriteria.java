@@ -13,9 +13,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.xodus.PullRequestInfoService;
 
@@ -30,7 +30,7 @@ public class IncludesCommitCriteria extends Criteria<PullRequest> {
 	private final String value;
 	
 	public IncludesCommitCriteria(@Nullable Project project, String value) {
-		ProjectScopedCommit commitId = EntityQuery.getCommitId(project, value);
+		ProjectScopedCommit commitId = QueryUtils.getCommitId(project, value);
 		this.project = commitId.getProject();
 		this.commitId = commitId.getCommitId();
 		this.value = value;

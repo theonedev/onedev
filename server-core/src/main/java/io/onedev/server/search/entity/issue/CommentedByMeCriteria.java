@@ -2,7 +2,6 @@ package io.onedev.server.search.entity.issue;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
@@ -10,7 +9,9 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
-import io.onedev.commons.utils.ExplicitException;
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.User;
@@ -32,7 +33,7 @@ public class CommentedByMeCriteria extends Criteria<Issue> {
 					builder.equal(comment.get(IssueComment.PROP_USER), User.get())));
 			return builder.exists(commentQuery);
 		} else {
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 		}
 	}
 
@@ -41,7 +42,7 @@ public class CommentedByMeCriteria extends Criteria<Issue> {
 		if (User.get() != null)
 			return issue.getComments().stream().anyMatch(it->it.getUser().equals(User.get()));
 		else
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 
 	@Override

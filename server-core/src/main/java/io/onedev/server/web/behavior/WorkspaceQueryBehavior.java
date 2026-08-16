@@ -30,6 +30,7 @@ import io.onedev.server.search.entity.workspace.WorkspaceQueryLexer;
 import io.onedev.server.search.entity.workspace.WorkspaceQueryParser;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
@@ -99,7 +100,7 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 							} else if (!fieldElements.isEmpty() && operatorElements.size() == 1) {
 								String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 								int operator = WorkspaceQuery.getOperator(operatorName);
-								String fieldName = WorkspaceQuery.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									WorkspaceQuery.checkField(fieldName, operator);
 									switch (fieldName) {
@@ -190,7 +191,7 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = WorkspaceQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = QueryUtils.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					WorkspaceQuery.checkField(fieldName, WorkspaceQuery.getOperator(suggestedLiteral));
 				} catch (ExplicitException e) {
@@ -209,7 +210,7 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 			if (criteriaValueExpect != null) {
 				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = WorkspaceQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Workspace.NAME_PROJECT)) {
 						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					} else if (fieldName.equals(Workspace.NAME_BRANCH)) {

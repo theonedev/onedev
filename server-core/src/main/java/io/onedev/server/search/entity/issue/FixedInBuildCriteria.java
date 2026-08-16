@@ -11,8 +11,8 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class FixedInBuildCriteria extends Criteria<Issue> {
@@ -38,7 +38,7 @@ public class FixedInBuildCriteria extends Criteria<Issue> {
 	
 	private Build getBuild() {
 		if (build == null)
-			build = EntityQuery.getBuild(project, value);
+			build = QueryUtils.getBuild(project, value);
 		return build;
 	}
 	

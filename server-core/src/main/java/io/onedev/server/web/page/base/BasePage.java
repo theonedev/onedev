@@ -6,6 +6,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.File;
 import java.io.Serializable;
+import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,6 +54,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -92,6 +95,8 @@ import io.onedev.server.web.websocket.ObservablesChanged;
 import io.onedev.server.web.websocket.WebSocketService;
 
 public abstract class BasePage extends WebPage {
+
+	private static final Logger logger = LoggerFactory.getLogger(BasePage.class);
 
 	private static final MetaDataKey<HashSet<String>> REMOVE_AUTOSAVE_KEYS = new MetaDataKey<>() {
 	};
@@ -355,7 +360,14 @@ public abstract class BasePage extends WebPage {
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				var zoneId = ZoneId.of(RequestCycle.get().getRequest().getRequestParameters().getParameterValue("timezone").toString());
+				var timeZoneId = RequestCycle.get().getRequest().getRequestParameters().getParameterValue("timezone").toString();
+				ZoneId zoneId;
+				try {
+					zoneId = ZoneId.of(timeZoneId);
+				} catch (DateTimeException e) {
+					logger.debug("Unable to parse time-zone ID: {}, using system default", timeZoneId, e);
+					zoneId = ZoneId.systemDefault();
+				}
 				WebSession.get().setZoneId(zoneId);
 				if (!zoneId.equals(ZoneId.systemDefault())) {
 					visitChildren(Component.class, (IVisitor<Component, Void>) (object, visit) -> {

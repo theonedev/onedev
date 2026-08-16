@@ -12,6 +12,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class LastActivityDateCriteria extends Criteria<CodeComment>  {
@@ -40,7 +41,7 @@ public class LastActivityDateCriteria extends Criteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
-		Path<Date> attribute = CodeCommentQuery.getPath(from, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);
+		Path<Date> attribute = QueryUtils.getPath(from, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);
 		if (operator == CodeCommentQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else

@@ -11,6 +11,7 @@ import javax.persistence.criteria.Subquery;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class HasUnfinishedBuildsCriteria extends Criteria<PullRequest> {
@@ -23,7 +24,7 @@ public class HasUnfinishedBuildsCriteria extends Criteria<PullRequest> {
 		Root<Build> build = buildQuery.from(Build.class);
 		buildQuery.select(build);
 		var status = build.get(Build.PROP_STATUS);
-		var buildCommitOfPullRequest = PullRequestQuery.getPath(from, PullRequest.PROP_BUILD_COMMIT_HASH);
+		var buildCommitOfPullRequest = QueryUtils.getPath(from, PullRequest.PROP_BUILD_COMMIT_HASH);
 		var buildCommit = build.get(Build.PROP_COMMIT_HASH);
 		buildQuery.where(builder.and(
 				builder.or(

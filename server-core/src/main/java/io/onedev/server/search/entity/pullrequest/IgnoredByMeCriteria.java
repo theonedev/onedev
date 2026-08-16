@@ -1,19 +1,20 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import org.jspecify.annotations.Nullable;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IgnoredByMe;
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.commons.utils.ExplicitException;
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
-
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IgnoredByMe;
-import static io.onedev.server.web.translation.Translation._T;
 
 public class IgnoredByMeCriteria extends Criteria<PullRequest> {
 
@@ -25,7 +26,7 @@ public class IgnoredByMeCriteria extends Criteria<PullRequest> {
 		if (user != null) 
 			return getCriteria(user).getPredicate(projectScope, query, from, builder);
 		else 
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 
 	@Override
@@ -34,7 +35,7 @@ public class IgnoredByMeCriteria extends Criteria<PullRequest> {
 		if (user != null)
 			return getCriteria(user).matches(request);
 		else
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {

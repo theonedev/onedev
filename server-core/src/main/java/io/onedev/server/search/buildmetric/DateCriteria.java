@@ -9,7 +9,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.QueryUtils;
 
 public class DateCriteria extends BuildMetricCriteria {
 
@@ -22,7 +22,7 @@ public class DateCriteria extends BuildMetricCriteria {
 	private final String value;
 	
 	public DateCriteria(String value, int operator) {
-		date = EntityQuery.getDateValue(value);
+		date = QueryUtils.getDateValue(value);
 		this.operator = operator;
 		this.value = value;
 	}

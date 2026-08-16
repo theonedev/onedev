@@ -10,8 +10,8 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.QueryUtils;
 
 public class CommitFieldCriteria extends FieldCriteria {
 
@@ -34,7 +34,7 @@ public class CommitFieldCriteria extends FieldCriteria {
 
 	private ProjectScopedCommit getCommit() {
 		if (commit == null)
-			commit = EntityQuery.getCommitId(project, value);
+			commit = QueryUtils.getCommitId(project, value);
 		return commit;
 	}
 	

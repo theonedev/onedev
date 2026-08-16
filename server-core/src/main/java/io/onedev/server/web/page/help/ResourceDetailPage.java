@@ -20,6 +20,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 
 public class ResourceDetailPage extends ApiHelpPage {
@@ -30,10 +31,11 @@ public class ResourceDetailPage extends ApiHelpPage {
 	
 	public ResourceDetailPage(PageParameters params) {
 		super(params);
+		var className = params.get(PARAM_RESOURCE).toString();
 		try {
-			resourceClass = Class.forName(params.get(PARAM_RESOURCE).toString());
+			resourceClass = Class.forName(className);
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw new NotFoundException("Resource class not found: " + className);
 		}
 	}
 

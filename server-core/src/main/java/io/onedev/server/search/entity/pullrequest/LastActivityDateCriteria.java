@@ -11,8 +11,8 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class LastActivityDateCriteria extends Criteria<PullRequest> {
@@ -28,7 +28,7 @@ public class LastActivityDateCriteria extends Criteria<PullRequest> {
 	public LastActivityDateCriteria(String value, int operator) {
 		this.operator = operator;
 		this.value = value;
-		date = EntityQuery.getDateValue(value);
+		date = QueryUtils.getDateValue(value);
 	}
 
 	public int getOperator() {
@@ -41,7 +41,7 @@ public class LastActivityDateCriteria extends Criteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		Path<Date> attribute = PullRequestQuery.getPath(from, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);
+		Path<Date> attribute = QueryUtils.getPath(from, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);
 		if (operator == PullRequestQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else

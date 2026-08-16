@@ -54,6 +54,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.service.GitService;
@@ -86,8 +87,8 @@ import io.onedev.server.web.component.savedquery.SavedQueriesLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
-import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 public abstract class CommitListPanel extends Panel {
@@ -156,12 +157,14 @@ public abstract class CommitListPanel extends Panel {
 					
 					commitHashes = gitService.revList(getProject(), options);
 				} catch (Exception e) {
-					if (e.getMessage() != null)
-						error(e.getMessage());
-					else
+					var explicitException = ExceptionUtils.find(e, ExplicitException.class);
+					if (explicitException != null) {
+						error(explicitException.getMessage());
+					} else {
 						error(_T("Error calculating commits: check log for details"));
+						logger.error("Error calculating commits", e);
+					}
 					commitHashes = new ArrayList<>();
-					logger.error("Error calculating commits: ", e);
 				}
 			} else {
 				commitHashes = new ArrayList<>();

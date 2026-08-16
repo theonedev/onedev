@@ -27,9 +27,9 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.search.buildmetric.BuildMetricQuery;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -82,7 +82,7 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 								List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 								return !suggestions.isEmpty()? suggestions: null;
 							} else {
-								String fieldName = EntityQuery.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									BuildMetricQuery.checkField(project, fieldName, operator);
 									if (fieldName.equals(Build.NAME_JOB)) {
@@ -130,7 +130,7 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = EntityQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = QueryUtils.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					BuildMetricQuery.checkField(getProject(), fieldName, BuildMetricQuery.getOperator(suggestedLiteral));
 				} catch (ExplicitException e) {
@@ -146,10 +146,10 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
-			if (criteriaValueExpect != null && EntityQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+			if (criteriaValueExpect != null && QueryUtils.isInsideQuote(terminalExpect.getUnmatchedText())) {
 				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = EntityQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Build.NAME_PROJECT) || fieldName.equals(Build.NAME_VERSION)
 							|| fieldName.equals(Build.NAME_JOB)) {
 						hints.add(_T("Use '*' for wildcard match"));

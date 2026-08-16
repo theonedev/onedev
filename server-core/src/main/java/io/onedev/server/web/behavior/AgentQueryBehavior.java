@@ -29,6 +29,7 @@ import io.onedev.server.service.AgentAttributeService;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
@@ -81,7 +82,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 									return SuggestionUtils.suggestBuilds(null, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								}
 							} else {
-								String fieldName = AgentQuery.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
  								try {
 									AgentQuery.checkField(fieldName, operator);
 									switch (fieldName) {
@@ -156,7 +157,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = AgentQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = QueryUtils.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					AgentQuery.checkField(fieldName, AgentQuery.getOperator(suggestedLiteral));
 				} catch (ExplicitException e) {
@@ -172,10 +173,10 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
-			if (criteriaValueExpect != null && AgentQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+			if (criteriaValueExpect != null && QueryUtils.isInsideQuote(terminalExpect.getUnmatchedText())) {
 				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = AgentQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Agent.NAME_NAME) 
 							|| fieldName.equals(Agent.NAME_OS_NAME) 
 							|| fieldName.equals(Agent.NAME_OS_ARCH) 

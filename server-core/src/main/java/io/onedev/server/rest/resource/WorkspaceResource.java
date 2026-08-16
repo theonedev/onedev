@@ -90,12 +90,7 @@ public class WorkspaceResource {
 		if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
 			throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
-		WorkspaceQuery parsedQuery;
-		try {
-			parsedQuery = WorkspaceQuery.parse(null, query, true);
-		} catch (Exception e) {
-			throw new NotAcceptableException("Error parsing query", e);
-		}
+		var parsedQuery = WorkspaceQuery.parse(null, query, true);
 
 		return workspaceService.query(subject, null, parsedQuery, offset, count);
 	}

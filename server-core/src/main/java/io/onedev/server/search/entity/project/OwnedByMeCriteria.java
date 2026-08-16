@@ -2,13 +2,14 @@ package io.onedev.server.search.entity.project;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.commons.utils.ExplicitException;
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -23,7 +24,7 @@ public class OwnedByMeCriteria extends OwnedByCriteria {
 		if (User.get() != null)
 			return new OwnedByUserCriteria(User.get()).getPredicate(projectScope, query, from, builder);
 		else
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 
 	@Override
@@ -36,7 +37,7 @@ public class OwnedByMeCriteria extends OwnedByCriteria {
 		if (User.get() != null)
 			return new OwnedByUserCriteria(User.get()).matches(project);
 		else
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 
 	@Override

@@ -4,8 +4,6 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -15,19 +13,20 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.SettingService;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.create.NewIssueEditor;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
@@ -48,7 +47,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		super(params);
 		
 		if (!getProject().isIssueManagement())
-			throw new ExplicitException(_T("Issue management not enabled in this project"));
+			throw new NotAcceptableException(_T("Issue management not enabled in this project"));
 		
 		User currentUser = getLoginUser();
 		if (currentUser == null)

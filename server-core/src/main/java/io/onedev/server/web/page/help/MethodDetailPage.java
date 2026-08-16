@@ -1,16 +1,27 @@
 package io.onedev.server.web.page.help;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.rest.ParamCheckFilter;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.resource.TriggerJobResource;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.util.TextUtils;
+import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
+import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.InputStream;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -23,28 +34,19 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import org.jspecify.annotations.Nullable;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
 
-import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
-import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
-import static io.onedev.server.web.translation.Translation._T;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.exception.NotFoundException;
+import io.onedev.server.rest.ParamCheckFilter;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.resource.TriggerJobResource;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.util.TextUtils;
 
 public class MethodDetailPage extends ApiHelpPage {
 
@@ -66,7 +68,7 @@ public class MethodDetailPage extends ApiHelpPage {
 			}
 			String errorMessage = String.format("Unable to find resource method (resource: %s, method: %s)", 
 					resourceClass.getName(), methodName);
-			throw new ExplicitException(errorMessage);
+			throw new NotFoundException(errorMessage);
 		}
 		
 	};
@@ -74,10 +76,11 @@ public class MethodDetailPage extends ApiHelpPage {
 	public MethodDetailPage(PageParameters params) {
 		super(params);
 
+		var className = params.get(PARAM_RESOURCE).toString();
 		try {
-			resourceClass = Class.forName(params.get(PARAM_RESOURCE).toString());
+			resourceClass = Class.forName(className);
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw new NotFoundException("Resource class not found: " + className);
 		}
 		
 		methodName = params.get(PARAM_METHOD).toString();

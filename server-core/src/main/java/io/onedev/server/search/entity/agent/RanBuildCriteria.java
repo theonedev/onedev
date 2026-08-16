@@ -10,8 +10,8 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class RanBuildCriteria extends Criteria<Agent> {
@@ -23,7 +23,7 @@ public class RanBuildCriteria extends Criteria<Agent> {
 	private final String value;
 	
 	public RanBuildCriteria(String value) {
-		build = EntityQuery.getBuild(null, value);
+		build = QueryUtils.getBuild(null, value);
 		this.value = value;
 	}
 

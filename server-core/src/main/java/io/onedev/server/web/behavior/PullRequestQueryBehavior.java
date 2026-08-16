@@ -1,7 +1,6 @@
 package io.onedev.server.web.behavior;
 
 import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
-import static io.onedev.server.search.entity.EntityQuery.getValue;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.checkField;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getOperator;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getRuleName;
@@ -20,6 +19,7 @@ import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.T
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeMergedByMe;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.WatchedByMe;
+import static io.onedev.server.util.QueryUtils.getValue;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
@@ -46,10 +46,10 @@ import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
@@ -236,10 +236,10 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			ParseExpect criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue");
-			if (criteriaValueExpect != null && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+			if (criteriaValueExpect != null && QueryUtils.isInsideQuote(terminalExpect.getUnmatchedText())) {
 				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
 							|| fieldName.equals(PullRequest.NAME_TARGET_BRANCH)) {
 						hints.add(_T("Use '**', '*', or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));

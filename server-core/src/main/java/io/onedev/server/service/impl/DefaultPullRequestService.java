@@ -130,7 +130,6 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.service.BuildService;
@@ -145,6 +144,7 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
@@ -1010,9 +1010,9 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 	private Order getOrder(EntitySort sort, CriteriaBuilder builder, From<PullRequest, PullRequest> root) {
 		if (sort.getDirection() == Direction.ASCENDING)
-			return builder.asc(PullRequestQuery.getPath(root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty()));
+			return builder.asc(QueryUtils.getPath(root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty()));
 		else
-			return builder.desc(PullRequestQuery.getPath(root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty()));
+			return builder.desc(QueryUtils.getPath(root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty()));
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -1047,7 +1047,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 			}
 		}
 		if (!found)
-			orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
+			orders.add(builder.desc(QueryUtils.getPath(root, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		
 		criteriaQuery.orderBy(orders);
 

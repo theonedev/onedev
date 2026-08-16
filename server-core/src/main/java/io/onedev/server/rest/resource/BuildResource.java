@@ -134,13 +134,8 @@ public class BuildResource {
 		if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
-    	BuildQuery parsedQuery;
-		try {
-			parsedQuery = BuildQuery.parse(null, query, true, true);
-		} catch (Exception e) {
-			throw new NotAcceptableException("Error parsing query", e);
-		}
-    	
+    	var parsedQuery = BuildQuery.parse(null, query, true, true);
+		
     	return buildService.query(subject, null, parsedQuery, false, offset, count);
     }
 

@@ -11,9 +11,9 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -52,7 +52,7 @@ public abstract class PersonCriteria extends CommitCriteria {
 						persons.add("<" + it + ">");
 					});
 				} else {
-					throw new ExplicitException(_T("Please login to perform this query"));
+					throw new NotAcceptableException(_T("Please login to perform this query"));
 				}
 			} else if (value.startsWith("@")) {
 				String userName = value.substring(1);
@@ -76,7 +76,7 @@ public abstract class PersonCriteria extends CommitCriteria {
 			if (value == null) { // authored by me
 				User user = User.get();
 				if (user == null) {
-					throw new ExplicitException(_T("Please login to perform this query"));
+					throw new NotAcceptableException(_T("Please login to perform this query"));
 				} else if (user.getVerifiedEmailAddresses().stream()
 						.anyMatch(it-> it.equalsIgnoreCase(personEmail))) { 
 					return true;

@@ -11,7 +11,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -32,9 +31,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.Request;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -131,22 +127,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware, Ch
 	
 	public ProjectPage(PageParameters params) {
 		super(params);
-
-		Request request = RequestCycle.get().getRequest();
-		String requestUrl = request.getUrl().toString();
-		requestUrl = StringUtils.stripStart(requestUrl, "/");
-		if (requestUrl.startsWith("projects/")) {
-			requestUrl = StringUtils.stripStart(requestUrl.substring("projects/".length()), "/");
-			Long projectId = Long.valueOf(StringUtils.substringBefore(requestUrl, "/"));
-			Project project = getProjectService().load(projectId);
-			String suffix = StringUtils.substringAfter(requestUrl, "/");
-			
-			String redirectUrl = "/" + project.getPath();
-			if (StringUtils.isNotBlank(suffix)) 
-				redirectUrl += "/~" + suffix;
-			
-			throw new RedirectToUrlException(redirectUrl, HttpServletResponse.SC_MOVED_PERMANENTLY);
-		}
 	
 		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toOptionalString();
 		if (projectPath == null)

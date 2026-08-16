@@ -15,8 +15,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.xodus.CommitInfoService;
 import io.onedev.server.xodus.PullRequestInfoService;
@@ -30,7 +30,7 @@ public class IncludesIssueCriteria extends Criteria<PullRequest> {
 	private final String value;
 	
 	public IncludesIssueCriteria(@Nullable Project project, String value) {
-		issue = EntityQuery.getIssue(project, value);
+		issue = QueryUtils.getIssue(project, value);
 		this.value = value;
 	}
 	

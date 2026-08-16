@@ -12,6 +12,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class CommitCriteria extends Criteria<Build>  {
@@ -32,8 +33,8 @@ public class CommitCriteria extends Criteria<Build>  {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
-		Path<?> projectAttribute = BuildQuery.getPath(from, Build.PROP_PROJECT);
-		Path<?> commitAttribute = BuildQuery.getPath(from, Build.PROP_COMMIT_HASH);
+		Path<?> projectAttribute = QueryUtils.getPath(from, Build.PROP_PROJECT);
+		Path<?> commitAttribute = QueryUtils.getPath(from, Build.PROP_COMMIT_HASH);
 		var predicate = builder.and(
 				builder.equal(projectAttribute, project), 
 				builder.equal(commitAttribute, commitId.name()));

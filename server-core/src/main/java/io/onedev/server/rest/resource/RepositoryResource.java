@@ -275,12 +275,7 @@ public class RepositoryResource {
     	if (count > MAX_COMMITS)
     		throw new NotAcceptableException("Count should not be greater than " + MAX_COMMITS);
 
-    	CommitQuery parsedQuery;
-		try {
-			parsedQuery = CommitQuery.parse(project, query, true);
-		} catch (Exception e) {
-			throw new NotAcceptableException("Error parsing query", e);
-		}
+		var parsedQuery = CommitQuery.parse(project, query, true);
     	
 		RevListOptions options = new RevListOptions();
 		options.ignoreCase(true);

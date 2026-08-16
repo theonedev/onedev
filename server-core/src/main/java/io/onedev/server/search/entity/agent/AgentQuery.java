@@ -15,6 +15,7 @@ import static io.onedev.server.search.entity.agent.AgentQueryParser.IsNot;
 import static io.onedev.server.search.entity.agent.AgentQueryParser.Offline;
 import static io.onedev.server.search.entity.agent.AgentQueryParser.Online;
 import static io.onedev.server.search.entity.agent.AgentQueryParser.Paused;
+import static io.onedev.server.util.QueryUtils.getValue;
 
 import java.util.ArrayList;
 import java.util.List;

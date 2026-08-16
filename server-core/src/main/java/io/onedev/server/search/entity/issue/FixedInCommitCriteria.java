@@ -8,9 +8,9 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class FixedInCommitCriteria extends Criteria<Issue> {
@@ -36,7 +36,7 @@ public class FixedInCommitCriteria extends Criteria<Issue> {
 	
 	private ProjectScopedCommit getCommit() {
 		if (commit == null)
-			commit = EntityQuery.getCommitId(project, value);
+			commit = QueryUtils.getCommitId(project, value);
 		return commit;
 	}
 	

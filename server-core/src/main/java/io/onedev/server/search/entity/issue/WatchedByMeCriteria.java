@@ -3,13 +3,14 @@ package io.onedev.server.search.entity.issue;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedByMe;
 import static io.onedev.server.web.translation.Translation._T;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.commons.utils.ExplicitException;
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ProjectScope;
@@ -25,7 +26,7 @@ public class WatchedByMeCriteria extends Criteria<Issue> {
 		if (user != null) 
 			return getCriteria(user).getPredicate(projectScope, query, from, builder);
 		else 
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 
 	@Override
@@ -34,7 +35,7 @@ public class WatchedByMeCriteria extends Criteria<Issue> {
 		if (user != null)
 			return getCriteria(user).matches(issue);
 		else
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 	
 	private Criteria<Issue> getCriteria(User user) {

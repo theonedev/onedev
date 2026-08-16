@@ -23,9 +23,9 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class FixedBetweenCriteria extends Criteria<Issue> {
@@ -70,10 +70,10 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 	
 	private static ProjectScopedCommit getCommitId(@Nullable Project project, int type, String value) {
 		if (type == IssueQueryLexer.Build) {
-			Build build = EntityQuery.getBuild(project, value);
+			Build build = QueryUtils.getBuild(project, value);
 			return new ProjectScopedCommit(build.getProject(), build.getCommitId());
 		} else {
-			return EntityQuery.getCommitId(project, value);
+			return QueryUtils.getCommitId(project, value);
 		}
 	}
 	

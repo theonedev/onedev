@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -36,16 +35,11 @@ import org.apache.shiro.subject.Subject;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import io.onedev.server.service.PackBlobReferenceService;
-import io.onedev.server.service.PackBlobService;
-import io.onedev.server.service.PackLabelService;
-import io.onedev.server.service.PackService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
 import io.onedev.server.exception.HttpResponseAwareException;
@@ -58,10 +52,16 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadPack;
+import io.onedev.server.service.PackBlobReferenceService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackLabelService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectPackTypeStat;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 @Singleton
@@ -104,9 +104,9 @@ public class DefaultPackService extends BaseEntityService<Pack>
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: sorts) {
 			if (sort.getDirection() == ASCENDING)
-				orders.add(builder.asc(PackQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
+				orders.add(builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(PackQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
+				orders.add(builder.desc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
 		if (orders.isEmpty())

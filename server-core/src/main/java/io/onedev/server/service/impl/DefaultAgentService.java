@@ -59,10 +59,10 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.service.AgentAttributeService;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.AgentTokenService;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.validation.validator.AttributeNameValidator;
 
@@ -302,13 +302,13 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: query.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
-				orders.add(builder.asc(AgentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
+				orders.add(builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(AgentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
+				orders.add(builder.desc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.asc(AgentQuery.getPath(root, Agent.PROP_NAME)));
+			orders.add(builder.asc(QueryUtils.getPath(root, Agent.PROP_NAME)));
 		criteriaQuery.orderBy(orders);
 		
 		return criteriaQuery;

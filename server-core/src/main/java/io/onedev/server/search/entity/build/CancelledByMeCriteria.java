@@ -2,14 +2,15 @@ package io.onedev.server.search.entity.build;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.commons.utils.ExplicitException;
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ProjectScope;
@@ -25,7 +26,7 @@ public class CancelledByMeCriteria extends Criteria<Build> {
 			Path<User> attribute = from.get(Build.PROP_CANCELLER);
 			return builder.equal(attribute, User.get());
 		} else {
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 		}
 	}
 
@@ -34,7 +35,7 @@ public class CancelledByMeCriteria extends Criteria<Build> {
 		if (User.get() != null)
 			return User.get().equals(build.getCanceller());
 		else
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 
 	@Override

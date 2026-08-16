@@ -2,14 +2,15 @@ package io.onedev.server.search.entity.codecomment;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.commons.utils.ExplicitException;
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -25,7 +26,7 @@ public class CreatedByMeCriteria extends CreatedByCriteria {
 			Path<?> attribute = from.get(CodeComment.PROP_USER);
 			return builder.equal(attribute, User.get());
 		} else {
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 		}
 	}
 
@@ -39,7 +40,7 @@ public class CreatedByMeCriteria extends CreatedByCriteria {
 		if (User.get() != null)
 			return User.get().equals(comment.getUser());
 		else
-			throw new ExplicitException(_T("Please login to perform this query"));
+			throw new NotAcceptableException(_T("Please login to perform this query"));
 	}
 
 	@Override

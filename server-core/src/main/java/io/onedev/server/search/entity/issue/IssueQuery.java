@@ -49,6 +49,13 @@ import static io.onedev.server.search.entity.issue.IssueQueryParser.MentionedMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.ReferencedInCurrentBranch;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.SubmittedByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.WatchedByMe;
+import static io.onedev.server.util.QueryUtils.getBooleanValue;
+import static io.onedev.server.util.QueryUtils.getFloatValue;
+import static io.onedev.server.util.QueryUtils.getGroup;
+import static io.onedev.server.util.QueryUtils.getIntValue;
+import static io.onedev.server.util.QueryUtils.getNumber;
+import static io.onedev.server.util.QueryUtils.getUser;
+import static io.onedev.server.util.QueryUtils.getValue;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -2,10 +2,10 @@ package io.onedev.server.search.entity.agent;
 
 import static io.onedev.server.model.Agent.PROP_LAST_USED_DATE;
 import static io.onedev.server.model.AgentLastUsedDate.PROP_VALUE;
-import static io.onedev.server.search.entity.EntityQuery.getDateValue;
-import static io.onedev.server.search.entity.EntityQuery.getPath;
 import static io.onedev.server.search.entity.agent.AgentQuery.getRuleName;
 import static io.onedev.server.search.entity.agent.AgentQueryLexer.EverUsedSince;
+import static io.onedev.server.util.QueryUtils.getDateValue;
+import static io.onedev.server.util.QueryUtils.getPath;
 
 import java.util.Date;
 

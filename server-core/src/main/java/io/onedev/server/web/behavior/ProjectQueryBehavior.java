@@ -37,6 +37,7 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
@@ -91,7 +92,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 									return SuggestionUtils.suggestUsers(matchWith);
 								}
 							} else {
-								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									ProjectQuery.checkField(fieldName, operator);
 									if (fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE)) {
@@ -187,7 +188,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = ProjectQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = QueryUtils.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					ProjectQuery.checkField(fieldName, ProjectQuery.getOperator(suggestedLiteral));
 				} catch (ExplicitException e) {
@@ -207,7 +208,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 			if (criteriaValueExpect != null) {
 				List<Element> fieldElements = criteriaValueExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
-					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Project.NAME_NAME)
 							|| fieldName.equals(Project.NAME_KEY) 
 							|| fieldName.equals(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS)) {

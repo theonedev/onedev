@@ -10,8 +10,8 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class RunningDateCriteria extends Criteria<Build> {
@@ -26,7 +26,7 @@ public class RunningDateCriteria extends Criteria<Build> {
 	
 	public RunningDateCriteria(String value, int operator) {
 		this.operator = operator;
-		date = EntityQuery.getDateValue(value);
+		date = QueryUtils.getDateValue(value);
 		this.value = value;
 	}
 

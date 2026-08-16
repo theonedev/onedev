@@ -1,19 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
-import io.onedev.server.model.support.issue.field.spec.CommitField;
-import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.criteria.Criteria;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.nio.channels.IllegalSelectorException;
@@ -22,6 +8,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.exception.NotAcceptableException;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueField;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
+import io.onedev.server.model.support.issue.field.spec.CommitField;
+import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.Criteria;
 
 public class FieldOperatorCriteria extends FieldCriteria {
 
@@ -49,12 +54,12 @@ public class FieldOperatorCriteria extends FieldCriteria {
 			if (User.get() != null) 
 				return builder.equal(valueAttribute, User.get().getName());
 			else 
-				throw new ExplicitException(_T("Please login to perform this query"));
+				throw new NotAcceptableException(_T("Please login to perform this query"));
 		} else if (operator == IssueQueryLexer.IsNotMe) {
 			if (User.get() != null) {
 				return builder.not(builder.equal(valueAttribute, User.get().getName()));
 			} else {
-				throw new ExplicitException(_T("Please login to perform this query"));
+				throw new NotAcceptableException(_T("Please login to perform this query"));
 			}
 		} else if (operator == IssueQueryLexer.IsCurrent) {
 			if (getFieldSpec() instanceof BuildChoiceField) {
@@ -127,7 +132,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 				else 
 					return Objects.equals(fieldValue, userName);
 			} else {
-				throw new ExplicitException(_T("Please login to perform this query"));
+				throw new NotAcceptableException(_T("Please login to perform this query"));
 			}
 		} else if (operator == IssueQueryLexer.IsCurrent) {
 			if (getFieldSpec() instanceof BuildChoiceField) {

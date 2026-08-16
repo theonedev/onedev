@@ -11,8 +11,8 @@ import org.jspecify.annotations.Nullable;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Workspace;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class PullRequestCriteria extends Criteria<Workspace> {
@@ -26,7 +26,7 @@ public class PullRequestCriteria extends Criteria<Workspace> {
 	private final int operator;
 
 	public PullRequestCriteria(@Nullable Project project, String value, int operator) {
-		pullRequest = EntityQuery.getPullRequest(project, value);
+		pullRequest = QueryUtils.getPullRequest(project, value);
 		this.value = value;
 		this.operator = operator;
 	}

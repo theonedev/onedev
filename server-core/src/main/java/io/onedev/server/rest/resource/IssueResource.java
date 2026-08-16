@@ -277,13 +277,8 @@ public class IssueResource {
     	if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
-    	IssueQuery parsedQuery;
-		try {
-			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
-			parsedQuery = IssueQuery.parse(null, query, option, true);
-		} catch (Exception e) {
-			throw new NotAcceptableException("Error parsing query", e);
-		}
+		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+		var parsedQuery = IssueQuery.parse(null, query, option, true);
 
 		var issues = new ArrayList<Map<String, Object>>();
 		for (var issue: issueService.query(subject, null, parsedQuery, false, offset, count)) {

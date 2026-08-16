@@ -11,8 +11,8 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class FixedInPullRequestCriteria extends Criteria<Issue> {
@@ -38,7 +38,7 @@ public class FixedInPullRequestCriteria extends Criteria<Issue> {
 	
 	public PullRequest getRequest() {
 		if (request == null)
-			request = EntityQuery.getPullRequest(project, value);
+			request = QueryUtils.getPullRequest(project, value);
 		return request;
 	}
 	

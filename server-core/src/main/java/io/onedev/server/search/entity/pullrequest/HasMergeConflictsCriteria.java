@@ -10,6 +10,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class HasMergeConflictsCriteria extends Criteria<PullRequest> {
@@ -18,8 +19,8 @@ public class HasMergeConflictsCriteria extends Criteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		Path<?> requestHead = PullRequestQuery.getPath(from, PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_HEAD_COMMIT_HASH);
-		Path<?> merged = PullRequestQuery.getPath(from, PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_MERGED_COMMIT_HASH);
+		Path<?> requestHead = QueryUtils.getPath(from, PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_HEAD_COMMIT_HASH);
+		Path<?> merged = QueryUtils.getPath(from, PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_MERGED_COMMIT_HASH);
 		return builder.and(
 				builder.isNotNull(requestHead), 
 				builder.isNull(merged));

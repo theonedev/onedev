@@ -114,6 +114,7 @@ import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.ProjectBuildStatusStat;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
@@ -647,9 +648,9 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: query.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
-				orders.add(builder.asc(BuildQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
+				orders.add(builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
-				orders.add(builder.desc(BuildQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
+				orders.add(builder.desc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
 
 		boolean found = false;

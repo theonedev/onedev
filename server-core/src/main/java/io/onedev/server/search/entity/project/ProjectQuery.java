@@ -20,6 +20,11 @@ import static io.onedev.server.search.entity.project.ProjectQueryParser.OwnedByM
 import static io.onedev.server.search.entity.project.ProjectQueryParser.OwnedByNone;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.Roots;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.WithoutEnoughReplicas;
+import static io.onedev.server.util.QueryUtils.getLabelSpec;
+import static io.onedev.server.util.QueryUtils.getLongValue;
+import static io.onedev.server.util.QueryUtils.getNumber;
+import static io.onedev.server.util.QueryUtils.getUser;
+import static io.onedev.server.util.QueryUtils.getValue;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -11,8 +11,8 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.util.criteria.Criteria;
 
 public class DependsOnCriteria extends Criteria<Build> {
@@ -24,7 +24,7 @@ public class DependsOnCriteria extends Criteria<Build> {
 	private final String value;
 	
 	public DependsOnCriteria(@Nullable Project project, String value) {
-		build = EntityQuery.getBuild(project, value);
+		build = QueryUtils.getBuild(project, value);
 		this.value = value;
 	}
 

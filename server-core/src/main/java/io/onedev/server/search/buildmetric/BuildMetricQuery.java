@@ -4,9 +4,9 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.BuildParamService;
+import io.onedev.server.util.QueryUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BuildMetric;
-import io.onedev.server.search.entity.EntityQuery;
 import org.antlr.v4.runtime.*;
 
 import org.jspecify.annotations.Nullable;
@@ -75,7 +75,7 @@ public class BuildMetricQuery implements Serializable {
 
 					@Override
 					public BuildMetricCriteria visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
-						String fieldName = EntityQuery.getValue(ctx.Quoted().getText());
+						String fieldName = QueryUtils.getValue(ctx.Quoted().getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
 						if (fieldName.equals(NAME_PULL_REQUEST))
@@ -86,13 +86,13 @@ public class BuildMetricQuery implements Serializable {
 					
 					@Override
 					public BuildMetricCriteria visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
-						String fieldName = EntityQuery.getValue(ctx.criteriaField.getText());
+						String fieldName = QueryUtils.getValue(ctx.criteriaField.getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
 						
 						var criterias = new ArrayList<BuildMetricCriteria>();
 						for (var quoted: ctx.criteriaValue.Quoted()) {
-							String value = EntityQuery.getValue(quoted.getText());
+							String value = QueryUtils.getValue(quoted.getText());
 							if (operator == Is || operator == IsNot) {
 								switch (fieldName) {
 									case BuildMetric.NAME_REPORT:
@@ -119,7 +119,7 @@ public class BuildMetricQuery implements Serializable {
 						var criterias = new ArrayList<BuildMetricCriteria>();
 						for (var quoted: ctx.criteriaValue.Quoted()) {
 							int operator = ctx.operator.getType();
-							String value = EntityQuery.getValue(quoted.getText());
+							String value = QueryUtils.getValue(quoted.getText());
 							if (operator == Since || operator == Until)
 								criterias.add(new DateCriteria(value, operator));
 							else
