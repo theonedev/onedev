@@ -1064,20 +1064,13 @@ public class Upgrade extends AbstractPlugin {
 				serverProps += String.format("%n%nssh_port: 6611%n");
 				writeStringToFile(serverPropsFile, serverProps, UTF_8);
 			}
-
-			File logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
-			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, UTF_8);
-			if (!logbackConfig.contains("AggregatedServiceLoader") 
-					|| !logbackConfig.contains("com.hazelcast.cp.CPSubsystem")) { 
-				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "logback.xml"), logbackConfigFile);
-			}
 			
 			File sampleKeystoreFile = new File(upgradeDir, "conf/sample.keystore");
 			if (sampleKeystoreFile.exists())
 				FileUtils.deleteFile(sampleKeystoreFile);
 			
-			logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
-			logbackConfig = FileUtils.readFileToString(logbackConfigFile, UTF_8);
+			var logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
+			var logbackConfig = FileUtils.readFileToString(logbackConfigFile, UTF_8);
 			logbackConfig = Strings.CS.replace(logbackConfig, 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"><maxFileSize>1MB</maxFileSize></triggeringPolicy>");
