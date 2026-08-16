@@ -250,7 +250,7 @@ The operation to [get issue fields](/~help/api/io.onedev.server.rest.IssueResour
 
 ### Database 
 
-Oracle support is removed as it is hard to test with latest version. If you happen to use this database, please back up data and restore to a supported database following [this guide]((https://docs.onedev.io/administration-guide/backup-restore)) 
+Oracle support is removed as it is hard to test with latest version. If you happen to use this database, please back up data and restore to a supported database following [this guide](https://docs.onedev.io/administration-guide/backup-restore)
 
 # 8.5.0
 

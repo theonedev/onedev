@@ -89,20 +89,20 @@ ul>li>a.code-comments.new.unresolved .icon {
 	}
 }
 
-.pull-request-detail>.card-body>.more-info>.body>* {
+.pull-request-detail>.card-body>.more-info>div>.body>* {
 	margin-bottom: 1.5rem;
 	border-top: 1px dashed var(--secondary);
 	padding-top: 1.5rem;
 }
-.dark-mode .pull-request-detail>.card-body>.more-info>.body>* {
+.dark-mode .pull-request-detail>.card-body>.more-info>div>.body>* {
 	border-top-color: var(--dark-mode-dark-gray);
 }
-.pull-request-detail>.card-body>.more-info>.body>:first-child {
+.pull-request-detail>.card-body>.more-info>div>.body>:first-child {
 	border-top: none;
 	padding-top: 0;
 }
 
-.pull-request-detail>.card-body>.more-info>.body>*>.head {
+.pull-request-detail>.card-body>.more-info>div>.body>*>.head {
 	font-weight: 600;
 	margin-bottom: 0.8rem;
 }

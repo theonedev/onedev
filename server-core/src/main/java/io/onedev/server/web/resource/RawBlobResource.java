@@ -33,6 +33,7 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -104,8 +105,13 @@ public class RawBlobResource extends AbstractResource {
 		}
 		
 		String disposition = params.get(PARAM_DISPOSITION).toOptionalString();
-		if (disposition != null)
-			response.setContentDisposition(ContentDisposition.valueOf(disposition));
+		if (disposition != null) {
+			try {
+				response.setContentDisposition(ContentDisposition.valueOf(disposition));
+			} catch (IllegalArgumentException e) {
+				throw new NotAcceptableException("Invalid content disposition: " + disposition);
+			}
+		}
 		
 		response.setWriteCallback(new WriteCallback() {
 

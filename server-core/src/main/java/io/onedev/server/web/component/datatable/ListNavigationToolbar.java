@@ -44,7 +44,7 @@ public class ListNavigationToolbar extends AbstractToolbar {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(getTable().getItemCount() != 0);
+		setVisible(getTable().getPageCount() > 1);
 	}
 
 }

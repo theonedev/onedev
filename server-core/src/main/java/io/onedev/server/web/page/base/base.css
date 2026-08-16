@@ -140,6 +140,9 @@ table {
 table>thead>tr>th, table>tbody>tr>td {
 	vertical-align: top;
 }
+table.table {
+	margin-bottom: 0;
+}
 .table>thead>tr>th {
 	border-top: none;
 }
@@ -151,8 +154,8 @@ table>thead>tr>th, table>tbody>tr>td {
 }
 
 tr.navigation>td {
-	padding-top: 20px;
-	padding-bottom: 20px;
+	padding-top: 2rem;
+	padding-bottom: 0;
 	padding-left: 0;
 	padding-right: 0;
 }

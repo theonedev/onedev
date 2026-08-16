@@ -1,29 +1,33 @@
 package io.onedev.server.plugin.report.markdown;
 
-import com.google.common.base.Splitter;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.model.Build;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import org.jspecify.annotations.Nullable;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.google.common.base.Splitter;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.exception.NotFoundException;
+import io.onedev.server.model.Build;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 
 public class MarkdownReportPage extends BuildDetailPage {
 
@@ -116,7 +120,11 @@ public class MarkdownReportPage extends BuildDetailPage {
 		public String call() throws Exception {
 			File file = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber),
 					PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + filePath);
-			return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+			try {
+				return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+			} catch (NoSuchFileException e) {
+				throw new NotFoundException("Markdown file not found (report: " + reportName + ", path: " + filePath + ")");
+			}
 		}
 		
 	}

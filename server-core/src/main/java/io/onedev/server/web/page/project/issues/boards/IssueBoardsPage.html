@@ -43,7 +43,7 @@
 	<wicket:fragment wicket:id="boardMenuFrag">
 		<div class="board-menu p-4">
 			<div class="text-muted mb-3"><wicket:svg href="bulb" class="icon"/> <wicket:t>The first board will be the default board</wicket:t></div>
-			<table class="boards table">
+			<table class="boards table mb-3 mb-last-child-0">
 				<tr wicket:id="boards" class="board">
 					<td class="name">
 						<span wicket:id="dragIndicator" class="drag-indicator"><wicket:svg href="grip" class="icon"/></span>			
@@ -64,7 +64,7 @@
 	<wicket:fragment wicket:id="iterationMenuFrag">
 		<div class="iteration-menu p-4">
 			<wicket:enclosure child="iterations">
-			<table class="iterations table">
+			<table class="iterations table mb-3 mb-last-child-0">
 				<tr wicket:id="iterations" class="iteration">
 					<td class="name text-nowrap">
 						<a wicket:id="select"><span wicket:id="name"></span></a> 

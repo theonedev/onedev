@@ -98,9 +98,11 @@
 		<div class="alerts">
 			<div class="text-center font-size-h6 border-bottom bg-light px-3 py-2 mb-2"><wicket:t>Alerts</wicket:t></div>
 			<table wicket:id="alerts" class="table"></table>
-			<div class="px-2 pb-2">
+			<wicket:enclosure child="clear">
+			<div class="px-2 pb-2 pt-4">
 				<a wicket:id="clear" class="btn btn-sm btn-block btn-light-primary"><wicket:t>Delete All</wicket:t></a>
-			</div>
+			</div>				
+			</wicket:enclosure>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="alertMessageFrag">
