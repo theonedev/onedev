@@ -1,57 +1,21 @@
 package io.onedev.server.web.page.project.commits;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.OneDev;
-import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.tools.code.CommitDetailTool;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
-import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.service.*;
-import io.onedev.server.entityreference.LinkTransformer;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.job.JobAuthorizationContext;
-import io.onedev.server.job.JobAuthorizationContextAware;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.Mark;
-import io.onedev.server.model.support.code.BranchProtection;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.component.AjaxLazyLoadPanel;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.branch.create.CreateBranchPanel;
-import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.createtag.CreateTagPanel;
-import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
-import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
-import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
-import io.onedev.server.web.util.editbean.CommitMessageBean;
-import io.onedev.server.xodus.CommitInfoService;
+import static io.onedev.server.ai.ToolUtils.getDiffTools;
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
@@ -78,24 +42,78 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.jspecify.annotations.Nullable;
-import java.io.Serializable;
-import java.text.MessageFormat;
-import java.util.*;
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
-import static io.onedev.server.ai.ToolUtils.getDiffTools;
-import static io.onedev.server.ai.ToolUtils.wrapForChat;
-import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
-import static io.onedev.server.web.translation.Translation._T;
-import static java.util.stream.Collectors.toList;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.OneDev;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.tools.code.CommitDetailTool;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.BuildSpecParseException;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.entityreference.LinkTransformer;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
+import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.job.JobAuthorizationContextAware;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.Mark;
+import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.component.AjaxLazyLoadPanel;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.branch.create.CreateBranchPanel;
+import io.onedev.server.web.component.contributorpanel.ContributorPanel;
+import io.onedev.server.web.component.createtag.CreateTagPanel;
+import io.onedev.server.web.component.diff.revision.RevisionAnnotationSupport;
+import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
+import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
+import io.onedev.server.web.util.editbean.CommitMessageBean;
+import io.onedev.server.xodus.CommitInfoService;
 
 public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
-
+	
 	public static final String PARAM_COMMIT = "commit";
 	
 	// make sure to use a different value from wicket:id according to wicket bug:
@@ -465,9 +483,10 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					if (buildSpec != null) {
 						jobs.addAll(buildSpec.getJobMap().values());
 					}
-				} catch (Exception e) {
-					logger.error("Error retrieving build spec (project: {}, commit: {})",
-							getProject().getPath(), getCommit().name(), e);
+				} catch (BuildSpecParseException e) {
+					var message = String.format("Error parsing build spec (project: %s, commit: %s)",
+							getProject().getPath(), getCommit().name());
+					logger.warn(message, e);
 				}
 				return jobs;
 			}

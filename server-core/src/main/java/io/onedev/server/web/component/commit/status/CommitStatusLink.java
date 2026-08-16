@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -18,12 +16,14 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.BuildSpecParseException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.Build;
@@ -36,7 +36,7 @@ import io.onedev.server.web.component.job.joblist.JobListPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 
 public abstract class CommitStatusLink extends DropdownLink {
-
+	
 	private static final Logger logger = LoggerFactory.getLogger(CommitStatusLink.class);
 	
 	private final ObjectId commitId;
@@ -53,9 +53,10 @@ public abstract class CommitStatusLink extends DropdownLink {
 				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
 				if (buildSpec != null)
 					jobs.addAll(buildSpec.getJobMap().values());
-			} catch (Exception e) {
-				logger.error("Error retrieving build spec (project: {}, commit: {})", 
-						getProject().getPath(), commitId.name(), e);
+			} catch (BuildSpecParseException e) {
+				var message = String.format("Error parsing build spec (project: %s, commit: %s)", 
+						getProject().getPath(), commitId.name());
+				logger.warn(message, e);
 			} finally {
 				JobAuthorizationContext.pop();
 			}

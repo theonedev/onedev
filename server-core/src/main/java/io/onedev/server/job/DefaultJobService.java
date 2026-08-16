@@ -799,7 +799,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 										} catch (Throwable e) {
 											String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)",
 													project.getPath(), commitId.name(), job.getName());
-											logger.error(message, e);
+											logException(message, e);
 										}
 									}
 
@@ -810,7 +810,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				} catch (Throwable t) {
 					String message = String.format("Error checking job triggers (project: %s, commit: %s)",
 							event.getProject().getPath(), commitId.name());
-					logger.error(message, t);
+					logException(message, t);
 				} finally {
 					JobAuthorizationContext.pop();
 				}
@@ -967,7 +967,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 								if (shell != null)
 									shell.writeToStdin(data);
 							} catch (Throwable e) {
-								logger.error("Error sending shell input", e);
+								logException("Error sending shell input", e);
 							}
 							return null;
 						});
@@ -981,7 +981,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 								if (shell != null)
 									shell.resize(rows, cols);
 							} catch (Throwable e) {
-								logger.error("Error resizing shell", e);
+								logException("Error resizing shell", e);
 							}
 							return null;
 						});
@@ -995,7 +995,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 								if (shell != null)
 									shell.terminate();
 							} catch (Throwable e) {
-								logger.error("Error exiting shell", e);
+								logException("Error exiting shell", e);
 							}
 							return null;
 						});
@@ -1082,14 +1082,20 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				branchSchedules.remove(key);
 			else
 				branchSchedules.put(key, schedules);
-		} catch (BuildSpecParseException e) {
-			logger.debug("Malformed build spec (project: {}, branch: {})", project.getPath(), branch);
-		} catch (ValidationException e) {
-			logger.debug(String.format("Error validating build spec (project: %s, branch: %s)", project.getPath(), branch), e);
 		} catch (Throwable e) {
-			logger.error(String.format("Error caching branch schedules (project: %s, branch: %s)", project.getPath(), branch), e);
+			var message = String.format("Error caching branch schedules (project: %s, branch: %s)", project.getPath(), branch);
+			logException(message, e);
 		} finally {
 			JobAuthorizationContext.pop();
+		}
+	}
+
+	private void logException(String message, Throwable e) {
+		if (ExceptionUtils.find(e, BuildSpecParseException.class) != null 
+				|| ExceptionUtils.find(e, ValidationException.class) != null) {
+			logger.warn(message, e);
+		} else {
+			logger.error(message, e);
 		}
 	}
 	
@@ -1167,7 +1173,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 									} catch (Exception e) {
 										String errorMessage = String.format("Error triggering scheduled job (project: %s, branch: %s)",
 												project.getPath(), GitUtils.ref2branch(match.getRefName()));
-										logger.error(errorMessage, e);
+										logException(errorMessage, e);
 									}
 								}
 							}
@@ -1294,7 +1300,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 									}
 								});
 							} catch (Throwable t) {
-								logger.error("Error checking unfinished builds", t);
+								logException("Error checking unfinished builds", t);
 							}
 							return null;
 						}));
@@ -1343,7 +1349,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				checkImmediately = false;
 			} catch (Throwable t) {
 				if (ExceptionUtils.find(t, ServerNotFoundException.class) == null) {
-					logger.error("Error checking builds", t);
+					logException("Error checking builds", t);
 				}
 			}
 		}
@@ -1371,7 +1377,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		} catch (Throwable e) {
 			String message = String.format("Error processing post build actions (project: %s, commit: %s, job: %s)",
 					build.getProject().getPath(), build.getCommitHash(), build.getJobName());
-			logger.error(message, e);
+			logException(message, e);
 		} finally {
 			Build.pop();
 			JobAuthorizationContext.pop();
