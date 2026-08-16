@@ -65,6 +65,8 @@ import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.web.page.help.ApiHelpUtils;
+import io.onedev.server.web.page.help.ValueInfo;
 
 @Api(name="Pull Request", description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
 		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -132,7 +134,7 @@ public class PullRequestResource {
     	return pullRequest.checkMergePreview();
     }
 	
-	@Api(order=300)
+	@Api(order=300, exampleProvider = "getAssignmentsExample")
 	@Path("/{requestId}/assignments")
     @GET
     public Collection<Map<String, Object>> getAssignments(@PathParam("requestId") Long requestId) {
@@ -149,7 +151,7 @@ public class PullRequestResource {
 				}).collect(toList());
     }
 	
-	@Api(order=400)
+	@Api(order=400, exampleProvider = "getReviewsExample")
 	@Path("/{requestId}/reviews")
     @GET
     public Collection<Map<String, Object>> getReviews(@PathParam("requestId") Long requestId) {
@@ -166,6 +168,24 @@ public class PullRequestResource {
 					return map;
 				}).collect(toList());
     }
+
+	@SuppressWarnings("unused")
+	private static Collection<Map<String, Object>> getAssignmentsExample() {
+		var assignments = new ArrayList<Map<String, Object>>();
+		var map = ApiHelpUtils.getExampleMap(PullRequestAssignment.class, ValueInfo.Origin.READ_BODY);
+		map.remove("id");
+		assignments.add(map);
+		return assignments;
+	}
+
+	@SuppressWarnings("unused")
+	private static Collection<Map<String, Object>> getReviewsExample() {
+		var reviews = new ArrayList<Map<String, Object>>();
+		var map = ApiHelpUtils.getExampleMap(PullRequestReview.class, ValueInfo.Origin.READ_BODY);
+		map.remove("id");
+		reviews.add(map);
+		return reviews;
+	}
 	
 	@Api(order=500)
 	@Path("/{requestId}/comments")

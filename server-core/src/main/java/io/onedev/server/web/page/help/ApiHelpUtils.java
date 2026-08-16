@@ -1,8 +1,40 @@
 package io.onedev.server.web.page.help;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
+import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
+import static java.util.Comparator.comparing;
+
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
+
+import org.objenesis.ObjenesisStd;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.server.OneDev;
@@ -15,26 +47,20 @@ import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
-import org.objenesis.ObjenesisStd;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.lang.reflect.*;
-import java.util.*;
-
-import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
-import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
-import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
-import static java.util.Comparator.comparing;
 
 public class ApiHelpUtils {
 
 	public static Serializable getExampleValue(Type valueType, ValueInfo.Origin origin) {
 		return getExampleValue(valueType, Sets.newHashSet(), origin);
 	}
+
+	public static Map<String, Object> getExampleMap(Type valueType, ValueInfo.Origin origin) {
+		var value = getExampleValue(valueType, origin);
+		return OneDev.getInstance(ObjectMapper.class).convertValue(value, new TypeReference<Map<String, Object>>() {});
+	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Serializable getExampleValue(Type valueType, Set<Class<?>> parsedTypes, ValueInfo.Origin origin) {
+	private static Serializable getExampleValue(Type valueType, Set<Class<?>> parsedTypes, ValueInfo.Origin origin) {
 		Class<?> valueClass = ReflectionUtils.getClass(valueType);
 		Object value = new ExampleProvider(valueClass, valueClass.getAnnotation(Api.class)).getExample();
 		if (value == null) {

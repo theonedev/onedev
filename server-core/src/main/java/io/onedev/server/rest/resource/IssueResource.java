@@ -36,7 +36,6 @@ import org.apache.shiro.subject.Subject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.SubscriptionService;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -117,7 +116,7 @@ public class IssueResource {
 		this.subscriptionService = subscriptionService;
 	}
 
-	@Api(order=100)
+	@Api(order=100, exampleProvider = "getIssueExample")
 	@Path("/{issueId}")
     @GET
     public Map<String, Object> getIssue(@PathParam("issueId") Long issueId) {
@@ -292,10 +291,16 @@ public class IssueResource {
     }
 	
 	@SuppressWarnings("unused")
+	private static Map<String, Object> getIssueExample() {
+		var issueMap = ApiHelpUtils.getExampleMap(Issue.class, ValueInfo.Origin.READ_BODY);
+		issueMap.put("branch", "string");
+		return issueMap;
+	}
+
+	@SuppressWarnings("unused")
 	private static List<Map<String, Object>> getIssuesExample() {
 		var issues = new ArrayList<Map<String, Object>>();
-		var issue = ApiHelpUtils.getExampleValue(Issue.class, ValueInfo.Origin.READ_BODY);
-		issues.add(OneDev.getInstance(ObjectMapper.class).convertValue(issue, new TypeReference<Map<String, Object>>() {}));
+		issues.add(ApiHelpUtils.getExampleMap(Issue.class, ValueInfo.Origin.READ_BODY));
 		return issues;
 	}
 
