@@ -1,10 +1,10 @@
 package io.onedev.server.exception.handler;
 
-import io.onedev.server.exception.HttpResponse;
+import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.StaleStateException;
 
-import javax.servlet.http.HttpServletResponse;
+import io.onedev.server.exception.HttpResponse;
 
 public class StaleStateExceptionHandler extends AbstractExceptionHandler<StaleStateException> {
 	
@@ -15,7 +15,7 @@ public class StaleStateExceptionHandler extends AbstractExceptionHandler<StaleSt
 		var errorMessage = exception.getMessage();
 		if (errorMessage == null)
 			errorMessage = "Persistence state staled";
-		return new HttpResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMessage);
+		return new HttpResponse(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
     }
     
 }

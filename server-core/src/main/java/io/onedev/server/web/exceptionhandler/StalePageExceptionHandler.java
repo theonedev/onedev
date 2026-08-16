@@ -15,7 +15,7 @@ public class StalePageExceptionHandler extends AbstractExceptionHandler<StalePag
 		String errorMessage = exception.getMessage();
 		if (errorMessage == null)
 			errorMessage = "Stale page";
-		return new HttpResponse(HttpServletResponse.SC_REQUEST_TIMEOUT, errorMessage);
+		return new HttpResponse(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
     }
     
 }
