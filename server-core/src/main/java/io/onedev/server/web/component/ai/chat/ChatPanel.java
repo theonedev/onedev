@@ -371,6 +371,8 @@ public class ChatPanel extends Panel {
 						
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				// Submit button is only enabled when input is not empty, so we can safely 
+				// assume that WebSession.get().getChatInput() is not null at this point
 				var input = WebSession.get().getChatInput().trim();
 				var chat = getActiveChat();
 				ChatMessage request = new ChatMessage();
