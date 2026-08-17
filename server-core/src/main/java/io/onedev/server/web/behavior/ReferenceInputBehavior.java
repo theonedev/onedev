@@ -74,7 +74,16 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 
 	@Override
 	protected int getAnchor(String inputContent) {
-		return inputContent.lastIndexOf('#');
+		Matcher matcher = REFERENCE_PATTERN.matcher(inputContent);
+		if (matcher.find()) {
+			String query = matcher.group("query");
+			int triggerIndex = query.lastIndexOf('#');
+			if (triggerIndex == -1)
+				triggerIndex = query.indexOf('-');
+			return matcher.start("query") + triggerIndex;
+		} else {
+			return inputContent.lastIndexOf('#');
+		}
 	}
 
 	protected abstract Project getProject();
