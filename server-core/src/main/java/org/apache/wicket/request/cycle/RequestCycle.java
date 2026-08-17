@@ -16,9 +16,18 @@
  */
 package org.apache.wicket.request.cycle;
 
+import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.wicket.*;
+import org.apache.wicket.Application;
+import org.apache.wicket.MetaDataEntry;
+import org.apache.wicket.MetaDataKey;
+import org.apache.wicket.Page;
+import org.apache.wicket.Session;
+import org.apache.wicket.ThreadContext;
+import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.core.request.handler.BookmarkablePageRequestHandler;
 import org.apache.wicket.core.request.handler.IPageProvider;
 import org.apache.wicket.core.request.handler.PageProvider;
@@ -26,7 +35,15 @@ import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.event.IEventSink;
 import org.apache.wicket.protocol.http.IRequestLogger;
-import org.apache.wicket.request.*;
+import org.apache.wicket.request.IExceptionMapper;
+import org.apache.wicket.request.IRequestCycle;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.IRequestMapper;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.RequestHandlerStack;
+import org.apache.wicket.request.Response;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.UrlRenderer;
 import org.apache.wicket.request.component.IRequestablePage;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.handler.resource.ResourceRequestHandler;
@@ -35,11 +52,11 @@ import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.request.resource.caching.IStaticCacheableResource;
 import org.apache.wicket.util.lang.Args;
+import org.eclipse.jetty.io.EofException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
+import io.onedev.server.exception.ExceptionUtils;
 
 /**
  * {@link RequestCycle} consists of two steps:
@@ -320,7 +337,10 @@ public class RequestCycle implements IRequestCycle, IEventSink
 					return;
 				}
 			}
-			log.error("Error during processing error message", e);
+			if (ExceptionUtils.find(e, EofException.class) == null) 
+				log.error("Error during processing error message", e);
+			else
+				log.debug("Eof while processing error message", e);
 		}
 	}
 

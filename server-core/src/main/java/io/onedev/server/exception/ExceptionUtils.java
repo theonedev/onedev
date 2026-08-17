@@ -1,19 +1,21 @@
 package io.onedev.server.exception;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.OneDev;
-import io.onedev.server.exception.handler.ExceptionHandler;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-import org.jspecify.annotations.Nullable;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MultivaluedMap;
+
+import org.jspecify.annotations.Nullable;
+
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.server.OneDev;
+import io.onedev.server.exception.handler.ExceptionHandler;
 
 public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 	

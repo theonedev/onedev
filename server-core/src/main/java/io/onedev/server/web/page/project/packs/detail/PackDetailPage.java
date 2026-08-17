@@ -21,12 +21,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.PackService;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.PackService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -58,7 +59,12 @@ public class PackDetailPage extends ProjectPage {
 
 			@Override
 			protected Pack load() {
-				Long packId = params.get(PARAM_PACK).toLong();
+				Long packId;
+				try {
+					packId = Long.valueOf(packIdString);
+				} catch (NumberFormatException e) {
+					throw new NotAcceptableException(MessageFormat.format(_T("Invalid pack ID: {0}"), packIdString));
+				}
 				return OneDev.getInstance(PackService.class).load(packId);
 			}
 

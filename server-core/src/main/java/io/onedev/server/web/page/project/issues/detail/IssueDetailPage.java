@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -36,10 +35,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.tools.issue.GetIssueComments;
 import io.onedev.server.ai.tools.issue.GetIssue;
+import io.onedev.server.ai.tools.issue.GetIssueComments;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -111,7 +111,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				try {
 					issueNumber = Long.valueOf(issueNumberString);
 				} catch (NumberFormatException e) {
-					throw new ValidationException(MessageFormat.format(_T("Invalid issue number: {0}"), issueNumberString));
+					throw new NotAcceptableException(MessageFormat.format(_T("Invalid issue number: {0}"), issueNumberString));
 				}
 				
 				Issue issue = issueService.find(getProject(), issueNumber);

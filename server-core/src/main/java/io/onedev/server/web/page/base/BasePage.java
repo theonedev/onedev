@@ -65,12 +65,13 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
-import io.onedev.server.ai.ChatToolsContribution;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.ChatToolsContribution;
 import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.exception.BadRequestException;
 import io.onedev.server.jetty.JettyService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -228,6 +229,8 @@ public abstract class BasePage extends WebPage {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				String encodedData = params.getParameterValue("data").toString();
+				if (encodedData == null) 
+					throw new BadRequestException("Pop state data is missing");
 
 				byte[] bytes = Base64.decodeBase64(encodedData.getBytes());
 				Serializable data = (Serializable) SerializationUtils.deserialize(CryptoUtils.decrypt(bytes));
@@ -360,13 +363,18 @@ public abstract class BasePage extends WebPage {
 
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				var timeZoneId = RequestCycle.get().getRequest().getRequestParameters().getParameterValue("timezone").toString();
 				ZoneId zoneId;
-				try {
-					zoneId = ZoneId.of(timeZoneId);
-				} catch (DateTimeException e) {
-					logger.debug("Unable to parse time-zone ID: {}, using system default", timeZoneId, e);
+				var timeZoneId = RequestCycle.get().getRequest().getRequestParameters().getParameterValue("timezone").toString();
+				if (timeZoneId == null) {
+					logger.debug("Time-zone ID is not specified, using system default");
 					zoneId = ZoneId.systemDefault();
+				} else {
+					try {
+						zoneId = ZoneId.of(timeZoneId);
+					} catch (DateTimeException e) {
+						logger.debug("Unable to parse time-zone ID: {}, using system default", timeZoneId, e);
+						zoneId = ZoneId.systemDefault();
+					}
 				}
 				WebSession.get().setZoneId(zoneId);
 				if (!zoneId.equals(ZoneId.systemDefault())) {

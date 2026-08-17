@@ -78,7 +78,7 @@ public class RawBlobResource extends AbstractResource {
 		String revision = blobIdent.revision;
 		String path = blobIdent.path;
 		if (StringUtils.isBlank(revision) || StringUtils.isBlank(path))
-			throw new IllegalArgumentException("Revision and path should be specified");
+			throw new NotAcceptableException("Revision and path should be specified");
 
 		if (!SecurityUtils.canReadCode(project))
 			throw new UnauthorizedException();

@@ -4,6 +4,7 @@ import io.onedev.server.web.util.paginghistory.AjaxPagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigation;
 import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationIncrementLink;
@@ -104,16 +105,15 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 				if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
 					return newParamPagingLink(id, (int) pageIndex, false, false);
 				} else {
-					return new AjaxPagingNavigationLink(id, pageable, pageIndex) {
+					return disableListenerHref(new AjaxPagingNavigationLink(id, pageable, pageIndex) {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							super.onClick(target);
-							if (pagingHistorySupport instanceof AjaxPagingHistorySupport)
-								((AjaxPagingHistorySupport)pagingHistorySupport).onPageNavigated(target, (int) pageIndex);
+							notifyPageNavigated(target);
 						}
 
-					};
+					});
 				}
 			}
 
@@ -143,15 +143,13 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 		if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
 			link = newParamPagingLink(id, increment, true, false);
 		} else {
-			link = new AjaxPagingNavigationIncrementLink(id, pageable, increment) {
+			link = disableListenerHref(new AjaxPagingNavigationIncrementLink(id, pageable, increment) {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					super.onClick(target);
-					int pageNumber = (int) getPageable().getCurrentPage();
-					if (pagingHistorySupport instanceof AjaxPagingHistorySupport)
-						((AjaxPagingHistorySupport)pagingHistorySupport).onPageNavigated(target, pageNumber);
+					notifyPageNavigated(target);
 				}
-			};
+			});
 		}
 		return link;
 	}
@@ -162,16 +160,32 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 		if (pagingHistorySupport instanceof ParamPagingHistorySupport) {
 			link = newParamPagingLink(id, pageNumber, false, true);
 		} else {
-			link = new AjaxPagingNavigationLink(id, pageable, pageNumber) {
+			link = disableListenerHref(new AjaxPagingNavigationLink(id, pageable, pageNumber) {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					super.onClick(target);
-					if (pagingHistorySupport instanceof AjaxPagingHistorySupport)
-						((AjaxPagingHistorySupport)pagingHistorySupport).onPageNavigated(target, pageNumber);
+					notifyPageNavigated(target);
 				}
-			};
+			});
 		}
 		return link;
+	}
+
+	private <T extends AbstractLink> T disableListenerHref(T link) {
+		link.add(new AttributeModifier("href", "javascript:;") {
+			@Override
+			public boolean isEnabled(Component component) {
+				return component.isEnabledInHierarchy();
+			}
+		});
+		return link;
+	}
+
+	private void notifyPageNavigated(AjaxRequestTarget target) {
+		if (pagingHistorySupport instanceof AjaxPagingHistorySupport) {
+			// Wicket uses -1 for the last-page link; record the resolved page after navigation
+			((AjaxPagingHistorySupport)pagingHistorySupport).onPageNavigated(target, (int) getPageable().getCurrentPage());
+		}
 	}
 
 	private BookmarkablePageLink<Void> newParamPagingLink(String id, int pageNumber,

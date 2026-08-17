@@ -48,6 +48,7 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.event.project.build.BuildUpdated;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.job.JobContext;
@@ -160,7 +161,12 @@ public abstract class BuildDetailPage extends ProjectPage
 
 			@Override
 			protected Build load() {
-				Long buildNumber = params.get(PARAM_BUILD).toLong();
+				Long buildNumber;
+				try {
+					buildNumber = Long.valueOf(buildNumberString);
+				} catch (NumberFormatException e) {
+					throw new NotAcceptableException(MessageFormat.format(_T("Invalid build number: {0}"), buildNumberString));
+				}
 				Build build = buildService.find(getProject(), buildNumber);
 				if (build == null)
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), String.valueOf(buildNumber), getProject()));

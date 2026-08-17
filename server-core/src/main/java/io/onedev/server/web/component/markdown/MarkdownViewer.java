@@ -28,10 +28,11 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entityreference.BuildReference;
-import io.onedev.server.entityreference.WorkspaceReference;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
+import io.onedev.server.entityreference.WorkspaceReference;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -307,20 +308,20 @@ public class MarkdownViewer extends GenericPanel<String> {
 						target.appendJavaScript("onedev.server.markdown.renderCommitTooltip();");
 					}
 					break;
-			case "workspace":
-				var workspaceRef = WorkspaceReference.of(referenceId, null);
-				var workspace = workspaceService.find(workspaceRef.getProject(), workspaceRef.getNumber());
-				if (workspace != null && SecurityUtils.canReadCode(workspace.getProject())) {
-					String title = workspace.getUser().getDisplayName() + " on " + workspace.getOnDescription() + " for " + workspace.getSpecName() + " (" + workspace.getStatus().name() + ")";
-					String script = String.format("onedev.server.markdown.renderWorkspaceTooltip('%s');",
-							JavaScriptEscape.escapeJavaScript(title));
-					target.appendJavaScript(script);
-				} else {
-					target.appendJavaScript("onedev.server.markdown.renderWorkspaceTooltip();");
-				}
-				break;
-			default:
-				throw new RuntimeException("Unrecognized reference type: " + referenceType);
+				case "workspace":
+					var workspaceRef = WorkspaceReference.of(referenceId, null);
+					var workspace = workspaceService.find(workspaceRef.getProject(), workspaceRef.getNumber());
+					if (workspace != null && SecurityUtils.canReadCode(workspace.getProject())) {
+						String title = workspace.getUser().getDisplayName() + " on " + workspace.getOnDescription() + " for " + workspace.getSpecName() + " (" + workspace.getStatus().name() + ")";
+						String script = String.format("onedev.server.markdown.renderWorkspaceTooltip('%s');",
+								JavaScriptEscape.escapeJavaScript(title));
+						target.appendJavaScript(script);
+					} else {
+						target.appendJavaScript("onedev.server.markdown.renderWorkspaceTooltip();");
+					}
+					break;
+				default:
+					throw new NotAcceptableException("Unrecognized reference type: " + referenceType);
 				}
 			}
 			
@@ -331,7 +332,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				String suggestionAction = params.getParameterValue(SUGGESTION_ACTION).toString();
+				String suggestionAction = params.getParameterValue(SUGGESTION_ACTION).toString();				
 				String suggestionContent = params.getParameterValue(SUGGESTION_CONTENT).toString();
 				List<String> suggestion = StringUtils.splitToLines(suggestionContent);
 				switch (suggestionAction) {
@@ -345,7 +346,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					getSuggestionSupport().getApplySupport().getBatchSupport().removeFromBatch(target);
 					break;
 				default:
-					throw new RuntimeException("Unrecognized suggestion action: " + suggestionAction);
+					throw new NotAcceptableException("Unrecognized suggestion action: " + suggestionAction);
 				}
 			}
 			

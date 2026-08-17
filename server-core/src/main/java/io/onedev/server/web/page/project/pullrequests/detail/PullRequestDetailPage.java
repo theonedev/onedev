@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -78,6 +77,7 @@ import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
@@ -250,7 +250,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				try {
 					requestNumber = Long.valueOf(requestNumberString);
 				} catch (NumberFormatException e) {
-					throw new ValidationException(MessageFormat.format(_T("Invalid pull request number: {0}"), requestNumberString));
+					throw new NotAcceptableException(MessageFormat.format(_T("Invalid pull request number: {0}"), requestNumberString));
 				}
 
 				PullRequest request = pullRequestService.find(getProject(), requestNumber);
