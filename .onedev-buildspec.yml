@@ -349,6 +349,7 @@ jobs:
   triggers:
   - type: ScheduleTrigger
     cronExpression: 0 0 1 * * ?
+    projects: onedev/server
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
