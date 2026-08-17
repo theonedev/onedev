@@ -528,3 +528,16 @@ body.markdown-editor-expanded {
 .dark-mode .markdown-rendered .callout-content {
 	color: var(--dark-mode-gray) !important;
 }
+
+.markdown-rendered .plantuml {
+	overflow-x: auto;
+	margin-bottom: 1.2rem;
+}
+.markdown-rendered .plantuml svg {
+	max-width: 100%;
+	height: auto;
+}
+.markdown-rendered .plantuml-error {
+	color: var(--danger);
+	white-space: pre-wrap;
+}

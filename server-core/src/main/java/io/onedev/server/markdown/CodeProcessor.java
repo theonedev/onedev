@@ -55,7 +55,6 @@ public class CodeProcessor implements HtmlProcessor {
 		}, document);
 
 		for (Element codeElement: codeElements) {
-			codeElement.parent().wrap("<div class='pre-outer'></div>");
 			String language = null;
 			String cssClasses = codeElement.attr("class");
 			for (String cssClass: Splitter.on(" ").trimResults().omitEmptyStrings().split(cssClasses)) {
@@ -64,6 +63,19 @@ public class CodeProcessor implements HtmlProcessor {
 					break;
 				}
 			}
+
+			if (!forExternal && isPlantUmlLanguage(language)) {
+				String source = codeElement.wholeText();
+				if (source.endsWith("\n"))
+					source = source.substring(0, source.length() - 1);
+				Element plantUml = new Element("div");
+				plantUml.addClass("plantuml");
+				plantUml.text(source);
+				codeElement.parent().replaceWith(plantUml);
+				continue;
+			}
+
+			codeElement.parent().wrap("<div class='pre-outer'></div>");
 
 			if (language != null) {
 				codeElement.attr("data-language", language);
@@ -103,6 +115,11 @@ public class CodeProcessor implements HtmlProcessor {
 			codeElement.parent().addClass("code");
 		}
 		
+	}
+
+	private boolean isPlantUmlLanguage(@Nullable String language) {
+		return language != null
+				&& (language.equalsIgnoreCase("plantuml") || language.equalsIgnoreCase("puml"));
 	}
 	
 }

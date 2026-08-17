@@ -1438,6 +1438,10 @@ onedev.server.markdown = {
 		var $mermaid = $container.find(".mermaid");
 		if ($mermaid.length != 0) 
 			mermaid.init(undefined, $mermaid);
+
+		var $plantuml = $container.find(".plantuml");
+		if ($plantuml.length != 0 && onedev.server.plantuml)
+			onedev.server.plantuml.render($plantuml);
 			
 		var $katex = $container.find(".katex");
 		if ($katex.legnth != 0) {
