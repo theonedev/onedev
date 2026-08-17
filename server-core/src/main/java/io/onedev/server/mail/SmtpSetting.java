@@ -15,15 +15,18 @@ public class SmtpSetting implements Serializable {
 	private final String smtpUser;
 	
 	private final MailCredential smtpCredential;
+
+	private final int concurrency;
 	
 	private final int timeout;
 
 	public SmtpSetting(String smtpHost, SmtpSslSetting sslSetting, String smtpUser,
-					   MailCredential smtpCredential, int timeout) {
+					   MailCredential smtpCredential, int concurrency, int timeout) {
 		this.smtpHost = smtpHost;
 		this.sslSetting = sslSetting;
 		this.smtpUser = smtpUser;
 		this.smtpCredential = smtpCredential;
+		this.concurrency = concurrency;
 		this.timeout = timeout;
 	}
 
@@ -43,8 +46,12 @@ public class SmtpSetting implements Serializable {
 		return smtpCredential;
 	}
 	
+	public int getConcurrency() {
+		return concurrency;
+	}
+	
 	public int getTimeout() {
 		return timeout;
 	}
-	
+
 }

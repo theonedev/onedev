@@ -35,8 +35,10 @@ public class SmtpImapConnector implements MailConnector {
 
 	private InboxPollSetting inboxPollSetting;
 
-	private int timeout = 60;
+	private int concurrency = 2;
 	
+	private int timeout = 60;
+
 	private transient MailPosition mailPosition;
 
 	@Editable(order=100, name="SMTP Host")
@@ -103,7 +105,17 @@ public class SmtpImapConnector implements MailConnector {
 		this.inboxPollSetting = inboxPollSetting;
 	}
 
-	@Editable(order=10000, description="Specify timeout in seconds when communicating with mail server")
+	@Editable(order=10000, description="Specify max number of mail sending sessions that can run concurrently")
+	@Min(value=1, message="This value should not be less than 1")
+	public int getConcurrency() {
+		return concurrency;
+	}
+
+	public void setConcurrency(int concurrency) {
+		this.concurrency = concurrency;
+	}
+
+	@Editable(order=10100, description="Specify timeout in seconds when communicating with mail server")
 	@Min(value=5, message="This value should not be less than 5")
 	public int getTimeout() {
 		return timeout;
@@ -119,7 +131,7 @@ public class SmtpImapConnector implements MailConnector {
 			smtpCredential = new BasicAuthPassword(smtpPassword);
 		else
 			smtpCredential = null;
-		return new SmtpSetting(smtpHost, sslSetting, smtpUser, smtpCredential, getTimeout());
+		return new SmtpSetting(smtpHost, sslSetting, smtpUser, smtpCredential, getConcurrency(), getTimeout());
 	}
 	
 	@Override

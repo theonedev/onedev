@@ -45,6 +45,8 @@ public class Office365Connector implements MailConnector {
 	private InboxPollSetting inboxPollSetting;
 	
 	private int timeout = 60;
+
+	private int concurrency = 2;
 	
 	private transient MailPosition mailPosition;
 	
@@ -128,8 +130,18 @@ public class Office365Connector implements MailConnector {
 	public void setInboxPollSetting(InboxPollSetting inboxPollSetting) {
 		this.inboxPollSetting = inboxPollSetting;
 	}
+
+	@Editable(order=10000, description="Specify max number of mail sending sessions that can run concurrently")
+	@Min(value=1, message="This value should not be less than 1")
+	public int getConcurrency() {
+		return concurrency;
+	}
+
+	public void setConcurrency(int concurrency) {
+		this.concurrency = concurrency;
+	}
 	
-	@Editable(order=10000, description="Specify timeout in seconds when communicating with mail server")
+	@Editable(order=10100, description="Specify timeout in seconds when communicating with mail server")
 	@Min(value=5, message="This value should not be less than 5")
 	public int getTimeout() {
 		return timeout;
@@ -225,7 +237,7 @@ public class Office365Connector implements MailConnector {
 			}
 		});
 		return new SmtpSetting("smtp.office365.com", new SmtpExplicitSsl(), userPrincipalName,
-				smtpCredential, getTimeout());
+				smtpCredential, getConcurrency(), getTimeout());
 	}	
 	
 	@Override

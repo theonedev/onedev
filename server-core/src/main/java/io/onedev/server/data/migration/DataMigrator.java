@@ -9310,4 +9310,20 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate239(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.addElement("concurrency").setText("2");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

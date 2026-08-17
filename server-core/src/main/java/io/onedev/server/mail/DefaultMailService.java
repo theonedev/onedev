@@ -21,9 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -174,6 +177,10 @@ public class DefaultMailService implements MailService, Serializable {
 	
 	private volatile Thread thread;
 
+	private volatile ThreadPoolExecutor sendExecutor;
+
+	private final ThreadLocal<Boolean> inSendExecutor = ThreadLocal.withInitial(() -> false);
+
 	private boolean isProdTest() {
 		if (prodTest == null) {
 			prodTest = settingService.getSystemSetting().getServerUrl().equals("https://code.onedev.io") 
@@ -186,6 +193,33 @@ public class DefaultMailService implements MailService, Serializable {
 		return "[" + settingService.getBrandingSetting().getName() + "]";
 	}
 
+	private synchronized ThreadPoolExecutor getSendExecutor(int concurrency) {
+		if (sendExecutor == null) {
+			sendExecutor = new ThreadPoolExecutor(concurrency, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
+					new LinkedBlockingQueue<>());
+			sendExecutor.allowCoreThreadTimeOut(true);
+		} else if (sendExecutor.getCorePoolSize() != concurrency) {
+			sendExecutor.setCorePoolSize(concurrency);
+		}
+		return sendExecutor;
+	}
+
+	private Future<?> submitToSendExecutor(int concurrency, Runnable runnable) {
+		if (Boolean.TRUE.equals(inSendExecutor.get())) {
+			runnable.run();
+			return CompletableFuture.completedFuture(null);
+		} else {
+			return getSendExecutor(concurrency).submit(() -> {
+				inSendExecutor.set(true);
+				try {
+					runnable.run();
+				} finally {
+					inSendExecutor.remove();
+				}
+			});
+		}
+	}
+
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(MailService.class);
 	}
@@ -195,15 +229,21 @@ public class DefaultMailService implements MailService, Serializable {
 	public void sendMailAsync(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 							  String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
 							  @Nullable String senderName, @Nullable String references) {
-		transactionService.runAfterCommit(() -> executorService.execute(() -> {
-			try {
-				SecurityUtils.bindAsSystem();
-				sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
-						senderName, references);
-			} catch (Exception e) {
-				logger.error("Error sending email (to: " + toList + ", subject: " + subject + ")", e);
-			}		
-		}));
+		transactionService.runAfterCommit(() -> {
+			var mailConnector = settingService.getMailConnector();
+			submitToSendExecutor(mailConnector.getConcurrency(), () -> {
+				try {
+					SecurityUtils.bindAsSystem();
+					sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress,
+							senderName, references);
+				} catch (Exception e) {
+					var message = String.format(
+						"Error sending email (to: %s, cc: %s, bcc: %s, subject: %s)", 
+						toList, ccList, bccList, subject);
+					logger.error(message, e);
+				}
+			});
+		});
 	}
 	
 	private String getThreadIndex(String references) {
@@ -341,8 +381,18 @@ public class DefaultMailService implements MailService, Serializable {
 			message.setContent(bodyPart);
 
 			logger.debug("Sending email (subject: {}, to: {}, cc: {}, bcc: {})... ", subject, toList, ccList, bccList);
-			
-			Transport.send(message);
+
+			try {
+				submitToSendExecutor(smtpSetting.getConcurrency(), () -> {
+					try {
+						Transport.send(message);
+					} catch (MessagingException e) {
+						throw new RuntimeException(e);
+					}	
+				}).get();
+			} catch (InterruptedException | ExecutionException e) {
+				throw new RuntimeException(e);
+			}
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}
@@ -813,12 +863,21 @@ public class DefaultMailService implements MailService, Serializable {
 	
 	@Listen
 	public void on(SystemStopping event) {
-		Thread copy = thread;
+		Thread threadCopy = thread;
 		thread = null;
-		if (copy != null) {
-			copy.interrupt();
+		if (threadCopy != null) {
+			threadCopy.interrupt();
 			try {
-				copy.join();
+				threadCopy.join();
+			} catch (InterruptedException ignored) {
+			}
+		}
+		var sendExecutorCopy = sendExecutor;
+		sendExecutor = null;
+		if (sendExecutorCopy != null) {
+			sendExecutorCopy.shutdown();
+			try {
+				sendExecutorCopy.awaitTermination(60, TimeUnit.SECONDS);
 			} catch (InterruptedException ignored) {
 			}
 		}

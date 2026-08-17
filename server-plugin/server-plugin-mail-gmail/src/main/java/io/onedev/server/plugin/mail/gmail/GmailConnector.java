@@ -46,8 +46,10 @@ public class GmailConnector implements MailConnector {
 	
 	private InboxPollSetting inboxPollSetting;
 	
-	private int timeout = 60;
+	private int concurrency = 2;
 	
+	private int timeout = 60;
+
 	private transient MailPosition mailPosition;
 
 	@Editable(order=100, description="Client ID of this OneDev instance registered in Google cloud")
@@ -187,10 +189,20 @@ public class GmailConnector implements MailConnector {
 
 		});
 		return new SmtpSetting("smtp.gmail.com", new SmtpExplicitSsl(), accountName, smtpCredential,
-				getTimeout());
+				getConcurrency(), getTimeout());
+	}
+
+	@Editable(order=10000, description="Specify max number of mail sending sessions that can run concurrently")
+	@Min(value=1, message="This value should not be less than 1")
+	public int getConcurrency() {
+		return concurrency;
+	}
+
+	public void setConcurrency(int concurrency) {
+		this.concurrency = concurrency;
 	}
 	
-	@Editable(order=10000, description="Specify timeout in seconds when communicating with mail server")
+	@Editable(order=10100, description="Specify timeout in seconds when communicating with mail server")
 	@Min(value=5, message="This value should not be less than 5")
 	public int getTimeout() {
 		return timeout;

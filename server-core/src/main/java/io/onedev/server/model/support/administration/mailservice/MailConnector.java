@@ -12,6 +12,8 @@ import io.onedev.server.mail.InboxMonitor;
 public interface MailConnector extends Serializable {
 
 	String getSystemAddress();
+
+	int getConcurrency();
 	
 	void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList,
 				  String subject, String htmlBody, String textBody, @Nullable String replyAddress,
