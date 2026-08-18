@@ -459,6 +459,8 @@ stepTemplates:
   - type: TrivyCacheStep
     name: cache
     key: trivy
+    uploadProjectPath: onedev
+    uploadAccessTokenSecret: onedev-token
     condition: SUCCESSFUL
     optional: false
   - type: RootFSScannerStep
