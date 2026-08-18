@@ -451,6 +451,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Backlog", "Arriéré");
 		m.put("Backlog Base Query", "Requête de base de l'arriéré");
 		m.put("Backup", "Sauvegarde");
+		m.put("Backup Email Addresses", "Adresses Email de Sauvegarde");
 		m.put("Backup Now", "Sauvegarder maintenant");
 		m.put("Backup Schedule", "Planification de sauvegarde");
 		m.put("Backup Setting", "Paramètre de sauvegarde");
@@ -652,13 +653,11 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Cannot disable root account", "Impossible de désactiver le compte racine");
 		m.put("Cannot disable yourself", "Impossible de vous désactiver");
 		m.put("Cannot find issue board: ", "Impossible de trouver le tableau des problèmes :");
+		m.put("Cannot move issue as it has workspaces", "Impossible de déplacer le problème car il contient des espaces de travail");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "Impossible de déplacer le projet \"{0}\" pour qu'il soit sous lui-même ou ses descendants");
 		m.put("Cannot perform this operation now", "Impossible d'effectuer cette opération maintenant");
 		m.put("Cannot remove agent \"{0}\" as it has workspaces", "Impossible de supprimer l'agent \"{0}\" car il a des espaces de travail");
 		m.put("Cannot remove agent as it has workspaces", "Impossible de supprimer l'agent car il a des espaces de travail");
-		m.put("Cannot reset password for disabled account", "Impossible de réinitialiser le mot de passe pour un compte désactivé");
-		m.put("Cannot reset password for service or AI account", "Impossible de réinitialiser le mot de passe pour un compte de service ou AI");
-		m.put("Cannot reset password for user authenticating via external system", "Impossible de réinitialiser le mot de passe pour un utilisateur s'authentifiant via un système externe");
 		m.put("Cannot save malformed query", "Impossible d'enregistrer une requête malformée");
 		m.put("Cannot use current or descendant project as parent", "Impossible d'utiliser le projet actuel ou descendant comme parent");
 		m.put("Case Sensitive", "Sensible à la casse");
@@ -924,6 +923,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Copy", "Copier");
 		m.put("Copy All Queried Issues To...", "Copier tous les problèmes interrogés vers...");
 		m.put("Copy Files with SCP", "Copier les fichiers avec SCP");
+		m.put("Copy Markdown", "Copier Markdown");
 		m.put("Copy Selected Issues To...", "Copier les problèmes sélectionnés vers...");
 		m.put("Copy as Markdown", "Copier en Markdown");
 		m.put("Copy dashboard", "Copier le tableau de bord");
@@ -1156,6 +1156,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Disable All Queried Users", "Désactiver tous les utilisateurs interrogés");
 		m.put("Disable Auto Update Check", "Désactiver la vérification de mise à jour automatique");
 		m.put("Disable Dashboard", "Désactiver le tableau de bord");
+		m.put("Disable Internal Login", "Désactiver la Connexion Interne");
 		m.put("Disable Selected Users", "Désactiver les utilisateurs sélectionnés");
 		m.put("Disabled", "Désactivé");
 		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
@@ -1237,6 +1238,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Do you really want to discard batched suggestions?", "Voulez-vous vraiment abandonner les suggestions groupées ?");
 		m.put("Do you really want to discard changes to this file? This cannot be undone.", "Voulez-vous vraiment annuler les modifications de ce fichier ? Cela ne peut pas être annulé.");
 		m.put("Do you really want to enable this account?", "Voulez-vous vraiment activer ce compte ?");
+		m.put("Do you really want to move this issue to project \"{0}\"", "Voulez-vous vraiment déplacer ce problème vers le projet \"{0}\"");
 		m.put("Do you really want to rebuild?", "Voulez-vous vraiment reconstruire ?");
 		m.put("Do you really want to remove agent \"{0}\"?", "Voulez-vous vraiment supprimer l'agent \"{0}\" ?");
 		m.put("Do you really want to remove assignee \"{0}\"?", "Voulez-vous vraiment retirer l'assigné \"{0}\" ?");
@@ -1310,6 +1312,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "La branche cible ou la branche source a de nouveaux commits à l'instant, veuillez revérifier.");
 		m.put("Email", "Email");
 		m.put("Email Address", "Adresse email");
+		m.put("Email Address Privacy", "Confidentialité de l'Adresse Email");
 		m.put("Email Address Verification", "Vérification de l'adresse e-mail");
 		m.put("Email Addresses", "Adresses email");
 		m.put("Email Templates", "Modèles d'email");
@@ -1324,6 +1327,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Email address already used by another user", "Adresse email déjà utilisée par un autre utilisateur");
 		m.put("Email address already used: ", "Adresse e-mail déjà utilisée :");
 		m.put("Email address to verify", "Adresse email à vérifier");
+		m.put("Email address with noreply domain is not allowed", "L'adresse email avec un domaine noreply n'est pas autorisée");
+		m.put("Email addresses privacy updated", "Confidentialité des adresses email mise à jour");
 		m.put("Email addresses with <span class=\"badge badge-warning badge-sm\">ineffective</span> mark are those not belong to or not verified by key owner", 
 			"Les adresses email avec la marque <span class=\"badge badge-warning badge-sm\">ineffective</span> sont celles qui n'appartiennent pas ou ne sont pas vérifiées par le propriétaire de la clé");
 		m.put("Email templates", "Modèles d'email");
@@ -1835,7 +1840,9 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Inbox Poll Setting", "Paramètre de sondage de la boîte de réception");
 		m.put("Include Child Projects", "Inclure les projets enfants");
 		m.put("Include Disabled", "Inclure les désactivés");
+		m.put("Include Downstream When Rebuild", "Inclure les Dépendances Aval Lors de la Reconstruction");
 		m.put("Include Forks", "Inclure les forks");
+		m.put("Include Upstream When Rebuild", "Inclure les Dépendances Amont Lors de la Reconstruction");
 		m.put("Include When Issue is Opened", "Inclure lorsque le problème est ouvert");
 		m.put("Incompatibilities", "Incompatibilités");
 		m.put("Inconsistent issuer in provider metadata and ID token", "Émetteur incohérent dans les métadonnées du fournisseur et le jeton ID");
@@ -1949,6 +1956,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Issue list", "Liste des problèmes");
 		m.put("Issue management not enabled in this project", "Gestion des problèmes non activée dans ce projet");
 		m.put("Issue management permission required to move issues", "Permission de gestion des problèmes requise pour déplacer des problèmes");
+		m.put("Issue moved", "Problème déplacé");
 		m.put("Issue not exist or access denied", "Problème inexistant ou accès refusé");
 		m.put("Issue number", "Numéro de problème");
 		m.put("Issue query watch only affects new issues. To manage watch status of existing issues in batch, filter issues by watch status in issues page, and then take appropriate action", 
@@ -2044,6 +2052,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Jobs required to be successful: ", "Tâches requises pour réussir :");
 		m.put("Jobs with same sequential group and executor will be executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for jobs executing by same executor and deploying to prod environment of current project to avoid conflicting deployments", 
 			"Les tâches avec le même groupe séquentiel et exécuteur seront exécutées séquentiellement. Par exemple, vous pouvez spécifier cette propriété comme <tt>@project_path@:prod</tt> pour les tâches exécutées par le même exécuteur et déployant dans l'environnement de production du projet actuel afin d'éviter des déploiements conflictuels");
+		m.put("Keep my email addresses private", "Garder mes adresses email privées");
 		m.put("Key", "Clé");
 		m.put("Key Fingerprint", "Empreinte de clé");
 		m.put("Key ID", "ID de clé");
@@ -2247,6 +2256,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"Il y a probablement des erreurs d'importation dans le <a wicket:id=\"buildSpec\">build spec</a>");
 		m.put("Mount Docker Sock", "Monter Docker Sock");
+		m.put("Move", "Déplacer");
 		m.put("Move All Queried Issues To...", "Déplacer toutes les issues interrogées vers...");
 		m.put("Move All Queried Projects To...", "Déplacer tous les projets interrogés vers...");
 		m.put("Move Selected Issues To...", "Déplacer les issues sélectionnées vers...");
@@ -2434,7 +2444,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("No suggestions", "Aucune suggestion");
 		m.put("No tags found", "Aucune étiquette trouvée");
 		m.put("No timesheets defined", "Aucune feuille de temps définie");
-		m.put("No user found with login name or email: ", "Aucun utilisateur trouvé avec le nom de connexion ou l'e-mail :");
 		m.put("No users to convert to service accounts", "Aucun utilisateur à convertir en comptes de service");
 		m.put("No users to delete", "Aucun utilisateur à supprimer");
 		m.put("No users to disable", "Aucun utilisateur à désactiver");
@@ -2450,6 +2459,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Node Selector", "Sélecteur de nœud");
 		m.put("Node Selector Entry", "Entrée du sélecteur de nœud");
 		m.put("None", "Aucun");
+		m.put("Noreply Email Domain", "Domaine Email Noreply");
 		m.put("Not Active Since", "Non actif depuis");
 		m.put("Not Used Since", "Non utilisé depuis");
 		m.put("Not a verified email of signing GPG key", "Pas un email vérifié de la clé GPG de signature");
@@ -2655,8 +2665,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"Spécifiez éventuellement les rôles autorisés à appuyer sur ce bouton. Si non spécifié, tous les utilisateurs sont autorisés.");
 		m.put("Optionally specify base query of the list", "Spécifiez éventuellement la requête de base de la liste.");
-		m.put("Optionally specify branches/users/groups allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
-			"Spécifiez éventuellement les branches/utilisateurs/groupes autorisés à accéder à ce secret. Si laissé vide, toute tâche peut accéder à ce secret, y compris celles déclenchées via des demandes de tirage externes.");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"Spécifiez éventuellement le chemin du contexte de construction relatif à <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>l'espace de travail de la tâche</a>. Laissez vide pour utiliser l'espace de travail de la tâche lui-même. Le fichier <code>Dockerfile</code> est censé exister dans le répertoire du contexte de construction, sauf si vous spécifiez un emplacement différent avec l'option <code>--dockerfile</code>.");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
@@ -2984,7 +2992,6 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Veuillez <a wicket:id=\"download\" class=\"font-weight-bolder\">télécharger</a> les codes de récupération ci-dessous et les garder secrets. Ces codes peuvent être utilisés pour fournir un accès unique à votre compte en cas d'impossibilité d'accéder à l'application d'authentification. Ils ne seront <b>PAS</b> affichés à nouveau");
 		m.put("Please Confirm", "Veuillez confirmer");
 		m.put("Please Note", "Veuillez noter");
-		m.put("Please check your email for password reset instructions", "Veuillez vérifier votre e-mail pour les instructions de réinitialisation du mot de passe");
 		m.put("Please choose revision to create branch from", "Veuillez choisir une révision pour créer une branche");
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "Veuillez configurer <a wicket:id=\"mailSetting\">le paramètre de messagerie</a> d'abord");
 		m.put("Please confirm", "Veuillez confirmer");
@@ -3075,7 +3082,9 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Primary", "Principal");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "Adresse <a wicket:id=\"noPrimaryAddressLink\">email principale</a> non spécifiée");
 		m.put("Primary Email", "Email principal");
-		m.put("Primary email address not specified", "Adresse e-mail principale non spécifiée");
+		m.put("Primary Email Address", "Adresse Email Principale");
+		m.put("Primary email address added", "Adresse email principale ajoutée");
+		m.put("Primary email address changed", "Adresse email principale modifiée");
 		m.put("Primary email address of your account is not specified yet", "L'adresse e-mail principale de votre compte n'est pas encore spécifiée");
 		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
 			"L'adresse e-mail principale sera utilisée pour recevoir des notifications, afficher le gravatar (si activé), etc.");
@@ -3366,6 +3375,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Required Reviewers", "Examinateurs requis");
 		m.put("Required Services", "Services requis");
 		m.put("Resend invitation", "Renvoyer l'invitation");
+		m.put("Resend verification email", "Renvoyer l'email de vérification");
 		m.put("Reset", "Réinitialiser");
 		m.put("Resolution", "Résolution");
 		m.put("Resolve merge conflicts", "Résoudre les conflits de fusion");
@@ -3567,6 +3577,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Service desk setting", "Paramètre du service desk");
 		m.put("Service desk settings have been saved", "Les paramètres du service desk ont été enregistrés");
 		m.put("Service or AI account not allowed to login", "Compte de service ou AI non autorisé à se connecter");
+		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
+			"Un service ou utilisateur AI ne peut pas spécifier d'adresses email. Cependant, l'adresse générée automatiquement");
 		m.put("Services", "Services");
 		m.put("Session Timeout", "Expiration de session");
 		m.put("Set", "Définir");
@@ -3884,8 +3896,6 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Spécifie les colonnes du tableau. Chaque colonne correspond à une valeur du champ de problème spécifié ci-dessus");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"Spécifie la commande pour vérifier la disponibilité du service. Cette commande sera interprétée par cmd.exe sur les images Windows, et par shell sur les images Linux. Elle sera exécutée de manière répétée jusqu'à ce qu'un code zéro soit retourné pour indiquer que le service est prêt");
-		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The prompt is stored in environment variable <code>$TASK_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
-			"Spécifiez la commande pour lancer l'agent de codage en mode sans interface pour exécuter la tâche assignée sous forme de\nprompt. Le prompt est stocké dans la variable d'environnement <code>$TASK_PROMPT</code>.<br>\n<b>NOTE : </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI et compétences associées</a> doivent également être installés pour que l'automatisation des tâches\nfonctionne. Les images d'espace de travail OneDev incluent ces composants par défaut");
 		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
 			"Spécifiez la commande à exécuter si ce raccourci est ouvert, par exemple <i>opencode</i>, <i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
@@ -3915,6 +3925,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Specify docker image of the service", "Spécifiez l'image Docker du service");
 		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
 			"Spécifiez le builder dockerx utilisé pour construire l'image Docker. OneDev créera automatiquement le builder s'il n'existe pas. Consultez <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>ce tutoriel</a> pour savoir comment personnaliser le builder, par exemple pour permettre la publication dans des registres non sécurisés");
+		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
+			"Spécifiez le domaine des différentes adresses email noreply pour les opérations git si les utilisateurs souhaitent\ngarder leurs propres adresses email privées");
 		m.put("Specify email addresses to send invitations, with one per line", "Spécifiez les adresses email pour envoyer les invitations, une par ligne");
 		m.put("Specify estimated time <b class='text-warning'>only for this issue</b>, not counting \"{0}\"", 
 			"Spécifiez le temps estimé <b class='text-warning'>uniquement pour ce problème</b>, sans compter \"{0}\"");
@@ -4285,6 +4297,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("The permission to access build pipeline", "La permission d'accéder au pipeline de construction");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
 			"La permission d'exécuter un job manuellement. Cela implique également la permission d'accéder au journal de construction, au pipeline de construction et à tous les rapports publiés");
+		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
+			"L'adresse email principale est utilisée pour recevoir des notifications et afficher votre gravatar (si activé). Elle est également utilisée pour les opérations Git basées sur le web, sauf si les adresses email sont gardées privées.");
 		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from OneDev. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
 			"Le secret qui vous permet de garantir que les requêtes POST envoyées à l'URL de charge utile proviennent de OneDev. Lorsque vous définissez un secret, vous recevrez l'en-tête X-OneDev-Signature dans la requête POST du webhook");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
@@ -4324,6 +4338,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
 			"Cette date utilise le <a href=\"https://www.w3.org/TR/NOTE-datetime\">format ISO 8601</a>");
 		m.put("This email address is being used", "Cette adresse e-mail est déjà utilisée");
+		m.put("This email address is not verified", "Cette adresse email n'est pas vérifiée");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "Cet exécuteur exécute des tâches de construction en tant que conteneurs Docker sur le serveur OneDev");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
 			"Cet exécuteur exécute des tâches de construction en tant que conteneurs Docker sur des machines distantes via <a href='/~administration/agents' target='_blank'>agents</a>");
@@ -4694,6 +4709,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Use specified title and description", "Utiliser le titre et la description spécifiés");
 		m.put("Use specified value or job secret", "Utiliser la valeur spécifiée ou le secret de travail");
 		m.put("Use specified values or job secrets", "Utiliser les valeurs spécifiées ou les secrets de travail");
+		m.put("Use the auto-generated email address", "Utiliser l'adresse email générée automatiquement");
 		m.put("Use triggers to run the job automatically under certain conditions", "Utiliser des déclencheurs pour exécuter le travail automatiquement sous certaines conditions");
 		m.put("Use value of specified parameter/secret", "Utiliser la valeur du paramètre/secret spécifié");
 		m.put("Used Heap Memory", "Mémoire heap utilisée");
@@ -4742,6 +4758,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Variable", "Variable");
 		m.put("Verification Code", "Code de vérification");
 		m.put("Verification email sent, please check it", "Email de vérification envoyé, veuillez le vérifier");
+		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
+			"Les adresses email de sauvegarde vérifiées peuvent être utilisées pour la récupération de mot de passe et pour identifier vos commits.");
 		m.put("Verify", "Vérifier");
 		m.put("Via chat interface", "Via l'interface de chat");
 		m.put("Via issue/PR assignee and reviewer", "Via l'assigné et le réviseur des issues/PR");
@@ -4811,6 +4829,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Whether or not to allow anonymous users to access this server", "Si les utilisateurs anonymes peuvent accéder à ce serveur ou non");
 		m.put("Whether or not to allow creating root projects (project without parent)", "Si la création de projets racine (projet sans parent) est autorisée ou non");
 		m.put("Whether or not to also include children of above projects", "Si les enfants des projets ci-dessus doivent également être inclus ou non");
+		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "Indique si les tâches aval directes doivent également être reconstruites lors de la reconstruction de cette tâche");
+		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "Indique si les tâches amont directes doivent également être reconstruites lors de la reconstruction de cette tâche");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same machine", 
 			"Si l'image doit toujours être tirée lors de l'exécution du conteneur ou de la construction des images ou non. Cette option doit être activée pour éviter que les images ne soient remplacées par des jobs malveillants exécutés sur la même machine");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
@@ -4823,6 +4843,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Whether or not to create the workspace inside container", "Créer ou non l'espace de travail à l'intérieur du conteneur");
 		m.put("Whether or not to delete workspace if task command completes successfully. Uncheck this if\nyou want to check how the prompt is processed by coding agent after task command completes\nsuccessfully. Note that workspace will not be deleted automatically if task command fails.", 
 			"Supprimer ou non l'espace de travail si la commande de tâche se termine avec succès. Décochez ceci si\nvous souhaitez vérifier comment le prompt est traité par l'agent de codage après que la commande de tâche se termine\navec succès. Notez que l'espace de travail ne sera pas supprimé automatiquement si la commande de tâche échoue.");
+		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
+			"Indique si le formulaire de connexion par mot de passe interne doit être désactivé et si seule la connexion SSO doit être utilisée.\n<b class=\"text-info\">CONSEILS :</b> Si vous êtes bloqué, la connexion interne peut être réactivée depuis la ligne de commande en exécutant <code>bin/enable-internal-login</code>");
 		m.put("Whether or not to enable code management for the project", "Si la gestion du code doit être activée pour le projet ou non");
 		m.put("Whether or not to enable issue management for the project", "Si la gestion des issues doit être activée pour le projet ou non");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4936,7 +4958,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("YouTrack Project", "Projet YouTrack");
 		m.put("YouTrack Projects to Import", "Projets YouTrack à importer");
 		m.put("Your email address is now verified", "Votre adresse e-mail est maintenant vérifiée");
-		m.put("Your primary email address is not verified", "Votre adresse e-mail principale n'est pas vérifiée");
 		m.put("[Any state]", "[Tout état]");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[Réinitialiser le mot de passe] Veuillez réinitialiser votre mot de passe OneDev");
 		m.put("a boolean indiciating whether or not topic comment can be created directly by replying the email", 
@@ -4973,6 +4994,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("build is successful for jobs \"{0}\" on branches \"{1}\"", "la construction est réussie pour les travaux \"{0}\" sur les branches \"{1}\"");
 		m.put("builds", "constructions");
 		m.put("cURL Example", "Exemple cURL");
+		m.put("can be used to associate Git commits with the user.", "peut être utilisée pour associer les commits Git à l'utilisateur.");
 		m.put("choose a color for this state", "choisissez une couleur pour cet état");
 		m.put("cluster:lead", "chef");
 		m.put("cmd-k to show command palette", "cmd-k pour afficher la palette de commandes");
@@ -5012,25 +5034,9 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("find by id", "trouver par id");
 		m.put("find by number", "trouver par numéro");
 		m.put("for AI task automation", "pour l'automatisation des tâches IA");
+		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
+			"pour les opérations Git. Toutes les opérations Git effectuées depuis l'interface web utiliseront également cette adresse.");
 		m.put("forked from <a wicket:id=\"forkedFrom\"></a>", "forké de <a wicket:id=\"forkedFrom\"></a>");
-		m.put("found 1 agent", "trouvé 1 agent");
-		m.put("found 1 build", "trouvé 1 build");
-		m.put("found 1 comment", "trouvé 1 commentaire");
-		m.put("found 1 issue", "trouvé 1 problème");
-		m.put("found 1 package", "trouvé 1 package");
-		m.put("found 1 project", "trouvé 1 projet");
-		m.put("found 1 pull request", "trouvé 1 pull request");
-		m.put("found 1 user", "trouvé 1 utilisateur");
-		m.put("found 1 workspace", "1 espace de travail trouvé");
-		m.put("found {0} agents", "trouvé {0} agents");
-		m.put("found {0} builds", "trouvé {0} builds");
-		m.put("found {0} comments", "trouvé {0} commentaires");
-		m.put("found {0} issues", "trouvé {0} problèmes");
-		m.put("found {0} packages", "trouvé {0} packages");
-		m.put("found {0} projects", "trouvé {0} projets");
-		m.put("found {0} pull requests", "trouvé {0} pull requests");
-		m.put("found {0} users", "trouvé {0} utilisateurs");
-		m.put("found {0} workspaces", "{0} espaces de travail trouvés");
 		m.put("has any value of", "a une valeur quelconque de");
 		m.put("head", "tête");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
@@ -5198,45 +5204,24 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Backup Email Addresses", "Adresses Email de Sauvegarde");
-		m.put("Cannot move issue as it has workspaces", "Impossible de déplacer le problème car il contient des espaces de travail");
-		m.put("Copy Markdown", "Copier Markdown");
-		m.put("Disable Internal Login", "Désactiver la Connexion Interne");
-		m.put("Do you really want to move this issue to project \"{0}\"", "Voulez-vous vraiment déplacer ce problème vers le projet \"{0}\"");
-		m.put("Email Address Privacy", "Confidentialité de l'Adresse Email");
-		m.put("Email address with noreply domain is not allowed", "L'adresse email avec un domaine noreply n'est pas autorisée");
-		m.put("Email addresses privacy updated", "Confidentialité des adresses email mise à jour");
-		m.put("Include Downstream When Rebuild", "Inclure les Dépendances Aval Lors de la Reconstruction");
-		m.put("Include Upstream When Rebuild", "Inclure les Dépendances Amont Lors de la Reconstruction");
-		m.put("Issue moved", "Problème déplacé");
-		m.put("Keep my email addresses private", "Garder mes adresses email privées");
-		m.put("Move", "Déplacer");
-		m.put("Noreply Email Domain", "Domaine Email Noreply");
-		m.put("Primary Email Address", "Adresse Email Principale");
-		m.put("Primary email address added", "Adresse email principale ajoutée");
-		m.put("Primary email address changed", "Adresse email principale modifiée");
-		m.put("Resend verification email", "Renvoyer l'email de vérification");
-		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
-			"Un service ou utilisateur AI ne peut pas spécifier d'adresses email. Cependant, l'adresse générée automatiquement");
-		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
-			"Spécifiez le domaine des différentes adresses email noreply pour les opérations git si les utilisateurs souhaitent\ngarder leurs propres adresses email privées");
-		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
-			"L'adresse email principale est utilisée pour recevoir des notifications et afficher votre gravatar (si activé). Elle est également utilisée pour les opérations Git basées sur le web, sauf si les adresses email sont gardées privées.");
-		m.put("This email address is not verified", "Cette adresse email n'est pas vérifiée");
-		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, arrow keys, or page up/down, and press q to exit.", 
-			"Pour faire défiler dans ce terminal, appuyez sur ctrl+b puis [. Utilisez la molette de la souris, les touches fléchées ou page haut/bas, et appuyez sur q pour quitter.");
-		m.put("To scroll in this terminal, tap tmux [, swipe the terminal, and tap tmux [ again to exit.", 
-			"Pour faire défiler dans ce terminal, tapez tmux [, balayez le terminal, et tapez à nouveau tmux [ pour quitter.");
-		m.put("Use the auto-generated email address", "Utiliser l'adresse email générée automatiquement");
-		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
-			"Les adresses email de sauvegarde vérifiées peuvent être utilisées pour la récupération de mot de passe et pour identifier vos commits.");
-		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "Indique si les tâches aval directes doivent également être reconstruites lors de la reconstruction de cette tâche");
-		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "Indique si les tâches amont directes doivent également être reconstruites lors de la reconstruction de cette tâche");
-		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
-			"Indique si le formulaire de connexion par mot de passe interne doit être désactivé et si seule la connexion SSO doit être utilisée.\n<b class=\"text-info\">CONSEILS :</b> Si vous êtes bloqué, la connexion interne peut être réactivée depuis la ligne de commande en exécutant <code>bin/enable-internal-login</code>");
-		m.put("can be used to associate Git commits with the user.", "peut être utilisée pour associer les commits Git à l'utilisateur.");
-		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
-			"pour les opérations Git. Toutes les opérations Git effectuées depuis l'interface web utiliseront également cette adresse.");
+		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
+			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">Markdown au format GitHub</a> est accepté, avec <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">le support de mermaid, plantuml et katex</a>.");
+		m.put("Invalid build number: {0}", "Numéro de build invalide : {0}");
+		m.put("Invalid pack ID: {0}", "ID de pack invalide : {0}");
+		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
+			"Spécifiez éventuellement les branches autorisées à accéder à ce secret. Si laissé vide, tout job peut accéder à ce secret, y compris ceux déclenchés via des pull requests externes.");
+		m.put("Port Accessors", "Accesseurs de port");
+		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
+			"Spécifiez la commande pour lancer l'agent de codage en mode sans interface pour exécuter la tâche assignée sous forme de\nprompt. Le prompt combiné est stocké dans la variable d'environnement <code>$TASK_PROMPT</code>.\nLe prompt système et le prompt utilisateur sont également disponibles séparément sous\n<code>$TASK_SYSTEM_PROMPT</code> et <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE : </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI et compétences associées</a> doivent également être installés pour que l'automatisation des tâches\nfonctionne. Les images de l'espace de travail OneDev incluent ces composants par défaut.");
+		m.put("Specify max number of mail sending sessions that can run concurrently", "Spécifiez le nombre maximal de sessions d'envoi de mails pouvant s'exécuter simultanément.");
+		m.put("Teardown Commands", "Commandes de démontage");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
+			"Pour faire défiler dans ce terminal, appuyez sur ctrl+b puis [. Utilisez la molette de la souris, page haut/bas ou les flèches, et appuyez sur q pour quitter.");
+		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
+			"Pour faire défiler dans ce terminal, tapez tmux [, utilisez page haut/bas ou les flèches, et tapez tmux [ à nouveau pour quitter.");
+		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
+			"Nous enverrons des instructions de réinitialisation de mot de passe si ce nom d'utilisateur ou email correspond à un compte valide.");
+		m.put("{0} found", "{0} trouvé");
 	}
 		
 	@Override

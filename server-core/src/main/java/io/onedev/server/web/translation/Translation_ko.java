@@ -451,6 +451,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Backlog", "백로그");
 		m.put("Backlog Base Query", "백로그 기본 쿼리");
 		m.put("Backup", "백업");
+		m.put("Backup Email Addresses", "백업 이메일 주소");
 		m.put("Backup Now", "지금 백업");
 		m.put("Backup Schedule", "백업 일정");
 		m.put("Backup Setting", "백업 설정");
@@ -652,13 +653,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Cannot disable root account", "루트 계정을 비활성화할 수 없습니다");
 		m.put("Cannot disable yourself", "자신을 비활성화할 수 없습니다");
 		m.put("Cannot find issue board: ", "이슈 보드를 찾을 수 없습니다:");
+		m.put("Cannot move issue as it has workspaces", "작업 공간이 있어 이슈를 이동할 수 없습니다");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "프로젝트 \"{0}\"를 자신 또는 하위 프로젝트 아래로 이동할 수 없습니다");
 		m.put("Cannot perform this operation now", "지금 이 작업을 수행할 수 없습니다");
 		m.put("Cannot remove agent \"{0}\" as it has workspaces", "에이전트 \"{0}\"를 제거할 수 없습니다. 작업 공간이 있습니다.");
 		m.put("Cannot remove agent as it has workspaces", "작업 공간이 있어 에이전트를 제거할 수 없습니다.");
-		m.put("Cannot reset password for disabled account", "비활성화된 계정의 비밀번호를 재설정할 수 없습니다");
-		m.put("Cannot reset password for service or AI account", "서비스 또는 AI 계정의 비밀번호를 재설정할 수 없습니다");
-		m.put("Cannot reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
 		m.put("Cannot save malformed query", "잘못된 쿼리를 저장할 수 없습니다");
 		m.put("Cannot use current or descendant project as parent", "현재 또는 하위 프로젝트를 부모로 사용할 수 없습니다");
 		m.put("Case Sensitive", "대소문자 구분");
@@ -924,6 +923,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy", "복사");
 		m.put("Copy All Queried Issues To...", "쿼리된 모든 이슈를 복사하여...");
 		m.put("Copy Files with SCP", "SCP로 파일 복사");
+		m.put("Copy Markdown", "마크다운 복사");
 		m.put("Copy Selected Issues To...", "선택된 이슈를 복사하여...");
 		m.put("Copy as Markdown", "Markdown으로 복사");
 		m.put("Copy dashboard", "대시보드 복사");
@@ -1156,6 +1156,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Disable All Queried Users", "쿼리된 모든 사용자 비활성화");
 		m.put("Disable Auto Update Check", "자동 업데이트 확인 비활성화");
 		m.put("Disable Dashboard", "대시보드 비활성화");
+		m.put("Disable Internal Login", "내부 로그인 비활성화");
 		m.put("Disable Selected Users", "선택한 사용자 비활성화");
 		m.put("Disabled", "비활성화됨");
 		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
@@ -1237,6 +1238,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Do you really want to discard batched suggestions?", "정말로 배치된 제안을 폐기하시겠습니까?");
 		m.put("Do you really want to discard changes to this file? This cannot be undone.", "정말로 이 파일의 변경 사항을 버리시겠습니까? 이는 되돌릴 수 없습니다.");
 		m.put("Do you really want to enable this account?", "정말로 이 계정을 활성화하시겠습니까?");
+		m.put("Do you really want to move this issue to project \"{0}\"", "이 이슈를 프로젝트 \"{0}\"로 이동하시겠습니까?");
 		m.put("Do you really want to rebuild?", "정말로 다시 빌드하시겠습니까?");
 		m.put("Do you really want to remove agent \"{0}\"?", "정말로 에이전트 \"{0}\"를 제거하시겠습니까?");
 		m.put("Do you really want to remove assignee \"{0}\"?", "정말로 담당자 \"{0}\"를 제거하시겠습니까?");
@@ -1310,6 +1312,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "대상 브랜치 또는 소스 브랜치에 방금 새로운 커밋이 추가되었습니다. 다시 확인하세요.");
 		m.put("Email", "이메일");
 		m.put("Email Address", "이메일 주소");
+		m.put("Email Address Privacy", "이메일 주소 개인정보 보호");
 		m.put("Email Address Verification", "이메일 주소 확인");
 		m.put("Email Addresses", "이메일 주소들");
 		m.put("Email Templates", "이메일 템플릿");
@@ -1324,6 +1327,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Email address already used by another user", "다른 사용자가 이미 사용 중인 이메일 주소");
 		m.put("Email address already used: ", "이미 사용된 이메일 주소:");
 		m.put("Email address to verify", "인증할 이메일 주소");
+		m.put("Email address with noreply domain is not allowed", "noreply 도메인의 이메일 주소는 허용되지 않습니다");
+		m.put("Email addresses privacy updated", "이메일 주소 개인정보 보호가 업데이트되었습니다");
 		m.put("Email addresses with <span class=\"badge badge-warning badge-sm\">ineffective</span> mark are those not belong to or not verified by key owner", 
 			"<span class=\"badge badge-warning badge-sm\">비효과적</span> 표시가 있는 이메일 주소는 키 소유자에 속하지 않거나 인증되지 않은 주소입니다.");
 		m.put("Email templates", "이메일 템플릿");
@@ -1835,7 +1840,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Inbox Poll Setting", "받은 편지함 폴링 설정");
 		m.put("Include Child Projects", "하위 프로젝트 포함");
 		m.put("Include Disabled", "비활성 포함");
+		m.put("Include Downstream When Rebuild", "재빌드 시 다운스트림 포함");
 		m.put("Include Forks", "포크 포함");
+		m.put("Include Upstream When Rebuild", "재빌드 시 업스트림 포함");
 		m.put("Include When Issue is Opened", "문제가 열릴 때 포함");
 		m.put("Incompatibilities", "비호환성");
 		m.put("Inconsistent issuer in provider metadata and ID token", "제공자 메타데이터와 ID 토큰의 발급자가 일치하지 않음");
@@ -1949,6 +1956,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Issue list", "이슈 목록");
 		m.put("Issue management not enabled in this project", "이 프로젝트에서 이슈 관리가 활성화되지 않았습니다");
 		m.put("Issue management permission required to move issues", "이슈를 이동하려면 이슈 관리 권한이 필요합니다");
+		m.put("Issue moved", "이슈가 이동되었습니다");
 		m.put("Issue not exist or access denied", "이슈가 존재하지 않거나 액세스가 거부되었습니다");
 		m.put("Issue number", "이슈 번호");
 		m.put("Issue query watch only affects new issues. To manage watch status of existing issues in batch, filter issues by watch status in issues page, and then take appropriate action", 
@@ -2044,6 +2052,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Jobs required to be successful: ", "성공해야 하는 작업들:");
 		m.put("Jobs with same sequential group and executor will be executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for jobs executing by same executor and deploying to prod environment of current project to avoid conflicting deployments", 
 			"동일한 순차 그룹과 실행기를 가진 작업은 순차적으로 실행됩니다. 예를 들어, 동일한 실행기로 실행되고 현재 프로젝트의 프로덕션 환경에 배포하는 작업에 대해 <tt>@project_path@:prod</tt>로 이 속성을 지정하여 충돌하는 배포를 방지할 수 있습니다");
+		m.put("Keep my email addresses private", "내 이메일 주소를 비공개로 유지");
 		m.put("Key", "키");
 		m.put("Key Fingerprint", "키 지문");
 		m.put("Key ID", "키 ID");
@@ -2247,6 +2256,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"<a wicket:id=\"buildSpec\">빌드 스펙</a>에 가져오기 오류가 있을 가능성이 높습니다");
 		m.put("Mount Docker Sock", "Docker Sock 마운트");
+		m.put("Move", "이동");
 		m.put("Move All Queried Issues To...", "모든 조회된 이슈를 이동...");
 		m.put("Move All Queried Projects To...", "모든 조회된 프로젝트를 이동...");
 		m.put("Move Selected Issues To...", "선택된 이슈를 이동...");
@@ -2434,7 +2444,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No suggestions", "제안 없음");
 		m.put("No tags found", "태그 없음");
 		m.put("No timesheets defined", "정의된 근무 시간표 없음");
-		m.put("No user found with login name or email: ", "로그인 이름 또는 이메일로 사용자를 찾을 수 없습니다:");
 		m.put("No users to convert to service accounts", "서비스 계정으로 변환할 사용자가 없습니다");
 		m.put("No users to delete", "삭제할 사용자 없음");
 		m.put("No users to disable", "비활성화할 사용자 없음");
@@ -2450,6 +2459,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Node Selector", "노드 선택기");
 		m.put("Node Selector Entry", "노드 선택기 항목");
 		m.put("None", "없음");
+		m.put("Noreply Email Domain", "Noreply 이메일 도메인");
 		m.put("Not Active Since", "활성 상태가 아닌 이후");
 		m.put("Not Used Since", "사용되지 않은 이후");
 		m.put("Not a verified email of signing GPG key", "GPG 키 서명의 확인된 이메일이 아닙니다");
@@ -2655,8 +2665,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"선택적으로 이 버튼을 누를 수 있는 권한이 있는 역할을 지정하세요. 지정하지 않으면 모든 사용자가 허용됩니다.");
 		m.put("Optionally specify base query of the list", "선택적으로 목록의 기본 쿼리를 지정하세요.");
-		m.put("Optionally specify branches/users/groups allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
-			"선택적으로 이 비밀에 액세스할 수 있는 브랜치/사용자/그룹을 지정하세요. 비워 두면 외부 풀 요청을 통해 트리거된 작업을 포함하여 모든 작업이 이 비밀에 액세스할 수 있습니다.");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>에 상대적인 빌드 컨텍스트 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요. <code>Dockerfile</code> 파일은 빌드 컨텍스트 디렉터리에 존재해야 하며, 옵션 <code>--dockerfile</code>로 다른 위치를 지정하지 않는 한 그렇습니다.");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
@@ -2984,7 +2992,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"아래 복구 코드를 <a wicket:id=\"download\" class=\"font-weight-bolder\">다운로드</a>하고 비밀로 유지하세요. 이 코드는 인증 애플리케이션에 접근할 수 없는 경우 계정에 일회성 접근을 제공하는 데 사용됩니다. 이 코드는 <b>다시 표시되지 않습니다</b>");
 		m.put("Please Confirm", "확인해주세요");
 		m.put("Please Note", "참고해주세요");
-		m.put("Please check your email for password reset instructions", "비밀번호 재설정 지침을 이메일로 확인하세요");
 		m.put("Please choose revision to create branch from", "브랜치를 생성할 리비전을 선택해주세요");
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "먼저 <a wicket:id=\"mailSetting\">메일 설정</a>을 구성해주세요");
 		m.put("Please confirm", "확인해주세요");
@@ -3075,7 +3082,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Primary", "기본");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "기본 <a wicket:id=\"noPrimaryAddressLink\">이메일 주소</a>가 지정되지 않았습니다");
 		m.put("Primary Email", "기본 이메일");
-		m.put("Primary email address not specified", "기본 이메일 주소가 지정되지 않았습니다");
+		m.put("Primary Email Address", "기본 이메일 주소");
+		m.put("Primary email address added", "기본 이메일 주소가 추가되었습니다");
+		m.put("Primary email address changed", "기본 이메일 주소가 변경되었습니다");
 		m.put("Primary email address of your account is not specified yet", "계정의 기본 이메일 주소가 아직 지정되지 않았습니다");
 		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
 			"기본 이메일 주소는 알림을 받거나, gravatar를 표시하는 데 사용됩니다 (활성화된 경우)");
@@ -3366,6 +3375,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Required Reviewers", "필수 리뷰어");
 		m.put("Required Services", "필수 서비스");
 		m.put("Resend invitation", "초대 다시 보내기");
+		m.put("Resend verification email", "인증 이메일 다시 보내기");
 		m.put("Reset", "재설정");
 		m.put("Resolution", "해결");
 		m.put("Resolve merge conflicts", "병합 충돌 해결");
@@ -3567,6 +3577,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Service desk setting", "서비스 데스크 설정");
 		m.put("Service desk settings have been saved", "서비스 데스크 설정이 저장되었습니다");
 		m.put("Service or AI account not allowed to login", "서비스 또는 AI 계정은 로그인할 수 없습니다");
+		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
+			"서비스 또는 AI 사용자는 이메일 주소를 지정할 수 없습니다. 그러나 자동 생성된 주소는");
 		m.put("Services", "서비스");
 		m.put("Session Timeout", "세션 시간 초과");
 		m.put("Set", "설정");
@@ -3884,8 +3896,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"보드의 열을 지정합니다. 각 열은 위에 지정된 이슈 필드의 값에 해당합니다");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"서비스 준비 상태를 확인하기 위한 명령을 지정합니다. 이 명령은 Windows 이미지에서는 cmd.exe, Linux 이미지에서는 셸에 의해 해석됩니다. 서비스 준비를 나타내는 0 코드가 반환될 때까지 반복적으로 실행됩니다");
-		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The prompt is stored in environment variable <code>$TASK_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
-			"지정된 작업을 실행하기 위해 헤드리스 모드에서 코딩 에이전트를 실행하는 명령을 지정하세요.\n프롬프트는 환경 변수 <code>$TASK_PROMPT</code>에 저장됩니다.<br>\n<b>참고: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI 및 동반 스킬</a>도 설치되어야 작업\n자동화가 작동합니다. OneDev 워크스페이스 이미지는 이러한 구성 요소를 기본적으로 포함합니다");
 		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
 			"이 바로가기가 열릴 때 실행할 명령을 지정하세요. 예: <i>opencode</i>, <i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
@@ -3915,6 +3925,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify docker image of the service", "서비스의 도커 이미지를 지정하세요.");
 		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
 			"도커 이미지를 빌드하는 데 사용되는 dockerx 빌더를 지정하세요. OneDev는 빌더가 존재하지 않을 경우 자동으로 생성합니다. 예를 들어 비보안 레지스트리에 게시를 허용하도록 빌더를 사용자 정의하는 방법에 대한 <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>이 튜토리얼</a>을 확인하세요.");
+		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
+			"사용자가 자신의 이메일 주소를 비공개로 유지하려는 경우 Git 작업을 위한 다양한 noreply 이메일 주소의 도메인을 지정하십시오\n");
 		m.put("Specify email addresses to send invitations, with one per line", "초대장을 보낼 이메일 주소를 한 줄에 하나씩 지정하세요.");
 		m.put("Specify estimated time <b class='text-warning'>only for this issue</b>, not counting \"{0}\"", 
 			"\"{0}\"을 제외하고 <b class='text-warning'>이 문제에 대해서만</b> 예상 시간을 지정하세요.");
@@ -4285,6 +4297,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("The permission to access build pipeline", "빌드 파이프라인에 접근할 권한");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
 			"작업을 수동으로 실행할 권한. 이는 빌드 로그, 빌드 파이프라인 및 모든 게시된 보고서에 접근할 권한을 포함합니다");
+		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
+			"기본 이메일 주소는 알림을 받고 Gravatar(활성화된 경우)를 표시하는 데 사용됩니다. 또한 이메일 주소가 비공개로 유지되지 않는 한 웹 기반 Git 작업에도 사용됩니다.");
 		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from OneDev. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
 			"POST 요청이 OneDev에서 페이로드 URL로 전송되었는지 확인할 수 있는 비밀 키입니다. 비밀 키를 설정하면 웹훅 POST 요청에서 X-OneDev-Signature 헤더를 받게 됩니다");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
@@ -4324,6 +4338,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
 			"이 날짜는 <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 형식</a>을 사용합니다");
 		m.put("This email address is being used", "이 이메일 주소는 사용 중입니다");
+		m.put("This email address is not verified", "이 이메일 주소는 인증되지 않았습니다");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "이 실행자는 OneDev 서버에서 Docker 컨테이너로 빌드 작업을 실행합니다");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
 			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신에서 Docker 컨테이너로 빌드 작업을 실행합니다");
@@ -4694,6 +4709,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Use specified title and description", "지정된 제목 및 설명 사용");
 		m.put("Use specified value or job secret", "지정된 값 또는 작업 비밀 사용");
 		m.put("Use specified values or job secrets", "지정된 값 또는 작업 비밀 사용");
+		m.put("Use the auto-generated email address", "자동 생성된 이메일 주소 사용");
 		m.put("Use triggers to run the job automatically under certain conditions", "특정 조건에서 작업을 자동으로 실행하기 위해 트리거 사용");
 		m.put("Use value of specified parameter/secret", "지정된 매개변수/비밀의 값 사용");
 		m.put("Used Heap Memory", "사용된 힙 메모리");
@@ -4742,6 +4758,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Variable", "변수");
 		m.put("Verification Code", "확인 코드");
 		m.put("Verification email sent, please check it", "확인 이메일이 발송되었습니다. 확인해 주세요");
+		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
+			"인증된 백업 이메일 주소는 비밀번호 복구 및 커밋 식별에 사용할 수 있습니다.");
 		m.put("Verify", "확인");
 		m.put("Via chat interface", "채팅 인터페이스를 통해");
 		m.put("Via issue/PR assignee and reviewer", "이슈/PR 담당자 및 리뷰어를 통해");
@@ -4811,6 +4829,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to allow anonymous users to access this server", "익명 사용자가 이 서버에 접근할 수 있는지 여부");
 		m.put("Whether or not to allow creating root projects (project without parent)", "루트 프로젝트(상위 프로젝트가 없는 프로젝트)를 생성할 수 있는지 여부");
 		m.put("Whether or not to also include children of above projects", "위 프로젝트의 하위 프로젝트를 포함할지 여부");
+		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "이 작업을 재빌드할 때 직접적인 다운스트림 작업도 재빌드할지 여부");
+		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "이 작업을 재빌드할 때 직접적인 업스트림 작업도 재빌드할지 여부");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same machine", 
 			"컨테이너를 실행하거나 이미지를 빌드할 때 항상 이미지를 가져올지 여부. 이 옵션을 활성화하면 동일한 머신에서 실행되는 악성 작업이 이미지를 교체하는 것을 방지할 수 있습니다");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
@@ -4823,6 +4843,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to create the workspace inside container", "컨테이너 내부에 워크스페이스를 생성할지 여부");
 		m.put("Whether or not to delete workspace if task command completes successfully. Uncheck this if\nyou want to check how the prompt is processed by coding agent after task command completes\nsuccessfully. Note that workspace will not be deleted automatically if task command fails.", 
 			"작업 명령이 성공적으로 완료되면 워크스페이스를 삭제할지 여부.\n작업 명령이 성공적으로 완료된 후 코딩 에이전트가 프롬프트를 처리하는 방식을 확인하려면 이 옵션을 선택 해제하세요.\n작업 명령이 실패한 경우 워크스페이스는 자동으로 삭제되지 않습니다.");
+		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
+			"내부 비밀번호 로그인 양식을 비활성화하고 SSO 로그인만 사용할지 여부.\n<b class=\"text-info\">팁:</b> 잠금 해제된 경우, 명령줄에서 <code>bin/enable-internal-login</code>을 실행하여 내부 로그인을 다시 활성화할 수 있습니다");
 		m.put("Whether or not to enable code management for the project", "프로젝트에 대한 코드 관리를 활성화할지 여부");
 		m.put("Whether or not to enable issue management for the project", "프로젝트에 대한 문제 관리를 활성화할지 여부");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4936,7 +4958,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("YouTrack Project", "YouTrack 프로젝트");
 		m.put("YouTrack Projects to Import", "YouTrack 가져올 프로젝트");
 		m.put("Your email address is now verified", "이메일 주소가 이제 확인되었습니다");
-		m.put("Your primary email address is not verified", "기본 이메일 주소가 확인되지 않았습니다");
 		m.put("[Any state]", "[어떤 상태든]");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[비밀번호 재설정] OneDev 비밀번호를 재설정하세요");
 		m.put("a boolean indiciating whether or not topic comment can be created directly by replying the email", 
@@ -4973,6 +4994,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("build is successful for jobs \"{0}\" on branches \"{1}\"", "브랜치 \"{1}\"에서 작업 \"{0}\"의 빌드가 성공적임");
 		m.put("builds", "빌드들");
 		m.put("cURL Example", "cURL 예제");
+		m.put("can be used to associate Git commits with the user.", "Git 커밋을 사용자와 연결하는 데 사용할 수 있습니다.");
 		m.put("choose a color for this state", "이 상태에 대한 색상을 선택하세요");
 		m.put("cluster:lead", "리드");
 		m.put("cmd-k to show command palette", "cmd-k를 눌러 명령 팔레트를 표시하세요");
@@ -5012,25 +5034,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("find by id", "ID로 찾기");
 		m.put("find by number", "번호로 찾기");
 		m.put("for AI task automation", "AI 작업 자동화를 위해");
+		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
+			"Git 작업을 위해. 웹 UI에서 수행된 모든 Git 작업도 이 주소를 사용합니다.");
 		m.put("forked from <a wicket:id=\"forkedFrom\"></a>", "<a wicket:id=\"forkedFrom\"></a>에서 포크됨");
-		m.put("found 1 agent", "1개의 에이전트를 찾았습니다");
-		m.put("found 1 build", "1개의 빌드를 찾았습니다");
-		m.put("found 1 comment", "1개의 댓글을 찾았습니다");
-		m.put("found 1 issue", "1개의 이슈를 찾았습니다");
-		m.put("found 1 package", "1개의 패키지를 찾았습니다");
-		m.put("found 1 project", "1개의 프로젝트를 찾았습니다");
-		m.put("found 1 pull request", "1개의 풀 리퀘스트를 찾았습니다");
-		m.put("found 1 user", "1명의 사용자를 찾았습니다");
-		m.put("found 1 workspace", "1개의 워크스페이스 발견됨");
-		m.put("found {0} agents", "{0}개의 에이전트를 찾았습니다");
-		m.put("found {0} builds", "{0}개의 빌드를 찾았습니다");
-		m.put("found {0} comments", "{0}개의 댓글을 찾았습니다");
-		m.put("found {0} issues", "{0}개의 이슈를 찾았습니다");
-		m.put("found {0} packages", "{0}개의 패키지를 찾았습니다");
-		m.put("found {0} projects", "{0}개의 프로젝트를 찾았습니다");
-		m.put("found {0} pull requests", "{0}개의 풀 리퀘스트를 찾았습니다");
-		m.put("found {0} users", "{0}명의 사용자를 찾았습니다");
-		m.put("found {0} workspaces", "{0}개의 워크스페이스 발견됨");
 		m.put("has any value of", "값이 존재합니다");
 		m.put("head", "헤드");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
@@ -5198,45 +5204,24 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Backup Email Addresses", "백업 이메일 주소");
-		m.put("Cannot move issue as it has workspaces", "작업 공간이 있어 이슈를 이동할 수 없습니다");
-		m.put("Copy Markdown", "마크다운 복사");
-		m.put("Disable Internal Login", "내부 로그인 비활성화");
-		m.put("Do you really want to move this issue to project \"{0}\"", "이 이슈를 프로젝트 \"{0}\"로 이동하시겠습니까?");
-		m.put("Email Address Privacy", "이메일 주소 개인정보 보호");
-		m.put("Email address with noreply domain is not allowed", "noreply 도메인의 이메일 주소는 허용되지 않습니다");
-		m.put("Email addresses privacy updated", "이메일 주소 개인정보 보호가 업데이트되었습니다");
-		m.put("Include Downstream When Rebuild", "재빌드 시 다운스트림 포함");
-		m.put("Include Upstream When Rebuild", "재빌드 시 업스트림 포함");
-		m.put("Issue moved", "이슈가 이동되었습니다");
-		m.put("Keep my email addresses private", "내 이메일 주소를 비공개로 유지");
-		m.put("Move", "이동");
-		m.put("Noreply Email Domain", "Noreply 이메일 도메인");
-		m.put("Primary Email Address", "기본 이메일 주소");
-		m.put("Primary email address added", "기본 이메일 주소가 추가되었습니다");
-		m.put("Primary email address changed", "기본 이메일 주소가 변경되었습니다");
-		m.put("Resend verification email", "인증 이메일 다시 보내기");
-		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
-			"서비스 또는 AI 사용자는 이메일 주소를 지정할 수 없습니다. 그러나 자동 생성된 주소는");
-		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
-			"사용자가 자신의 이메일 주소를 비공개로 유지하려는 경우 Git 작업을 위한 다양한 noreply 이메일 주소의 도메인을 지정하십시오\n");
-		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
-			"기본 이메일 주소는 알림을 받고 Gravatar(활성화된 경우)를 표시하는 데 사용됩니다. 또한 이메일 주소가 비공개로 유지되지 않는 한 웹 기반 Git 작업에도 사용됩니다.");
-		m.put("This email address is not verified", "이 이메일 주소는 인증되지 않았습니다");
-		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, arrow keys, or page up/down, and press q to exit.", 
-			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [를 누르세요. 마우스 휠, 화살표 키 또는 페이지 업/다운을 사용하고, 종료하려면 q를 누르세요.");
-		m.put("To scroll in this terminal, tap tmux [, swipe the terminal, and tap tmux [ again to exit.", 
-			"이 터미널에서 스크롤하려면 tmux [를 누르고 터미널을 스와이프한 후 다시 tmux [를 누르세요.");
-		m.put("Use the auto-generated email address", "자동 생성된 이메일 주소 사용");
-		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
-			"인증된 백업 이메일 주소는 비밀번호 복구 및 커밋 식별에 사용할 수 있습니다.");
-		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "이 작업을 재빌드할 때 직접적인 다운스트림 작업도 재빌드할지 여부");
-		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "이 작업을 재빌드할 때 직접적인 업스트림 작업도 재빌드할지 여부");
-		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
-			"내부 비밀번호 로그인 양식을 비활성화하고 SSO 로그인만 사용할지 여부.\n<b class=\"text-info\">팁:</b> 잠금 해제된 경우, 명령줄에서 <code>bin/enable-internal-login</code>을 실행하여 내부 로그인을 다시 활성화할 수 있습니다");
-		m.put("can be used to associate Git commits with the user.", "Git 커밋을 사용자와 연결하는 데 사용할 수 있습니다.");
-		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
-			"Git 작업을 위해. 웹 UI에서 수행된 모든 Git 작업도 이 주소를 사용합니다.");
+		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
+			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 스타일 마크다운</a>이 허용되며, <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml 및 katex 지원</a>이 포함됩니다.");
+		m.put("Invalid build number: {0}", "잘못된 빌드 번호: {0}");
+		m.put("Invalid pack ID: {0}", "잘못된 패키지 ID: {0}");
+		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
+			"이 비밀에 접근할 수 있는 브랜치를 선택적으로 지정하세요. 비워두면 외부 풀 리퀘스트를 통해 트리거된 작업을 포함하여 모든 작업이 이 비밀에 접근할 수 있습니다.");
+		m.put("Port Accessors", "포트 접근자");
+		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
+			"할당된 작업을 실행하기 위해 헤드리스 모드에서 코딩 에이전트를 실행하는 명령을 \n프롬프트 형식으로 지정하세요. 결합된 프롬프트는 환경 변수 <code>$TASK_PROMPT</code>에 저장됩니다.\n시스템 프롬프트와 사용자 프롬프트는 각각 \n<code>$TASK_SYSTEM_PROMPT</code> 및 <code>$TASK_USER_PROMPT</code>로도 사용할 수 있습니다.<br>\n<b>참고: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI 및 동반 스킬</a>도 설치되어야 작업\n자동화가 작동합니다. OneDev 워크스페이스 이미지는 이러한 구성 요소를 기본적으로 포함합니다.");
+		m.put("Specify max number of mail sending sessions that can run concurrently", "동시에 실행될 수 있는 최대 메일 전송 세션 수를 지정하세요.");
+		m.put("Teardown Commands", "종료 명령");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
+			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [를 누르세요. 마우스 휠, 페이지 업/다운 또는 화살표 키를 사용하고, q를 눌러 종료하세요.");
+		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
+			"이 터미널에서 스크롤하려면 tmux [를 누르고, 페이지 업/다운 또는 화살표 키를 사용한 후 다시 tmux [를 눌러 종료하세요.");
+		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
+			"로그인 이름 또는 이메일이 유효한 계정과 일치하면 비밀번호 재설정 지침을 보내드립니다.");
+		m.put("{0} found", "{0} 발견됨");
 	}
 		
 	@Override

@@ -451,6 +451,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Backlog", "バックログ");
 		m.put("Backlog Base Query", "バックログ基本クエリ");
 		m.put("Backup", "バックアップ");
+		m.put("Backup Email Addresses", "バックアップメールアドレス");
 		m.put("Backup Now", "今すぐバックアップ");
 		m.put("Backup Schedule", "バックアップスケジュール");
 		m.put("Backup Setting", "バックアップ設定");
@@ -652,13 +653,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Cannot disable root account", "ルートアカウントを無効化できません");
 		m.put("Cannot disable yourself", "自分自身を無効化できません");
 		m.put("Cannot find issue board: ", "課題ボードが見つかりません:");
+		m.put("Cannot move issue as it has workspaces", "ワークスペースがあるため、課題を移動できません");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "プロジェクト\"{0}\"を自身またはその子孫の下に移動することはできません");
 		m.put("Cannot perform this operation now", "現在この操作を実行することはできません");
 		m.put("Cannot remove agent \"{0}\" as it has workspaces", "エージェント \"{0}\" を削除できません。ワークスペースが存在します");
 		m.put("Cannot remove agent as it has workspaces", "エージェントを削除できません。ワークスペースが存在します");
-		m.put("Cannot reset password for disabled account", "無効なアカウントのパスワードをリセットできません");
-		m.put("Cannot reset password for service or AI account", "サービスまたはAIアカウントのパスワードをリセットできません");
-		m.put("Cannot reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
 		m.put("Cannot save malformed query", "不正なクエリを保存することはできません");
 		m.put("Cannot use current or descendant project as parent", "現在のプロジェクトまたは子孫プロジェクトを親として使用することはできません");
 		m.put("Case Sensitive", "大文字小文字を区別");
@@ -924,6 +923,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy", "コピー");
 		m.put("Copy All Queried Issues To...", "クエリされたすべての課題を...にコピー");
 		m.put("Copy Files with SCP", "SCPでファイルをコピー");
+		m.put("Copy Markdown", "Markdownをコピー");
 		m.put("Copy Selected Issues To...", "選択された課題を...にコピー");
 		m.put("Copy as Markdown", "Markdownとしてコピー");
 		m.put("Copy dashboard", "ダッシュボードをコピー");
@@ -1156,6 +1156,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Disable All Queried Users", "クエリされたすべてのユーザーを無効化");
 		m.put("Disable Auto Update Check", "自動更新チェックを無効化");
 		m.put("Disable Dashboard", "ダッシュボードを無効化");
+		m.put("Disable Internal Login", "内部ログインを無効化");
 		m.put("Disable Selected Users", "選択したユーザーを無効化");
 		m.put("Disabled", "無効化済み");
 		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
@@ -1237,6 +1238,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do you really want to discard batched suggestions?", "本当にバッチ化された提案を破棄しますか？");
 		m.put("Do you really want to discard changes to this file? This cannot be undone.", "本当にこのファイルへの変更を破棄しますか？これは元に戻せません。");
 		m.put("Do you really want to enable this account?", "本当にこのアカウントを有効にしますか？");
+		m.put("Do you really want to move this issue to project \"{0}\"", "本当にこの課題をプロジェクト「{0}」に移動しますか");
 		m.put("Do you really want to rebuild?", "本当に再構築しますか？");
 		m.put("Do you really want to remove agent \"{0}\"?", "本当にエージェント \"{0}\" を削除しますか？");
 		m.put("Do you really want to remove assignee \"{0}\"?", "本当に担当者「{0}」を削除しますか？");
@@ -1310,6 +1312,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "ターゲットブランチまたはソースブランチに新しいコミットが今追加されました。再確認してください。");
 		m.put("Email", "メール");
 		m.put("Email Address", "メールアドレス");
+		m.put("Email Address Privacy", "メールアドレスのプライバシー");
 		m.put("Email Address Verification", "メールアドレスの確認");
 		m.put("Email Addresses", "メールアドレス");
 		m.put("Email Templates", "メールテンプレート");
@@ -1324,6 +1327,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Email address already used by another user", "別のユーザーによって既に使用されているメールアドレス");
 		m.put("Email address already used: ", "メールアドレスは既に使用されています:");
 		m.put("Email address to verify", "認証するメールアドレス");
+		m.put("Email address with noreply domain is not allowed", "noreplyドメインのメールアドレスは許可されていません");
+		m.put("Email addresses privacy updated", "メールアドレスのプライバシーが更新されました");
 		m.put("Email addresses with <span class=\"badge badge-warning badge-sm\">ineffective</span> mark are those not belong to or not verified by key owner", 
 			"<span class=\"badge badge-warning badge-sm\">無効</span> のマークが付いたメールアドレスは、キー所有者に属していないか、認証されていないものです。");
 		m.put("Email templates", "メールテンプレート");
@@ -1835,7 +1840,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Inbox Poll Setting", "受信トレイポーリング設定");
 		m.put("Include Child Projects", "子プロジェクトを含む");
 		m.put("Include Disabled", "無効化されたものを含む");
+		m.put("Include Downstream When Rebuild", "再ビルド時に下流を含める");
 		m.put("Include Forks", "フォークを含む");
+		m.put("Include Upstream When Rebuild", "再ビルド時に上流を含める");
 		m.put("Include When Issue is Opened", "課題が開かれたときに含む");
 		m.put("Incompatibilities", "非互換性");
 		m.put("Inconsistent issuer in provider metadata and ID token", "プロバイダーメタデータとIDトークンの発行者が一致しない");
@@ -1949,6 +1956,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Issue list", "課題一覧");
 		m.put("Issue management not enabled in this project", "このプロジェクトでは課題管理が有効ではありません");
 		m.put("Issue management permission required to move issues", "課題を移動するには課題管理権限が必要です");
+		m.put("Issue moved", "課題が移動されました");
 		m.put("Issue not exist or access denied", "課題が存在しないか、アクセスが拒否されました");
 		m.put("Issue number", "課題番号");
 		m.put("Issue query watch only affects new issues. To manage watch status of existing issues in batch, filter issues by watch status in issues page, and then take appropriate action", 
@@ -2044,6 +2052,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Jobs required to be successful: ", "成功する必要があるジョブ:");
 		m.put("Jobs with same sequential group and executor will be executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for jobs executing by same executor and deploying to prod environment of current project to avoid conflicting deployments", 
 			"同じ順序グループとエグゼキューターを持つジョブは順次実行されます。例えば、同じエグゼキューターで実行され、現在のプロジェクトの本番環境にデプロイするジョブの競合を避けるために、このプロパティを<tt>@project_path@:prod</tt>として指定することができます");
+		m.put("Keep my email addresses private", "メールアドレスを非公開にする");
 		m.put("Key", "キー");
 		m.put("Key Fingerprint", "キーのフィンガープリント");
 		m.put("Key ID", "キーID");
@@ -2247,6 +2256,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"<a wicket:id=\"buildSpec\">ビルド仕様</a>にインポートエラーがある可能性が高いです");
 		m.put("Mount Docker Sock", "Dockerソケットをマウント");
+		m.put("Move", "移動");
 		m.put("Move All Queried Issues To...", "すべてのクエリ済み課題を移動...");
 		m.put("Move All Queried Projects To...", "すべてのクエリ済みプロジェクトを移動...");
 		m.put("Move Selected Issues To...", "選択した課題を移動...");
@@ -2434,7 +2444,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No suggestions", "提案はありません");
 		m.put("No tags found", "タグが見つかりません");
 		m.put("No timesheets defined", "定義されたタイムシートなし");
-		m.put("No user found with login name or email: ", "ログイン名またはメールでユーザーが見つかりません:");
 		m.put("No users to convert to service accounts", "サービスアカウントに変換するユーザーがいません");
 		m.put("No users to delete", "削除するユーザーなし");
 		m.put("No users to disable", "無効化するユーザーなし");
@@ -2450,6 +2459,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Node Selector", "ノードセレクター");
 		m.put("Node Selector Entry", "ノードセレクターエントリー");
 		m.put("None", "なし");
+		m.put("Noreply Email Domain", "Noreplyメールドメイン");
 		m.put("Not Active Since", "以降アクティブではありません");
 		m.put("Not Used Since", "以降使用されていません");
 		m.put("Not a verified email of signing GPG key", "署名GPGキーの確認済みメールではありません");
@@ -2655,8 +2665,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"オプションで、このボタンを押すための認証済みロールを指定してください。指定されていない場合、すべてのユーザーが許可されます。");
 		m.put("Optionally specify base query of the list", "オプションで、リストの基本クエリを指定してください。");
-		m.put("Optionally specify branches/users/groups allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
-			"オプションで、このシークレットにアクセスできるブランチ/ユーザー/グループを指定してください。空のままにすると、外部プルリクエストを介してトリガーされたジョブを含む、任意のジョブがこのシークレットにアクセスできます。");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するビルドコンテキストパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。<code>Dockerfile</code>ファイルはビルドコンテキストディレクトリに存在することが期待されますが、オプション<code>--dockerfile</code>で異なる場所を指定することもできます。");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
@@ -2984,7 +2992,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"以下のリカバリーコードを<a wicket:id=\"download\" class=\"font-weight-bolder\">ダウンロード</a>して秘密に保管してください。これらのコードは、認証アプリケーションにアクセスできない場合にアカウントへの一時的なアクセスを提供するために使用できます。これらは<b>再表示されません</b>");
 		m.put("Please Confirm", "確認してください");
 		m.put("Please Note", "注意してください");
-		m.put("Please check your email for password reset instructions", "パスワードリセットの指示についてはメールを確認してください");
 		m.put("Please choose revision to create branch from", "ブランチを作成するためのリビジョンを選択してください");
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "まず<a wicket:id=\"mailSetting\">メール設定</a>を構成してください");
 		m.put("Please confirm", "確認してください");
@@ -3075,7 +3082,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Primary", "プライマリ");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "プライマリ<a wicket:id=\"noPrimaryAddressLink\">メールアドレス</a>が指定されていません");
 		m.put("Primary Email", "プライマリメール");
-		m.put("Primary email address not specified", "プライマリメールアドレスが指定されていません");
+		m.put("Primary Email Address", "プライマリメールアドレス");
+		m.put("Primary email address added", "プライマリメールアドレスが追加されました");
+		m.put("Primary email address changed", "プライマリメールアドレスが変更されました");
 		m.put("Primary email address of your account is not specified yet", "アカウントの主メールアドレスはまだ指定されていません");
 		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
 			"主メールアドレスは通知の受信、Gravatarの表示（有効化されている場合）などに使用されます");
@@ -3366,6 +3375,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Required Reviewers", "必要なレビュアー");
 		m.put("Required Services", "必要なサービス");
 		m.put("Resend invitation", "招待を再送信");
+		m.put("Resend verification email", "確認メールを再送信");
 		m.put("Reset", "リセット");
 		m.put("Resolution", "解決");
 		m.put("Resolve merge conflicts", "マージコンフリクトを解決");
@@ -3567,6 +3577,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Service desk setting", "サービスデスク設定");
 		m.put("Service desk settings have been saved", "サービスデスク設定が保存されました");
 		m.put("Service or AI account not allowed to login", "サービスまたはAIアカウントはログインできません");
+		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
+			"サービスまたはAIユーザーはメールアドレスを指定できません。ただし、自動生成されたアドレス");
 		m.put("Services", "サービス");
 		m.put("Session Timeout", "セッションタイムアウト");
 		m.put("Set", "設定");
@@ -3884,8 +3896,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ボードの列を指定します。各列は上記で指定された課題フィールドの値に対応します");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"サービスの準備状態を確認するコマンドを指定します。このコマンドは Windows イメージでは cmd.exe によって解釈され、Linux イメージではシェルによって解釈されます。ゼロコードが返されてサービス準備完了を示すまで繰り返し実行されます");
-		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The prompt is stored in environment variable <code>$TASK_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
-			"割り当てられたタスクを実行するためにヘッドレスモードでコーディングエージェントを起動するコマンドを指定してください。\nプロンプトは環境変数<code>$TASK_PROMPT</code>に格納されます。<br>\n<b>注意: </b><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLIおよび補助スキル</a>もインストールされている必要があります。\nOneDevワークスペースイメージにはこれらのコンポーネントが標準で含まれています");
 		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
 			"このショートカットが開かれた場合に実行するコマンドを指定してください。例えば<i>opencode</i>, <i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
@@ -3915,6 +3925,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify docker image of the service", "サービスのDockerイメージを指定してください。");
 		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
 			"Dockerイメージをビルドするために使用するdockerxビルダーを指定してください。OneDevはビルダーが存在しない場合、自動的に作成します。例えば、非セキュアなレジストリへの公開を許可するためにビルダーをカスタマイズする方法については<a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>このチュートリアル</a>を確認してください。");
+		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
+			"ユーザーが自身のメールアドレスを非公開にしたい場合、Git操作用のさまざまなnoreplyメールアドレスのドメインを指定してください\n");
 		m.put("Specify email addresses to send invitations, with one per line", "招待を送るメールアドレスを指定してください。1行につき1つのアドレスを記載してください。");
 		m.put("Specify estimated time <b class='text-warning'>only for this issue</b>, not counting \"{0}\"", 
 			"<b class='text-warning'>この課題のみ</b>の推定時間を指定してください。\"{0}\"は含まれません。");
@@ -4285,6 +4297,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("The permission to access build pipeline", "ビルドパイプラインにアクセスする権限");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
 			"ジョブを手動で実行する権限。それはまた、ビルドログ、ビルドパイプライン、およびすべての公開されたレポートにアクセスする権限を含みます");
+		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
+			"プライマリメールアドレスは通知を受け取るためや、Gravatar（有効化されている場合）を表示するために使用されます。また、メールアドレスが非公開でない限り、WebベースのGit操作にも使用されます。");
 		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from OneDev. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
 			"POSTリクエストがOneDevから送信されたことを確認するための秘密鍵。秘密鍵を設定すると、WebhookのPOSTリクエストでX-OneDev-Signatureヘッダーを受け取ります");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
@@ -4324,6 +4338,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
 			"この日付は<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601形式</a>を使用しています");
 		m.put("This email address is being used", "このメールアドレスは使用されています");
+		m.put("This email address is not verified", "このメールアドレスは確認されていません");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "このエグゼキュータは、OneDevサーバー上でDockerコンテナとしてビルドジョブを実行します");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
 			"このエグゼキュータは、<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシン上でDockerコンテナとしてビルドジョブを実行します");
@@ -4694,6 +4709,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Use specified title and description", "指定されたタイトルと説明を使用");
 		m.put("Use specified value or job secret", "指定された値またはジョブシークレットを使用");
 		m.put("Use specified values or job secrets", "指定された値またはジョブシークレットを使用");
+		m.put("Use the auto-generated email address", "自動生成されたメールアドレスを使用");
 		m.put("Use triggers to run the job automatically under certain conditions", "特定の条件下でジョブを自動的に実行するためにトリガーを使用");
 		m.put("Use value of specified parameter/secret", "指定されたパラメータ/シークレットの値を使用");
 		m.put("Used Heap Memory", "使用済みヒープメモリ");
@@ -4742,6 +4758,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Variable", "変数");
 		m.put("Verification Code", "確認コード");
 		m.put("Verification email sent, please check it", "確認メールが送信されました。確認してください");
+		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
+			"確認済みのバックアップメールアドレスは、パスワードの回復やコミットの識別に使用できます。");
 		m.put("Verify", "確認する");
 		m.put("Via chat interface", "チャットインターフェースを通じて");
 		m.put("Via issue/PR assignee and reviewer", "問題/PRの担当者およびレビュアー経由");
@@ -4811,6 +4829,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to allow anonymous users to access this server", "匿名ユーザーがこのサーバーにアクセスできるかどうか");
 		m.put("Whether or not to allow creating root projects (project without parent)", "ルートプロジェクト（親のないプロジェクト）を作成できるかどうか");
 		m.put("Whether or not to also include children of above projects", "上記のプロジェクトの子も含めるかどうか");
+		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "このジョブを再ビルドする際に、直接の下流ジョブも再ビルドするかどうか");
+		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "このジョブを再ビルドする際に、直接の上流ジョブも再ビルドするかどうか");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same machine", 
 			"コンテナを実行したりイメージをビルドしたりするときに常にイメージをプルするかどうか。このオプションを有効にすると、同じマシンで実行される悪意のあるジョブによってイメージが置き換えられるのを防ぐことができます");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
@@ -4823,6 +4843,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to create the workspace inside container", "コンテナ内にワークスペースを作成するかどうか");
 		m.put("Whether or not to delete workspace if task command completes successfully. Uncheck this if\nyou want to check how the prompt is processed by coding agent after task command completes\nsuccessfully. Note that workspace will not be deleted automatically if task command fails.", 
 			"タスクコマンドが正常に完了した場合にワークスペースを削除するかどうか。\nタスクコマンドが正常に完了した後、コーディングエージェントがプロンプトをどのように処理するかを確認したい場合は、このチェックを外してください。\nタスクコマンドが失敗した場合、ワークスペースは自動的に削除されないことに注意してください。");
+		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
+			"内部パスワードログインフォームを無効化し、SSOログインのみを使用するかどうか。\n<b class=\"text-info\">TIPS:</b> ロックアウトされた場合、コマンドラインで<code>bin/enable-internal-login</code>を実行することで内部ログインを再有効化できます。");
 		m.put("Whether or not to enable code management for the project", "プロジェクトのコード管理を有効にするかどうか");
 		m.put("Whether or not to enable issue management for the project", "プロジェクトの課題管理を有効にするかどうか");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4936,7 +4958,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("YouTrack Project", "YouTrackプロジェクト");
 		m.put("YouTrack Projects to Import", "インポートするYouTrackプロジェクト");
 		m.put("Your email address is now verified", "メールアドレスが確認されました");
-		m.put("Your primary email address is not verified", "プライマリメールアドレスが確認されていません");
 		m.put("[Any state]", "[任意の状態]");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[パスワードリセット] OneDevパスワードをリセットしてください");
 		m.put("a boolean indiciating whether or not topic comment can be created directly by replying the email", 
@@ -4973,6 +4994,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("build is successful for jobs \"{0}\" on branches \"{1}\"", "ジョブ「{0}」でブランチ「{1}」でビルドが成功");
 		m.put("builds", "ビルド");
 		m.put("cURL Example", "cURLの例");
+		m.put("can be used to associate Git commits with the user.", "Gitコミットをユーザーに関連付けるために使用できます。");
 		m.put("choose a color for this state", "この状態の色を選択してください");
 		m.put("cluster:lead", "リード");
 		m.put("cmd-k to show command palette", "cmd-kでコマンドパレットを表示");
@@ -5012,25 +5034,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("find by id", "IDで検索");
 		m.put("find by number", "番号で検索");
 		m.put("for AI task automation", "AIタスク自動化用");
+		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
+			"Git操作用です。Web UIから実行されるすべてのGit操作もこのアドレスを使用します。");
 		m.put("forked from <a wicket:id=\"forkedFrom\"></a>", "<a wicket:id=\"forkedFrom\"></a>からフォークされました");
-		m.put("found 1 agent", "1 エージェントが見つかりました");
-		m.put("found 1 build", "1 ビルドが見つかりました");
-		m.put("found 1 comment", "1 コメントが見つかりました");
-		m.put("found 1 issue", "1 課題が見つかりました");
-		m.put("found 1 package", "1 パッケージが見つかりました");
-		m.put("found 1 project", "1 プロジェクトが見つかりました");
-		m.put("found 1 pull request", "1 プルリクエストが見つかりました");
-		m.put("found 1 user", "1 ユーザーが見つかりました");
-		m.put("found 1 workspace", "1つのワークスペースが見つかりました");
-		m.put("found {0} agents", "{0} エージェントが見つかりました");
-		m.put("found {0} builds", "{0} ビルドが見つかりました");
-		m.put("found {0} comments", "{0} コメントが見つかりました");
-		m.put("found {0} issues", "{0} 課題が見つかりました");
-		m.put("found {0} packages", "{0} パッケージが見つかりました");
-		m.put("found {0} projects", "{0} プロジェクトが見つかりました");
-		m.put("found {0} pull requests", "{0} プルリクエストが見つかりました");
-		m.put("found {0} users", "{0} ユーザーが見つかりました");
-		m.put("found {0} workspaces", "{0}個のワークスペースが見つかりました");
 		m.put("has any value of", "任意の値を持っています");
 		m.put("head", "ヘッド");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
@@ -5198,45 +5204,24 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Backup Email Addresses", "バックアップメールアドレス");
-		m.put("Cannot move issue as it has workspaces", "ワークスペースがあるため、課題を移動できません");
-		m.put("Copy Markdown", "Markdownをコピー");
-		m.put("Disable Internal Login", "内部ログインを無効化");
-		m.put("Do you really want to move this issue to project \"{0}\"", "本当にこの課題をプロジェクト「{0}」に移動しますか");
-		m.put("Email Address Privacy", "メールアドレスのプライバシー");
-		m.put("Email address with noreply domain is not allowed", "noreplyドメインのメールアドレスは許可されていません");
-		m.put("Email addresses privacy updated", "メールアドレスのプライバシーが更新されました");
-		m.put("Include Downstream When Rebuild", "再ビルド時に下流を含める");
-		m.put("Include Upstream When Rebuild", "再ビルド時に上流を含める");
-		m.put("Issue moved", "課題が移動されました");
-		m.put("Keep my email addresses private", "メールアドレスを非公開にする");
-		m.put("Move", "移動");
-		m.put("Noreply Email Domain", "Noreplyメールドメイン");
-		m.put("Primary Email Address", "プライマリメールアドレス");
-		m.put("Primary email address added", "プライマリメールアドレスが追加されました");
-		m.put("Primary email address changed", "プライマリメールアドレスが変更されました");
-		m.put("Resend verification email", "確認メールを再送信");
-		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
-			"サービスまたはAIユーザーはメールアドレスを指定できません。ただし、自動生成されたアドレス");
-		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
-			"ユーザーが自身のメールアドレスを非公開にしたい場合、Git操作用のさまざまなnoreplyメールアドレスのドメインを指定してください\n");
-		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
-			"プライマリメールアドレスは通知を受け取るためや、Gravatar（有効化されている場合）を表示するために使用されます。また、メールアドレスが非公開でない限り、WebベースのGit操作にも使用されます。");
-		m.put("This email address is not verified", "このメールアドレスは確認されていません");
-		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, arrow keys, or page up/down, and press q to exit.", 
-			"このターミナルでスクロールするには、ctrl+bを押してから[を押します。マウスホイール、矢印キー、またはページアップ/ダウンを使用し、終了するにはqを押してください。");
-		m.put("To scroll in this terminal, tap tmux [, swipe the terminal, and tap tmux [ again to exit.", 
-			"このターミナルでスクロールするには、tmux [をタップし、ターミナルをスワイプして、再度tmux [をタップして終了します。");
-		m.put("Use the auto-generated email address", "自動生成されたメールアドレスを使用");
-		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
-			"確認済みのバックアップメールアドレスは、パスワードの回復やコミットの識別に使用できます。");
-		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "このジョブを再ビルドする際に、直接の下流ジョブも再ビルドするかどうか");
-		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "このジョブを再ビルドする際に、直接の上流ジョブも再ビルドするかどうか");
-		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
-			"内部パスワードログインフォームを無効化し、SSOログインのみを使用するかどうか。\n<b class=\"text-info\">TIPS:</b> ロックアウトされた場合、コマンドラインで<code>bin/enable-internal-login</code>を実行することで内部ログインを再有効化できます。");
-		m.put("can be used to associate Git commits with the user.", "Gitコミットをユーザーに関連付けるために使用できます。");
-		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
-			"Git操作用です。Web UIから実行されるすべてのGit操作もこのアドレスを使用します。");
+		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
+			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub風マークダウン</a>が使用可能で、<a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml、katexのサポート</a>があります。");
+		m.put("Invalid build number: {0}", "無効なビルド番号: {0}");
+		m.put("Invalid pack ID: {0}", "無効なパックID: {0}");
+		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
+			"このシークレットにアクセスできるブランチをオプションで指定します。空白のままにすると、外部プルリクエストを介してトリガーされたジョブを含め、どのジョブでもこのシークレットにアクセスできます。");
+		m.put("Port Accessors", "ポートアクセサー");
+		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
+			"割り当てられたタスクを実行するためにヘッドレスモードでコーディングエージェントを起動するコマンドを指定します。\n結合されたプロンプトは環境変数<code>$TASK_PROMPT</code>に格納されます。\nシステムプロンプトとユーザープロンプトもそれぞれ<code>$TASK_SYSTEM_PROMPT</code>および<code>$TASK_USER_PROMPT</code>として利用可能です。<br>\n<b>注意: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLIと補助スキル</a>もインストールする必要があります。\nタスク自動化を機能させるために、OneDevワークスペースイメージにはこれらのコンポーネントが標準で含まれています。");
+		m.put("Specify max number of mail sending sessions that can run concurrently", "同時に実行可能なメール送信セッションの最大数を指定します。");
+		m.put("Teardown Commands", "終了コマンド");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
+			"このターミナルでスクロールするには、ctrl+bを押してから[を押します。マウスホイール、ページアップ/ダウン、または矢印キーを使用し、終了するにはqを押します。");
+		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
+			"このターミナルでスクロールするには、tmux [をタップし、ページアップ/ダウンまたは矢印キーを使用し、終了するには再度tmux [をタップします。");
+		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
+			"そのログイン名またはメールアドレスが有効なアカウントと一致する場合、パスワードリセットの指示を送信します。");
+		m.put("{0} found", "{0}が見つかりました");
 	}
 		
 	@Override

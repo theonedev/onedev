@@ -477,6 +477,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Backlog", "待办");
 		m.put("Backlog Base Query", "待办工单基础查询");
 		m.put("Backup", "备份");
+		m.put("Backup Email Addresses", "备份邮箱地址");
 		m.put("Backup Now", "立即备份");
 		m.put("Backup Schedule", "备份计划");
 		m.put("Backup Setting", "备份设置");
@@ -678,13 +679,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Cannot disable root account", "不能禁用根账户");
 		m.put("Cannot disable yourself", "不能禁用自己");
 		m.put("Cannot find issue board: ", "找不到工单看板：");
+		m.put("Cannot move issue as it has workspaces", "无法移动工单，因为它有工作区");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
 		m.put("Cannot perform this operation now", "当前无法执行此操作");
 		m.put("Cannot remove agent \"{0}\" as it has workspaces", "无法移除代理 \"{0}\"，因为它有工作区");
 		m.put("Cannot remove agent as it has workspaces", "无法移除代理，因为它有工作区");
-		m.put("Cannot reset password for disabled account", "无法为已禁用账户重置密码");
-		m.put("Cannot reset password for service or AI account", "无法为服务或 AI 账户重置密码");
-		m.put("Cannot reset password for user authenticating via external system", "无法重置通过外部系统认证的用户密码");
 		m.put("Cannot save malformed query", "无法保存格式错误的查询");
 		m.put("Cannot use current or descendant project as parent", "不能使用当前或子项目作为父项目");
 		m.put("Case Sensitive", "区分大小写");
@@ -950,6 +949,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy", "复制");
 		m.put("Copy All Queried Issues To...", "复制所有查询的工单到...");
 		m.put("Copy Files with SCP", "使用 SCP 复制文件");
+		m.put("Copy Markdown", "复制 Markdown");
 		m.put("Copy Selected Issues To...", "复制选定的工单到...");
 		m.put("Copy as Markdown", "复制为 Markdown");
 		m.put("Copy dashboard", "复制仪表板");
@@ -1182,6 +1182,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Disable All Queried Users", "禁用所有查询的用户");
 		m.put("Disable Auto Update Check", "禁用自动更新检查");
 		m.put("Disable Dashboard", "禁用仪表盘");
+		m.put("Disable Internal Login", "禁用内部登录");
 		m.put("Disable Selected Users", "禁用选定的用户");
 		m.put("Disabled", "已禁用");
 		m.put("Disabled users, service accounts, and AI users are excluded from user-month calculation", 
@@ -1263,6 +1264,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Do you really want to discard batched suggestions?", "您真的要丢弃批量建议吗？");
 		m.put("Do you really want to discard changes to this file? This cannot be undone.", "您真的想放弃对此文件的更改吗？此操作无法撤销。");
 		m.put("Do you really want to enable this account?", "您真的要启用此账户吗？");
+		m.put("Do you really want to move this issue to project \"{0}\"", "您确定要将此工单移动到项目 \"{0}\" 吗");
 		m.put("Do you really want to rebuild?", "您确定要重建此构建吗？");
 		m.put("Do you really want to remove agent \"{0}\"?", "您确定要移除代理 \"{0}\" 吗？");
 		m.put("Do you really want to remove assignee \"{0}\"?", "确定要移除指派人 \"{0}\" 吗？");
@@ -1336,6 +1338,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "目标分支或源分支有新的提交，请重新检查。");
 		m.put("Email", "邮箱");
 		m.put("Email Address", "邮箱地址");
+		m.put("Email Address Privacy", "邮箱地址隐私");
 		m.put("Email Address Verification", "邮箱地址验证");
 		m.put("Email Addresses", "电子邮件地址");
 		m.put("Email Templates", "邮件模板");
@@ -1350,6 +1353,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Email address already used by another user", "电子邮件地址已被另一个用户使用");
 		m.put("Email address already used: ", "邮箱地址已被使用：");
 		m.put("Email address to verify", "待验证的邮箱地址");
+		m.put("Email address with noreply domain is not allowed", "不允许使用 noreply 域的邮箱地址");
+		m.put("Email addresses privacy updated", "邮箱地址隐私已更新");
 		m.put("Email addresses with <span class=\"badge badge-warning badge-sm\">ineffective</span> mark are those not belong to or not verified by key owner", 
 			"带有 <span class=\"badge badge-warning badge-sm\">无效</span> 标记的电子邮件地址是那些不属于或未被密钥所有者验证的电子邮件地址");
 		m.put("Email templates", "邮箱模板");
@@ -1861,7 +1866,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Inbox Poll Setting", "Inbox 轮询设置");
 		m.put("Include Child Projects", "包含子项目");
 		m.put("Include Disabled", "包含禁用");
+		m.put("Include Downstream When Rebuild", "重建时包含下游");
 		m.put("Include Forks", "包含分支");
+		m.put("Include Upstream When Rebuild", "重建时包含上游");
 		m.put("Include When Issue is Opened", "在工单打开时包含");
 		m.put("Incompatibilities", "不兼容性");
 		m.put("Inconsistent issuer in provider metadata and ID token", "提供者元数据中的发行者与 ID 令牌中的发行者不一致");
@@ -1975,6 +1982,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Issue list", "工单列表");
 		m.put("Issue management not enabled in this project", "工单管理未启用此项目");
 		m.put("Issue management permission required to move issues", "移动工单需要管理员权限");
+		m.put("Issue moved", "工单已移动");
 		m.put("Issue not exist or access denied", "工单不存在或访问被拒绝");
 		m.put("Issue number", "工单编号");
 		m.put("Issue query watch only affects new issues. To manage watch status of existing issues in batch, filter issues by watch status in issues page, and then take appropriate action", 
@@ -2070,6 +2078,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Jobs required to be successful: ", "需要成功的任务：");
 		m.put("Jobs with same sequential group and executor will be executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for jobs executing by same executor and deploying to prod environment of current project to avoid conflicting deployments", 
 			"具有相同顺序组和执行器的任务将按顺序执行。例如，您可以为此属性指定 <tt>@project_path@:prod</tt> 用于执行相同执行器并在当前项目的 prod 环境中部署任务以避免冲突的部署");
+		m.put("Keep my email addresses private", "保持我的邮箱地址私密");
 		m.put("Key", "键");
 		m.put("Key Fingerprint", "密钥指纹");
 		m.put("Key ID", "密钥 ID");
@@ -2273,6 +2282,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"最有可能的是<a wicket:id=\"buildSpec\">构建规范</a>中存在导入错误");
 		m.put("Mount Docker Sock", "挂载 Docker Sock");
+		m.put("Move", "移动");
 		m.put("Move All Queried Issues To...", "移动所有查询的工单到...");
 		m.put("Move All Queried Projects To...", "移动所有查询的项目到...");
 		m.put("Move Selected Issues To...", "移动选定的工单到...");
@@ -2460,7 +2470,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No suggestions", "没有建议");
 		m.put("No tags found", "未找到标签");
 		m.put("No timesheets defined", "未定义时间表");
-		m.put("No user found with login name or email: ", "未找到登录名或邮箱为的用户：");
 		m.put("No users to convert to service accounts", "没有用户可转换为服务账户");
 		m.put("No users to delete", "没有要删除的用户");
 		m.put("No users to disable", "没有要禁用的用户");
@@ -2476,6 +2485,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Node Selector", "节点选择器");
 		m.put("Node Selector Entry", "节点选择器条目");
 		m.put("None", "无");
+		m.put("Noreply Email Domain", "Noreply 邮箱域");
 		m.put("Not Active Since", "不活跃起");
 		m.put("Not Used Since", "未使用时间");
 		m.put("Not a verified email of signing GPG key", "不是签署 GPG 密钥的已验证电子邮件");
@@ -2681,8 +2691,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"可选择指定允许按此按钮的授权角色。如果未指定，则允许所有用户");
 		m.put("Optionally specify base query of the list", "可选择指定列表的基本查询");
-		m.put("Optionally specify branches/users/groups allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
-			"可选择指定允许访问此密钥的分支/用户/组。如果留空，任何任务都可以访问此密钥，包括通过外部合并请求触发的任务");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>任务工作区</a> 的构建上下文路径。留空则使用任务工作区本身。除非使用选项 <code>--dockerfile</code> 指定不同位置，否则文件 <code>Dockerfile</code> 应存在于构建上下文目录中");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
@@ -3010,7 +3018,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"请<a wicket:id=\"download\" class=\"font-weight-bolder\">下载</a>下方的恢复代码并妥善保管。这些代码可用于在您无法访问认证应用程序时提供一次性账户访问权限。它们<b>不会</b>再次显示");
 		m.put("Please Confirm", "请确认");
 		m.put("Please Note", "请注意");
-		m.put("Please check your email for password reset instructions", "请检查您的邮箱以获取密码重置说明");
 		m.put("Please choose revision to create branch from", "请选择要从中创建分支的版本");
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "请先配置 <a wicket:id=\"mailSetting\">邮件设置</a>");
 		m.put("Please confirm", "请确认");
@@ -3101,7 +3108,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Primary", "主要");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "未指定主 <a wicket:id=\"noPrimaryAddressLink\">电子邮件地址</a>");
 		m.put("Primary Email", "主电子邮件");
-		m.put("Primary email address not specified", "未指定主要邮箱地址");
+		m.put("Primary Email Address", "主邮箱地址");
+		m.put("Primary email address added", "主邮箱地址已添加");
+		m.put("Primary email address changed", "主邮箱地址已更改");
 		m.put("Primary email address of your account is not specified yet", "您的账户尚未指定主要电子邮件地址");
 		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
 			"主电子邮件地址将用于接收通知、显示 Gravatar（如果启用）等。");
@@ -3392,6 +3401,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Required Reviewers", "要求审查者");
 		m.put("Required Services", "所需服务");
 		m.put("Resend invitation", "重新发送邀请");
+		m.put("Resend verification email", "重新发送验证邮件");
 		m.put("Reset", "重置");
 		m.put("Resolution", "解决");
 		m.put("Resolve merge conflicts", "解决合并冲突");
@@ -3593,6 +3603,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Service desk setting", "服务台设置");
 		m.put("Service desk settings have been saved", "服务台设置已保存");
 		m.put("Service or AI account not allowed to login", "服务或 AI 账户不允许登录");
+		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
+			"服务或 AI 用户无法指定邮箱地址。但是自动生成的地址");
 		m.put("Services", "服务");
 		m.put("Session Timeout", "会话超时");
 		m.put("Set", "设置");
@@ -3910,8 +3922,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定看板的列。每列对应于上面指定的工单字段的一个值");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"指定检查服务就绪状态的命令。此命令在 Windows 镜像上由 cmd.exe 解释，在 Linux 镜像上由 shell 解释。它将重复执行，直到返回零代码表示服务就绪");
-		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The prompt is stored in environment variable <code>$TASK_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
-			"指定命令以无头模式启动编码代理以运行分配的任务，形式为\n提示。提示存储在环境变量 <code>$TASK_PROMPT</code> 中。<br>\n<b>注意：</b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI 和配套技能</a> 也必须安装以使任务\n自动化工作。OneDev 工作区镜像开箱即用地包含这些组件");
 		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
 			"指定在打开此快捷方式时要运行的命令，例如<i>opencode</i>、<i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
@@ -3941,6 +3951,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify docker image of the service", "指定服务的 Docker 镜像");
 		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
 			"指定用于构建 Docker 镜像的 dockerx 构建器。如果不存在，OneDev 将自动创建构建器。查看<a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>此教程</a>了解如何自定义构建器，例如允许发布到不安全的注册表");
+		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
+			"指定用于 Git 操作的各种 noreply 邮箱地址的域，如果用户希望\n保持自己的邮箱地址私密");
 		m.put("Specify email addresses to send invitations, with one per line", "指定要发送邀请的电子邮件地址，每行一个");
 		m.put("Specify estimated time <b class='text-warning'>only for this issue</b>, not counting \"{0}\"", 
 			"指定预计时间 <b class='text-warning'>仅针对此工单</b>，不包括 \"{0}\"");
@@ -4311,6 +4323,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("The permission to access build pipeline", "访问构建流水线的权限");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
 			"手动运行任务的权限。这也隐含访问构建日志、构建流水线和所有已发布报告的权限");
+		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
+			"主邮箱地址用于接收通知并显示您的 gravatar（如果启用）。除非邮箱地址保持私密，否则它也用于基于 Web 的 Git 操作。");
 		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from OneDev. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
 			"确保发送到有效负载 URL 的 POST 请求来自 OneDev 的密钥。设置密钥后，您将在 Webhook POST 请求中收到 X-OneDev-Signature 头部");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
@@ -4350,6 +4364,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
 			"此日期使用<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601格式</a>");
 		m.put("This email address is being used", "此电子邮件地址正在使用");
+		m.put("This email address is not verified", "此邮箱地址未验证");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "此执行器在 OneDev 服务器上以 Docker 容器运行构建任务");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
 			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 在远程机器上以 Docker 容器运行构建任务");
@@ -4720,6 +4735,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Use specified title and description", "使用指定的标题和描述");
 		m.put("Use specified value or job secret", "使用指定的值或任务密钥");
 		m.put("Use specified values or job secrets", "使用指定的值或任务密钥");
+		m.put("Use the auto-generated email address", "使用自动生成的邮箱地址");
 		m.put("Use triggers to run the job automatically under certain conditions", "使用触发器在特定条件下自动运行任务");
 		m.put("Use value of specified parameter/secret", "使用指定参数/密钥的值");
 		m.put("Used Heap Memory", "已用堆内存");
@@ -4768,6 +4784,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Variable", "变量");
 		m.put("Verification Code", "验证码");
 		m.put("Verification email sent, please check it", "验证电子邮件已发送，请检查");
+		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
+			"已验证的备份邮箱地址可用于密码恢复和识别您的提交。");
 		m.put("Verify", "验证");
 		m.put("Via chat interface", "通过聊天界面");
 		m.put("Via issue/PR assignee and reviewer", "通过工单/合并请求的分配者和审阅者");
@@ -4837,6 +4855,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to allow anonymous users to access this server", "是否允许匿名用户访问此服务器");
 		m.put("Whether or not to allow creating root projects (project without parent)", "是否允许创建根项目（无父项目的项目）");
 		m.put("Whether or not to also include children of above projects", "是否同时包含上述项目的子项目");
+		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "在重建此任务时是否也重建直接下游任务");
+		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "在重建此任务时是否也重建直接上游任务");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same machine", 
 			"是否在运行容器或构建镜像时始终拉取镜像。应启用此选项，以避免同一机器上运行的恶意任务替换镜像");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
@@ -4849,6 +4869,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to create the workspace inside container", "是否在容器内创建工作区");
 		m.put("Whether or not to delete workspace if task command completes successfully. Uncheck this if\nyou want to check how the prompt is processed by coding agent after task command completes\nsuccessfully. Note that workspace will not be deleted automatically if task command fails.", 
 			"是否在任务命令成功完成后删除工作区。如果您想检查任务命令成功完成后编码代理如何处理提示，请取消选中此选项。\n请注意，如果任务命令失败，工作区将不会自动删除。");
+		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
+			"是否禁用内部密码登录表单并仅使用 SSO 登录。\n<b class=\"text-info\">提示：</b>如果您被锁定，可以通过运行 <code>bin/enable-internal-login</code> 从命令\n行重新启用内部登录");
 		m.put("Whether or not to enable code management for the project", "是否为项目启用代码管理");
 		m.put("Whether or not to enable issue management for the project", "是否为项目启用工单管理");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4962,7 +4984,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("YouTrack Project", "YouTrack 项目");
 		m.put("YouTrack Projects to Import", "要导入的 YouTrack 项目");
 		m.put("Your email address is now verified", "您的邮箱地址已验证");
-		m.put("Your primary email address is not verified", "您的主要邮箱地址未验证");
 		m.put("[Any state]", "[任何状态]");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[重置密码] 请重置您的 OneDev 密码");
 		m.put("a boolean indiciating whether or not topic comment can be created directly by replying the email", 
@@ -4999,6 +5020,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("build is successful for jobs \"{0}\" on branches \"{1}\"", "分支 \"{1}\" 上的任务 \"{0}\" 构建都成功");
 		m.put("builds", "构建");
 		m.put("cURL Example", "cURL示例");
+		m.put("can be used to associate Git commits with the user.", "可用于将 Git 提交与用户关联。");
 		m.put("choose a color for this state", "选择一个颜色");
 		m.put("cluster:lead", "主节点");
 		m.put("cmd-k to show command palette", "cmd-k 显示命令面板");
@@ -5038,25 +5060,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("find by id", "通过 ID 查找");
 		m.put("find by number", "通过编号查找");
 		m.put("for AI task automation", "用于 AI 任务自动化");
+		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
+			"用于 Git 操作。从 Web UI 执行的所有 Git 操作也将使用此地址。");
 		m.put("forked from <a wicket:id=\"forkedFrom\"></a>", "从 <a wicket:id=\"forkedFrom\"></a> 分叉");
-		m.put("found 1 agent", "找到 1 个代理");
-		m.put("found 1 build", "找到 1 个构建");
-		m.put("found 1 comment", "找到 1 条评论");
-		m.put("found 1 issue", "找到 1 个工单");
-		m.put("found 1 package", "找到 1 个包");
-		m.put("found 1 project", "找到 1 个项目");
-		m.put("found 1 pull request", "找到 1 个合并请求");
-		m.put("found 1 user", "找到 1 个用户");
-		m.put("found 1 workspace", "找到 1 个工作区");
-		m.put("found {0} agents", "找到 {0} 个代理");
-		m.put("found {0} builds", "找到 {0} 个构建");
-		m.put("found {0} comments", "找到 {0} 条评论");
-		m.put("found {0} issues", "找到 {0} 个工单");
-		m.put("found {0} packages", "找到 {0} 个包");
-		m.put("found {0} projects", "找到 {0} 个项目");
-		m.put("found {0} pull requests", "找到 {0} 个合并请求");
-		m.put("found {0} users", "找到 {0} 个用户");
-		m.put("found {0} workspaces", "找到 {0} 个工作区");
 		m.put("has any value of", "具有下列任何值");
 		m.put("head", "头部");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
@@ -5224,45 +5230,24 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Backup Email Addresses", "备份邮箱地址");
-		m.put("Cannot move issue as it has workspaces", "无法移动工单，因为它有工作区");
-		m.put("Copy Markdown", "复制 Markdown");
-		m.put("Disable Internal Login", "禁用内部登录");
-		m.put("Do you really want to move this issue to project \"{0}\"", "您确定要将此工单移动到项目 \"{0}\" 吗");
-		m.put("Email Address Privacy", "邮箱地址隐私");
-		m.put("Email address with noreply domain is not allowed", "不允许使用 noreply 域的邮箱地址");
-		m.put("Email addresses privacy updated", "邮箱地址隐私已更新");
-		m.put("Include Downstream When Rebuild", "重建时包含下游");
-		m.put("Include Upstream When Rebuild", "重建时包含上游");
-		m.put("Issue moved", "工单已移动");
-		m.put("Keep my email addresses private", "保持我的邮箱地址私密");
-		m.put("Move", "移动");
-		m.put("Noreply Email Domain", "Noreply 邮箱域");
-		m.put("Primary Email Address", "主邮箱地址");
-		m.put("Primary email address added", "主邮箱地址已添加");
-		m.put("Primary email address changed", "主邮箱地址已更改");
-		m.put("Resend verification email", "重新发送验证邮件");
-		m.put("Service or AI user can not specify email addresses. However the auto-generated address", 
-			"服务或 AI 用户无法指定邮箱地址。但是自动生成的地址");
-		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
-			"指定用于 Git 操作的各种 noreply 邮箱地址的域，如果用户希望\n保持自己的邮箱地址私密");
-		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
-			"主邮箱地址用于接收通知并显示您的 gravatar（如果启用）。除非邮箱地址保持私密，否则它也用于基于 Web 的 Git 操作。");
-		m.put("This email address is not verified", "此邮箱地址未验证");
-		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, arrow keys, or page up/down, and press q to exit.", 
-			"要在此终端中滚动，请按 ctrl+b 然后 [。使用鼠标滚轮、箭头键或 page up/down，然后按 q 退出。");
-		m.put("To scroll in this terminal, tap tmux [, swipe the terminal, and tap tmux [ again to exit.", 
-			"要在此终端中滚动，请点击 tmux [，滑动终端，然后再次点击 tmux [ 退出。");
-		m.put("Use the auto-generated email address", "使用自动生成的邮箱地址");
-		m.put("Verified backup email addresses can be used for password recovery and to identify your commits.", 
-			"已验证的备份邮箱地址可用于密码恢复和识别您的提交。");
-		m.put("Whether or not to also rebuild direct downstream jobs when rebuilding this job", "在重建此任务时是否也重建直接下游任务");
-		m.put("Whether or not to also rebuild direct upstream jobs when rebuilding this job", "在重建此任务时是否也重建直接上游任务");
-		m.put("Whether or not to disable the internal password login form and use SSO login only.\n<b class=\"text-info\">TIPS:</b> If you are locked out, internal login can be re-enabled from command\nline by running <code>bin/enable-internal-login</code>", 
-			"是否禁用内部密码登录表单并仅使用 SSO 登录。\n<b class=\"text-info\">提示：</b>如果您被锁定，可以通过运行 <code>bin/enable-internal-login</code> 从命令\n行重新启用内部登录");
-		m.put("can be used to associate Git commits with the user.", "可用于将 Git 提交与用户关联。");
-		m.put("for Git operations. All Git operations performed from the web UI will also use this address.", 
-			"用于 Git 操作。从 Web UI 执行的所有 Git 操作也将使用此地址。");
+		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
+			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> 被接受，并支持 <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml 和 katex</a>。");
+		m.put("Invalid build number: {0}", "无效的构建编号: {0}");
+		m.put("Invalid pack ID: {0}", "无效的包 ID: {0}");
+		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
+			"可选地指定允许访问此密钥的分支。如果留空，任何任务都可以访问此密钥，包括通过外部合并请求触发的任务。");
+		m.put("Port Accessors", "端口访问器");
+		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
+			"指定命令以无头模式启动编码代理以运行分配的任务，形式为\n提示。组合提示存储在环境变量 <code>$TASK_PROMPT</code> 中。\n系统提示和用户提示也分别可用，分别为\n<code>$TASK_SYSTEM_PROMPT</code> 和 <code>$TASK_USER_PROMPT</code>。<br>\n<b>注意: </b> 必须安装 <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI 和配套技能</a> 才能使任务\n自动化工作。OneDev 工作区镜像默认包含这些组件。");
+		m.put("Specify max number of mail sending sessions that can run concurrently", "指定可以同时运行的邮件发送会话的最大数量");
+		m.put("Teardown Commands", "拆解命令");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
+			"要在此终端中滚动，请按 ctrl+b 然后 [。使用鼠标滚轮、向上/向下翻页键或箭头键，然后按 q 退出。");
+		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
+			"要在此终端中滚动，请点击 tmux [，使用向上/向下翻页键或箭头键，然后再次点击 tmux [ 退出。");
+		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
+			"如果该登录名或电子邮件与有效账户匹配，我们将发送密码重置说明。");
+		m.put("{0} found", "{0} 已找到");
 	}
 		
 	@Override
