@@ -91,57 +91,49 @@ public class PasswordResetPage extends SimplePage {
 				@Override
 				protected TaskResult runTask(TaskLogger logger) {
 					return OneDev.getInstance(SessionService.class).call(() -> {
-						User user = getUserService().findByName(loginNameOrEmail);
-						if (user == null) 
-							user = getUserService().findByVerifiedEmailAddress(loginNameOrEmail);
-						if (user == null) {
-							throw new ExplicitException(_T("No user found with login name or email: ") + loginNameOrEmail);
-						} else if (user.isDisabled()) {
-							throw new ExplicitException(_T("Cannot reset password for disabled account"));
-						} else if (user.getType() != ORDINARY) {
-							throw new ExplicitException(_T("Cannot reset password for service or AI account"));
-						} else if (user.getPassword() == null) {
-							throw new ExplicitException(_T("Cannot reset password for user authenticating via external system"));
-						} else {
-							SettingService settingService = OneDev.getInstance(SettingService.class);
-							if (settingService.getMailConnector() != null) {
-								String passwordResetCode = CryptoUtils.generateSecret();
-								user.setPasswordResetCode(passwordResetCode);
-								getUserService().update(user, null);
-
-								MailService mailService = OneDev.getInstance(MailService.class);
-
-								Map<String, Object> bindings = new HashMap<>();
-								bindings.put("passwordResetUrl", settingService.getSystemSetting().getServerUrl() + "/~reset-password/" + passwordResetCode);
-								bindings.put("user", user);
-
-								var template = settingService.getEmailTemplates().getPasswordReset();
-								var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
-								var textBody = EmailTemplates.evalTemplate(false, template, bindings);
-
-								String emailAddressValue;
-								if (loginNameOrEmail.contains("@")) {
-									emailAddressValue = loginNameOrEmail;
-								} else {
-									EmailAddress emailAddress = user.getPrimaryEmailAddress();
-									if (emailAddress == null)
-										throw new ExplicitException(_T("Primary email address not specified"));
-									else if (!emailAddress.isVerified())
-										throw new ExplicitException(_T("Your primary email address is not verified"));
-									else
-										emailAddressValue = emailAddress.getValue();
-								}
-
-								mailService.sendMail(Arrays.asList(emailAddressValue),
-										Lists.newArrayList(), Lists.newArrayList(),
-										"[Password Reset] You are Requesting to Reset Your OneDev Password",
-										htmlBody, textBody, null, null, null);
-
-								return new TaskResult(true, new PlainMessage(_T("Please check your email for password reset instructions")));
-							} else {
-								return new TaskResult(false, new PlainMessage(_T("Unable to send password reset email as mail service is not configured")));
-							}
+						SettingService settingService = OneDev.getInstance(SettingService.class);
+						if (settingService.getMailConnector() == null) {
+							return new TaskResult(false, new PlainMessage(_T("Unable to send password reset email as mail service is not configured")));
 						}
+
+						var sentMessage = new TaskResult(true, new PlainMessage(_T("We'll send password reset instructions if that login name or email matches a valid account")));
+
+						User user = getUserService().findByName(loginNameOrEmail);
+						if (user == null)
+							user = getUserService().findByVerifiedEmailAddress(loginNameOrEmail);
+						if (user == null || user.isDisabled() || user.getType() != ORDINARY || user.getPassword() == null)
+							return sentMessage;
+
+						String emailAddressValue;
+						if (loginNameOrEmail.contains("@")) {
+							emailAddressValue = loginNameOrEmail;
+						} else {
+							EmailAddress emailAddress = user.getPrimaryEmailAddress();
+							if (emailAddress == null || !emailAddress.isVerified())
+								return sentMessage;
+							emailAddressValue = emailAddress.getValue();
+						}
+
+						String passwordResetCode = CryptoUtils.generateSecret();
+						user.setPasswordResetCode(passwordResetCode);
+						getUserService().update(user, null);
+
+						MailService mailService = OneDev.getInstance(MailService.class);
+
+						Map<String, Object> bindings = new HashMap<>();
+						bindings.put("passwordResetUrl", settingService.getSystemSetting().getServerUrl() + "/~reset-password/" + passwordResetCode);
+						bindings.put("user", user);
+
+						var template = settingService.getEmailTemplates().getPasswordReset();
+						var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+						var textBody = EmailTemplates.evalTemplate(false, template, bindings);
+
+						mailService.sendMail(Arrays.asList(emailAddressValue),
+								Lists.newArrayList(), Lists.newArrayList(),
+								"[Password Reset] You are Requesting to Reset Your OneDev Password",
+								htmlBody, textBody, null, null, null);
+
+						return sentMessage;
 					});
 				}
 

@@ -252,7 +252,7 @@ public class LdapAuthenticator extends Authenticator {
 			if (results == null)
 				throw new ExplicitException("No user search base specified");
 			if (!results.hasMore())
-				throw new UnknownAccountException("Invalid credentials");
+				throw new UnknownAccountException("Unknown account");
             
             SearchResult searchResult = results.next();
             String userDN = searchResult.getNameInNamespace();
@@ -279,7 +279,7 @@ public class LdapAuthenticator extends Authenticator {
                 userCtx = new InitialDirContext(ldapEnv);
             } catch (AuthenticationException e) {
                 logger.error("Unable to bind as '" + userDN + "'", e);
-            	throw new IncorrectCredentialsException("Invalid credentials");
+            	throw new IncorrectCredentialsException("Incorrect credentials");
             } finally {
                 if (userCtx != null) {
                     try {

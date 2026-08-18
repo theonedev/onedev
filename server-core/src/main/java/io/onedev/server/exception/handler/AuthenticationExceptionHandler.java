@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.shiro.authc.AuthenticationException;
 
 import io.onedev.server.exception.HttpResponse;
+import io.onedev.server.security.SecurityUtils;
 
 public class AuthenticationExceptionHandler extends AbstractExceptionHandler<AuthenticationException> {
 	
@@ -13,7 +14,7 @@ public class AuthenticationExceptionHandler extends AbstractExceptionHandler<Aut
 	@Override
     public HttpResponse getResponse(AuthenticationException exception) {
 		return new HttpResponse(HttpServletResponse.SC_UNAUTHORIZED, 
-				"User unknown or credential incorrect");
+				SecurityUtils.AUTHENTICATION_FAILED_MESSAGE);
     }
     
 }

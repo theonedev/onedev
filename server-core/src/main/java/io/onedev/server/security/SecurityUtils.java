@@ -91,6 +91,8 @@ import io.onedev.server.util.facade.UserFacade;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
+	public static final String AUTHENTICATION_FAILED_MESSAGE = "Invalid account or incorrect credentials";
+
 	public static final String PRINCIPAL_ANONYMOUS = "anonymous";
 	
 	public static final PrincipalCollection PRINCIPALS_ANONYMOUS = 

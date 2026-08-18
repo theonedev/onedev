@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -32,8 +33,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
@@ -130,8 +131,8 @@ public class LoginPage extends SimplePage {
 					} else {
 						afterLogin(user);
 					}
-				} catch (IncorrectCredentialsException|UnknownAccountException e) {
-					error(_T("Invalid credentials"));
+				} catch (IncorrectCredentialsException|UnknownAccountException|DisabledAccountException e) {
+					error(_T(SecurityUtils.AUTHENTICATION_FAILED_MESSAGE));
 				} catch (AuthenticationException ae) {
 					error(ae.getMessage());
 				}
