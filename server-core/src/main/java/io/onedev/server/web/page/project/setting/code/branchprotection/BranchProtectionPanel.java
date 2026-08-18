@@ -54,6 +54,15 @@ abstract class BranchProtectionPanel extends Panel {
 			}
 			
 		});
+
+		add(new AjaxLink<Void>("copy") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCopy(target);
+			}
+
+		});
 		
 		add(new AjaxLink<Void>("delete") {
 
@@ -97,6 +106,8 @@ abstract class BranchProtectionPanel extends Panel {
 	}
 	
 	protected abstract void onDelete(AjaxRequestTarget target);
+
+	protected abstract void onCopy(AjaxRequestTarget target);
 
 	protected abstract void onSave(AjaxRequestTarget target, BranchProtection protection);
 	

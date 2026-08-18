@@ -28,12 +28,21 @@ abstract class JobExecutorEditPanel extends Panel {
 	private final List<JobExecutor> executors;
 	
 	private final int executorIndex;
+
+	@Nullable
+	private final JobExecutor executor;
 	
 	public JobExecutorEditPanel(String id, List<JobExecutor> executors, int executorIndex) {
+		this(id, executors, executorIndex, null);
+	}
+
+	public JobExecutorEditPanel(String id, List<JobExecutor> executors, int executorIndex,
+			@Nullable JobExecutor executor) {
 		super(id);
 		
 		this.executors = executors;
 		this.executorIndex = executorIndex;
+		this.executor = executor;
 	}
 	
 	@Nullable
@@ -50,7 +59,9 @@ abstract class JobExecutorEditPanel extends Panel {
 		super.onInitialize();
 		
 		JobExecutorBean bean = new JobExecutorBean();
-		if (executorIndex != -1)
+		if (executor != null)
+			bean.setExecutor(SerializationUtils.clone(executor));
+		else if (executorIndex != -1)
 			bean.setExecutor(SerializationUtils.clone(executors.get(executorIndex)));
 
 		BeanEditor editor = BeanContext.edit("editor", bean);

@@ -4,6 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.List;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -69,6 +70,11 @@ public class TagProtectionsPage extends ProjectSettingPage {
 					}
 
 					@Override
+					protected void onCopy(AjaxRequestTarget target) {
+						showNewProtectionEditor(target, SerializationUtils.clone(item.getModelObject()));
+					}
+
+					@Override
 					protected void onCancel(AjaxRequestTarget target) {
 						target.add(container);
 					}
@@ -103,35 +109,41 @@ public class TagProtectionsPage extends ProjectSettingPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("newProtection", "editNewFrag", getPage());
-				fragment.setOutputMarkupId(true);
-				fragment.add(new TagProtectionEditPanel("editor", new TagProtection()) {
-
-					@Override
-					protected void onSave(AjaxRequestTarget target, TagProtection protection) {
-						getProject().getTagProtections().add(protection);
-						var newAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
-						getProjectService().update(getProject());
-						auditService.audit(getProject(), "added tag protection rule", null, newAuditContent);
-						container.replace(newAddNewFrag());
-						target.add(container);
-					}
-
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						Component newAddNewFrag = newAddNewFrag();
-						container.replace(newAddNewFrag);
-						target.add(newAddNewFrag);
-					}
-					
-				});
-				container.replace(fragment);
-				target.add(fragment);
+				showNewProtectionEditor(target, new TagProtection());
 			}
 			
 		});
 		fragment.setOutputMarkupId(true);
 		return fragment;
+	}
+
+	private void showNewProtectionEditor(AjaxRequestTarget target, TagProtection protection) {
+		Fragment fragment = new Fragment("newProtection", "editNewFrag", getPage());
+		fragment.setOutputMarkupId(true);
+		fragment.add(new TagProtectionEditPanel("editor", protection) {
+
+			@Override
+			protected void onSave(AjaxRequestTarget target, TagProtection protection) {
+				getProject().getTagProtections().add(protection);
+				var newAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
+				getProjectService().update(getProject());
+				auditService.audit(getProject(), "added tag protection rule", null, newAuditContent);
+				container.replace(newAddNewFrag());
+				target.add(container);
+			}
+
+			@Override
+			protected void onCancel(AjaxRequestTarget target) {
+				Component newAddNewFrag = newAddNewFrag();
+				container.replace(newAddNewFrag);
+				target.add(newAddNewFrag);
+			}
+			
+		});
+		container.replace(fragment);
+		target.add(fragment);
+		if (protection.getTags() != null)
+			target.appendJavaScript(String.format("$('#%s')[0].scrollIntoView();", fragment.getMarkupId()));
 	}
 
 	@Override

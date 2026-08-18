@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -79,6 +80,11 @@ public class JobExecutorsPage extends AdministrationPage {
 					}
 
 					@Override
+					protected void onCopy(AjaxRequestTarget target) {
+						showNewExecutorEditor(target, executors.get(item.getIndex()));
+					}
+
+					@Override
 					protected void onCancel(AjaxRequestTarget target) {
 						target.add(container);
 					}
@@ -118,35 +124,41 @@ public class JobExecutorsPage extends AdministrationPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("newExecutor", "editNewFrag", getPage());
-				fragment.setOutputMarkupId(true);
-				fragment.add(new JobExecutorEditPanel("editor", executors, -1) {
-
-					@Override
-					protected void onSave(AjaxRequestTarget target) {
-						getSettingService().saveJobExecutors(executors);
-						container.replace(newAddNewFrag());
-						var executor = executors.get(executors.size() - 1);
-						var newAuditContent = VersionedXmlDoc.fromBean(executor).toXML();
-						auditService.audit(null, "added job executor \"" + executor.getName() + "\"", null, newAuditContent);
-						target.add(container);
-					}
-
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						Component newAddNewFrag = newAddNewFrag();
-						container.replace(newAddNewFrag);
-						target.add(newAddNewFrag);
-					}
-					
-				});
-				container.replace(fragment);
-				target.add(fragment);
+				showNewExecutorEditor(target, null);
 			}
 			
 		});
 		fragment.setOutputMarkupId(true);
 		return fragment;
+	}
+
+	private void showNewExecutorEditor(AjaxRequestTarget target, @Nullable JobExecutor executor) {
+		Fragment fragment = new Fragment("newExecutor", "editNewFrag", getPage());
+		fragment.setOutputMarkupId(true);
+		fragment.add(new JobExecutorEditPanel("editor", executors, -1, executor) {
+
+			@Override
+			protected void onSave(AjaxRequestTarget target) {
+				getSettingService().saveJobExecutors(executors);
+				container.replace(newAddNewFrag());
+				var executor = executors.get(executors.size() - 1);
+				var newAuditContent = VersionedXmlDoc.fromBean(executor).toXML();
+				auditService.audit(null, "added job executor \"" + executor.getName() + "\"", null, newAuditContent);
+				target.add(container);
+			}
+
+			@Override
+			protected void onCancel(AjaxRequestTarget target) {
+				Component newAddNewFrag = newAddNewFrag();
+				container.replace(newAddNewFrag);
+				target.add(newAddNewFrag);
+			}
+			
+		});
+		container.replace(fragment);
+		target.add(fragment);
+		if (executor != null)
+			target.appendJavaScript(String.format("$('#%s')[0].scrollIntoView();", fragment.getMarkupId()));
 	}
 
 	@Override

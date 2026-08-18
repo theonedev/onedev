@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -80,6 +81,11 @@ public class WorkspaceProvisionersPage extends AdministrationPage {
 					}
 
 					@Override
+					protected void onCopy(AjaxRequestTarget target) {
+						showNewProvisionerEditor(target, provisioners.get(item.getIndex()));
+					}
+
+					@Override
 					protected void onCancel(AjaxRequestTarget target) {
 						target.add(container);
 					}
@@ -121,35 +127,41 @@ public class WorkspaceProvisionersPage extends AdministrationPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("newProvisioner", "editNewFrag", getPage());
-				fragment.setOutputMarkupId(true);
-				fragment.add(new WorkspaceProvisionerEditPanel("editor", provisioners, -1) {
-
-					@Override
-					protected void onSave(AjaxRequestTarget target) {
-						getSettingService().saveWorkspaceProvisioners(provisioners);
-						container.replace(newAddNewFrag());
-						var provisioner = provisioners.get(provisioners.size() - 1);
-						var newAuditContent = VersionedXmlDoc.fromBean(provisioner).toXML();
-						auditService.audit(null, "added workspace provisioner \"" + provisioner.getName() + "\"", null, newAuditContent);
-						target.add(container);
-					}
-
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						Component newAddNewFrag = newAddNewFrag();
-						container.replace(newAddNewFrag);
-						target.add(newAddNewFrag);
-					}
-
-				});
-				container.replace(fragment);
-				target.add(fragment);
+				showNewProvisionerEditor(target, null);
 			}
 
 		});
 		fragment.setOutputMarkupId(true);
 		return fragment;
+	}
+
+	private void showNewProvisionerEditor(AjaxRequestTarget target, @Nullable WorkspaceProvisioner provisioner) {
+		Fragment fragment = new Fragment("newProvisioner", "editNewFrag", getPage());
+		fragment.setOutputMarkupId(true);
+		fragment.add(new WorkspaceProvisionerEditPanel("editor", provisioners, -1, provisioner) {
+
+			@Override
+			protected void onSave(AjaxRequestTarget target) {
+				getSettingService().saveWorkspaceProvisioners(provisioners);
+				container.replace(newAddNewFrag());
+				var provisioner = provisioners.get(provisioners.size() - 1);
+				var newAuditContent = VersionedXmlDoc.fromBean(provisioner).toXML();
+				auditService.audit(null, "added workspace provisioner \"" + provisioner.getName() + "\"", null, newAuditContent);
+				target.add(container);
+			}
+
+			@Override
+			protected void onCancel(AjaxRequestTarget target) {
+				Component newAddNewFrag = newAddNewFrag();
+				container.replace(newAddNewFrag);
+				target.add(newAddNewFrag);
+			}
+
+		});
+		container.replace(fragment);
+		target.add(fragment);
+		if (provisioner != null)
+			target.appendJavaScript(String.format("$('#%s')[0].scrollIntoView();", fragment.getMarkupId()));
 	}
 
 	@Override

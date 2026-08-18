@@ -4,6 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.List;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -81,6 +82,11 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 					}
 
 					@Override
+					protected void onCopy(AjaxRequestTarget target) {
+						newWorkspaceSpecEditPanel(target, SerializationUtils.clone(item.getModelObject()));
+					}
+
+					@Override
 					protected void onCancel(AjaxRequestTarget target) {
 						target.add(container);
 					}
@@ -139,6 +145,8 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 		});
 		container.replace(fragment);
 		target.add(fragment);
+		if (spec.getName() != null)
+			target.appendJavaScript(String.format("$('#%s')[0].scrollIntoView();", fragment.getMarkupId()));
 	}
 
 	private Component newAddNewLinksFrag() {

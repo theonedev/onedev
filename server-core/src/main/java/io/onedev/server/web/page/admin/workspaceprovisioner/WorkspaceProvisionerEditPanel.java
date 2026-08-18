@@ -34,10 +34,19 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 
 	private final int provisonerIndex;
 
+	@Nullable
+	private final WorkspaceProvisioner provisioner;
+
 	public WorkspaceProvisionerEditPanel(String id, List<WorkspaceProvisioner> provisioners, int provisonerIndex) {
+		this(id, provisioners, provisonerIndex, null);
+	}
+
+	public WorkspaceProvisionerEditPanel(String id, List<WorkspaceProvisioner> provisioners, int provisonerIndex,
+			@Nullable WorkspaceProvisioner provisioner) {
 		super(id);
 		this.provisioners = provisioners;
 		this.provisonerIndex = provisonerIndex;
+		this.provisioner = provisioner;
 	}
 
 	@Nullable
@@ -54,7 +63,9 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 		super.onInitialize();
 
 		WorkspaceProvisionerBean bean = new WorkspaceProvisionerBean();
-		if (provisonerIndex != -1)
+		if (provisioner != null)
+			bean.setProvisioner(SerializationUtils.clone(provisioner));
+		else if (provisonerIndex != -1)
 			bean.setProvisioner(SerializationUtils.clone(provisioners.get(provisonerIndex)));
 
 		BeanEditor editor = BeanContext.edit("editor", bean);

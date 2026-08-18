@@ -50,6 +50,15 @@ abstract class WorkspaceSpecPanel extends Panel {
 
 		});
 
+		add(new AjaxLink<Void>("copy") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCopy(target);
+			}
+
+		});
+
 		add(new AjaxLink<Void>("delete") {
 
 			@Override
@@ -71,6 +80,8 @@ abstract class WorkspaceSpecPanel extends Panel {
 	}
 
 	protected abstract void onDelete(AjaxRequestTarget target);
+
+	protected abstract void onCopy(AjaxRequestTarget target);
 
 	protected abstract String onSave(AjaxRequestTarget target, WorkspaceSpec spec);
 
