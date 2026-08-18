@@ -27,10 +27,10 @@ jobs:
   - type: CommandStep
     name: build
     runInContainer: true
-    image: '@property:buildEnvironment@'
+    image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
-      shell: sh
+      shell: bash
       commands: |
         set -e
         set -o pipefail
@@ -71,11 +71,11 @@ jobs:
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - valuesProvider:
+    - secret: false
+      valuesProvider:
         type: SpecifiedValues
         values:
         - - server-product/target/docker/app
-      secret: false
       name: Scan Path
     condition: SUCCESSFUL
     optional: false
@@ -114,10 +114,10 @@ jobs:
   - type: CommandStep
     name: publish helm chart
     runInContainer: true
-    image: '@property:buildEnvironment@'
+    image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
-      shell: sh
+      shell: bash
       commands: |
         set -e
 
@@ -138,10 +138,10 @@ jobs:
   - type: CommandStep
     name: publish GH release
     runInContainer: true
-    image: '@property:buildEnvironment@'
+    image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
-      shell: sh
+      shell: bash
       commands: |
         set -e
         set -o pipefail
@@ -246,7 +246,7 @@ jobs:
   - type: CommandStep
     name: build
     runInContainer: true
-    image: '@property:buildEnvironment@'
+    image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
       shell: sh
@@ -324,7 +324,7 @@ jobs:
   - type: CommandStep
     name: build
     runInContainer: true
-    image: '@property:buildEnvironment@'
+    image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
       shell: sh
@@ -338,11 +338,11 @@ jobs:
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - valuesProvider:
+    - secret: false
+      valuesProvider:
         type: SpecifiedValues
         values:
         - - server-product/target/sandbox
-      secret: false
       name: Scan Path
     condition: SUCCESSFUL
     optional: false
@@ -385,7 +385,7 @@ jobs:
   - type: CommandStep
     name: build
     runInContainer: true
-    image: '@property:buildEnvironment@'
+    image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
       shell: sh
@@ -399,11 +399,11 @@ jobs:
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - valuesProvider:
+    - secret: false
+      valuesProvider:
         type: SpecifiedValues
         values:
         - - server-product/target/sandbox
-      secret: false
       name: Scan Path
     condition: SUCCESSFUL
     optional: false
@@ -459,6 +459,8 @@ stepTemplates:
   - type: TrivyCacheStep
     name: cache
     key: trivy
+    uploadProjectPath: onedev
+    uploadAccessTokenSecret: onedev-token
     condition: SUCCESSFUL
     optional: false
   - type: RootFSScannerStep
