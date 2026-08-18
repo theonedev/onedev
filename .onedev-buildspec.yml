@@ -30,7 +30,7 @@ jobs:
     image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
-      shell: sh
+      shell: bash
       commands: |
         set -e
         set -o pipefail
@@ -117,7 +117,7 @@ jobs:
     image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
-      shell: sh
+      shell: bash
       commands: |
         set -e
 
@@ -141,7 +141,7 @@ jobs:
     image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
-      shell: sh
+      shell: bash
       commands: |
         set -e
         set -o pipefail
