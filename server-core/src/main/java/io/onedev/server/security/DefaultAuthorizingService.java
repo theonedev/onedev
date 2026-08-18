@@ -27,15 +27,15 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.permission.BasePermission;
-import io.onedev.server.security.permission.ConfidentialIssuePermission;
+import io.onedev.server.security.permission.ConfidentialIssuesPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
+import io.onedev.server.service.IssueAuthorizationService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.facade.UserFacade;
@@ -48,6 +48,9 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
     
     @Inject
     private SettingService settingService;
+
+	@Inject
+	private IssueAuthorizationService issueAuthorizationService;
     
     private final MetaDataKey<Map<String, AuthorizationInfo>> AUTHORIZATION_INFOS = new MetaDataKey<>() {};    
 	
@@ -79,11 +82,8 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 
 					for (UserAuthorization authorization : user.getProjectAuthorizations())
 						permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-					for (IssueAuthorization authorization : user.getIssueAuthorizations()) {
-						permissions.add(new ProjectPermission(
-								authorization.getIssue().getProject(),
-								new ConfidentialIssuePermission(authorization.getIssue())));
-					}
+
+					permissions.add(new ConfidentialIssuesPermission(issueAuthorizationService.getAuthorizedIssueIds(user)));
 				}
 			}
 			

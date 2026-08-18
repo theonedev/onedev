@@ -1,12 +1,17 @@
 package io.onedev.server.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Singleton;
+
+import org.hibernate.query.Query;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.IssueAuthorizationService;
 
@@ -48,5 +53,15 @@ public class DefaultIssueAuthorizationService extends BaseEntityService<IssueAut
 	public void createOrUpdate(IssueAuthorization authorization) {
 		dao.persist(authorization);
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@Sessional
+	@Override
+	public Set<Long> getAuthorizedIssueIds(User user) {
+		Query<Long> query = getSession().createQuery(
+				"select issue.id from IssueAuthorization where user=:user");
+		query.setParameter("user", user);
+		return new HashSet<>(query.list());
+	}
+
 }
