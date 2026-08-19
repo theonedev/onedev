@@ -51,6 +51,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">Benutzer</a>, um die E-Mail zu verifizieren");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub-flavored Markdown</a> wird akzeptiert, mit <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">Mermaid- und KaTeX-Unterstützung</a>.");
+		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
+			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub-flavored Markdown</a> wird akzeptiert, mit <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">Unterstützung für Mermaid, PlantUML und KaTeX</a>.");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
 			"<a href='/~administration/settings/lite-ai-model' target='_blank'>Richten Sie KI ein</a>, um mit natürlicher Sprache abzufragen");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
@@ -1872,12 +1874,14 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Invalid GPG signature", "Ungültige GPG-Signatur");
 		m.put("Invalid PCRE syntax", "Ungültige PCRE-Syntax");
 		m.put("Invalid access token: {0}", "Ungültiges Zugriffstoken: {0}");
+		m.put("Invalid build number: {0}", "Ungültige Build-Nummer: {0}");
 		m.put("Invalid credentials", "Ungültige Anmeldedaten");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "Ungültiger Datumsbereich, erwartet \"yyyy-MM-dd bis yyyy-MM-dd\"");
 		m.put("Invalid email address: {0}", "Ungültige E-Mail-Adresse: {0}");
 		m.put("Invalid invitation code", "Ungültiger Einladungscode");
 		m.put("Invalid issue date of ID token", "Ungültiges Ausstellungsdatum des ID-Tokens");
 		m.put("Invalid issue number: {0}", "Ungültige Ausgabenummer: {0}");
+		m.put("Invalid pack ID: {0}", "Ungültige Pack-ID: {0}");
 		m.put("Invalid pull request number: {0}", "Ungültige Pull-Request-Nummer: {0}");
 		m.put("Invalid request path", "Ungültiger Anforderungspfad");
 		m.put("Invalid selection, click for details", "Ungültige Auswahl, klicken Sie für Details");
@@ -2665,6 +2669,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"Optional geben Sie autorisierte Rollen an, um diese Schaltfläche zu drücken. Wenn nicht angegeben, sind alle Benutzer berechtigt");
 		m.put("Optionally specify base query of the list", "Optional geben Sie die Basisabfrage der Liste an");
+		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
+			"Optional können Sie Zweige angeben, die auf dieses Geheimnis zugreifen dürfen. Wenn leer gelassen, kann jeder Job auf dieses Geheimnis zugreifen, einschließlich solcher, die über externe Pull-Requests ausgelöst werden.");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"Optional geben Sie den Build-Kontextpfad relativ zu <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job-Arbeitsbereich</a> an. Lassen Sie das Feld leer, um den Job-Arbeitsbereich selbst zu verwenden. Die Datei <code>Dockerfile</code> wird im Build-Kontextverzeichnis erwartet, es sei denn, Sie geben einen anderen Speicherort mit der Option <code>--dockerfile</code> an");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
@@ -3050,6 +3056,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Poll Interval", "Abfrageintervall");
 		m.put("Populate Tag Mappings", "Tag-Zuordnungen ausfüllen");
 		m.put("Port", "Port");
+		m.put("Port Accessors", "Port-Zugriffssteuerungen");
 		m.put("Port Mappings", "Port-Zuordnungen");
 		m.put("Possible definitions", "Mögliche Definitionen");
 		m.put("Post", "Posten");
@@ -3896,6 +3903,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Gibt die Spalten des Boards an. Jede Spalte entspricht einem Wert des oben angegebenen Issue-Felds");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"Gibt den Befehl an, um die Bereitschaft des Dienstes zu überprüfen. Dieser Befehl wird unter Windows-Images von cmd.exe und unter Linux-Images von Shell interpretiert. Er wird wiederholt ausgeführt, bis ein Null-Code zurückgegeben wird, um anzuzeigen, dass der Dienst bereit ist");
+		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
+			"Geben Sie den Befehl an, um den Coding-Agent im Headless-Modus zu starten, um die zugewiesene Aufgabe in Form von\nPrompt auszuführen. Der kombinierte Prompt wird in der Umgebungsvariable <code>$TASK_PROMPT</code> gespeichert.\nDer System-Prompt und der Benutzer-Prompt sind auch separat verfügbar als\n<code>$TASK_SYSTEM_PROMPT</code> und <code>$TASK_USER_PROMPT</code>.<br>\n<b>HINWEIS: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI und zugehörige Skills</a> müssen ebenfalls installiert sein, damit die\nAufgabenautomatisierung funktioniert. OneDev-Workspace-Images enthalten diese Komponenten standardmäßig.");
 		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
 			"Geben Sie den Befehl an, der ausgeführt werden soll, wenn dieser Shortcut geöffnet wird, zum Beispiel <i>opencode</i>, <i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
@@ -3995,6 +4004,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Geben Sie die maximale Anzahl von Jobs/Diensten an, die dieser Executor gleichzeitig auf jedem übereinstimmenden Agent ausführen kann. Lassen Sie das Feld leer, um es als Agent-CPU-Kerne festzulegen.");
 		m.put("Specify max number of jobs/services this executor can run concurrently. Leave empty to set as CPU cores", 
 			"Geben Sie die maximale Anzahl von Jobs/Diensten an, die dieser Executor gleichzeitig ausführen kann. Lassen Sie das Feld leer, um es als CPU-Kerne festzulegen.");
+		m.put("Specify max number of mail sending sessions that can run concurrently", "Geben Sie die maximale Anzahl gleichzeitiger E-Mail-Sitzungen an, die ausgeführt werden können.");
 		m.put("Specify max number of workspaces this provisioner can handle concurrently.\nLeave empty to set as CPU cores", 
 			"Geben Sie die maximale Anzahl von Arbeitsbereichen an, die dieser Provisioner gleichzeitig verarbeiten kann.\nLeer lassen, um als CPU-Kerne festzulegen");
 		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
@@ -4271,6 +4281,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Task Automation", "Aufgabenautomatisierung");
 		m.put("Task List", "Aufgabenliste");
 		m.put("Task list", "Aufgabenliste");
+		m.put("Teardown Commands", "Abbau-Befehle");
 		m.put("Tell user to reset password", "Benutzer auffordern, das Passwort zurückzusetzen");
 		m.put("Template", "Vorlage");
 		m.put("Template Name", "Vorlagenname");
@@ -4479,6 +4490,10 @@ public class Translation_de extends TranslationResourceBundle {
 			"Um Duplikate zu vermeiden, wird die hier angezeigte verbrachte Zeit nicht mit der aus \"{0}\" aggregierten Zeit kombiniert");
 		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
 			"Um in diesem Terminal zu scrollen, drücken Sie Strg+b, dann [, und verwenden Sie die Pfeiltasten oder Seite hoch/runter. Drücken Sie q, um zu beenden.");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
+			"Um in diesem Terminal zu scrollen, drücken Sie Strg+b und dann [. Verwenden Sie das Mausrad, Bild auf/ab oder die Pfeiltasten, und drücken Sie q, um zu beenden.");
+		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
+			"Um in diesem Terminal zu scrollen, tippen Sie tmux [, verwenden Sie Bild auf/ab oder die Pfeiltasten, und tippen Sie erneut tmux [, um zu beenden.");
 		m.put("To use this package, add below to project pom.xml", "Um dieses Paket zu verwenden, fügen Sie Folgendes zur Projekt-pom.xml hinzu");
 		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
 			"Um dieses Paket zu verwenden, bearbeiten Sie <code>$HOME/.cargo/config.toml</code>, um ein Registry wie unten hinzuzufügen");
@@ -4787,6 +4802,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Watch/Unwatch Selected Pull Requests", "Ausgewählte Pull-Requests beobachten/nicht beobachten");
 		m.put("Watched. Click to unwatch", "Beobachtet. Klicken, um nicht mehr zu beobachten");
 		m.put("Watchers", "Beobachter");
+		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
+			"Wir senden Anweisungen zum Zurücksetzen des Passworts, wenn dieser Login-Name oder diese E-Mail-Adresse mit einem gültigen Konto übereinstimmt.");
 		m.put("Web Hook", "Web-Hook");
 		m.put("Web Hook Header", "Web-Hook-Header");
 		m.put("Web Hooks", "Web-Hooks");
@@ -5186,6 +5203,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{0} edited {1}", "{0} bearbeitet {1}");
 		m.put("{0} files", "{0} Dateien");
 		m.put("{0} forks", "{0} Forks");
+		m.put("{0} found", "{0} gefunden");
 		m.put("{0} hour", "{0} Stunde");
 		m.put("{0} hours", "{0} Stunden");
 		m.put("{0} inaccessible activities", "{0} nicht zugängliche Aktivitäten");
@@ -5204,24 +5222,11 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
-			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub-flavored Markdown</a> wird akzeptiert, mit <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">Unterstützung für Mermaid, PlantUML und KaTeX</a>.");
-		m.put("Invalid build number: {0}", "Ungültige Build-Nummer: {0}");
-		m.put("Invalid pack ID: {0}", "Ungültige Pack-ID: {0}");
-		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
-			"Optional können Sie Zweige angeben, die auf dieses Geheimnis zugreifen dürfen. Wenn leer gelassen, kann jeder Job auf dieses Geheimnis zugreifen, einschließlich solcher, die über externe Pull-Requests ausgelöst werden.");
-		m.put("Port Accessors", "Port-Zugriffssteuerungen");
-		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
-			"Geben Sie den Befehl an, um den Coding-Agent im Headless-Modus zu starten, um die zugewiesene Aufgabe in Form von\nPrompt auszuführen. Der kombinierte Prompt wird in der Umgebungsvariable <code>$TASK_PROMPT</code> gespeichert.\nDer System-Prompt und der Benutzer-Prompt sind auch separat verfügbar als\n<code>$TASK_SYSTEM_PROMPT</code> und <code>$TASK_USER_PROMPT</code>.<br>\n<b>HINWEIS: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI und zugehörige Skills</a> müssen ebenfalls installiert sein, damit die\nAufgabenautomatisierung funktioniert. OneDev-Workspace-Images enthalten diese Komponenten standardmäßig.");
-		m.put("Specify max number of mail sending sessions that can run concurrently", "Geben Sie die maximale Anzahl gleichzeitiger E-Mail-Sitzungen an, die ausgeführt werden können.");
-		m.put("Teardown Commands", "Abbau-Befehle");
-		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
-			"Um in diesem Terminal zu scrollen, drücken Sie Strg+b und dann [. Verwenden Sie das Mausrad, Bild auf/ab oder die Pfeiltasten, und drücken Sie q, um zu beenden.");
-		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
-			"Um in diesem Terminal zu scrollen, tippen Sie tmux [, verwenden Sie Bild auf/ab oder die Pfeiltasten, und tippen Sie erneut tmux [, um zu beenden.");
-		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
-			"Wir senden Anweisungen zum Zurücksetzen des Passworts, wenn dieser Login-Name oder diese E-Mail-Adresse mit einem gültigen Konto übereinstimmt.");
-		m.put("{0} found", "{0} gefunden");
+		m.put("Cannot unauthorize yourself", "Kann sich nicht selbst deautorisieren");
+		m.put("Copy this executor", "Diesen Executor kopieren");
+		m.put("Copy this provisioner", "Diesen Provisioner kopieren");
+		m.put("Copy this rule", "Diese Regel kopieren");
+		m.put("Copy this spec", "Diesen Spec kopieren");
 	}
 			
 	@Override

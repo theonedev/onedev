@@ -51,6 +51,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">사용자</a>의 이메일을 확인합니다");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 스타일 마크다운</a>이 허용되며, <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid 및 katex 지원</a>이 포함됩니다.");
+		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
+			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 스타일 마크다운</a>이 허용되며, <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml 및 katex 지원</a>이 포함됩니다.");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
 			"<a href='/~administration/settings/lite-ai-model' target='_blank'>AI 설정</a>을 통해 자연어로 질의합니다");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
@@ -1872,12 +1874,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Invalid GPG signature", "유효하지 않은 GPG 서명");
 		m.put("Invalid PCRE syntax", "잘못된 PCRE 구문");
 		m.put("Invalid access token: {0}", "잘못된 액세스 토큰: {0}");
+		m.put("Invalid build number: {0}", "잘못된 빌드 번호: {0}");
 		m.put("Invalid credentials", "잘못된 자격 증명");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "잘못된 날짜 범위, \"yyyy-MM-dd to yyyy-MM-dd\" 형식이어야 합니다");
 		m.put("Invalid email address: {0}", "잘못된 이메일 주소: {0}");
 		m.put("Invalid invitation code", "초대 코드가 유효하지 않습니다");
 		m.put("Invalid issue date of ID token", "ID 토큰의 발행 날짜가 잘못되었습니다");
 		m.put("Invalid issue number: {0}", "잘못된 발행 번호: {0}");
+		m.put("Invalid pack ID: {0}", "잘못된 패키지 ID: {0}");
 		m.put("Invalid pull request number: {0}", "잘못된 풀 리퀘스트 번호: {0}");
 		m.put("Invalid request path", "잘못된 요청 경로");
 		m.put("Invalid selection, click for details", "잘못된 선택, 세부 정보 확인 클릭");
@@ -2665,6 +2669,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"선택적으로 이 버튼을 누를 수 있는 권한이 있는 역할을 지정하세요. 지정하지 않으면 모든 사용자가 허용됩니다.");
 		m.put("Optionally specify base query of the list", "선택적으로 목록의 기본 쿼리를 지정하세요.");
+		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
+			"이 비밀에 접근할 수 있는 브랜치를 선택적으로 지정하세요. 비워두면 외부 풀 리퀘스트를 통해 트리거된 작업을 포함하여 모든 작업이 이 비밀에 접근할 수 있습니다.");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>에 상대적인 빌드 컨텍스트 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요. <code>Dockerfile</code> 파일은 빌드 컨텍스트 디렉터리에 존재해야 하며, 옵션 <code>--dockerfile</code>로 다른 위치를 지정하지 않는 한 그렇습니다.");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
@@ -3050,6 +3056,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Poll Interval", "폴링 간격");
 		m.put("Populate Tag Mappings", "태그 매핑 채우기");
 		m.put("Port", "포트");
+		m.put("Port Accessors", "포트 접근자");
 		m.put("Port Mappings", "포트 매핑");
 		m.put("Possible definitions", "가능한 정의");
 		m.put("Post", "게시");
@@ -3896,6 +3903,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"보드의 열을 지정합니다. 각 열은 위에 지정된 이슈 필드의 값에 해당합니다");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"서비스 준비 상태를 확인하기 위한 명령을 지정합니다. 이 명령은 Windows 이미지에서는 cmd.exe, Linux 이미지에서는 셸에 의해 해석됩니다. 서비스 준비를 나타내는 0 코드가 반환될 때까지 반복적으로 실행됩니다");
+		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
+			"할당된 작업을 실행하기 위해 헤드리스 모드에서 코딩 에이전트를 실행하는 명령을 \n프롬프트 형식으로 지정하세요. 결합된 프롬프트는 환경 변수 <code>$TASK_PROMPT</code>에 저장됩니다.\n시스템 프롬프트와 사용자 프롬프트는 각각 \n<code>$TASK_SYSTEM_PROMPT</code> 및 <code>$TASK_USER_PROMPT</code>로도 사용할 수 있습니다.<br>\n<b>참고: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI 및 동반 스킬</a>도 설치되어야 작업\n자동화가 작동합니다. OneDev 워크스페이스 이미지는 이러한 구성 요소를 기본적으로 포함합니다.");
 		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
 			"이 바로가기가 열릴 때 실행할 명령을 지정하세요. 예: <i>opencode</i>, <i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
@@ -3995,6 +4004,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 실행자가 각 일치하는 에이전트에서 동시에 실행할 수 있는 작업/서비스의 최대 수를 지정하세요. 에이전트 CPU 코어로 설정하려면 비워 두세요.");
 		m.put("Specify max number of jobs/services this executor can run concurrently. Leave empty to set as CPU cores", 
 			"이 실행자가 동시에 실행할 수 있는 작업/서비스의 최대 수를 지정하세요. CPU 코어로 설정하려면 비워 두세요.");
+		m.put("Specify max number of mail sending sessions that can run concurrently", "동시에 실행될 수 있는 최대 메일 전송 세션 수를 지정하세요.");
 		m.put("Specify max number of workspaces this provisioner can handle concurrently.\nLeave empty to set as CPU cores", 
 			"이 프로비저너가 동시에 처리할 수 있는 최대 워크스페이스 수를 지정하십시오.\n비워 두면 CPU 코어로 설정됩니다");
 		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
@@ -4271,6 +4281,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Task Automation", "작업 자동화");
 		m.put("Task List", "작업 목록");
 		m.put("Task list", "작업 목록");
+		m.put("Teardown Commands", "종료 명령");
 		m.put("Tell user to reset password", "사용자에게 비밀번호 재설정을 요청하세요");
 		m.put("Template", "템플릿");
 		m.put("Template Name", "템플릿 이름");
@@ -4479,6 +4490,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"중복을 피하기 위해 여기 표시된 소요 시간은 \"{0}\"에서 집계된 시간을 포함하지 않습니다");
 		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
 			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [, 화살표 키 또는 페이지 업/다운을 사용하세요. 종료하려면 q를 누르세요.");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
+			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [를 누르세요. 마우스 휠, 페이지 업/다운 또는 화살표 키를 사용하고, q를 눌러 종료하세요.");
+		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
+			"이 터미널에서 스크롤하려면 tmux [를 누르고, 페이지 업/다운 또는 화살표 키를 사용한 후 다시 tmux [를 눌러 종료하세요.");
 		m.put("To use this package, add below to project pom.xml", "이 패키지를 사용하려면 아래 내용을 프로젝트 pom.xml에 추가하세요");
 		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
 			"이 패키지를 사용하려면, 아래와 같이 레지스트리를 추가하기 위해 <code>$HOME/.cargo/config.toml</code>을 편집하세요");
@@ -4787,6 +4802,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Watch/Unwatch Selected Pull Requests", "선택된 풀 리퀘스트 관찰/관찰 취소");
 		m.put("Watched. Click to unwatch", "관찰 중입니다. 클릭하여 관찰 취소");
 		m.put("Watchers", "관찰자들");
+		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
+			"로그인 이름 또는 이메일이 유효한 계정과 일치하면 비밀번호 재설정 지침을 보내드립니다.");
 		m.put("Web Hook", "웹 훅");
 		m.put("Web Hook Header", "웹 훅 헤더");
 		m.put("Web Hooks", "웹 훅들");
@@ -5186,6 +5203,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{0} edited {1}", "{0}이(가) {1}을(를) 수정함");
 		m.put("{0} files", "{0} 파일");
 		m.put("{0} forks", "{0} 포크");
+		m.put("{0} found", "{0} 발견됨");
 		m.put("{0} hour", "{0} 시간");
 		m.put("{0} hours", "{0} 시간들");
 		m.put("{0} inaccessible activities", "{0} 접근 불가능한 활동");
@@ -5204,24 +5222,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
-			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 스타일 마크다운</a>이 허용되며, <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml 및 katex 지원</a>이 포함됩니다.");
-		m.put("Invalid build number: {0}", "잘못된 빌드 번호: {0}");
-		m.put("Invalid pack ID: {0}", "잘못된 패키지 ID: {0}");
-		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
-			"이 비밀에 접근할 수 있는 브랜치를 선택적으로 지정하세요. 비워두면 외부 풀 리퀘스트를 통해 트리거된 작업을 포함하여 모든 작업이 이 비밀에 접근할 수 있습니다.");
-		m.put("Port Accessors", "포트 접근자");
-		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
-			"할당된 작업을 실행하기 위해 헤드리스 모드에서 코딩 에이전트를 실행하는 명령을 \n프롬프트 형식으로 지정하세요. 결합된 프롬프트는 환경 변수 <code>$TASK_PROMPT</code>에 저장됩니다.\n시스템 프롬프트와 사용자 프롬프트는 각각 \n<code>$TASK_SYSTEM_PROMPT</code> 및 <code>$TASK_USER_PROMPT</code>로도 사용할 수 있습니다.<br>\n<b>참고: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI 및 동반 스킬</a>도 설치되어야 작업\n자동화가 작동합니다. OneDev 워크스페이스 이미지는 이러한 구성 요소를 기본적으로 포함합니다.");
-		m.put("Specify max number of mail sending sessions that can run concurrently", "동시에 실행될 수 있는 최대 메일 전송 세션 수를 지정하세요.");
-		m.put("Teardown Commands", "종료 명령");
-		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
-			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [를 누르세요. 마우스 휠, 페이지 업/다운 또는 화살표 키를 사용하고, q를 눌러 종료하세요.");
-		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
-			"이 터미널에서 스크롤하려면 tmux [를 누르고, 페이지 업/다운 또는 화살표 키를 사용한 후 다시 tmux [를 눌러 종료하세요.");
-		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
-			"로그인 이름 또는 이메일이 유효한 계정과 일치하면 비밀번호 재설정 지침을 보내드립니다.");
-		m.put("{0} found", "{0} 발견됨");
+		m.put("Cannot unauthorize yourself", "자신을 비승인할 수 없습니다");
+		m.put("Copy this executor", "이 실행기를 복사");
+		m.put("Copy this provisioner", "이 프로비저너를 복사");
+		m.put("Copy this rule", "이 규칙을 복사");
+		m.put("Copy this spec", "이 사양을 복사");
 	}
 		
 	@Override

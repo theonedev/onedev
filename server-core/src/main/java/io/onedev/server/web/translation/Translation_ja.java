@@ -51,6 +51,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">ユーザー</a>のメールを確認するため");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub フレーバードマークダウン</a>が使用可能で、<a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid と katex のサポート</a>があります。");
+		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
+			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub風マークダウン</a>が使用可能で、<a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml、katexのサポート</a>があります。");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
 			"<a href='/~administration/settings/lite-ai-model' target='_blank'>AIを設定</a>して自然言語でクエリ");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
@@ -1872,12 +1874,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Invalid GPG signature", "無効なGPG署名");
 		m.put("Invalid PCRE syntax", "無効なPCRE構文");
 		m.put("Invalid access token: {0}", "無効なアクセス トークン: {0}");
+		m.put("Invalid build number: {0}", "無効なビルド番号: {0}");
 		m.put("Invalid credentials", "無効な資格情報");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "無効な日付範囲、\"yyyy-MM-dd to yyyy-MM-dd\"を期待しています");
 		m.put("Invalid email address: {0}", "無効なメールアドレス: {0}");
 		m.put("Invalid invitation code", "無効な招待コード");
 		m.put("Invalid issue date of ID token", "IDトークンの発行日が無効です");
 		m.put("Invalid issue number: {0}", "無効な発行番号: {0}");
+		m.put("Invalid pack ID: {0}", "無効なパックID: {0}");
 		m.put("Invalid pull request number: {0}", "無効なプルリクエスト番号: {0}");
 		m.put("Invalid request path", "無効なリクエストパス");
 		m.put("Invalid selection, click for details", "無効な選択、詳細をクリックしてください");
@@ -2665,6 +2669,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"オプションで、このボタンを押すための認証済みロールを指定してください。指定されていない場合、すべてのユーザーが許可されます。");
 		m.put("Optionally specify base query of the list", "オプションで、リストの基本クエリを指定してください。");
+		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
+			"このシークレットにアクセスできるブランチをオプションで指定します。空白のままにすると、外部プルリクエストを介してトリガーされたジョブを含め、どのジョブでもこのシークレットにアクセスできます。");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するビルドコンテキストパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。<code>Dockerfile</code>ファイルはビルドコンテキストディレクトリに存在することが期待されますが、オプション<code>--dockerfile</code>で異なる場所を指定することもできます。");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
@@ -3050,6 +3056,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Poll Interval", "ポーリング間隔");
 		m.put("Populate Tag Mappings", "タグマッピングを入力");
 		m.put("Port", "ポート");
+		m.put("Port Accessors", "ポートアクセサー");
 		m.put("Port Mappings", "ポートマッピング");
 		m.put("Possible definitions", "可能な定義");
 		m.put("Post", "投稿");
@@ -3896,6 +3903,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ボードの列を指定します。各列は上記で指定された課題フィールドの値に対応します");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"サービスの準備状態を確認するコマンドを指定します。このコマンドは Windows イメージでは cmd.exe によって解釈され、Linux イメージではシェルによって解釈されます。ゼロコードが返されてサービス準備完了を示すまで繰り返し実行されます");
+		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
+			"割り当てられたタスクを実行するためにヘッドレスモードでコーディングエージェントを起動するコマンドを指定します。\n結合されたプロンプトは環境変数<code>$TASK_PROMPT</code>に格納されます。\nシステムプロンプトとユーザープロンプトもそれぞれ<code>$TASK_SYSTEM_PROMPT</code>および<code>$TASK_USER_PROMPT</code>として利用可能です。<br>\n<b>注意: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLIと補助スキル</a>もインストールする必要があります。\nタスク自動化を機能させるために、OneDevワークスペースイメージにはこれらのコンポーネントが標準で含まれています。");
 		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
 			"このショートカットが開かれた場合に実行するコマンドを指定してください。例えば<i>opencode</i>, <i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
@@ -3995,6 +4004,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このエグゼキューターが各一致したエージェントで同時に実行できるジョブ/サービスの最大数を指定してください。空欄の場合、エージェントのCPUコア数として設定されます。");
 		m.put("Specify max number of jobs/services this executor can run concurrently. Leave empty to set as CPU cores", 
 			"このエグゼキューターが同時に実行できるジョブ/サービスの最大数を指定してください。空欄の場合、CPUコア数として設定されます。");
+		m.put("Specify max number of mail sending sessions that can run concurrently", "同時に実行可能なメール送信セッションの最大数を指定します。");
 		m.put("Specify max number of workspaces this provisioner can handle concurrently.\nLeave empty to set as CPU cores", 
 			"このプロビジョナーが同時に処理できる最大ワークスペース数を指定します。\n空にしてCPUコア数として設定します");
 		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
@@ -4271,6 +4281,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Task Automation", "タスク自動化");
 		m.put("Task List", "タスクリスト");
 		m.put("Task list", "タスクリスト");
+		m.put("Teardown Commands", "終了コマンド");
 		m.put("Tell user to reset password", "ユーザーにパスワードリセットを指示する");
 		m.put("Template", "テンプレート");
 		m.put("Template Name", "テンプレート名");
@@ -4479,6 +4490,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"重複を避けるため、ここに表示される費やした時間には\"{0}\"から集計されたものは含まれていません");
 		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
 			"このターミナルでスクロールするには、ctrl+bを押してから[を押し、矢印キーまたはページアップ/ダウンを使用してください。終了するにはqを押してください。");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
+			"このターミナルでスクロールするには、ctrl+bを押してから[を押します。マウスホイール、ページアップ/ダウン、または矢印キーを使用し、終了するにはqを押します。");
+		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
+			"このターミナルでスクロールするには、tmux [をタップし、ページアップ/ダウンまたは矢印キーを使用し、終了するには再度tmux [をタップします。");
 		m.put("To use this package, add below to project pom.xml", "このパッケージを使用するには、以下をプロジェクトのpom.xmlに追加してください");
 		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
 			"このパッケージを使用するには、以下のようにレジストリを追加するために<code>$HOME/.cargo/config.toml</code>を編集します");
@@ -4787,6 +4802,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Watch/Unwatch Selected Pull Requests", "選択されたプルリクエストをウォッチ/アンウォッチ");
 		m.put("Watched. Click to unwatch", "ウォッチ中。クリックしてアンウォッチ");
 		m.put("Watchers", "ウォッチャー");
+		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
+			"そのログイン名またはメールアドレスが有効なアカウントと一致する場合、パスワードリセットの指示を送信します。");
 		m.put("Web Hook", "ウェブフック");
 		m.put("Web Hook Header", "Webフックヘッダー");
 		m.put("Web Hooks", "ウェブフック");
@@ -5186,6 +5203,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{0} edited {1}", "{0} が編集 {1}");
 		m.put("{0} files", "{0} ファイル");
 		m.put("{0} forks", "{0} フォーク");
+		m.put("{0} found", "{0}が見つかりました");
 		m.put("{0} hour", "{0} 時間");
 		m.put("{0} hours", "{0} 時間");
 		m.put("{0} inaccessible activities", "{0} アクセス不可の活動");
@@ -5204,24 +5222,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
-			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub風マークダウン</a>が使用可能で、<a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml、katexのサポート</a>があります。");
-		m.put("Invalid build number: {0}", "無効なビルド番号: {0}");
-		m.put("Invalid pack ID: {0}", "無効なパックID: {0}");
-		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
-			"このシークレットにアクセスできるブランチをオプションで指定します。空白のままにすると、外部プルリクエストを介してトリガーされたジョブを含め、どのジョブでもこのシークレットにアクセスできます。");
-		m.put("Port Accessors", "ポートアクセサー");
-		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
-			"割り当てられたタスクを実行するためにヘッドレスモードでコーディングエージェントを起動するコマンドを指定します。\n結合されたプロンプトは環境変数<code>$TASK_PROMPT</code>に格納されます。\nシステムプロンプトとユーザープロンプトもそれぞれ<code>$TASK_SYSTEM_PROMPT</code>および<code>$TASK_USER_PROMPT</code>として利用可能です。<br>\n<b>注意: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLIと補助スキル</a>もインストールする必要があります。\nタスク自動化を機能させるために、OneDevワークスペースイメージにはこれらのコンポーネントが標準で含まれています。");
-		m.put("Specify max number of mail sending sessions that can run concurrently", "同時に実行可能なメール送信セッションの最大数を指定します。");
-		m.put("Teardown Commands", "終了コマンド");
-		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
-			"このターミナルでスクロールするには、ctrl+bを押してから[を押します。マウスホイール、ページアップ/ダウン、または矢印キーを使用し、終了するにはqを押します。");
-		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
-			"このターミナルでスクロールするには、tmux [をタップし、ページアップ/ダウンまたは矢印キーを使用し、終了するには再度tmux [をタップします。");
-		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
-			"そのログイン名またはメールアドレスが有効なアカウントと一致する場合、パスワードリセットの指示を送信します。");
-		m.put("{0} found", "{0}が見つかりました");
+		m.put("Cannot unauthorize yourself", "自分自身の認可を解除することはできません");
+		m.put("Copy this executor", "このエグゼキューターをコピー");
+		m.put("Copy this provisioner", "このプロビジョナーをコピー");
+		m.put("Copy this rule", "このルールをコピー");
+		m.put("Copy this spec", "このスペックをコピー");
 	}
 		
 	@Override

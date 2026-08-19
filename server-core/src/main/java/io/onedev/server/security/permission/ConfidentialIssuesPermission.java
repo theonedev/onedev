@@ -17,7 +17,15 @@ public class ConfidentialIssuesPermission implements BasePermission {
 	
 	@Override
 	public boolean implies(Permission p) {
-		if (p instanceof ConfidentialIssuePermission) {
+		if (p instanceof ProjectPermission) {
+			ProjectPermission projectPermission = (ProjectPermission) p;
+			if (projectPermission.getPrivilege() instanceof ConfidentialIssuePermission) {
+				var issue = ((ConfidentialIssuePermission) projectPermission.getPrivilege()).getIssue();
+				return issueIds.contains(issue.getId());
+			} else {
+				return false;
+			}
+		} else if (p instanceof ConfidentialIssuePermission) {
 			ConfidentialIssuePermission issuePermission = (ConfidentialIssuePermission) p;
 			return issueIds.contains(issuePermission.getIssue().getId());
 		} else if (p instanceof ConfidentialIssuesPermission) {

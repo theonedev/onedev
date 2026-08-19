@@ -271,7 +271,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		for (IssueSchedule schedule: issue.getSchedules())
 			dao.persist(schedule);
 		
-		if (!SecurityUtils.isAdministrator(issue.getSubmitter().asSubject())) {
+		if (!SecurityUtils.canAccessConfidentialIssues(issue.getSubmitter().asSubject(), issue.getProject()) && issue.isConfidential()) {
 			IssueAuthorization authorization = new IssueAuthorization();
 			authorization.setIssue(issue);
 			authorization.setUser(issue.getSubmitter());

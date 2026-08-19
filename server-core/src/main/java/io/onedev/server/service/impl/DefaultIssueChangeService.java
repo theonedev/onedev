@@ -59,6 +59,7 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueDescriptionRevision;
@@ -106,6 +107,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.LastActivityDateCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueAuthorizationService;
 import io.onedev.server.service.IssueChangeService;
 import io.onedev.server.service.IssueFieldService;
 import io.onedev.server.service.IssueLinkService;
@@ -148,6 +150,9 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 
 	@Inject
 	private IssueLinkService issueLinkService;
+
+	@Inject
+	private IssueAuthorizationService authorizationService;
 
 	@Inject
 	private ListenerRegistry listenerRegistry;
@@ -313,6 +318,21 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 			change.setData(new IssueConfidentialChangeData(prevConfidential, issue.isConfidential()));
 			create(change, null);
 			dao.persist(issue);
+
+			if (!SecurityUtils.canAccessIssue(user.asSubject(), issue)) {
+				IssueAuthorization authorization = new IssueAuthorization();
+				authorization.setIssue(issue);
+				authorization.setUser(user);
+				issue.getAuthorizations().add(authorization);
+				authorizationService.createOrUpdate(authorization);	
+			}
+			if (!user.equals(issue.getSubmitter()) && !SecurityUtils.canAccessIssue(issue.getSubmitter().asSubject(), issue)) {
+				IssueAuthorization authorization = new IssueAuthorization();
+				authorization.setIssue(issue);
+				authorization.setUser(issue.getSubmitter());
+				issue.getAuthorizations().add(authorization);
+				authorizationService.createOrUpdate(authorization);	
+			}
 		}
 	}
 	

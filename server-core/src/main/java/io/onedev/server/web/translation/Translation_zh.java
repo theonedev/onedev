@@ -77,6 +77,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"验证邮箱的 <a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">用户</a>");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"可使用 <a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 风格的 markdown</a>，并支持 <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid 和 katex</a>。");
+		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
+			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> 被接受，并支持 <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml 和 katex</a>。");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
 			"<a href='/~administration/settings/lite-ai-model' target='_blank'>设置 AI</a> 以使用自然语言查询");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
@@ -1898,12 +1900,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Invalid GPG signature", "无效的 GPG 签名");
 		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
 		m.put("Invalid access token: {0}", "无效的访问令牌：{0}");
+		m.put("Invalid build number: {0}", "无效的构建编号: {0}");
 		m.put("Invalid credentials", "无效的凭据");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "无效的日期范围，期望 \"yyyy-MM-dd to yyyy-MM-dd\"");
 		m.put("Invalid email address: {0}", "无效的电子邮件地址: {0}");
 		m.put("Invalid invitation code", "无效的邀请代码");
 		m.put("Invalid issue date of ID token", "ID 令牌的发行日期无效");
 		m.put("Invalid issue number: {0}", "无效的工单编号: {0}");
+		m.put("Invalid pack ID: {0}", "无效的包 ID: {0}");
 		m.put("Invalid pull request number: {0}", "无效的合并请求编号：{0}");
 		m.put("Invalid request path", "无效的请求路径");
 		m.put("Invalid selection, click for details", "无效的选择，点击查看详情");
@@ -2691,6 +2695,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"可选择指定允许按此按钮的授权角色。如果未指定，则允许所有用户");
 		m.put("Optionally specify base query of the list", "可选择指定列表的基本查询");
+		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
+			"可选地指定允许访问此密钥的分支。如果留空，任何任务都可以访问此密钥，包括通过外部合并请求触发的任务。");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>任务工作区</a> 的构建上下文路径。留空则使用任务工作区本身。除非使用选项 <code>--dockerfile</code> 指定不同位置，否则文件 <code>Dockerfile</code> 应存在于构建上下文目录中");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
@@ -3076,6 +3082,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Poll Interval", "轮询间隔");
 		m.put("Populate Tag Mappings", "填充标签映射");
 		m.put("Port", "端口");
+		m.put("Port Accessors", "端口访问器");
 		m.put("Port Mappings", "端口映射");
 		m.put("Possible definitions", "可能的定义");
 		m.put("Post", "发布");
@@ -3922,6 +3929,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定看板的列。每列对应于上面指定的工单字段的一个值");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"指定检查服务就绪状态的命令。此命令在 Windows 镜像上由 cmd.exe 解释，在 Linux 镜像上由 shell 解释。它将重复执行，直到返回零代码表示服务就绪");
+		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
+			"指定命令以无头模式启动编码代理以运行分配的任务，形式为\n提示。组合提示存储在环境变量 <code>$TASK_PROMPT</code> 中。\n系统提示和用户提示也分别可用，分别为\n<code>$TASK_SYSTEM_PROMPT</code> 和 <code>$TASK_USER_PROMPT</code>。<br>\n<b>注意: </b> 必须安装 <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI 和配套技能</a> 才能使任务\n自动化工作。OneDev 工作区镜像默认包含这些组件。");
 		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
 			"指定在打开此快捷方式时要运行的命令，例如<i>opencode</i>、<i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
@@ -4021,6 +4030,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定此执行器在每个匹配代理上可并发运行的任务/服务最大数量。留空以设置为代理 CPU 核心数");
 		m.put("Specify max number of jobs/services this executor can run concurrently. Leave empty to set as CPU cores", 
 			"指定此执行器可并发运行的任务/服务最大数量。留空以设置为 CPU 核心数");
+		m.put("Specify max number of mail sending sessions that can run concurrently", "指定可以同时运行的邮件发送会话的最大数量");
 		m.put("Specify max number of workspaces this provisioner can handle concurrently.\nLeave empty to set as CPU cores", 
 			"指定此配置器可以同时处理的最大工作区数量。\n留空以设置为 CPU 核心数。");
 		m.put("Specify max number of workspaces this provisioner can run concurrently on each matched agent. Leave empty to set as agent CPU cores", 
@@ -4297,6 +4307,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Task Automation", "任务自动化");
 		m.put("Task List", "任务列表");
 		m.put("Task list", "任务列表");
+		m.put("Teardown Commands", "拆解命令");
 		m.put("Tell user to reset password", "告诉用户重置密码");
 		m.put("Template", "模板");
 		m.put("Template Name", "模板名称");
@@ -4505,6 +4516,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"为避免重复，这里显示的时间不包括从 \"{0}\" 聚合的时间");
 		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
 			"要在此终端中滚动，请按 ctrl+b 然后 [，并使用箭头键或向上/向下翻页键。按 q 退出。");
+		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
+			"要在此终端中滚动，请按 ctrl+b 然后 [。使用鼠标滚轮、向上/向下翻页键或箭头键，然后按 q 退出。");
+		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
+			"要在此终端中滚动，请点击 tmux [，使用向上/向下翻页键或箭头键，然后再次点击 tmux [ 退出。");
 		m.put("To use this package, add below to project pom.xml", "要使用此包，请将以下内容添加到项目 pom.xml");
 		m.put("To use this package, edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", 
 			"要使用此包，请编辑 <code>$HOME/.cargo/config.toml</code> 以添加如下注册表");
@@ -4813,6 +4828,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Watch/Unwatch Selected Pull Requests", "监视/取消监视选定的合并请求");
 		m.put("Watched. Click to unwatch", "已关注。点击取消关注");
 		m.put("Watchers", "观察者");
+		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
+			"如果该登录名或电子邮件与有效账户匹配，我们将发送密码重置说明。");
 		m.put("Web Hook", "Web Hook");
 		m.put("Web Hook Header", "Web Hook 头");
 		m.put("Web Hooks", "Web Hooks");
@@ -5212,6 +5229,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{0} edited {1}", "{0} 编辑于 {1}");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} forks", "{0} 个分叉");
+		m.put("{0} found", "{0} 已找到");
 		m.put("{0} hour", "{0} 小时");
 		m.put("{0} hours", "{0} 小时");
 		m.put("{0} inaccessible activities", "{0} 个无权查看的活动");
@@ -5230,24 +5248,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
-			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> 被接受，并支持 <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml 和 katex</a>。");
-		m.put("Invalid build number: {0}", "无效的构建编号: {0}");
-		m.put("Invalid pack ID: {0}", "无效的包 ID: {0}");
-		m.put("Optionally specify branches allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
-			"可选地指定允许访问此密钥的分支。如果留空，任何任务都可以访问此密钥，包括通过外部合并请求触发的任务。");
-		m.put("Port Accessors", "端口访问器");
-		m.put("Specify command to launch coding agent in headless mode to run assigned task in form of\nprompt. The combined prompt is stored in environment variable <code>$TASK_PROMPT</code>.\nThe system prompt and user prompt are also available separately as\n<code>$TASK_SYSTEM_PROMPT</code> and <code>$TASK_USER_PROMPT</code>.<br>\n<b>NOTE: </b> <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI and companion skills</a> must also be installed to make task\nautomation work. OneDev workspace images ship these components out of the box", 
-			"指定命令以无头模式启动编码代理以运行分配的任务，形式为\n提示。组合提示存储在环境变量 <code>$TASK_PROMPT</code> 中。\n系统提示和用户提示也分别可用，分别为\n<code>$TASK_SYSTEM_PROMPT</code> 和 <code>$TASK_USER_PROMPT</code>。<br>\n<b>注意: </b> 必须安装 <a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>OneDev tod CLI 和配套技能</a> 才能使任务\n自动化工作。OneDev 工作区镜像默认包含这些组件。");
-		m.put("Specify max number of mail sending sessions that can run concurrently", "指定可以同时运行的邮件发送会话的最大数量");
-		m.put("Teardown Commands", "拆解命令");
-		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
-			"要在此终端中滚动，请按 ctrl+b 然后 [。使用鼠标滚轮、向上/向下翻页键或箭头键，然后按 q 退出。");
-		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
-			"要在此终端中滚动，请点击 tmux [，使用向上/向下翻页键或箭头键，然后再次点击 tmux [ 退出。");
-		m.put("We'll send password reset instructions if that login name or email matches a valid account", 
-			"如果该登录名或电子邮件与有效账户匹配，我们将发送密码重置说明。");
-		m.put("{0} found", "{0} 已找到");
+		m.put("Cannot unauthorize yourself", "无法取消授权自己");
+		m.put("Copy this executor", "复制此执行器");
+		m.put("Copy this provisioner", "复制此配置器");
+		m.put("Copy this rule", "复制此规则");
+		m.put("Copy this spec", "复制此规范");
 	}
 		
 	@Override

@@ -121,7 +121,8 @@ public final class TranslationTagHandler extends AbstractMarkupFilter
             }
             for (var entry : translatedAttributes.entrySet()) {
                 tag.remove("t:" + entry.getKey());
-                tag.put(entry.getKey(), entry.getValue());
+                if (!tag.getAttributes().containsKey(entry.getKey()))
+                    tag.put(entry.getKey(), entry.getValue());
             }
 		}
 	}
