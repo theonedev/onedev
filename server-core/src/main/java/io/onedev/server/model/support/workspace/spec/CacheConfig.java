@@ -20,6 +20,7 @@ import io.onedev.k8shelper.CacheConfigFacade;
 import io.onedev.k8shelper.UploadStrategy;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -125,6 +126,7 @@ public class CacheConfig implements Serializable {
 	@Editable(order=500, description = """
 			Specify access token with upload cache permission for above project. 
 			Note that this property is not required if upload cache to current project""")
+	@Password
 	public String getUploadAccessToken() {
 		return uploadAccessToken;
 	}
