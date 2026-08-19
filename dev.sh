@@ -29,7 +29,7 @@ ensure_artifact() {
 	artifact=$(artifact_path "$1" "$2" "$3")
 	if [ ! -f "$artifact" ]; then
 		echo "Downloading $1:$2:$3..." >&2
-		run_maven -U dependency:get -Dmaven.repo.local="$MAVEN_REPOSITORY" \
+		run_maven -q -U dependency:get -Dmaven.repo.local="$MAVEN_REPOSITORY" \
 			-Dartifact="$1:$2:$3:jar" -Dtransitive=false
 	fi
 	if [ ! -f "$artifact" ]; then
