@@ -44,7 +44,7 @@ public class IssueCommentResource {
 	@GET
 	public IssueComment getComment(@PathParam("commentId") Long commentId) {
 		IssueComment comment = commentService.load(commentId);
-    	if (!SecurityUtils.canAccessProject(comment.getIssue().getProject()))  
+    	if (!SecurityUtils.canAccessIssue(comment.getIssue()))  
 			throw new UnauthorizedException();
     	return comment;
 	}
@@ -52,8 +52,7 @@ public class IssueCommentResource {
 	@Api(order=200, description="Create new issue comment")
 	@POST
 	public Long createComment(@NotNull IssueComment comment) {
-		if (!canAccessIssue(comment.getIssue()) 
-				|| !isAdministrator() && !comment.getUser().equals(getUser())) {
+		if (!canAccessIssue(comment.getIssue()) || !isAdministrator() && !comment.getUser().equals(getUser())) {
 			throw new UnauthorizedException();
 		}
 		commentService.create(comment);
