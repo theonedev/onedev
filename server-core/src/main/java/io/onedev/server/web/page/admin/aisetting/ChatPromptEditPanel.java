@@ -6,13 +6,14 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.support.administration.AiSetting;
@@ -57,6 +58,10 @@ public class ChatPromptEditPanel extends Panel {
 		oldAuditContent = newAuditContent;
 	}
 
+	private Component newEditor() {
+		return BeanContext.edit("editor", aiSetting, Set.of(propertyName), false);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -65,22 +70,34 @@ public class ChatPromptEditPanel extends Panel {
 		// referencing the same instance after page serialization
 		oldAuditContent = getPrompt();
 
-		Form<?> form = new Form<Void>("form");
-		form.add(BeanContext.edit("editor", aiSetting, Set.of(propertyName), false));
-
-		form.add(new Button("save") {
+		Form<?> form = new Form<Void>("form") {
 
 			@Override
-			public void onSubmit() {
-				super.onSubmit();
+			protected void onError() {
+				super.onError();
+				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+			}
+
+		};
+		form.add(newEditor());
+
+		form.add(new AjaxButton("save") {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
 				savePrompt("changed");
 				getSession().success(_T("Chat prompt has been saved"));
-				setResponsePage(ChatPromptsPage.class);
+				target.add(form);
 			}
 
 		});
 
-		form.add(new AjaxLink<Void>("revert") {
+		form.add(new AjaxButton("revert") {
+
+			{
+				setDefaultFormProcessing(false);
+			}
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -89,11 +106,12 @@ public class ChatPromptEditPanel extends Panel {
 			}
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				setPrompt(defaultValue);
 				savePrompt("reverted");
 				getSession().success(_T("Chat prompt has been reverted to default"));
-				setResponsePage(ChatPromptsPage.class);
+				form.replace(newEditor());
+				target.add(form);
 			}
 
 			@Override
@@ -112,6 +130,7 @@ public class ChatPromptEditPanel extends Panel {
 
 		});
 
+		form.setOutputMarkupId(true);
 		add(form);
 	}
 
