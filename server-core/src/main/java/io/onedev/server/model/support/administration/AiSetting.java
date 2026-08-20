@@ -26,12 +26,15 @@ public class AiSetting implements Serializable {
 
     public static final String DEFAULT_BUILD_FAILURE_ISSUE_PROMPT = """
         Create an issue for the build failure:
+
         Title: Job '<job name>' is failed on '<ref name>'
         Description: <The build summary>
-        Type: <Build Failed>
+        Type: Build Failed
         Priority: Major
         Build: <build number>
-        Assignees: <your own user name>""";
+        Assignees: <your own user name>
+        
+        Create exactly one issue. If you find problems with the created issue, report them instead of creating additional issues""";
 
     public static final String PROP_LITE_MODEL_SETTING = "liteModelSetting";
 

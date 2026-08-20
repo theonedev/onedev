@@ -9326,4 +9326,31 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate240(File dataDir, Stack<Integer> versions) {
+		var oldBuildFailureIssuePrompt = """
+			Create an issue for the build failure:
+			Title: Job '<job name>' is failed on '<ref name>'
+			Description: <The build summary>
+			Type: <Build Failed>
+			Priority: Major
+			Build: <build number>
+			Assignees: <your own user name>""";
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("AI")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element promptElement = valueElement.element("buildFailureIssuePrompt");
+							if (promptElement.getText().equals(oldBuildFailureIssuePrompt))
+								promptElement.setText(AiSetting.DEFAULT_BUILD_FAILURE_ISSUE_PROMPT);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }
