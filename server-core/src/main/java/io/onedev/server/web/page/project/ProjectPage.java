@@ -41,7 +41,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.tools.issue.CreateIssue;
-import io.onedev.server.ai.tools.issue.GetValidFields;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -548,10 +547,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware, Ch
 	@Override
 	public List<ChatTool> getChatTools() {
 		var tools = new ArrayList<ChatTool>();
-		if (getProject().isIssueManagement()) {
+		if (getProject().isIssueManagement()) 
 			tools.add(wrapForChat(new CreateIssue(getProject().getId())));
-			tools.add(wrapForChat(new GetValidFields()));
-		}
 		return tools;
 	}
 

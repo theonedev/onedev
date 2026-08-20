@@ -661,6 +661,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Cannot remove agent \"{0}\" as it has workspaces", "Impossibile rimuovere l'agente \"{0}\" poiché ha workspace");
 		m.put("Cannot remove agent as it has workspaces", "Impossibile rimuovere l'agente poiché ha workspace");
 		m.put("Cannot save malformed query", "Non è possibile salvare una query malformata");
+		m.put("Cannot unauthorize yourself", "Non puoi disautorizzarti");
 		m.put("Cannot use current or descendant project as parent", "Non è possibile utilizzare il progetto corrente o un discendente come genitore");
 		m.put("Case Sensitive", "Sensibile alle maiuscole");
 		m.put("Certificates to Trust", "Certificati da fidare");
@@ -686,7 +687,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Chat Prompts", "Prompt di Chat");
 		m.put("Chat deleted", "Chat eliminata");
 		m.put("Chat preserve days setting has been saved", "Impostazione dei giorni di conservazione chat è stata salvata");
-		m.put("Chat prompts have been saved", "I prompt di chat sono stati salvati");
+		m.put("Chat prompt has been reverted to default", "Il prompt della chat è stato ripristinato al valore predefinito");
+		m.put("Chat prompt has been saved", "Il prompt della chat è stato salvato");
 		m.put("Chat with", "Chatta con");
 		m.put("Chat with AI", "Chatta con AI");
 		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
@@ -933,6 +935,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Copy permanent link", "Copia link permanente");
 		m.put("Copy public key", "Copia chiave pubblica");
 		m.put("Copy selected text to clipboard", "Copia testo selezionato negli appunti");
+		m.put("Copy this executor", "Copia questo executor");
+		m.put("Copy this provisioner", "Copia questo provisioner");
+		m.put("Copy this rule", "Copia questa regola");
+		m.put("Copy this spec", "Copia questa specifica");
 		m.put("Copy to clipboard", "Copia negli appunti");
 		m.put("Count", "Conteggio");
 		m.put("Coverage Statistics", "Statistiche di Copertura");
@@ -1249,6 +1255,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Do you really want to remove this account?", "Vuoi davvero rimuovere questo account?");
 		m.put("Do you really want to remove this link?", "Vuoi davvero rimuovere questo collegamento?");
 		m.put("Do you really want to restart this agent?", "Vuoi davvero riavviare questo agente?");
+		m.put("Do you really want to revert to default prompt?", "Vuoi davvero ripristinare il prompt predefinito?");
 		m.put("Do you really want to unauthorize user \"{0}\"?", "Vuoi davvero non autorizzare l'utente \"{0}\"?");
 		m.put("Do you really want to use default template?", "Vuoi davvero utilizzare il modello predefinito?");
 		m.put("Docker", "Docker");
@@ -3415,6 +3422,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Retry Condition", "Condizione di ritentativo");
 		m.put("Retry Delay", "Ritardo di ritentativo");
 		m.put("Revert", "Ripristina");
+		m.put("Revert to Default", "Ripristina al Predefinito");
 		m.put("Reverted successfully", "Ripristinato con successo");
 		m.put("Review required for deletion. Submit pull request instead", "Revisione richiesta per l'eliminazione. Invia una richiesta di pull invece");
 		m.put("Review required for this change. Please submit pull request instead", "Revisione richiesta per questa modifica. Si prega di inviare una pull request invece.");
@@ -3492,6 +3500,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("STAGED", "STAGED");
 		m.put("SUCCESSFUL", "RIUSCITO.");
 		m.put("Save", "Salva.");
+		m.put("Save Prompt", "Salva Prompt");
 		m.put("Save Query", "Salva query.");
 		m.put("Save Query Bean", "Salva query bean.");
 		m.put("Save Settings", "Salva impostazioni.");
@@ -5222,11 +5231,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Cannot unauthorize yourself", "Non puoi disautorizzarti");
-		m.put("Copy this executor", "Copia questo executor");
-		m.put("Copy this provisioner", "Copia questo provisioner");
-		m.put("Copy this rule", "Copia questa regola");
-		m.put("Copy this spec", "Copia questa specifica");
 	}
 		
 	@Override

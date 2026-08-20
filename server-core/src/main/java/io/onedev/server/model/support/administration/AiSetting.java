@@ -25,16 +25,13 @@ public class AiSetting implements Serializable {
     public static final String DEFAULT_PULL_REQUEST_SUMMARY_PROMPT = "Summarize comments of current pull request.";
 
     public static final String DEFAULT_BUILD_FAILURE_ISSUE_PROMPT = """
-        Create an issue for the build failure:
+        Create an issue for the build failure using the createIssue tool. Call getBuild first for build details.
 
-        Title: Job '<job name>' is failed on '<ref name>'
-        Description: <The build summary>
-        Type: Build Failed
-        Priority: Major
-        Build: <build number>
-        Assignees: <your own user name>
-        
-        Create exactly one issue. If you find problems with the created issue, report them instead of creating additional issues""";
+        - title: Job '<job name>' failed on '<ref name>'
+        - description: <the build summary>
+        - fields: {"Type": "Build Failed", "Priority": "Major", "Build": "<build number>", "Assignees": ["<your user name>"]}
+
+        Create exactly one issue. If you find problems with the created issue, report them instead of creating additional issues.""";
 
     public static final String PROP_LITE_MODEL_SETTING = "liteModelSetting";
 

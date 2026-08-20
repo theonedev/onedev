@@ -661,6 +661,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Cannot remove agent \"{0}\" as it has workspaces", "에이전트 \"{0}\"를 제거할 수 없습니다. 작업 공간이 있습니다.");
 		m.put("Cannot remove agent as it has workspaces", "작업 공간이 있어 에이전트를 제거할 수 없습니다.");
 		m.put("Cannot save malformed query", "잘못된 쿼리를 저장할 수 없습니다");
+		m.put("Cannot unauthorize yourself", "자신을 비승인할 수 없습니다");
 		m.put("Cannot use current or descendant project as parent", "현재 또는 하위 프로젝트를 부모로 사용할 수 없습니다");
 		m.put("Case Sensitive", "대소문자 구분");
 		m.put("Certificates to Trust", "신뢰할 인증서");
@@ -686,7 +687,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Chat Prompts", "채팅 프롬프트");
 		m.put("Chat deleted", "채팅이 삭제되었습니다");
 		m.put("Chat preserve days setting has been saved", "채팅 보존 일수 설정이 저장되었습니다");
-		m.put("Chat prompts have been saved", "채팅 프롬프트가 저장되었습니다");
+		m.put("Chat prompt has been reverted to default", "채팅 프롬프트가 기본값으로 복원되었습니다");
+		m.put("Chat prompt has been saved", "채팅 프롬프트가 저장되었습니다");
 		m.put("Chat with", "채팅 상대");
 		m.put("Chat with AI", "AI와 채팅");
 		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
@@ -933,6 +935,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy permanent link", "영구 링크 복사");
 		m.put("Copy public key", "공개 키 복사");
 		m.put("Copy selected text to clipboard", "선택된 텍스트를 클립보드에 복사");
+		m.put("Copy this executor", "이 실행기를 복사");
+		m.put("Copy this provisioner", "이 프로비저너를 복사");
+		m.put("Copy this rule", "이 규칙을 복사");
+		m.put("Copy this spec", "이 사양을 복사");
 		m.put("Copy to clipboard", "클립보드에 복사");
 		m.put("Count", "개수");
 		m.put("Coverage Statistics", "커버리지 통계");
@@ -1249,6 +1255,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Do you really want to remove this account?", "정말로 이 계정을 제거하시겠습니까?");
 		m.put("Do you really want to remove this link?", "정말로 이 링크를 제거하시겠습니까?");
 		m.put("Do you really want to restart this agent?", "정말로 이 에이전트를 재시작하시겠습니까?");
+		m.put("Do you really want to revert to default prompt?", "기본 프롬프트로 복원하시겠습니까?");
 		m.put("Do you really want to unauthorize user \"{0}\"?", "정말로 사용자 \"{0}\"의 권한을 해제하시겠습니까?");
 		m.put("Do you really want to use default template?", "정말로 기본 템플릿을 사용하시겠습니까?");
 		m.put("Docker", "도커");
@@ -3415,6 +3422,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Retry Condition", "재시도 조건");
 		m.put("Retry Delay", "재시도 지연");
 		m.put("Revert", "되돌리기");
+		m.put("Revert to Default", "기본값으로 복원");
 		m.put("Reverted successfully", "성공적으로 되돌림");
 		m.put("Review required for deletion. Submit pull request instead", "삭제를 위해 리뷰가 필요합니다. 대신 풀 리퀘스트를 제출하십시오");
 		m.put("Review required for this change. Please submit pull request instead", "이 변경 사항에는 검토가 필요합니다. 대신 풀 리퀘스트를 제출하세요.");
@@ -3492,6 +3500,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("STAGED", "스테이지됨");
 		m.put("SUCCESSFUL", "성공");
 		m.put("Save", "저장");
+		m.put("Save Prompt", "프롬프트 저장");
 		m.put("Save Query", "쿼리 저장");
 		m.put("Save Query Bean", "쿼리 빈 저장");
 		m.put("Save Settings", "설정 저장");
@@ -5222,11 +5231,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Cannot unauthorize yourself", "자신을 비승인할 수 없습니다");
-		m.put("Copy this executor", "이 실행기를 복사");
-		m.put("Copy this provisioner", "이 프로비저너를 복사");
-		m.put("Copy this rule", "이 규칙을 복사");
-		m.put("Copy this spec", "이 사양을 복사");
 	}
 		
 	@Override

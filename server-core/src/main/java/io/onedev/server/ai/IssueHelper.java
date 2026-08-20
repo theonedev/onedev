@@ -9,13 +9,19 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.langchain4j.model.chat.request.json.JsonArraySchema;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.model.chat.request.json.JsonStringSchema;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -194,6 +200,53 @@ public class IssueHelper {
         for (var field : OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpecs())
             issueFields.put(getParamName(field.getName()), getFieldProperties(field));
         return issueFields;
+    }
+
+    public static JsonObjectSchema getFieldsSchema() {
+        var builder = JsonObjectSchema.builder()
+                .description("Issue custom fields as a map of field name to value. "
+                        + "Must be a JSON object, not an array");
+        for (Entry<String, Object> entry : getValidFields().entrySet()) {
+            @SuppressWarnings("unchecked")
+            var fieldProps = (Map<String, Object>) entry.getValue();
+            var description = (String) fieldProps.get("description");
+            if ("array".equals(fieldProps.get("type"))) {
+                builder.addProperty(entry.getKey(), JsonArraySchema.builder()
+                        .description(description)
+                        .items(new JsonStringSchema())
+                        .build());
+            } else {
+                builder.addStringProperty(entry.getKey()).description(description);
+            }
+        }
+        return builder.build();
+    }
+
+    public static void setFieldValues(Map<String, Serializable> data, JsonNode fieldsNode) {
+        if (fieldsNode == null || !fieldsNode.isObject())
+            return;
+        var fields = fieldsNode.fields();
+        while (fields.hasNext()) {
+            var entry = fields.next();
+            setFieldValue(data, entry.getKey(), entry.getValue());
+        }
+    }
+
+    private static void setFieldValue(Map<String, Serializable> data, String fieldName, JsonNode value) {
+        if (value == null || value.isNull())
+            return;
+        if (value.isArray()) {
+            var values = new ArrayList<String>();
+            for (var element : value)
+                values.add(element.asText());
+            data.put(fieldName, values);
+        } else if (value.isTextual()) {
+            var trimmed = StringUtils.trimToNull(value.asText());
+            if (trimmed != null)
+                data.put(fieldName, trimmed);
+        } else {
+            data.put(fieldName, value.asText());
+        }
     }
 
     public static void normalizeData(Map<String, Serializable> data) {

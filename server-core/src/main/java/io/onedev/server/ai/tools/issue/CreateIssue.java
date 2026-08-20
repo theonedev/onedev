@@ -45,10 +45,7 @@ public final class CreateIssue implements TaskTool {
 								.description("Names of iterations to schedule the issue into")
 								.items(new JsonStringSchema()).build())
 						.addIntegerProperty("ownEstimatedTime").description("Estimated time in hours for this issue only (requires active subscription and time tracking enabled)")
-						.addProperty("fields", JsonObjectSchema.builder()
-								.description("Issue fields as a map of field name to value. "
-										+ "Call getValidFields tool to discover valid field names and allowed values")
-								.additionalProperties(true).build())
+						.addProperty("fields", IssueHelper.getFieldsSchema())
 						.required("title").build())
 				.build();
 	}
@@ -82,27 +79,7 @@ public final class CreateIssue implements TaskTool {
 			data.put("iterations", iterations);
 		}
 
-		if (arguments.get("fields") != null) {
-			var fields = arguments.get("fields").fields();
-			while (fields.hasNext()) {
-				var entry = fields.next();
-				var value = entry.getValue();
-				if (value == null || value.isNull()) {
-					continue;
-				} else if (value.isArray()) {
-					var values = new ArrayList<String>();
-					for (var element : value)
-						values.add(element.asText());
-					data.put(entry.getKey(), values);
-				} else if (value.isTextual()) {
-					var trimmed = trimToNull(value.asText());
-					if (trimmed != null)
-						data.put(entry.getKey(), trimmed);
-				} else {
-					data.put(entry.getKey(), value.asText());
-				}
-			}
-		}
+		IssueHelper.setFieldValues(data, arguments.get("fields"));
 
 		try {
 			var issue = IssueHelper.createIssue(subject, project, data);

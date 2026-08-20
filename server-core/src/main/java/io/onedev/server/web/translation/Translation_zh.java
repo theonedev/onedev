@@ -687,6 +687,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Cannot remove agent \"{0}\" as it has workspaces", "无法移除代理 \"{0}\"，因为它有工作区");
 		m.put("Cannot remove agent as it has workspaces", "无法移除代理，因为它有工作区");
 		m.put("Cannot save malformed query", "无法保存格式错误的查询");
+		m.put("Cannot unauthorize yourself", "无法取消授权自己");
 		m.put("Cannot use current or descendant project as parent", "不能使用当前或子项目作为父项目");
 		m.put("Case Sensitive", "区分大小写");
 		m.put("Certificates to Trust", "信任的证书");
@@ -712,7 +713,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Chat Prompts", "聊天提示");
 		m.put("Chat deleted", "聊天已删除");
 		m.put("Chat preserve days setting has been saved", "聊天保留天数设置已保存");
-		m.put("Chat prompts have been saved", "聊天提示已保存");
+		m.put("Chat prompt has been reverted to default", "聊天提示已恢复为默认值");
+		m.put("Chat prompt has been saved", "聊天提示已保存");
 		m.put("Chat with", "聊天对象");
 		m.put("Chat with AI", "与 AI 聊天");
 		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
@@ -959,6 +961,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy permanent link", "复制永久链接");
 		m.put("Copy public key", "复制公钥");
 		m.put("Copy selected text to clipboard", "复制选中的文本到剪贴板");
+		m.put("Copy this executor", "复制此执行器");
+		m.put("Copy this provisioner", "复制此配置器");
+		m.put("Copy this rule", "复制此规则");
+		m.put("Copy this spec", "复制此规范");
 		m.put("Copy to clipboard", "复制到剪贴板");
 		m.put("Count", "数量");
 		m.put("Coverage Statistics", "代码覆盖率统计");
@@ -1275,6 +1281,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Do you really want to remove this account?", "您确定要删除此账户吗？");
 		m.put("Do you really want to remove this link?", "您确定要删除此链接吗？");
 		m.put("Do you really want to restart this agent?", "你确定要重启这个代理吗？");
+		m.put("Do you really want to revert to default prompt?", "您确定要恢复为默认提示吗？");
 		m.put("Do you really want to unauthorize user \"{0}\"?", "您真的要取消用户 \"{0}\" 的授权吗？");
 		m.put("Do you really want to use default template?", "您确定要使用默认模板吗？");
 		m.put("Docker", "Docker");
@@ -3441,6 +3448,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Retry Condition", "重试条件");
 		m.put("Retry Delay", "重试延迟");
 		m.put("Revert", "回滚");
+		m.put("Revert to Default", "恢复为默认");
 		m.put("Reverted successfully", "revert 成功");
 		m.put("Review required for deletion. Submit pull request instead", "需要审查才能删除。请提交合并请求");
 		m.put("Review required for this change. Please submit pull request instead", "此更改需要审核。请提交拉取请求。");
@@ -3518,6 +3526,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("STAGED", "已暂存");
 		m.put("SUCCESSFUL", "成功");
 		m.put("Save", "保存");
+		m.put("Save Prompt", "保存提示");
 		m.put("Save Query", "保存查询");
 		m.put("Save Query Bean", "保存查询 Bean");
 		m.put("Save Settings", "保存设置");
@@ -5248,11 +5257,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Cannot unauthorize yourself", "无法取消授权自己");
-		m.put("Copy this executor", "复制此执行器");
-		m.put("Copy this provisioner", "复制此配置器");
-		m.put("Copy this rule", "复制此规则");
-		m.put("Copy this spec", "复制此规范");
 	}
 		
 	@Override

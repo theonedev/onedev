@@ -661,6 +661,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Cannot remove agent \"{0}\" as it has workspaces", "エージェント \"{0}\" を削除できません。ワークスペースが存在します");
 		m.put("Cannot remove agent as it has workspaces", "エージェントを削除できません。ワークスペースが存在します");
 		m.put("Cannot save malformed query", "不正なクエリを保存することはできません");
+		m.put("Cannot unauthorize yourself", "自分自身の認可を解除することはできません");
 		m.put("Cannot use current or descendant project as parent", "現在のプロジェクトまたは子孫プロジェクトを親として使用することはできません");
 		m.put("Case Sensitive", "大文字小文字を区別");
 		m.put("Certificates to Trust", "信頼する証明書");
@@ -686,7 +687,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Chat Prompts", "チャットプロンプト");
 		m.put("Chat deleted", "チャットが削除されました");
 		m.put("Chat preserve days setting has been saved", "チャット保存日数の設定が保存されました");
-		m.put("Chat prompts have been saved", "チャットプロンプトが保存されました");
+		m.put("Chat prompt has been reverted to default", "チャットプロンプトがデフォルトに戻されました");
+		m.put("Chat prompt has been saved", "チャットプロンプトが保存されました");
 		m.put("Chat with", "とのチャット");
 		m.put("Chat with AI", "AIとのチャット");
 		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
@@ -933,6 +935,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy permanent link", "永久リンクをコピー");
 		m.put("Copy public key", "公開鍵をコピー");
 		m.put("Copy selected text to clipboard", "選択されたテキストをクリップボードにコピー");
+		m.put("Copy this executor", "このエグゼキューターをコピー");
+		m.put("Copy this provisioner", "このプロビジョナーをコピー");
+		m.put("Copy this rule", "このルールをコピー");
+		m.put("Copy this spec", "このスペックをコピー");
 		m.put("Copy to clipboard", "クリップボードにコピー");
 		m.put("Count", "カウント");
 		m.put("Coverage Statistics", "カバレッジ統計");
@@ -1249,6 +1255,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do you really want to remove this account?", "本当にこのアカウントを削除しますか？");
 		m.put("Do you really want to remove this link?", "本当にこのリンクを削除しますか？");
 		m.put("Do you really want to restart this agent?", "本当にこのエージェントを再起動しますか？");
+		m.put("Do you really want to revert to default prompt?", "本当にデフォルトプロンプトに戻しますか？");
 		m.put("Do you really want to unauthorize user \"{0}\"?", "本当にユーザー「{0}」の認可を解除しますか？");
 		m.put("Do you really want to use default template?", "本当にデフォルトテンプレートを使用しますか？");
 		m.put("Docker", "Docker");
@@ -3415,6 +3422,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Retry Condition", "再試行条件");
 		m.put("Retry Delay", "再試行遅延");
 		m.put("Revert", "元に戻す");
+		m.put("Revert to Default", "デフォルトに戻す");
 		m.put("Reverted successfully", "正常に元に戻しました");
 		m.put("Review required for deletion. Submit pull request instead", "削除にはレビューが必要です。代わりにプルリクエストを送信してください");
 		m.put("Review required for this change. Please submit pull request instead", "この変更にはレビューが必要です。代わりにプルリクエストを提出してください。");
@@ -3492,6 +3500,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("STAGED", "ステージング済み");
 		m.put("SUCCESSFUL", "成功");
 		m.put("Save", "保存");
+		m.put("Save Prompt", "プロンプトを保存");
 		m.put("Save Query", "クエリを保存");
 		m.put("Save Query Bean", "クエリBeanを保存");
 		m.put("Save Settings", "設定を保存");
@@ -5222,11 +5231,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Cannot unauthorize yourself", "自分自身の認可を解除することはできません");
-		m.put("Copy this executor", "このエグゼキューターをコピー");
-		m.put("Copy this provisioner", "このプロビジョナーをコピー");
-		m.put("Copy this rule", "このルールをコピー");
-		m.put("Copy this spec", "このスペックをコピー");
 	}
 		
 	@Override
