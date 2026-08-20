@@ -5,8 +5,16 @@
 	right: 0;
 	z-index: 1040;
 	display: flex;
+	width: 400px;
 	background: white;
 	box-shadow: 0 0 12px rgba(0,0,0,0.2);	
+}
+@media (max-width: 767.98px) {
+	.chat {
+		width: 100%;
+		max-width: 100%;
+		min-width: 100%;
+	}
 }
 .dark-mode .chat {
 	background-color: var(--dark-mode-dark);	

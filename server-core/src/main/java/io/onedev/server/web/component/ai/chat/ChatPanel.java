@@ -555,8 +555,6 @@ public class ChatPanel extends Panel {
 		Cookie cookie = request.getCookie("chat.width");
 		if (cookie != null) 
 			add(AttributeAppender.append("style", "width:" + cookie.getValue() + "px;"));
-		else
-			add(AttributeAppender.append("style", "width:400px;"));				
 		super.onBeforeRender();
 	}
 
