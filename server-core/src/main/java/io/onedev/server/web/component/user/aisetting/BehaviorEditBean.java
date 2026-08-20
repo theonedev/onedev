@@ -64,7 +64,7 @@ public class BehaviorEditBean implements Serializable {
 	}
 
 	@Editable(order=300, description="""
-			Maximum number of times this AI user can be awakened in a single event chain. \
+			Maximum number of times this AI user can be awakened in a single task. \
 			When the limit is reached, the AI user will not run and a system comment will be posted instead""")
 	@Min(value=1, message="At least 1 should be specified")
 	public int getMaxLoopCount() {
