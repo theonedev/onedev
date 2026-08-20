@@ -108,7 +108,7 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 					throw new ExplicitException("Project not found: " + projectPath);
 				String url = OneDev.getInstance(UrlService.class).cloneUrlFor(project, false);
 				Map<Object, Object> response = CollectionUtils.newHashMap(
-						"href", url + ".git/info/lfs", 
+						"href", url + "/info/lfs", 
 						"header", CollectionUtils.newHashMap(
 								"Authorization", KubernetesHelper.BEARER + " " + accessToken)); 
 				out.write(OneDev.getInstance(ObjectMapper.class).writeValueAsBytes(response));
