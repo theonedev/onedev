@@ -1,0 +1,65 @@
+.unit-test-case-detail:has(.playwright-test-detail) {
+	margin-top: 0.5rem !important;
+	white-space: normal;
+}
+
+.playwright-test-detail {
+	white-space: normal;
+}
+
+.playwright-attempt {
+	border-left: 3px solid var(--secondary);
+	margin-top: 1rem;
+	padding-left: 1rem;
+}
+
+.playwright-attempt:first-child {
+	margin-top: 0;
+}
+
+.playwright-attempt > .playwright-section:first-child {
+	margin-top: 0;
+}
+
+.playwright-section {
+	margin-top: 1rem;
+}
+
+.playwright-section-title {
+	font-weight: 600;
+	margin-bottom: 0.5rem;
+}
+
+.playwright-output {
+	background: var(--light);
+	border-radius: 0.25rem;
+	box-sizing: border-box;
+	display: block;
+	margin: 0 0 0.5rem;
+	max-height: 30rem;
+	max-width: 100%;
+	min-width: 0;
+	overflow: auto;
+	overflow-wrap: anywhere;
+	padding: 0.75rem;
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.playwright-attachment {
+	margin-top: 0.75rem;
+}
+
+.playwright-attachment > a {
+	display: inline-flex;
+	flex-direction: column;
+}
+
+.playwright-image {
+	border: 1px solid var(--light);
+	border-radius: 0.25rem;
+	margin-bottom: 0.5rem;
+	max-height: 24rem;
+	max-width: min(100%, 48rem);
+	object-fit: contain;
+}

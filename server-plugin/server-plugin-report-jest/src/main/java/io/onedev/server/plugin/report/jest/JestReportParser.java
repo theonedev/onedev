@@ -1,6 +1,21 @@
 package io.onedev.server.plugin.report.jest;
 
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
+
 import com.fasterxml.jackson.databind.JsonNode;
+
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -11,19 +26,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.StringTransformer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import org.jspecify.annotations.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 public class JestReportParser {
 
@@ -85,7 +87,7 @@ public class JestReportParser {
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					protected Component renderDetail(String componentId, Build build) {
+					protected Component renderDetail(String componentId, Build build, String reportName) {
 						return JestReportParser.renderMessage(componentId, build, testCaseMessage);
 					}
 					

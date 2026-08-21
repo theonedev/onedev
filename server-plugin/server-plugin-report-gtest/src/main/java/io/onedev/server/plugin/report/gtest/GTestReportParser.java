@@ -75,7 +75,7 @@ public class GTestReportParser {
 
 						@Nullable
 						@Override
-						protected Component renderDetail(String componentId, Build build) {
+						protected Component renderDetail(String componentId, Build build, String reportName) {
 							return renderMessage(componentId, build, blobLocation, message);
 						}
 					});
@@ -100,7 +100,7 @@ public class GTestReportParser {
 
 						@Nullable
 						@Override
-						protected Component renderDetail(String componentId, Build build) {
+						protected Component renderDetail(String componentId, Build build, String reportName) {
 							return renderMessage(componentId, build, blobLocation, message);
 						}
 					});

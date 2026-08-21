@@ -584,6 +584,10 @@ pre>.actions>a {
 	background: var(--dark-mode-dark);
 }
 
+.whitespace-pre-wrap {
+	white-space: pre-wrap;
+}
+
 .spin {
 	animation-name: spin;
 	animation-duration: 2000ms;

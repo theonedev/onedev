@@ -1,0 +1,196 @@
+{
+  "config": {
+    "argv": [
+      "/Users/robin/.nvm/versions/node/v26.1.0/bin/node",
+      "/Users/robin/Projects/onedev/server/e2e-test/node_modules/.bin/playwright",
+      "test",
+      "--reporter=json"
+    ],
+    "configFile": "/Users/robin/Projects/onedev/server/e2e-test/playwright.config.js",
+    "rootDir": "/Users/robin/Projects/onedev/server/e2e-test/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/robin/Projects/onedev/server/e2e-test/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/robin/Projects/onedev/server/e2e-test/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 7,
+    "webServer": {
+      "command": "./dev.sh run",
+      "cwd": "/Users/robin/Projects/onedev/server",
+      "url": "http://127.0.0.1:6610",
+      "reuseExistingServer": true,
+      "timeout": 600000,
+      "stdout": "pipe",
+      "stderr": "pipe",
+      "env": {
+        "initial_user": "admin",
+        "initial_password": "admin",
+        "initial_email": "admin@example.com",
+        "initial_server_url": "http://192.168.7.1:6610"
+      }
+    }
+  },
+  "suites": [
+    {
+      "title": "confidential-issue.spec.js",
+      "file": "confidential-issue.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Issue Reporter can create and view a confidential issue",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 120057,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "/Users/robin/Projects/onedev/server/e2e-test/tests/helpers.js",
+                        "column": 62,
+                        "line": 8
+                      },
+                      "message": "Error: locator.fill: Test timeout of 120000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder('Login name or email address')\u001b[22m\n\n\n\u001b[90m   at \u001b[39mhelpers.js:8\n\n\u001b[0m \u001b[90m  6 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m login(page\u001b[33m,\u001b[39m userName\u001b[33m,\u001b[39m password) {\n \u001b[90m  7 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'~/login'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  8 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByPlaceholder(\u001b[32m'Login name or email address'\u001b[39m)\u001b[33m.\u001b[39mfill(userName)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  9 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByPlaceholder(\u001b[32m'Password'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m\n \u001b[90m 10 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Sign in'\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 11 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL((url) \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39murl\u001b[33m.\u001b[39mpathname\u001b[33m.\u001b[39mincludes(\u001b[32m'~/login'\u001b[39m))\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at login (/Users/robin/Projects/onedev/server/e2e-test/tests/helpers.js:8:62)\u001b[22m\n\u001b[2m    at /Users/robin/Projects/onedev/server/e2e-test/tests/confidential-issue.spec.js:14:3\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-08-21T06:03:22.446Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/onedev-build/work/confidential-issue-Issue-R-14762-d-view-a-confidential-issue-chromium/test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/onedev-build/work/confidential-issue-Issue-R-14762-d-view-a-confidential-issue-chromium/error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "dbf125409f7f8c4b5e9c-dffa72cd6a057e70d37c",
+          "file": "confidential-issue.spec.js",
+          "line": 4,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "server.spec.js",
+      "file": "server.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "serves the OneDev web interface",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 153,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-08-21T06:03:22.447Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7cfb09b9a132f1542744-e4b6ee58d336fd8035a4",
+          "file": "server.spec.js",
+          "line": 3,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-08-21T06:03:22.285Z",
+    "duration": 120314.833,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

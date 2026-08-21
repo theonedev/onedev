@@ -226,7 +226,7 @@ public class UnitTestReport implements Serializable {
 		}
 		
 		@Nullable
-		protected abstract Component renderDetail(String componentId, Build build);
+		protected abstract Component renderDetail(String componentId, Build build, String reportName);
 		
 	}
 	

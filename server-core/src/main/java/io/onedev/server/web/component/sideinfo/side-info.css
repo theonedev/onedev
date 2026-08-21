@@ -43,6 +43,11 @@ a.side-info {
 /* Stretch the pane so its border spans the full content height, while keeping
    its content pinned under the top chrome in the shared page scroller. */
 @media(min-width: 1199px) {
+	/* Hide the ellipsis until JS applies side-info-visible. Otherwise a refresh
+	   paints the trigger, then onDomReady opens the pinned pane and hides it. */
+	html:not(.hide-side-info):not(.side-info-ready) a.side-info {
+		display: none;
+	}
 	div.side-info>.content {
 		position: sticky;
 		top: 0;

@@ -8,6 +8,10 @@
 .build-detail>.card-body>.main>.error-message {
 	max-height: 100px;
 }
+/* Let the main flex column shrink without pushing side info out of the card. */
+.build-detail>.card-body>.main {
+	min-width: 0;
+}
 .build-detail>.card-body>.main>.description {
 	border-width: 2px !important;
 }

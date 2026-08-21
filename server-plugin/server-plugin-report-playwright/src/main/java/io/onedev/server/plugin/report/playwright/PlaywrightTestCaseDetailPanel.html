@@ -1,0 +1,35 @@
+<wicket:panel>
+	<div class="playwright-test-detail">
+		<div wicket:id="results" class="playwright-attempt">
+			<div wicket:id="header" class="d-flex align-items-center mb-2">
+				<span wicket:id="attempt" class="font-weight-bold"></span>
+				<span wicket:id="status" class="badge badge-light ml-2"></span>
+				<span wicket:id="duration" class="text-muted ml-auto"></span>
+			</div>
+			<div wicket:id="errorsSection" class="playwright-section">
+				<div class="playwright-section-title">Errors</div>
+				<div wicket:id="errors">
+					<div wicket:id="error" class="playwright-output text-danger"></div>
+				</div>
+			</div>
+			<div wicket:id="stdoutSection" class="playwright-section">
+				<div class="playwright-section-title">Standard output</div>
+				<div wicket:id="stdout" class="playwright-output"></div>
+			</div>
+			<div wicket:id="stderrSection" class="playwright-section">
+				<div class="playwright-section-title">Standard error</div>
+				<div wicket:id="stderr" class="playwright-output"></div>
+			</div>
+			<div wicket:id="attachmentsSection" class="playwright-section">
+				<div class="playwright-section-title">Attachments</div>
+				<div wicket:id="attachments" class="playwright-attachment">
+					<a wicket:id="link" target="_blank" rel="noopener">
+						<img wicket:id="image" class="playwright-image" alt="Playwright attachment">
+						<span wicket:id="name" class="font-weight-bold"></span>
+					</a>
+					<span wicket:id="contentType" class="text-muted ml-2"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</wicket:panel>

@@ -436,7 +436,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					else
 						item.add(new WebMarkupContainer("duration").setVisible(false));
 
-					Component detailViewer = testCase.renderDetail("detail", getBuild());
+					Component detailViewer = testCase.renderDetail("detail", getBuild(), getReportName());
 					if (detailViewer != null)
 						item.add(detailViewer);
 					else

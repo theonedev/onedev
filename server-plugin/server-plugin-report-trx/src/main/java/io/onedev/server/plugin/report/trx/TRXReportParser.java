@@ -115,7 +115,7 @@ public class TRXReportParser {
 							testCaseData.duration) {
 
 						@Override
-						protected Component renderDetail(String componentId, Build build) {
+						protected Component renderDetail(String componentId, Build build, String reportName) {
 							if (detailInfo != null) {
 								if (SecurityUtils.canReadCode(build.getProject())) {
 									String transformed = new StringTransformer(PATTERN_LOCATION) {

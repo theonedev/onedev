@@ -54,9 +54,12 @@ onedev.server.sideInfo = {
 		var mql = window.matchMedia("(max-width: 1198px)");
 
 		// Wide pinned layouts restore from cookie (default open); overlay stays closed until opened
-		if (!overlayMode && Cookies.get(onedev.server.sideInfo.cookieKey) != "false")
-			$container.removeClass("closed");
+		if (!overlayMode && Cookies.get(onedev.server.sideInfo.cookieKey) != "false") {
+			$container.addClass("no-animation").removeClass("closed");
+			requestAnimationFrame(function(){$container.removeClass("no-animation");});		
+		}
 		onedev.server.sideInfo.syncTrigger($container);
+		$("html").addClass("side-info-ready");
 
 		function onBreakpointChange() {
 			var nextOverlayMode = onedev.server.sideInfo.isOverlayMode($container);
