@@ -21,3 +21,7 @@ pom.xml.versionsBackup
 *.bak
 *~.nib
 *.DS_Store
+
+e2e-test/node_modules/
+e2e-test/playwright-report/
+e2e-test/test-results/
