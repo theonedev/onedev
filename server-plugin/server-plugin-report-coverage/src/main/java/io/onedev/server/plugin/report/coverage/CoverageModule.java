@@ -2,36 +2,24 @@ package io.onedev.server.plugin.report.coverage;
 
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.server.model.Build.getProjectRelativeDirPath;
-import static io.onedev.server.plugin.report.coverage.CoverageStats.CATEGORY;
-import static io.onedev.server.plugin.report.coverage.CoverageStats.getReportLockName;
+import static io.onedev.server.codequality.CoverageStats.CATEGORY;
+import static io.onedev.server.codequality.CoverageStats.getReportLockName;
 import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 import static io.onedev.server.web.translation.Translation._T;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
-
-import org.apache.commons.lang.SerializationException;
-import org.apache.commons.lang.SerializationUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.BuildMetricService;
 import io.onedev.server.service.ProjectService;
@@ -54,8 +42,6 @@ import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
  */
 public class CoverageModule extends AbstractPluginModule {
 
-	private static final Logger logger = LoggerFactory.getLogger(CoverageModule.class);
-	
 	@Override
 	protected void configure() {
 		super.configure();
@@ -77,22 +63,6 @@ public class CoverageModule extends AbstractPluginModule {
 				return 200;
 			}
 			
-		});
-		
-		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> {
-			Long projectId = build.getProject().getId();
-			Long buildNumber = build.getNumber();
-			
-			Map<Integer, CoverageStatus> coverages = new HashMap<>();
-			for (var entry: getProjectService().runOnActiveServer(projectId, new GetLineCoverages(projectId, buildNumber, blobPath, reportName)).entrySet()) {
-				if (SecurityUtils.canAccessReport(build, entry.getKey())) {
-					entry.getValue().forEach((key, value) -> {
-						coverages.merge(key, value, CoverageStatus::mergeWith);
-					});
-				}
-			}
-			
-			return coverages;
 		});
 		
 		contribute(BuildTabContribution.class, new BuildTabContribution() {
@@ -164,49 +134,4 @@ public class CoverageModule extends AbstractPluginModule {
 		
 	}	
 	
-	private static class GetLineCoverages implements ClusterTask<Map<String, Map<Integer, CoverageStatus>>> {
-
-		private static final long serialVersionUID = 1L;
-
-		private final Long projectId;
-		
-		private final Long buildNumber;
-		
-		private final String blobPath;
-		
-		private final String reportName;
-		
-		public GetLineCoverages(Long projectId, Long buildNumber, String blobPath, @Nullable String reportName) {
-			this.projectId = projectId;
-			this.buildNumber = buildNumber;
-			this.blobPath = blobPath;
-			this.reportName = reportName;
-		}
-		
-		@SuppressWarnings("unchecked")
-		@Override
-		public Map<String, Map<Integer, CoverageStatus>> call() {
-			return read(getReportLockName(projectId, buildNumber), () -> {
-				Map<String, Map<Integer, CoverageStatus>> coverages = new HashMap<>();
-				File categoryDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CATEGORY);
-				if (categoryDir.exists()) {
-					for (File reportDir: categoryDir.listFiles()) {
-						if (reportName == null || reportName.equals(reportDir.getName())) { 
-							File lineCoveragesFile = new File(reportDir, CoverageStats.FILES + "/" + blobPath);
-							if (lineCoveragesFile.exists()) {
-								try (var is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
-									coverages.put(reportDir.getName(), (Map<Integer, CoverageStatus>) SerializationUtils.deserialize(is));
-								} catch (SerializationException e) {
-									logger.error("Error reading coverage status: " + lineCoveragesFile, e);
-								}
-							}
-						}
-					}
-				}
-				return coverages;
-			});
-			
-		}
-		
-	}
 }

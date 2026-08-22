@@ -19,9 +19,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
+import io.onedev.server.codequality.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport.TestCase;
+import io.onedev.server.codequality.UnitTestReport.TestSuite;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.StringTransformer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -74,7 +74,7 @@ public class JestReportParser {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected Component renderDetail(String componentId, Build build) {
+				public Component renderDetail(String componentId, Build build) {
 					return JestReportParser.renderMessage(componentId, build, testSuiteMessage);
 				}
 				
@@ -87,7 +87,7 @@ public class JestReportParser {
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					protected Component renderDetail(String componentId, Build build, String reportName) {
+					public Component renderDetail(String componentId, Build build, String reportName) {
 						return JestReportParser.renderMessage(componentId, build, testCaseMessage);
 					}
 					

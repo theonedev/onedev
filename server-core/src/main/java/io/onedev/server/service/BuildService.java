@@ -1,6 +1,8 @@
 package io.onedev.server.service;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -96,6 +98,12 @@ public interface BuildService extends EntityService<Build> {
 	
 	@Nullable
 	ArtifactInfo getArtifactInfo(Build build, @Nullable String artifactPath);
+
+	@NoDBAccess
+	void downloadArtifact(Long projectId, Long buildNumber, String artifactPath, OutputStream os);
+
+	@NoDBAccess
+	void uploadArtifact(Long projectId, Long buildNumber, String artifactPath, InputStream is);
 	
 	void deleteArtifact(Build build, @Nullable String artifactPath);
 	

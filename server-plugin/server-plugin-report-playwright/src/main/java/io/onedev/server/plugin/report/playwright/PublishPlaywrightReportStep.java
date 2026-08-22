@@ -21,19 +21,20 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.PublishUnitTestReportStep;
-import io.onedev.server.plugin.report.unittest.UnitTestReport;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
+import io.onedev.server.codequality.UnitTestReport;
+import io.onedev.server.codequality.UnitTestReport.TestCase;
 
 @Editable(order=10000, group=StepGroup.PUBLISH, name="Playwright Test Report")
 public class PublishPlaywrightReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;
 
-	@Editable(order=100, description="Specify Playwright test result files in JSON format relative to "
-			+ "<a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. "
-			+ "Configure Playwright reporter as <tt>[['json', { outputFile: 'results.json' }]]</tt>. "
-			+ "Make sure referenced artifacts such as screenshots and traces are also included. "
-			+ "Use * or ? for pattern match")
+	@Editable(order=100, description="""
+			Specify files to publish relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>.
+			Published files should include the Playwright JSON report and all referenced artifacts, such as screenshots and traces.
+			For example, run <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>
+			from the job working directory, and use <code>test-results/**</code> as the file pattern to publish the report and artifacts together.
+			Use * or ? for pattern matching""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty

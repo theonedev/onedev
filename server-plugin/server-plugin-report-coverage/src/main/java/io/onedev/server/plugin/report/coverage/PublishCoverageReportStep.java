@@ -7,6 +7,8 @@ import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
+import io.onedev.server.codequality.Coverage;
+import io.onedev.server.codequality.CoverageStats;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.BuildMetricService;
@@ -22,7 +24,7 @@ import java.io.*;
 import java.util.Map;
 
 import static io.onedev.commons.utils.LockUtils.write;
-import static io.onedev.server.plugin.report.coverage.CoverageStats.getReportLockName;
+import static io.onedev.server.codequality.CoverageStats.getReportLockName;
 
 @Editable
 public abstract class PublishCoverageReportStep extends PublishReportStep {

@@ -1,10 +1,6 @@
 package io.onedev.server.plugin.report.unittest;
 
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
+import io.onedev.server.codequality.UnitTestReport;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
@@ -28,7 +24,6 @@ import org.jspecify.annotations.Nullable;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,9 +34,7 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 		@Override
 		protected UnitTestReport load() {
 			try {
-				Long projectId = getProject().getId();
-				Long buildNumber = getBuild().getNumber();
-				return OneDev.getInstance(ProjectService.class).runOnActiveServer(projectId, new GetUnitTestReport(projectId, buildNumber, getReportName()));
+				return UnitTestReport.readFrom(getBuild(), getReportName());
 			} catch (Exception e) {
 				if (ExceptionUtils.find(e, SerializationException.class) != null)
 					return null;
@@ -116,27 +109,4 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 		
 	}
 	
-	private static class GetUnitTestReport implements ClusterTask<UnitTestReport> {
-
-		private final Long projectId;
-		
-		private final Long buildNumber;
-		
-		private final String reportName;
-		
-		private GetUnitTestReport(Long projectId, Long buildNumber, String reportName) {
-			this.projectId = projectId;
-			this.buildNumber = buildNumber;
-			this.reportName = reportName;
-		}		
-		
-		@Override
-		public UnitTestReport call() throws Exception {
-			return LockUtils.read(UnitTestReport.getReportLockName(projectId, buildNumber), () -> {
-				File reportDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);
-				return UnitTestReport.readFrom(reportDir);
-			});
-		}
-		
-	}
 }

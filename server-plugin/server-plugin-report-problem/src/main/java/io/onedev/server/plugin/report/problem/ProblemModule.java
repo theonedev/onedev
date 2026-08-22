@@ -2,37 +2,24 @@ package io.onedev.server.plugin.report.problem;
 
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.server.model.Build.getProjectRelativeDirPath;
-import static io.onedev.server.plugin.report.problem.ProblemReport.CATEGORY;
-import static io.onedev.server.plugin.report.problem.ProblemReport.getReportLockName;
+import static io.onedev.server.codequality.ProblemReport.CATEGORY;
+import static io.onedev.server.codequality.ProblemReport.getReportLockName;
 import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 import static io.onedev.server.web.translation.Translation._T;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.SerializationException;
-import org.apache.commons.lang.SerializationUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.ProblemMetric;
 import io.onedev.server.model.Project;
@@ -55,8 +42,6 @@ import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
  */
 public class ProblemModule extends AbstractPluginModule {
 
-	private static final Logger logger = LoggerFactory.getLogger(ProblemModule.class);
-	
 	@Override
 	protected void configure() {
 		super.configure();
@@ -79,22 +64,6 @@ public class ProblemModule extends AbstractPluginModule {
 				return 300;
 			}
 			
-		});
-		
-		contribute(CodeProblemContribution.class, (build, blobPath, reportName) -> {
-			Long projectId = build.getProject().getId();
-			Long buildNumber = build.getNumber();
-			
-			Map<String, Collection<CodeProblem>> problemsMap = getProjectService().runOnActiveServer(
-					projectId, new GetCodeProblems(projectId, buildNumber, blobPath, reportName));
-						
-			List<CodeProblem> problems = new ArrayList<>();
-			for (var entry: problemsMap.entrySet()) {
-				if (SecurityUtils.canAccessReport(build, entry.getKey()))
-					problems.addAll(entry.getValue());
-			}
-			
-			return problems;
 		});
 		
 		contribute(BuildTabContribution.class, new BuildTabContribution() {
@@ -131,55 +100,6 @@ public class ProblemModule extends AbstractPluginModule {
 
 	private ProjectService getProjectService() {
 		return OneDev.getInstance(ProjectService.class);
-	}
-	
-	private static class GetCodeProblems implements ClusterTask<Map<String, Collection<CodeProblem>>> {
-
-		private static final long serialVersionUID = 1L;
-
-		private final Long projectId;
-		
-		private final Long buildNumber;
-		
-		private final String blobPath;
-		
-		private final String reportName;
-		
-		public GetCodeProblems(Long projectId, Long buildNumber, @Nullable String blobPath, @Nullable String reportName) {
-			this.projectId = projectId;
-			this.buildNumber = buildNumber;
-			this.blobPath = blobPath;
-			this.reportName = reportName;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public Map<String, Collection<CodeProblem>> call() {
-			return read(getReportLockName(projectId, buildNumber), () -> {
-				Map<String, Collection<CodeProblem>> problems = new HashMap<>();
-				File categoryDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CATEGORY);
-				if (categoryDir.exists()) {
-					for (File reportDir: categoryDir.listFiles()) {
-						if (!isVersionFile(reportDir) && (reportName == null || reportName.equals(reportDir.getName()))) { 
-							if (blobPath != null) {
-								File file = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
-								if (file.exists()) {
-									try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
-										problems.put(reportDir.getName(), (Collection<CodeProblem>) SerializationUtils.deserialize(is));
-									} catch (SerializationException e) {
-										logger.error("Error reading problem report: " + file, e);
-									}
-								}	
-							} else {
-								problems.put(reportDir.getName(), ProblemReport.readFrom(reportDir).getProblems());
-							}					
-						}
-					}
-				}
-				return problems;
-			});
-		}
-		
 	}
 	
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {

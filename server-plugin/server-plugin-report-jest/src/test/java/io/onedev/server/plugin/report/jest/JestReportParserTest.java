@@ -14,8 +14,8 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport;
+import io.onedev.server.codequality.UnitTestReport.Status;
 import io.onedev.server.util.patternset.PatternSet;
 
 public class JestReportParserTest {

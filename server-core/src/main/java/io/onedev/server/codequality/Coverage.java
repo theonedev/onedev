@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.coverage;
+package io.onedev.server.codequality;
 
 import java.io.Serializable;
 

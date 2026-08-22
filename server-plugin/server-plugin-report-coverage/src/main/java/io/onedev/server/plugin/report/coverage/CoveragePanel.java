@@ -8,6 +8,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.codequality.Coverage;
+
  class CoveragePanel<T extends Coverage> extends GenericPanel<T> {
 
 	public CoveragePanel(String id, IModel<T> model) {

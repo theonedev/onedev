@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.report.playwright;
 
+import static io.onedev.server.codequality.UnitTestReport.ARTIFACTS;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,9 +25,9 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
+import io.onedev.server.codequality.UnitTestReport;
+import io.onedev.server.codequality.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport.TestCase;
 import io.onedev.server.util.patternset.PatternSet;
 
 public class PlaywrightReportParserTest {
@@ -81,6 +83,12 @@ public class PlaywrightReportParserTest {
 			assertEquals(Status.NOT_PASSED, timedOut.getStatus());
 			assertEquals("timedOut", timedOut.getStatusText());
 			assertEquals(120057, timedOut.getDuration());
+			List<Map<String, Object>> artifacts = getArtifacts(timedOut);
+			assertEquals(2, artifacts.size());
+			assertEquals("screenshot", artifacts.get(0).get("name"));
+			assertEquals("image/png", artifacts.get(0).get("contentType"));
+			assertEquals(ARTIFACTS + "/" + ARTIFACT_DIR + "/test-failed-1.png",
+					artifacts.get(0).get("path"));
 
 			TestCase passed = report.getTestCases().stream()
 					.filter(it -> it.getName().equals("serves the OneDev web interface"))
@@ -98,14 +106,19 @@ public class PlaywrightReportParserTest {
 			assertTrue(report.hasTestCaseDuration());
 
 			File copiedScreenshot = new File(reportDir,
-					PlaywrightReportParser.FILES + "/" + ARTIFACT_DIR + "/test-failed-1.png");
+					ARTIFACTS + "/" + ARTIFACT_DIR + "/test-failed-1.png");
 			assertTrue(copiedScreenshot.isFile());
 			assertArrayEquals(
 					Resources.toByteArray(Resources.getResource(
 							PlaywrightReportParserTest.class, ARTIFACT_DIR + "/test-failed-1.png")),
 					Files.readAllBytes(copiedScreenshot.toPath()));
 			report.writeTo(reportDir);
-			assertEquals(2, UnitTestReport.readFrom(reportDir).getTestCases().size());
+			UnitTestReport persistedReport = UnitTestReport.readFrom(reportDir);
+			assertEquals(2, persistedReport.getTestCases().size());
+			assertEquals(2, getArtifacts(persistedReport.getTestCases().stream()
+					.filter(it -> it.getName().equals(
+							"Issue Reporter can create and view a confidential issue"))
+					.findFirst().orElseThrow()).size());
 
 			JsonNode unsafeRootNode = rootNode.deepCopy();
 			((com.fasterxml.jackson.databind.node.ObjectNode) unsafeRootNode.path("suites").get(0)
@@ -114,10 +127,15 @@ public class PlaywrightReportParserTest {
 			File unsafeReportDir = temp.newFolder("unsafe-report");
 			PlaywrightReportParser.parse(build, unsafeRootNode, inputDir, unsafeReportDir, null);
 			assertFalse(new File(unsafeReportDir,
-					PlaywrightReportParser.FILES + "/" + ARTIFACT_DIR + "/test-failed-1.png").exists());
+					ARTIFACTS + "/" + ARTIFACT_DIR + "/test-failed-1.png").exists());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static List<Map<String, Object>> getArtifacts(TestCase testCase) {
+		return (List<Map<String, Object>>) testCase.getDetailData().get("artifacts");
 	}
 
 	@Test

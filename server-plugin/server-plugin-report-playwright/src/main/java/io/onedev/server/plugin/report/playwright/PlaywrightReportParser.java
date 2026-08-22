@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.report.playwright;
 
-import static io.onedev.server.plugin.report.unittest.UnitTestReport.Status.getOverallStatus;
+import static io.onedev.server.codequality.UnitTestReport.Status.getOverallStatus;
+import static io.onedev.server.codequality.UnitTestReport.ARTIFACTS;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.io.File;
@@ -29,17 +30,15 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
+import io.onedev.server.codequality.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport.TestCase;
+import io.onedev.server.codequality.UnitTestReport.TestSuite;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.StringTransformer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 public class PlaywrightReportParser {
-
-	static final String FILES = "files";
 
 	private static final Pattern PATTERN_LOCATION = Pattern.compile("([^\\s()]+):(\\d+):(\\d+)");
 
@@ -69,7 +68,7 @@ public class PlaywrightReportParser {
 
 				@Nullable
 				@Override
-				protected Component renderDetail(String componentId, Build build) {
+				public Component renderDetail(String componentId, Build build) {
 					return null;
 				}
 
@@ -85,13 +84,28 @@ public class PlaywrightReportParser {
 
 					@Nullable
 					@Override
-					protected Component renderDetail(String componentId, Build build, String reportName) {
+					public Component renderDetail(String componentId, Build build, String reportName) {
 						if (shouldRenderResults(results)) {
 							return new PlaywrightTestCaseDetailPanel(
 									componentId, build, reportName, results);
 						} else {
 							return PlaywrightReportParser.renderDetail(componentId, build, detail);
 						}
+					}
+
+					@Override
+					public Map<String, Object> getDetailData() {
+						var artifacts = results.stream()
+								.flatMap(it -> it.attachments.stream())
+								.map(it -> {
+									Map<String, Object> artifact = new LinkedHashMap<>();
+									artifact.put("name", it.name);
+									artifact.put("contentType", it.contentType);
+									artifact.put("path", it.path);
+									return artifact;
+								})
+								.collect(Collectors.toList());
+						return Map.of("artifacts", artifacts);
 					}
 
 				});
@@ -191,7 +205,7 @@ public class PlaywrightReportParser {
 						AttachmentData attachment = new AttachmentData();
 						attachment.name = attachmentNode.path("name").asText();
 						attachment.contentType = attachmentNode.path("contentType").asText();
-						attachment.path = FILES + "/" + artifactPath;
+						attachment.path = ARTIFACTS + "/" + artifactPath;
 						result.attachments.add(attachment);
 					}
 				}
@@ -273,7 +287,7 @@ public class PlaywrightReportParser {
 			warn(logger, "Playwright artifact not found: " + artifactPath);
 			return false;
 		}
-		File targetFile = new File(reportDir, FILES + "/" + artifactPath);
+		File targetFile = new File(reportDir, ARTIFACTS + "/" + artifactPath);
 		FileUtils.createDir(targetFile.getParentFile());
 		try {
 			FileUtils.copyFile(artifactFile, targetFile);

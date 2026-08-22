@@ -6,6 +6,7 @@ import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
+import io.onedev.server.codequality.UnitTestReport;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.BuildMetricService;
 import io.onedev.server.service.ProjectService;
@@ -18,7 +19,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.File;
 
 import static io.onedev.commons.utils.LockUtils.write;
-import static io.onedev.server.plugin.report.unittest.UnitTestReport.getReportLockName;
+import static io.onedev.server.codequality.UnitTestReport.getReportLockName;
 
 @Editable
 public abstract class PublishUnitTestReportStep extends PublishReportStep {
@@ -34,6 +35,11 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 			UnitTestReport report = write(getReportLockName(build), () -> {
 				UnitTestReport aReport = process(build, inputDir, logger);
 				if (aReport != null) {
+					var notPassedCount = aReport.getTestCases().stream()
+							.filter(it -> it.getStatus() == UnitTestReport.Status.NOT_PASSED)
+							.count();
+					if (notPassedCount > 0)
+						logger.error("[" + getReportName() + "]: " + notPassedCount + " not passed test cases");
 					FileUtils.createDir(reportDir);
 					aReport.writeTo(reportDir);
 					OneDev.getInstance(ProjectService.class).directoryModified(

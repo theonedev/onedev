@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.coverage;
+package io.onedev.server.codequality;
 
 public class FileCoverage extends NamedCoverage {
 

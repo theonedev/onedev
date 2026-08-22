@@ -5,9 +5,9 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
+import io.onedev.server.codequality.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport.TestCase;
+import io.onedev.server.codequality.UnitTestReport.TestSuite;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.StringTransformer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.onedev.server.plugin.report.unittest.UnitTestReport.Status.getOverallStatus;
+import static io.onedev.server.codequality.UnitTestReport.Status.getOverallStatus;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
@@ -101,7 +101,7 @@ public class TRXReportParser {
 				var testSuite = new TestSuite(entry.getKey(), status, duration, null, null) {
 
 					@Override
-					protected Component renderDetail(String componentId, Build build) {
+					public Component renderDetail(String componentId, Build build) {
 						return null;
 					}
 				};
@@ -115,7 +115,7 @@ public class TRXReportParser {
 							testCaseData.duration) {
 
 						@Override
-						protected Component renderDetail(String componentId, Build build, String reportName) {
+						public Component renderDetail(String componentId, Build build, String reportName) {
 							if (detailInfo != null) {
 								if (SecurityUtils.canReadCode(build.getProject())) {
 									String transformed = new StringTransformer(PATTERN_LOCATION) {

@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.report.coverage;
 
+import io.onedev.server.codequality.CoverageStats;
 import io.onedev.server.codequality.CoverageStatus;
 
 import java.util.Map;

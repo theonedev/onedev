@@ -3,12 +3,10 @@ package io.onedev.server.plugin.report.coverage;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.jspecify.annotations.Nullable;
 
@@ -42,13 +40,13 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.StringMatcher;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
+import io.onedev.server.codequality.Coverage;
+import io.onedev.server.codequality.CoverageStats;
+import io.onedev.server.codequality.FileCoverage;
+import io.onedev.server.codequality.GroupCoverage;
+import io.onedev.server.codequality.NamedCoverage;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -91,8 +89,7 @@ public class CoverageReportPage extends BuildReportPage {
 		@Override
 		protected CoverageStats load() {
 			try {
-				Long projectId = getProject().getId();
-				return OneDev.getInstance(ProjectService.class).runOnActiveServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
+				return CoverageStats.readFrom(getBuild(), getReportName());
 			} catch (Exception e) {
 				if (ExceptionUtils.find(e, SerializationException.class) != null)
 					return null;
@@ -432,31 +429,4 @@ public class CoverageReportPage extends BuildReportPage {
 		
 	}
 	
-	private static class GetCoverageReport implements ClusterTask<CoverageStats> {
-
-		private final Long projectId;
-		
-		private final Long buildNumber;
-		
-		private final String reportName;
-		
-		private GetCoverageReport(Long projectId, Long buildNumber, String reportName) {
-			this.projectId = projectId;
-			this.buildNumber = buildNumber;
-			this.reportName = reportName;
-		}
-		
-		@Override
-		public CoverageStats call() throws Exception {
-			return LockUtils.read(CoverageStats.getReportLockName(projectId, buildNumber), new Callable<CoverageStats>() {
-
-				@Override
-				public CoverageStats call() throws Exception {
-					return CoverageStats.readFrom(new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CoverageStats.CATEGORY + "/" + reportName));
-				}
-				
-			});
-		}
-		
-	}
 }

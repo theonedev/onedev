@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.report.coverage;
 
+import io.onedev.server.codequality.Coverage;
+
 enum CoverageOrderBy {
 	DEFAULT {
 

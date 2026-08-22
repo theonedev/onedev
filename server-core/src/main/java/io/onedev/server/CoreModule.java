@@ -8,7 +8,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -81,8 +80,6 @@ import io.onedev.server.assets.AssetsSyncManager;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.attachment.DefaultAttachmentService;
 import io.onedev.server.cluster.ClusterResource;
-import io.onedev.server.codequality.CodeProblemContribution;
-import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.commandhandler.ApplyDatabaseConstraints;
 import io.onedev.server.commandhandler.BackupDatabase;
 import io.onedev.server.commandhandler.CheckDataVersion;
@@ -640,9 +637,6 @@ public class CoreModule extends AbstractPluginModule {
 
 	    bind(ExecutorService.class).toProvider(() -> Bootstrap.executorService).in(Singleton.class);
 	    	    	    
-		contribute(CodeProblemContribution.class, (build, blobPath, reportName) -> newArrayList());
-	    
-		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
 		contribute(AdministrationSettingContribution.class, () -> new ArrayList<>());
 		contribute(ProjectSettingContribution.class, () -> new ArrayList<>());
 		contribute(ChatToolsContribution.class, page -> List.of());

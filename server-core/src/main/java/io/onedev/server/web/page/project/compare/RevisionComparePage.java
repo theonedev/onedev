@@ -41,9 +41,9 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.CoverageStats;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.codequality.ProblemReport;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
@@ -134,12 +134,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 
 	@Inject
 	private CodeCommentStatusChangeService codeCommentStatusChangeService;
-
-	@Inject
-	private Set<CodeProblemContribution> codeProblemContributions;
-
-	@Inject
-	private Set<LineCoverageContribution> lineCoverageContributions;
 	
 	private final IModel<PullRequest> requestModel;
 	
@@ -909,8 +903,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		Set<CodeProblem> problems = new HashSet<>();
 		ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
 		for (Build build: state.leftSide.getProject().getBuilds(oldCommitId)) {
-			for (CodeProblemContribution contribution: codeProblemContributions)
-				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
+			problems.addAll(ProblemReport.getCodeProblems(build, blobPath, null));
 		}
 		return problems;
 	}
@@ -919,8 +912,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	public Collection<CodeProblem> getNewProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
 		for (Build build: state.rightSide.getProject().getBuilds(rightCommitId)) {
-			for (CodeProblemContribution contribution: codeProblemContributions)
-				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
+			problems.addAll(ProblemReport.getCodeProblems(build, blobPath, null));
 		}
 		return problems;
 	}
@@ -930,11 +922,9 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
 		for (Build build: state.leftSide.getProject().getBuilds(oldCommitId)) {
-			for (LineCoverageContribution contribution: lineCoverageContributions) {
-				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
-					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
-				});
-			}
+			CoverageStats.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
+				coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
+			});
 		}
 		return coverages;
 	}
@@ -943,11 +933,9 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		for (Build build: state.rightSide.getProject().getBuilds(rightCommitId)) {
-			for (LineCoverageContribution contribution: lineCoverageContributions) {
-				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
-					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
-				});
-			}
+			CoverageStats.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
+				coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
+			});
 		}
 		return coverages;
 	}

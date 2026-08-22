@@ -59,9 +59,9 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecParseException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.CoverageStats;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.codequality.ProblemReport;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -941,8 +941,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	public Collection<CodeProblem> getOldProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
 		for (Build build: getProject().getBuilds(getCompareWith())) {
-			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
-				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
+			problems.addAll(ProblemReport.getCodeProblems(build, blobPath, null));
 		}
 		return problems;
 	}
@@ -951,8 +950,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	public Collection<CodeProblem> getNewProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
 		for (Build build: getProject().getBuilds(getCommit())) {
-			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
-				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
+			problems.addAll(ProblemReport.getCodeProblems(build, blobPath, null));
 		}
 		return problems;
 	}
@@ -961,11 +959,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		for (Build build: getProject().getBuilds(getCompareWith())) {
-			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
-					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
-				});
-			}
+			CoverageStats.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
+				coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
+			});
 		}
 		return coverages;
 	}
@@ -974,11 +970,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		for (Build build: getProject().getBuilds(getCommit())) {
-			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
-					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
-				});
-			}
+			CoverageStats.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
+				coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
+			});
 		}
 		return coverages;
 	}

@@ -82,9 +82,9 @@ import io.onedev.server.ai.tools.code.GetHighlightedText;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.CoverageStats;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.codequality.ProblemReport;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -171,12 +171,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	private CodeSearchService searchService;
 
 	@Inject
-	private Set<CodeProblemContribution> codeProblemContributions;
-
-	@Inject
-	private Set<LineCoverageContribution> lineCoverageContributions;
-
-	@Inject
 	private GitService gitService;
 
 	@Inject
@@ -204,13 +198,10 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			Map<Integer, CoverageStatus> coverages = new HashMap<>();
 			var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 			for (var build: buildService.query(project, commitId, null, null, null, null, new HashMap<>())) {
-				for (var contribution: codeProblemContributions) 
-					problems.addAll(contribution.getCodeProblems(build, path, context.getProblemReport()));
-				for (var contribution: lineCoverageContributions) { 
-					contribution.getLineCoverages(build, path, context.getCoverageReport()).forEach((key, value)->{
-						coverages.merge(key, value, CoverageStatus::mergeWith);
-					});
-				}
+				problems.addAll(ProblemReport.getCodeProblems(build, path, context.getProblemReport()));
+				CoverageStats.getLineCoverages(build, path, context.getCoverageReport()).forEach((key, value)->{
+					coverages.merge(key, value, CoverageStatus::mergeWith);
+				});
 			}
 			
 			return new AnnotationInfo(

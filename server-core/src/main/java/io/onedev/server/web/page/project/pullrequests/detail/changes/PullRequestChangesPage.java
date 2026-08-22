@@ -51,9 +51,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.CoverageStats;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.codequality.ProblemReport;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
@@ -982,10 +982,43 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		Set<CodeProblem> problems = new HashSet<>();
 		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
 		for (Build build: getProject().getBuilds(buildCommitId)) {
-			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
-				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
-					if (!buildCommitId.equals(getComparisonBase())) {
-						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
+			for (CodeProblem problem: ProblemReport.getCodeProblems(build, blobPath, null)) {
+				if (!buildCommitId.equals(getComparisonBase())) {
+					Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
+					if (problem.getTarget() instanceof BlobTarget) {
+						BlobTarget repoTarget = (BlobTarget) problem.getTarget();
+						if (repoTarget.getLocation() != null) {
+							PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
+							if (location != null) {
+								repoTarget = new BlobTarget(repoTarget.getGroupKey().getName(), location);
+								problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
+							}
+						}
+					}
+				} else {
+					problems.add(problem);
+				}
+			}
+		}
+		return problems;
+	}
+
+	@Override
+	public Collection<CodeProblem> getNewProblems(String blobPath) {
+		PullRequest request = getPullRequest();
+		ObjectId buildCommitId;
+		if (request.getBuildCommitHash() != null)
+			buildCommitId = ObjectId.fromString(request.getBuildCommitHash());
+		else 
+			buildCommitId = ObjectId.zeroId();
+		
+		Set<CodeProblem> problems = new HashSet<>();
+		for (Build build: getProject().getBuilds(buildCommitId)) {
+			if (request.equals(build.getRequest())) {
+				for (CodeProblem problem: ProblemReport.getCodeProblems(build, blobPath, null)) {
+					if (!state.newCommitHash.equals(buildCommitId.name())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
+								ObjectId.fromString(state.newCommitHash), blobPath);
 						if (problem.getTarget() instanceof BlobTarget) {
 							BlobTarget repoTarget = (BlobTarget) problem.getTarget();
 							if (repoTarget.getLocation() != null) {
@@ -1006,57 +1039,18 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public Collection<CodeProblem> getNewProblems(String blobPath) {
-		PullRequest request = getPullRequest();
-		ObjectId buildCommitId;
-		if (request.getBuildCommitHash() != null)
-			buildCommitId = ObjectId.fromString(request.getBuildCommitHash());
-		else 
-			buildCommitId = ObjectId.zeroId();
-		
-		Set<CodeProblem> problems = new HashSet<>();
-		for (Build build: getProject().getBuilds(buildCommitId)) {
-			if (request.equals(build.getRequest())) {
-				for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
-					for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
-						if (!state.newCommitHash.equals(buildCommitId.name())) {
-							Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
-									ObjectId.fromString(state.newCommitHash), blobPath);
-							if (problem.getTarget() instanceof BlobTarget) {
-								BlobTarget repoTarget = (BlobTarget) problem.getTarget();
-								if (repoTarget.getLocation() != null) {
-									PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
-									if (location != null) {
-										repoTarget = new BlobTarget(repoTarget.getGroupKey().getName(), location);
-										problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
-									}
-								}
-							}
-						} else {
-							problems.add(problem);
-						}
-					}
-				}
-			}
-		}
-		return problems;
-	}
-
-	@Override
 	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
 		for (Build build: getProject().getBuilds(buildCommitId)) {
-			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-				for (Map.Entry<Integer, CoverageStatus> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
-					if (!buildCommitId.equals(getComparisonBase())) {
-						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
-						Integer mappedLine = lineMapping.get(entry.getKey());
-						if (mappedLine != null)
-							coverages.put(mappedLine, entry.getValue());
-					} else {
-						coverages.put(entry.getKey(), entry.getValue());
-					}
+			for (Map.Entry<Integer, CoverageStatus> entry: CoverageStats.getLineCoverages(build, blobPath, null).entrySet()) {
+				if (!buildCommitId.equals(getComparisonBase())) {
+					Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
+					Integer mappedLine = lineMapping.get(entry.getKey());
+					if (mappedLine != null)
+						coverages.put(mappedLine, entry.getValue());
+				} else {
+					coverages.put(entry.getKey(), entry.getValue());
 				}
 			}
 		}
@@ -1075,17 +1069,15 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		for (Build build: getProject().getBuilds(buildCommitId)) {
 			if (request.equals(build.getRequest())) {
-				for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-					for (Map.Entry<Integer, CoverageStatus> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
-						if (!state.newCommitHash.equals(buildCommitId.name())) {
-							Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
-									ObjectId.fromString(state.newCommitHash), blobPath);
-							Integer mappedLine = lineMapping.get(entry.getKey());
-							if (mappedLine != null)
-								coverages.put(mappedLine, entry.getValue());
-						} else {
-							coverages.put(entry.getKey(), entry.getValue());
-						}
+				for (Map.Entry<Integer, CoverageStatus> entry: CoverageStats.getLineCoverages(build, blobPath, null).entrySet()) {
+					if (!state.newCommitHash.equals(buildCommitId.name())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
+								ObjectId.fromString(state.newCommitHash), blobPath);
+						Integer mappedLine = lineMapping.get(entry.getKey());
+						if (mappedLine != null)
+							coverages.put(mappedLine, entry.getValue());
+					} else {
+						coverages.put(entry.getKey(), entry.getValue());
 					}
 				}
 			}

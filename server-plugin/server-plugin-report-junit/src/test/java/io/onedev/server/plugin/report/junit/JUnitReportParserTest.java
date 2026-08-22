@@ -1,8 +1,8 @@
 package io.onedev.server.plugin.report.junit;
 
 import com.google.common.io.Resources;
-import io.onedev.server.plugin.report.unittest.UnitTestReport;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport;
+import io.onedev.server.codequality.UnitTestReport.Status;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import org.junit.Test;

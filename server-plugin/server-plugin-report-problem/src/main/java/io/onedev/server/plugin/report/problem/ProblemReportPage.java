@@ -3,14 +3,12 @@ package io.onedev.server.plugin.report.problem;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
-import java.io.File;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.jspecify.annotations.Nullable;
 
@@ -46,18 +44,15 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.codequality.ProblemGroup;
+import io.onedev.server.codequality.ProblemReport;
 import io.onedev.server.codequality.ProblemTarget;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -97,10 +92,9 @@ public class ProblemReportPage extends BuildReportPage {
 		@Override
 		protected ProblemReport load() {
 			try {
-				Long projectId = getProject().getId();
-				Long buildNumber = getBuild().getNumber();
-
-				var report = OneDev.getInstance(ProjectService.class).runOnActiveServer(projectId, new GetProblemReport(projectId, buildNumber, getReportName()));
+				var report = ProblemReport.readFrom(getBuild(), getReportName());
+				if (report == null)
+					return null;
 				for (var problem: report.getProblems()) {
 					if (problem.getTarget() == null)
 						return null;
@@ -427,35 +421,6 @@ public class ProblemReportPage extends BuildReportPage {
 		if (file != null)
 			params.add(PARAM_NAME, file);
 		return params;
-	}
-	
-	private static class GetProblemReport implements ClusterTask<ProblemReport> {
-
-		private final Long projectId;
-		
-		private final Long buildNumber;
-		
-		private final String reportName;
-		
-		private GetProblemReport(Long projectId, Long buildNumber, String reportName) {
-			this.projectId = projectId;
-			this.buildNumber = buildNumber;
-			this.reportName = reportName;
-		}
-		
-		@Override
-		public ProblemReport call() throws Exception {
-			return LockUtils.read(ProblemReport.getReportLockName(projectId, buildNumber), new Callable<ProblemReport>() {
-
-				@Override
-				public ProblemReport call() throws Exception {
-					File reportDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), ProblemReport.CATEGORY + "/" + reportName);
-					return ProblemReport.readFrom(reportDir);
-				}
-				
-			});
-		}
-		
 	}
 	
 }

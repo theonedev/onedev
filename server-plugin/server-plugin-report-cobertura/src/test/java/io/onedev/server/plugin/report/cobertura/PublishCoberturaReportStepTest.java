@@ -5,7 +5,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.coverage.FileCoverage;
+import io.onedev.server.codequality.FileCoverage;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;

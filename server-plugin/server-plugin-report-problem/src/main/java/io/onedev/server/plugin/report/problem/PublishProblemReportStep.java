@@ -11,6 +11,7 @@ import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.codequality.BlobTarget;
+import io.onedev.server.codequality.ProblemReport;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.BuildMetricService;
 import io.onedev.server.service.ProjectService;
@@ -101,7 +102,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 				OneDev.getInstance(Dao.class).persist(metric);
 
 				if (report.getProblems().stream().anyMatch(it -> it.getSeverity().ordinal() <= failThreshold.ordinal())) {
-					logger.error(getReportName() + ": found problems with severity " + failThreshold + " or higher");
+					logger.error("[" + getReportName() + "]: found problems with severity " + failThreshold + " or higher");
 					return new ServerStepResult(false);
 				} else {
 					return new ServerStepResult(true);

@@ -18,9 +18,9 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
+import io.onedev.server.codequality.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport.TestCase;
+import io.onedev.server.codequality.UnitTestReport.TestSuite;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
@@ -59,7 +59,7 @@ public class GTestReportParser {
 
 				@Nullable
 				@Override
-				protected Component renderDetail(String componentId, Build build) {
+				public Component renderDetail(String componentId, Build build) {
 					return null;
 				}
 			};
@@ -75,7 +75,7 @@ public class GTestReportParser {
 
 						@Nullable
 						@Override
-						protected Component renderDetail(String componentId, Build build, String reportName) {
+						public Component renderDetail(String componentId, Build build, String reportName) {
 							return renderMessage(componentId, build, blobLocation, message);
 						}
 					});
@@ -100,7 +100,7 @@ public class GTestReportParser {
 
 						@Nullable
 						@Override
-						protected Component renderDetail(String componentId, Build build, String reportName) {
+						public Component renderDetail(String componentId, Build build, String reportName) {
 							return renderMessage(componentId, build, blobLocation, message);
 						}
 					});

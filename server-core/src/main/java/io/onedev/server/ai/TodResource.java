@@ -4,8 +4,12 @@ import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -48,9 +53,10 @@ import io.onedev.server.SubscriptionService;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.ContainerTarget;
 import io.onedev.server.codequality.GeneralTarget;
+import io.onedev.server.codequality.ProblemReport;
+import io.onedev.server.codequality.UnitTestReport;
 import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
@@ -111,6 +117,7 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.web.util.MimeUtils;
 
 @Api(internal = true)
 @Path("/tod")
@@ -775,7 +782,6 @@ public class TodResource {
         return workMap;
     }
 
-
     @Path("/query-pull-requests")
     @GET
     public List<Map<String, Object>> queryPullRequests(
@@ -872,32 +878,104 @@ public class TodResource {
         if (!SecurityUtils.canAccessReport(build, reportName))
             throw new UnauthorizedException("No permission to access report: " + reportName);
 
+        var report = ProblemReport.readFrom(build, reportName);
+        if (report == null)
+            throw new NotFoundException("Code problem report not found: " + reportName);
+
         var problems = new ArrayList<Map<String, Object>>();
-        for (var contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
-            for (var problem: contribution.getCodeProblems(build, null, reportName)) {
-                if (problem.getSeverity().ordinal() <= severityLevel.ordinal()) {
-                    var problemMap = new HashMap<String, Object>();
-                    problemMap.put("severity", problem.getSeverity().name());
-                    problemMap.put("message", problem.getMessage());
-                    if (problem.getTarget() instanceof BlobTarget blobTarget) {
-                        problemMap.put("file", blobTarget.getGroupKey().getName());
-                        if (blobTarget.getLocation() != null) {
-                            problemMap.put("beginLine", blobTarget.getLocation().getFromRow() + 1);
-                            problemMap.put("endLine", blobTarget.getLocation().getToRow() + 1);
-                        }
-                    } else if (problem.getTarget() instanceof ContainerTarget containerTarget) {
-                        problemMap.put("target", containerTarget.getGroupKey().getName());
-                        problemMap.put("platform", ((ContainerTarget.GroupKey) containerTarget.getGroupKey()).getPlatform());
-                    } else if (problem.getTarget() instanceof GeneralTarget generalTarget) {
-                        problemMap.put("target", generalTarget.getGroupKey().getName());
-                    } else {
-                        throw new ExplicitException("Unknown problem target type: " + problem.getTarget().getClass().getName());
+        for (var problem: report.getProblems()) {
+            if (problem.getSeverity().ordinal() <= severityLevel.ordinal()) {
+                var problemMap = new HashMap<String, Object>();
+                problemMap.put("severity", problem.getSeverity().name());
+                problemMap.put("message", problem.getMessage());
+                if (problem.getTarget() instanceof BlobTarget blobTarget) {
+                    problemMap.put("file", blobTarget.getGroupKey().getName());
+                    if (blobTarget.getLocation() != null) {
+                        problemMap.put("beginLine", blobTarget.getLocation().getFromRow() + 1);
+                        problemMap.put("endLine", blobTarget.getLocation().getToRow() + 1);
                     }
-                    problems.add(problemMap);
-                }               
+                } else if (problem.getTarget() instanceof ContainerTarget containerTarget) {
+                    problemMap.put("target", containerTarget.getGroupKey().getName());
+                    problemMap.put("platform", ((ContainerTarget.GroupKey) containerTarget.getGroupKey()).getPlatform());
+                } else if (problem.getTarget() instanceof GeneralTarget generalTarget) {
+                    problemMap.put("target", generalTarget.getGroupKey().getName());
+                } else {
+                    throw new ExplicitException("Unknown problem target type: " + problem.getTarget().getClass().getName());
+                }
+                problems.add(problemMap);
             }
         }
         return problems;
+    }
+
+    @Path("/get-build-unit-test-report")
+    @GET
+    public Response getBuildUnitTestReport(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String buildReference,
+                @QueryParam("reportName") @NotNull String reportName,
+                @QueryParam("artifactPath") String artifactPath) {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var build = getBuild(currentProject, buildReference);
+
+        if (!SecurityUtils.canAccessReport(build, reportName))
+            throw new UnauthorizedException("No permission to access report: " + reportName);
+        if (artifactPath != null) {
+            if (reportName.contains("..") || artifactPath.contains("..")
+                    || !artifactPath.startsWith(UnitTestReport.ARTIFACTS + "/")) {
+                throw new ExplicitException("Invalid artifact request path");
+            }
+            String mediaType;
+            try {
+                mediaType = MimeUtils.sanitize(Files.probeContentType(Paths.get(artifactPath)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String fileName = StringUtils.substringAfterLast(artifactPath, "/");
+            var projectId = build.getProject().getId();
+            var buildNumber = build.getNumber();
+            StreamingOutput streamingOutput = os -> UnitTestReport.downloadArtifact(
+                    projectId, buildNumber, reportName, artifactPath, os);
+            return Response.ok(streamingOutput, mediaType)
+                    .header("X-Content-Type-Options", "nosniff")
+                    .header("Content-Disposition", "attachment; filename=\""
+                            + URLEncoder.encode(fileName, StandardCharsets.UTF_8) + "\"")
+                    .build();
+        } else {
+            var report = UnitTestReport.readFrom(build, reportName);
+            if (report != null) {
+                var reportData = new HashMap<String, Object>();
+                reportData.put("hasTestCaseDuration", report.hasTestCaseDuration());
+
+                var testSuites = new ArrayList<Map<String, Object>>();
+                for (var testSuite: report.getTestSuites()) {
+                    var testSuiteData = new HashMap<String, Object>();
+                    testSuiteData.put("name", testSuite.getName());
+                    testSuiteData.put("status", testSuite.getStatus().name());
+                    testSuiteData.put("duration", testSuite.getDuration());
+                    testSuites.add(testSuiteData);
+                }
+                reportData.put("testSuites", testSuites);
+
+                var testCases = new ArrayList<Map<String, Object>>();
+                for (var testCase: report.getTestCases()) {
+                    var testCaseData = new HashMap<String, Object>();
+                    testCaseData.put("testSuite", testCase.getTestSuite().getName());
+                    testCaseData.put("name", testCase.getName());
+                    testCaseData.put("status", testCase.getStatus().name());
+                    testCaseData.put("statusText", testCase.getStatusText());
+                    testCaseData.put("duration", testCase.getDuration());
+                    testCaseData.putAll(testCase.getDetailData());
+                    testCases.add(testCaseData);
+                }
+                reportData.put("testCases", testCases);
+                return Response.ok(reportData).build();
+            }
+            throw new NotFoundException("Unit test report not found: " + reportName);
+        }
     }
     
     @Path("/get-previous-successful-similar-build")

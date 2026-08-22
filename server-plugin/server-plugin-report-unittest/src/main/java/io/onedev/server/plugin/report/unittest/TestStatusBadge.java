@@ -6,7 +6,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport.Status;
 import io.onedev.server.web.util.TextUtils;
 
 class TestStatusBadge extends Label {

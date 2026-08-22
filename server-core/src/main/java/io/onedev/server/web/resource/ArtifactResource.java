@@ -1,14 +1,6 @@
 package io.onedev.server.web.resource;
 
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getArtifactsLockName;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -16,16 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.mime.MimeTypes;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
@@ -34,15 +19,12 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.ProjectService;
-import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.web.util.MimeUtils;
 
@@ -118,44 +100,8 @@ public class ArtifactResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				ProjectService projectService = OneDev.getInstance(ProjectService.class);
-				String activeServer = projectService.getActiveServer(projectId, true);
-				ClusterService clusterService = OneDev.getInstance(ClusterService.class);
-				if (activeServer.equals(clusterService.getLocalServerAddress())) {
-					read(getArtifactsLockName(projectId, buildNumber), () -> {
-						File artifactFile = new File(getBuildService().getArtifactsDir(projectId, buildNumber), artifactPath);
-						try (
-								InputStream is = new FileInputStream(artifactFile);
-								OutputStream os = attributes.getResponse().getOutputStream()) {
-							IOUtils.copy(is, os, BUFFER_SIZE);
-						}
-						return null;
-					});
-				} else {
-	    			Client client = ClientBuilder.newClient();
-	    			try {
-	    				CharSequence path = RequestCycle.get().urlFor(
-	    						new ArtifactResourceReference(), 
-	    						ArtifactResource.paramsOf(projectId, buildNumber, artifactPath));
-	    				String activeServerUrl = clusterService.getServerUrl(activeServer);
-	    				
-	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
-	    				Invocation.Builder builder =  target.request();
-	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterService.getCredential());
-	    				
-	    				try (Response response = builder.get()) {
-	    					KubernetesHelper.checkStatus(response);
-	    					try (
-	    							InputStream is = response.readEntity(InputStream.class);
-	    							OutputStream os = attributes.getResponse().getOutputStream()) {
-	    						IOUtils.copy(is, os, BUFFER_SIZE);
-	    					} 
-	    				} 
-	    			} finally {
-	    				client.close();
-	    			}
-				}
+				getBuildService().downloadArtifact(projectId, buildNumber, artifactPath, 
+						attributes.getResponse().getOutputStream());
 			}			
 			
 		});

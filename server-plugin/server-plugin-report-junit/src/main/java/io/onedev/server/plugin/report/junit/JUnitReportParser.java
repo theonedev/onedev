@@ -12,9 +12,9 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
+import io.onedev.server.codequality.UnitTestReport.Status;
+import io.onedev.server.codequality.UnitTestReport.TestCase;
+import io.onedev.server.codequality.UnitTestReport.TestSuite;
 
 public class JUnitReportParser {
 
@@ -60,7 +60,7 @@ public class JUnitReportParser {
 
 				@Nullable
 				@Override
-				protected Component renderDetail(String componentId, Build build) {
+				public Component renderDetail(String componentId, Build build) {
 					return null;
 				}
 			};
@@ -71,7 +71,7 @@ public class JUnitReportParser {
 					testCases.add(new TestCase(testSuite, name, Status.NOT_RUN, "skipped", 0) {
 
 						@Override
-						protected Component renderDetail(String componentId, Build build, String reportName) {
+						public Component renderDetail(String componentId, Build build, String reportName) {
 							return null;
 						}
 					});
@@ -93,7 +93,7 @@ public class JUnitReportParser {
 					testCases.add(new TestCase(testSuite, name, status, null, duration) {
 
 						@Override
-						protected Component renderDetail(String componentId, Build build, String reportName) {
+						public Component renderDetail(String componentId, Build build, String reportName) {
 							if (message != null)
 								return new Label(componentId, message);
 							else 

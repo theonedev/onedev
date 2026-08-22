@@ -1,7 +1,6 @@
 package io.onedev.server.cluster;
 
 import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.model.Build.getArtifactsLockName;
 import static io.onedev.server.model.Project.SHARE_TEST_DIR;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
@@ -41,9 +40,9 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TarUtils;
-import io.onedev.server.StorageService;
 import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.attachment.AttachmentService;
+import io.onedev.server.codequality.UnitTestReport;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.LfsObject;
@@ -82,9 +81,6 @@ public class ClusterResource {
 	
 	@Inject
 	private VisitInfoService visitInfoService;
-	
-	@Inject
-	private StorageService storageService;
 	
 	@Inject
 	private PackBlobService packBlobService;
@@ -179,14 +175,23 @@ public class ClusterResource {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
-		StreamingOutput os = output -> read(getArtifactsLockName(projectId, buildNumber), () -> {
-			File artifactsDir = buildService.getArtifactsDir(projectId, buildNumber);
-			File artifactFile = new File(artifactsDir, artifactPath);
-			try (output; InputStream is = new FileInputStream(artifactFile)) {
-				IOUtils.copy(is, output, BUFFER_SIZE);
-			}
-			return null;
-		});
+		StreamingOutput os = output -> buildService.downloadArtifact(
+				projectId, buildNumber, artifactPath, output);
+		return ok(os).build();
+	}
+
+	@Path("/unit-test-artifact")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadUnitTestArtifact(@QueryParam("projectId") Long projectId,
+			@QueryParam("buildNumber") Long buildNumber,
+			@QueryParam("reportName") String reportName,
+			@QueryParam("artifactPath") String artifactPath) {
+		if (!SecurityUtils.isSystem())
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+
+		StreamingOutput os = output -> UnitTestReport.downloadArtifact(
+				projectId, buildNumber, reportName, artifactPath, output);
 		return ok(os).build();
 	}
 	
@@ -424,19 +429,7 @@ public class ClusterResource {
 		if (!SecurityUtils.isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
-		write(getArtifactsLockName(projectId, buildNumber), () -> {
-			var artifactsDir = storageService.initArtifactsDir(projectId, buildNumber);
-			File artifactFile = new File(artifactsDir, artifactPath);
-			FileUtils.createDir(artifactFile.getParentFile());
-			try (input; var os = new BufferedOutputStream(new FileOutputStream(artifactFile), BUFFER_SIZE)) {
-				IOUtils.copy(input, os, BUFFER_SIZE);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			projectService.directoryModified(projectId, artifactsDir);
-			return null;
-		});
-		
+		buildService.uploadArtifact(projectId, buildNumber, artifactPath, input);
 		return ok().build();
 	}
 

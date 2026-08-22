@@ -29,11 +29,11 @@ import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.coverage.Coverage;
+import io.onedev.server.codequality.Coverage;
+import io.onedev.server.codequality.CoverageStats;
+import io.onedev.server.codequality.FileCoverage;
+import io.onedev.server.codequality.GroupCoverage;
 import io.onedev.server.plugin.report.coverage.CoverageReport;
-import io.onedev.server.plugin.report.coverage.CoverageStats;
-import io.onedev.server.plugin.report.coverage.FileCoverage;
-import io.onedev.server.plugin.report.coverage.GroupCoverage;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.util.XmlUtils;
 

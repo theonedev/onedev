@@ -1,7 +1,11 @@
 package io.onedev.server.plugin.report.clover;
 
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.codequality.Coverage;
+import io.onedev.server.codequality.CoverageStats;
 import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.codequality.FileCoverage;
+import io.onedev.server.codequality.GroupCoverage;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.coverage.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;

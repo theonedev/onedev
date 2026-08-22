@@ -2,7 +2,10 @@ package io.onedev.server.service.impl;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static edu.emory.mathcs.backport.java.util.Collections.sort;
+import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
 import static io.onedev.server.model.Build.ARTIFACTS_DIR;
 import static io.onedev.server.model.Build.LOG_FILE;
 import static io.onedev.server.model.Build.PROP_FINISH_DATE;
@@ -18,12 +21,20 @@ import static io.onedev.server.model.Build.Status.SUCCESSFUL;
 import static io.onedev.server.model.Project.BUILDS_DIR;
 import static io.onedev.server.model.Project.SHARE_TEST_DIR;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 import static java.lang.Long.valueOf;
 import static java.util.Arrays.asList;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectStreamException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -48,12 +59,20 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
+import org.glassfish.jersey.client.ClientProperties;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -112,6 +131,7 @@ import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
+import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.ProjectBuildStatusStat;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.QueryUtils;
@@ -1079,6 +1099,86 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 				return null;
 			}
 		});
+	}
+
+	@Override
+	public void downloadArtifact(Long projectId, Long buildNumber, String artifactPath, OutputStream os) {
+		var activeServer = projectService.getActiveServer(projectId, true);
+		if (activeServer.equals(clusterService.getLocalServerAddress())) {
+			read(getArtifactsLockName(projectId, buildNumber), () -> {
+				File artifactFile = new File(getArtifactsDir(projectId, buildNumber), artifactPath);
+				try (var is = new FileInputStream(artifactFile)) {
+					IOUtils.copy(is, os, BUFFER_SIZE);
+				}
+				return null;
+			});
+		} else {
+			Client client = ClientBuilder.newClient();
+			try {
+				String serverUrl = clusterService.getServerUrl(activeServer);
+				WebTarget target = client.target(serverUrl).path("~api/cluster/artifact")
+						.queryParam("projectId", projectId)
+						.queryParam("buildNumber", buildNumber)
+						.queryParam("artifactPath", artifactPath);
+				Invocation.Builder builder = target.request();
+				builder.header(AUTHORIZATION, BEARER + " "
+						+ clusterService.getCredential());
+				try (Response response = builder.get()) {
+					checkStatus(response);
+					try (var is = response.readEntity(InputStream.class)) {
+						IOUtils.copy(is, os, BUFFER_SIZE);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			} finally {
+				client.close();
+			}
+		}
+	}
+
+	@Override
+	public void uploadArtifact(Long projectId, Long buildNumber, String artifactPath, InputStream is) {
+		var activeServer = projectService.getActiveServer(projectId, true);
+		if (activeServer.equals(clusterService.getLocalServerAddress())) {
+			write(getArtifactsLockName(projectId, buildNumber), () -> {
+				var artifactsDir = storageService.initArtifactsDir(projectId, buildNumber);
+				File artifactFile = new File(artifactsDir, artifactPath);
+				FileUtils.createDir(artifactFile.getParentFile());
+				try (var os = new BufferedOutputStream(new FileOutputStream(artifactFile), BUFFER_SIZE)) {
+					IOUtils.copy(is, os, BUFFER_SIZE);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				projectService.directoryModified(projectId, artifactsDir);
+				return null;
+			});
+		} else {
+			Client client = ClientBuilder.newClient();
+			client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
+			try {
+				String serverUrl = clusterService.getServerUrl(activeServer);
+				WebTarget target = client.target(serverUrl)
+						.path("~api/cluster/artifact")
+						.queryParam("projectId", projectId)
+						.queryParam("buildNumber", buildNumber)
+						.queryParam("artifactPath", artifactPath);
+				Invocation.Builder builder = target.request();
+				builder.header(AUTHORIZATION, BEARER + " " + clusterService.getCredential());
+				StreamingOutput output = os -> {
+					try {
+						IOUtils.copy(is, os, BUFFER_SIZE);
+					} finally {
+						os.close();
+					}
+				};
+				try (Response response = builder.post(Entity.entity(output, MediaType.APPLICATION_OCTET_STREAM))) {
+					checkStatus(response);
+				}
+			} finally {
+				client.close();
+			}
+		}
 	}
 	
 	@Override

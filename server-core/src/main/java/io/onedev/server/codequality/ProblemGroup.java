@@ -1,7 +1,4 @@
-package io.onedev.server.plugin.report.problem;
-
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.ProblemTarget;
+package io.onedev.server.codequality;
 
 import java.io.Serializable;
 import java.util.ArrayList;

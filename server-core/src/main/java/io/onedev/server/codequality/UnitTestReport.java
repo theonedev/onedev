@@ -1,9 +1,16 @@
-package io.onedev.server.plugin.report.unittest;
+package io.onedev.server.codequality;
 
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.model.Build;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
@@ -12,16 +19,29 @@ import org.jspecify.annotations.Nullable;
 import java.io.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static java.util.stream.Collectors.toList;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 public class UnitTestReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	public static final String CATEGORY = "unit-test";
+
+	public static final String ARTIFACTS = "artifacts";
 	
 	private static final String REPORT = "report.ser";
 	
@@ -102,6 +122,70 @@ public class UnitTestReport implements Serializable {
 			throw new RuntimeException(e);
 		}
 	}
+
+	private static boolean existsIn(File reportDir) {
+		return new File(reportDir, REPORT).isFile();
+	}
+
+	@Nullable
+	public static UnitTestReport readFrom(Build build, String reportName) {
+		checkReportName(reportName);
+		Long projectId = build.getProject().getId();
+		return OneDev.getInstance(ProjectService.class).runOnActiveServer(projectId,
+				new ReadReport(projectId, build.getNumber(), reportName));
+	}
+
+	public static void downloadArtifact(Long projectId, Long buildNumber, String reportName,
+			String artifactPath, OutputStream os) {
+		checkReportName(reportName);
+		if (artifactPath.contains("..") || !artifactPath.startsWith(ARTIFACTS + "/"))
+			throw new ExplicitException("Invalid request path");
+
+		var clusterService = OneDev.getInstance(ClusterService.class);
+		var activeServer = OneDev.getInstance(ProjectService.class).getActiveServer(projectId, true);
+		if (activeServer.equals(clusterService.getLocalServerAddress())) {
+			read(getReportLockName(projectId, buildNumber), () -> {
+				File reportDir = getReportDir(projectId, buildNumber, reportName);
+				File artifactFile = new File(reportDir, artifactPath).getCanonicalFile();
+				if (!artifactFile.toPath().startsWith(reportDir.getCanonicalFile().toPath())
+						|| !artifactFile.isFile()) {
+					throw new ExplicitException("Invalid request path");
+				}
+				try (var is = new FileInputStream(artifactFile)) {
+					IOUtils.copy(is, os, BUFFER_SIZE);
+				}
+				return null;
+			});
+		} else {
+			Client client = ClientBuilder.newClient();
+			try {
+				String serverUrl = clusterService.getServerUrl(activeServer);
+				WebTarget target = client.target(serverUrl).path("~api/cluster/unit-test-artifact")
+						.queryParam("projectId", projectId)
+						.queryParam("buildNumber", buildNumber)
+						.queryParam("reportName", reportName)
+						.queryParam("artifactPath", artifactPath);
+				Invocation.Builder builder = target.request();
+				builder.header(AUTHORIZATION, BEARER + " "
+						+ clusterService.getCredential());
+				try (Response response = builder.get()) {
+					checkStatus(response);
+					try (var is = response.readEntity(InputStream.class)) {
+						IOUtils.copy(is, os, BUFFER_SIZE);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			} finally {
+				client.close();
+			}
+		}
+	}
+
+	private static void checkReportName(String reportName) {
+		if (reportName.contains(".."))
+			throw new ExplicitException("Invalid report name");
+	}
 	
 	public void writeTo(File reportDir) {
 		File reportFile = new File(reportDir, REPORT);
@@ -179,7 +263,7 @@ public class UnitTestReport implements Serializable {
 		}
 
 		@Nullable
-		protected abstract Component renderDetail(String componentId, Build build);
+		public abstract Component renderDetail(String componentId, Build build);
 		
 	}
 	
@@ -224,18 +308,56 @@ public class UnitTestReport implements Serializable {
 		public long getDuration() {
 			return duration;
 		}
+
+		public Map<String, Object> getDetailData() {
+			return Map.of();
+		}
 		
 		@Nullable
-		protected abstract Component renderDetail(String componentId, Build build, String reportName);
+		public abstract Component renderDetail(String componentId, Build build, String reportName);
 		
 	}
-	
+
 	public static String getReportLockName(Build build) {
 		return getReportLockName(build.getProject().getId(), build.getNumber());
 	}
 	
 	public static String getReportLockName(Long projectId, Long buildNumber) {
 		return UnitTestReport.class.getName() + ":" + projectId + ":" + buildNumber;
+	}
+
+	private static class ReadReport implements ClusterTask<UnitTestReport> {
+
+		private static final long serialVersionUID = 1L;
+
+		private final Long projectId;
+
+		private final Long buildNumber;
+
+		private final String reportName;
+
+		private ReadReport(Long projectId, Long buildNumber, String reportName) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+			this.reportName = reportName;
+		}
+
+		@Override
+		public UnitTestReport call() {
+			return read(getReportLockName(projectId, buildNumber), () -> {
+				File reportDir = getReportDir(projectId, buildNumber, reportName);
+				if (existsIn(reportDir))
+					return readFrom(reportDir);
+				else
+					return null;
+			});
+		}
+
+	}
+
+	private static File getReportDir(Long projectId, Long buildNumber, String reportName) {
+		return new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber),
+				CATEGORY + "/" + reportName);
 	}
 	
 }

@@ -7,8 +7,6 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.buildspec.step.PublishReportStep;
-import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.BaseResourceMapper;
 
 public class PlaywrightModule extends AbstractPluginModule {
 
@@ -29,11 +27,6 @@ public class PlaywrightModule extends AbstractPluginModule {
 			}
 
 		});
-
-		contribute(WebApplicationConfigurator.class, application -> application.mount(
-				new BaseResourceMapper(
-						"~downloads/projects/${project}/builds/${build}/playwright/${report}",
-						new PlaywrightReportDownloadResourceReference())));
 	}
 
 }

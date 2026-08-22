@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.coverage;
+package io.onedev.server.codequality;
 
 import java.util.ArrayList;
 import java.util.HashMap;
