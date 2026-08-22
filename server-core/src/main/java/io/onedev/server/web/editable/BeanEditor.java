@@ -31,6 +31,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.unbescape.html.HtmlEscape;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.annotation.OmitName;
@@ -333,7 +334,9 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		String script = String.format("onedev.server.editable.onBeanEditorDomReady('%s');", getMarkupId());
+		String script = String.format("onedev.server.editable.onBeanEditorDomReady('%s', '%s', '%s');",
+				getMarkupId(), JavaScriptEscape.escapeJavaScript(_T("Click to copy")),
+				JavaScriptEscape.escapeJavaScript(_T("Copied")));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

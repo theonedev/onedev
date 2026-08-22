@@ -160,6 +160,14 @@
     margin: 0.8rem 0;
 }
 
+.editable-description code.code-span {
+	cursor: pointer;
+}
+.editable-description code.code-span.copied {
+	background-color: var(--primary);
+	color: white;
+}
+
 .property-editor .select2-container {
 	width: 100%;
 }

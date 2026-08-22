@@ -1366,74 +1366,9 @@ onedev.server.markdown = {
 			}
 		});
 
-		$rendered.find("code").each(function() {
-			var $code = $(this);
-			if ($code.closest("pre").length != 0)
-				return;
-
-			$code.addClass("code-span");
-			$code.attr("data-tippy-content", onedev.server.markdown.translations["click-to-copy"]);
-
-			var dragStart = null;
-			var dragged = false;
-			$code.on("mousedown", function(e) {
-				dragStart = {x: e.clientX, y: e.clientY};
-				dragged = false;
-			}).on("mousemove", function(e) {
-				if (dragStart && (Math.abs(e.clientX - dragStart.x) > 4 || Math.abs(e.clientY - dragStart.y) > 4))
-					dragged = true;
-			}).on("click", function(e) {
-				if (dragged)
-					return;
-				var selection = window.getSelection();
-				if (selection && selection.toString().length > 0)
-					return;
-
-				e.preventDefault();
-				e.stopPropagation();
-
-				var text = $code.text();
-				var options = {
-					text: function() {
-						return text;
-					}
-				};
-				var $modal = $code.closest(".modal-dialog");
-				if ($modal.length != 0)
-					options.container = $modal[0];
-
-				var $trigger = $("<button></button>").css({
-					position: "fixed",
-					left: "-9999px"
-				}).appendTo(document.body);
-				var clipboard = new ClipboardJS($trigger[0], options);
-				clipboard.on("success", function() {
-					clipboard.destroy();
-					$trigger.remove();
-					$code.addClass("copied");
-					var tooltipInstance = $code[0]._tippy;
-					if (tooltipInstance) {
-						clearTimeout($code[0].copyFeedbackTimeout);
-						tooltipInstance.setContent(onedev.server.markdown.translations["copied"]);
-						tooltipInstance.show();
-						$code[0].copyFeedbackTimeout = setTimeout(function() {
-							if (!tooltipInstance.state.isDestroyed) {
-								tooltipInstance.hide();
-								tooltipInstance.setContent(onedev.server.markdown.translations["click-to-copy"]);
-							}
-						}, 1000);
-					}
-					setTimeout(function() {
-						$code.removeClass("copied");
-					}, 150);
-				});
-				clipboard.on("error", function() {
-					clipboard.destroy();
-					$trigger.remove();
-				});
-				$trigger[0].click();
-			});
-		});
+		onedev.server.copyToClipboard.initCodeSpans($rendered,
+			onedev.server.markdown.translations["click-to-copy"],
+			onedev.server.markdown.translations["copied"]);
 
 		var $mermaid = $container.find(".mermaid");
 		if ($mermaid.length != 0) 
