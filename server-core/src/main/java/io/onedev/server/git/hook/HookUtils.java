@@ -18,7 +18,9 @@ import java.util.Map;
 
 public class HookUtils {
 
-	public static final String RECEIVE_HOOK_TOKEN = CryptoUtils.generateSecret(); 
+	public static final String RECEIVE_HOOK_TOKEN = CryptoUtils.generateSecret();
+
+	public static final String PARAM_REF_UPDATES = "REF_UPDATES"; 
 	
 	private static final String gitReceiveHook;
 
@@ -61,37 +63,24 @@ public class HookUtils {
 		return envs;
 	}
 	
-	public static boolean isReceiveHookValid(File gitDir, String hookName) {
-        File hookFile = new File(gitDir, "hooks/" + hookName);
-        if (!hookFile.exists()) 
-        	return false;
-        
-        try {
-			String content = FileUtils.readFileToString(hookFile, Charset.defaultCharset());
-			if (!content.contains("ONEDEV_HOOK_TOKEN"))
-				return false;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		
-        if (!hookFile.canExecute())
-        	return false;
-        
-        return true;
+	public static void checkReceiveHooks(File gitDir) {
+		File hooksDir = new File(gitDir, "hooks");
+		installReceiveHook(new File(hooksDir, "pre-receive"), "git-prereceive-callback");
+		installReceiveHook(new File(hooksDir, "post-receive"), "git-postreceive-callback");
 	}
 
-	public static void checkReceiveHooks(File gitDir) {
-		if (!isReceiveHookValid(gitDir, "pre-receive") || !isReceiveHookValid(gitDir, "post-receive")) {
-            File hooksDir = new File(gitDir, "hooks");
-
-            File gitPreReceiveHookFile = new File(hooksDir, "pre-receive");
-            FileUtils.writeFile(gitPreReceiveHookFile, String.format(gitReceiveHook, "git-prereceive-callback"));
-            gitPreReceiveHookFile.setExecutable(true);
-            
-            File gitPostReceiveHookFile = new File(hooksDir, "post-receive");
-            FileUtils.writeFile(gitPostReceiveHookFile, String.format(gitReceiveHook, "git-postreceive-callback"));
-            gitPostReceiveHookFile.setExecutable(true);
-        }
+	private static void installReceiveHook(File hookFile, String callback) {
+		String content = String.format(gitReceiveHook, callback);
+		if (hookFile.exists() && hookFile.canExecute()) {
+			try {
+				if (content.equals(FileUtils.readFileToString(hookFile, Charset.defaultCharset())))
+					return;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		FileUtils.writeFile(hookFile, content);
+		hookFile.setExecutable(true);
 	}
 	
 }

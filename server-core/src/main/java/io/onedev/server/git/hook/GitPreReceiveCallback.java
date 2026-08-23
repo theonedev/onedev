@@ -91,7 +91,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 			ThreadContext.bind(asSubject(asPrincipals(principal)));
 			Project project = projectService.load(Long.valueOf(fields.get(0)));
 			
-			String refUpdateInfo = null;
+			String refUpdateInfo = request.getParameter(HookUtils.PARAM_REF_UPDATES);
 			
 			/*
 			 * Since git 2.11, pushed commits will be placed in to a QUARANTINE directory when pre-receive hook 
@@ -102,9 +102,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 			Enumeration<String> paramNames = request.getParameterNames();
 			while (paramNames.hasMoreElements()) {
 				String paramName = paramNames.nextElement();
-				if (paramName.contains(" ")) {
-					refUpdateInfo = paramName;
-				} else if (paramName.startsWith("ENV_")) {
+				if (paramName.startsWith("ENV_")) {
 					String paramValue = request.getParameter(paramName);
 					if (StringUtils.isNotBlank(paramValue))
 						gitEnvs.put(paramName.substring("ENV_".length()), paramValue);
@@ -116,10 +114,8 @@ public class GitPreReceiveCallback extends HttpServlet {
 			Output output = new Output(response.getOutputStream());
 			
 			/*
-			 * If multiple refs are updated, the hook stdin will put each ref update info into
-			 * a separate line, however the line breaks is omitted when forward the hook stdin
-			 * to curl via "@-", below logic is used to parse these info correctly even 
-			 * without line breaks.  
+			 * If multiple refs are updated, the hook stdin puts each ref update on a separate
+			 * line. Parse correctly even if those line breaks are missing.  
 			 */
 			refUpdateInfo = StringUtils.reverse(StringUtils.remove(refUpdateInfo, '\n'));
 			fields = StringUtils.splitAndTrim(refUpdateInfo, " ");

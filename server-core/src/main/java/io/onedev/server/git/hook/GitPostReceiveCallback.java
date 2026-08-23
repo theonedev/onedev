@@ -5,7 +5,6 @@ import static io.onedev.server.security.SecurityUtils.asSubject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -83,23 +82,14 @@ public class GitPostReceiveCallback extends HttpServlet {
         
         ThreadContext.bind(asSubject(asPrincipals(principal)));
 
-        String refUpdateInfo = null;
-        Enumeration<String> paramNames = request.getParameterNames();
-        while (paramNames.hasMoreElements()) {
-        	String paramName = paramNames.nextElement();
-        	if (paramName.contains(" ")) {
-        		refUpdateInfo = paramName;
-        	} 
-        }
+        String refUpdateInfo = request.getParameter(HookUtils.PARAM_REF_UPDATES);
         Preconditions.checkState(refUpdateInfo != null, "Git ref update information is not available");
 
 		Output output = new Output(response.getOutputStream());
         
         /*
-         * If multiple refs are updated, the hook stdin will put each ref update info into
-         * a separate line, however the line breaks is omitted when forward the hook stdin
-         * to curl via "@-", below logic is used to parse these info correctly even 
-         * without line breaks.  
+         * If multiple refs are updated, the hook stdin puts each ref update on a separate
+         * line. Parse correctly even if those line breaks are missing.  
          */
         refUpdateInfo = StringUtils.reverse(StringUtils.remove(refUpdateInfo, '\n'));
         
