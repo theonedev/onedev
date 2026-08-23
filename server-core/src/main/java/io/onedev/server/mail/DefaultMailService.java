@@ -231,18 +231,22 @@ public class DefaultMailService implements MailService, Serializable {
 							  @Nullable String senderName, @Nullable String references) {
 		transactionService.runAfterCommit(() -> {
 			var mailConnector = settingService.getMailConnector();
-			submitToSendExecutor(mailConnector.getConcurrency(), () -> {
-				try {
-					SecurityUtils.bindAsSystem();
-					sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress,
-							senderName, references);
-				} catch (Exception e) {
-					var message = String.format(
-						"Error sending email (to: %s, cc: %s, bcc: %s, subject: %s)", 
-						toList, ccList, bccList, subject);
-					logger.error(message, e);
-				}
-			});
+			if (mailConnector != null) {
+				submitToSendExecutor(mailConnector.getConcurrency(), () -> {
+					try {
+						SecurityUtils.bindAsSystem();
+						sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress,
+								senderName, references);
+					} catch (Exception e) {
+						var message = String.format(
+							"Error sending email (to: %s, cc: %s, bcc: %s, subject: %s)", 
+							toList, ccList, bccList, subject);
+						logger.error(message, e);
+					}
+				});	
+			} else {
+				logger.warn("Unable to send mail as mail service is not configured");
+			}
 		});
 	}
 	
