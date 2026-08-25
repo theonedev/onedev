@@ -30,7 +30,7 @@ import io.onedev.server.service.BuildService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.util.MimeUtils;
 
-public class ArtifactResource extends AbstractResource {
+public class TestArtifactResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 

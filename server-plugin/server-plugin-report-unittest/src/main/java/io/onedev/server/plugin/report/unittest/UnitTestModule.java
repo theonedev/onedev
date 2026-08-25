@@ -87,7 +87,7 @@ public class UnitTestModule extends AbstractPluginModule {
 		
 		contribute(WebApplicationConfigurator.class, application -> {
 			application.mount(new BaseResourceMapper("~downloads/projects/${project}/builds/${build}/unit-test/${report}",
-					new ArtifactResourceReference()));
+					new TestArtifactResourceReference()));
 			application.mount(new ProjectPageMapper("${project}/~builds/${build}/unit-test/${report}/test-suites", UnitTestSuitesPage.class));
 			application.mount(new ProjectPageMapper("${project}/~builds/${build}/unit-test/${report}/test-cases", UnitTestCasesPage.class));
 			application.mount(new ProjectPageMapper("${project}/~stats/unit-test", UnitTestStatsPage.class));

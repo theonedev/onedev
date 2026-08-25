@@ -3,17 +3,17 @@ package io.onedev.server.plugin.report.unittest;
 import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.request.resource.ResourceReference;
 
-public class ArtifactResourceReference extends ResourceReference {
+public class TestArtifactResourceReference extends ResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public ArtifactResourceReference() {
-		super("artifact");
+	public TestArtifactResourceReference() {
+		super("test-artifact");
 	}
 
 	@Override
 	public IResource getResource() {
-		return new ArtifactResource();
+		return new TestArtifactResource();
 	}
 
 }
