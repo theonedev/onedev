@@ -69,7 +69,9 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	private List<CacheConfig> cacheConfigs = new ArrayList<>();
 
-	private boolean retrieveLfs;
+	private boolean retrieveLfs = true;
+
+	private boolean retrieveSubmodules = true;
 
 	private String runAs = "0:0";
 	
@@ -251,6 +253,19 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	public void setRetrieveLfs(boolean retrieveLfs) {
 		this.retrieveLfs = retrieveLfs;
+	}
+
+	@Editable(order = 1200, name = "Retrieve Submodules", group = "More Settings", description = """
+			Whether or not to retrieve submodules. Refer to
+			<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on
+			how to configure submodule authentication
+			""")
+	public boolean isRetrieveSubmodules() {
+		return retrieveSubmodules;
+	}
+
+	public void setRetrieveSubmodules(boolean retrieveSubmodules) {
+		this.retrieveSubmodules = retrieveSubmodules;
 	}
 
 	@Editable(order = 1400, name = "Run As", group = "More Settings", description = "Specify uid:gid to run container as")

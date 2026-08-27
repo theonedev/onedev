@@ -2,6 +2,7 @@
 	max-width: 360px !important;
 	min-width: 360px !important;
 	background: white;
+	overflow-y: auto;
 }
 @media (max-width: 1199.98px) {
 	.workspace-changes>.changes-sidebar {
@@ -29,25 +30,48 @@
 .workspace-changes>.changes-sidebar a.with-working-indicator {
 	display: none;
 }
-.workspace-changes>.changes-sidebar>.sync-info {
+.workspace-changes>.changes-sidebar .repository-title {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background: white;
+	color: var(--gray-dark);
+	border-top: 1px solid var(--light-gray);
+	border-bottom: 1px solid var(--light-gray);
+	font-size: 0.85rem;
+	line-height: 1.5;
+	letter-spacing: 0.02em;
+}
+.workspace-changes>.changes-sidebar .repository-section+.repository-section {
+	margin-top: 1.5rem;
+}
+.workspace-changes>.changes-sidebar .repository-section:first-child>.repository-title {
+	border-top: none;
+}
+.dark-mode .workspace-changes>.changes-sidebar .repository-title {
+	background: var(--dark-mode-dark);
+	color: var(--dark-mode-light-gray);
+	border-color: var(--dark-mode-lighter-dark);
+}
+.workspace-changes>.changes-sidebar .repository-section>.sync-info {
 	font-size: 1.1rem;
 	font-weight: bold;
 }
 /* .icon is fixed 16px in base.css; scale all sync bar SVGs to match larger text */
-.workspace-changes>.changes-sidebar>.sync-info .icon {
+.workspace-changes>.changes-sidebar .repository-section>.sync-info .icon {
 	width: 20px;
 	height: 20px;
 }
-.dark-mode .workspace-changes>.changes-sidebar>.sync-info {
+.dark-mode .workspace-changes>.changes-sidebar .repository-section>.sync-info {
 	border-bottom-color: var(--dark-mode-lighter-dark) !important;
 }
-.workspace-changes>.changes-sidebar>.commit-form textarea {
+.workspace-changes>.changes-sidebar .repository-section>.commit-form textarea {
 	resize: vertical;
 }
-.dark-mode .workspace-changes>.changes-sidebar>.commit-form {
+.dark-mode .workspace-changes>.changes-sidebar .repository-section>.commit-form {
 	border-bottom-color: var(--dark-mode-lighter-dark) !important;
 }
-.workspace-changes>.changes-sidebar>.commit-form .btn-group {
+.workspace-changes>.changes-sidebar .repository-section>.commit-form .btn-group {
 	position: relative;
 }
 .workspace-changes>.changes-sidebar .file-section>.section-header {
@@ -179,6 +203,14 @@
 	width: 92vw;
 	max-width: 800px;
 	max-height: 70vh;
+}
+.floating.workspace-diff-dropdown {
+	overflow: hidden !important;
+}
+.floating.workspace-diff-dropdown>.content,
+.floating.workspace-diff-dropdown>.content>.diff-dropdown {
+	height: 100%;
+	min-height: 0;
 }
 .floating>.content>.diff-dropdown>.diff-header {
 	background: var(--light);

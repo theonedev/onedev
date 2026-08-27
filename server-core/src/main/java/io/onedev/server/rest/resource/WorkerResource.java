@@ -283,6 +283,7 @@ public class WorkerResource {
 				context.getCommitHash(),
 				context.getBranch(),
 				context.getSpec().isRetrieveLfs(),
+				context.getSpec().isRetrieveSubmodules(),
 				context.getCacheConfigFacades(),
 				context.getUserDataFacades(),
 				context.getConfigFileFacades(),

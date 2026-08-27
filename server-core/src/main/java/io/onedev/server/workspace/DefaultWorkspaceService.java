@@ -1091,7 +1091,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Sessional
 	@Override
-	public GitExecutionResult executeGitCommand(Workspace workspace, String[] gitArgs) {
+	public GitExecutionResult executeGitCommand(Workspace workspace, String[] gitArgs) {		
 		var workspaceId = workspace.getId();
 		var server = workspaceServers.get(workspaceId);
 		if (server == null)

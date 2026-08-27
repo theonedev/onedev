@@ -9353,4 +9353,18 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate241(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element projectElement : dom.getRootElement().elements()) {
+					var workspaceSpecsElement = projectElement.element("workspaceSpecs");
+					for (Element workspaceSpecElement : workspaceSpecsElement.elements())
+						workspaceSpecElement.addElement("retrieveSubmodules").setText("true");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

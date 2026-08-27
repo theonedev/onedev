@@ -75,7 +75,8 @@ public final class ServerProvisionerUtils {
 
 		WorkspaceHelper.setupRepository(workspaceDir, GitUtils.newGit(), context.getUserName(),
 				context.getUserEmail(), cloneInfo, context.getCommitHash(), context.getBranch(),
-				context.getSpec().isRetrieveLfs(), Bootstrap.getTrustCertsDir(),
+				context.getSpec().isRetrieveLfs(), context.getSpec().isRetrieveSubmodules(),
+				Bootstrap.getTrustCertsDir(),
 				runtimeWorkspaceDirPath, context.getProjectGitDir(), 
 				AgentUtils.newInfoLogger(logger), AgentUtils.newWarningLogger(logger));
 	}

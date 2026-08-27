@@ -1,7 +1,9 @@
 <wicket:extend>
 	<div class="workspace-changes d-flex flex-grow-1 position-relative">
 		<div wicket:id="changesSidebar" class="changes-sidebar autofit d-flex flex-column flex-grow-1 border-right">
-			<div wicket:id="statusError" class="alert alert-light-warning text-break m-3"></div>
+			<div wicket:id="repositorySections" class="repository-section d-flex flex-column flex-shrink-0">
+				<div wicket:id="repositoryTitle" class="repository-title font-weight-bold text-truncate px-3 py-2"></div>
+				<div wicket:id="statusError" class="alert alert-light-warning text-break m-3"></div>
 			<div class="sync-info d-flex align-items-center p-3">
 				<div class="pull-info flex-grow-1 d-flex align-items-center">
 					<a wicket:id="pull" t:data-tippy-content="Pull"><wicket:svg href="arrow3" class="icon rotate-90"/></a>
@@ -13,7 +15,7 @@
 					<span wicket:id="aheadCount" class="mr-1"></span>
 					<a wicket:id="push" t:data-tippy-content="Push"><wicket:svg href="arrow3" class="icon rotate-270"/></a>
 				</div>
-			</div>
+				</div>
 			<form wicket:id="commitForm" class="commit-form px-3 pt-2 pb-4">
 				<div class="d-flex">
 					<textarea wicket:id="commitMessage" class="form-control form-control-sm" rows="3" t:placeholder="Commit message"></textarea>
@@ -51,9 +53,11 @@
 				</div>
 				<div wicket:id="stagedSection" class="file-section">
 					<div class="section-header d-flex align-items-center">
-						<span class="font-weight-bold font-size-sm"><wicket:t>STAGED</wicket:t></span>
-						<span wicket:id="stagedCount" class="badge badge-sm badge-secondary ml-1 mr-2"></span>
-						<a wicket:id="unstageAll" class="btn btn-xs btn-icon btn-hover-primary ml-auto" t:data-tippy-content="Unstage All">
+						<div class="d-flex align-items-center flex-grow-1">
+							<span class="font-weight-bold font-size-sm"><wicket:t>STAGED</wicket:t></span>
+							<span wicket:id="stagedCount" class="badge badge-sm badge-secondary ml-1"></span>	
+						</div>
+						<a wicket:id="unstageAll" class="btn btn-xs btn-icon btn-hover-primary ml-1" t:data-tippy-content="Unstage All">
 							<wicket:svg href="minus" class="icon"/>
 						</a>
 					</div>
@@ -71,9 +75,11 @@
 				</div>
 				<div wicket:id="unstagedSection" class="file-section">
 					<div class="section-header d-flex align-items-center">
+						<div class="d-flex align-items-center flex-grow-1">
 						<span class="font-weight-bold font-size-sm"><wicket:t>UNSTAGED</wicket:t></span>
-						<span wicket:id="unstagedCount" class="badge badge-sm badge-secondary ml-1 mr-2"></span>
-						<a wicket:id="discardAll" class="btn btn-xs btn-icon btn-hover-danger ml-auto" t:data-tippy-content="Discard All">
+						<span wicket:id="unstagedCount" class="badge badge-sm badge-secondary ml-1"></span>
+						</div>
+						<a wicket:id="discardAll" class="btn btn-xs btn-icon btn-hover-danger ml-1" t:data-tippy-content="Discard All">
 							<wicket:svg href="undo2" class="icon"/>
 						</a>
 						<a wicket:id="stageAll" class="btn btn-xs btn-icon btn-hover-primary ml-1" t:data-tippy-content="Stage All">
@@ -95,6 +101,7 @@
 						</li>
 					</ul>
 				</div>
+			</div>
 			</div>
 		</div>
 		<div wicket:id="diffContent" class="diff-content autofit d-flex flex-column flex-grow-1">

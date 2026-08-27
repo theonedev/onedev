@@ -5,7 +5,9 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -30,7 +32,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -56,13 +57,17 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	private static final String PARAM_FILE = "file";
 
+	private static final String PARAM_REPOSITORY = "repository";
+
 	/**
 	 * Matches viewports on which the diff pane is hidden by css and diffs are shown in a
 	 * dropdown instead. Keep in sync with workspace-changes.css.
 	 */
 	private static final String NARROW_MEDIA_QUERY = "(max-width: 991.98px)";
 
-	private String commitMessage;
+	private final Map<String, String> commitMessages = new HashMap<>();
+
+	private String selectedRepository = "";
 
 	private String selectedFile;
 
@@ -76,30 +81,21 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	private WebMarkupContainer noSelection;
 
-	private final IModel<StatusInfo> statusModel = new LoadableDetachableModel<>() {
+	private final IModel<List<RepositoryInfo>> repositoriesModel = new LoadableDetachableModel<>() {
 
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected StatusInfo load() {
+		protected List<RepositoryInfo> load() {
 			if (getWorkspace().getStatus() != Workspace.Status.ACTIVE) {
-				return StatusInfo.failure(_T("Please reprovision the workspace to show changes"));
+				return List.of(new RepositoryInfo("", StatusInfo.failure(
+						_T("Please reprovision the workspace to show changes"))));
 			}
-			GitExecutionResult result = executeGit(
-					"status", "-b", "--porcelain", "--untracked-files=all");
-			if (result.getReturnCode() != 0)
-				return StatusInfo.failure(getErrorMessage(result));
-			boolean mergeInProgress = workspaceService.readFileData(
-					getWorkspace(), ".git/MERGE_HEAD") != null;
-			StatusInfo info = parseStatusOutput(stdoutString(result), mergeInProgress);
-			if (info.ahead == null) {
-				// Branch has no upstream tracking (e.g. workspace was provisioned
-				// from an empty server repository). Fall back to counting local
-				// commits reachable from HEAD so commits made inside the workspace
-				// are reflected by the ahead count and the push button is enabled.
-				info = StatusInfo.success(info.entries, countLocalCommits(), mergeInProgress);
-			}
-			return info;
+			List<RepositoryInfo> repositories = new ArrayList<>();
+			repositories.add(new RepositoryInfo("", loadStatus("")));
+			for (String path : getSubmodulePaths())
+				repositories.add(new RepositoryInfo(path, loadStatus(path)));
+			return repositories;
 		}
 
 	};
@@ -110,6 +106,9 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			throw new RestartResponseException(WorkspaceLogPage.class, params);
 
 		selectedFile = params.get(PARAM_FILE).toString();
+		String repository = params.get(PARAM_REPOSITORY).toString();
+		if (repository != null)
+			selectedRepository = repository;
 	}
 
 	@Override
@@ -120,9 +119,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		sidebar.setOutputMarkupId(true);
 		add(sidebar);
 
-		addSyncInfo(sidebar);
-		addCommitForm(sidebar);
-		addFileSections(sidebar);
+		addRepositorySections(sidebar);
 
 		diffContent = new WebMarkupContainer("diffContent");
 		diffContent.setOutputMarkupPlaceholderTag(true);
@@ -137,17 +134,41 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		add(noSelection);
 
 		if (selectedFile != null) {
-			FileEntry found = findSelectedFileEntry();
+			RepositoryInfo repository = findSelectedRepository();
+			FileEntry found = findSelectedFileEntry(repository);
 			if (found == null)
 				throw new ExplicitException("Not a changed file: " + selectedFile);
 			selectedStaged = found.staged;
 			selectedConflicted = found.conflicted;
-			showDiffContent(found);
+			showDiffContent(repository, found);
 		}
 	}
 
-	private void addSyncInfo(WebMarkupContainer container) {
-		int aheadCount = getAhead();
+	private void addRepositorySections(WebMarkupContainer container) {
+		List<RepositoryInfo> repositories = repositoriesModel.getObject();
+		container.add(new ListView<>("repositorySections", repositories) {
+
+			@Override
+			protected void populateItem(ListItem<RepositoryInfo> item) {
+				if (repositories.size() == 1)
+					item.add(AttributeAppender.append("class", " flex-grow-1 min-height-0"));
+				RepositoryInfo repository = item.getModelObject();
+				Label title = new Label("repositoryTitle",
+						repository.path.isEmpty()
+								? _T("Main Repository")
+								: _T("Submodule") + ": " + repository.path);
+				title.setVisible(repositories.size() > 1);
+				item.add(title);
+				addSyncInfo(item, repository);
+				addCommitForm(item, repository);
+				addFileSections(item, repository);
+			}
+
+		});
+	}
+
+	private void addSyncInfo(WebMarkupContainer container, RepositoryInfo repository) {
+		int aheadCount = getAhead(repository);
 
 		container.add(new Label("aheadCount", String.valueOf(aheadCount)));
 
@@ -162,7 +183,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				GitExecutionResult result = executeGit("pull");
+				GitExecutionResult result = executeGitIn(repository.path, "pull");
 				if (result.getReturnCode() == 0) {
 					Session.get().success(_T("Pull successful"));
 				} else {
@@ -190,16 +211,16 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				if (getWorkspace().getProject().getDefaultBranch() != null) {
-					var result = executeGit("pull");
+				if (!repository.path.isEmpty() || getWorkspace().getProject().getDefaultBranch() != null) {
+					var result = executeGitIn(repository.path, "pull");
 					if (result.getReturnCode() != 0) {
 						Session.get().error(getErrorMessage(result));
 						refreshAll(target);
 						return;
 					}
 				}
-				if (getAhead() > 0) {
-					var result = executeGit("push");
+				if (getAhead(repository) > 0) {
+					var result = executeGitIn(repository.path, "push");
 					if (result.getReturnCode() != 0) {
 						Session.get().error(getErrorMessage(result));
 						refreshAll(target);
@@ -229,12 +250,12 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				GitExecutionResult result = executeGit("push");
+				GitExecutionResult result = executeGitIn(repository.path, "push");
 				if (result.getReturnCode() == 0) {
 					Session.get().success(_T("Push successful"));
 				} else {
 					Session.get().error(getErrorMessage(result));
-					executeGit("fetch");
+					executeGitIn(repository.path, "fetch");
 				}
 				refreshAll(target);
 			}
@@ -248,16 +269,32 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		container.add(pushLink);
 	}
 
-	private void addCommitForm(WebMarkupContainer container) {
+	private void addCommitForm(WebMarkupContainer container, RepositoryInfo repository) {
 		Form<?> form = new Form<>("commitForm");
 		container.add(form);
 
-		form.add(new TextArea<>("commitMessage", new PropertyModel<>(this, "commitMessage")));
+		form.add(new TextArea<>("commitMessage", new IModel<String>() {
+
+			@Override
+			public String getObject() {
+				return commitMessages.get(repository.path);
+			}
+
+			@Override
+			public void setObject(String object) {
+				commitMessages.put(repository.path, object);
+			}
+
+			@Override
+			public void detach() {
+			}
+
+		}));
 
 		AjaxButton commitButton = new AjaxButton("commitButton", form) {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				doCommit(target, false);
+				doCommit(target, repository, false);
 			}
 
 			@Override
@@ -272,7 +309,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		AjaxButton amendButton = new AjaxButton("amendButton", form) {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				doCommit(target, true);
+				doCommit(target, repository, true);
 			}
 
 			@Override
@@ -282,8 +319,8 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		};
 		form.add(amendButton);
 
-		boolean conflicts = hasConflicts();
-		boolean mergeInProgress = isMergeInProgress();
+		boolean conflicts = hasConflicts(repository);
+		boolean mergeInProgress = isMergeInProgress(repository);
 
 		WebMarkupContainer mergeHint = new WebMarkupContainer("mergeHint");
 		mergeHint.setVisible(mergeInProgress && !conflicts);
@@ -297,7 +334,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				executeGit("merge", "--abort");
+				executeGitIn(repository.path, "merge", "--abort");
 				Session.get().success(_T("Merge aborted"));
 				refreshAll(target);
 			}
@@ -305,12 +342,13 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		});
 		form.add(mergeHint);
 
-		form.setVisible((hasStagedFiles() || mergeInProgress) 
+		form.setVisible((hasStagedFiles(repository) || mergeInProgress)
 				&& !conflicts 
 				&& SecurityUtils.canModifyOrDelete(getWorkspace()));
 	}
 
-	private void doCommit(AjaxRequestTarget target, boolean amend) {
+	private void doCommit(AjaxRequestTarget target, RepositoryInfo repository, boolean amend) {
+		String commitMessage = commitMessages.get(repository.path);
 		if (commitMessage == null || commitMessage.trim().isEmpty()) {
 			Session.get().error(_T("Please enter a commit message"));
 			refreshAll(target);
@@ -322,18 +360,18 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			args.add("--amend");
 		args.add("-m");
 		args.add(commitMessage.trim());
-		GitExecutionResult result = executeGit(args.toArray(new String[0]));
+		GitExecutionResult result = executeGitIn(repository.path, args.toArray(new String[0]));
 		if (result.getReturnCode() == 0) {
 			Session.get().success(_T("Changes committed successfully"));
-			commitMessage = null;
+			commitMessages.remove(repository.path);
 		} else {
 			Session.get().error(getErrorMessage(result));
 		}
 		refreshAll(target);
 	}
 
-	private void addFileSections(WebMarkupContainer container) {
-		StatusInfo status = statusModel.getObject();
+	private void addFileSections(WebMarkupContainer container, RepositoryInfo repository) {
+		StatusInfo status = repository.status;
 
 		Label statusError = new Label("statusError", status.errorMessage != null ? status.errorMessage : "");
 		statusError.setVisible(status.errorMessage != null);
@@ -356,11 +394,11 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 				if (entry.workTreeStatus != ' ' || entry.indexStatus == '?')
 					unstagedEntries.add(new FileEntry(
 							entry.indexStatus == '?' ? 'U' : entry.workTreeStatus,
-							entry.path, false));
+							entry.path, false, isSubmodule(repository, entry.path)));
 			}
 		}
 
-		addConflictSection(container, conflictEntries);
+		addConflictSection(container, repository, conflictEntries);
 
 		WebMarkupContainer stagedSection = new WebMarkupContainer("stagedSection");
 		stagedSection.setVisible(!stagedEntries.isEmpty());
@@ -371,7 +409,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				executeGit("reset", "HEAD", "--", ".");
+				executeGitIn(repository.path, "reset", "HEAD", "--", ".");
 				refreshAll(target);
 			}
 
@@ -387,7 +425,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			@Override
 			protected void populateItem(ListItem<FileEntry> item) {
 				FileEntry entry = item.getModelObject();
-				populateFileItem(item, entry);
+				populateFileItem(item, repository, entry);
 			}
 		});
 
@@ -406,15 +444,16 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				executeGit("checkout", "--", ".");
-				executeGit("clean", "-fd");
+				executeGitIn(repository.path, "checkout", "--", ".");
+				executeGitIn(repository.path, "clean", "-fd");
 				refreshAll(target);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canModifyOrDelete(getWorkspace()));
+				setVisible(unstagedEntries.stream().anyMatch(it -> !it.submodule)
+						&& SecurityUtils.canModifyOrDelete(getWorkspace()));
 			}
 
 		});
@@ -422,7 +461,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				executeGit("add", "-A");
+				executeGitIn(repository.path, "add", "-A");
 				refreshAll(target);
 			}
 
@@ -438,12 +477,13 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			@Override
 			protected void populateItem(ListItem<FileEntry> item) {
 				FileEntry entry = item.getModelObject();
-				populateFileItem(item, entry);
+				populateFileItem(item, repository, entry);
 			}
 		});
 	}
 
-	private void addConflictSection(WebMarkupContainer container, List<FileEntry> conflictEntries) {
+	private void addConflictSection(WebMarkupContainer container, RepositoryInfo repository,
+			List<FileEntry> conflictEntries) {
 		WebMarkupContainer conflictSection = new WebMarkupContainer("conflictSection");
 		conflictSection.setVisible(!conflictEntries.isEmpty());
 		container.add(conflictSection);
@@ -453,7 +493,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				executeGit("merge", "--abort");
+				executeGitIn(repository.path, "merge", "--abort");
 				Session.get().success(_T("Merge aborted"));
 				refreshAll(target);
 			}
@@ -469,18 +509,19 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		conflictSection.add(new ListView<>("conflictFiles", conflictEntries) {
 			@Override
 			protected void populateItem(ListItem<FileEntry> item) {
-				populateConflictFileItem(item, item.getModelObject());
+				populateConflictFileItem(item, repository, item.getModelObject());
 			}
 		});
 	}
 
-	private void populateConflictFileItem(ListItem<FileEntry> item, FileEntry entry) {
+	private void populateConflictFileItem(ListItem<FileEntry> item, RepositoryInfo repository,
+			FileEntry entry) {
 		item.setOutputMarkupId(true);
-		if (selectedFile != null && selectedFile.equals(entry.path) && selectedConflicted) {
+		if (isSelected(repository, entry) && selectedConflicted) {
 			item.add(new AttributeAppender("class", " active"));
 		}
 
-		DropdownLink fileLink = newFileLink(item, entry);
+		DropdownLink fileLink = newFileLink(item, repository, entry);
 		item.add(fileLink);
 
 		String fileName = entry.path;
@@ -506,11 +547,11 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				GitExecutionResult result = executeGit("add", "-A", "--", entry.path);
+				GitExecutionResult result = executeGitIn(repository.path, "add", "-A", "--", entry.path);
 				if (result.getReturnCode() != 0)
-					executeGit("rm", "--cached", "--", entry.path);
+					executeGitIn(repository.path, "rm", "--cached", "--", entry.path);
 				refreshSidebar(target);
-				if (entry.path.equals(selectedFile))
+				if (isSelected(repository, entry))
 					refreshDiff(target);
 			}
 
@@ -523,14 +564,14 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		});
 	}
 
-	private void populateFileItem(ListItem<FileEntry> item, FileEntry entry) {
+	private void populateFileItem(ListItem<FileEntry> item, RepositoryInfo repository, FileEntry entry) {
 		item.setOutputMarkupId(true);
-		if (selectedFile != null && selectedFile.equals(entry.path)
+		if (isSelected(repository, entry)
 				&& selectedStaged == entry.staged && !selectedConflicted) {
 			item.add(new AttributeAppender("class", " active"));
 		}
 
-		DropdownLink fileLink = newFileLink(item, entry);
+		DropdownLink fileLink = newFileLink(item, repository, entry);
 		item.add(fileLink);
 
 		Label statusLabel = new Label("status", String.valueOf(entry.displayStatus));
@@ -556,9 +597,9 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					executeGit("reset", "HEAD", "--", entry.path);
+					executeGitIn(repository.path, "reset", "HEAD", "--", entry.path);
 					refreshSidebar(target);
-					if (entry.path.equals(selectedFile))
+					if (isSelected(repository, entry))
 						refreshDiff(target);
 				}
 
@@ -581,19 +622,20 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					if (entry.displayStatus == 'U') {
-						executeGit("clean", "-f", "--", entry.path);
+						executeGitIn(repository.path, "clean", "-f", "--", entry.path);
 					} else {
-						executeGit("checkout", "--", entry.path);
+						executeGitIn(repository.path, "checkout", "--", entry.path);
 					}
 					refreshSidebar(target);
-					if (entry.path.equals(selectedFile))
+					if (isSelected(repository, entry))
 						refreshDiff(target);
 				}
 
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.canModifyOrDelete(getWorkspace()));
+					setVisible(!entry.submodule
+							&& SecurityUtils.canModifyOrDelete(getWorkspace()));
 				}
 	
 			});
@@ -601,9 +643,9 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					executeGit("add", "--", entry.path);
+					executeGitIn(repository.path, "add", "--", entry.path);
 					refreshSidebar(target);
-					if (entry.path.equals(selectedFile))
+					if (isSelected(repository, entry))
 						refreshDiff(target);
 				}
 
@@ -622,8 +664,14 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	 * pane is hidden by css and the diff is shown in a dropdown instead. Only the browser
 	 * knows which of the two applies, hence the extra ajax parameter.
 	 */
-	private DropdownLink newFileLink(ListItem<FileEntry> item, FileEntry entry) {
+	private DropdownLink newFileLink(ListItem<FileEntry> item, RepositoryInfo repository, FileEntry entry) {
 		return new DropdownLink("fileLink") {
+
+			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", "workspace-diff-dropdown"));
+			}
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -637,10 +685,11 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 				if (isNarrow()) {
 					super.onClick(target);
 				} else {
+					selectedRepository = repository.path;
 					selectedFile = entry.path;
 					selectedStaged = entry.staged;
 					selectedConflicted = entry.conflicted;
-					showDiffContent(entry);
+					showDiffContent(repository, entry);
 					target.add(diffContent);
 					target.add(noSelection);
 					pushState(target);
@@ -662,7 +711,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 					}
 
 				});
-				fragment.add(newDiffPanel("diffPanel", entry));
+				fragment.add(newDiffPanel("diffPanel", repository, entry));
 				return fragment;
 			}
 
@@ -682,9 +731,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	private void refreshSidebar(AjaxRequestTarget target) {
 		WebMarkupContainer newSidebar = new WebMarkupContainer("changesSidebar");
 		newSidebar.setOutputMarkupId(true);
-		addSyncInfo(newSidebar);
-		addCommitForm(newSidebar);
-		addFileSections(newSidebar);
+		addRepositorySections(newSidebar);
 		sidebar.replaceWith(newSidebar);
 		sidebar = newSidebar;
 		target.add(sidebar);
@@ -692,13 +739,15 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	private void refreshDiff(AjaxRequestTarget target) {
 		if (selectedFile != null) {
-			FileEntry found = findSelectedFileEntry();
+			RepositoryInfo repository = findSelectedRepository();
+			FileEntry found = findSelectedFileEntry(repository);
 			if (found != null) {
 				selectedStaged = found.staged;
 				selectedConflicted = found.conflicted;
-				showDiffContent(found);
+				showDiffContent(repository, found);
 			} else {
 				selectedFile = null;
+				selectedRepository = "";
 				diffContent.setVisible(false);
 				noSelection.setVisible(true);
 				replaceState(target);
@@ -711,12 +760,12 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		target.add(noSelection);
 	}
 
-	private void showDiffContent(FileEntry entry) {
+	private void showDiffContent(RepositoryInfo repository, FileEntry entry) {
 		diffContent.setVisible(true);
 		noSelection.setVisible(false);
 
 		diffContent.replace(new Label("diffFileName", getDiffTitle(entry)));
-		diffContent.replace(newDiffPanel("diffPanel", entry));
+		diffContent.replace(newDiffPanel("diffPanel", repository, entry));
 	}
 
 	private String getDiffTitle(FileEntry entry) {
@@ -728,11 +777,11 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		}
 	}
 
-	private Component newDiffPanel(String id, FileEntry entry) {
+	private Component newDiffPanel(String id, RepositoryInfo repository, FileEntry entry) {
 		if (entry.conflicted)
-			return newConflictDiffPanel(id, entry);
+			return newConflictDiffPanel(id, repository, entry);
 		else
-			return newRegularDiffPanel(id, entry);
+			return newRegularDiffPanel(id, repository, entry);
 	}
 
 	private Component newMessagePanel(String id, String message) {
@@ -740,16 +789,17 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 				"d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center"));
 	}
 
-	private Component newRegularDiffPanel(String id, FileEntry entry) {
+	private Component newRegularDiffPanel(String id, RepositoryInfo repository, FileEntry entry) {
 		if (entry.displayStatus == 'U') {
-			FileData fileData = workspaceService.readFileData(getWorkspace(), entry.path);
+			FileData fileData = workspaceService.readFileData(
+					getWorkspace(), workspacePath(repository.path, entry.path));
 			if (fileData != null)
 				return new FileViewPanel(id, Model.of(fileData));
 			else
 				return newMessagePanel(id, _T("File not found"));
 		}
 
-		String diffOutput = getDiffOutput(entry);
+		String diffOutput = getDiffOutput(repository, entry);
 		if (isBinaryDiff(diffOutput)) {
 			return newMessagePanel(id, _T("Binary file"));
 		} else {
@@ -758,13 +808,14 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		}
 	}
 
-	private Component newConflictDiffPanel(String id, FileEntry entry) {
+	private Component newConflictDiffPanel(String id, RepositoryInfo repository, FileEntry entry) {
 		if (entry.indexStatus == 'D' && entry.workTreeStatus == 'D') {
 			return newMessagePanel(id, _T("Both sides deleted this file") + ". "
 					+ _T("Mark as resolved to confirm the deletion, or restore the file in terminal."));
 		}
 
-		var fileData = workspaceService.readFileData(getWorkspace(), entry.path);
+		var fileData = workspaceService.readFileData(
+				getWorkspace(), workspacePath(repository.path, entry.path));
 		if (fileData != null) {
 			return new FileViewPanel(id, Model.of(fileData));
 		} else {
@@ -791,12 +842,12 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		return _T("Conflict");
 	}
 
-	private String getDiffOutput(FileEntry entry) {
+	private String getDiffOutput(RepositoryInfo repository, FileEntry entry) {
 		GitExecutionResult result;
 		if (entry.staged) {
-			result = executeGit("diff", "--cached", "-U999999", "--", entry.path);
+			result = executeGitIn(repository.path, "diff", "--cached", "-U999999", "--", entry.path);
 		} else {
-			result = executeGit("diff", "-U999999", "--", entry.path);
+			result = executeGitIn(repository.path, "diff", "-U999999", "--", entry.path);
 		}
 		return stdoutString(result);
 	}
@@ -813,6 +864,72 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	private GitExecutionResult executeGit(String... args) {
 		return workspaceService.executeGitCommand(getWorkspace(), args);
+	}
+
+	private GitExecutionResult executeGitIn(String repository, String... args) {
+		if (repository.isEmpty())
+			return executeGit(args);
+		String[] contextualArgs = new String[args.length + 2];
+		contextualArgs[0] = "-C";
+		contextualArgs[1] = repository;
+		System.arraycopy(args, 0, contextualArgs, 2, args.length);
+		return executeGit(contextualArgs);
+	}
+
+	private StatusInfo loadStatus(String repository) {
+		GitExecutionResult result = executeGitIn(repository,
+				"status", "-b", "--porcelain", "--untracked-files=all", "--ignore-submodules=dirty");
+		if (result.getReturnCode() != 0)
+			return StatusInfo.failure(getErrorMessage(result));
+		boolean mergeInProgress = executeGitIn(repository,
+				"rev-parse", "-q", "--verify", "MERGE_HEAD").getReturnCode() == 0;
+		StatusInfo info = parseStatusOutput(stdoutString(result), mergeInProgress);
+		if (info.ahead == null) {
+			// Branch has no upstream tracking (e.g. workspace was provisioned
+			// from an empty server repository). Fall back to counting local
+			// commits reachable from HEAD so commits made inside the workspace
+			// are reflected by the ahead count and the push button is enabled.
+			info = StatusInfo.success(info.entries, countLocalCommits(repository), mergeInProgress);
+		}
+		return info;
+	}
+
+	private List<String> getSubmodulePaths() {
+		GitExecutionResult result = executeGit("submodule", "status", "--recursive");
+		if (result.getReturnCode() != 0)
+			return List.of();
+		return parseSubmodulePaths(stdoutString(result));
+	}
+
+	static List<String> parseSubmodulePaths(String output) {
+		List<String> paths = new ArrayList<>();
+		for (String line : output.split("\n")) {
+			// A leading '-' denotes a submodule which is defined but not checked out.
+			// The commit hash occupies the next 40 characters, followed by a space.
+			if (line.length() > 42 && line.charAt(0) != '-') {
+				String pathAndDescription = line.substring(42);
+				int descriptionStart = pathAndDescription.lastIndexOf(" (");
+				String path = descriptionStart != -1
+						? pathAndDescription.substring(0, descriptionStart)
+						: pathAndDescription;
+				if (!path.isEmpty())
+					paths.add(path);
+			}
+		}
+		return paths;
+	}
+
+	private String workspacePath(String repository, String path) {
+		return repository.isEmpty() ? path : repository + "/" + path;
+	}
+
+	private boolean isSubmodule(RepositoryInfo repository, String path) {
+		String workspacePath = workspacePath(repository.path, path);
+		for (RepositoryInfo each : repositoriesModel.getObject()) {
+			if (each.path.equals(workspacePath))
+				return true;
+		}
+		return false;
 	}
 
 	private String stdoutString(GitExecutionResult result) {
@@ -885,33 +1002,34 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 				|| (x == 'D' && y == 'D');
 	}
 
-	private boolean hasConflicts() {
-		for (FileEntry entry : parseGitStatus()) {
+	private boolean hasConflicts(RepositoryInfo repository) {
+		for (FileEntry entry : repository.status.entries) {
 			if (isConflicted(entry))
 				return true;
 		}
 		return false;
 	}
 
-	private boolean isMergeInProgress() {
-		return statusModel.getObject().mergeInProgress;
+	private boolean isMergeInProgress(RepositoryInfo repository) {
+		return repository.status.mergeInProgress;
 	}
 
-	private boolean hasStagedFiles() {
-		for (FileEntry entry : parseGitStatus()) {
+	private boolean hasStagedFiles(RepositoryInfo repository) {
+		for (FileEntry entry : repository.status.entries) {
 			if (entry.indexStatus != ' ' && entry.indexStatus != '?' && !isConflicted(entry))
 				return true;
 		}
 		return false;
 	}
 
-	private int getAhead() {
-		Integer cached = statusModel.getObject().ahead;
+	private int getAhead(RepositoryInfo repository) {
+		Integer cached = repository.status.ahead;
 		return cached != null ? cached : 0;
 	}
 
-	private int countLocalCommits() {
-		GitExecutionResult result = executeGit("rev-list", "--count", "HEAD");
+	private int countLocalCommits(String repository) {
+		GitExecutionResult result = executeGitIn(repository,
+				"rev-list", "--count", "HEAD", "--not", "--remotes");
 		if (result.getReturnCode() != 0)
 			return 0;
 		try {
@@ -919,10 +1037,6 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		} catch (NumberFormatException e) {
 			return 0;
 		}
-	}
-
-	private List<FileEntry> parseGitStatus() {
-		return statusModel.getObject().entries;
 	}
 
 	private StatusInfo parseStatusOutput(String output, boolean mergeInProgress) {
@@ -1046,7 +1160,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	@Override
 	protected void onDetach() {
-		statusModel.detach();
+		repositoriesModel.detach();
 		super.onDetach();
 	}
 
@@ -1062,9 +1176,18 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		}
 	}
 
-	private FileEntry findSelectedFileEntry() {
-		List<FileEntry> allEntries = parseGitStatus();
-		for (FileEntry e : allEntries) {
+	private RepositoryInfo findSelectedRepository() {
+		for (RepositoryInfo repository : repositoriesModel.getObject()) {
+			if (repository.path.equals(selectedRepository))
+				return repository;
+		}
+		return null;
+	}
+
+	private FileEntry findSelectedFileEntry(RepositoryInfo repository) {
+		if (repository == null)
+			return null;
+		for (FileEntry e : repository.status.entries) {
 			if (e.path.equals(selectedFile)) {
 				if (isConflicted(e))
 					return new FileEntry(e.path, e.indexStatus, e.workTreeStatus);
@@ -1080,23 +1203,39 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		return null;
 	}
 
+	private boolean isSelected(RepositoryInfo repository, FileEntry entry) {
+		return selectedFile != null
+				&& selectedRepository.equals(repository.path)
+				&& selectedFile.equals(entry.path);
+	}
+
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
-		selectedFile = (String) data;
+		if (data instanceof Selection selection) {
+			selectedRepository = selection.repository;
+			selectedFile = selection.file;
+		} else if (data instanceof String file) {
+			selectedRepository = "";
+			selectedFile = file;
+		} else {
+			selectedRepository = "";
+			selectedFile = null;
+		}
 		refreshAll(target);
 	}
 
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getWorkspace(), selectedFile);
+		PageParameters params = paramsOf(getWorkspace(), selectedRepository, selectedFile);
 		CharSequence url = RequestCycle.get().urlFor(WorkspaceChangesPage.class, params);
-		pushState(target, url.toString(), selectedFile);
+		pushState(target, url.toString(), new Selection(selectedRepository, selectedFile));
 	}
 
 	private void replaceState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getWorkspace(), selectedFile);
+		PageParameters params = paramsOf(getWorkspace(), selectedRepository, selectedFile);
 		CharSequence url = RequestCycle.get().urlFor(WorkspaceChangesPage.class, params);
-		replaceState(target, url.toString(), selectedFile);
+		replaceState(target, url.toString(), selectedFile != null
+				? new Selection(selectedRepository, selectedFile) : null);
 	}
 
 	public static PageParameters paramsOf(Workspace workspace) {
@@ -1108,10 +1247,40 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	public static PageParameters paramsOf(Workspace workspace, String file) {
+		return paramsOf(workspace, "", file);
+	}
+
+	private static PageParameters paramsOf(Workspace workspace, String repository, String file) {
 		PageParameters params = WorkspaceDetailPage.paramsOf(workspace);
+		if (!repository.isEmpty())
+			params.add(PARAM_REPOSITORY, repository);
 		if (file != null)
 			params.add(PARAM_FILE, file);
 		return params;
+	}
+
+	private static class Selection implements Serializable {
+		private static final long serialVersionUID = 1L;
+
+		final String repository;
+		final String file;
+
+		Selection(String repository, String file) {
+			this.repository = repository;
+			this.file = file;
+		}
+	}
+
+	private static class RepositoryInfo implements Serializable {
+		private static final long serialVersionUID = 1L;
+
+		final String path;
+		final StatusInfo status;
+
+		RepositoryInfo(String path, StatusInfo status) {
+			this.path = path;
+			this.status = status;
+		}
 	}
 
 	private static class FileEntry implements Serializable {
@@ -1123,6 +1292,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 		final char displayStatus;
 		final boolean staged;
 		final boolean conflicted;
+		final boolean submodule;
 
 		FileEntry(char indexStatus, char workTreeStatus, String path) {
 			this.indexStatus = indexStatus;
@@ -1131,15 +1301,21 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			this.displayStatus = ' ';
 			this.staged = false;
 			this.conflicted = false;
+			this.submodule = false;
 		}
 
 		FileEntry(char displayStatus, String path, boolean staged) {
+			this(displayStatus, path, staged, false);
+		}
+
+		FileEntry(char displayStatus, String path, boolean staged, boolean submodule) {
 			this.indexStatus = ' ';
 			this.workTreeStatus = ' ';
 			this.path = path;
 			this.displayStatus = displayStatus;
 			this.staged = staged;
 			this.conflicted = false;
+			this.submodule = submodule;
 		}
 
 		FileEntry(String path, char indexStatus, char workTreeStatus) {
@@ -1149,6 +1325,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			this.displayStatus = 'C';
 			this.staged = false;
 			this.conflicted = true;
+			this.submodule = false;
 		}
 	}
 
