@@ -18,8 +18,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.playwright.PlaywrightReportParser.AttachmentData;
 import io.onedev.server.plugin.report.playwright.PlaywrightReportParser.ResultData;
-import io.onedev.server.plugin.report.unittest.ArtifactResource;
-import io.onedev.server.plugin.report.unittest.ArtifactResourceReference;
+import io.onedev.server.plugin.report.unittest.TestArtifactResource;
+import io.onedev.server.plugin.report.unittest.TestArtifactResourceReference;
 
 public class PlaywrightTestCaseDetailPanel extends Panel {
 
@@ -76,8 +76,8 @@ public class PlaywrightTestCaseDetailPanel extends Panel {
 					protected void populateItem(ListItem<AttachmentData> item) {
 						AttachmentData attachment = item.getModelObject();
 						String url = RequestCycle.get().urlFor(
-								new ArtifactResourceReference(),
-								ArtifactResource.paramsOf(
+								new TestArtifactResourceReference(),
+								TestArtifactResource.paramsOf(
 										build, reportName, attachment.path)).toString();
 						ExternalLink link = new ExternalLink("link", url);
 						link.add(new ExternalImage("image", url).setVisible(

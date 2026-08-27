@@ -13,14 +13,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.validation.Constraint;
 import javax.validation.Payload;
-
-import io.onedev.server.validation.validator.CodeValidator;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=CodeValidator.class) 
 public @interface Code {
 	
 	String GROOVY = "Groovy";
