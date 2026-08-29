@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeTraversor;
 
 import com.google.common.collect.ImmutableSet;
@@ -33,7 +35,26 @@ public class ReferenceUtils {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("code", "a");
 
+	private static final Collection<String> IGNORED_CLASSES = ImmutableSet.of("mermaid", "plantuml");
+
 	private static final Pattern PATTERN = compile(format("(?<prefix>^|\\W+)(?<type>(issue|build|workspace|pr|(pull\\s+request))\\s+)?(?<reference>(((?<projectPath>%s)?#)|((?<projectKey>%s)-))(?<number>\\d+))(?=$|[\\W]+)", ProjectPathValidator.PATTERN.pattern(), ProjectKeyValidator.PATTERN.pattern()), CASE_INSENSITIVE);
+
+	private static boolean hasIgnoredAncestor(Node node) {
+		if (HtmlUtils.hasAncestor(node, IGNORED_TAGS))
+			return true;
+		var parent = node.parentNode();
+		while (parent != null) {
+			if (parent instanceof Element) {
+				var element = (Element) parent;
+				for (var ignoredClass : IGNORED_CLASSES) {
+					if (element.hasClass(ignoredClass))
+						return true;
+				}
+			}
+			parent = parent.parentNode();
+		}
+		return false;
+	}
 	
 	public static List<EntityReference> extractReferences(String text, @Nullable Project currentProject) {
 		Set<EntityReference> references = new LinkedHashSet<>();
@@ -91,7 +112,7 @@ public class ReferenceUtils {
 		NodeTraversor.traverse(visitor, document);
 
 		for (var node : visitor.getMatchedNodes()) {
-			if (!HtmlUtils.hasAncestor(node, IGNORED_TAGS)) {
+			if (!hasIgnoredAncestor(node)) {
 				var text = transformReferences(node.getWholeText(), currentProject, transformer);
 				if (text.length() != 0)
 					node.before(text);
