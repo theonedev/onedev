@@ -65,9 +65,11 @@ public class AttachAjaxIndicatorListener implements IAjaxCallListener {
 		String insertAt = attachMode==AttachMode.APPEND?"after":"before";
 		return String.format(""
 				+ "var $attachTo = $('#%s');"
+				+ "if ($attachTo.length != 0) {"
 				+ "clearTimeout($attachTo[0].successIndicatorTimeout);"
 				+ "$attachTo.siblings('.working-indicator').remove(); "
-				+ "$attachTo.addClass('with-working-indicator').%s('<img src=\"%s\" width=\"16\" height=\"16\" class=\"working-indicator\"></img>');", 
+				+ "$attachTo.addClass('with-working-indicator').%s('<img src=\"%s\" width=\"16\" height=\"16\" class=\"working-indicator\"></img>');"
+				+ "}",
 				attachTo.getMarkupId(), insertAt, url);
 	}
 
@@ -85,12 +87,14 @@ public class AttachAjaxIndicatorListener implements IAjaxCallListener {
 			String insertAt = attachMode==AttachMode.APPEND?"after":"before";
 			return String.format(""
 					+ "var $attachTo = $('#%s');"
+					+ "if ($attachTo.length != 0) {"
 					+ "clearTimeout($attachTo[0].successIndicatorTimeout);"
 					+ "$attachTo.removeClass('with-working-indicator').siblings('.working-indicator').remove();"
 					+ "$attachTo.%s('<svg class=\"icon working-indicator text-success\"><use xlink:href=\"%s\"/></svg>');"
 					+ "$attachTo[0].successIndicatorTimeout = setTimeout(function() {"
 					+ "$attachTo.siblings('.working-indicator').remove();"
-					+ "}, 1000);", 
+					+ "}, 1000);"
+					+ "}",
 					attachTo.getMarkupId(), insertAt, 
 					SpriteImage.getVersionedHref(IconScope.class, "tick"));
 		} else {
