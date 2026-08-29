@@ -36,11 +36,15 @@ public class CommitMessageFixSetting implements Serializable, Validatable {
 	private static final long serialVersionUID = 1L;
 
 	public static final String DEFAULT_FIX_SUGGESTION = """
-		When a commit is intended to resolve/fix/close an issue, add the issue reference in the commit message \
-		footer as a separate line, for instance: 
+		When a commit is intended to resolve, fix, or close an issue, add the issue reference to the commit \
+		message footer on a separate line. For example:
 		
 		Fixes #100
-		Fixes PROJ-100""";
+		Fixes PROJECTKEY-100
+
+		For changes made in a submodule, include the issue reference in the submodule commit's message footer \
+		as well. Use the project key form if the issue's project has a key; otherwise, use the full issue \
+		reference, such as projectpath#100""";
 
 	private String fixSuggestion = DEFAULT_FIX_SUGGESTION;
 		

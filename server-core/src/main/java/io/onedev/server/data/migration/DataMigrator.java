@@ -9367,4 +9367,29 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate242(File dataDir, Stack<Integer> versions) {
+		var oldFixSuggestion = StringUtils.deleteWhitespace("""
+				When a commit is intended to resolve/fix/close an issue, add the issue reference
+				in the commit message footer as a separate line, for instance:
+				Fixes #100
+				Fixes PROJ-100""");
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							var commitMessageFixSettingElement = valueElement.element("commitMessageFixSetting");
+							var fixSuggestionElement = commitMessageFixSettingElement.element("fixSuggestion");
+							if (StringUtils.deleteWhitespace(fixSuggestionElement.getText()).equals(oldFixSuggestion))
+								fixSuggestionElement.setText(CommitMessageFixSetting.DEFAULT_FIX_SUGGESTION);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }
