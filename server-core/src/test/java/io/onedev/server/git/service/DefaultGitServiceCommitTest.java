@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.eclipse.jgit.dircache.DirCacheEditor.PathEdit;
+import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -32,8 +34,10 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.AbstractGitTest;
+import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
+import io.onedev.server.git.Submodule;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
@@ -72,6 +76,32 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		
 		gitService = new DefaultGitService(projectService, settingService, sessionService, 
 				clusterService, listenerRegistry);
+	}
+
+	@Test
+	public void testGetUnregisteredGitLink() throws IOException {
+		addFileAndCommit("README.md", "test", "initial commit");
+		ObjectId gitLinkId = ObjectId.fromString("0123456789012345678901234567890123456789");
+		var dirCache = git.getRepository().lockDirCache();
+		var editor = dirCache.editor();
+		editor.add(new PathEdit("unregistered") {
+
+			@Override
+			public void apply(DirCacheEntry entry) {
+				entry.setFileMode(FileMode.GITLINK);
+				entry.setObjectId(gitLinkId);
+			}
+
+		});
+		editor.commit();
+		ObjectId commitId = ObjectId.fromString(commit("add unregistered gitlink"));
+
+		Blob blob = gitService.getBlob(new Project(), commitId, "unregistered");
+
+		assertEquals(gitLinkId.name(), blob.getText().getContent());
+		Submodule submodule = Submodule.fromString(blob.getText().getContent());
+		assertNull(submodule.getUrl());
+		assertEquals(gitLinkId.name(), submodule.getCommitId());
 	}
 	
 	@Test

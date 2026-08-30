@@ -37,15 +37,16 @@ public class GitLinkPanel extends BlobViewPanel {
 		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 		String rootUrl = settingService.getSystemSetting().getServerUrl() + "/";
 		Project project = null;
-		if (submodule.getUrl().startsWith(rootUrl)) {
+		String url = submodule.getUrl();
+		if (url != null && url.startsWith(rootUrl)) {
 			link = new WebMarkupContainer("link");
-			String projectPath = submodule.getUrl().substring(rootUrl.length());
+			String projectPath = url.substring(rootUrl.length());
 			project = projectService.findByPath(projectPath);
-		} else if (!submodule.getUrl().startsWith("http:") 
-				&& !submodule.getUrl().startsWith("https:") 
-				&& !submodule.getUrl().startsWith("ssh:")) { // relative url
+		} else if (url != null && !url.startsWith("http:")
+				&& !url.startsWith("https:")
+				&& !url.startsWith("ssh:")) { // relative url
 			String projectPath = Paths.get(context.getProject().getPath())
-					.resolve(submodule.getUrl()).normalize().toString();
+					.resolve(url).normalize().toString();
 			project = projectService.findByPath(projectPath);
 		}
 		if (project != null) {
@@ -66,6 +67,7 @@ public class GitLinkPanel extends BlobViewPanel {
 		}
 		link.add(new Label("label", submodule));
 		add(link);
+		add(new WebMarkupContainer("unregistered").setVisible(url == null));
 	}
 
 	@Override

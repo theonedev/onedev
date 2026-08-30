@@ -936,14 +936,8 @@ public class DefaultGitService implements GitService, Serializable {
 							ObjectId blobId = treeWalk.getObjectId(0);
 							if (blobIdent.isGitLink()) {
 								String url = getSubmodules().get(blobIdent.path);
-								if (url == null) {
-									logger.error("Unable to find submodule (revision: {}, path: {})",
-											revId.name(), path);
-									blob = new Blob(blobIdent, blobId, treeWalk.getObjectReader());
-								} else {
-									String hash = blobId.name();
-									blob = new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes());
-								}
+								String hash = blobId.name();
+								blob = new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes());
 							} else if (blobIdent.isTree()) {
 								throw new BadRequestException("Path '" + blobIdent.path + "' is a tree");
 							} else {

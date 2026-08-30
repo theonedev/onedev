@@ -2,7 +2,7 @@ package io.onedev.server.git;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 
 public class Submodule implements Serializable {
 
@@ -10,16 +10,16 @@ public class Submodule implements Serializable {
 	
 	private static final String SEPARATOR = ":";
 
-	private final String url;
+	private final @Nullable String url;
 	
 	private final String commitHash;
 	
-	public Submodule(String url, String commitHash) {
+	public Submodule(@Nullable String url, String commitHash) {
 		this.url = url;
 		this.commitHash = commitHash;
 	}
 
-	public String getUrl() {
+	public @Nullable String getUrl() {
 		return url;
 	}
 
@@ -29,12 +29,20 @@ public class Submodule implements Serializable {
 	
 	@Override
 	public String toString() {
-		return url + SEPARATOR + commitHash;
+		if (url != null)
+			return url + SEPARATOR + commitHash;
+		else
+			return commitHash;
 	}
 	
 	public static Submodule fromString(String str) {
-		String url = StringUtils.substringBeforeLast(str, SEPARATOR);
-		String commitHash = StringUtils.substringAfterLast(str, SEPARATOR);
-		return new Submodule(url, commitHash);
+		int separatorIndex = str.lastIndexOf(SEPARATOR);
+		if (separatorIndex != -1) {
+			String url = str.substring(0, separatorIndex);
+			String commitHash = str.substring(separatorIndex + SEPARATOR.length());
+			return new Submodule(url, commitHash);
+		} else {
+			return new Submodule(null, str);
+		}
 	}
 }
