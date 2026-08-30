@@ -69,6 +69,7 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.user.UserCssResourceReference;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
@@ -80,6 +81,8 @@ public class UserListPage extends AdministrationPage {
 	private static final String PARAM_QUERY = "query";
 
 	private static final String PARAM_INCLUDE_DISABLED = "includeDisabled";
+
+	private static final String PARAM_TYPE = "type";
 	
 	private final IModel<List<User>> usersModel = new LoadableDetachableModel<List<User>>() {
 
@@ -90,7 +93,11 @@ public class UserListPage extends AdministrationPage {
 			var emailAddresses = new HashMap<Long, Collection<String>>();
 			for (var emailAddress: emailAddressCache.values()) 
 				emailAddresses.computeIfAbsent(emailAddress.getOwnerId(), key -> new HashSet<>()).add(emailAddress.getValue());
-			List<User> users = new ArrayList<>(userCache.getUsers(it->state.includeDisabled?true:!it.isDisabled()));
+			List<User> users = new ArrayList<>(userCache.getUsers(it -> {
+				if (!state.includeDisabled && it.isDisabled())
+					return false;
+				return state.type == null || it.getType() == state.type;
+			}));
 			users.sort(userCache.comparingDisplayName(Sets.newHashSet()));
 			users = new Similarities<>(users) {
 
@@ -113,6 +120,8 @@ public class UserListPage extends AdministrationPage {
 	private TextField<String> searchField;
 
 	private AjaxLink<?> includeDisabledLink;
+
+	private MenuLink filterTypeLink;
 	
 	private DataTable<User, Void> usersTable;
 
@@ -129,6 +138,9 @@ public class UserListPage extends AdministrationPage {
 		
 		state.query = params.get(PARAM_QUERY).toString();
 		state.includeDisabled = params.get(PARAM_INCLUDE_DISABLED).toBoolean(false);
+		var typeString = params.get(PARAM_TYPE).toString();
+		if (typeString != null)
+			state.type = User.Type.valueOf(typeString);
 	}
 	
 	@Override
@@ -138,9 +150,14 @@ public class UserListPage extends AdministrationPage {
 		
 		getPageParameters().set(PARAM_QUERY, state.query);
 		getPageParameters().set(PARAM_INCLUDE_DISABLED, state.includeDisabled);
+		if (state.type != null)
+			getPageParameters().set(PARAM_TYPE, state.type.name());
+		else
+			getPageParameters().remove(PARAM_TYPE);
 		target.add(searchField);
 		if (WicketUtils.isSubscriptionActive())
 			target.add(includeDisabledLink);
+		target.add(filterTypeLink);
 		selectionColumn.getSelections().clear();
 		target.add(usersTable);
 	}
@@ -820,6 +837,32 @@ public class UserListPage extends AdministrationPage {
 			}
 			
 		}));
+
+		add(filterTypeLink = new MenuLink("filterType") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return getTypeFilterLabel();
+					}
+
+				}));
+			}
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				List<MenuItem> menuItems = new ArrayList<>();
+				menuItems.add(newTypeFilterItem(dropdown, null));
+				for (var type: User.Type.values())
+					menuItems.add(newTypeFilterItem(dropdown, type));
+				return menuItems;
+			}
+
+		});
 		
 		List<IColumn<User, Void>> columns = new ArrayList<>();
 
@@ -994,6 +1037,55 @@ public class UserListPage extends AdministrationPage {
 				WebConstants.PAGE_SIZE, pagingHistorySupport, true));
 	}
 	
+	private MenuItem newTypeFilterItem(FloatingPanel dropdown, User.Type type) {
+		return new MenuItem() {
+
+			@Override
+			public String getLabel() {
+				return getTypeFilterLabel(type);
+			}
+
+			@Override
+			public boolean isSelected() {
+				return state.type == type;
+			}
+
+			@Override
+			public WebMarkupContainer newLink(String id) {
+				return new AjaxLink<Void>(id) {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						dropdown.close();
+						state.type = type;
+						var params = paramsOf(state, 0);
+						var url = RequestCycle.get().urlFor(UserListPage.class, params).toString();
+						pushState(target, url, state);
+
+						target.add(filterTypeLink);
+
+						usersTable.setCurrentPage(0);
+						selectionColumn.getSelections().clear();
+						target.add(usersTable);
+					}
+
+				};
+			}
+
+		};
+	}
+
+	private String getTypeFilterLabel() {
+		return getTypeFilterLabel(state.type);
+	}
+
+	private String getTypeFilterLabel(User.Type type) {
+		if (type != null)
+			return _T(TextUtils.getDisplayValue(type));
+		else
+			return _T("All Types");
+	}
+
 	private UserService getUserService() {
 		return OneDev.getInstance(UserService.class);
 	}
@@ -1024,6 +1116,8 @@ public class UserListPage extends AdministrationPage {
 			params.add(PARAM_QUERY, state.query);
 		if (state.includeDisabled)
 			params.add(PARAM_INCLUDE_DISABLED, state.includeDisabled);
+		if (state.type != null)
+			params.add(PARAM_TYPE, state.type.name());
 		if (page != 0)
 			params.add(PARAM_PAGE, page);
 		return params;
@@ -1041,6 +1135,8 @@ public class UserListPage extends AdministrationPage {
 		public String query;
 
 		public boolean includeDisabled;
+
+		public User.Type type;
 		
 	}
 

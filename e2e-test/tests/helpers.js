@@ -53,9 +53,11 @@ export async function fillConfirmativePassword(root, password) {
 }
 
 /**
- * Create a user via the admin UI. Caller must be logged in as an administrator.
+ * Create a user. Ordinary and service accounts go through the admin UI.
+ * AI accounts are created via REST so model settings do not need a live API.
+ * Caller must be logged in as an administrator.
  * @param {import('@playwright/test').Page} page
- * @param {{ userName?: string, password?: string, email?: string }} [options]
+ * @param {{ userName?: string, password?: string, email?: string, type?: 'Ordinary' | 'Service' | 'AI', apiUser?: string, apiPassword?: string }} [options]
  * @returns {Promise<{ userName: string, password: string, email: string }>}
  */
 export async function createUser(page, options = {}) {
@@ -63,11 +65,41 @@ export async function createUser(page, options = {}) {
   const userName = options.userName ?? `user${suffix}`;
   const password = options.password ?? 'userpass1';
   const email = options.email ?? `${userName}@example.com`;
+  const type = options.type ?? 'Ordinary';
+
+  if (type === 'AI') {
+    const apiUser = options.apiUser ?? 'admin';
+    const apiPassword = options.apiPassword ?? 'admin';
+    const response = await page.request.post('~api/users', {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${apiUser}:${apiPassword}`).toString('base64')}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        type: 'AI',
+        name: userName,
+        aiSetting: {
+          modelSetting: {
+            baseUrl: 'http://127.0.0.1:1',
+            name: 'dummy',
+            timeoutSeconds: 30,
+          },
+        },
+      },
+    });
+    expect(response.ok()).toBeTruthy();
+    return { userName, password, email };
+  }
 
   await page.goto('~administration/users/new');
+  if (type !== 'Ordinary') {
+    await select2Choose(page, formGroup(page, 'Type'), type);
+  }
   await fillLabeledInput(page, 'Login Name', userName);
-  await fillConfirmativePassword(page, password);
-  await fillLabeledInput(page, 'Email Address', email);
+  if (type === 'Ordinary') {
+    await fillConfirmativePassword(page, password);
+    await fillLabeledInput(page, 'Email Address', email);
+  }
   await page.getByRole('button', { name: 'Create' }).click();
   await expect(page.locator('#session-feedback')).toContainText('New user created');
 
