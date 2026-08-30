@@ -110,17 +110,21 @@ compile_changed() {
 	done
 }
 
+rebuild_project() {
+	build_reference="server-product/target/sandbox"
+	run_maven compile "$@"
+	if [ ! -d "$build_reference" ]; then
+		echo "Maven compile did not create $build_reference" >&2
+		exit 1
+	fi
+	touch "$build_reference"
+}
+
 build_project() {
 	build_reference="server-product/target/sandbox"
-
 	if [ ! -d "$build_reference" ]; then
 		echo "Development sandbox not found. Running: mvn compile"
-		run_maven compile
-		if [ ! -d "$build_reference" ]; then
-			echo "Maven compile did not create $build_reference" >&2
-			exit 1
-		fi
-		touch "$build_reference"
+		rebuild_project
 		return
 	fi
 
@@ -151,6 +155,7 @@ usage() {
 	echo "Commands:"
 	echo "  run      Start the dev server and hot-load rebuilt classes; restart if hot loading fails"
 	echo "  build    Build with Maven when needed, otherwise compile changed files with ECJ"
+	echo "  rebuild  Build all modules with Maven"
 	echo "  test     Run tests with Maven"
 	echo "  install  Install project artifacts with Maven"
 	echo "  clean    Clean build outputs with Maven"
@@ -165,6 +170,11 @@ case "$1" in
 	build)
 		shift
 		build_project "$@"
+		exit
+		;;
+	rebuild)
+		shift
+		rebuild_project "$@"
 		exit
 		;;
 	clean)
