@@ -34,14 +34,14 @@ ensure_artifact() {
 	fi
 	if [ ! -f "$artifact" ]; then
 		echo "Unable to find $1:$2:$3 in $MAVEN_REPOSITORY" >&2
-		exit 1
+		return 1
 	fi
 	echo "$artifact"
 }
 
 build_classpath() {
 	run_maven -pl server-product dependency:build-classpath \
-		-Dmdep.outputFile=target/deps-classpath.txt
+		-Dmdep.outputFile=target/deps-classpath.txt || return 1
 
 	module_cp=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
 		| tr '\n' ':' | sed 's/:$//')
@@ -58,11 +58,7 @@ build_classpath() {
 }
 
 compile_changed() {
-	ecj=$(ensure_artifact org.eclipse.jdt ecj "$ECJ_VERSION")
-	build_classpath
-
 	work_dir=$(mktemp -d "${TMPDIR:-/tmp}/onedev-compile.XXXXXX")
-	trap 'rm -rf "$work_dir"' EXIT
 	sources="$work_dir/sources"
 	: > "$sources"
 
@@ -96,7 +92,19 @@ compile_changed() {
 
 	if [ ! -s "$sources" ]; then
 		echo "No changed Java source files to compile."
+		rm -rf "$work_dir"
 		return
+	fi
+
+	ecj=$(ensure_artifact org.eclipse.jdt ecj "$ECJ_VERSION") || {
+		rm -rf "$work_dir"
+		return 1
+	}
+	if [ -z "${classpath:-}" ]; then
+		build_classpath || {
+			rm -rf "$work_dir"
+			return 1
+		}
 	fi
 
 	sed 's|/src/main/java/.*||' "$sources" | sort -u | while read -r module; do
@@ -106,8 +114,14 @@ compile_changed() {
 		count=$(wc -l < "$module_sources" | tr -d ' ')
 		echo "Compiling $count changed file(s) in ${module#$ROOT/}..."
 		java -jar "$ecj" -17 -encoding UTF-8 -g -parameters -proc:none -nowarn \
-			-classpath "$classpath" -d "$module/target/classes" "@$module_sources"
-	done
+			-classpath "$classpath" -d "$module/target/classes" "@$module_sources" \
+			|| return 1
+	done || {
+		rm -rf "$work_dir"
+		return 1
+	}
+
+	rm -rf "$work_dir"
 }
 
 copy_changed_resources() {
@@ -138,7 +152,10 @@ copy_changed_resources() {
 
 	if [ -s "$resources" ]; then
 		modules=$(cut -d ' ' -f 1 "$resources" | sed 's|^./||' | sort -u | paste -sd, -)
-		run_maven -q -pl "$modules" resources:resources
+		if ! run_maven -q -pl "$modules" resources:resources; then
+			rm -rf "$work_dir"
+			return 1
+		fi
 		cut -d ' ' -f 2- "$resources" | while read -r source; do
 			echo "Copied resource: ${source#./}"
 		done
@@ -147,12 +164,34 @@ copy_changed_resources() {
 	rm -rf "$work_dir"
 }
 
+watch_and_build() {
+	reference=$1
+	while true; do
+		sleep 1
+		if find . -type f ! -path '*/target/*' ! -path '*/bin/*' \
+			! -name '.DS_Store' ! -name '.*.sw?' ! -name '*~' \( \
+			-name pom.xml -o -path '*/src/main/java/*' -o \
+			-path '*/src/main/resources/*' \
+		\) -newer "$reference" -print -quit | grep -q .; then
+			detected=$(mktemp "${TMPDIR:-/tmp}/onedev-change.XXXXXX")
+			touch "$detected"
+			echo >&2
+			echo "Changes detected. Running incremental build..." >&2
+			if ! build_project; then
+				echo "Build failed. Waiting for further changes..." >&2
+			fi
+			touch -r "$detected" "$reference"
+			rm -f "$detected"
+		fi
+	done
+}
+
 rebuild_project() {
 	build_reference="server-product/target/sandbox"
-	run_maven compile "$@"
+	run_maven compile "$@" || return 1
 	if [ ! -d "$build_reference" ]; then
 		echo "Maven compile did not create $build_reference" >&2
-		exit 1
+		return 1
 	fi
 	touch "$build_reference"
 }
@@ -161,7 +200,8 @@ build_project() {
 	build_reference="server-product/target/sandbox"
 	if [ ! -d "$build_reference" ]; then
 		echo "Development sandbox not found. Running: mvn compile"
-		rebuild_project
+		rebuild_project || return 1
+		classpath=
 		return
 	fi
 
@@ -170,20 +210,21 @@ build_project() {
 	if [ -n "$changed_poms" ]; then
 		if echo "$changed_poms" | grep -qx './pom.xml'; then
 			echo "Root pom.xml changed. Running: mvn compile"
-			run_maven compile
+			run_maven compile || return 1
 		else
 			modules=$(echo "$changed_poms" | while read -r pom; do
 				dirname "${pom#./}"
 			done | sort -u | paste -sd, -)
 			echo "Module POM changes detected. Running: mvn -pl $modules -am -amd compile"
-			run_maven -pl "$modules" -am -amd compile
+			run_maven -pl "$modules" -am -amd compile || return 1
 		fi
+		classpath=
 		touch "$build_reference"
 		return
 	fi
 
-	copy_changed_resources
-	compile_changed "$@"
+	copy_changed_resources || return 1
+	compile_changed "$@" || return 1
 	touch "$build_reference"
 }
 
@@ -191,7 +232,7 @@ usage() {
 	echo "Usage: ./dev.sh <command>"
 	echo
 	echo "Commands:"
-	echo "  run      Start the dev server and hot-load rebuilt classes; restart if hot loading fails"
+	echo "  run      Build, start the dev server, and rebuild automatically when files change"
 	echo "  build    Build with Maven when needed, otherwise compile changed files with ECJ"
 	echo "  rebuild  Build all modules with Maven"
 	echo "  test     Run tests with Maven"
@@ -232,6 +273,10 @@ case "$1" in
 		;;
 	run)
 		shift
+		watch_reference=$(mktemp "${TMPDIR:-/tmp}/onedev-watch.XXXXXX")
+		touch "$watch_reference"
+		trap 'rm -f "$watch_reference"' EXIT
+		build_project
 		;;
 	*)
 		usage >&2
@@ -239,7 +284,9 @@ case "$1" in
 		;;
 esac
 
-build_classpath
+if [ -z "${classpath:-}" ]; then
+	build_classpath
+fi
 hotswap_agent=$(ensure_artifact org.hotswapagent hotswap-agent "$HOTSWAP_AGENT_VERSION")
 
 hotswap_options="-javaagent:$hotswap_agent=autoHotswap=true"
@@ -250,6 +297,15 @@ else
 	echo "Use a JetBrains Runtime with AllowEnhancedClassRedefinition for structural changes." >&2
 fi
 
-echo "HotswapAgent enabled. Run './dev.sh build' after changing Java files." >&2
-exec java $MAVEN_OPTS $hotswap_options -cp "$classpath" \
+echo "HotswapAgent enabled. Watching source files for changes." >&2
+watch_and_build "$watch_reference" &
+watcher_pid=$!
+cleanup_run() {
+	kill "$watcher_pid" 2>/dev/null || true
+	wait "$watcher_pid" 2>/dev/null || true
+	rm -f "$watch_reference"
+}
+trap cleanup_run EXIT
+
+java $MAVEN_OPTS $hotswap_options -cp "$classpath" \
 	io.onedev.commons.bootstrap.Bootstrap "$@"
