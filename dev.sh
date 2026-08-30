@@ -110,6 +110,43 @@ compile_changed() {
 	done
 }
 
+copy_changed_resources() {
+	work_dir=$(mktemp -d "${TMPDIR:-/tmp}/onedev-resources.XXXXXX")
+	resources="$work_dir/resources"
+	: > "$resources"
+
+	find . -type f ! -path '*/bin/*' \
+		! -name '.DS_Store' ! -name '.*.sw?' ! -name '*~' \( \
+		\( -path '*/src/main/java/*' ! -name '*.java' \) -o \
+		-path '*/src/main/resources/*' \
+	\) | while read -r source; do
+		case "$source" in
+		*/src/main/resources/*)
+			module=${source%%/src/main/resources/*}
+			relative=${source#*/src/main/resources/}
+			;;
+		*/src/main/java/*)
+			module=${source%%/src/main/java/*}
+			relative=${source#*/src/main/java/}
+			;;
+		esac
+		target="$module/target/classes/$relative"
+		if [ ! -f "$target" ] || [ "$source" -nt "$target" ]; then
+			echo "$module $source" >> "$resources"
+		fi
+	done
+
+	if [ -s "$resources" ]; then
+		modules=$(cut -d ' ' -f 1 "$resources" | sed 's|^./||' | sort -u | paste -sd, -)
+		run_maven -q -pl "$modules" resources:resources
+		cut -d ' ' -f 2- "$resources" | while read -r source; do
+			echo "Copied resource: ${source#./}"
+		done
+	fi
+
+	rm -rf "$work_dir"
+}
+
 rebuild_project() {
 	build_reference="server-product/target/sandbox"
 	run_maven compile "$@"
@@ -145,6 +182,7 @@ build_project() {
 		return
 	fi
 
+	copy_changed_resources
 	compile_changed "$@"
 	touch "$build_reference"
 }
