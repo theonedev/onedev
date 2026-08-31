@@ -775,11 +775,79 @@ public abstract class LayoutPage extends BasePage {
 			}
 
 		});
-		topbar.add(new Link<Void>("darkMode") {
+		topbar.add(new MenuLink("colorMode") {
 
 			@Override
-			public void onClick() {
-				toggleDarkMode();
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				var menuItems = new ArrayList<MenuItem>();
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Dark Mode";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return isDarkMode();
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+							@Override
+							public void onClick() {
+								changeColorMode(ColorTheme.DARK);
+							}
+						};
+					}
+
+				});
+				menuItems.add(new MenuItem() {
+					@Override
+					public String getLabel() {
+						return "Light Mode";
+					}
+
+
+					@Override
+					public boolean isSelected() {
+						return getColorTheme().equals(ColorTheme.LIGHT);
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+							@Override
+							public void onClick() {
+								changeColorMode(ColorTheme.LIGHT);
+							}
+						};
+					}
+				});
+
+				menuItems.add(new MenuItem() {
+					@Override
+					public String getLabel() {
+						return "System Mode";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return getColorTheme().equals(ColorTheme.AUTO);
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+							@Override
+							public void onClick() {
+								changeColorMode(ColorTheme.AUTO);
+							}
+						};
+					}
+				});
+				return menuItems;
 			}
 
 			@Override
@@ -790,10 +858,11 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					protected String load() {
-						if (isDarkMode())
-							return "moon";
-						else
-							return "sun";
+                        return switch (getColorTheme()) {
+                            case DARK -> "moon";
+                            case LIGHT -> "sun";
+                            case AUTO -> "spin";
+                        };
 					}
 
 				}));
