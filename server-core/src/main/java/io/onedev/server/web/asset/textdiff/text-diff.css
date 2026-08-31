@@ -166,6 +166,35 @@
 	padding: 2rem 0;
 	margin: -2rem -1px;
 }
+.text-diff>tbody>tr.expander>td.expander.directional {
+	padding: 0;
+	/* Give controls below a definite height to stretch against */
+	height: 1px;
+}
+.text-diff>tbody>tr.expander>td.expander>.expander-controls {
+	display: flex;
+	height: 100%;
+}
+.text-diff>tbody>tr.expander>td.expander>.expander-controls>a {
+	display: flex;
+	flex: 1 1 0;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 0.5rem 0;
+	min-width: 0;
+}
+.text-diff>tbody>tr.expander>td.expander>.expander-controls>a+a {
+	border-left: 1px solid var(--light-gray);
+}
+.dark-mode .text-diff>tbody>tr.expander>td.expander>.expander-controls>a+a {
+	border-left-color: var(--dark-mode-lighter-dark);
+}
+.text-diff>tbody>tr.expander>td.expander>.expander-controls>a:hover,
+.text-diff>tbody>tr.expander>td.expander>.expander-controls>a:focus {
+	background: var(--primary);
+	color: white;
+}
 .dark-mode .text-diff>tbody>tr.expander>td.expander a {
 	background: rgb(23, 33, 53);
 	color: var(--gray);
