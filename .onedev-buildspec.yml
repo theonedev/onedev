@@ -71,11 +71,11 @@ jobs:
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - secret: false
-      valuesProvider:
+    - valuesProvider:
         type: SpecifiedValues
         values:
         - - server-product/target/docker/app
+      secret: false
       name: Scan Path
     condition: SUCCESSFUL
     optional: false
@@ -338,11 +338,11 @@ jobs:
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - secret: false
-      valuesProvider:
+    - valuesProvider:
         type: SpecifiedValues
         values:
         - - server-product/target/sandbox
+      secret: false
       name: Scan Path
     condition: SUCCESSFUL
     optional: false
@@ -377,20 +377,34 @@ jobs:
     templateName: set up cache
     condition: SUCCESSFUL
     optional: false
+  - type: SetupCacheStep
+    name: set up npm cache
+    key: node-modules
+    checksumFiles: e2e-test/package-lock.json
+    entries:
+    - path: e2e-test/node_modules
+    uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
+    uploadProjectPath: onedev
+    uploadAccessTokenSecret: onedev-token
+    condition: SUCCESSFUL
+    optional: false
   - type: UseTemplateStep
     name: set build version
     templateName: set build version
     condition: SUCCESSFUL
     optional: false
   - type: CommandStep
-    name: build
+    name: test
     runInContainer: true
     image: '@property:buildenv@'
     interpreter:
       type: PosixInterpreter
       shell: sh
       commands: |
-        mvn package
+        mvn test
+        cd e2e-test
+        npm install
+        npm test
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -399,11 +413,11 @@ jobs:
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - secret: false
-      valuesProvider:
+    - valuesProvider:
         type: SpecifiedValues
         values:
         - - server-product/target/sandbox
+      secret: false
       name: Scan Path
     condition: SUCCESSFUL
     optional: false
