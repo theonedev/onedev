@@ -2,8 +2,6 @@ import { expect, test } from '@playwright/test';
 import { createProject, login, openIssue } from './helpers.js';
 
 test('admin can edit an issue field from the issue list', async ({ page }) => {
-  test.setTimeout(60_000);
-
   const indicatorErrors = [];
   page.on('console', (message) => {
     if (message.type() === 'error' && message.text().includes('successIndicatorTimeout')) {

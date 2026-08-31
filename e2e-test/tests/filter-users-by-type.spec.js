@@ -2,8 +2,6 @@ import { expect, test } from '@playwright/test';
 import { createUser, login } from './helpers.js';
 
 test('admin can filter users by type', async ({ page }) => {
-  test.setTimeout(120_000);
-
   const suffix = Date.now();
   const prefix = `typefilter${suffix}`;
   const ordinaryName = `${prefix}-ordinary`;

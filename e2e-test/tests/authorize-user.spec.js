@@ -2,8 +2,6 @@ import { expect, test } from '@playwright/test';
 import { authorizeUser, createProject, createUser, login } from './helpers.js';
 
 test('admin can authorize a user to a project with Issue Reporter role', async ({ page }) => {
-  test.setTimeout(90_000);
-
   const suffix = Date.now();
 
   await login(page, 'admin', 'admin');

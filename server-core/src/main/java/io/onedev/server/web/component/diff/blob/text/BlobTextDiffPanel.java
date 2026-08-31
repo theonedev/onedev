@@ -274,12 +274,16 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 						blameInfo.lastNewCommitHash = null;
 					}
 					int index = params.getParameterValue("param1").toInt();
-					int lastContextSize = expandSupport.getContextSize(index);
-					int contextSize = expandSupport.expand(index);
+					DiffBlock<String> block = change.getDiffBlocks().get(index);
+					var lastContextSizes = expandSupport.getContextSizes(index, block.getElements().size(),
+							change.getDiffBlocks().size());
+					var direction = DiffExpandSupport.Direction.fromString(
+							params.getParameterValue("param2").toString("down"));
+					var contextSizes = expandSupport.expand(index, block.getElements().size(),
+							change.getDiffBlocks().size(), direction);
 					
 					StringBuilder builder = new StringBuilder();
-					DiffBlock<String> block = change.getDiffBlocks().get(index);
-					expandSupport.appendEquals(builder, index, lastContextSize, contextSize,
+					expandSupport.appendEquals(builder, index, lastContextSizes, contextSizes,
 							block, change.getDiffBlocks().size(), new ExpandCallbackImpl());
 					
 					String expanded = Strings.CS.replace(builder.toString(), "\n", "");
@@ -585,8 +589,9 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		for (int i=0; i<change.getDiffBlocks().size(); i++) {
 			DiffBlock<String> block = change.getDiffBlocks().get(i);
 			if (block.getOperation() == Operation.EQUAL) {
-				int contextSize = expandSupport.getContextSize(i);
-				expandSupport.appendEquals(builder, i, 0, contextSize,
+				var contextSizes = expandSupport.getContextSizes(i, block.getElements().size(),
+						change.getDiffBlocks().size());
+				expandSupport.appendEquals(builder, i, new DiffExpandSupport.ContextSizes(0, 0), contextSizes,
 						block, change.getDiffBlocks().size(), callback);
 			} else if (block.getOperation() == Operation.DELETE) {
 				if (i+1<change.getDiffBlocks().size()) {
@@ -955,43 +960,61 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		builder.append("</td></tr>");		
 	}
 	
-	private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
+	private String expanderLink(String cssClass, String tooltip, String svg, int blockIndex,
+			String direction) {
+		String script = String.format("javascript:$('#%s').data('callback')('expand', %d, '%s');",
+				getMarkupId(), blockIndex, direction);
+		return "<a class='" + cssClass + "' aria-label='" + tooltip
+				+ "' data-tippy-content='" + tooltip + "' href=\"" + script + "\">" + svg + "</a>";
+	}
+
+	private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
+			boolean canExpandDown, boolean canExpandUp) {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
-		String expandSvg = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
-				SpriteImage.getVersionedHref(IconScope.class, "expand2"));
+		String upSvg = String.format("<svg class='icon rotate-270'><use xlink:href='%s'/></svg>",
+				SpriteImage.getVersionedHref(IconScope.class, "arrow"));
+		String downSvg = String.format("<svg class='icon rotate-90'><use xlink:href='%s'/></svg>",
+				SpriteImage.getVersionedHref(IconScope.class, "arrow"));
 		String ellipsisSvg = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
 				SpriteImage.getVersionedHref(IconScope.class, "ellipsis"));
 		
-		String script = String.format("javascript:$('#%s').data('callback')('expand', %d);", getMarkupId(), blockIndex);
 		var skippedMessage = MessageFormat.format(_T("skipped {0} lines"), String.valueOf(skippedLines));
+		String downLink = expanderLink("expand-down", _T("Show more lines above"), downSvg, blockIndex, "down");
+		String upLink = expanderLink("expand-up", _T("Show more lines below"), upSvg, blockIndex, "up");
+		boolean directional = canExpandDown && canExpandUp;
+		String expanderInner;
+		if (directional)
+			expanderInner = "<div class='expander-controls'>" + downLink + upLink + "</div>";
+		else
+			expanderInner = canExpandDown ? downLink : upLink;
+		String skippedInner = ellipsisSvg + " " + skippedMessage + " " + ellipsisSvg;
+
+		String expanderClass = directional ? "expander directional noselect" : "expander noselect";
 		if (diffMode == DiffViewMode.UNIFIED) {
 			if (blameInfo != null) {
-				builder.append("<td colspan='3' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"")
-						.append(script).append("\">").append(expandSvg).append("</a></td>");
+				builder.append("<td colspan='3' class='").append(expanderClass).append("'>")
+						.append(expanderInner).append("</td>");
 				blameInfo.lastCommitHash = null;
 				blameInfo.lastOldCommitHash = null;
 				blameInfo.lastNewCommitHash = null;
 			} else {
-				builder.append("<td colspan='2' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"")
-						.append(script).append("\">").append(expandSvg).append("</a></td>");
+				builder.append("<td colspan='2' class='").append(expanderClass).append("'>")
+						.append(expanderInner).append("</td>");
 			}
-			builder.append("<td colspan='2' class='skipped noselect'>").append(ellipsisSvg).append(" ")
-					.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
+			builder.append("<td colspan='2' class='skipped noselect'>").append(skippedInner).append("</td>");
 		} else {
 			if (blameInfo != null) {
-				builder.append("<td colspan='2' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"").append(script)
-						.append("\">").append(expandSvg).append("</a></td>");
-				builder.append("<td class='skipped noselect' colspan='6'>").append(ellipsisSvg).append(" ")
-						.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
+				builder.append("<td colspan='2' class='").append(expanderClass).append("'>")
+						.append(expanderInner).append("</td>");
+				builder.append("<td class='skipped noselect' colspan='6'>").append(skippedInner).append("</td>");
 				blameInfo.lastCommitHash = null;
 				blameInfo.lastOldCommitHash = null;
 				blameInfo.lastNewCommitHash = null;
 			} else {
-				builder.append("<td class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"").append(script)
-						.append("\">").append(expandSvg).append("</a></td>");
-				builder.append("<td class='skipped noselect' colspan='5'>").append(ellipsisSvg).append(" ")
-						.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
+				builder.append("<td class='").append(expanderClass).append("'>")
+						.append(expanderInner).append("</td>");
+				builder.append("<td class='skipped noselect' colspan='5'>").append(skippedInner).append("</td>");
 			}
 		}
 		builder.append("</tr>");
@@ -1085,8 +1108,9 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		}
 		
 		@Override
-		public void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
-			BlobTextDiffPanel.this.appendExpander(builder, blockIndex, skippedLines);
+		public void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
+				boolean canExpandDown, boolean canExpandUp) {
+			BlobTextDiffPanel.this.appendExpander(builder, blockIndex, skippedLines, canExpandDown, canExpandUp);
 		}
 	}
 
