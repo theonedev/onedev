@@ -2219,8 +2219,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Max Upload File Size (MB)", "最大アップロードファイルサイズ（MB）");
 		m.put("Max Value", "最大値");
 		m.put("Maximum number of entries to return when search code in repository", "リポジトリ内のコード検索時に返されるエントリの最大数");
-		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"このAIユーザーが単一のイベントチェーンで起動される最大回数。この制限に達すると、AIユーザーは実行されず、代わりにシステムコメントが投稿されます");
 		m.put("Maximum of retries before giving up", "諦める前の最大リトライ回数");
 		m.put("May not be empty", "空であってはなりません");
 		m.put("Medium", "中程度");
@@ -5231,6 +5229,20 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("All Types", "すべてのタイプ");
+		m.put("Auto", "自動");
+		m.put("Color mode", "カラーモード");
+		m.put("Dark", "ダーク");
+		m.put("Light", "ライト");
+		m.put("Main Repository", "メインリポジトリ");
+		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"このAIユーザーが単一タスクで起動できる最大回数です。制限に達すると、AIユーザーは実行されず、代わりにシステムコメントが投稿されます");
+		m.put("Playwright Test Report", "Playwrightテストレポート");
+		m.put("Specify files to publish relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>.\nPublished files should include the Playwright JSON report and all referenced artifacts, such as screenshots and traces.\nFor example, run <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\nfrom the job working directory, and use <code>test-results/**</code> as the file pattern to publish the report and artifacts together.\nUse * or ? for pattern matching", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブ作業ディレクトリ</a>を基準に公開するファイルを指定します。\n公開するファイルには、Playwright JSONレポートとスクリーンショットやトレースなどのすべての参照アーティファクトを含める必要があります。\n例えば、ジョブ作業ディレクトリから<code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\nを実行し、<code>test-results/**</code>をファイルパターンとして使用してレポートとアーティファクトを一緒に公開します。\nパターンマッチングには * または ? を使用してください");
+		m.put("Submodule", "サブモジュール");
+		m.put("Whether or not to retrieve submodules. Refer to\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on\nhow to configure submodule authentication\n", 
+			"サブモジュールを取得するかどうか。\nサブモジュール認証の設定方法については、\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>このチュートリアル</a>を参照してください\n");
 	}
 		
 	@Override

@@ -2245,8 +2245,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Max Upload File Size (MB)", "最大上传文件大小 (MB)");
 		m.put("Max Value", "最大值");
 		m.put("Maximum number of entries to return when search code in repository", "搜索代码库时返回的最大条目数");
-		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"此 AI 用户在单个事件链中可被唤醒的最大次数。当达到限制时，AI 用户将不会运行，而是发布一条系统评论");
 		m.put("Maximum of retries before giving up", "放弃前的最大重试次数");
 		m.put("May not be empty", "不能为空");
 		m.put("Medium", "中等");
@@ -5257,6 +5255,20 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("All Types", "所有类型");
+		m.put("Auto", "自动");
+		m.put("Color mode", "颜色模式");
+		m.put("Dark", "深色");
+		m.put("Light", "浅色");
+		m.put("Main Repository", "主仓库");
+		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"此 AI 用户在单个任务中可以被唤醒的最大次数。当达到限制时，AI 用户将不会运行，而是会发布一条系统评论");
+		m.put("Playwright Test Report", "Playwright 测试报告");
+		m.put("Specify files to publish relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>.\nPublished files should include the Playwright JSON report and all referenced artifacts, such as screenshots and traces.\nFor example, run <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\nfrom the job working directory, and use <code>test-results/**</code> as the file pattern to publish the report and artifacts together.\nUse * or ? for pattern matching", 
+			"指定相对于<a href='https://docs.onedev.io/concepts#job-workdir'>任务工作目录</a>的要发布的文件。\n发布的文件应包括 Playwright JSON 报告和所有引用的制品，例如截图和跟踪文件。\n例如，从任务工作目录运行 <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\n，并使用 <code>test-results/**</code> 作为文件模式来一起发布报告和制品。\n使用 * 或 ? 进行模式匹配");
+		m.put("Submodule", "子模块");
+		m.put("Whether or not to retrieve submodules. Refer to\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on\nhow to configure submodule authentication\n", 
+			"是否检索子模块。请参考\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>本教程</a>\n了解如何配置子模块认证\n");
 	}
 		
 	@Override

@@ -106,7 +106,7 @@ public abstract class BasePage extends WebPage {
 	
 	protected static final String COOKIE_LANGUAGE = "language";
 
-	public enum ColorTheme { DARK, LIGHT, AUTO };
+	public enum ColorTheme { AUTO, LIGHT, DARK};
 
 	private ColorTheme colorTheme = ColorTheme.AUTO;
 

@@ -2219,8 +2219,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Max Upload File Size (MB)", "Maximale Upload-Dateigröße (MB)");
 		m.put("Max Value", "Maximalwert");
 		m.put("Maximum number of entries to return when search code in repository", "Maximale Anzahl von Einträgen, die bei der Codesuche im Repository zurückgegeben werden");
-		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"Maximale Anzahl, wie oft dieser AI-Benutzer in einer einzelnen Ereigniskette aktiviert werden kann. Wenn das Limit erreicht ist, wird der AI-Benutzer nicht ausgeführt und stattdessen ein Systemkommentar gepostet");
 		m.put("Maximum of retries before giving up", "Maximale Anzahl von Wiederholungen, bevor aufgegeben wird");
 		m.put("May not be empty", "Darf nicht leer sein");
 		m.put("Medium", "Mittel");
@@ -5231,6 +5229,20 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("All Types", "Alle Typen");
+		m.put("Auto", "Auto");
+		m.put("Color mode", "Farbmodus");
+		m.put("Dark", "Dunkel");
+		m.put("Light", "Hell");
+		m.put("Main Repository", "Haupt-Repository");
+		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"Maximale Anzahl, wie oft dieser KI-Benutzer in einer einzelnen Aufgabe aktiviert werden kann. Wenn das Limit erreicht ist, wird der KI-Benutzer nicht ausgeführt und stattdessen ein Systemkommentar gepostet");
+		m.put("Playwright Test Report", "Playwright-Testbericht");
+		m.put("Specify files to publish relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>.\nPublished files should include the Playwright JSON report and all referenced artifacts, such as screenshots and traces.\nFor example, run <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\nfrom the job working directory, and use <code>test-results/**</code> as the file pattern to publish the report and artifacts together.\nUse * or ? for pattern matching", 
+			"Geben Sie Dateien an, die relativ zum <a href='https://docs.onedev.io/concepts#job-workdir'>Job-Arbeitsverzeichnis</a> veröffentlicht werden sollen.\nVeröffentlichte Dateien sollten den Playwright-JSON-Bericht und alle referenzierten Artefakte wie Screenshots und Traces enthalten.\nFühren Sie beispielsweise <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\naus dem Job-Arbeitsverzeichnis aus und verwenden Sie <code>test-results/**</code> als Dateimuster, um den Bericht und die Artefakte zusammen zu veröffentlichen.\nVerwenden Sie * oder ? für die Mustererkennung");
+		m.put("Submodule", "Submodul");
+		m.put("Whether or not to retrieve submodules. Refer to\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on\nhow to configure submodule authentication\n", 
+			"Ob Submodule abgerufen werden sollen oder nicht. Siehe\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>dieses Tutorial</a> für\nInformationen zur Konfiguration der Submodul-Authentifizierung\n");
 	}
 			
 	@Override

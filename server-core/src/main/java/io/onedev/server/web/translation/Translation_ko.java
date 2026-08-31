@@ -2219,8 +2219,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Max Upload File Size (MB)", "최대 업로드 파일 크기 (MB)");
 		m.put("Max Value", "최대 값");
 		m.put("Maximum number of entries to return when search code in repository", "저장소에서 코드 검색 시 반환할 최대 항목 수");
-		m.put("Maximum number of times this AI user can be awakened in a single event chain. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"단일 이벤트 체인에서 이 AI 사용자가 깨울 수 있는 최대 횟수입니다. 제한에 도달하면 AI 사용자는 실행되지 않으며 대신 시스템 댓글이 게시됩니다");
 		m.put("Maximum of retries before giving up", "포기하기 전에 최대 재시도 횟수");
 		m.put("May not be empty", "비어 있을 수 없습니다");
 		m.put("Medium", "중간");
@@ -5231,6 +5229,20 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("All Types", "모든 유형");
+		m.put("Auto", "자동");
+		m.put("Color mode", "색상 모드");
+		m.put("Dark", "다크");
+		m.put("Light", "라이트");
+		m.put("Main Repository", "메인 저장소");
+		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"이 AI 사용자가 단일 작업에서 깨울 수 있는 최대 횟수입니다. 제한에 도달하면 AI 사용자는 실행되지 않으며 대신 시스템 댓글이 게시됩니다");
+		m.put("Playwright Test Report", "Playwright 테스트 보고서");
+		m.put("Specify files to publish relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>.\nPublished files should include the Playwright JSON report and all referenced artifacts, such as screenshots and traces.\nFor example, run <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\nfrom the job working directory, and use <code>test-results/**</code> as the file pattern to publish the report and artifacts together.\nUse * or ? for pattern matching", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 작업 디렉토리</a>를 기준으로 게시할 파일을 지정하세요.\n게시된 파일에는 Playwright JSON 보고서와 스크린샷 및 추적과 같은 모든 참조 아티팩트가 포함되어야 합니다.\n예를 들어, 작업 작업 디렉토리에서 <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\n를 실행하고, 보고서와 아티팩트를 함께 게시하기 위해 <code>test-results/**</code>를 파일 패턴으로 사용하세요.\n패턴 매칭에는 * 또는 ?를 사용하세요");
+		m.put("Submodule", "서브모듈");
+		m.put("Whether or not to retrieve submodules. Refer to\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on\nhow to configure submodule authentication\n", 
+			"서브모듈을 가져올지 여부입니다.\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>이 튜토리얼</a>을 참조하여\n서브모듈 인증을 구성하는 방법을 확인하세요\n");
 	}
 		
 	@Override

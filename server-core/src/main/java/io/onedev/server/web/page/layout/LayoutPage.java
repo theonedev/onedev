@@ -776,20 +776,25 @@ public abstract class LayoutPage extends BasePage {
 
 		});
 		topbar.add(new MenuLink("colorMode") {
-
+			
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				var menuItems = new ArrayList<MenuItem>();
-				menuItems.add(new MenuItem() {
 
+				menuItems.add(new MenuItem() {
 					@Override
 					public String getLabel() {
-						return "Dark Mode";
+						return "System Mode";
+					}
+
+					@Override
+					public String getIconHref() {
+						return "auto";
 					}
 
 					@Override
 					public boolean isSelected() {
-						return isDarkMode();
+						return getColorTheme().equals(ColorTheme.AUTO);
 					}
 
 					@Override
@@ -797,18 +802,22 @@ public abstract class LayoutPage extends BasePage {
 						return new Link<Void>(id) {
 							@Override
 							public void onClick() {
-								changeColorMode(ColorTheme.DARK);
+								changeColorMode(ColorTheme.AUTO);
 							}
 						};
 					}
-
 				});
+
 				menuItems.add(new MenuItem() {
 					@Override
 					public String getLabel() {
 						return "Light Mode";
 					}
 
+					@Override
+					public String getIconHref() {
+						return "sun";
+					}
 
 					@Override
 					public boolean isSelected() {
@@ -827,14 +836,20 @@ public abstract class LayoutPage extends BasePage {
 				});
 
 				menuItems.add(new MenuItem() {
+
 					@Override
 					public String getLabel() {
-						return "System Mode";
+						return "Dark Mode";
+					}
+
+					@Override
+					public String getIconHref() {
+						return "moon";
 					}
 
 					@Override
 					public boolean isSelected() {
-						return getColorTheme().equals(ColorTheme.AUTO);
+						return isDarkMode();
 					}
 
 					@Override
@@ -842,11 +857,13 @@ public abstract class LayoutPage extends BasePage {
 						return new Link<Void>(id) {
 							@Override
 							public void onClick() {
-								changeColorMode(ColorTheme.AUTO);
+								changeColorMode(ColorTheme.DARK);
 							}
 						};
 					}
+
 				});
+
 				return menuItems;
 			}
 
@@ -861,7 +878,7 @@ public abstract class LayoutPage extends BasePage {
                         return switch (getColorTheme()) {
                             case DARK -> "moon";
                             case LIGHT -> "sun";
-                            case AUTO -> "spin";
+                            case AUTO -> "auto";
                         };
 					}
 
