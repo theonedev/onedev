@@ -263,7 +263,6 @@ jobs:
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
-    cloneDepth: 1
     condition: SUCCESSFUL
     optional: false
   - type: UseTemplateStep
@@ -319,7 +318,6 @@ jobs:
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
-    cloneDepth: 1
     condition: SUCCESSFUL
     optional: false
   - type: UseTemplateStep
