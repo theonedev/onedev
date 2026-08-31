@@ -102,11 +102,13 @@ public abstract class BasePage extends WebPage {
 	private static final MetaDataKey<HashSet<String>> REMOVE_AUTOSAVE_KEYS = new MetaDataKey<>() {
 	};
 	
-	private static final String COOKIE_DARK_MODE = "darkMode";
+	private static final String COOKIE_COLOR_MODE = "colorMode";
 	
 	protected static final String COOKIE_LANGUAGE = "language";
 
-	private boolean darkMode;
+	public enum ColorTheme { DARK, LIGHT, AUTO };
+
+	private ColorTheme colorTheme = ColorTheme.AUTO;
 
 	private FeedbackPanel sessionFeedback;
 
@@ -140,11 +142,16 @@ public abstract class BasePage extends WebPage {
 		checkReady();
 
 		var request = (WebRequest) RequestCycle.get().getRequest();
-		var cookie = request.getCookie(COOKIE_DARK_MODE);
-		if (cookie != null)
-			darkMode = cookie.getValue().equals("yes");
-		else
-			darkMode = false;
+		var cookie = request.getCookie(COOKIE_COLOR_MODE);
+		if (cookie != null) {
+			try {
+				colorTheme = ColorTheme.valueOf(cookie.getValue().toUpperCase());
+            }  catch (IllegalArgumentException e) {
+				colorTheme = ColorTheme.AUTO;
+			}
+		} else {
+			colorTheme = ColorTheme.AUTO;
+		}
 
 		WebRequest webRequest = (WebRequest) RequestCycle.get().getRequest();
 		Cookie languageCookie = webRequest.getCookie(COOKIE_LANGUAGE);
@@ -159,18 +166,25 @@ public abstract class BasePage extends WebPage {
 		}
 	}
 
-	public boolean isDarkMode() {
-		return darkMode;
+	public ColorTheme getColorTheme() {
+		return colorTheme;
 	}
 
-	public void toggleDarkMode() {
-		darkMode = !darkMode;
+	public Boolean isDarkMode() {
+		return colorTheme.equals(ColorTheme.DARK);
+	}
+
+	public void changeColorMode(ColorTheme colorTheme) {
+		this.colorTheme = colorTheme;
 		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 		Cookie cookie;
-		if (darkMode)
-			cookie = new Cookie(COOKIE_DARK_MODE, "yes");
+		if (colorTheme == ColorTheme.DARK)
+			cookie = new Cookie(COOKIE_COLOR_MODE, "dark");
+		else if (colorTheme == ColorTheme.LIGHT)
+			cookie = new Cookie(COOKIE_COLOR_MODE, "light");
 		else
-			cookie = new Cookie(COOKIE_DARK_MODE, "no");
+			cookie = new Cookie(COOKIE_COLOR_MODE, "auto");
+
 		cookie.setPath("/");
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		response.addCookie(cookie);
@@ -330,8 +344,10 @@ public abstract class BasePage extends WebPage {
 
 				builder.append(" ").append(Joiner.on(' ').join(getCssClasses()));
 
-				if (darkMode)
+				if (colorTheme == ColorTheme.DARK)
 					builder.append(" dark-mode");
+				else if (colorTheme == ColorTheme.AUTO)
+					builder.append(" color-auto");
 
 				IVisitor<BeanEditor, BeanEditor> visitor = new IVisitor<BeanEditor, BeanEditor>() {
 
@@ -346,7 +362,12 @@ public abstract class BasePage extends WebPage {
 				if (getPage() instanceof SimplePage && getPage().visitChildren(BeanEditor.class, visitor) != null)
 					builder.append(" force-ordinary-style ");
 
-				return String.format("$('html').addClass('%s');", builder.toString());
+				return String.format(
+						"$('html').addClass('%s'); " +
+								"if ($('html').hasClass('color-auto') " +
+								"&& window.matchMedia('(prefers-color-scheme: dark)').matches) " +
+								"$('html').addClass('dark-mode');",
+                        builder);
 			}
 
 		}).setEscapeModelStrings(false));

@@ -48,8 +48,10 @@
 			<a wicket:id="alerts" t:data-tippy-content="Alerts" class="text-warning topbar-link d-none d-lg-inline"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
 			<a wicket:id="newVersionStatus" t:data-tippy-content="New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting" class="new-version-status topbar-link d-none d-md-inline"><img wicket:id="icon"/></a>
 			<a wicket:id="showChat" t:data-tippy-content="Chat with AI" class="topbar-link"><wicket:svg href="ai" class="icon"/></a>
-			<a wicket:id="darkMode" t:data-tippy-content="Toggle dark mode" class="topbar-link d-none d-md-inline"><svg wicket:id="icon" class="icon"/></a>
-			<a wicket:id="showCommandPalette" class="topbar-link command-palette d-none d-md-inline"></a>			
+			<a wicket:id="colorMode" t:data-tippy-content="ColorMode" class="topbar-link">
+				<img wicket:id="icon" class="icon"/>
+			</a>
+			<a wicket:id="showCommandPalette" class="topbar-link command-palette d-none d-md-inline"></a>
 			<a wicket:id="languageSelector" t:data-tippy-content="Language" class="topbar-link language-selector"><wicket:svg href="globe" class="icon"></wicket:svg></a>
 			<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline"><wicket:t>Sign In</wicket:t></span></a>
 			<a wicket:id="userInfo" class="user-info topbar-link">
@@ -59,6 +61,7 @@
 		</div>
 	</div>
 	<div class="main autofit d-flex flex-column resize-aware">
+		<wicket:child></wicket:child>
 		<wicket:child></wicket:child>
 		<div wicket:id="chat"></div>
 	</div>

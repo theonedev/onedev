@@ -138,7 +138,10 @@ onedev.server = {
 		}
 	},
 	isDarkMode: function() {
-		return Cookies.get("darkMode") == "yes";	
+		var mode = Cookies.get("colorMode") || "auto";
+		if (mode === "dark") return true;
+		if (mode === "light") return false;
+		return window.matchMedia("(prefers-color-scheme: dark)").matches;
 	},
 	setupAutoSize: function() {
 		function doAutosize($textarea) {
