@@ -394,12 +394,19 @@ jobs:
       shell: sh
       commands: |
         mvn test
+
         cd e2e-test
         npm install
-        npm test
+        CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
+    optional: false
+  - type: PublishPlaywrightReportStep
+    name: publish E2E test report
+    reportName: E2E Test Report
+    filePatterns: e2e-test/test-results/**
+    condition: ALWAYS
     optional: false
   triggers:
   - type: BranchUpdateTrigger
