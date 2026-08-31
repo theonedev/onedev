@@ -31,38 +31,7 @@ jobs:
     interpreter:
       type: PosixInterpreter
       shell: bash
-      commands: |
-        set -e
-        set -o pipefail
-
-        buildVersion=@build_version@
-
-        projectDir=`pwd`
-
-        curl -H "Authorization: Bearer @secret:onedev-token@" -f -G -X DELETE https://code.onedev.io/~api/packages --data-urlencode 'query="Type" is "Maven" and "Name" is "io.onedev:server*" and "Version" is "@build_version@"'
-
-        mvn -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy
-
-        # Prepare for artifact and site publish
-        cp server-product/target/onedev-${buildVersion}.zip .
-
-        unzip onedev-${buildVersion}.zip
-        tar zcvf onedev-${buildVersion}.tar.gz onedev-${buildVersion}
-        sha256sum onedev-${buildVersion}.zip > onedev-${buildVersion}.zip.sha256
-        sha256sum onedev-${buildVersion}.tar.gz > onedev-${buildVersion}.tar.gz.sha256
-
-        cp server-product/docker/*.yaml .
-
-        # Prepare for docker image build
-        cd $projectDir/server-product/target
-        cp -r ../docker docker
-        unzip onedev-$buildVersion.zip -d docker
-        mv docker/onedev-$buildVersion docker/app
-        cp -r agent docker/
-
-        cd $projectDir
-        echo "$buildVersion" | cut -d. -f1 > buildVersion.major
-        echo "$buildVersion" | cut -d. -f1,2 > buildVersion.major.minor
+      commands: "set -e\nset -o pipefail\n\nbuildVersion=@build_version@\n\nprojectDir=`pwd`\n\ncurl -H \"Authorization: Bearer @secret:onedev-token@\" -f -G -X DELETE https://code.onedev.io/~api/packages --data-urlencode 'query=\"Type\" is \"Maven\" and \"Name\" is \"io.onedev:server*\" and \"Version\" is \"@build_version@\"'\n\nmvn -Dmaven.deploy.username=@job_token@ -Dmaven.deploy.password=@secrets:maven-deploy-password@ -Dmaven.test.skip=true deploy \n\n# Prepare for artifact and site publish\ncp server-product/target/onedev-${buildVersion}.zip .\n\nunzip onedev-${buildVersion}.zip\ntar zcvf onedev-${buildVersion}.tar.gz onedev-${buildVersion}\nsha256sum onedev-${buildVersion}.zip > onedev-${buildVersion}.zip.sha256\nsha256sum onedev-${buildVersion}.tar.gz > onedev-${buildVersion}.tar.gz.sha256\n\ncp server-product/docker/*.yaml .\n\n# Prepare for docker image build\ncd $projectDir/server-product/target\ncp -r ../docker docker\nunzip onedev-$buildVersion.zip -d docker\nmv docker/onedev-$buildVersion docker/app\ncp -r agent docker/\n\ncd $projectDir\necho \"$buildVersion\" | cut -d. -f1 > buildVersion.major\necho \"$buildVersion\" | cut -d. -f1,2 > buildVersion.major.minor\n"
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -242,18 +211,7 @@ jobs:
     interpreter:
       type: PosixInterpreter
       shell: sh
-      commands: |
-        set -e
-
-        mvn -Dmaven.test.skip=true -Dmaven.source.skip=true package -Pee
-
-        cd server-product/target
-        cp -r ../docker docker
-        buildVersion=`ls onedev-*.zip|sed -e 's/onedev-\(.*\).zip/\1/'`
-
-        unzip onedev-$buildVersion.zip -d docker
-        mv docker/onedev-$buildVersion docker/app
-        cp -r agent docker/
+      commands: "set -e\n\nmvn -Dmaven.test.skip=true -Dmaven.source.skip=true package \n\ncd server-product/target\ncp -r ../docker docker\nbuildVersion=`ls onedev-*.zip|sed -e 's/onedev-\\(.*\\).zip/\\1/'`\n\nunzip onedev-$buildVersion.zip -d docker\nmv docker/onedev-$buildVersion docker/app\ncp -r agent docker/\n"
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -321,7 +279,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
-        mvn clean package
+        mvn -Dmaven.test.skip=true -Dmaven.source.skip=true package
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -393,7 +351,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
-        mvn test
+        mvn -Dmaven.source.skip=true test
 
         cd e2e-test
         npm install
