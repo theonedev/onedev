@@ -278,7 +278,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 					var lastContextSizes = expandSupport.getContextSizes(index, block.getElements().size(),
 							change.getDiffBlocks().size());
 					var direction = DiffExpandSupport.Direction.fromString(
-							params.getParameterValue("param2").toString("both"));
+							params.getParameterValue("param2").toString("down"));
 					var contextSizes = expandSupport.expand(index, block.getElements().size(),
 							change.getDiffBlocks().size(), direction);
 					
@@ -960,12 +960,18 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		builder.append("</td></tr>");		
 	}
 	
+	private String expanderLink(String cssClass, String tooltip, String svg, int blockIndex,
+			String direction) {
+		String script = String.format("javascript:$('#%s').data('callback')('expand', %d, '%s');",
+				getMarkupId(), blockIndex, direction);
+		return "<a class='" + cssClass + "' aria-label='" + tooltip
+				+ "' data-tippy-content='" + tooltip + "' href=\"" + script + "\">" + svg + "</a>";
+	}
+
 	private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
-			boolean canExpandUp, boolean canExpandDown) {
+			boolean canExpandDown, boolean canExpandUp) {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
-		String expandSvg = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
-				SpriteImage.getVersionedHref(IconScope.class, "expand2"));
 		String upSvg = String.format("<svg class='icon rotate-270'><use xlink:href='%s'/></svg>",
 				SpriteImage.getVersionedHref(IconScope.class, "arrow"));
 		String downSvg = String.format("<svg class='icon rotate-90'><use xlink:href='%s'/></svg>",
@@ -974,64 +980,41 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 				SpriteImage.getVersionedHref(IconScope.class, "ellipsis"));
 		
 		var skippedMessage = MessageFormat.format(_T("skipped {0} lines"), String.valueOf(skippedLines));
-		if (canExpandUp && canExpandDown) {
-			int colspan;
-			if (diffMode == DiffViewMode.UNIFIED)
-				colspan = blameInfo != null ? 5 : 4;
-			else
-				colspan = blameInfo != null ? 8 : 6;
-			String upScript = String.format("javascript:$('#%s').data('callback')('expand', %d, 'up');", getMarkupId(), blockIndex);
-			String bothScript = String.format("javascript:$('#%s').data('callback')('expand', %d, 'both');", getMarkupId(), blockIndex);
-			String downScript = String.format("javascript:$('#%s').data('callback')('expand', %d, 'down');", getMarkupId(), blockIndex);
-			builder.append("<td colspan='").append(colspan).append("' class='expander directional noselect'><div class='expander-controls'>")
-					.append("<a class='expand-up' aria-label='").append(_T("Show more lines above"))
-					.append("' data-tippy-content='").append(_T("Show more lines above")).append("' href=\"")
-					.append(upScript).append("\">").append(upSvg).append("</a>")
-					.append("<a class='expand-both' aria-label='").append(_T("Show more lines"))
-					.append("' data-tippy-content='").append(_T("Show more lines")).append("' href=\"")
-					.append(bothScript).append("\">").append(expandSvg).append(" <span>").append(skippedMessage).append("</span></a>")
-					.append("<a class='expand-down' aria-label='").append(_T("Show more lines below"))
-					.append("' data-tippy-content='").append(_T("Show more lines below")).append("' href=\"")
-					.append(downScript).append("\">").append(downSvg).append("</a></div></td>");
-			if (blameInfo != null) {
-				blameInfo.lastCommitHash = null;
-				blameInfo.lastOldCommitHash = null;
-				blameInfo.lastNewCommitHash = null;
-			}
-			builder.append("</tr>");
-			return;
-		}
+		String downLink = expanderLink("expand-down", _T("Show more lines above"), downSvg, blockIndex, "down");
+		String upLink = expanderLink("expand-up", _T("Show more lines below"), upSvg, blockIndex, "up");
+		boolean directional = canExpandDown && canExpandUp;
+		String expanderInner;
+		if (directional)
+			expanderInner = "<div class='expander-controls'>" + downLink + upLink + "</div>";
+		else
+			expanderInner = canExpandDown ? downLink : upLink;
+		String skippedInner = ellipsisSvg + " " + skippedMessage + " " + ellipsisSvg;
 
-		String direction = canExpandUp ? "up" : "down";
-		String script = String.format("javascript:$('#%s').data('callback')('expand', %d, '%s');",
-				getMarkupId(), blockIndex, direction);
+		String expanderClass = directional ? "expander directional noselect" : "expander noselect";
 		if (diffMode == DiffViewMode.UNIFIED) {
 			if (blameInfo != null) {
-				builder.append("<td colspan='3' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"")
-						.append(script).append("\">").append(expandSvg).append("</a></td>");
+				builder.append("<td colspan='3' class='").append(expanderClass).append("'>")
+						.append(expanderInner).append("</td>");
 				blameInfo.lastCommitHash = null;
 				blameInfo.lastOldCommitHash = null;
 				blameInfo.lastNewCommitHash = null;
 			} else {
-				builder.append("<td colspan='2' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"")
-						.append(script).append("\">").append(expandSvg).append("</a></td>");
+				builder.append("<td colspan='2' class='").append(expanderClass).append("'>")
+						.append(expanderInner).append("</td>");
 			}
-			builder.append("<td colspan='2' class='skipped noselect'>").append(ellipsisSvg).append(" ")
-					.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
+			builder.append("<td colspan='2' class='skipped noselect'>").append(skippedInner).append("</td>");
 		} else {
 			if (blameInfo != null) {
-				builder.append("<td colspan='2' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"").append(script)
-						.append("\">").append(expandSvg).append("</a></td>");
-				builder.append("<td class='skipped noselect' colspan='6'>").append(ellipsisSvg).append(" ")
-						.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
+				builder.append("<td colspan='2' class='").append(expanderClass).append("'>")
+						.append(expanderInner).append("</td>");
+				builder.append("<td class='skipped noselect' colspan='6'>").append(skippedInner).append("</td>");
 				blameInfo.lastCommitHash = null;
 				blameInfo.lastOldCommitHash = null;
 				blameInfo.lastNewCommitHash = null;
 			} else {
-				builder.append("<td class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"").append(script)
-						.append("\">").append(expandSvg).append("</a></td>");
-				builder.append("<td class='skipped noselect' colspan='5'>").append(ellipsisSvg).append(" ")
-						.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
+				builder.append("<td class='").append(expanderClass).append("'>")
+						.append(expanderInner).append("</td>");
+				builder.append("<td class='skipped noselect' colspan='5'>").append(skippedInner).append("</td>");
 			}
 		}
 		builder.append("</tr>");
@@ -1126,8 +1109,8 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		
 		@Override
 		public void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
-				boolean canExpandUp, boolean canExpandDown) {
-			BlobTextDiffPanel.this.appendExpander(builder, blockIndex, skippedLines, canExpandUp, canExpandDown);
+				boolean canExpandDown, boolean canExpandUp) {
+			BlobTextDiffPanel.this.appendExpander(builder, blockIndex, skippedLines, canExpandDown, canExpandUp);
 		}
 	}
 

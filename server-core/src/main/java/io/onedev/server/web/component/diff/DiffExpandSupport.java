@@ -15,15 +15,20 @@ public class DiffExpandSupport implements Serializable {
 	
 	private final Map<Integer, ContextSizes> contextSizes = new HashMap<>();
 
+	/**
+	 * Direction of the arrow clicked by user. DOWN continues downwards from the previous hunk, 
+	 * that is, it grows the top context of the gap. UP continues upwards from the next hunk, 
+	 * that is, it grows the bottom context of the gap.
+	 */
 	public enum Direction {
-		UP, BOTH, DOWN;
+		DOWN, UP;
 
 		public static Direction fromString(String value) {
 			for (Direction direction : values()) {
 				if (direction.name().equalsIgnoreCase(value))
 					return direction;
 			}
-			return BOTH;
+			return DOWN;
 		}
 	}
 
@@ -76,13 +81,10 @@ public class DiffExpandSupport implements Serializable {
 			bottom = Math.min(blockSize, bottom + WebConstants.DIFF_EXPAND_SIZE);
 		} else if (blockIndex == totalBlocks - 1) {
 			top = Math.min(blockSize, top + WebConstants.DIFF_EXPAND_SIZE);
+		} else if (direction == Direction.DOWN) {
+			top = Math.min(blockSize - bottom, top + WebConstants.DIFF_EXPAND_SIZE);
 		} else {
-			int maxTop = (blockSize + 1) / 2;
-			int maxBottom = blockSize / 2;
-			if (direction == Direction.UP || direction == Direction.BOTH)
-				top = Math.min(maxTop, top + WebConstants.DIFF_EXPAND_SIZE);
-			if (direction == Direction.DOWN || direction == Direction.BOTH)
-				bottom = Math.min(maxBottom, bottom + WebConstants.DIFF_EXPAND_SIZE);
+			bottom = Math.min(blockSize - top, bottom + WebConstants.DIFF_EXPAND_SIZE);
 		}
 		ContextSizes newContextSizes = new ContextSizes(top, bottom);
 		contextSizes.put(blockIndex, newContextSizes);
@@ -109,7 +111,7 @@ public class DiffExpandSupport implements Serializable {
 			if (start < 0)
 				start = 0;
 			else if (start > 0)
-				callback.appendExpander(builder, blockIndex, start, true, false);
+				callback.appendExpander(builder, blockIndex, start, false, true);
 			for (int j = start; j < block.getElements().size() - lastContextSizes.getBottom(); j++)
 				callback.appendEqual(builder, block, j, lastContextSizes.getBottom());
 		} else if (blockIndex == totalBlocks - 1) {
@@ -123,17 +125,14 @@ public class DiffExpandSupport implements Serializable {
 			for (int j = lastContextSizes.getTop(); j < end; j++)
 				callback.appendEqual(builder, block, j, lastContextSizes.getTop());
 			if (skipped != 0)
-				callback.appendExpander(builder, blockIndex, skipped, false, true);
+				callback.appendExpander(builder, blockIndex, skipped, true, false);
 		} else {
-			// Middle block: top and bottom contexts grow independently toward the block midpoint
+			// Middle block: top and bottom contexts grow independently until they meet
 			for (int j = lastContextSizes.getTop(); j < contextSizes.getTop(); j++)
 				callback.appendEqual(builder, block, j, lastContextSizes.getTop());
 			int skipped = block.getElements().size() - contextSizes.getTop() - contextSizes.getBottom();
-			if (skipped > 0) {
-				boolean canExpandUp = contextSizes.getTop() < (block.getElements().size() + 1) / 2;
-				boolean canExpandDown = contextSizes.getBottom() < block.getElements().size() / 2;
-				callback.appendExpander(builder, blockIndex, skipped, canExpandUp, canExpandDown);
-			}
+			if (skipped > 0)
+				callback.appendExpander(builder, blockIndex, skipped, true, true);
 			for (int j = block.getElements().size() - contextSizes.getBottom();
 					j < block.getElements().size() - lastContextSizes.getBottom(); j++) {
 				callback.appendEqual(builder, block, j, lastContextSizes.getBottom());
@@ -161,8 +160,10 @@ public class DiffExpandSupport implements Serializable {
 		 * @param builder the string builder
 		 * @param blockIndex the block index
 		 * @param skippedLines the number of skipped lines
+		 * @param canExpandDown true to show a down arrow revealing more lines below the previous hunk
+		 * @param canExpandUp true to show an up arrow revealing more lines above the next hunk
 		 */
 		void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
-				boolean canExpandUp, boolean canExpandDown);
+				boolean canExpandDown, boolean canExpandUp);
 	}
 }

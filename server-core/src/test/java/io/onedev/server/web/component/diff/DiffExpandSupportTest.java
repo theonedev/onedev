@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.diff;
 
-import static io.onedev.server.web.component.diff.DiffExpandSupport.Direction.BOTH;
 import static io.onedev.server.web.component.diff.DiffExpandSupport.Direction.DOWN;
 import static io.onedev.server.web.component.diff.DiffExpandSupport.Direction.UP;
 import static java.util.stream.Collectors.toList;
@@ -30,47 +29,64 @@ public class DiffExpandSupportTest {
 				contextSizes, block, 3, callback);
 		assertEquals(List.of(0, 1, 2, 97, 98, 99), callback.lines);
 		assertEquals(94, callback.skippedLines);
-		assertTrue(callback.canExpandUp);
 		assertTrue(callback.canExpandDown);
+		assertTrue(callback.canExpandUp);
 
 		callback = new Callback();
 		var lastContextSizes = contextSizes;
-		contextSizes = support.expand(1, 100, 3, UP);
+		contextSizes = support.expand(1, 100, 3, DOWN);
 		support.appendEquals(new StringBuilder(), 1, lastContextSizes, contextSizes, block, 3, callback);
-		assertEquals(range(3, 18).boxed().collect(toList()), callback.lines);
-		assertEquals(79, callback.skippedLines);
+		assertEquals(range(3, 33).boxed().collect(toList()), callback.lines);
+		assertEquals(64, callback.skippedLines);
 
-		support.expand(1, 100, 3, UP);
-		support.expand(1, 100, 3, UP);
-		lastContextSizes = support.getContextSizes(1, 100, 3);
-		contextSizes = support.expand(1, 100, 3, UP);
-		callback = new Callback();
-		support.appendEquals(new StringBuilder(), 1, lastContextSizes, contextSizes, block, 3, callback);
-		assertEquals(List.of(48, 49), callback.lines);
-		assertFalse(callback.canExpandUp);
-		assertTrue(callback.canExpandDown);
-		assertEquals(47, callback.skippedLines);
-
+		// Expanding down keeps both controls available even past the block midpoint
 		lastContextSizes = contextSizes;
 		contextSizes = support.expand(1, 100, 3, DOWN);
 		callback = new Callback();
 		support.appendEquals(new StringBuilder(), 1, lastContextSizes, contextSizes, block, 3, callback);
-		assertEquals(range(82, 97).boxed().collect(toList()), callback.lines);
-		assertFalse(callback.canExpandUp);
+		assertEquals(range(33, 63).boxed().collect(toList()), callback.lines);
+		assertEquals(34, callback.skippedLines);
 		assertTrue(callback.canExpandDown);
+		assertTrue(callback.canExpandUp);
+
+		lastContextSizes = contextSizes;
+		contextSizes = support.expand(1, 100, 3, UP);
+		callback = new Callback();
+		support.appendEquals(new StringBuilder(), 1, lastContextSizes, contextSizes, block, 3, callback);
+		assertEquals(range(67, 97).boxed().collect(toList()), callback.lines);
+		assertEquals(4, callback.skippedLines);
+		assertTrue(callback.canExpandDown);
+		assertTrue(callback.canExpandUp);
 	}
 
 	@Test
-	public void shouldExpandBothSidesAndRemoveExpanderWhenSidesMeet() {
+	public void shouldExposeUpControlForFirstBlockAndDownControlForLastBlock() {
+		var support = new DiffExpandSupport();
+
+		var first = new Callback();
+		support.appendEquals(new StringBuilder(), 0, new DiffExpandSupport.ContextSizes(0, 0),
+				support.getContextSizes(0, 40, 3), newBlock(40), 3, first);
+		assertFalse(first.canExpandDown);
+		assertTrue(first.canExpandUp);
+
+		var last = new Callback();
+		support.appendEquals(new StringBuilder(), 2, new DiffExpandSupport.ContextSizes(0, 0),
+				support.getContextSizes(2, 40, 3), newBlock(40), 3, last);
+		assertTrue(last.canExpandDown);
+		assertFalse(last.canExpandUp);
+	}
+
+	@Test
+	public void shouldRemoveExpanderWhenSidesMeet() {
 		var support = new DiffExpandSupport();
 		var block = newBlock(40);
-		support.expand(1, 40, 3, BOTH);
+		support.expand(1, 40, 3, DOWN);
 		var lastContextSizes = support.getContextSizes(1, 40, 3);
-		var contextSizes = support.expand(1, 40, 3, BOTH);
+		var contextSizes = support.expand(1, 40, 3, DOWN);
 		var callback = new Callback();
 
 		support.appendEquals(new StringBuilder(), 1, lastContextSizes, contextSizes, block, 3, callback);
-		assertEquals(range(18, 22).boxed().collect(toList()), callback.lines);
+		assertEquals(range(33, 37).boxed().collect(toList()), callback.lines);
 		assertEquals(-1, callback.skippedLines);
 	}
 
@@ -85,9 +101,9 @@ public class DiffExpandSupportTest {
 
 		private int skippedLines = -1;
 
-		private boolean canExpandUp;
-
 		private boolean canExpandDown;
+
+		private boolean canExpandUp;
 
 		@Override
 		public void appendEqual(StringBuilder builder, DiffBlock<String> block, int lineIndex,
@@ -97,10 +113,10 @@ public class DiffExpandSupportTest {
 
 		@Override
 		public void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
-				boolean canExpandUp, boolean canExpandDown) {
+				boolean canExpandDown, boolean canExpandUp) {
 			this.skippedLines = skippedLines;
-			this.canExpandUp = canExpandUp;
 			this.canExpandDown = canExpandDown;
+			this.canExpandUp = canExpandUp;
 		}
 	}
 }

@@ -6,7 +6,7 @@ import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { fillLabeledInput, login } from './helpers.js';
 
-test('expands a middle text-diff gap up, both, and down', async ({ page }) => {
+test('expands text-diff gaps with directional arrows', async ({ page }) => {
   test.setTimeout(120_000);
 
   // 1. Open a commit containing two distant changes
@@ -49,48 +49,85 @@ test('expands a middle text-diff gap up, both, and down', async ({ page }) => {
 
   const commitUrl = `${projectName}/~commits/${commitHash}`;
   await page.goto(commitUrl);
-  const directionalRow = page.locator('tr.expander').filter({ has: page.locator('.expander-controls') });
+  const expanders = page.locator('tr.expander');
+  await expect(expanders).toHaveCount(3);
+  const startRow = expanders.first();
+  const endRow = expanders.last();
+  const directionalRow = expanders.filter({ has: page.locator('.expander-controls') });
   await expect(directionalRow).toHaveCount(1);
-  await expect(page.locator('tr.expander').filter({ hasNot: page.locator('.expander-controls') })).toHaveCount(2);
+
+  await expect(startRow.locator('.expand-up')).toBeVisible();
+  await expect(startRow.getByLabel('Show more lines below')).toBeVisible();
+  await expect(startRow.locator('.expand-down')).toHaveCount(0);
+
+  await expect(endRow.locator('.expand-down')).toBeVisible();
+  await expect(endRow.getByLabel('Show more lines above')).toBeVisible();
+  await expect(endRow.locator('.expand-up')).toHaveCount(0);
 
   const controls = directionalRow.locator('.expander-controls > a');
-  await expect(controls).toHaveCount(3);
+  await expect(controls).toHaveCount(2);
+  await expect(directionalRow.locator('td.expander .expand-down')).toBeVisible();
+  await expect(directionalRow.locator('td.expander .expand-up')).toBeVisible();
   await expect(directionalRow.getByLabel('Show more lines above')).toBeVisible();
-  await expect(directionalRow.getByLabel('Show more lines', { exact: true })).toBeVisible();
   await expect(directionalRow.getByLabel('Show more lines below')).toBeVisible();
-  await expect(controls.nth(1)).toContainText(/skipped \d+ lines/);
-  const widths = await controls.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().width));
-  expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(2);
+
+  // Skipped lines are informational only, without any expand control
+  for (const row of [startRow, directionalRow, endRow]) {
+    await expect(row.locator('td.skipped')).toContainText(/skipped \d+ lines/);
+    await expect(row.locator('td.skipped a')).toHaveCount(0);
+  }
+
+  const [downBox, upBox, directionalWidth, singleWidth] = await Promise.all([
+    directionalRow.locator('.expand-down').evaluate((element) => element.getBoundingClientRect()),
+    directionalRow.locator('.expand-up').evaluate((element) => element.getBoundingClientRect()),
+    directionalRow.locator('td.expander').evaluate((element) => element.getBoundingClientRect().width),
+    startRow.locator('td.expander').evaluate((element) => element.getBoundingClientRect().width),
+  ]);
+  expect(downBox.left).toBeLessThan(upBox.left);
+  expect(Math.abs(downBox.top - upBox.top)).toBeLessThan(2);
+  expect(Math.abs(directionalWidth - singleWidth)).toBeLessThan(2);
 
   const rowClass = (await directionalRow.getAttribute('class')).split(/\s+/).find((name) => /^expander\d+$/.test(name));
   const middleRow = page.locator(`tr.${rowClass}`);
 
-  // 2. Expand only toward the preceding hunk
-  await directionalRow.locator('.expand-up').click();
+  // 2. Expand the bottom of the preceding hunk
+  await directionalRow.locator('.expand-down').click();
   await expect(page.getByText('unchanged-line-28', { exact: true })).toBeVisible();
   await expect(page.getByText('unchanged-line-71', { exact: true })).toHaveCount(0);
 
-  // 3. Reload and expand only toward the following hunk
+  // 3. Reload and expand the top of the following hunk
   await page.goto(commitUrl);
-  await page.locator(`tr.${rowClass} .expand-down`).click();
+  await page.locator(`tr.${rowClass} .expand-up`).click();
   await expect(page.getByText('unchanged-line-72', { exact: true })).toBeVisible();
   await expect(page.getByText('unchanged-line-29', { exact: true })).toHaveCount(0);
 
-  // 4. Reload and retain the existing both-sides expansion
+  // 4. Expand both halves of the same gap
   await page.goto(commitUrl);
-  await page.locator(`tr.${rowClass} .expand-both`).click();
+  await page.locator(`tr.${rowClass} .expand-down`).click();
   await expect(page.getByText('unchanged-line-28', { exact: true })).toBeVisible();
+  await page.locator(`tr.${rowClass} .expand-up`).click();
   await expect(page.getByText('unchanged-line-72', { exact: true })).toBeVisible();
 
-  // 5. Exhaust the upward half and leave one control for the downward half
+  // 5. Expand the top of the first hunk
   await page.goto(commitUrl);
-  for (let click = 0; click < 3; click += 1)
-    await page.locator(`tr.${rowClass} .expand-up`).click();
-  await expect(middleRow.locator('.expander-controls')).toHaveCount(0);
-  await expect(middleRow.locator('td.expander > a')).toHaveCount(1);
+  await startRow.locator('.expand-up').click();
+  await expect(page.getByText('unchanged-line-1', { exact: true })).toBeVisible();
 
-  // 6. Reveal the remaining half until the expander disappears
-  for (let click = 0; click < 3; click += 1)
-    await middleRow.locator('td.expander > a').click();
+  // 6. Expand the bottom of the last hunk
+  await page.goto(commitUrl);
+  await endRow.locator('.expand-down').click();
+  await expect(page.getByText('unchanged-line-100', { exact: true })).toBeVisible();
+
+  // 7. Keep both arrows while any line of the gap is still skipped
+  await page.goto(commitUrl);
+  for (const remaining of [43, 13]) {
+    await middleRow.locator('.expand-down').click();
+    await expect(middleRow.locator('td.skipped')).toContainText(`skipped ${remaining} lines`);
+    await expect(middleRow.locator('.expand-down')).toBeVisible();
+    await expect(middleRow.locator('.expand-up')).toBeVisible();
+  }
+
+  // 8. Reveal the rest of the gap
+  await middleRow.locator('.expand-down').click();
   await expect(middleRow).toHaveCount(0);
 });
