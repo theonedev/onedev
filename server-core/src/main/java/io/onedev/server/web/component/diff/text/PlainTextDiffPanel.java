@@ -73,12 +73,14 @@ public class PlainTextDiffPanel extends Panel {
                 IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
                 if ("expand".equals(params.getParameterValue("action").toString(""))) {                    
                     int index = params.getParameterValue("param1").toInt();
-                    int lastContextSize = expandSupport.getContextSize(index);
-                    int contextSize = expandSupport.expand(index);
+                    DiffBlock<String> block = diffBlocks.get(index);
+                    var lastContextSizes = expandSupport.getContextSizes(index, block.getElements().size(), diffBlocks.size());
+                    var direction = DiffExpandSupport.Direction.fromString(
+                            params.getParameterValue("param2").toString("both"));
+                    var contextSizes = expandSupport.expand(index, block.getElements().size(), diffBlocks.size(), direction);
                     
                     StringBuilder builder = new StringBuilder();
-                    DiffBlock<String> block = diffBlocks.get(index);
-                    expandSupport.appendEquals(builder, index, lastContextSize, contextSize, 
+                    expandSupport.appendEquals(builder, index, lastContextSizes, contextSizes,
                             block, diffBlocks.size(), new ExpandCallbackImpl());
                     
                     String expanded = Strings.CS.replace(builder.toString(), "\n", "");
@@ -117,8 +119,8 @@ public class PlainTextDiffPanel extends Panel {
         for (int i = 0; i < diffBlocks.size(); i++) {
             DiffBlock<String> block = diffBlocks.get(i);
             if (block.getOperation() == Operation.EQUAL) {
-                int contextSize = expandSupport.getContextSize(i);
-                expandSupport.appendEquals(builder, i, 0, contextSize, 
+                var contextSizes = expandSupport.getContextSizes(i, block.getElements().size(), diffBlocks.size());
+                expandSupport.appendEquals(builder, i, new DiffExpandSupport.ContextSizes(0, 0), contextSizes,
                         block, diffBlocks.size(), callback);
             } else if (block.getOperation() == Operation.DELETE) {
                 for (int j = 0; j < block.getElements().size(); j++)
@@ -186,16 +188,40 @@ public class PlainTextDiffPanel extends Panel {
         builder.append("</td></tr>");
     }
     
-    private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
+    private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
+            boolean canExpandUp, boolean canExpandDown) {
         builder.append("<tr class='expander expander").append(blockIndex).append("'>");
         
         String expandSvg = String.format("<svg class='icon'><use xlink:href='%s'/></svg>",
                 SpriteImage.getVersionedHref(IconScope.class, "expand2"));
+        String upSvg = String.format("<svg class='icon rotate-270'><use xlink:href='%s'/></svg>",
+                SpriteImage.getVersionedHref(IconScope.class, "arrow"));
+        String downSvg = String.format("<svg class='icon rotate-90'><use xlink:href='%s'/></svg>",
+                SpriteImage.getVersionedHref(IconScope.class, "arrow"));
         String ellipsisSvg = String.format("<svg class='icon'><use xlink:href='%s'/></svg>",
                 SpriteImage.getVersionedHref(IconScope.class, "ellipsis"));
         
-        String script = String.format("javascript:$('#%s').data('callback')('expand', %d);", getMarkupId(), blockIndex);
         var skippedMessage = MessageFormat.format(_T("skipped {0} lines"), String.valueOf(skippedLines));
+        if (canExpandUp && canExpandDown) {
+            String upScript = String.format("javascript:$('#%s').data('callback')('expand', %d, 'up');", getMarkupId(), blockIndex);
+            String bothScript = String.format("javascript:$('#%s').data('callback')('expand', %d, 'both');", getMarkupId(), blockIndex);
+            String downScript = String.format("javascript:$('#%s').data('callback')('expand', %d, 'down');", getMarkupId(), blockIndex);
+            builder.append("<td colspan='").append(showLineNumbers ? 4 : 2).append("' class='expander directional noselect'><div class='expander-controls'>")
+                    .append("<a class='expand-up' aria-label='").append(_T("Show more lines above"))
+                    .append("' data-tippy-content='").append(_T("Show more lines above")).append("' href=\"")
+                    .append(upScript).append("\">").append(upSvg).append("</a>")
+                    .append("<a class='expand-both' aria-label='").append(_T("Show more lines"))
+                    .append("' data-tippy-content='").append(_T("Show more lines")).append("' href=\"")
+                    .append(bothScript).append("\">").append(expandSvg).append(" <span>").append(skippedMessage).append("</span></a>")
+                    .append("<a class='expand-down' aria-label='").append(_T("Show more lines below"))
+                    .append("' data-tippy-content='").append(_T("Show more lines below")).append("' href=\"")
+                    .append(downScript).append("\">").append(downSvg).append("</a></div></td></tr>");
+            return;
+        }
+
+        String direction = canExpandUp ? "up" : "down";
+        String script = String.format("javascript:$('#%s').data('callback')('expand', %d, '%s');",
+                getMarkupId(), blockIndex, direction);
         
         if (showLineNumbers) {
             builder.append("<td colspan='2' class='expander noselect'><a data-tippy-content='").append(_T("Show more lines")).append("' href=\"")
@@ -222,7 +248,8 @@ public class PlainTextDiffPanel extends Panel {
         super.renderHead(response);
         response.render(JavaScriptHeaderItem.forReference(new PlainTextDiffResourceReference()));
         
-        CharSequence callback = callbackBehavior.getCallbackFunction(explicit("action"), explicit("param1"));
+        CharSequence callback = callbackBehavior.getCallbackFunction(
+                explicit("action"), explicit("param1"), explicit("param2"));
         String fileNameParam = fileName != null ? "'" + escapeJavaScript(fileName) + "'" : "null";
         String script = String.format("onedev.server.plainTextDiff.onDomReady('%s', %s, %s);", 
                 getMarkupId(), callback, fileNameParam);
@@ -236,8 +263,9 @@ public class PlainTextDiffPanel extends Panel {
         }
         
         @Override
-        public void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
-            PlainTextDiffPanel.this.appendExpander(builder, blockIndex, skippedLines);
+        public void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
+                boolean canExpandUp, boolean canExpandDown) {
+            PlainTextDiffPanel.this.appendExpander(builder, blockIndex, skippedLines, canExpandUp, canExpandDown);
         }
     }
     

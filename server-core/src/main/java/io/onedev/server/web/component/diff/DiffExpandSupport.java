@@ -13,25 +13,80 @@ import io.onedev.server.web.WebConstants;
  */
 public class DiffExpandSupport implements Serializable {
 	
-	private final Map<Integer, Integer> contextSizes = new HashMap<>();
+	private final Map<Integer, ContextSizes> contextSizes = new HashMap<>();
+
+	public enum Direction {
+		UP, BOTH, DOWN;
+
+		public static Direction fromString(String value) {
+			for (Direction direction : values()) {
+				if (direction.name().equalsIgnoreCase(value))
+					return direction;
+			}
+			return BOTH;
+		}
+	}
+
+	public static class ContextSizes implements Serializable {
+
+		private final int top;
+
+		private final int bottom;
+
+		public ContextSizes(int top, int bottom) {
+			this.top = top;
+			this.bottom = bottom;
+		}
+
+		public int getTop() {
+			return top;
+		}
+
+		public int getBottom() {
+			return bottom;
+		}
+	}
 	
 	/**
 	 * Gets the current or default context size for a given block index.
 	 */
-	public int getContextSize(int blockIndex) {
-		Integer contextSize = contextSizes.get(blockIndex);
-		return contextSize != null ? contextSize : WebConstants.DIFF_CONTEXT_SIZE;
+	public ContextSizes getContextSizes(int blockIndex, int blockSize, int totalBlocks) {
+		ContextSizes contextSizes = this.contextSizes.get(blockIndex);
+		if (contextSizes != null)
+			return contextSizes;
+		if (blockIndex == 0)
+			return new ContextSizes(0, Math.min(WebConstants.DIFF_CONTEXT_SIZE, blockSize));
+		else if (blockIndex == totalBlocks - 1)
+			return new ContextSizes(Math.min(WebConstants.DIFF_CONTEXT_SIZE, blockSize), 0);
+		else
+			return new ContextSizes(
+					Math.min(WebConstants.DIFF_CONTEXT_SIZE, (blockSize + 1) / 2),
+					Math.min(WebConstants.DIFF_CONTEXT_SIZE, blockSize / 2));
 	}
 	
 	/**
 	 * Expands the context for a given block index.
 	 * @return the new context size after expansion
 	 */
-	public int expand(int blockIndex) {
-		int lastContextSize = getContextSize(blockIndex);
-		int newContextSize = lastContextSize + WebConstants.DIFF_EXPAND_SIZE;
-		contextSizes.put(blockIndex, newContextSize);
-		return newContextSize;
+	public ContextSizes expand(int blockIndex, int blockSize, int totalBlocks, Direction direction) {
+		ContextSizes lastContextSizes = getContextSizes(blockIndex, blockSize, totalBlocks);
+		int top = lastContextSizes.getTop();
+		int bottom = lastContextSizes.getBottom();
+		if (blockIndex == 0) {
+			bottom = Math.min(blockSize, bottom + WebConstants.DIFF_EXPAND_SIZE);
+		} else if (blockIndex == totalBlocks - 1) {
+			top = Math.min(blockSize, top + WebConstants.DIFF_EXPAND_SIZE);
+		} else {
+			int maxTop = (blockSize + 1) / 2;
+			int maxBottom = blockSize / 2;
+			if (direction == Direction.UP || direction == Direction.BOTH)
+				top = Math.min(maxTop, top + WebConstants.DIFF_EXPAND_SIZE);
+			if (direction == Direction.DOWN || direction == Direction.BOTH)
+				bottom = Math.min(maxBottom, bottom + WebConstants.DIFF_EXPAND_SIZE);
+		}
+		ContextSizes newContextSizes = new ContextSizes(top, bottom);
+		contextSizes.put(blockIndex, newContextSizes);
+		return newContextSizes;
 	}
 	
 	/**
@@ -39,47 +94,50 @@ public class DiffExpandSupport implements Serializable {
 	 * 
 	 * @param builder the string builder to append to
 	 * @param blockIndex the index of the current equal block
-	 * @param lastContextSize the previous context size (0 for initial render)
-	 * @param contextSize the current context size to render
+	 * @param lastContextSizes the previous top and bottom context sizes
+	 * @param contextSizes the current top and bottom context sizes to render
 	 * @param block the diff block containing equal lines
 	 * @param totalBlocks total number of diff blocks
 	 * @param callback callback to append individual lines and expanders
 	 */
-	public void appendEquals(StringBuilder builder, int blockIndex, int lastContextSize, 
-			int contextSize, DiffBlock<String> block, int totalBlocks, ExpandCallback callback) {
+	public void appendEquals(StringBuilder builder, int blockIndex, ContextSizes lastContextSizes,
+			ContextSizes contextSizes, DiffBlock<String> block, int totalBlocks, ExpandCallback callback) {
 		
 		if (blockIndex == 0) {
 			// First block: show last N context lines
-			int start = block.getElements().size() - contextSize;
+			int start = block.getElements().size() - contextSizes.getBottom();
 			if (start < 0)
 				start = 0;
 			else if (start > 0)
-				callback.appendExpander(builder, blockIndex, start);
-			for (int j = start; j < block.getElements().size() - lastContextSize; j++)
-				callback.appendEqual(builder, block, j, lastContextSize);
+				callback.appendExpander(builder, blockIndex, start, true, false);
+			for (int j = start; j < block.getElements().size() - lastContextSizes.getBottom(); j++)
+				callback.appendEqual(builder, block, j, lastContextSizes.getBottom());
 		} else if (blockIndex == totalBlocks - 1) {
 			// Last block: show first N context lines
 			int end = block.getElements().size();
 			int skipped = 0;
-			if (end > contextSize) {
-				skipped = end - contextSize;
-				end = contextSize;
+			if (end > contextSizes.getTop()) {
+				skipped = end - contextSizes.getTop();
+				end = contextSizes.getTop();
 			}
-			for (int j = lastContextSize; j < end; j++)
-				callback.appendEqual(builder, block, j, lastContextSize);
+			for (int j = lastContextSizes.getTop(); j < end; j++)
+				callback.appendEqual(builder, block, j, lastContextSizes.getTop());
 			if (skipped != 0)
-				callback.appendExpander(builder, blockIndex, skipped);
-		} else if (2 * contextSize < block.getElements().size()) {
-			// Middle block with large content: show N lines at start, expander, N lines at end
-			for (int j = lastContextSize; j < contextSize; j++)
-				callback.appendEqual(builder, block, j, lastContextSize);
-			callback.appendExpander(builder, blockIndex, block.getElements().size() - 2 * contextSize);
-			for (int j = block.getElements().size() - contextSize; j < block.getElements().size() - lastContextSize; j++)
-				callback.appendEqual(builder, block, j, lastContextSize);
+				callback.appendExpander(builder, blockIndex, skipped, false, true);
 		} else {
-			// Middle block with small content: show all newly expanded lines
-			for (int j = lastContextSize; j < block.getElements().size() - lastContextSize; j++)
-				callback.appendEqual(builder, block, j, lastContextSize);
+			// Middle block: top and bottom contexts grow independently toward the block midpoint
+			for (int j = lastContextSizes.getTop(); j < contextSizes.getTop(); j++)
+				callback.appendEqual(builder, block, j, lastContextSizes.getTop());
+			int skipped = block.getElements().size() - contextSizes.getTop() - contextSizes.getBottom();
+			if (skipped > 0) {
+				boolean canExpandUp = contextSizes.getTop() < (block.getElements().size() + 1) / 2;
+				boolean canExpandDown = contextSizes.getBottom() < block.getElements().size() / 2;
+				callback.appendExpander(builder, blockIndex, skipped, canExpandUp, canExpandDown);
+			}
+			for (int j = block.getElements().size() - contextSizes.getBottom();
+					j < block.getElements().size() - lastContextSizes.getBottom(); j++) {
+				callback.appendEqual(builder, block, j, lastContextSizes.getBottom());
+			}
 		}
 	}
 	
@@ -104,7 +162,7 @@ public class DiffExpandSupport implements Serializable {
 		 * @param blockIndex the block index
 		 * @param skippedLines the number of skipped lines
 		 */
-		void appendExpander(StringBuilder builder, int blockIndex, int skippedLines);
+		void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,
+				boolean canExpandUp, boolean canExpandDown);
 	}
 }
-
