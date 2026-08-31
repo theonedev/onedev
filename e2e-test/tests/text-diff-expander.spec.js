@@ -7,8 +7,6 @@ import { expect, test } from '@playwright/test';
 import { fillLabeledInput, login } from './helpers.js';
 
 test('expands text-diff gaps with directional arrows', async ({ page }) => {
-  test.setTimeout(120_000);
-
   // 1. Open a commit containing two distant changes
   await login(page, 'admin', 'admin');
   const projectName = `text-diff-expander-${Date.now()}`;

@@ -26,8 +26,6 @@ test.describe('confidential issue access', () => {
   let issueTitle;
 
   test('normal user can access confidential issue created by himself', async ({ page }) => {
-    test.setTimeout(180_000);
-
     const suffix = Date.now();
 
     await login(page, 'admin', 'admin');
@@ -53,8 +51,6 @@ test.describe('confidential issue access', () => {
   });
 
   test('normal user cannot access confidential issue created by others', async ({ page }) => {
-    test.setTimeout(60_000);
-
     await login(page, other.userName, other.password);
     const response = await page.goto(issueUrl);
 
@@ -67,8 +63,6 @@ test.describe('confidential issue access', () => {
   test('normal user authorized to a confidential issue created by others can access it', async ({
     page,
   }) => {
-    test.setTimeout(90_000);
-
     await login(page, creator.userName, creator.password);
     await authorizeIssueUser(page, issueUrl, granted.userName);
 

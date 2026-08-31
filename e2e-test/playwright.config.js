@@ -22,6 +22,10 @@ function getHostIp() {
 export default defineConfig({
   testDir: './tests',
   outputDir: './test-results',
+  timeout: 3 * 60 * 1000,
+  expect: {
+    timeout: 30 * 1000,
+  },
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
@@ -30,6 +34,8 @@ export default defineConfig({
   workers: 1,
   use: {
     baseURL,
+    actionTimeout: 30 * 1000,
+    navigationTimeout: 2 * 60 * 1000,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

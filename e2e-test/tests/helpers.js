@@ -101,7 +101,8 @@ export async function createUser(page, options = {}) {
     await fillLabeledInput(page, 'Email Address', email);
   }
   await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page.locator('#session-feedback')).toContainText('New user created');
+  await expect(page).toHaveURL(/\/~users\/\d+\/basic-setting(?:\?|$)/);
+  await expect(formGroup(page, 'Login Name').locator('input.form-control')).toHaveValue(userName);
 
   return { userName, password, email };
 }
@@ -118,8 +119,8 @@ export async function createProject(page, projectName) {
   await page.goto('~projects/new');
   await fillLabeledInput(page, 'Name', name);
   await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page.locator('#session-feedback')).toContainText('New project created');
   await expect(page).toHaveURL(new RegExp(`/${name}(/|$)`));
+  await expect(page.locator('.sidebar')).toContainText(name);
 
   return name;
 }
@@ -141,7 +142,11 @@ export async function authorizeUser(page, projectName, userName, roleName) {
   await select2Choose(page, authRow.locator('td').nth(1), userName);
   await select2Choose(page, authRow.locator('td').nth(2), roleName);
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.locator('#session-feedback')).toContainText('User authorizations updated');
+  await page.goto(`${projectName}/~settings/user-authorizations`);
+  const savedAuthRow = page
+    .locator('.user-authorizations .bean-list tbody tr')
+    .filter({ hasText: userName });
+  await expect(savedAuthRow).toContainText(roleName);
 }
 
 /**
@@ -180,7 +185,7 @@ export async function authorizeIssueUser(page, issueUrl, userName) {
   const authorizationsUrl = issueUrl.replace(/\/?$/, '') + '/authorizations';
   await page.goto(authorizationsUrl);
   await select2Choose(page, page.locator('.issue-authorization-list'), userName);
-  await expect(page.locator('#session-feedback')).toContainText('User authorized');
+  await page.goto(authorizationsUrl);
   await expect(page.locator('.issue-authorization-list .authorizations')).toContainText(userName);
 }
 

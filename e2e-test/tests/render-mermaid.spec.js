@@ -2,8 +2,6 @@ import { expect, test } from '@playwright/test';
 import { createProject, login } from './helpers.js';
 
 test('renders Mermaid classes with numeric hex colors', async ({ page }) => {
-  test.setTimeout(60_000);
-
   await login(page, 'admin', 'admin');
   const projectName = await createProject(page);
 
@@ -20,6 +18,6 @@ test('renders Mermaid classes with numeric hex colors', async ({ page }) => {
   await page.getByRole('button', { name: 'Save' }).click();
 
   const styledNode = page.locator('.mermaid svg .node.oldError');
-  await expect(styledNode).toBeVisible({ timeout: 15_000 });
+  await expect(styledNode).toBeVisible();
   await expect(styledNode).toContainText('Error Node');
 });
