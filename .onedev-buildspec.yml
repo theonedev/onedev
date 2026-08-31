@@ -67,18 +67,6 @@ jobs:
     useTTY: true
     condition: SUCCESSFUL
     optional: false
-  - type: UseTemplateStep
-    name: scan
-    templateName: scan vulnerabilities
-    paramMatrix:
-    - valuesProvider:
-        type: SpecifiedValues
-        values:
-        - - server-product/target/docker/app
-      secret: false
-      name: Scan Path
-    condition: SUCCESSFUL
-    optional: false
   - type: PublishArtifactStep
     name: publish artifacts
     artifacts: '*.zip *.tar.gz *.sha256 *.yaml'
@@ -182,6 +170,10 @@ jobs:
     accessTokenSecret: onedev-token
     condition: SUCCESSFUL
     optional: false
+  jobDependencies:
+  - jobName: CI
+    requireSuccessful: true
+    artifacts: '**'
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -409,23 +401,15 @@ jobs:
     useTTY: true
     condition: SUCCESSFUL
     optional: false
-  - type: UseTemplateStep
-    name: scan
-    templateName: scan vulnerabilities
-    paramMatrix:
-    - valuesProvider:
-        type: SpecifiedValues
-        values:
-        - - server-product/target/sandbox
-      secret: false
-      name: Scan Path
-    condition: SUCCESSFUL
-    optional: false
   triggers:
   - type: BranchUpdateTrigger
     branches: main
     userMatch: anyone
     projects: onedev/server
+  jobDependencies:
+  - jobName: Scan Vulnerabilities
+    requireSuccessful: true
+    artifacts: '**'
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
