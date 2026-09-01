@@ -54,6 +54,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadPack;
 import io.onedev.server.service.PackBlobService;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.util.XmlUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -105,11 +106,14 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 					var baos = new ByteArrayOutputStream();
 					packBlobService.downloadBlob(packBlob.getProject().getId(),
 							packBlob.getSha256Hash(), baos);
+							
 					try {
-						pomElement = new SAXReader().read(new ByteArrayInputStream(baos.toByteArray())).getRootElement();
+						SAXReader reader = new SAXReader();
+						XmlUtils.disallowDocTypeDecl(reader);
+						pomElement = reader.read(new ByteArrayInputStream(baos.toByteArray())).getRootElement();
 					} catch (DocumentException e) {
 						throw new RuntimeException(e);
-					}
+					}			
 					break;
 				}
 			}
