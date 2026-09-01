@@ -40,7 +40,7 @@ ensure_artifact() {
 }
 
 build_classpath() {
-	run_maven -pl server-product dependency:build-classpath \
+	run_maven -pl server-product -am dependency:build-classpath \
 		-Dmdep.outputFile=target/deps-classpath.txt || return 1
 
 	module_cp=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
