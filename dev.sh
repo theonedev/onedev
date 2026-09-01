@@ -40,13 +40,15 @@ ensure_artifact() {
 }
 
 build_classpath() {
-	run_maven -pl server-product -am dependency:build-classpath \
+	local_artifacts=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
+		| while read -r dir; do basename "$(dirname "$(dirname "$dir")")"; done | sort -u)
+	exclude_artifacts=$(echo "$local_artifacts" | paste -sd, -)
+	run_maven -pl server-product dependency:build-classpath \
+		-DexcludeArtifactIds="$exclude_artifacts" \
 		-Dmdep.outputFile=target/deps-classpath.txt || return 1
 
 	module_cp=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
 		| tr '\n' ':' | sed 's/:$//')
-	local_artifacts=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
-		| while read -r dir; do basename "$(dirname "$(dirname "$dir")")"; done | sort -u)
 	deps_cp=$(tr ':' '\n' < server-product/target/deps-classpath.txt | while read -r jar; do
 		artifact=$(echo "$jar" | sed -n 's|.*/io/onedev/\([^/]*\)/.*|\1|p')
 		if [ -n "$artifact" ] && echo "$local_artifacts" | grep -qx "$artifact"; then
