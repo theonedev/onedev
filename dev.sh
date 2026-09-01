@@ -40,14 +40,22 @@ ensure_artifact() {
 }
 
 build_classpath() {
-	run_maven -pl server-product dependency:build-classpath \
-		-Dmdep.outputFile=target/deps-classpath.txt || return 1
+	# Sibling modules are only resolvable from the reactor, so include them with
+	# -am and let the compile phase run. Compilation itself is skipped as classes
+	# are built separately, but Maven still needs the phase to map module
+	# dependencies to their target/classes directories instead of looking for
+	# jars in a repository.
+	run_maven -pl server-product -am compile dependency:build-classpath \
+		-Dmaven.main.skip=true -Dmdep.outputFile=target/deps-classpath.txt || return 1
 
 	module_cp=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
 		| tr '\n' ':' | sed 's/:$//')
 	local_artifacts=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
 		| while read -r dir; do basename "$(dirname "$(dirname "$dir")")"; done | sort -u)
 	deps_cp=$(tr ':' '\n' < server-product/target/deps-classpath.txt | while read -r jar; do
+		if [ "${jar#$ROOT/}" != "$jar" ]; then
+			continue
+		fi
 		artifact=$(echo "$jar" | sed -n 's|.*/io/onedev/\([^/]*\)/.*|\1|p')
 		if [ -n "$artifact" ] && echo "$local_artifacts" | grep -qx "$artifact"; then
 			continue
