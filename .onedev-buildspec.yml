@@ -143,6 +143,9 @@ jobs:
   - jobName: CI
     requireSuccessful: true
     artifacts: '**'
+  - jobName: Scan Vulnerabilities
+    requireSuccessful: true
+    artifacts: '**'
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -263,7 +266,6 @@ jobs:
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
-    cloneDepth: 1
     condition: SUCCESSFUL
     optional: false
   - type: UseTemplateStep
@@ -319,7 +321,6 @@ jobs:
       accessTokenSecret: onedev-token
     withLfs: false
     withSubmodules: true
-    cloneDepth: 1
     condition: SUCCESSFUL
     optional: false
   - type: UseTemplateStep
@@ -371,10 +372,6 @@ jobs:
     branches: main
     userMatch: anyone
     projects: onedev/server
-  jobDependencies:
-  - jobName: Scan Vulnerabilities
-    requireSuccessful: true
-    artifacts: '**'
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
