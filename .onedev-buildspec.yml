@@ -143,6 +143,9 @@ jobs:
   - jobName: CI
     requireSuccessful: true
     artifacts: '**'
+  - jobName: Scan Vulnerabilities
+    requireSuccessful: true
+    artifacts: '**'
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -369,10 +372,6 @@ jobs:
     branches: main
     userMatch: anyone
     projects: onedev/server
-  jobDependencies:
-  - jobName: Scan Vulnerabilities
-    requireSuccessful: true
-    artifacts: '**'
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
