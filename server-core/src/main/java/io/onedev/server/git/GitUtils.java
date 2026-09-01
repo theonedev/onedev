@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.Strings;
@@ -63,6 +64,7 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.eclipse.jgit.transport.PacketLineOut;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
@@ -93,6 +95,8 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.exception.NotFoundException;
+import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
+import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.IsAncestorCommand;
 import io.onedev.server.git.command.ReceivePackCommand;
@@ -857,9 +861,44 @@ public class GitUtils {
 		return change;
 	}
 	
-	public static void uploadPack(File gitDir, Map<String, String> environments, String protocol, 
+	public static void advertiseUploadRefs(File gitDir, String protocol, OutputStream stdout) {
+		advertiseUploadRefs(gitDir, protocol, stdout, true);
+	}
+
+	public static void advertiseUploadRefs(File gitDir, String protocol, OutputStream stdout, boolean logError) {
+		AtomicBoolean outputWritten = new AtomicBoolean(false);
+		var errorMessage = new AtomicReference<String>();
+		var advertise = new AdvertiseUploadRefsCommand(gitDir, trackOutput(stdout, outputWritten),
+				errorLogger(errorMessage, logError));
+		var result = advertise.protocol(protocol).run();
+		handleGitResult(result, stdout, outputWritten, errorMessage.get(),
+				"git upload-pack --advertise-refs failed", logError);
+	}
+
+	public static void advertiseReceiveRefs(File gitDir, String protocol, OutputStream stdout) {
+		advertiseReceiveRefs(gitDir, protocol, stdout, true);
+	}
+
+	public static void advertiseReceiveRefs(File gitDir, String protocol, OutputStream stdout, boolean logError) {
+		AtomicBoolean outputWritten = new AtomicBoolean(false);
+		var errorMessage = new AtomicReference<String>();
+		var advertise = new AdvertiseReceiveRefsCommand(gitDir, trackOutput(stdout, outputWritten),
+				errorLogger(errorMessage, logError));
+		var result = advertise.protocol(protocol).run();
+		handleGitResult(result, stdout, outputWritten, errorMessage.get(),
+				"git receive-pack --advertise-refs failed", logError);
+	}
+
+	public static void uploadPack(File gitDir, Map<String, String> environments, String protocol,
 			InputStream stdin, OutputStream stdout) {
+		uploadPack(gitDir, environments, protocol, stdin, stdout, true);
+	}
+
+	public static void uploadPack(File gitDir, Map<String, String> environments, String protocol,
+			InputStream stdin, OutputStream stdout, boolean logError) {
 		AtomicBoolean toleratedErrors = new AtomicBoolean(false);
+		AtomicBoolean outputWritten = new AtomicBoolean(false);
+		var errorMessage = new AtomicReference<String>();
 		var stderr = new LineConsumer(UTF_8.name()) {
 
 			@Override
@@ -869,35 +908,93 @@ public class GitUtils {
 					toleratedErrors.set(true);
 					logger.debug(line);
 				} else {
-					logger.error(line);
+					errorMessage.compareAndSet(null, line);
+					if (logError)
+						logger.error(line);
 				}
 			}
 			
 		};
 
-		ExecutionResult result;
-		var upload = new UploadPackCommand(gitDir, stdin, stdout, stderr, environments);
+		var upload = new UploadPackCommand(gitDir, stdin, trackOutput(stdout, outputWritten), stderr, environments);
 		upload.statelessRpc(true).protocol(protocol);
-		result = upload.run();
-		if (result.getReturnCode() != 0 && !toleratedErrors.get())
-			throw result.buildException();
+		var result = upload.run();
+		if (!toleratedErrors.get())
+			handleGitResult(result, stdout, outputWritten, errorMessage.get(), "git upload-pack failed", logError);
 	}
-	
+
 	public static void receivePack(File gitDir, Map<String, String> environments, String protocol, 
 			InputStream stdin, OutputStream stdout) {
-		var stderr = new LineConsumer(UTF_8.name()) {
+		receivePack(gitDir, environments, protocol, stdin, stdout, true);
+	}
+
+	public static void receivePack(File gitDir, Map<String, String> environments, String protocol,
+			InputStream stdin, OutputStream stdout, boolean logError) {
+		AtomicBoolean outputWritten = new AtomicBoolean(false);
+		var errorMessage = new AtomicReference<String>();
+		var receive = new ReceivePackCommand(gitDir, stdin, trackOutput(stdout, outputWritten),
+				errorLogger(errorMessage, logError), environments);
+		receive.statelessRpc(true).protocol(protocol);
+		ExecutionResult result = receive.run();
+		handleGitResult(result, stdout, outputWritten, errorMessage.get(), "git receive-pack failed", logError);
+	}
+
+	private static LineConsumer errorLogger(AtomicReference<String> errorMessage, boolean logError) {
+		return new LineConsumer(UTF_8.name()) {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				errorMessage.compareAndSet(null, line);
+				if (logError)
+					logger.error(line);
 			}
-			
+
 		};
-		
-		var receive = new ReceivePackCommand(gitDir, stdin, stdout, stderr, environments);
-		receive.statelessRpc(true).protocol(protocol);
-		ExecutionResult result = receive.run();
-		result.checkReturnCode();
+	}
+
+	private static OutputStream trackOutput(OutputStream output, AtomicBoolean outputWritten) {
+		return new OutputStream() {
+
+			@Override
+			public void write(int b) throws IOException {
+				output.write(b);
+				outputWritten.set(true);
+			}
+
+			@Override
+			public void write(byte[] b, int off, int len) throws IOException {
+				output.write(b, off, len);
+				if (len != 0)
+					outputWritten.set(true);
+			}
+
+			@Override
+			public void flush() throws IOException {
+				output.flush();
+			}
+
+		};
+	}
+
+	private static void handleGitResult(ExecutionResult result, OutputStream output, AtomicBoolean outputWritten,
+			String errorMessage, String fallbackMessage, boolean logError) {
+		if (result.getReturnCode() != 0) {
+			if (!outputWritten.get()) {
+				var message = errorMessage;
+				if (message == null)
+					message = fallbackMessage;
+				try {
+					var packet = new PacketLineOut(output);
+					packet.writeString("ERR " + message + "\n");
+					packet.end();
+					output.flush();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else if (errorMessage == null && logError) {
+				logger.error("{} (exit code: {})", fallbackMessage, result.getReturnCode());
+			}
+		}
 	}
 		
 }

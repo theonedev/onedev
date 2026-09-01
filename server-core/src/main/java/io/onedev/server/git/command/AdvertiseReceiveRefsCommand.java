@@ -5,52 +5,43 @@ import java.io.OutputStream;
 
 import org.jspecify.annotations.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.git.GitUtils;
 
 public class AdvertiseReceiveRefsCommand {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdvertiseReceiveRefsCommand.class);
-	
 	private final File workingDir;
-	
-	private final OutputStream output;
-	
+
+	private final OutputStream stdout;
+
+	private final OutputStream stderr;
+
 	private String protocol;
-	
-	public AdvertiseReceiveRefsCommand(File workingDir, OutputStream output) {
+
+	public AdvertiseReceiveRefsCommand(File workingDir, OutputStream stdout, OutputStream stderr) {
 		this.workingDir = workingDir;
-		this.output = output;
+		this.stdout = stdout;
+		this.stderr = stderr;
 	}
 
 	public AdvertiseReceiveRefsCommand protocol(@Nullable String protocol) {
 		this.protocol = protocol;
 		return this;
 	}
-	
+
 	protected Commandline newGit() {
 		return GitUtils.newGit();
 	}
-	
-	public void run() {
+
+	public ExecutionResult run() {
 		Commandline git = newGit().workingDir(workingDir);
-		
+
 		if (protocol != null)
 			git.envs().put("GIT_PROTOCOL", protocol);
-		
-		git.addArgs("receive-pack", "--stateless-rpc", "--advertise-refs", ".");
-		git.execute(output, new LineConsumer() {
 
-			@Override
-			public void consume(String line) {
-				logger.error(line);
-			}
-			
-		}).checkReturnCode();
+		git.addArgs("receive-pack", "--stateless-rpc", "--advertise-refs", ".");
+		return git.execute(stdout, stderr);
 	}
 
 }

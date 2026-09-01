@@ -1,12 +1,17 @@
 package io.onedev.server.git;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +23,7 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.PacketLineOut;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.junit.Test;
@@ -28,6 +34,68 @@ import com.google.common.io.Resources;
 import io.onedev.commons.utils.FileUtils;
 
 public class GitUtilsTest extends AbstractGitTest {
+
+	@Test
+	public void testAdvertiseRefsErrorResponse() {
+		var emptyDir = FileUtils.createTempDir();
+		try {
+			var stdout = new ByteArrayOutputStream();
+			GitUtils.advertiseUploadRefs(emptyDir, null, stdout, false);
+			var response = stdout.toString(StandardCharsets.UTF_8);
+			assertTrue(response.contains("ERR "));
+			assertTrue(response.contains("does not appear to be a git repository"));
+			assertTrue(response.endsWith("0000"));
+
+			stdout.reset();
+			GitUtils.advertiseReceiveRefs(emptyDir, null, stdout, false);
+			response = stdout.toString(StandardCharsets.UTF_8);
+			assertTrue(response.contains("ERR "));
+			assertTrue(response.contains("does not appear to be a git repository"));
+			assertTrue(response.endsWith("0000"));
+		} finally {
+			FileUtils.deleteDir(emptyDir);
+		}
+	}
+
+	@Test
+	public void testUploadPackErrorResponse() throws Exception {
+		var existingObject = addFileAndCommit("file", "content", "initial");
+		var missingObject = "4d70cd380dcc3d21e6450f77b8aeddd8994e1f9d";
+		var stdin = new ByteArrayOutputStream();
+		var packet = new PacketLineOut(stdin);
+		packet.writeString("command=fetch\n");
+		packet.writeString("agent=git/2.43.0\n");
+		packet.writeString("object-format=sha1\n");
+		packet.writeDelim();
+		packet.writeString("thin-pack\n");
+		packet.writeString("no-progress\n");
+		packet.writeString("ofs-delta\n");
+		packet.writeString("want " + existingObject + "\n");
+		packet.writeString("want " + missingObject + "\n");
+		packet.writeString("have " + existingObject + "\n");
+		packet.end();
+
+		var stdout = new ByteArrayOutputStream();
+		GitUtils.uploadPack(git.getRepository().getDirectory(), Collections.emptyMap(), "version=2",
+				new ByteArrayInputStream(stdin.toByteArray()), stdout, false);
+
+		var expected = new ByteArrayOutputStream();
+		packet = new PacketLineOut(expected);
+		packet.writeString("ERR upload-pack: not our ref " + missingObject);
+		assertArrayEquals(expected.toByteArray(), stdout.toByteArray());
+	}
+
+	@Test
+	public void testReceivePackErrorResponse() {
+		var stdout = new ByteArrayOutputStream();
+		GitUtils.receivePack(git.getRepository().getDirectory(), Collections.emptyMap(), null,
+				new ByteArrayInputStream("invalid request".getBytes(StandardCharsets.UTF_8)), stdout, false);
+
+		var response = stdout.toString(StandardCharsets.UTF_8);
+		assertTrue(response.contains("ERR "));
+		assertTrue(response.contains("bad line length character"));
+		assertTrue(response.endsWith("0000"));
+	}
 
 	@Test
 	public void testExactOnlyRenameDetection() {

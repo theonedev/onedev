@@ -46,8 +46,6 @@ import io.onedev.server.codequality.UnitTestReport;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.LfsObject;
-import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
-import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
@@ -275,9 +273,9 @@ public class ClusterResource {
 		StreamingOutput os = output -> {
 			File gitDir = projectService.getGitDir(projectId);
 			if (upload)
-				new AdvertiseUploadRefsCommand(gitDir, output).protocol(protocol).run();
+				GitUtils.advertiseUploadRefs(gitDir, protocol, output);
 			else
-				new AdvertiseReceiveRefsCommand(gitDir, output).protocol(protocol).run();
+				GitUtils.advertiseReceiveRefs(gitDir, protocol, output);
 	   };
 		return ok(os).build();
 	}

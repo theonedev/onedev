@@ -3,52 +3,43 @@ package io.onedev.server.git.command;
 import java.io.File;
 import java.io.OutputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.git.GitUtils;
 
 public class AdvertiseUploadRefsCommand {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdvertiseUploadRefsCommand.class);
-	
 	private final File workingDir;
-	
-	private final OutputStream output;
-	
+
+	private final OutputStream stdout;
+
+	private final OutputStream stderr;
+
 	private String protocol;
-	
-	public AdvertiseUploadRefsCommand(File workingDir, OutputStream output) {
+
+	public AdvertiseUploadRefsCommand(File workingDir, OutputStream stdout, OutputStream stderr) {
 		this.workingDir = workingDir;
-		this.output = output;
+		this.stdout = stdout;
+		this.stderr = stderr;
 	}
 
 	public AdvertiseUploadRefsCommand protocol(String protocol) {
 		this.protocol = protocol;
 		return this;
 	}
-	
+
 	protected Commandline newGit() {
 		return GitUtils.newGit();
 	}
-	
-	public void run() {
+
+	public ExecutionResult run() {
 		Commandline git = newGit().workingDir(workingDir);
-		
+
 		if (protocol != null)
 			git.envs().put("GIT_PROTOCOL", protocol);
-		
-		git.addArgs("upload-pack", "--stateless-rpc", "--advertise-refs", ".");
-		git.execute(output, new LineConsumer() {
 
-			@Override
-			public void consume(String line) {
-				logger.error(line);
-			}
-			
-		}).checkReturnCode();
+		git.addArgs("upload-pack", "--stateless-rpc", "--advertise-refs", ".");
+		return git.execute(stdout, stderr);
 	}
 
 }

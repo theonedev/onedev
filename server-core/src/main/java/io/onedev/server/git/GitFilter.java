@@ -45,8 +45,6 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
-import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
@@ -337,10 +335,10 @@ public class GitFilter implements Filter {
 		String activeServer = projectService.getActiveServer(projectId, true);
 		if (activeServer.equals(clusterService.getLocalServerAddress())) {
 			File gitDir = projectService.getGitDir(projectId);
-			if (upload) 
-				new AdvertiseUploadRefsCommand(gitDir, output).protocol(protocol).run();
-			else 
-				new AdvertiseReceiveRefsCommand(gitDir, output).protocol(protocol).run();
+			if (upload)
+				GitUtils.advertiseUploadRefs(gitDir, protocol, output);
+			else
+				GitUtils.advertiseReceiveRefs(gitDir, protocol, output);
 		} else {
 			Client client = ClientBuilder.newClient();
 			try {
