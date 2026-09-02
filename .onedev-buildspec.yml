@@ -361,6 +361,12 @@ jobs:
     useTTY: true
     condition: SUCCESSFUL
     optional: false
+  - type: PublishJUnitReportStep
+    name: publish unit test report
+    reportName: Unit Test Report
+    filePatterns: '**/TEST-*.xml'
+    condition: ALWAYS
+    optional: false
   - type: PublishPlaywrightReportStep
     name: publish E2E test report
     reportName: E2E Test Report
