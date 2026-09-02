@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 import { createProject, login, openIssue } from './helpers.js';
 
 test('admin can edit an issue field from the issue list', async ({ page }) => {

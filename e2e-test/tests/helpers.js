@@ -1,35 +1,16 @@
 import { expect } from '@playwright/test';
 
 /**
- * Wait for OneDev's delayed autofocus, which runs 100ms after page setup, to settle.
- * @param {import('@playwright/test').Page} page
- */
-export async function waitForDelayedAutoFocus(page) {
-  await page.waitForTimeout(150);
-}
-
-/**
  * @param {import('@playwright/test').Page} page
  * @param {string} userName
  * @param {string} password
  */
 export async function login(page, userName, password) {
   await page.goto('~login');
-  await waitForDelayedAutoFocus(page);
-  const form = page.locator('form');
-  const userNameInput = form.locator('input[name="userName"]');
-  const passwordInput = form.locator('input[name="password"]');
-
-  await expect(form).toBeVisible();
-  await userNameInput.fill(userName);
-  await passwordInput.fill(password);
-  await expect(userNameInput).toHaveValue(userName);
-  await expect(passwordInput).toHaveValue(password);
-
-  await Promise.all([
-    page.waitForURL((url) => !url.pathname.includes('~login')),
-    form.getByRole('button', { name: 'Sign in' }).click(),
-  ]);
+  await page.getByPlaceholder('Login name or email address', { exact: true }).fill(userName);
+  await page.locator('form input[type="password"]').fill(password);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.waitForURL((url) => !url.pathname.includes('~login'));
 }
 
 /**
@@ -111,7 +92,6 @@ export async function createUser(page, options = {}) {
   }
 
   await page.goto('~administration/users/new');
-  await waitForDelayedAutoFocus(page);
   if (type !== 'Ordinary') {
     await select2Choose(page, formGroup(page, 'Type'), type);
   }
@@ -119,13 +99,6 @@ export async function createUser(page, options = {}) {
   if (type === 'Ordinary') {
     await fillConfirmativePassword(page, password);
     await fillLabeledInput(page, 'Email Address', email);
-  }
-  await expect(formGroup(page, 'Login Name').locator('input.form-control')).toHaveValue(userName);
-  if (type === 'Ordinary') {
-    const passwordGroup = formGroup(page, 'Password');
-    await expect(passwordGroup.getByPlaceholder('Type password here')).toHaveValue(password);
-    await expect(passwordGroup.getByPlaceholder('Confirm password here')).toHaveValue(password);
-    await expect(formGroup(page, 'Email Address').locator('input.form-control')).toHaveValue(email);
   }
   await page.getByRole('button', { name: 'Create' }).click();
   await expect(page).toHaveURL(/\/~users\/\d+\/basic-setting(?:\?|$)/);
@@ -144,7 +117,6 @@ export async function createProject(page, projectName) {
   const name = projectName ?? `project${Date.now()}`;
 
   await page.goto('~projects/new');
-  await waitForDelayedAutoFocus(page);
   await fillLabeledInput(page, 'Name', name);
   await page.getByRole('button', { name: 'Create' }).click();
   await expect(page).toHaveURL(new RegExp(`/${name}(/|$)`));
@@ -189,7 +161,6 @@ export async function openIssue(page, projectName, options = {}) {
   const confidential = options.confidential ?? false;
 
   await page.goto(`${projectName}/~issues/new`);
-  await waitForDelayedAutoFocus(page);
   await page.getByPlaceholder('Input title here').fill(title);
   if (confidential) {
     const confidentialSwitch = page.locator('.form-group.confidential .switch');

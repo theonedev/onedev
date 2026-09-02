@@ -3,15 +3,14 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { expect, test } from '@playwright/test';
-import { fillLabeledInput, login, waitForDelayedAutoFocus } from './helpers.js';
+import { expect, test } from './fixtures.js';
+import { fillLabeledInput, login } from './helpers.js';
 
 test('expands text-diff gaps with directional arrows', async ({ page }) => {
   // 1. Open a commit containing two distant changes
   await login(page, 'admin', 'admin');
   const projectName = `text-diff-expander-${Date.now()}`;
   await page.goto('~projects/new');
-  await waitForDelayedAutoFocus(page);
   await fillLabeledInput(page, 'Name', projectName);
   await page.getByRole('button', { name: 'Create' }).click();
   await expect(page).toHaveURL(new RegExp(`/${projectName}(/|$)`));

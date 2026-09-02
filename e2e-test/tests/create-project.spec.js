@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 import { createProject, login } from './helpers.js';
 
 test('admin can create a project', async ({ page }) => {

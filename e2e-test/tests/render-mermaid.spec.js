@@ -1,12 +1,11 @@
-import { expect, test } from '@playwright/test';
-import { createProject, login, waitForDelayedAutoFocus } from './helpers.js';
+import { expect, test } from './fixtures.js';
+import { createProject, login } from './helpers.js';
 
 test('renders Mermaid classes with numeric hex colors', async ({ page }) => {
   await login(page, 'admin', 'admin');
   const projectName = await createProject(page);
 
   await page.goto(`${projectName}/~issues/new`);
-  await waitForDelayedAutoFocus(page);
   await page.getByPlaceholder('Input title here').fill(`Mermaid diagram ${Date.now()}`);
   await page.locator('.new-issue > .description textarea').fill([
     '```mermaid',

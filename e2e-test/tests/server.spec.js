@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 
 test('serves the OneDev web interface', async ({ page }) => {
   const response = await page.goto('/');

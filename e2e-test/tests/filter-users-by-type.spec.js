@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { createUser, login, waitForDelayedAutoFocus } from './helpers.js';
+import { expect, test } from './fixtures.js';
+import { createUser, login } from './helpers.js';
 
 test('admin can filter users by type', async ({ page }) => {
   const suffix = Date.now();
@@ -14,7 +14,6 @@ test('admin can filter users by type', async ({ page }) => {
   await createUser(page, { userName: aiName, type: 'AI' });
 
   await page.goto('~administration/users');
-  await waitForDelayedAutoFocus(page);
   await page.getByPlaceholder('Filter by name or email address').fill(prefix);
   const usersTable = page.locator('table.users');
   await expect(usersTable).toContainText(ordinaryName);
