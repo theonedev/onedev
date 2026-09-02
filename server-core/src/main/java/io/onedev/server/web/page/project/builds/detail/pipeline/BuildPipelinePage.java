@@ -1,5 +1,11 @@
 package io.onedev.server.web.page.project.builds.detail.pipeline;
 
+import java.util.List;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -7,11 +13,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
 import io.onedev.server.web.component.pipeline.PipelinePanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
-
-import java.util.List;
 
 public class BuildPipelinePage extends BuildDetailPage {
 
@@ -66,6 +67,11 @@ public class BuildPipelinePage extends BuildDetailPage {
 					@Override
 					protected Build getActiveBuild() {
 						return getBuild();
+					}
+
+					@Override
+					protected ObjectId getSeenBranchTip(String branch) {
+						return null;
 					}
 
 				};

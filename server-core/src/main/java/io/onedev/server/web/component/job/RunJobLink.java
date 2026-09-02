@@ -28,6 +28,8 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
@@ -51,6 +53,9 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 	@Inject
 	private JobService jobService;
 
+	@Inject
+	private GitService gitService;
+
 	private final String refName;
 	
 	private final ObjectId commitId;
@@ -69,6 +74,28 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 	
 	@Nullable
 	protected abstract PullRequest getPullRequest();
+
+	@Nullable
+	protected abstract ObjectId getSeenBranchTip(String branch);
+
+	private boolean isBranchUpdated(Collection<String> refNames) {
+		for (var refName : refNames) {
+			var branch = GitUtils.ref2branch(refName);
+			if (branch == null)
+				continue;
+			var seenBranchTip = getSeenBranchTip(branch);
+			if (seenBranchTip != null) {
+				var branchRef = gitService.getRef(getProject(), refName);
+				if (branchRef == null || !seenBranchTip.equals(branchRef.getPeeledObj()))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	private void warnBranchUpdated() {
+		getSession().warn(_T("Branch is updated. Please refresh the page and resubmit the job"));
+	}
 	
 	@Override
 	public void onClick(AjaxRequestTarget target) {
@@ -117,6 +144,11 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 						@Override
 						protected void onSave(AjaxRequestTarget target, Collection<String> selectedRefNames,
 											  Serializable populatedParamBean) {
+							if (isBranchUpdated(selectedRefNames)) {
+								warnBranchUpdated();
+								close();
+								return;
+							}
 							Map<String, List<String>> paramMap = ParamUtils.getParamMap(
 									job, populatedParamBean, job.getParamSpecMap().keySet());
 							List<Build> builds = new ArrayList<>();
@@ -153,6 +185,10 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 
 					};
 				} else {
+					if (isBranchUpdated(refNames)) {
+						warnBranchUpdated();
+						return;
+					}
 					Build build = jobService.submit(user, getProject(), commitId, job.getName(),
 							new HashMap<>(), refNames.iterator().next(), getPullRequest(), null, 
 							_T("Submitted manually"));

@@ -170,6 +170,11 @@ public abstract class JobRunSelector extends Panel {
 				return null;
 			}
 
+			@Override
+			protected ObjectId getSeenBranchTip(String branch) {
+				return branchRef.getPeeledObj().copy();
+			}
+
 		};
 		jobLink.add(new Label("label", jobName));
 		item.add(jobLink);

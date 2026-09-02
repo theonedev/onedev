@@ -335,7 +335,12 @@ public class ProjectTagsPage extends ProjectPage {
 					protected PullRequest getPullRequest() {
 						return null;
 					}
-					
+
+					@Override
+					protected ObjectId getSeenBranchTip(String branch) {
+						return null;
+					}
+
 				});
 
 				fragment.add(new DropdownLink("workspaces") {

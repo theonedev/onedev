@@ -197,6 +197,8 @@ public abstract class CommitListPanel extends Panel {
 		}
 		
 	};
+
+	private final Map<String, ObjectId> seenBranchTips = new HashMap<>();
 	
 	private final IModel<Map<String, List<String>>> labelsModel = new LoadableDetachableModel<Map<String, List<String>>>() {
 		
@@ -204,6 +206,8 @@ public abstract class CommitListPanel extends Panel {
 		protected Map<String, List<String>> load() {
 			Map<String, List<String>> labels = new HashMap<>();
 			List<RefFacade> refInfos = getProject().getBranchRefs();
+			for (RefFacade ref: refInfos) 
+				seenBranchTips.put(GitUtils.ref2branch(ref.getName()), ref.getPeeledObj().copy());
 			refInfos.addAll(getProject().getTagRefs());
 			for (RefFacade ref: refInfos) {
 				if (ref.getPeeledObj() instanceof RevCommit) {
@@ -657,6 +661,11 @@ public abstract class CommitListPanel extends Panel {
 						return null;
 					}
 
+					@Override
+					protected ObjectId getSeenBranchTip(String branch) {
+						return seenBranchTips.get(branch);
+					}
+					
 				});
 			} else {
 				item.add(new WebMarkupContainer("buildStatus").setVisible(false));				

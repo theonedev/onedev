@@ -149,6 +149,11 @@ public abstract class CommitStatusLink extends DropdownLink {
 				return CommitStatusLink.this.getPullRequest();
 			}
 			
+			@Override
+			protected ObjectId getSeenBranchTip(String branch) {
+				return CommitStatusLink.this.getSeenBranchTip(branch);
+			}
+			
 		};
 	}
 
@@ -175,5 +180,8 @@ public abstract class CommitStatusLink extends DropdownLink {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CommitStatusCssResourceReference()));
 	}
-	
+
+	@Nullable
+	protected abstract ObjectId getSeenBranchTip(String branch);
+
 }

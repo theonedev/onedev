@@ -132,6 +132,11 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 							return JobListPanel.this.getPullRequest();
 						}
 						
+						@Override
+						protected ObjectId getSeenBranchTip(String branch) {
+							return JobListPanel.this.getSeenBranchTip(branch);
+						}
+
 					});
 					
 					jobItem.add(new BookmarkablePageLink<Void>("showInList", ProjectBuildsPage.class, 
@@ -233,4 +238,7 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 		return new ProjectScopedCommit(getProject(), commitId);
 	}
 	
+	@Nullable
+	protected abstract ObjectId getSeenBranchTip(String branch);
+
 }

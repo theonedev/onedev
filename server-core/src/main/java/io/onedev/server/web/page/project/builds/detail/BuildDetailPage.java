@@ -37,6 +37,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Sets;
 
@@ -370,6 +371,11 @@ public abstract class BuildDetailPage extends ProjectPage
 								return getBuild().getRequest();
 							}
 
+							@Override
+							protected ObjectId getSeenBranchTip(String branch) {
+								return null;
+							}
+							
 						};
 					}
 

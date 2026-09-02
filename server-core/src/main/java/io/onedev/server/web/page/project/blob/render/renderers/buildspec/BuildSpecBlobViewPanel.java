@@ -35,6 +35,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Throwables;
@@ -49,6 +50,7 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.step.StepTemplate;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.build.JobProperty;
@@ -249,6 +251,15 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 												@Override
 												protected PullRequest getPullRequest() {
 													return null;
+												}
+
+												@Override
+												protected ObjectId getSeenBranchTip(String branch) {
+													var refName = context.getRefName();
+													if (refName != null && GitUtils.ref2branch(refName) != null)
+														return context.getCommit().copy();
+													else
+														return null;
 												}
 		
 											});

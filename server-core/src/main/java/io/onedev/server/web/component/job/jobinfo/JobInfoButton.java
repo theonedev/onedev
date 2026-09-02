@@ -149,7 +149,12 @@ public abstract class JobInfoButton extends Panel {
 			protected PullRequest getPullRequest() {
 				return null;
 			}
-			
+
+			@Override
+			protected ObjectId getSeenBranchTip(String branch) {
+				return JobInfoButton.this.getSeenBranchTip(branch);
+			}
+
 		});
 	}
 	
@@ -164,6 +169,9 @@ public abstract class JobInfoButton extends Panel {
 	protected abstract ObjectId getCommitId();
 	
 	protected abstract String getJobName();
+
+	@Nullable
+	protected abstract ObjectId getSeenBranchTip(String branch);
 	
 	@Nullable
 	protected Build getActiveBuild() {

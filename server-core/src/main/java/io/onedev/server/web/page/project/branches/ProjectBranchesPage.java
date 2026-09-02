@@ -464,6 +464,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				link.add(new Label("name", branch));
 				fragment.add(link);
 				
+				var seenBranchTip = ref.getPeeledObj().copy();
 				fragment.add(new CommitStatusLink("buildStatus", ref.getObjectId(), ref.getName()) {
 
 					@Override
@@ -475,7 +476,12 @@ public class ProjectBranchesPage extends ProjectPage {
 					protected PullRequest getPullRequest() {
 						return null;
 					}
-					
+
+					@Override
+					protected ObjectId getSeenBranchTip(String branch) {
+						return seenBranchTip;
+					}
+
 				});
 				
 				fragment.add(new DropdownLink("workspaces") {

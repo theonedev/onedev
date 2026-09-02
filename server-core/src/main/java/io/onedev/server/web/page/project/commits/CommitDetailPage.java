@@ -140,12 +140,16 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 
 	private List<String> operateBranches;
 
+	private final Map<String, ObjectId> seenBranchTips = new HashMap<>();
+
 	private final IModel<List<RefFacade>> refsModel = new LoadableDetachableModel<List<RefFacade>>() {
 		@Override
 		protected List<RefFacade> load() {
 			Collection<ObjectId> descendants = getDescendants();
 			List<RefFacade> refs = new ArrayList<>();
 			refs.addAll(getProject().getBranchRefs());
+			for (RefFacade ref: refs) 
+				seenBranchTips.put(GitUtils.ref2branch(ref.getName()), ref.getPeeledObj().copy());
 			refs.addAll(getProject().getTagRefs());
 			return refs.stream().filter(ref -> descendants.contains(ref.getPeeledObj())).collect(toList());
 		}
@@ -513,6 +517,11 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					@Override
 					protected String getJobName() {
 						return job.getName();
+					}
+
+					@Override
+					protected ObjectId getSeenBranchTip(String branch) {
+						return seenBranchTips.get(branch);
 					}
 
 				});

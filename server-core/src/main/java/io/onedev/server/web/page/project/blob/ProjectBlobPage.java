@@ -916,6 +916,15 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				protected PullRequest getPullRequest() {
 					return null;
 				}
+
+				@Override
+				protected ObjectId getSeenBranchTip(String branch) {
+					var refName = getRefName();
+					if (refName != null && GitUtils.ref2branch(refName) != null)
+						return resolvedRevision;
+					else
+						return null;
+				}
 				
 			};
 		} else {

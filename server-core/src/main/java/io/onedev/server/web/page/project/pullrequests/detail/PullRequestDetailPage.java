@@ -835,6 +835,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 								&& buildSpec.getJobMap().containsKey(jobName) 
 								&& (SecurityUtils.canRunJob(getProject(), jobName) || SecurityUtils.canModifyPullRequest(getPullRequest())));
 					}
+
+					@Override
+					protected ObjectId getSeenBranchTip(String branch) {
+						return null;
+					}
+
 				});	
 			}
 
