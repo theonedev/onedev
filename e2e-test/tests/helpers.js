@@ -7,10 +7,20 @@ import { expect } from '@playwright/test';
  */
 export async function login(page, userName, password) {
   await page.goto('~login');
-  await page.getByPlaceholder('Login name or email address', { exact: true }).fill(userName);
-  await page.locator('form input[type="password"]').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await page.waitForURL((url) => !url.pathname.includes('~login'));
+  const form = page.locator('form');
+  const userNameInput = form.locator('input[name="userName"]');
+  const passwordInput = form.locator('input[name="password"]');
+
+  await expect(form).toBeVisible();
+  await userNameInput.fill(userName);
+  await passwordInput.fill(password);
+  await expect(userNameInput).toHaveValue(userName);
+  await expect(passwordInput).toHaveValue(password);
+
+  await Promise.all([
+    page.waitForURL((url) => !url.pathname.includes('~login')),
+    form.getByRole('button', { name: 'Sign in' }).click(),
+  ]);
 }
 
 /**
