@@ -197,7 +197,7 @@ watch_and_build() {
 	done
 }
 
-rebuild_project() {
+compile_project() {
 	build_reference="server-product/target/sandbox"
 	rm -f server-product/target/deps-classpath.txt
 	run_maven compile "$@" || return 1
@@ -208,11 +208,57 @@ rebuild_project() {
 	touch "$build_reference"
 }
 
+restore_preserved_sandbox() {
+	if [ -n "${preserved_sandbox:-}" ] && [ -d "$preserved_sandbox" ]; then
+		mkdir -p "$ROOT/server-product/target"
+		if [ -e "$ROOT/server-product/target/sandbox" ]; then
+			echo "Unable to restore sandbox: destination already exists" >&2
+			return 1
+		fi
+		mv "$preserved_sandbox" "$ROOT/server-product/target/sandbox" || return 1
+		rmdir "$preservation_dir" || return 1
+		preserved_sandbox=
+		preservation_dir=
+	fi
+}
+
+rebuild_project() {
+	sandbox="$ROOT/server-product/target/sandbox"
+	preservation_dir=
+	preserved_sandbox=
+	sandbox_preserved=false
+	if [ -d "$sandbox" ]; then
+		preservation_dir=$(mktemp -d "$ROOT/server-product/.onedev-sandbox.XXXXXX")
+		preserved_sandbox="$preservation_dir/sandbox"
+		trap restore_preserved_sandbox EXIT
+		if ! mv "$sandbox" "$preserved_sandbox"; then
+			trap - EXIT
+			rmdir "$preservation_dir"
+			return 1
+		fi
+		sandbox_preserved=true
+	fi
+
+	clean_status=0
+	run_maven clean "$@" || clean_status=$?
+	if ! restore_preserved_sandbox; then
+		return 1
+	fi
+	if [ "$sandbox_preserved" = true ]; then
+		trap - EXIT
+	fi
+	if [ "$clean_status" -ne 0 ]; then
+		return "$clean_status"
+	fi
+
+	compile_project "$@"
+}
+
 build_project() {
 	build_reference="server-product/target/sandbox"
 	if [ ! -d "$build_reference" ]; then
 		echo "Development sandbox not found. Running: mvn compile"
-		rebuild_project || return 1
+		compile_project || return 1
 		classpath=
 		return
 	fi
@@ -242,15 +288,33 @@ build_project() {
 }
 
 usage() {
-	echo "Usage: ./dev.sh <command>"
+	echo "Usage: ./dev.sh <command> [<command>...] [options]"
 	echo
 	echo "Commands:"
 	echo "  run      Build, start the dev server, and rebuild automatically when files change"
 	echo "  build    Build with Maven when needed, otherwise compile changed files with ECJ"
-	echo "  rebuild  Build all modules with Maven"
+	echo "  rebuild  Clean and build all modules while preserving the development sandbox"
 	echo "  test     Run tests with Maven"
+	echo "  package  Package all modules with Maven"
 	echo "  install  Install project artifacts with Maven"
 	echo "  clean    Clean build outputs with Maven"
+	echo
+	echo "Commands may be combined, for example: ./dev.sh clean package"
+}
+
+is_command() {
+	case "$1" in
+		build|rebuild|clean|install|test|package|run) return 0 ;;
+		*) return 1 ;;
+	esac
+}
+
+flush_maven_commands() {
+	if [ "${#maven_commands[@]}" -gt 0 ]; then
+		run_maven "${maven_commands[@]}" "${maven_arguments[@]}"
+		maven_commands=()
+		maven_arguments=()
+	fi
 }
 
 if [ "$#" -eq 0 ]; then
@@ -258,44 +322,57 @@ if [ "$#" -eq 0 ]; then
 	exit 1
 fi
 
-case "$1" in
-	build)
-		shift
-		build_project "$@"
-		exit
-		;;
-	rebuild)
-		shift
-		rebuild_project "$@"
-		exit
-		;;
-	clean)
-		shift
-		run_maven clean "$@"
-		exit
-		;;
-	install)
-		shift
-		run_maven install "$@"
-		exit
-		;;
-	test)
-		shift
-		run_maven test "$@"
-		exit
-		;;
-	run)
-		shift
-		watch_reference=$(mktemp "${TMPDIR:-/tmp}/onedev-watch.XXXXXX")
-		touch "$watch_reference"
-		trap 'rm -f "$watch_reference"' EXIT
-		build_project
-		;;
-	*)
-		usage >&2
-		exit 1
-		;;
-esac
+maven_commands=()
+maven_arguments=()
+run_requested=false
+run_arguments=()
+while [ "$#" -gt 0 ]; do
+	command=$1
+	shift
+	case "$command" in
+		clean|install|test|package)
+			maven_commands+=("$command")
+			while [ "$#" -gt 0 ] && ! is_command "$1"; do
+				maven_arguments+=("$1")
+				shift
+			done
+			;;
+		build|rebuild)
+			flush_maven_commands
+			command_arguments=()
+			while [ "$#" -gt 0 ] && ! is_command "$1"; do
+				command_arguments+=("$1")
+				shift
+			done
+			if [ "$command" = build ]; then
+				build_project "${command_arguments[@]}"
+			else
+				rebuild_project "${command_arguments[@]}"
+			fi
+			;;
+		run)
+			flush_maven_commands
+			run_requested=true
+			run_arguments=("$@")
+			break
+			;;
+		*)
+			usage >&2
+			exit 1
+			;;
+	esac
+done
+flush_maven_commands
+
+if [ "$run_requested" != true ]; then
+	exit
+fi
+
+set -- "${run_arguments[@]}"
+watch_reference=$(mktemp "${TMPDIR:-/tmp}/onedev-watch.XXXXXX")
+touch "$watch_reference"
+trap 'rm -f "$watch_reference"' EXIT
+build_project
 
 if [ -z "${classpath:-}" ]; then
 	build_classpath
