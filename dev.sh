@@ -40,19 +40,22 @@ ensure_artifact() {
 }
 
 build_classpath() {
-	# Sibling modules are only resolvable from the reactor, so include them with
-	# -am and let the compile phase run. Compilation itself is skipped as classes
-	# are built separately, but Maven still needs the phase to map module
-	# dependencies to their target/classes directories instead of looking for
-	# jars in a repository.
-	run_maven -pl server-product -am compile dependency:build-classpath \
-		-Dmaven.main.skip=true -Dmdep.outputFile=target/deps-classpath.txt || return 1
+	deps_classpath_file=server-product/target/deps-classpath.txt
+	if [ ! -s "$deps_classpath_file" ]; then
+		# Sibling modules are only resolvable from the reactor, so include them with
+		# -am and let the compile phase run. Compilation itself is skipped as classes
+		# are built separately, but Maven still needs the phase to map module
+		# dependencies to their target/classes directories instead of looking for
+		# jars in a repository.
+		run_maven -pl server-product -am compile dependency:build-classpath \
+			-Dmaven.main.skip=true -Dmdep.outputFile=target/deps-classpath.txt || return 1
+	fi
 
 	module_cp=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
 		| tr '\n' ':' | sed 's/:$//')
 	local_artifacts=$(find . -path '*/target/classes' -type d ! -path '*/bin/*' \
 		| while read -r dir; do basename "$(dirname "$(dirname "$dir")")"; done | sort -u)
-	deps_cp=$(tr ':' '\n' < server-product/target/deps-classpath.txt | while read -r jar; do
+	deps_cp=$(tr ':' '\n' < "$deps_classpath_file" | while read -r jar; do
 		if [ "${jar#$ROOT/}" != "$jar" ]; then
 			continue
 		fi
@@ -196,6 +199,7 @@ watch_and_build() {
 
 rebuild_project() {
 	build_reference="server-product/target/sandbox"
+	rm -f server-product/target/deps-classpath.txt
 	run_maven compile "$@" || return 1
 	if [ ! -d "$build_reference" ]; then
 		echo "Maven compile did not create $build_reference" >&2
@@ -216,6 +220,7 @@ build_project() {
 	changed_poms=$(find . -name pom.xml -type f ! -path '*/target/*' \
 		! -path '*/archetype-resources/*' -newer "$build_reference" | sort)
 	if [ -n "$changed_poms" ]; then
+		rm -f server-product/target/deps-classpath.txt
 		if echo "$changed_poms" | grep -qx './pom.xml'; then
 			echo "Root pom.xml changed. Running: mvn compile"
 			run_maven compile || return 1
@@ -317,4 +322,3 @@ trap cleanup_run EXIT
 
 java $MAVEN_OPTS $hotswap_options -cp "$classpath" \
 	io.onedev.commons.bootstrap.Bootstrap "$@"
-
