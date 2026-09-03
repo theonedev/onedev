@@ -241,14 +241,17 @@ public class PullRequestHelper {
                         });
                         mappedRange = DiffUtils.mapRange(lineMapping, mark.getRange());
                     }
-                    if (mappedRange == null)
-                        return;
-
                     var commentMap = new LinkedHashMap<String, Object>();
                     commentMap.put("id", comment.getId());
                     commentMap.put("filePath", path);
-                    commentMap.put("startLine", mappedRange.getFromRow() + 1);
-                    commentMap.put("endLine", mappedRange.getToRow() + 1);
+                    if (mappedRange != null) {
+                        commentMap.put("startLine", mappedRange.getFromRow() + 1);
+                        commentMap.put("endLine", mappedRange.getToRow() + 1);
+                    } else {
+                        commentMap.put("startLine", mark.getRange().getFromRow() + 1);
+                        commentMap.put("endLine", mark.getRange().getToRow() + 1);
+                        commentMap.put("commit", mark.getCommitHash());
+                    }
                     commentMap.put("user", comment.getUser().getName());
                     commentMap.put("date", comment.getCreateDate());
                     commentMap.put("content", comment.getContent());
