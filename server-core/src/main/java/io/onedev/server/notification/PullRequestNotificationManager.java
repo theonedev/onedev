@@ -266,11 +266,11 @@ public class PullRequestNotificationManager implements Serializable {
 						&& isAiEligible(null, request, request.getSubmitter(), true)
 						&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
-							Work on pull request %d to address user feedbacks since your last work. \
+							Work on pull request %d %sto address user feedbacks since your last work. \
 							If code is changed as a result of this, make sure to not mention users \
 							in your comments; otherwise, mention users only when you expect a response. \
 							Make sure to submit work afterwards without confirmation."""
-							.formatted(request.getNumber());
+							.formatted(request.getNumber(), getRolesInfo(request.getSubmitter(), request));
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
 					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
 							prompt, false, event.getParticipatingUserIds());
@@ -282,9 +282,9 @@ public class PullRequestNotificationManager implements Serializable {
 						&& isAiEligible(null, request, request.getSubmitter(), true)
 						&& canCreateWorkspace(request.getSubmitter(), request, true)) {
 					var prompt = """
-							Work on pull request %d to address %s's latest concern. \
+							Work on pull request %d %sto address %s's latest concern. \
 							Make sure to submit work afterwards without confirmation."""
-							.formatted(request.getNumber(), user.getName());
+							.formatted(request.getNumber(), getRolesInfo(request.getSubmitter(), request), user.getName());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
 					runPrompt(request.getSubmitter(), request, commitId, getWorkspaceBranch(request),
 							prompt, false, event.getParticipatingUserIds());
@@ -345,13 +345,13 @@ public class PullRequestNotificationManager implements Serializable {
 					} else if (isAiEligible(null, request, reviewer, true) 
 							&& canCreateWorkspace(reviewer, request, true)) {				
 						var prompt = """
-								Work on pull request %d to perform the review. \
+								Work on pull request %d %sto perform the review. \
 								Stay on current checkout and do not modify code. \
 								If review state is changed as a result of this, \
 								make sure to not mention users in the review notes or comments; \
 								otherwise, mention users only when you expect a response. \
 								Make sure to submit work afterwards without confirmation."""
-								.formatted(request.getNumber(), request.getSubmitter().getName());
+								.formatted(request.getNumber(), getRolesInfo(reviewer, request));
 						var commitId = request.getLatestUpdate().getHeadCommit().copy();						
 						runPrompt(reviewer, request, commitId, getWorkspaceBranch(request),
 								prompt, false, event.getParticipatingUserIds());
@@ -531,13 +531,14 @@ public class PullRequestNotificationManager implements Serializable {
 						&& isAiEligible(null, request, mergeIfAcceptableAiUser, true) 
 						&& canWriteCode(mergeIfAcceptableAiUser, request, request.getTargetProject())) {
 					var prompt = """
-							Work on pull request %d to review the pull request. \
+							Work on pull request %d %sto review the pull request. \
 							Merge the pull request if changes are acceptable; \
 							otherwise, mention @%s in a PR comment to request changes. \
 							When add PR comment, check your last comment content to avoid duplication. \
 							Stay on current checkout and do not modify code. \
 							Make sure to submit the work afterwards without confirmation."""
-							.formatted(request.getNumber(), request.getSubmitter().getName());
+							.formatted(request.getNumber(), getRolesInfo(mergeIfAcceptableAiUser, request),
+									request.getSubmitter().getName());
 					var commitId = request.getLatestUpdate().getHeadCommit().copy();
 					runPrompt(mergeIfAcceptableAiUser, request, commitId, getWorkspaceBranch(request),
 							prompt, true, event.getParticipatingUserIds());
@@ -608,14 +609,14 @@ public class PullRequestNotificationManager implements Serializable {
 		String prompt;
 		if (build != null) {
 			prompt = """
-				Work on pull request %d to fix failure of build %d. \
+				Work on pull request %d %sto fix failure of build %d. \
 				Make sure to submit work afterwards without confirmation."""
-				.formatted(request.getNumber(), build.getNumber());
+				.formatted(request.getNumber(), getRolesInfo(ai, request), build.getNumber());
 		} else {
 			prompt = """
-				Work on pull request %d to fix failed builds. \
+				Work on pull request %d %sto fix failed builds. \
 				Make sure to submit work afterwards without confirmation."""
-				.formatted(request.getNumber());
+				.formatted(request.getNumber(), getRolesInfo(ai, request));
 		}
 		var commitId = request.getLatestUpdate().getHeadCommit().copy();
 		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt, false, participatingUserIds);
@@ -623,9 +624,9 @@ public class PullRequestNotificationManager implements Serializable {
 
 	private void resolveMergeConflicts(User ai, PullRequest request, Collection<Long> participatingUserIds) {
 		var prompt = """
-			Work on pull request %d to resolve merge conflict. \
+			Work on pull request %d %sto resolve merge conflict. \
 			Make sure to submit work afterwards without confirmation."""
-			.formatted(request.getNumber());
+			.formatted(request.getNumber(), getRolesInfo(ai, request));
 		var commitId = request.getLatestUpdate().getHeadCommit().copy();
 		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt, false, participatingUserIds);
 	}
@@ -633,13 +634,8 @@ public class PullRequestNotificationManager implements Serializable {
 	private void onAiMentioned(User ai, User commenter, PullRequest request,
 			Collection<Long> participatingUserIds) {
 		List<String> prompts = new ArrayList<>();
-		if (request.getSubmitter().equals(ai)) {
-			prompts.add("Work on pull request %d as submitter to address %s's latest concern."
-					.formatted(request.getNumber(), commenter.getName()));
-		} else {
-			prompts.add("Work on pull request %d to address %s's latest concern."
-					.formatted(request.getNumber(), commenter.getName()));
-		}
+		prompts.add("Work on pull request %d %sto address %s's latest concern."
+				.formatted(request.getNumber(), getRolesInfo(ai, request), commenter.getName()));
 		prompts.add("Do not switch checkout if the concern does not require you to write code.");
 		if (request.getAssignees().contains(ai) && request.checkMergeCondition() == null 
 				&& canWriteCode(ai, request, request.getTargetProject())) {
@@ -659,13 +655,27 @@ public class PullRequestNotificationManager implements Serializable {
 	private void onAiNotified(User ai, User commenter, PullRequest request,
 			Collection<Long> participatingUserIds) {
 		String prompt = """
-				Work on pull request %d to check whether you are relevant to %s's latest comment. \
+				Work on pull request %d %sto check whether you are relevant to %s's latest comment. \
 				Do not switch checkout if the comment does not require you to write code. \
 				Respond only if you are relevant and a response is necessary. \
 				Make sure to submit work afterwards without confirmation."""
-				.formatted(request.getNumber(), commenter.getName());
+				.formatted(request.getNumber(), getRolesInfo(ai, request), commenter.getName());
 		var commitId = request.getLatestUpdate().getHeadCommit().copy();
 		runPrompt(ai, request, commitId, getWorkspaceBranch(request), prompt, false, participatingUserIds);
+	}
+
+	private String getRolesInfo(User ai, PullRequest request) {
+		var roles = new ArrayList<String>();
+		if (request.getSubmitter().equals(ai))
+			roles.add("submitter");
+		if (request.isReviewer(ai))
+			roles.add("reviewer");
+		if (request.getAssignees().contains(ai))
+			roles.add("assignee");
+		if (!roles.isEmpty())
+			return "as roles [%s] ".formatted(StringUtils.join(roles, ", "));
+		else
+			return "";
 	}
 
 	private void runPrompt(User ai, PullRequest request, ObjectId commitId,
