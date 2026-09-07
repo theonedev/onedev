@@ -1,3 +1,9 @@
 <wicket:extend>
-	<div wicket:id="markdown"></div>
+	<div class="markdown-blob-view flex-grow-1 d-flex overflow-hidden">
+		<div wicket:id="markdown" class="markdown-content flex-grow-1 overflow-auto"></div>
+		<div wicket:id="outline" class="need-width"></div>
+	</div>
+	<wicket:fragment wicket:id="outlineOptionsFrag">
+		<label class="checkbox"><input type="checkbox" wicket:id="outline" class="outline-toggle"> <wicket:t>Outline</wicket:t></label>
+	</wicket:fragment>
 </wicket:extend>

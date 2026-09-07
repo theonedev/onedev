@@ -79,7 +79,8 @@ import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.markdown.MarkdownBlobViewer;
+import io.onedev.server.web.component.markdown.MarkdownOutlineDropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.ProjectAvatar;
@@ -256,7 +257,7 @@ public class ProjectOverviewPage extends ProjectPage {
 			}
 
 		}));
-		readme.add(new MarkdownViewer("body", new LoadableDetachableModel<>() {
+		var markdown = new MarkdownBlobViewer("body", new LoadableDetachableModel<>() {
 
 			@Override
 			protected String load() {
@@ -442,6 +443,15 @@ public class ProjectOverviewPage extends ProjectPage {
 					}
 
 				};
+			}
+
+		};
+		readme.add(markdown);
+		readme.add(new MarkdownOutlineDropdownLink("outline") {
+
+			@Override
+			protected MarkdownBlobViewer getViewer() {
+				return markdown;
 			}
 
 		});

@@ -15,10 +15,16 @@
 	border-top: none;
 }
 .folder-view>.readme>.head {
+	position: sticky;
+	top: 0;
+	z-index: 10;
 	padding: 0.5rem 1rem;
 	background: var(--light);
 	border-top: 1px solid var(--light-gray);
 	border-bottom: 1px solid var(--light-gray);
+}
+.folder-view>.readme .header-anchor {
+	scroll-margin-top: 48px;
 }
 .folder-view>.readme>.body {
 	max-width: 900px;

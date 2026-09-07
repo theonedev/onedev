@@ -45,7 +45,8 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
 import io.onedev.server.web.component.blob.BlobIcon;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.markdown.MarkdownBlobViewer;
+import io.onedev.server.web.component.markdown.MarkdownOutlineDropdownLink;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -252,7 +253,7 @@ public class FolderViewPanel extends Panel {
 			}
 			
 		});
-		readmeContainer.add(new MarkdownViewer("body", new LoadableDetachableModel<String>() {
+		var markdown = new MarkdownBlobViewer("body", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
@@ -269,6 +270,15 @@ public class FolderViewPanel extends Panel {
 			@Override
 			protected BlobRenderContext getRenderContext() {
 				return context;
+			}
+
+		};
+		readmeContainer.add(markdown);
+		readmeContainer.add(new MarkdownOutlineDropdownLink("outline") {
+
+			@Override
+			protected MarkdownBlobViewer getViewer() {
+				return markdown;
 			}
 
 		});

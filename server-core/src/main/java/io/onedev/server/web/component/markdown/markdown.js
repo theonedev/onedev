@@ -1385,6 +1385,64 @@ onedev.server.markdown = {
 			});
 		}
 	},
+	initOutline: function(outlineId, viewerId, sidebar, triggerId) {
+		var $outline = $("#" + outlineId);
+		var $viewer = $("#" + viewerId);
+		var $content = $outline.children(".content");
+		var $headings = $viewer.find(".markdown-rendered").first()
+				.find("h1, h2, h3, h4, h5, h6").filter(function() {
+					return $(this).children("a.header-anchor").length != 0;
+				});
+
+		$content.empty();
+		$headings.each(function() {
+			var $heading = $(this);
+			var href = $heading.children("a.header-anchor").first().attr("href");
+			var label = $heading.clone().children("a.header-link, a.header-anchor").remove().end().text().trim();
+			var level = parseInt(this.tagName.substring(1));
+			var $link = $("<a class='item d-block text-truncate'></a>")
+					.attr("href", href)
+					.attr("title", label)
+					.css("padding-left", ((level - 1) * 1.2 + 0.6) + "rem")
+					.text(label);
+			$link.on("click", function() {
+				$content.children("a").removeClass("active");
+				$(this).addClass("active");
+			});
+			$content.append($link);
+		});
+
+		if (triggerId) {
+			var $trigger = $("#" + triggerId);
+			if ($trigger.is(":checkbox"))
+				$trigger = $trigger.closest("label");
+			$trigger.toggle($headings.length != 0);
+		}
+		if ($headings.length == 0)
+			$outline.hide();
+
+		if (sidebar && $headings.length != 0 && !$outline.hasClass("ui-resizable")) {
+			var $viewerContainer = $viewer;
+			$outline.resizable({
+				autoHide: false,
+				handles: {"w": $outline.children(".ui-resizable-handle")},
+				minWidth: 160,
+				resize: function(e, ui) {
+					if ($viewerContainer.outerWidth() < 300)
+						$(this).resizable({maxWidth: ui.size.width});
+				},
+				stop: function(e, ui) {
+					$(this).resizable({maxWidth: undefined});
+					Cookies.set("markdownBlob.outline.width", ui.size.width, {expires: Infinity});
+				}
+			});
+		}
+	},
+	toggleOutline: function(outlineId, visible) {
+		$("#" + outlineId).toggle(visible);
+		Cookies.set("markdownBlob.outline", visible ? "yes" : "no", {expires: Infinity});
+		$(window).resize();
+	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback, 
 			suggestionCallback, translations) {
 		onedev.server.markdown.translations = translations;

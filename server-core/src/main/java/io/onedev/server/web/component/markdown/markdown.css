@@ -456,6 +456,57 @@ body.markdown-editor-expanded {
 	color: var(--dark-mode-light-gray);
 }
 
+.markdown-outline {
+	display: flex;
+}
+.markdown-outline.side {
+	border-left: 1px solid var(--light-gray);
+	background: white;
+	flex-shrink: 0;
+}
+.dark-mode .markdown-outline.side {
+	border-left-color: var(--dark-mode-lighter-dark);
+	background: var(--dark-mode-dark);
+}
+.markdown-outline.side>.ui-resizable-handle {
+	border-left: 1px solid var(--light-gray);
+	background: var(--light) url(/~icon/grip3.svg) no-repeat scroll center center;
+	background-size: 18px 18px;
+	cursor: w-resize;
+	width: 4px;
+	position: relative;
+	left: 0;
+}
+.dark-mode .markdown-outline.side>.ui-resizable-handle {
+	border-left-color: var(--dark-mode-lighter-dark);
+	background-color: var(--dark-mode-light-dark);
+	background-image: url(/~icon/dark-grip3.svg);
+}
+.markdown-outline>.content {
+	padding: 0.6rem;
+	overflow-x: hidden !important;
+}
+.markdown-outline>.content>.item {
+	padding-top: 0.35rem;
+	padding-right: 0.6rem;
+	padding-bottom: 0.35rem;
+	border-radius: 0.42rem;
+	color: var(--gray-dark);
+}
+.dark-mode .markdown-outline>.content>.item {
+	color: var(--dark-mode-gray);
+}
+.markdown-outline>.content>.item:hover,
+.markdown-outline>.content>.item.active {
+	background: var(--light);
+	color: var(--primary);
+}
+.dark-mode .markdown-outline>.content>.item:hover,
+.dark-mode .markdown-outline>.content>.item.active {
+	background: var(--dark-mode-light-dark);
+	color: var(--primary);
+}
+
 #reference-tooltip {
 	z-index: 1000;
 	background-color: var(--light-info); 

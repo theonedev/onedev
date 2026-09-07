@@ -39,6 +39,15 @@
 .project-overview .children .project-list > .card-body {
 	padding: 0;
 }
+.project-overview .readme>.card-header {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: inherit;
+}
+.project-overview .readme .header-anchor {
+	scroll-margin-top: 80px;
+}
 .project-overview .readme .markdown-viewer {
 	max-width: 900px;
 	margin-left: auto;

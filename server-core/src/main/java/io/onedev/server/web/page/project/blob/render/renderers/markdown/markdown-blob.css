@@ -1,5 +1,7 @@
-.blob-view>.body>div>.markdown-viewer {
+.markdown-blob-view>.markdown-content>.markdown-viewer {
 	padding: 1.6rem;
+}
+.markdown-blob-view>.markdown-content>.markdown-viewer>.markdown-rendered {
 	max-width: 900px;
 	margin-left: auto;
 	margin-right: auto;
