@@ -86,11 +86,43 @@ public class MavenPackSupport implements PackSupport {
 		var tplUrl = Resources.getResource(MavenPackSupport.class, "servers-and-mirrors.tpl");
 		var template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
 		template = template.replace(
-			"maven:has-permission-notice", 
+			"maven:has-permission-notice",
 			_T("Make sure the account has package ${permission} permission over the project"));
 		template = template.replace(
-			"maven:allow-http-notice", 
+			"maven:allow-http-notice",
 			_T("Add below to allow accessing via http protocol in new Maven versions"));
+		return template;
+	}
+
+	public static String getGradleDependencyTemplate(String templateName) throws IOException {
+		var tplUrl = Resources.getResource(MavenPackSupport.class, templateName);
+		var template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
+		template = template.replace(
+			"gradle:has-permission-notice",
+			_T("Make sure the account has package ${permission} permission over the project"));
+		template = template.replace(
+			"gradle:allow-http-notice",
+			_T("Add below to allow accessing via http protocol"));
+		return template;
+	}
+
+	public static String getGradlePropertiesTemplate() throws IOException {
+		var tplUrl = Resources.getResource(MavenPackSupport.class, "gradle-properties.tpl");
+		var template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
+		return template.replace(
+			"gradle:has-permission-notice",
+			_T("Make sure the account has package ${permission} permission over the project"));
+	}
+
+	public static String getGradleJobCommandsTemplate() throws IOException {
+		var tplUrl = Resources.getResource(MavenPackSupport.class, "gradle-job-commands.tpl");
+		var template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
+		template = template.replace(
+			"gradle:job-token-notice",
+			_T("Use job token as user name so that OneDev can know which build is ${permission.equals(\"write\")? \"deploying\": \"using\"} packages"));
+		template = template.replace(
+			"gradle:access-token-notice",
+			_T("Job secret 'access-token' should be defined in project build setting as an access token with package ${permission} permission"));
 		return template;
 	}
 }
