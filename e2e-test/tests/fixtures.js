@@ -4,7 +4,27 @@ import { admin, credentials, FixturesApi } from './api.js';
 export { expect, admin };
 
 export const test = base.extend({
-  api: [async ({ playwright }, use, workerInfo) => {
+  serverReady: [async ({ playwright }, use, workerInfo) => {
+    const request = await playwright.request.newContext({
+      baseURL: workerInfo.project.use.baseURL,
+    });
+    try {
+      // The root URL can serve the initialization page before authentication is ready.
+      await expect(async () => {
+        const response = await request.get('~api/server/ready', { timeout: 5000 });
+        try {
+          expect(response.status()).toBe(200);
+          expect(await response.json()).toBe(true);
+        } finally {
+          await response.dispose();
+        }
+      }).toPass({ timeout: 10 * 60 * 1000, intervals: [1000] });
+    } finally {
+      await request.dispose();
+    }
+    await use();
+  }, { scope: 'worker', auto: true, timeout: 11 * 60 * 1000 }],
+  api: [async ({ playwright, serverReady }, use, workerInfo) => {
     const request = await playwright.request.newContext({
       baseURL: workerInfo.project.use.baseURL, extraHTTPHeaders: credentials(admin),
     });

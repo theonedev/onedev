@@ -23,6 +23,10 @@ By default Playwright starts `./dev.sh run` from the repository root and waits
 up to ten minutes for `http://127.0.0.1:6610`. If a server is already listening
 there, Playwright reuses it.
 
+Before running tests, each worker polls `~api/server/ready` without
+authentication until it returns `true`, allowing up to ten minutes for server
+initialization to finish.
+
 When Playwright starts the server, it passes OneDev
 [unattended setup](https://docs.onedev.io/installation-guide/run-as-docker-container)
 environment variables so the first-run wizard is skipped: admin user/password
