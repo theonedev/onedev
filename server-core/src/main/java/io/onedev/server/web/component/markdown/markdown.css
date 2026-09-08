@@ -550,6 +550,23 @@ body.markdown-editor-expanded {
 	color: #0073e9;
 }
 
+.markdown-rendered a+.missing, .markdown-rendered img+.missing {
+	background: var(--light-danger);
+	margin-left: 4px;
+	padding: 0 2px;
+}
+.dark-mode .markdown-rendered a+.missing, .dark-mode .markdown-rendered img+.missing {
+	background: var(--dark-mode-light-danger);
+	color: var(--danger);
+}
+.markdown-rendered img+.missing {
+	vertical-align: middle;
+}
+.markdown-rendered .missing+.add-missing {
+	color: var(--success);
+	margin-left: 4px;
+}
+
 .markdown-rendered .no-color * {
 	color: inherit !important;
 	background-color: inherit !important;

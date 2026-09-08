@@ -122,3 +122,10 @@
 .outline-search>.modal-body>.content {
 	height: 480px;
 }
+
+@media (max-width: 991.98px) {
+	.source-outline-option,
+	.source-view>.outline {
+		display: none !important;
+	}
+}

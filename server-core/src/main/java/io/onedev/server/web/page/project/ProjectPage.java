@@ -64,6 +64,8 @@ import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.SidebarMenu;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.wiki.ProjectWikiPage;
+import io.onedev.server.web.page.project.setting.wiki.WikiSettingPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
@@ -250,6 +252,12 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware, Ch
 					Lists.newArrayList(WorkspaceDetailPage.class)));
 		}
 
+		if (getProject().isCodeManagement() && getProject().isWikiManagement()
+				&& SecurityUtils.canAccessProject(getProject())) {
+			menuItems.add(new SidebarMenuItem.Page("wiki", _T("Wiki"),
+					ProjectWikiPage.class, ProjectWikiPage.paramsOf(getProject())));
+		}
+
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 		
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
@@ -315,6 +323,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware, Ch
 
 			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Cache Management"),
 					CacheManagementPage.class, CacheManagementPage.paramsOf(getProject())));
+
+			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Wiki"),
+					WikiSettingPage.class, WikiSettingPage.paramsOf(getProject())));
 
 			if (getSettingService().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
 				settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Service Desk"), 

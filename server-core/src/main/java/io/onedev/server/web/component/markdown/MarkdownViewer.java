@@ -110,8 +110,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 		protected String load() {
 			String markdown = getModelObject();
 			if (markdown != null) {
-				return markdownService.process(markdownService.render(markdown), getProject(), 
-						getRenderContext(), getSuggestionSupport(), false);
+				return renderMarkdown(markdown);
 			} else {
 				return null;
 			}
@@ -126,6 +125,11 @@ public class MarkdownViewer extends GenericPanel<String> {
 			lastContentVersion = contentVersionSupport.getVersion();
 	}
 	
+	protected String renderMarkdown(String markdown) {
+		return markdownService.process(markdownService.render(markdown), getProject(),
+				getRenderContext(), getSuggestionSupport(), false);
+	}
+
 	protected BlobRenderContext getRenderContext() {
 		return null;
 	}

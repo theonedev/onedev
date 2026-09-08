@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.unbescape.javascript.JavaScriptEscape;
 
 public class MarkdownOutlinePanel extends Panel {
 
@@ -15,17 +14,10 @@ public class MarkdownOutlinePanel extends Panel {
 
 	private final boolean sidebar;
 
-	private Component trigger;
-
 	public MarkdownOutlinePanel(String id, Component viewer, boolean sidebar) {
 		super(id);
 		this.viewer = viewer;
 		this.sidebar = sidebar;
-	}
-
-	public MarkdownOutlinePanel setTrigger(Component trigger) {
-		this.trigger = trigger;
-		return this;
 	}
 
 	@Override
@@ -43,11 +35,8 @@ public class MarkdownOutlinePanel extends Panel {
 		super.renderHead(response);
 
 		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
-		String triggerId = trigger != null
-				? "'" + JavaScriptEscape.escapeJavaScript(trigger.getMarkupId(true)) + "'"
-				: "undefined";
-		String script = String.format("onedev.server.markdown.initOutline('%s', '%s', %s, %s);",
-				getMarkupId(), viewer.getMarkupId(true), sidebar, triggerId);
+		String script = String.format("onedev.server.markdown.initOutline('%s', '%s', %s);",
+				getMarkupId(), viewer.getMarkupId(true), sidebar);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.dropzonefield;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.upload.FileUpload;
@@ -20,6 +22,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
 
 import org.jspecify.annotations.Nullable;
+import org.unbescape.javascript.JavaScriptEscape;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -137,13 +140,14 @@ public class DropzoneField extends FormComponentPanel<String> {
 		response.render(JavaScriptHeaderItem.forReference(new DropzoneFieldResourceReference()));
 		
 		String script = String.format(
-				"onedev.server.dropzone.onDomReady('%s', '%s', %s, %s, %s, %d);", 
+				"onedev.server.dropzone.onDomReady('%s', '%s', %s, %s, %s, %d, '%s');",
 				getMarkupId(), 
 				uploadBehavior.getCallbackUrl(), 
 				deleteBehavior.getCallbackFunction(CallbackParameter.explicit("name")),
 				acceptedFiles!=null?"'" + acceptedFiles + "'":"null",				
 				maxFiles!=0?maxFiles:"null",
-				maxFilesize);
+				maxFilesize,
+				JavaScriptEscape.escapeJavaScript(_T("Drop files here or click to upload")));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

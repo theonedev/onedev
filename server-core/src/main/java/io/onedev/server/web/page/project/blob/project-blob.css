@@ -72,21 +72,3 @@
 .floating.get-code .card {
 	box-shadow: none;
 }
-
-.markdown-rendered a+.missing, img+.missing {
-	background: var(--light-danger);
-	margin-left: 4px;
-	padding: 0 2px;
-}
-.dark-mode .markdown-rendered a+.missing, .dark-mode img+.missing {
-	background: var(--dark-mode-light-danger);
-	color: var(--danger);
-}
-.markdown-rendered img+.missing {
-	vertical-align: middle;
-}
-
-.markdown-rendered .missing+.add-missing {
-	color: var(--success);
-	margin-left: 4px;
-}

@@ -9392,4 +9392,17 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate243(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("wikiSetting");
+					element.addElement("wikiManagement").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

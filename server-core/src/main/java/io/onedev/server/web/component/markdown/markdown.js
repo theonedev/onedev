@@ -1385,7 +1385,7 @@ onedev.server.markdown = {
 			});
 		}
 	},
-	initOutline: function(outlineId, viewerId, sidebar, triggerId) {
+	initOutline: function(outlineId, viewerId, sidebar) {
 		var $outline = $("#" + outlineId);
 		var $viewer = $("#" + viewerId);
 		var $content = $outline.children(".content");
@@ -1394,7 +1394,8 @@ onedev.server.markdown = {
 					return $(this).children("a.header-anchor").length != 0;
 				});
 
-		$content.empty();
+		$content.children(".item").remove();
+		$content.children(".no-headings").toggle($headings.length == 0);
 		$headings.each(function() {
 			var $heading = $(this);
 			var href = $heading.children("a.header-anchor").first().attr("href");
@@ -1412,16 +1413,7 @@ onedev.server.markdown = {
 			$content.append($link);
 		});
 
-		if (triggerId) {
-			var $trigger = $("#" + triggerId);
-			if ($trigger.is(":checkbox"))
-				$trigger = $trigger.closest("label");
-			$trigger.toggle($headings.length != 0);
-		}
-		if ($headings.length == 0)
-			$outline.hide();
-
-		if (sidebar && $headings.length != 0 && !$outline.hasClass("ui-resizable")) {
+		if (sidebar && !$outline.hasClass("ui-resizable")) {
 			var $viewerContainer = $viewer;
 			$outline.resizable({
 				autoHide: false,

@@ -148,7 +148,8 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setKey(editProject.getKey());
 						newProject.setDescription(editProject.getDescription());
 						newProject.setPackManagement(editProject.isPackManagement());
-						newProject.setIssueManagement(editProject.isIssueManagement());
+						newProject.setIssueManagement(editProject.isIssueManagement());						
+						newProject.setWikiManagement(editProject.isWikiManagement());
 						newProject.setTimeTracking(editProject.isTimeTracking());
 						newProject.setCodeAnalysisSetting(getProject().getCodeAnalysisSetting());
 						newProject.setGitPackConfig(getProject().getGitPackConfig());
@@ -159,6 +160,7 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.getBuildSetting().setListParams(getProject().getBuildSetting().getListParams(false));
 						newProject.getBuildSetting().setNamedQueries(getProject().getBuildSetting().getNamedQueries());
 						newProject.setPackSetting(getProject().getPackSetting());
+						newProject.setWikiSetting(getProject().getWikiSetting());
 						newProject.setPullRequestSetting(getProject().getPullRequestSetting());
 						newProject.setWorkspaceSetting(getProject().getWorkspaceSetting());
 						newProject.setWorkspaceSpecs(getProject().getWorkspaceSpecs());

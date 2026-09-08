@@ -17,3 +17,10 @@
 .blob-edit .markdown-editor>.body>.preview>.markdown-rendered {
 	border-radius: 0 !important;
 } 
+
+@media (max-width: 991.98px) {
+	.markdown-outline-option,
+	.markdown-blob-view>.markdown-outline {
+		display: none !important;
+	}
+}

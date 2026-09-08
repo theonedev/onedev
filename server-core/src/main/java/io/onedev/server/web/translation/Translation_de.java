@@ -127,6 +127,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "Ein untergeordnetes Projekt mit dem Namen \"{0}\" existiert bereits unter \"{1}\"");
 		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
 			"Eine Datei existiert dort, wo Sie versuchen, ein Unterverzeichnis zu erstellen. Wählen Sie einen neuen Pfad und versuchen Sie es erneut.");
+		m.put("A page with this name already exists.", "Eine Seite mit diesem Namen existiert bereits.");
 		m.put("A path with same name already exists.Please choose a different name and try again.", 
 			"Ein Pfad mit demselben Namen existiert bereits. Bitte wählen Sie einen anderen Namen und versuchen Sie es erneut.");
 		m.put("A pull request is open for this change", "Ein Pull-Request ist für diese Änderung geöffnet");
@@ -200,6 +201,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Add GPG keys here to verify commits/tags signed by you", "Fügen Sie hier GPG-Schlüssel hinzu, um Commits/Tags zu verifizieren, die von Ihnen signiert wurden");
 		m.put("Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified.", 
 			"Fügen Sie hier GPG-öffentliche Schlüssel hinzu, die vertrauenswürdig sind. Commits, die mit vertrauenswürdigen Schlüsseln signiert sind, werden als verifiziert angezeigt.");
+		m.put("Add Home page", "Startseite hinzufügen");
 		m.put("Add Issue...", "Problem hinzufügen...");
 		m.put("Add Issues to Iteration", "Probleme zur Iteration hinzufügen");
 		m.put("Add New", "Neu hinzufügen");
@@ -246,6 +248,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Add new import", "Neuen Import hinzufügen");
 		m.put("Add new issue creation setting", "Neue Einstellung für Issue-Erstellung hinzufügen");
 		m.put("Add new job dependency", "Neue Job-Abhängigkeit hinzufügen");
+		m.put("Add new page", "Neue Seite hinzufügen");
 		m.put("Add new param", "Neuen Parameter hinzufügen");
 		m.put("Add new post-build action", "Neue Post-Build-Aktion hinzufügen");
 		m.put("Add new project dependency", "Neue Projekt-Abhängigkeit hinzufügen");
@@ -253,6 +256,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Add new step", "Neuen Schritt hinzufügen");
 		m.put("Add new trigger", "Neuen Trigger hinzufügen");
 		m.put("Add new user data", "Neue Benutzerdaten hinzufügen");
+		m.put("Add page", "Seite hinzufügen");
+		m.put("Add page or upload files", "Seite hinzufügen oder Dateien hochladen");
 		m.put("Add project", "Projekt hinzufügen");
 		m.put("Add reviewer...", "Reviewer hinzufügen...");
 		m.put("Add to batch to commit with other suggestions later", "Zur Batch hinzufügen, um später mit anderen Vorschlägen zu committen");
@@ -302,6 +307,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("All AI users", "Alle KI-Benutzer");
 		m.put("All Issues", "Alle Issues");
 		m.put("All RESTful Resources", "Alle RESTful-Ressourcen");
+		m.put("All Types", "Alle Typen");
 		m.put("All accessible", "Alle zugänglich");
 		m.put("All builds", "Alle Builds");
 		m.put("All changes", "Alle Änderungen");
@@ -439,6 +445,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Authorize user...", "Benutzer autorisieren...");
 		m.put("Authorized Projects", "Autorisierte Projekte");
 		m.put("Authorized Roles", "Autorisierte Rollen");
+		m.put("Auto", "Auto");
 		m.put("Auto Merge", "Automatisches Zusammenführen");
 		m.put("Auto Spec", "Automatische Spezifikation");
 		m.put("Auto update check is performed by requesting an image in your browser from onedev.io indicating new version availability, with color indicating severity of the update. It works the same way as how gravatar requests avatar images. If disabled, you are highly recommended to check update manually from time to time (can be done via help menu on left bottom of the screen) to see if there are any security/critical fixes", 
@@ -526,6 +533,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Branch Protection", "Branch-Schutz");
 		m.put("Branch Revision", "Branch-Revision");
 		m.put("Branch is created", "Branch wurde erstellt");
+		m.put("Branch is updated. Please refresh the page and resubmit the job", "Branch wurde aktualisiert. Bitte aktualisieren Sie die Seite und senden Sie den Job erneut");
 		m.put("Branch update", "Branch-Aktualisierung");
 		m.put("Branches", "Branches");
 		m.put("Brand Setting Edit Bean", "Markeneinstellungs-Bearbeitungs-Bean");
@@ -826,6 +834,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Code write permission is required for this operation", "Schreibberechtigung für Code ist für diese Operation erforderlich");
 		m.put("Collapse all", "Alle einklappen");
 		m.put("Color", "Farbe");
+		m.put("Color mode", "Farbmodus");
 		m.put("Columns", "Spalten");
 		m.put("Command", "Befehl");
 		m.put("Command Palette", "Befehls-Palette");
@@ -1023,7 +1032,9 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Current platform", "Aktuelle Plattform");
 		m.put("Current project", "Aktuelles Projekt");
 		m.put("Custom Headers", "Benutzerdefinierte Header");
+		m.put("Customize", "Anpassen");
 		m.put("DISCARDED", "VERWORFEN");
+		m.put("Dark", "Dunkel");
 		m.put("Dashboard Share Bean", "Dashboard-Share-Bean");
 		m.put("Dashboard name", "Dashboard-Name");
 		m.put("Dashboards", "Dashboards");
@@ -1117,6 +1128,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Delete chat", "Chat löschen");
 		m.put("Delete dashboard", "Dashboard löschen");
 		m.put("Delete from branch {0}", "Von Branch {0} löschen");
+		m.put("Delete page", "Seite löschen");
 		m.put("Delete this", "Dies löschen");
 		m.put("Delete this GPG key", "Diesen GPG-Schlüssel löschen");
 		m.put("Delete this access token", "Diesen Zugriffstoken löschen");
@@ -1133,6 +1145,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Delete this state", "Diesen Zustand löschen");
 		m.put("Delete this tag", "Diesen Tag löschen");
 		m.put("Delete this value", "Diesen Wert löschen");
+		m.put("Delete this wiki page?", "Diese Wiki-Seite löschen?");
 		m.put("Delete this workspace", "Diesen Arbeitsbereich löschen");
 		m.put("Delete this workspace data", "Daten dieses Arbeitsbereichs löschen");
 		m.put("Deleted by us, modified by them", "Von uns gelöscht, von ihnen geändert");
@@ -1266,6 +1279,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Dockerfile", "Dockerfile");
 		m.put("Documentation", "Dokumentation");
 		m.put("Don't have an account yet?", "Haben Sie noch kein Konto?");
+		m.put("Down", "Runter");
 		m.put("Download", "Herunterladen");
 		m.put("Download <a wicket:id=\"agentZip\" class=\"link-primary\">agent.zip</a> or <a wicket:id=\"agentTgz\" class=\"link-primary\">agent.tar.gz</a>. A new agent token will be included in the package", 
 			"Laden Sie <a wicket:id=\"agentZip\" class=\"link-primary\">agent.zip</a> oder <a wicket:id=\"agentTgz\" class=\"link-primary\">agent.tar.gz</a> herunter. Ein neuer Agent-Token wird im Paket enthalten sein.");
@@ -1274,6 +1288,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Download log", "Protokoll herunterladen");
 		m.put("Download patch", "Patch herunterladen");
 		m.put("Download tag archive", "Tag-Archiv herunterladen");
+		m.put("Drop files here or click to upload", "Dateien hierher ziehen oder klicken, um hochzuladen");
 		m.put("Dry Run", "Trockener Lauf");
 		m.put("Due Date", "Fälligkeitsdatum");
 		m.put("Due Date Issue Field", "Fälligkeitsdatum-Feld");
@@ -1301,6 +1316,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Edit job", "Job bearbeiten");
 		m.put("Edit on branch {0}", "Bearbeiten im Branch {0}");
 		m.put("Edit on source branch", "Bearbeiten im Quell-Branch");
+		m.put("Edit page", "Seite bearbeiten");
 		m.put("Edit plain", "Einfach bearbeiten");
 		m.put("Edit saved queries", "Gespeicherte Abfragen bearbeiten");
 		m.put("Edit this access token", "Diesen Zugriffstoken bearbeiten");
@@ -2105,6 +2121,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("License Setting", "Lizenzeinstellung");
 		m.put("Licensed To", "Lizenziert für");
 		m.put("Licensed To:", "Lizenziert für:");
+		m.put("Light", "Hell");
 		m.put("Line", "Zeile");
 		m.put("Line: ", "Zeile:");
 		m.put("Lines", "Zeilen");
@@ -2167,6 +2184,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Mail Service Test", "Mail-Dienst-Test");
 		m.put("Mail service not configured", "Mail-Dienst nicht konfiguriert");
 		m.put("Mail service settings saved", "Mail-Dienst-Einstellungen gespeichert");
+		m.put("Main Repository", "Haupt-Repository");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
 			"Stellen Sie sicher, dass <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 oder höher</a> installiert ist");
 		m.put("Make sure current user has permission to run docker containers", "Stellen Sie sicher, dass der aktuelle Benutzer die Berechtigung hat, Docker-Container auszuführen");
@@ -2219,6 +2237,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Max Upload File Size (MB)", "Maximale Upload-Dateigröße (MB)");
 		m.put("Max Value", "Maximalwert");
 		m.put("Maximum number of entries to return when search code in repository", "Maximale Anzahl von Einträgen, die bei der Codesuche im Repository zurückgegeben werden");
+		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
+			"Maximale Anzahl, wie oft dieser KI-Benutzer in einer einzelnen Aufgabe aktiviert werden kann. Wenn das Limit erreicht ist, wird der KI-Benutzer nicht ausgeführt und stattdessen ein Systemkommentar gepostet");
 		m.put("Maximum of retries before giving up", "Maximale Anzahl von Wiederholungen, bevor aufgegeben wird");
 		m.put("May not be empty", "Darf nicht leer sein");
 		m.put("Medium", "Mittel");
@@ -2406,6 +2426,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No group by", "Keine Gruppierung");
 		m.put("No groups claim returned", "Keine Gruppenansprüche zurückgegeben");
 		m.put("No groups to remove from", "Keine Gruppen zum Entfernen");
+		m.put("No headings", "Keine Überschriften");
 		m.put("No ignore file", "Keine Ignorierdatei");
 		m.put("No image attachments", "Keine Bildanhänge");
 		m.put("No imports defined", "Keine Importe definiert");
@@ -2474,6 +2495,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Not a verified email of signing GPG key", "Keine verifizierte E-Mail des signierenden GPG-Schlüssels");
 		m.put("Not a verified email of signing ssh key owner", "Nicht eine verifizierte E-Mail des Besitzers des signierenden SSH-Schlüssels");
 		m.put("Not allowed file type: {0}", "Nicht erlaubter Dateityp: {0}");
+		m.put("Not allowed to modify this file", "Keine Berechtigung, diese Datei zu ändern");
 		m.put("Not assigned", "Nicht zugewiesen");
 		m.put("Not authorized to create project under \"{0}\"", "Nicht berechtigt, ein Projekt unter \"{0}\" zu erstellen");
 		m.put("Not authorized to create root project", "Nicht berechtigt, ein Root-Projekt zu erstellen");
@@ -2904,7 +2926,10 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Package {0} deleted", "Paket {0} gelöscht");
 		m.put("Packages", "Pakete");
 		m.put("Page Not Found", "Seite nicht gefunden");
+		m.put("Page history", "Seitenverlauf");
 		m.put("Page is in error, reload to recover", "Seite ist fehlerhaft, neu laden, um sich zu erholen");
+		m.put("Page name", "Seitenname");
+		m.put("Pages", "Seiten");
 		m.put("Param Instance", "Parameterinstanz");
 		m.put("Param Instances", "Parameterinstanzen");
 		m.put("Param Map", "Parameterkarte");
@@ -2999,6 +3024,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Plain text expected", "Reiner Text erwartet");
 		m.put("Platform", "Plattform");
 		m.put("Platforms", "Plattformen");
+		m.put("Playwright Test Report", "Playwright-Testbericht");
 		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you cannot access the authentication application. They will <b>NOT</b> be displayed again", 
 			"Bitte <a wicket:id=\"download\" class=\"font-weight-bolder\">laden</a> Sie die Wiederherstellungscodes unten herunter und bewahren Sie sie geheim. Diese Codes können verwendet werden, um einmaligen Zugriff auf Ihr Konto zu gewähren, falls Sie keinen Zugriff auf die Authentifizierungsanwendung haben. Sie werden <b>NICHT</b> erneut angezeigt");
 		m.put("Please Confirm", "Bitte bestätigen");
@@ -3352,6 +3378,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Remove this file", "Diese Datei entfernen");
 		m.put("Remove this image", "Entfernen Sie dieses Bild");
 		m.put("Remove this reviewer", "Entfernen Sie diesen Prüfer");
+		m.put("Rename", "Umbenennen");
 		m.put("Rename {0}", "Umbenennen {0}");
 		m.put("Renew Subscription", "Abonnement erneuern");
 		m.put("Renovate CLI Options", "Renovate CLI-Optionen");
@@ -3368,6 +3395,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"Berichtsformat geändert. Sie können diesen Build erneut ausführen, um den Bericht im neuen Format zu erstellen");
 		m.put("Repository Sync", "Repository-Synchronisation");
+		m.put("Repository folder containing Markdown wiki pages. Leave empty to inherit from parent (defaults to wiki). Use Home.md for the home page and _Sidebar.md for the sidebar", 
+			"Repository-Ordner mit Markdown-Wiki-Seiten. Leer lassen, um vom übergeordneten Element zu erben (Standard ist wiki). Verwenden Sie Home.md für die Startseite und _Sidebar.md für die Seitenleiste");
 		m.put("Reprovision workspace", "Arbeitsbereich neu bereitstellen");
 		m.put("Request Body", "Anfrageinhalt");
 		m.put("Request For Changes", "Änderungen anfordern");
@@ -3505,6 +3534,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Save Settings & Redistribute Projects", "Einstellungen speichern & Projekte neu verteilen");
 		m.put("Save Template", "Vorlage speichern");
 		m.put("Save as Mine", "Als meine speichern");
+		m.put("Save page", "Seite speichern");
 		m.put("Saved Queries", "Gespeicherte Abfragen");
 		m.put("Scan Path", "Scan-Pfad");
 		m.put("Scan Paths", "Scan-Pfade");
@@ -3673,7 +3703,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Show issues not scheduled into current iteration", "Probleme anzeigen, die nicht in die aktuelle Iteration eingeplant sind");
 		m.put("Show matching agents", "Passende Agenten anzeigen");
 		m.put("Show more", "Mehr anzeigen");
-		m.put("Show more lines", "Mehr Zeilen anzeigen");
+		m.put("Show more lines above", "Mehr Zeilen oben anzeigen");
+		m.put("Show more lines below", "Mehr Zeilen unten anzeigen");
 		m.put("Show next match", "Nächste Übereinstimmung anzeigen");
 		m.put("Show previous match", "Vorherige Übereinstimmung anzeigen");
 		m.put("Show test cases of this test suite", "Testfälle dieser Test-Suite anzeigen");
@@ -3834,6 +3865,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Specify a Docker Image to Test Against", "Gibt ein Docker-Image an, gegen das getestet werden soll");
 		m.put("Specify a custom field of Enum type", "Gibt ein benutzerdefiniertes Feld vom Typ Enum an");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "Gibt eine Standardabfrage an, um behobene Issues der angegebenen Jobs zu filtern/zu sortieren");
+		m.put("Specify a folder relative to the repository root. Leave empty to upload to the root folder.", 
+			"Geben Sie einen Ordner relativ zum Repository-Stamm an. Lassen Sie das Feld leer, um in den Stammordner hochzuladen.");
 		m.put("Specify a key to identify the user data. Data with same key will be shared across workspaces\neven if project is different", 
 			"Geben Sie einen Schlüssel an, um die Benutzerdaten zu identifizieren. Daten mit demselben Schlüssel werden über Arbeitsbereiche hinweg geteilt\nauch wenn das Projekt unterschiedlich ist");
 		m.put("Specify a multi-value user field to hold assignees information.<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3952,6 +3985,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Specify fields to display in board card", "Geben Sie die Felder an, die auf der Board-Karte angezeigt werden sollen.");
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"Geben Sie Dateien relativ zum <a href='https://docs.onedev.io/concepts#job-workdir'>Job-Arbeitsbereich</a> an, die veröffentlicht werden sollen. Verwenden Sie * oder ? für Musterabgleich.");
+		m.put("Specify files to publish relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>.\nPublished files should include the Playwright JSON report and all referenced artifacts, such as screenshots and traces.\nFor example, run <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\nfrom the job working directory, and use <code>test-results/**</code> as the file pattern to publish the report and artifacts together.\nUse * or ? for pattern matching", 
+			"Geben Sie Dateien an, die relativ zum <a href='https://docs.onedev.io/concepts#job-workdir'>Job-Arbeitsverzeichnis</a> veröffentlicht werden sollen.\nVeröffentlichte Dateien sollten den Playwright-JSON-Bericht und alle referenzierten Artefakte wie Screenshots und Traces enthalten.\nFühren Sie beispielsweise <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\naus dem Job-Arbeitsverzeichnis aus und verwenden Sie <code>test-results/**</code> als Dateimuster, um den Bericht und die Artefakte zusammen zu veröffentlichen.\nVerwenden Sie * oder ? für die Mustererkennung");
 		m.put("Specify files under above directory to be published", "Geben Sie Dateien im obigen Verzeichnis an, die veröffentlicht werden sollen");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> If <code>index.html</code> is included, it will be served as the site start page; otherwise a listing of published files will be shown", 
 			"Dateien im obigen Verzeichnis angeben, die veröffentlicht werden sollen. Verwenden Sie * oder ? für Musterabgleich. <b>HINWEIS:</b> Wenn <code>index.html</code> enthalten ist, wird es als Startseite der Seite angezeigt; andernfalls wird eine Liste der veröffentlichten Dateien angezeigt");
@@ -4209,6 +4244,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Submitted By", "Eingereicht von");
 		m.put("Submitted manually", "Manuell eingereicht");
 		m.put("Submitter", "Einreicher");
+		m.put("Submodule", "Submodul");
 		m.put("Subscription Key", "Abonnement-Schlüssel");
 		m.put("Subscription Management", "Abonnement-Verwaltung");
 		m.put("Subscription data", "Abonnement-Daten");
@@ -4306,6 +4342,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Test successful: authentication passed with below information retrieved:", "Test erfolgreich: Authentifizierung bestanden mit den unten abgerufenen Informationen:");
 		m.put("Text", "Text");
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "Die URL des Serverendpunkts, der die Webhook-POST-Anfragen empfängt");
+		m.put("The branch changed. Copy your edits and reload before saving.", "Der Branch hat sich geändert. Kopieren Sie Ihre Änderungen und laden Sie neu, bevor Sie speichern.");
+		m.put("The branch changed. Reload before uploading files.", "Der Branch hat sich geändert. Laden Sie neu, bevor Sie Dateien hochladen.");
 		m.put("The change contains disallowed file type(s): {0}", "Die Änderung enthält nicht erlaubte Dateitypen: {0}");
 		m.put("The first board will be the default board", "Das erste Board wird das Standard-Board sein");
 		m.put("The first timesheet will be the default timesheet", "Die erste Zeiterfassung wird die Standard-Zeiterfassung sein");
@@ -4466,6 +4504,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("This user is authenticating via internal database.", "Dieser Benutzer authentifiziert sich über die interne Datenbank.");
 		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
 			"Dieser Benutzer authentifiziert sich derzeit über ein externes System. Das Festlegen eines Passworts wechselt zur Verwendung der internen Datenbank");
+		m.put("This wiki page does not exist at this revision.", "Diese Wiki-Seite existiert in dieser Revision nicht.");
 		m.put("This will deactivate current subscription and all enterprise features will be disabled, do you want to continue?", 
 			"Dies wird das aktuelle Abonnement deaktivieren und alle Enterprise-Funktionen werden deaktiviert. Möchten Sie fortfahren?");
 		m.put("This will discard all project specific boards, do you want to continue?", "Dies wird alle projektspezifischen Boards verwerfen. Möchten Sie fortfahren?");
@@ -4514,6 +4553,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Toggle half screen", "Halbbildschirm umschalten");
 		m.put("Toggle matched contents", "Übereinstimmende Inhalte umschalten");
 		m.put("Toggle navigation", "Navigation umschalten");
+		m.put("Toggle page outline", "Seitenumriss umschalten");
 		m.put("Toggle work log", "Arbeitsprotokoll umschalten");
 		m.put("Tokens", "Tokens");
 		m.put("Too many commits to load", "Zu viele Commits zum Laden");
@@ -4673,6 +4713,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Unviewed code comment activity", "Ungesehene Code-Kommentar-Aktivität");
 		m.put("Unvote", "Abstimmung zurückziehen");
 		m.put("Unwatched. Click to watch", "Nicht beobachtet. Klicken, um zu beobachten");
+		m.put("Up", "Hoch");
 		m.put("Update", "Aktualisieren");
 		m.put("Update Dependencies via Renovate", "Abhängigkeiten über Renovate aktualisieren");
 		m.put("Update Source Branch", "Quellzweig aktualisieren");
@@ -4688,6 +4729,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Upload a 128x128 transparent png file to be used as logo for light mode", "Laden Sie eine 128x128 transparente PNG-Datei hoch, die als Logo für den Hellmodus verwendet werden soll");
 		m.put("Upload artifacts", "Artefakte hochladen");
 		m.put("Upload avatar", "Avatar hochladen");
+		m.put("Upload files", "Dateien hochladen");
 		m.put("Upload should be less than {0} Mb", "Upload sollte weniger als {0} MB betragen");
 		m.put("Upload to Project", "Zum Projekt hochladen");
 		m.put("Uploaded Caches", "Hochgeladene Caches");
@@ -4715,6 +4757,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Use Step Template", "Schrittvorlage verwenden");
 		m.put("Use curl in System Path", "curl im Systempfad verwenden");
 		m.put("Use default", "Standard verwenden");
+		m.put("Use default sidebar?", "Standard-Seitenleiste verwenden?");
 		m.put("Use default storage class", "Standard-Speicherklasse verwenden");
 		m.put("Use generated branch name", "Generierten Branch-Namen verwenden");
 		m.put("Use generated title and description", "Generierten Titel und Beschreibung verwenden");
@@ -4871,6 +4914,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Ob das interne Passwort-Login-Formular deaktiviert und nur SSO-Login verwendet werden soll.\n<b class=\"text-info\">TIPPS:</b> Falls Sie ausgesperrt sind, kann das interne Login über die Befehls\nzeile durch Ausführen von <code>bin/enable-internal-login</code> wieder aktiviert werden.");
 		m.put("Whether or not to enable code management for the project", "Ob die Codeverwaltung für das Projekt aktiviert werden soll oder nicht");
 		m.put("Whether or not to enable issue management for the project", "Ob die Problemverwaltung für das Projekt aktiviert werden soll oder nicht");
+		m.put("Whether or not to enable wiki management for the project", "Ob die Wiki-Verwaltung für das Projekt aktiviert werden soll oder nicht");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"Ob LFS-Objekte abgerufen werden sollen, wenn der Pull-Request von einem anderen Projekt geöffnet wird");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -4892,6 +4936,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Whether or not to require this dependency to be successful", "Ob diese Abhängigkeit erfolgreich sein muss oder nicht");
 		m.put("Whether or not to retrieve groups of login user. Make sure to add groups claim via token configuration of the app registered in Entra ID if this option is enabled. The groups claim should return group id (the default option) via various token types in this case", 
 			"Ob Gruppen des Login-Benutzers abgerufen werden sollen oder nicht. Stellen Sie sicher, dass Sie Gruppenansprüche über die Token-Konfiguration der in Entra ID registrierten App hinzufügen, wenn diese Option aktiviert ist. Der Gruppenanspruch sollte in diesem Fall Gruppen-ID (die Standardoption) über verschiedene Token-Typen zurückgeben");
+		m.put("Whether or not to retrieve submodules. Refer to\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on\nhow to configure submodule authentication\n", 
+			"Ob Submodule abgerufen werden sollen oder nicht. Siehe\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>dieses Tutorial</a> für\nInformationen zur Konfiguration der Submodul-Authentifizierung\n");
 		m.put("Whether or not to retrieve submodules. Refer to <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on how to set up clone credential above to retrieve submodules", 
 			"Ob Untermodule abgerufen werden sollen oder nicht. Siehe <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>dieses Tutorial</a>, wie Sie oben Anmeldeinformationen für das Klonen einrichten, um Untermodule abzurufen");
 		m.put("Whether or not to run this step inside container", "Ob dieser Schritt innerhalb eines Containers ausgeführt werden soll oder nicht");
@@ -4913,6 +4959,12 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Widget", "Widget");
 		m.put("Widget Tab", "Widget-Tab");
 		m.put("Widget Timesheet Setting", "Widget-Zeiterfassungseinstellungen");
+		m.put("Wiki", "Wiki");
+		m.put("Wiki Folder", "Wiki-Ordner");
+		m.put("Wiki Management", "Wiki-Verwaltung");
+		m.put("Wiki Setting", "Wiki-Einstellung");
+		m.put("Wiki Settings", "Wiki-Einstellungen");
+		m.put("Wiki settings updated", "Wiki-Einstellungen aktualisiert");
 		m.put("Will be prompted to set up two-factor authentication upon next login", "Wird beim nächsten Login aufgefordert, die Zwei-Faktor-Authentifizierung einzurichten");
 		m.put("Window", "Fenster");
 		m.put("Window Memory", "Fensterspeicher");
@@ -5191,6 +5243,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("week:Tue", "Di");
 		m.put("week:Wed", "Mi");
 		m.put("widget:Tabs", "Tabs");
+		m.put("wiki", "Wiki");
 		m.put("workspaces", "Arbeitsbereiche");
 		m.put("you may show this page later via incompatibilities link in help menu", "Sie können diese Seite später über den Link \"Inkompatibilitäten\" im Hilfemenü anzeigen.");
 		m.put("{0} Lines", "{0} Zeilen");
@@ -5229,20 +5282,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("All Types", "Alle Typen");
-		m.put("Auto", "Auto");
-		m.put("Color mode", "Farbmodus");
-		m.put("Dark", "Dunkel");
-		m.put("Light", "Hell");
-		m.put("Main Repository", "Haupt-Repository");
-		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
-			"Maximale Anzahl, wie oft dieser KI-Benutzer in einer einzelnen Aufgabe aktiviert werden kann. Wenn das Limit erreicht ist, wird der KI-Benutzer nicht ausgeführt und stattdessen ein Systemkommentar gepostet");
-		m.put("Playwright Test Report", "Playwright-Testbericht");
-		m.put("Specify files to publish relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>.\nPublished files should include the Playwright JSON report and all referenced artifacts, such as screenshots and traces.\nFor example, run <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\nfrom the job working directory, and use <code>test-results/**</code> as the file pattern to publish the report and artifacts together.\nUse * or ? for pattern matching", 
-			"Geben Sie Dateien an, die relativ zum <a href='https://docs.onedev.io/concepts#job-workdir'>Job-Arbeitsverzeichnis</a> veröffentlicht werden sollen.\nVeröffentlichte Dateien sollten den Playwright-JSON-Bericht und alle referenzierten Artefakte wie Screenshots und Traces enthalten.\nFühren Sie beispielsweise <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>\naus dem Job-Arbeitsverzeichnis aus und verwenden Sie <code>test-results/**</code> als Dateimuster, um den Bericht und die Artefakte zusammen zu veröffentlichen.\nVerwenden Sie * oder ? für die Mustererkennung");
-		m.put("Submodule", "Submodul");
-		m.put("Whether or not to retrieve submodules. Refer to\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on\nhow to configure submodule authentication\n", 
-			"Ob Submodule abgerufen werden sollen oder nicht. Siehe\n<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>dieses Tutorial</a> für\nInformationen zur Konfiguration der Submodul-Authentifizierung\n");
+		m.put("Add home page", "Startseite hinzufügen");
+		m.put("Home page not found", "Startseite nicht gefunden");
 	}
 			
 	@Override

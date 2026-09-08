@@ -1,7 +1,7 @@
 <wicket:panel>
 	<form wicket:id="form" class="upload-blobs">
 		<div class="modal-header">
-			<h5 class="modal-title">Upload Files</h5>
+			<h5 class="modal-title"><wicket:t>Upload Files</wicket:t></h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
@@ -10,18 +10,18 @@
 				<div wicket:id="files" class="files"></div>
 			</div>
 			<div class="form-group">
-  				<label>Directory</label>
+				<label><wicket:t>Directory</wicket:t></label>
 				<input wicket:id="directory" class="form-control"></input>
-				<p class="form-text text-muted">Optionally specify relative directory to put uploaded files</p>
+				<p class="form-text text-muted"><wicket:t>Specify a folder relative to the repository root. Leave empty to upload to the root folder.</wicket:t></p>
 			</div>			
 			<div class="form-group">
-  				<label>Commit Message</label>
+				<label><wicket:t>Commit Message</wicket:t></label>
 				<textarea wicket:id="commitMessage" class="form-control" t:placeholder="Add files via upload" rows="6"></textarea>
 			</div>			
 		</div>
 		<div class="modal-footer">
-			<button wicket:id="upload" class="btn btn-primary">Upload</button>
-			<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+			<button wicket:id="upload" class="btn btn-primary"><wicket:t>Upload</wicket:t></button>
+			<button wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></button>
 		</div>
 	</form>
 </wicket:panel>

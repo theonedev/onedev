@@ -1,0 +1,58 @@
+.wiki>.head {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: inherit;
+}
+.wiki .wiki-view,
+.wiki .wiki-content,
+.wiki .navigation-content {
+	min-width: 0;
+	min-height: 0;
+}
+.wiki .wiki-content .markdown-viewer>.markdown-rendered {
+	max-width: 900px;
+	margin: 0 auto;
+}
+.wiki .wiki-navigation {
+	width: 300px;
+	max-width: calc(100% - 80px);
+	position: relative;
+	left: 0 !important;
+}
+.wiki .navigation-content {
+	overflow-wrap: anywhere;
+}
+.wiki .wiki-pages summary {
+	cursor: pointer;
+}
+.wiki .page-expand {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 1.2rem;
+	height: 1.5rem;
+}
+.wiki .page-expand-indicator {
+	width: 0;
+	height: 0;
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
+	border-left: 5px solid currentColor;
+}
+.wiki .page-expand[aria-expanded=true] .page-expand-indicator {
+	transform: rotate(90deg);
+}
+.wiki .wiki-pages .wiki-page-outline {
+	padding-left: 1.8rem;
+}
+.wiki .wiki-pages [aria-current=page] {
+	font-weight: 600;
+}
+
+@media (max-width: 991.98px) {
+	.wiki .wiki-navigation {
+		display: none !important;
+	}
+}

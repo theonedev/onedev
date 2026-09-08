@@ -1,51 +1,16 @@
-import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
+import { expect, test, admin } from './fixtures.js';
+import { login } from './helpers.js';
 
-import { expect, test } from './fixtures.js';
-import { fillLabeledInput, login } from './helpers.js';
+test('expands text-diff gaps with directional arrows', async ({ page, api }) => {
+  const project = await api.createProject();
+  const lines = Array.from({ length: 100 }, (_, index) => `unchanged-line-${index + 1}`);
+  await api.putFile(project, 'fixture.txt', `${lines.join('\n')}\n`, 'Add text diff fixture');
+  lines[9] = 'changed-line-10';
+  lines[89] = 'changed-line-90';
+  const { commitHash } = await api.putFile(project, 'fixture.txt', `${lines.join('\n')}\n`, 'Change distant fixture lines');
+  await login(page, admin.name, admin.password);
 
-test('expands text-diff gaps with directional arrows', async ({ page }) => {
-  // 1. Open a commit containing two distant changes
-  await login(page, 'admin', 'admin');
-  const projectName = `text-diff-expander-${Date.now()}`;
-  await page.goto('~projects/new');
-  await fillLabeledInput(page, 'Name', projectName);
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(new RegExp(`/${projectName}(/|$)`));
-  const repositoryDir = mkdtempSync(path.join(tmpdir(), 'onedev-text-diff-'));
-  let commitHash;
-  try {
-    const git = (...args) => execFileSync('git', args, { cwd: repositoryDir, stdio: 'pipe' });
-    git('init', '--initial-branch=main');
-    git('config', 'user.name', 'OneDev E2E');
-    git('config', 'user.email', 'e2e@example.com');
-
-    const lines = Array.from({ length: 100 }, (_, index) => `unchanged-line-${index + 1}`);
-    writeFileSync(path.join(repositoryDir, 'fixture.txt'), `${lines.join('\n')}\n`);
-    git('add', 'fixture.txt');
-    git('commit', '-m', 'Add text diff fixture');
-
-    lines[9] = 'changed-line-10';
-    lines[89] = 'changed-line-90';
-    writeFileSync(path.join(repositoryDir, 'fixture.txt'), `${lines.join('\n')}\n`);
-    git('commit', '-am', 'Change distant fixture lines');
-    commitHash = git('rev-parse', 'HEAD').toString().trim();
-
-    const remoteUrl = new URL(page.url());
-    remoteUrl.username = 'admin';
-    remoteUrl.password = 'admin';
-    remoteUrl.pathname = `/${projectName}`;
-    remoteUrl.search = '';
-    remoteUrl.hash = '';
-    git('remote', 'add', 'origin', remoteUrl.toString());
-    git('push', 'origin', 'main');
-  } finally {
-    rmSync(repositoryDir, { recursive: true, force: true });
-  }
-
-  const commitUrl = `${projectName}/~commits/${commitHash}`;
+  const commitUrl = `${project.name}/~commits/${commitHash}`;
   await page.goto(commitUrl);
   const expanders = page.locator('tr.expander');
   await expect(expanders).toHaveCount(3);

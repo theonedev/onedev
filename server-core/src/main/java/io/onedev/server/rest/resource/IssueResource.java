@@ -40,6 +40,7 @@ import io.onedev.server.SubscriptionService;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueLink;
@@ -225,6 +226,16 @@ public class IssueResource {
 			throw new UnauthorizedException();
     	return issue.getWatches();
     }
+
+	@Api(order=625)
+	@Path("/{issueId}/authorizations")
+	@GET
+	public Collection<IssueAuthorization> getAuthorizations(@PathParam("issueId") Long issueId) {
+		Issue issue = issueService.load(issueId);
+		if (!SecurityUtils.canModifyIssue(issue))
+			throw new UnauthorizedException();
+		return issue.getAuthorizations();
+	}
 
 	@Api(order=650)
 	@Path("/{issueId}/links")

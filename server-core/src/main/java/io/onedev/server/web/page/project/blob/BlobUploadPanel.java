@@ -5,7 +5,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.upload.UploadService;
 
 import static io.onedev.server.web.translation.Translation._T;
@@ -25,8 +25,6 @@ import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.ObjectId;
 
 public abstract class BlobUploadPanel extends Panel {
-
-	private final BlobRenderContext context;
 	
 	private String directory;
 	
@@ -34,9 +32,9 @@ public abstract class BlobUploadPanel extends Panel {
 	
 	private String uploadId;
 	
-	public BlobUploadPanel(String id, BlobRenderContext context) {
+	public BlobUploadPanel(String id, String defaultDirectory) {
 		super(id);
-		this.context = context;
+		directory = defaultDirectory;
 	}
 
 	@Override
@@ -83,7 +81,7 @@ public abstract class BlobUploadPanel extends Panel {
 				
 				var upload = getUploadService().getUpload(uploadId);
 				try {
-					onCommitted(target, context.uploadFiles(upload, directory, commitMessage));
+					onCommitted(target, uploadFiles(upload, directory, commitMessage));
 				} finally {
 					upload.clear();
 				}
@@ -103,7 +101,7 @@ public abstract class BlobUploadPanel extends Panel {
 			
 			@Override
 			protected Project getProject() {
-				return context.getProject();
+				return BlobUploadPanel.this.getProject();
 			}
 			
 		};
@@ -123,6 +121,10 @@ public abstract class BlobUploadPanel extends Panel {
 	private UploadService getUploadService() {
 		return OneDev.getInstance(UploadService.class);
 	}
+
+	protected abstract Project getProject();
+
+	protected abstract ObjectId uploadFiles(FileUpload upload, String directory, String commitMessage);
 
 	public abstract void onCommitted(AjaxRequestTarget target, ObjectId commitId);
 	

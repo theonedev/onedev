@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Splitter;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
@@ -43,6 +42,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.LongRange;
+import io.onedev.server.util.RevisionAndPath;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.util.MimeUtils;
 import io.onedev.server.web.util.WicketUtils;
@@ -67,20 +67,18 @@ public class RawBlobResource extends AbstractResource {
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String segment = params.get(i).toString();
-			if (segment.contains(".."))
-				throw new ExplicitException("Invalid request path");
 			if (segment.length() != 0)
 				revisionAndPathSegments.add(segment);
 		}
 
-		BlobIdent blobIdent = new BlobIdent(project, revisionAndPathSegments);
+		RevisionAndPath revisionAndPath = RevisionAndPath.parse(project, revisionAndPathSegments);
 
-		String revision = blobIdent.revision;
-		String path = blobIdent.path;
+		String revision = revisionAndPath.getRevision();
+		String path = GitUtils.normalizePath(revisionAndPath.getPath());
 		if (StringUtils.isBlank(revision) || StringUtils.isBlank(path))
 			throw new NotAcceptableException("Revision and path should be specified");
 
-		if (!SecurityUtils.canReadCode(project))
+		if (!SecurityUtils.canReadFile(project, path))
 			throw new UnauthorizedException();
 
 		final Blob blob = project.getBlob(new BlobIdent(revision, path, 0), true);

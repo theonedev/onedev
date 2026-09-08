@@ -1,21 +1,18 @@
-import { expect, test } from './fixtures.js';
-import { createProject, login } from './helpers.js';
+import { expect, test, admin } from './fixtures.js';
+import { login } from './helpers.js';
 
-test('renders Mermaid classes with numeric hex colors', async ({ page }) => {
-  await login(page, 'admin', 'admin');
-  const projectName = await createProject(page);
-
-  await page.goto(`${projectName}/~issues/new`);
-  await page.getByPlaceholder('Input title here').fill(`Mermaid diagram ${Date.now()}`);
-  await page.locator('.new-issue > .description textarea').fill([
+test('renders Mermaid classes with numeric hex colors', async ({ page, api }) => {
+  const project = await api.createProject();
+  const issue = await api.createIssue(project, { description: [
     '```mermaid',
     'flowchart TD',
     '    classDef oldError fill:#f8d7da,stroke:#999,color:#333',
     '    A@{ shape: hex, label: "Error Node" }',
     '    class A oldError',
     '```',
-  ].join('\n'));
-  await page.getByRole('button', { name: 'Save' }).click();
+  ].join('\n') });
+  await login(page, admin.name, admin.password);
+  await page.goto(issue.url);
 
   const styledNode = page.locator('.mermaid svg .node.oldError');
   await expect(styledNode).toBeVisible();

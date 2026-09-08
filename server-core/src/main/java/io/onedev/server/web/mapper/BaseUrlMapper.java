@@ -101,6 +101,8 @@ import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.NoProjectStoragePage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.wiki.ProjectWikiPage;
+import io.onedev.server.web.page.project.setting.wiki.WikiSettingPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.InvalidBuildPage;
@@ -427,6 +429,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		
 		add(new ProjectPageMapper("${project}", ProjectOverviewPage.class));
 
+		add(new ProjectPageMapper("${project}/~wiki", ProjectWikiPage.class));
+		add(new ProjectPageMapper("${project}/~settings/wiki", WikiSettingPage.class));
 		add(new ProjectPageMapper("${project}/~files", ProjectBlobPage.class));
 		add(new ProjectPageMapper("${project}/~commits", ProjectCommitsPage.class));
 		add(new ProjectPageMapper("${project}/~commits/${commit}", CommitDetailPage.class));

@@ -9,6 +9,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 
 import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
+import io.onedev.server.web.component.markdown.BlobMarkdownEditor;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
 
@@ -26,7 +27,7 @@ public class MarkdownBlobEditPanel extends BlobEditPanel {
 
 	@Override
 	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
-		return new MarkdownBlobEditor(componentId, context, initialContent);
+		return new BlobMarkdownEditor(componentId, context, initialContent);
 	}
 
 	@Override

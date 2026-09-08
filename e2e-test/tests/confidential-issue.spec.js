@@ -1,78 +1,42 @@
 import { expect, test } from './fixtures.js';
-import {
-  authorizeIssueUser,
-  authorizeUser,
-  createProject,
-  createUser,
-  login,
-  logout,
-  openIssue,
-} from './helpers.js';
+import { login } from './helpers.js';
 
 test.describe('confidential issue access', () => {
-  test.describe.configure({ mode: 'serial' });
-
-  /** @type {string} */
-  let projectName;
-  /** @type {{ userName: string, password: string }} */
   let creator;
-  /** @type {{ userName: string, password: string }} */
   let other;
-  /** @type {{ userName: string, password: string }} */
-  let granted;
-  /** @type {string} */
-  let issueUrl;
-  /** @type {string} */
-  let issueTitle;
+  let issue;
+
+  // Each case creates its own fixture and can run independently.
+  test.beforeEach(async ({ api }) => {
+    const project = await api.createProject();
+    creator = await api.createUser();
+    other = await api.createUser();
+    await api.authorizeUser(project, creator);
+    await api.authorizeUser(project, other);
+    issue = await api.createIssue(project, { confidential: true, creator });
+  });
 
   test('normal user can access confidential issue created by himself', async ({ page }) => {
-    const suffix = Date.now();
-
-    await login(page, 'admin', 'admin');
-    creator = await createUser(page, { userName: `creator${suffix}`, password: 'userpass1' });
-    other = await createUser(page, { userName: `other${suffix}`, password: 'userpass1' });
-    granted = await createUser(page, { userName: `granted${suffix}`, password: 'userpass1' });
-    projectName = await createProject(page, `confidential-${suffix}`);
-    await authorizeUser(page, projectName, creator.userName, 'Issue Reporter');
-    await authorizeUser(page, projectName, other.userName, 'Issue Reporter');
-    await authorizeUser(page, projectName, granted.userName, 'Issue Reporter');
-
-    await logout(page);
     await login(page, creator.userName, creator.password);
-    ({ title: issueTitle, url: issueUrl } = await openIssue(page, projectName, {
-      title: `Confidential ${suffix}`,
-      confidential: true,
-    }));
-
-    await expect(
-      page.locator('.issue-editable-title [data-tippy-content="Confidential"]'),
-    ).toBeVisible();
-    await expect(page.locator('.issue-editable-title')).toContainText(issueTitle);
+    await page.goto(issue.url);
+    await expect(page.locator('.issue-editable-title [data-tippy-content="Confidential"]')).toBeVisible();
+    await expect(page.locator('.issue-editable-title')).toContainText(issue.title);
   });
 
   test('normal user cannot access confidential issue created by others', async ({ page }) => {
     await login(page, other.userName, other.password);
-    const response = await page.goto(issueUrl);
-
+    const response = await page.goto(issue.url);
     expect(response?.status()).toBe(403);
     await expect(page.locator('.title h3')).toContainText('OOPS! There Is An Error');
     await expect(page.locator('.sub-title')).toContainText('You are not allowed to perform this operation');
     await expect(page.locator('.issue-editable-title')).toHaveCount(0);
   });
 
-  test('normal user authorized to a confidential issue created by others can access it', async ({
-    page,
-  }) => {
-    await login(page, creator.userName, creator.password);
-    await authorizeIssueUser(page, issueUrl, granted.userName);
-
-    await logout(page);
-    await login(page, granted.userName, granted.password);
-    await page.goto(issueUrl);
-
-    await expect(page.locator('.issue-editable-title')).toContainText(issueTitle);
-    await expect(
-      page.locator('.issue-editable-title [data-tippy-content="Confidential"]'),
-    ).toBeVisible();
+  test('normal user authorized to a confidential issue created by others can access it', async ({ page, api }) => {
+    await api.authorizeIssueUser(issue, other, creator);
+    await login(page, other.userName, other.password);
+    await page.goto(issue.url);
+    await expect(page.locator('.issue-editable-title')).toContainText(issue.title);
+    await expect(page.locator('.issue-editable-title [data-tippy-content="Confidential"]')).toBeVisible();
   });
 });

@@ -11,6 +11,41 @@ export MAVEN_OPTS
 HOTSWAP_AGENT_VERSION=2.0.3
 ECJ_VERSION=3.38.0
 MAVEN_REPOSITORY="${MAVEN_REPOSITORY:-$HOME/.m2/repository}"
+SERVER_PID_FILE="$ROOT/server-product/target/sandbox/dev-server.pid"
+
+running_server() {
+	[ -f "$SERVER_PID_FILE" ] || return 1
+	server_pid=$(cat "$SERVER_PID_FILE")
+	case "$server_pid" in
+		''|*[!0-9]*|0) return 1 ;;
+	esac
+	# The development classpath can make the command line very long.
+	server_command=$(ps -ww -p "$server_pid" -o args=) || return 1
+	case "$server_command" in
+		*"-Donedev.dev.root=$ROOT "*"io.onedev.commons.bootstrap.Bootstrap"*) return 0 ;;
+		*) return 1 ;;
+	esac
+}
+
+stop_server() {
+	if ! running_server; then
+		rm -f "$SERVER_PID_FILE"
+		echo "Development server is not running."
+		return
+	fi
+
+	echo "Stopping development server (PID $server_pid)..."
+	kill "$server_pid"
+	for ((attempt = 0; attempt < 30; attempt++)); do
+		if ! running_server; then
+			echo "Development server stopped."
+			return
+		fi
+		sleep 1
+	done
+	echo "Development server did not stop within 30 seconds. Check the server console." >&2
+	return 1
+}
 
 run_maven() {
 	if [ -f server-ee/pom.xml ]; then
@@ -292,6 +327,7 @@ usage() {
 	echo
 	echo "Commands:"
 	echo "  run      Build, start the dev server, and rebuild automatically when files change"
+	echo "  stop     Stop the running development server"
 	echo "  build    Build with Maven when needed, otherwise compile changed files with ECJ"
 	echo "  rebuild  Clean and build all modules while preserving the development sandbox"
 	echo "  test     Run tests with Maven"
@@ -304,7 +340,7 @@ usage() {
 
 is_command() {
 	case "$1" in
-		build|rebuild|clean|install|test|package|run) return 0 ;;
+		build|rebuild|clean|install|test|package|run|stop) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -350,6 +386,10 @@ while [ "$#" -gt 0 ]; do
 				rebuild_project "${command_arguments[@]}"
 			fi
 			;;
+		stop)
+			flush_maven_commands
+			stop_server
+			;;
 		run)
 			flush_maven_commands
 			run_requested=true
@@ -369,6 +409,10 @@ if [ "$run_requested" != true ]; then
 fi
 
 set -- "${run_arguments[@]}"
+if running_server; then
+	echo "Development server is already running (PID $server_pid). Use ./dev.sh stop first." >&2
+	exit 1
+fi
 watch_reference=$(mktemp "${TMPDIR:-/tmp}/onedev-watch.XXXXXX")
 touch "$watch_reference"
 trap 'rm -f "$watch_reference"' EXIT
@@ -392,10 +436,22 @@ watch_and_build "$watch_reference" &
 watcher_pid=$!
 cleanup_run() {
 	kill "$watcher_pid" 2>/dev/null || true
+	if [ -n "${java_pid:-}" ]; then
+		kill "$java_pid" 2>/dev/null || true
+		wait "$java_pid" 2>/dev/null || true
+		if [ "$(cat "$SERVER_PID_FILE" 2>/dev/null)" = "$java_pid" ]; then
+			rm -f "$SERVER_PID_FILE"
+		fi
+	fi
 	wait "$watcher_pid" 2>/dev/null || true
 	rm -f "$watch_reference"
 }
 trap cleanup_run EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
-java $MAVEN_OPTS $hotswap_options -cp "$classpath" \
-	io.onedev.commons.bootstrap.Bootstrap "$@"
+java $MAVEN_OPTS $hotswap_options "-Donedev.dev.root=$ROOT" -cp "$classpath" \
+	io.onedev.commons.bootstrap.Bootstrap "$@" <&0 &
+java_pid=$!
+echo "$java_pid" > "$SERVER_PID_FILE"
+wait "$java_pid"

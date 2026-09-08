@@ -487,7 +487,17 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 							@Override
 							protected Component newContent(String id, ModalPanel modal) {
-								return new BlobUploadPanel(id, ProjectBlobPage.this) {
+								return new BlobUploadPanel(id, getDirectory()) {
+
+									@Override
+									protected Project getProject() {
+										return ProjectBlobPage.this.getProject();
+									}
+
+									@Override
+									protected ObjectId uploadFiles(FileUpload upload, String directory, String commitMessage) {
+										return ProjectBlobPage.this.uploadFiles(upload, directory, commitMessage);
+									}
 
 									@Override
 									public void onCancel(AjaxRequestTarget target) {
@@ -1605,15 +1615,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	public ObjectId uploadFiles(FileUpload upload, String directory, String commitMessage) {
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
-		String parentPath = getDirectory();
-		
-		if (directory != null) { 
-			if (parentPath != null)
-				parentPath += "/" + directory;
-			else
-				parentPath = directory;
-		}
-		
+		String parentPath = directory;
+
 		User user = Preconditions.checkNotNull(SecurityUtils.getAuthUser());
 		BlobIdent blobIdent = getBlobIdent();
 		
@@ -1622,6 +1625,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			String blobPath = FilenameUtils.sanitizeFileName(FileUpload.getFileName(item));
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
+			blobPath = GitUtils.normalizePath(blobPath);
+			if (blobPath == null)
+				throw new BlobEditException("Invalid upload path");
 			var blobType = FileExtension.getExtension(blobPath);
 
 			var disallowedFileTypes = getProject().getBranchProtection(blobIdent.revision, user).getDisallowedFileTypes();

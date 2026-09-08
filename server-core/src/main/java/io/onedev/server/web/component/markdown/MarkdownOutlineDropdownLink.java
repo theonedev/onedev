@@ -14,11 +14,11 @@ public abstract class MarkdownOutlineDropdownLink extends DropdownLink {
 	}
 
 	@Nullable
-	protected abstract MarkdownBlobViewer getViewer();
+	protected abstract MarkdownViewer getViewer();
 
 	@Override
 	protected Component newContent(String id, FloatingPanel dropdown) {
-		return new MarkdownOutlinePanel(id, getViewer(), false).setTrigger(this);
+		return new MarkdownOutlinePanel(id, getViewer(), false);
 	}
 
 	@Override

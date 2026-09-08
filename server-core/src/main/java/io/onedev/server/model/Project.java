@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import io.onedev.server.model.support.WikiSetting;
+
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.model.Project.PROP_PATH;
@@ -210,6 +212,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public static final String PROP_CODE_MANAGEMENT = "codeManagement";
 
+	public static final String PROP_WIKI_MANAGEMENT = "wikiManagement";
+
 	public static final String PROP_PACK_MANAGEMENT = "packManagement";
 	
 	public static final String PROP_ISSUE_MANAGEMENT = "issueManagement";
@@ -397,6 +401,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private ArrayList<WorkspaceSpec> workspaceSpecs = new ArrayList<>();
 	
 	private boolean codeManagement = true;
+
+	private boolean wikiManagement = true;
 	
 	private boolean packManagement = true;
 	
@@ -411,6 +417,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Lob
 	@Column(length=65535)
 	private CodeAnalysisSetting codeAnalysisSetting = new CodeAnalysisSetting();
+
+	@Lob
+	@Column(length=65535)
+	private WikiSetting wikiSetting = new WikiSetting();
 	
 	@Lob
 	@Column(length=65535)
@@ -1052,6 +1062,16 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.codeManagement = codeManagement;
 	}
 
+	@Editable(order=275, description="Whether or not to enable wiki management for the project")
+	@DependsOn(property="codeManagement")
+	public boolean isWikiManagement() {
+		return wikiManagement;
+	}
+
+	public void setWikiManagement(boolean wikiManagement) {
+		this.wikiManagement = wikiManagement;
+	}
+
 	@Editable(order=300, description="Whether or not to enable issue management for the project")
 	public boolean isIssueManagement() {
 		return issueManagement;
@@ -1137,6 +1157,24 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setGitPackConfig(GitPackConfig gitPackConfig) {
 		this.gitPackConfig = gitPackConfig;
+	}
+
+	public WikiSetting getWikiSetting() {
+		if (wikiSetting == null)
+			wikiSetting = new WikiSetting();
+		return wikiSetting;
+	}
+
+	public void setWikiSetting(WikiSetting wikiSetting) {
+		this.wikiSetting = wikiSetting;
+	}
+
+	public String getWikiFolder() {
+		for (Project current = this; current != null; current = current.getParent()) {
+			if (current.getWikiSetting().getFolder() != null)
+				return current.getWikiSetting().getFolder();
+		}
+		return "wiki";
 	}
 
 	public CodeAnalysisSetting getCodeAnalysisSetting() {

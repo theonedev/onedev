@@ -3,6 +3,9 @@ package io.onedev.server.web.page.project.blob.render.commitoption;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
+
+import io.onedev.server.web.util.DefaultCommitMessage;
+import io.onedev.server.web.util.DefaultCommitMessage.Operation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -100,38 +103,22 @@ public class CommitOptionPanel extends Panel {
 	
 	public String getDefaultCommitMessage() {
 		String oldPath = getOldPath();
-		String oldName;
-		if (oldPath != null && oldPath.contains("/"))
-			oldName = StringUtils.substringAfterLast(oldPath, "/");
+		String newPath = newContentProvider != null ? context.getNewPath() : null;
+		Operation operation;
+		if (newContentProvider == null)
+			operation = Operation.DELETE;
+		else if (oldPath == null)
+			operation = Operation.ADD;
+		else if (oldPath.equals(newPath))
+			operation = Operation.EDIT;
 		else
-			oldName = oldPath;
-		
-		String commitMessage;
-		if (newContentProvider == null) { 
-			commitMessage = "Delete " + oldName;
-		} else {
-			String newPath = context.getNewPath();
-
-			String newName;
-			if (newPath != null && newPath.contains("/"))
-				newName = StringUtils.substringAfterLast(newPath, "/");
-			else
-				newName = newPath;
-			
-			if (oldPath == null) {
-				if (newName != null)
-					commitMessage = MessageFormat.format(_T("Add {0}"), newName);
-				else
-					commitMessage = _T("Add new file");
-			} else if (oldPath.equals(newPath)) {
-				commitMessage = MessageFormat.format(_T("Edit {0}"), oldName);
-			} else {
-				commitMessage = MessageFormat.format(_T("Rename {0}"), oldName);
-			}
-		}
-		if (context.getProject().getBranchProtection(context.getBlobIdent().revision, SecurityUtils.getUser()).getCommitMessageChecker() instanceof ConventionalCommitChecker)
-			commitMessage = "chore: " + commitMessage;
-		return commitMessage;
+			operation = Operation.RENAME;
+		String path = operation == Operation.ADD ? newPath : oldPath;
+		String name = path != null && path.contains("/") ? StringUtils.substringAfterLast(path, "/") : path;
+		boolean conventional = context.getProject()
+				.getBranchProtection(context.getBlobIdent().revision, SecurityUtils.getUser())
+				.getCommitMessageChecker() instanceof ConventionalCommitChecker;
+		return DefaultCommitMessage.generate(operation, name, _T("Add new file"), conventional);
 	}
 	
 	private GitService getGitService() {

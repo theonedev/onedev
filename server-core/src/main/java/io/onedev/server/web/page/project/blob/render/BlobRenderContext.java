@@ -102,6 +102,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onAddComment(AjaxRequestTarget target, PlanarRange range);
 		
+	/** Upload to the specified repository-root-relative directory, or the root if null. */
 	ObjectId uploadFiles(FileUpload upload, @Nullable String directory, String commitMessage);
 	
 	@Nullable

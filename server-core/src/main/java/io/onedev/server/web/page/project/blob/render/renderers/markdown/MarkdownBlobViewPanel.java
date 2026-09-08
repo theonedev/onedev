@@ -11,7 +11,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 
 import io.onedev.server.git.Blob;
-import io.onedev.server.web.component.markdown.MarkdownBlobViewer;
+import io.onedev.server.web.component.markdown.BlobMarkdownViewer;
 import io.onedev.server.web.component.markdown.MarkdownOutlinePanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
@@ -34,7 +34,7 @@ public class MarkdownBlobViewPanel extends BlobViewPanel {
 	@Override
 	protected void onInitialize() {
 		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
-		var markdown = new MarkdownBlobViewer("markdown", Model.of(blob.getText().getContent()), null) {
+		var markdown = new BlobMarkdownViewer("markdown", Model.of(blob.getText().getContent()), null) {
 
 			@Override
 			protected BlobRenderContext getRenderContext() {
@@ -48,7 +48,6 @@ public class MarkdownBlobViewPanel extends BlobViewPanel {
 
 		add(markdown);
 		add(outline);
-		outline.setTrigger(outlineToggle);
 
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		var widthCookie = request.getCookie(COOKIE_OUTLINE_WIDTH);

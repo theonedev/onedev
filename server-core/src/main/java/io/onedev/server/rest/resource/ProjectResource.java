@@ -1,5 +1,7 @@
 package io.onedev.server.rest.resource;
 
+import io.onedev.server.model.support.WikiSetting;
+
 import static io.onedev.server.util.DateUtils.parseISO8601Date;
 import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.time.ZoneId.systemDefault;
@@ -472,6 +474,9 @@ public class ProjectResource {
 
 		@Api(order = 600)
 		private boolean codeManagement = true;
+
+		@Api(order = 625)
+		private boolean wikiManagement;
 	
 		@Api(order = 650)
 		private boolean packManagement = true;
@@ -556,6 +561,14 @@ public class ProjectResource {
 			this.createDate = createDate;
 		}
 
+		public boolean isWikiManagement() {
+			return wikiManagement;
+		}
+
+		public void setWikiManagement(boolean wikiManagement) {
+			this.wikiManagement = wikiManagement;
+		}
+
 		public boolean isCodeManagement() {
 			return codeManagement;
 		}
@@ -627,6 +640,7 @@ public class ProjectResource {
 			project.setKey(getKey());
 			project.setDescription(getDescription());
 			project.setCodeManagement(isCodeManagement());
+			project.setWikiManagement(isWikiManagement());
 			project.setPackManagement(isPackManagement());
 			project.setIssueManagement(isIssueManagement());
 			project.setTimeTracking(isTimeTracking());
@@ -646,6 +660,7 @@ public class ProjectResource {
 			data.setDescription(project.getDescription());
 			data.setCreateDate(project.getCreateDate());
 			data.setCodeManagement(project.isCodeManagement());
+			data.setWikiManagement(project.isWikiManagement());
 			data.setPackManagement(project.isPackManagement());
 			data.setIssueManagement(project.isIssueManagement());
 			data.setTimeTracking(project.isTimeTracking());
@@ -667,6 +682,8 @@ public class ProjectResource {
 		private ArrayList<TagProtection> tagProtections = new ArrayList<>();
 		
 		private ProjectIssueSetting issueSetting = new ProjectIssueSetting();
+
+		private WikiSetting wikiSetting = new WikiSetting();
 		
 		private ProjectBuildSetting buildSetting = new ProjectBuildSetting();
 		
@@ -700,6 +717,16 @@ public class ProjectResource {
 
 		public void setTagProtections(ArrayList<TagProtection> tagProtections) {
 			this.tagProtections = tagProtections;
+		}
+
+		@Valid
+		@NotNull
+		public WikiSetting getWikiSetting() {
+			return wikiSetting;
+		}
+
+		public void setWikiSetting(WikiSetting wikiSetting) {
+			this.wikiSetting = wikiSetting;
 		}
 
 		@Valid
@@ -789,6 +816,7 @@ public class ProjectResource {
 			project.setBuildSetting(getBuildSetting());
 			project.setPackSetting(getPackSetting());
 			project.setIssueSetting(getIssueSetting());
+			project.setWikiSetting(getWikiSetting());
 			project.setNamedCodeCommentQueries(getNamedCodeCommentQueries());
 			project.setNamedCommitQueries(getNamedCommitQueries());
 			project.setPullRequestSetting(getPullRequestSetting());
@@ -807,6 +835,7 @@ public class ProjectResource {
 			setting.setBuildSetting(project.getBuildSetting());
 			setting.setPackSetting(project.getPackSetting());
 			setting.setIssueSetting(project.getIssueSetting());
+			setting.setWikiSetting(project.getWikiSetting());
 			setting.setNamedCodeCommentQueries(project.getNamedCodeCommentQueries());
 			setting.setNamedCommitQueries(project.getNamedCommitQueries());
 			setting.setPullRequestSetting(project.getPullRequestSetting());

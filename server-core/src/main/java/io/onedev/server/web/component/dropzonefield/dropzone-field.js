@@ -1,5 +1,5 @@
 onedev.server.dropzone = {
-	onDomReady: function(containerId, uploadUrl, deleteCallback, acceptedFiles, maxFiles, maxFilesize) {
+	onDomReady: function(containerId, uploadUrl, deleteCallback, acceptedFiles, maxFiles, maxFilesize, defaultMessage) {
 		var input = document.querySelector("#" + containerId + ">.dropzone");
 		
 		var dropzone = new Dropzone(input, {
@@ -8,7 +8,7 @@ onedev.server.dropzone = {
 			acceptedFiles: acceptedFiles,
 			maxFiles: maxFiles,
 			maxFilesize: maxFilesize, 
-			dictDefaultMessage: "Drop files here or click to upload",
+			dictDefaultMessage: defaultMessage,
 			success: function() {
 				onedev.server.form.markDirty($(input).closest("form"));
 			},

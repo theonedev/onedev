@@ -1,8 +1,20 @@
 import { expect, test as base } from '@playwright/test';
+import { admin, credentials, FixturesApi } from './api.js';
 
-export { expect };
+export { expect, admin };
 
 export const test = base.extend({
+  api: [async ({ playwright }, use, workerInfo) => {
+    const request = await playwright.request.newContext({
+      baseURL: workerInfo.project.use.baseURL, extraHTTPHeaders: credentials(admin),
+    });
+    const api = new FixturesApi(request);
+    try {
+      await use(api);
+    } finally {
+      await api.dispose();
+    }
+  }, { scope: 'worker' }],
   disableAutoFocus: [async ({ context }, use) => {
     await context.addInitScript(() => {
       const add = () => document.documentElement.classList.add('no-autofocus');

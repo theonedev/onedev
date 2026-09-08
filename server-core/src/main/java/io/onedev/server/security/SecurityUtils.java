@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
@@ -287,6 +288,38 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return canCreateBranch(getSubject(), project, branchName);
 	}
 	
+	/** The caller must normalize the file path before checking permission and reading it. */
+	public static boolean canReadFile(Project project, String file) {
+		return canReadFile(getSubject(), project, file);
+	}
+
+	/** The caller must normalize the file path before checking permission and reading it. */
+	public static boolean canReadFile(Subject subject, Project project, String file) {
+		return canReadCode(subject, project) || project.isWikiManagement()
+				&& file != null && file.startsWith(project.getWikiFolder() + "/")
+				&& canAccessProject(subject, project);
+	}
+
+	public static boolean canEditWikiPage(Project project, @Nullable String revision, String path) {
+		if (!project.isCodeManagement() || !project.isWikiManagement() || !canAccessProject(project))
+			return false;
+		String branchName;
+		if (revision == null) {
+			if (project.getDefaultBranch() != null || !canCreateBranch(project, "main"))
+				return false;
+			branchName = "main";
+		} else {
+			var branch = project.getRef(revision);
+			if (branch == null || !branch.getName().startsWith("refs/heads/"))
+				return false;
+			branchName = GitUtils.ref2branch(branch.getName());
+		}
+		var user = getAuthUser();
+		return user != null && canModifyFile(project, branchName, path)
+				&& project.getBranchProtection(branchName, user).getDisallowedFileTypes()
+						.stream().noneMatch(it -> it.equalsIgnoreCase("md"));
+	}
+
 	public static boolean canModifyFile(Project project, String branch, String file) {
 		var subject = getSubject();
 		var user = getUser(subject);

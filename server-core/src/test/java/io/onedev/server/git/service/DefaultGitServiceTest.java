@@ -47,7 +47,7 @@ import io.onedev.server.persistence.SessionService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
 
-public class DefaultGitServiceCommitTest extends AbstractGitTest {
+public class DefaultGitServiceTest extends AbstractGitTest {
 
 	private GitService gitService;
 	
@@ -76,6 +76,27 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		
 		gitService = new DefaultGitService(projectService, settingService, sessionService, 
 				clusterService, listenerRegistry);
+	}
+
+	@Test
+	public void testInitialWikiCommit() throws IOException {
+		var project = new Project();
+		String path = "docs/wiki/Home.md";
+		var edits = new BlobEdits(Set.of(), Map.of(path,
+				new BlobContent("# Home".getBytes(java.nio.charset.StandardCharsets.UTF_8), FileMode.REGULAR_FILE.getBits())));
+		assertNull(git.getRepository().resolve("refs/heads/main"));
+		ObjectId commitId = gitService.commit(project, edits, "refs/heads/main", ObjectId.zeroId(),
+				ObjectId.zeroId(), user, "Add wiki home page", false);
+		assertEquals(commitId, git.getRepository().resolve("refs/heads/main"));
+		assertEquals("main", gitService.getDefaultBranch(project));
+		assertEquals("# Home", gitService.getBlob(project, commitId, path).getText().getContent());
+		try (var walk = new RevWalk(git.getRepository())) {
+			assertEquals(0, walk.parseCommit(commitId).getParentCount());
+		}
+		var exception = org.junit.Assert.assertThrows(Exception.class, () -> gitService.commit(project, edits,
+				"refs/heads/main", ObjectId.zeroId(), ObjectId.zeroId(), user, "Stale initial wiki save", false));
+		assertNotNull(ExceptionUtils.find(exception, ObsoleteCommitException.class));
+		assertEquals(commitId, git.getRepository().resolve("refs/heads/main"));
 	}
 
 	@Test

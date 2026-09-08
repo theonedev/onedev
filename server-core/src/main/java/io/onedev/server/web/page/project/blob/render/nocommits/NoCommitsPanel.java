@@ -31,6 +31,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
 import io.onedev.server.web.page.project.blob.BlobUploadPanel;
+import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
@@ -95,7 +96,17 @@ public class NoCommitsPanel extends Panel {
 
 								@Override
 								protected Component newContent(String id, ModalPanel modal) {
-									return new BlobUploadPanel(id, context) {
+									return new BlobUploadPanel(id, null) {
+
+										@Override
+										protected Project getProject() {
+											return context.getProject();
+										}
+
+										@Override
+										protected ObjectId uploadFiles(FileUpload upload, String directory, String commitMessage) {
+											return context.uploadFiles(upload, directory, commitMessage);
+										}
 
 										@Override
 										public void onCancel(AjaxRequestTarget target) {

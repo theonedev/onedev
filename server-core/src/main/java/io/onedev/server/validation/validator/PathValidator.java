@@ -52,9 +52,11 @@ public class PathValidator implements ConstraintValidator<Path, Object> {
 	}
 	
 	public static String checkPath(Path.Type type, String value) {
-		if (value.contains(".."))
-			return "'..' is not allowed";
-		else if (FilenameUtils.getPrefixLength(value) == 0 && type == Path.Type.ABSOLUTE)
+		for (String segment : value.replace('\\', '/').split("/")) {
+			if (segment.equals(".."))
+				return "'..' is not allowed";
+		}
+		if (FilenameUtils.getPrefixLength(value) == 0 && type == Path.Type.ABSOLUTE)
 			return "Absolute path is required";
 		else if (FilenameUtils.getPrefixLength(value) != 0 && type == Path.Type.RELATIVE)
 			return "Relative path is required";

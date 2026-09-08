@@ -1,17 +1,17 @@
-import { expect, test } from './fixtures.js';
-import { createUser, login } from './helpers.js';
+import { expect, test, admin } from './fixtures.js';
+import { login } from './helpers.js';
 
-test('admin can filter users by type', async ({ page }) => {
+test('admin can filter users by type', async ({ page, api }) => {
   const suffix = Date.now();
   const prefix = `typefilter${suffix}`;
   const ordinaryName = `${prefix}-ordinary`;
   const serviceName = `${prefix}-service`;
   const aiName = `${prefix}-ai`;
 
-  await login(page, 'admin', 'admin');
-  await createUser(page, { userName: ordinaryName });
-  await createUser(page, { userName: serviceName, type: 'Service' });
-  await createUser(page, { userName: aiName, type: 'AI' });
+  await login(page, admin.name, admin.password);
+  await api.createUser({ userName: ordinaryName });
+  await api.createUser({ userName: serviceName, type: 'Service' });
+  await api.createUser({ userName: aiName, type: 'AI' });
 
   await page.goto('~administration/users');
   await page.getByPlaceholder('Filter by name or email address').fill(prefix);

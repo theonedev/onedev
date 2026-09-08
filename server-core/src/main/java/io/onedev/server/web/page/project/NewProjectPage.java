@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project;
 
 import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_WIKI_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_DESCRIPTION;
 import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_KEY;
@@ -57,7 +58,7 @@ public class NewProjectPage extends LayoutPage {
 		Project editProject = new Project();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_KEY, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, 
+				PROP_CODE_MANAGEMENT, PROP_WIKI_MANAGEMENT, PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT,
 				PROP_TIME_TRACKING);
 		
 		DefaultRolesBean defaultRolesBean = new DefaultRolesBean();

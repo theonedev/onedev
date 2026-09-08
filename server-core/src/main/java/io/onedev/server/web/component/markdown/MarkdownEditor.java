@@ -704,6 +704,16 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	}
 	
 	@Nullable
+	public BlobSelectionSupport getBlobSelectionSupport() {
+		return null;
+	}
+
+	@Nullable
+	public BlobUploadSupport getBlobUploadSupport() {
+		return null;
+	}
+
+	@Nullable
 	public BlobRenderContext getBlobRenderContext() {
 		return blobRenderContext;
 	}
