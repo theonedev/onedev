@@ -340,18 +340,25 @@ public class RepositoryResource {
 	}
 	
 	@Api(order=100, description="Get metadata and content of specified file")
-	@Path("/{projectId}/files/{revisionAndFile:.*}")
+	@Path("/{projectId}/files")
 	@GET
 	public FileResponse getFile(
 			@PathParam("projectId") Long projectId, 
-			@PathParam("revisionAndFile") @NotEmpty @Api(example="some-branch-or-tag/path/to/file") String revisionAndFile) {
+			@QueryParam("revision") @NotEmpty @Api(example="some-branch-or-tag") String revision,
+			@QueryParam("file") @NotEmpty @Api(example="path/to/file") String file) {
 		Project project = projectService.load(projectId);
-		if (!SecurityUtils.canReadCode(project)) {
+		file = GitUtils.normalizePath(file);
+		if (file == null)
+			throw new NotAcceptableException("File should be specified");
+		
+		if (!SecurityUtils.canReadFile(project, file)) {
 			throw new UnauthorizedException();
 		}
 
-		List<String> revisionAndPathSegments = Splitter.on('/').splitToList(revisionAndFile);
-		BlobIdent blobIdent = new BlobIdent(project, revisionAndPathSegments);
+		int mode = project.getMode(revision, file);
+		if (mode == 0)
+			throw new NotFoundException("Unable to find blob path '" + file + "' in revision '" + revision + "'");
+		BlobIdent blobIdent = new BlobIdent(revision, file, mode);
 
 		if (!blobIdent.isFile()) {
 			throw new NotAcceptableException("Specified path is not a file: " + blobIdent.path);

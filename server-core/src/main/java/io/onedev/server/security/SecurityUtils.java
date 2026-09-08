@@ -295,9 +295,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	/** The caller must normalize the file path before checking permission and reading it. */
 	public static boolean canReadFile(Subject subject, Project project, String file) {
-		return canReadCode(subject, project) || project.isWikiManagement()
-				&& file != null && file.startsWith(project.getWikiFolder() + "/")
-				&& canAccessProject(subject, project);
+		return canReadCode(subject, project) 
+				|| project.isWikiManagement() 
+					&& file.startsWith(project.getWikiFolder() + "/") 
+					&& canAccessProject(subject, project);
 	}
 
 	public static boolean canEditWikiPage(Project project, @Nullable String revision, String path) {

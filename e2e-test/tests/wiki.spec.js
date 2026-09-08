@@ -248,16 +248,16 @@ test('allows project members to view wiki but denies repository API and outside 
   await login(page, wikiProject.reader.name, wikiProject.reader.password);
   await page.goto(`${wikiProject.name}/~wiki/main/Home`);
   await expect(body(page)).toContainText('Home');
-  const wikiFile = await page.request.get(`~api/repositories/${wikiProject.id}/files/main/wiki/Home.md`);
-  // Repository API access requires code-read permission even for wiki files.
-  expect(wikiFile.status()).toBe(403);
+  const wikiFile = await page.request.get(`~api/repositories/${wikiProject.id}/files?revision=main&file=wiki/Home.md`);
+  expect(wikiFile.status()).toBe(200);
   await body(page).getByRole('link', { name: 'Private file', exact: true }).click();
   await expect(page.getByText('You are not allowed to perform this operation', { exact: true })).toBeVisible();
   await expect(page.locator('body')).not.toContainText('E2E_PRIVATE_CODE_CONTENT');
   for (const url of [
     `${wikiProject.name}/~files/main/wiki/Home.md?query=password`,
-    `${wikiProject.name}/~raw/main/private.txt`,
-    `~api/repositories/${wikiProject.id}/files/main/private.txt`,
+    `${wikiProject.name}/~raw?revision=main&file=private.txt`,
+    `${wikiProject.name}/~raw?revision=main&file=wiki/../private.txt`,
+    `~api/repositories/${wikiProject.id}/files?revision=main&file=private.txt`,
   ]) {
     const response = await page.request.get(url);
     expect(response.status(), url).toBe(403);

@@ -7,8 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.core.HttpHeaders;
@@ -26,8 +24,6 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Splitter;
-
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
@@ -42,7 +38,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.LongRange;
-import io.onedev.server.util.RevisionAndPath;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.util.MimeUtils;
 import io.onedev.server.web.util.WicketUtils;
@@ -52,6 +47,8 @@ public class RawBlobResource extends AbstractResource {
 	private static final long serialVersionUID = 1L;
 	
 	private static final String PARAM_DISPOSITION = "disposition";
+	private static final String PARAM_REVISION = "revision";
+	private static final String PARAM_FILE = "file";
 	
 	private static final Logger logger = LoggerFactory.getLogger(RawBlobResource.class);
 
@@ -64,17 +61,8 @@ public class RawBlobResource extends AbstractResource {
 		if (project == null)
 			throw new EntityNotFoundException("Project not found: " + projectPath);
 		
-		List<String> revisionAndPathSegments = new ArrayList<>();
-		for (int i = 0; i < params.getIndexedCount(); i++) {
-			String segment = params.get(i).toString();
-			if (segment.length() != 0)
-				revisionAndPathSegments.add(segment);
-		}
-
-		RevisionAndPath revisionAndPath = RevisionAndPath.parse(project, revisionAndPathSegments);
-
-		String revision = revisionAndPath.getRevision();
-		String path = GitUtils.normalizePath(revisionAndPath.getPath());
+		String revision = params.get(PARAM_REVISION).toOptionalString();
+		String path = GitUtils.normalizePath(params.get(PARAM_FILE).toOptionalString());
 		if (StringUtils.isBlank(revision) || StringUtils.isBlank(path))
 			throw new NotAcceptableException("Revision and path should be specified");
 
@@ -199,15 +187,8 @@ public class RawBlobResource extends AbstractResource {
 		if (disposition != null)
 			params.add(PARAM_DISPOSITION, disposition.name());
 		
-		int index = 0;
-		for (String segment: Splitter.on("/").split(blobIdent.revision)) {
-			params.set(index, segment);
-			index++;
-		}
-		for (String segment: Splitter.on("/").split(blobIdent.path)) {
-			params.set(index, segment);
-			index++;
-		}
+		params.set(PARAM_REVISION, blobIdent.revision);
+		params.set(PARAM_FILE, blobIdent.path);
 
 		return params;
 	}

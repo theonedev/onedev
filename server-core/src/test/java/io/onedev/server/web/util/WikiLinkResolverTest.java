@@ -86,7 +86,11 @@ public class WikiLinkResolverTest {
 		when(cycle.urlFor(eq(ProjectBlobPage.class), any(PageParameters.class)))
 				.thenAnswer(it -> url("~files", it.getArgument(1)));
 		when(cycle.urlFor(any(RawBlobResourceReference.class), any(PageParameters.class)))
-				.thenAnswer(it -> url("~raw", it.getArgument(1)));
+				.thenAnswer(it -> {
+					PageParameters params = it.getArgument(1);
+					assertEquals(0, params.getIndexedCount());
+					return "/project/~raw?revision=" + params.get("revision") + "&file=" + params.get("file");
+				});
 		try (var requestCycle = mockStatic(RequestCycle.class);
 				var sprite = mockStatic(SpriteImage.class); var security = mockStatic(SecurityUtils.class)) {
 			requestCycle.when(RequestCycle::get).thenReturn(cycle);
@@ -100,8 +104,8 @@ public class WikiLinkResolverTest {
 			assertEquals("Read this", document.selectFirst("p a").text());
 			assertEquals(1, document.select("a[href=/project/~files/main/README.md]").size());
 			assertEquals(1, document.select("a[href=/project/~wiki/main/guide/Sibling#intro]").size());
-			assertEquals(1, document.select("a[href=/project/~raw/main/wiki/manual.pdf]").size());
-			assertEquals("/project/~raw/main/wiki/logo.png", document.select("img").get(0).attr("src"));
+			assertEquals(1, document.select("a[href='/project/~raw?revision=main&file=wiki/manual.pdf']").size());
+			assertEquals("/project/~raw?revision=main&file=wiki/logo.png", document.select("img").get(0).attr("src"));
 			assertEquals("/project/~files/main/logo.png?raw=true&v=2#preview", document.select("img").get(1).attr("src"));
 			assertEquals(1, document.select("a[href=/project/~files/main/manual.pdf#page=3]").size());
 			assertEquals(3, document.select("span.missing").size());

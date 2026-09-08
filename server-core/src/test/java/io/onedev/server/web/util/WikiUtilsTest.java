@@ -150,7 +150,6 @@ public class WikiUtilsTest {
 		assertTrue(SecurityUtils.canReadFile(subject, project, "docs/wiki/image.png"));
 		assertFalse(SecurityUtils.canReadFile(subject, project, "private.txt"));
 		assertFalse(SecurityUtils.canReadFile(subject, project, "docs/wiki-other/Home.md"));
-		assertFalse(SecurityUtils.canReadFile(subject, project, null));
 		when(project.isWikiManagement()).thenReturn(false);
 		assertFalse(SecurityUtils.canReadFile(subject, project, "docs/wiki/Home.md"));
 		when(project.isWikiManagement()).thenReturn(true);

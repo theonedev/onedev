@@ -262,7 +262,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		
 		if (params.get(PARAM_RAW).toBoolean(false)) {
 			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
-					new ResourceReferenceRequestHandler(new RawBlobResourceReference(), getPageParameters()));
+					new ResourceReferenceRequestHandler(new RawBlobResourceReference(),
+							RawBlobResource.paramsOf(getProject(), getBlobIdent())));
 		}
 	}
 	
