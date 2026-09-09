@@ -1,0 +1,3 @@
+# gradle:has-permission-notice
+onedevUsername=onedev_account_name
+onedevPassword=onedev_password_or_access_token

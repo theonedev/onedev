@@ -3,21 +3,57 @@
 	<wicket:fragment wicket:id="artifactFrag">
 		<div wicket:id="description" class="alert alert-notice alert-light mb-5"></div>
 		<div wicket:id="usage" class="mb-4"></div>
-		<table wicket:id="files" class="table"></table>			
+		<table wicket:id="files" class="table"></table>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="usageFrag">
-		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>To use this package, add below to project pom.xml</wicket:t></div>
+		<wicket:enclosure child="buildToolTabs">
+			<ul wicket:id="buildToolTabs" class="nav nav-tabs nav-tabs-line nav-bold mb-4"></ul>
+		</wicket:enclosure>
+		<div wicket:id="buildToolInstructions"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="mavenInstructionsFrag">
+		<div class="font-size-lg font-weight-bolder mb-3">
+			<wicket:t>To use this package, add below to project pom.xml</wicket:t>
+		</div>
 		<div wicket:id="pom" class="mb-5"></div>
 		<wicket:enclosure child="settings">
-		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Also add below to $HOME/.m2/settings.xml if you want to compile project from command line</wicket:t></div>
-		<div wicket:id="settings" class="mb-5"></div>
+			<div class="font-size-lg font-weight-bolder mb-3">
+				<wicket:t>Also add below to $HOME/.m2/settings.xml if you want to compile project from command line</wicket:t>
+			</div>
+			<div wicket:id="settings" class="mb-5"></div>
 		</wicket:enclosure>
 		<wicket:enclosure child="jobCommands">
-		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:</wicket:t>	</div>
-		<div wicket:id="jobCommands"></div>
+			<div class="font-size-lg font-weight-bolder mb-3">
+				<wicket:t>For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:</wicket:t>
+			</div>
+			<div wicket:id="jobCommands"></div>
+		</wicket:enclosure>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="gradleInstructionsFrag">
+		<div class="font-size-lg font-weight-bolder mb-3">
+			<wicket:t>Add below to build.gradle (Groovy)</wicket:t>
+		</div>
+		<div wicket:id="gradleGroovy" class="mb-5"></div>
+		<div class="font-size-lg font-weight-bolder mb-3">
+			<wicket:t>Or below to build.gradle.kts (Kotlin)</wicket:t>
+		</div>
+		<div wicket:id="gradleKotlin" class="mb-5"></div>
+		<wicket:enclosure child="gradleProperties">
+			<div class="font-size-lg font-weight-bolder mb-3">
+				<wicket:t>Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line</wicket:t>
+			</div>
+			<div wicket:id="gradleProperties" class="mb-5"></div>
+		</wicket:enclosure>
+		<wicket:enclosure child="gradleJobCommands">
+			<div class="font-size-lg font-weight-bolder mb-3">
+				<wicket:t>For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:</wicket:t>
+			</div>
+			<div wicket:id="gradleJobCommands"></div>
 		</wicket:enclosure>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="fileFrag">
-		<a wicket:id="link"><span wicket:id="label"></span></a>
+		<a wicket:id="link">
+			<span wicket:id="label"></span>
+		</a>
 	</wicket:fragment>
 </wicket:panel>

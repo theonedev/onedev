@@ -1,10 +1,22 @@
 <wicket:panel>
-	<div>
+	<ul wicket:id="buildToolTabs" class="nav nav-tabs nav-tabs-line nav-bold mb-4"></ul>
+	<div wicket:id="buildToolInstructions"></div>
+	<wicket:fragment wicket:id="mavenInstructionsFrag">
 		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>1. Use below repositories in project pom.xml</wicket:t></div>
 		<div wicket:id="pom" class="mb-5"></div>
 		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line</wicket:t></div>
 		<div wicket:id="settings" class="mb-5"></div>
 		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:</wicket:t></div>
 		<div wicket:id="jobCommands"></div>
-	</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="gradleInstructionsFrag">
+		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>1. Add below to build.gradle (Groovy)</wicket:t></div>
+		<div wicket:id="gradleGroovy" class="mb-5"></div>
+		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Or below to build.gradle.kts (Kotlin)</wicket:t></div>
+		<div wicket:id="gradleKotlin" class="mb-5"></div>
+		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line</wicket:t></div>
+		<div wicket:id="gradleProperties" class="mb-5"></div>
+		<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:</wicket:t></div>
+		<div wicket:id="gradleJobCommands"></div>
+	</wicket:fragment>
 </wicket:panel>

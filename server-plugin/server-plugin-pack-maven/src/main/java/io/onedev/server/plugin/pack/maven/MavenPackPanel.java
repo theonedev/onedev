@@ -19,11 +19,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
+import io.onedev.server.web.component.tabbable.AjaxActionTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
 import org.apache.commons.io.FileUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
@@ -119,9 +125,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 			}
 
 			if (pomElement != null) {
-				var packaging = pomElement.elementText("packaging");
-				if (packaging == null)
-					packaging = "jar";
+				var packaging = Objects.requireNonNullElse(pomElement.elementText("packaging"), "jar");
 				var description = "<b>Packaging: " + HtmlEscape.escapeHtml5(packaging) + "</b>";				
 				var descriptionElement = pomElement.element("description");
 				if (descriptionElement != null)
@@ -129,6 +133,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 				artifactFrag.add(new Label("description", description).setEscapeModelStrings(false));
 				
 				var bindings = new HashMap<String, Object>();
+				bindings.put("scope", "implementation");
 				bindings.put("groupId", substringBefore(getPack().getName(), ":"));
 				bindings.put("artifactId", substringAfter(getPack().getName(), ":"));
 				bindings.put("version", getPack().getVersion());
@@ -143,23 +148,32 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 
 				if (packaging.equals("jar") || packaging.equals("maven-plugin") || packaging.equals("pom")) {
 					var usageFrag = new Fragment("usage", "usageFrag", this);
-					
-					URL tplUrl;
-					if (packaging.equals("jar"))
-						tplUrl = Resources.getResource(MavenPackPanel.class, "dependency.tpl");
-					else if (packaging.equals("pom"))
-						tplUrl = Resources.getResource(MavenPackPanel.class, "parent.tpl");
-					else
-						tplUrl = Resources.getResource(MavenPackPanel.class, "plugin.tpl");
 
-					try {
-						var template = Resources.toString(tplUrl, UTF_8);
-						usageFrag.add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings).trim())));
-						usageFrag.add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings).trim())).setVisible(requireSettings));
-						usageFrag.add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings).trim())).setVisible(requireSettings));
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+					if (packaging.equals("jar")) {
+						List<Tab> buildToolTabs = new ArrayList<>();
+						buildToolTabs.add(new AjaxActionTab(Model.of(_T("Maven"))) {
+							@Override
+							protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+								Component content = newMavenInstructions(packaging, bindings, requireSettings);
+								target.add(content);
+								usageFrag.replace(content);
+							}
+						}.setSelected(true));
+						buildToolTabs.add(new AjaxActionTab(Model.of(_T("Gradle"))) {
+							@Override
+							protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+								Component content = newGradleInstructions(bindings, canAccessAnonymously);
+								target.add(content);
+								usageFrag.replace(content);
+							}
+						});
+						usageFrag.add(new Tabbable("buildToolTabs", buildToolTabs));
+						usageFrag.add(newMavenInstructions(packaging, bindings, requireSettings));
+					} else {
+						usageFrag.add(new WebMarkupContainer("buildToolTabs").setVisible(false));
+						usageFrag.add(newMavenInstructions(packaging, bindings, requireSettings));
 					}
+
 					artifactFrag.add(usageFrag);
 				} else {
 					artifactFrag.add(new WebMarkupContainer("usage").setVisible(false));
@@ -251,6 +265,45 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 			
 			add(artifactFrag);
 		}
+	}
+
+	private Component newMavenInstructions(String packaging, Map<String, Object> bindings,
+										   boolean requireSettings) {
+		var fragment = new Fragment("buildToolInstructions", "mavenInstructionsFrag", this);
+		URL tplUrl;
+		if (packaging.equals("jar"))
+			tplUrl = Resources.getResource(MavenPackPanel.class, "dependency.tpl");
+		else if (packaging.equals("pom"))
+			tplUrl = Resources.getResource(MavenPackPanel.class, "parent.tpl");
+		else
+			tplUrl = Resources.getResource(MavenPackPanel.class, "plugin.tpl");
+		try {
+			var template = Resources.toString(tplUrl, UTF_8);
+			fragment.add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings).trim())));
+			fragment.add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings).trim())).setVisible(requireSettings));
+			fragment.add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings).trim())).setVisible(requireSettings));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		fragment.setOutputMarkupId(true);
+		return fragment;
+	}
+
+	private Component newGradleInstructions(Map<String, Object> bindings, boolean canAccessAnonymously) {
+		var fragment = new Fragment("buildToolInstructions", "gradleInstructionsFrag", this);
+		var requireGradleCredentials = !canAccessAnonymously;
+		try {
+			var groovyTpl = MavenPackSupport.getGradleDependencyTemplate("gradle-groovy.tpl");
+			var kotlinTpl = MavenPackSupport.getGradleDependencyTemplate("gradle-kotlin.tpl");
+			fragment.add(new CodeSnippetPanel("gradleGroovy", Model.of(evalTemplate(groovyTpl, bindings).trim())));
+			fragment.add(new CodeSnippetPanel("gradleKotlin", Model.of(evalTemplate(kotlinTpl, bindings).trim())));
+			fragment.add(new CodeSnippetPanel("gradleProperties", Model.of(evalTemplate(MavenPackSupport.getGradlePropertiesTemplate(), bindings).trim())).setVisible(requireGradleCredentials));
+			fragment.add(new CodeSnippetPanel("gradleJobCommands", Model.of(evalTemplate(MavenPackSupport.getGradleJobCommandsTemplate(), bindings).trim())).setVisible(requireGradleCredentials));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		fragment.setOutputMarkupId(true);
+		return fragment;
 	}
 	
 	private Pack getPack() {
