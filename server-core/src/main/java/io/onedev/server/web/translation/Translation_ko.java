@@ -201,7 +201,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Add GPG keys here to verify commits/tags signed by you", "본인이 서명한 커밋/태그를 확인하려면 여기에 GPG 키를 추가하세요");
 		m.put("Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified.", 
 			"신뢰할 수 있는 GPG 공개 키를 여기에 추가하세요. 신뢰할 수 있는 키로 서명된 커밋은 확인된 것으로 표시됩니다.");
-		m.put("Add Home page", "홈 페이지 추가");
 		m.put("Add Issue...", "문제 추가...");
 		m.put("Add Issues to Iteration", "반복에 문제 추가");
 		m.put("Add New", "새로 추가");
@@ -235,6 +234,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Add files to current directory", "현재 디렉토리에 파일 추가");
 		m.put("Add files via upload", "업로드를 통해 파일 추가");
 		m.put("Add groovy script", "Groovy 스크립트 추가");
+		m.put("Add home page", "홈 페이지 추가");
 		m.put("Add issue description template", "이슈 설명 템플릿 추가");
 		m.put("Add issue link", "이슈 링크 추가");
 		m.put("Add issue state", "이슈 상태 추가");
@@ -1762,6 +1762,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("History", "기록");
 		m.put("History of comparing revisions is unrelated", "리비전 비교 기록이 관련이 없습니다");
 		m.put("History of target branch and source branch is unrelated", "대상 브랜치와 소스 브랜치의 기록이 관련이 없습니다");
+		m.put("Home page not found", "홈 페이지를 찾을 수 없습니다");
 		m.put("Host name or ip address of remote machine to run commands via SSH", "SSH를 통해 명령을 실행할 원격 머신의 호스트 이름 또는 IP 주소");
 		m.put("Hours Per Day", "하루당 시간");
 		m.put("How to Publish", "게시 방법");
@@ -3395,8 +3396,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"보고서 형식이 변경되었습니다. 새 형식으로 보고서를 생성하려면 이 빌드를 다시 실행하십시오");
 		m.put("Repository Sync", "저장소 동기화");
-		m.put("Repository folder containing Markdown wiki pages. Leave empty to inherit from parent (defaults to wiki). Use Home.md for the home page and _Sidebar.md for the sidebar", 
-			"Markdown 위키 페이지를 포함하는 저장소 폴더입니다. 상위 폴더에서 상속하려면 비워 두세요 (기본값은 wiki). 홈 페이지는 Home.md를 사용하고 사이드바는 _Sidebar.md를 사용하세요.");
 		m.put("Reprovision workspace", "작업 공간 재프로비저닝");
 		m.put("Request Body", "요청 본문");
 		m.put("Request For Changes", "변경 요청");
@@ -4914,7 +4913,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"내부 비밀번호 로그인 양식을 비활성화하고 SSO 로그인만 사용할지 여부.\n<b class=\"text-info\">팁:</b> 잠금 해제된 경우, 명령줄에서 <code>bin/enable-internal-login</code>을 실행하여 내부 로그인을 다시 활성화할 수 있습니다");
 		m.put("Whether or not to enable code management for the project", "프로젝트에 대한 코드 관리를 활성화할지 여부");
 		m.put("Whether or not to enable issue management for the project", "프로젝트에 대한 문제 관리를 활성화할지 여부");
-		m.put("Whether or not to enable wiki management for the project", "프로젝트에 대해 위키 관리를 활성화할지 여부");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"풀 리퀘스트가 다른 프로젝트에서 열렸을 경우 LFS 객체를 가져올지 여부");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -5243,7 +5241,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("week:Tue", "화");
 		m.put("week:Wed", "수");
 		m.put("widget:Tabs", "탭");
-		m.put("wiki", "위키");
 		m.put("workspaces", "워크스페이스들");
 		m.put("you may show this page later via incompatibilities link in help menu", "도움말 메뉴의 호환성 링크를 통해 나중에 이 페이지를 표시할 수 있습니다");
 		m.put("{0} Lines", "{0} 줄");
@@ -5282,8 +5279,21 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Add home page", "홈 페이지 추가");
-		m.put("Home page not found", "홈 페이지를 찾을 수 없습니다");
+		m.put("Cannot display wiki pages hosted on other servers.", "다른 서버에 호스팅된 위키 페이지를 표시할 수 없습니다.");
+		m.put("No permission to access wiki project.", "위키 프로젝트에 접근할 권한이 없습니다.");
+		m.put("Open target wiki home page", "대상 위키 홈 페이지 열기");
+		m.put("Repository Root", "저장소 루트");
+		m.put("Specified Path", "지정된 경로");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
+			"위키 페이지를 저장할 저장소 폴더를 지정하세요. 상위에서 상속받으려면 비워 두세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다.");
+		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "이 위키는 서브모듈로 연결되어 있습니다. 대상 프로젝트의 위키를 방문하려면 클릭하세요.");
+		m.put("Use folder 'wiki'", "'wiki' 폴더 사용");
+		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
+			"프로젝트에 대한 위키 관리를 활성화할지 여부. 위키 페이지는\n프로젝트에 접근할 수 있는 모든 사용자에게 접근 가능합니다.");
+		m.put("Wiki project not found.", "위키 프로젝트를 찾을 수 없습니다.");
+		m.put("Wiki revision not found.", "위키 리비전을 찾을 수 없습니다.");
+		m.put("Wiki submodule URL is not configured.", "위키 서브모듈 URL이 구성되지 않았습니다.");
+		m.put("in", "에서");
 	}
 		
 	@Override

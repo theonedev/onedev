@@ -201,7 +201,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Add GPG keys here to verify commits/tags signed by you", "Fügen Sie hier GPG-Schlüssel hinzu, um Commits/Tags zu verifizieren, die von Ihnen signiert wurden");
 		m.put("Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified.", 
 			"Fügen Sie hier GPG-öffentliche Schlüssel hinzu, die vertrauenswürdig sind. Commits, die mit vertrauenswürdigen Schlüsseln signiert sind, werden als verifiziert angezeigt.");
-		m.put("Add Home page", "Startseite hinzufügen");
 		m.put("Add Issue...", "Problem hinzufügen...");
 		m.put("Add Issues to Iteration", "Probleme zur Iteration hinzufügen");
 		m.put("Add New", "Neu hinzufügen");
@@ -235,6 +234,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Add files to current directory", "Dateien zum aktuellen Verzeichnis hinzufügen");
 		m.put("Add files via upload", "Dateien per Upload hinzufügen");
 		m.put("Add groovy script", "Groovy-Skript hinzufügen");
+		m.put("Add home page", "Startseite hinzufügen");
 		m.put("Add issue description template", "Vorlage für Issue-Beschreibung hinzufügen");
 		m.put("Add issue link", "Issue-Link hinzufügen");
 		m.put("Add issue state", "Issue-Status hinzufügen");
@@ -1762,6 +1762,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("History", "Verlauf");
 		m.put("History of comparing revisions is unrelated", "Verlauf des Vergleichs von Revisionen ist nicht zusammenhängend");
 		m.put("History of target branch and source branch is unrelated", "Verlauf des Ziel- und Quellzweigs ist nicht zusammenhängend");
+		m.put("Home page not found", "Startseite nicht gefunden");
 		m.put("Host name or ip address of remote machine to run commands via SSH", "Hostname oder IP-Adresse der entfernten Maschine, um Befehle über SSH auszuführen");
 		m.put("Hours Per Day", "Stunden pro Tag");
 		m.put("How to Publish", "Wie veröffentlichen");
@@ -3395,8 +3396,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"Berichtsformat geändert. Sie können diesen Build erneut ausführen, um den Bericht im neuen Format zu erstellen");
 		m.put("Repository Sync", "Repository-Synchronisation");
-		m.put("Repository folder containing Markdown wiki pages. Leave empty to inherit from parent (defaults to wiki). Use Home.md for the home page and _Sidebar.md for the sidebar", 
-			"Repository-Ordner mit Markdown-Wiki-Seiten. Leer lassen, um vom übergeordneten Element zu erben (Standard ist wiki). Verwenden Sie Home.md für die Startseite und _Sidebar.md für die Seitenleiste");
 		m.put("Reprovision workspace", "Arbeitsbereich neu bereitstellen");
 		m.put("Request Body", "Anfrageinhalt");
 		m.put("Request For Changes", "Änderungen anfordern");
@@ -4914,7 +4913,6 @@ public class Translation_de extends TranslationResourceBundle {
 			"Ob das interne Passwort-Login-Formular deaktiviert und nur SSO-Login verwendet werden soll.\n<b class=\"text-info\">TIPPS:</b> Falls Sie ausgesperrt sind, kann das interne Login über die Befehls\nzeile durch Ausführen von <code>bin/enable-internal-login</code> wieder aktiviert werden.");
 		m.put("Whether or not to enable code management for the project", "Ob die Codeverwaltung für das Projekt aktiviert werden soll oder nicht");
 		m.put("Whether or not to enable issue management for the project", "Ob die Problemverwaltung für das Projekt aktiviert werden soll oder nicht");
-		m.put("Whether or not to enable wiki management for the project", "Ob die Wiki-Verwaltung für das Projekt aktiviert werden soll oder nicht");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"Ob LFS-Objekte abgerufen werden sollen, wenn der Pull-Request von einem anderen Projekt geöffnet wird");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -5243,7 +5241,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("week:Tue", "Di");
 		m.put("week:Wed", "Mi");
 		m.put("widget:Tabs", "Tabs");
-		m.put("wiki", "Wiki");
 		m.put("workspaces", "Arbeitsbereiche");
 		m.put("you may show this page later via incompatibilities link in help menu", "Sie können diese Seite später über den Link \"Inkompatibilitäten\" im Hilfemenü anzeigen.");
 		m.put("{0} Lines", "{0} Zeilen");
@@ -5282,8 +5279,21 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Add home page", "Startseite hinzufügen");
-		m.put("Home page not found", "Startseite nicht gefunden");
+		m.put("Cannot display wiki pages hosted on other servers.", "Wiki-Seiten, die auf anderen Servern gehostet werden, können nicht angezeigt werden.");
+		m.put("No permission to access wiki project.", "Keine Berechtigung, auf das Wiki-Projekt zuzugreifen.");
+		m.put("Open target wiki home page", "Startseite des Ziel-Wikis öffnen");
+		m.put("Repository Root", "Repository-Wurzel");
+		m.put("Specified Path", "Angegebener Pfad");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
+			"Geben Sie den Repository-Ordner an, um Wiki-Seiten zu speichern. Lassen Sie das Feld leer, um vom übergeordneten Element zu erben.\nWenn Sie keine Wiki-Seiten im Projekt-Repository speichern möchten, kann der angegebene Ordner\nein Git-Submodul sein.");
+		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "Dieses Wiki ist als Submodul verknüpft. Klicken Sie, um das Wiki im Zielprojekt zu besuchen.");
+		m.put("Use folder 'wiki'", "Ordner 'wiki' verwenden");
+		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
+			"Ob die Wiki-Verwaltung für das Projekt aktiviert werden soll oder nicht. Wiki-Seiten\nsind für alle Benutzer mit Zugriff auf das Projekt zugänglich.");
+		m.put("Wiki project not found.", "Wiki-Projekt nicht gefunden.");
+		m.put("Wiki revision not found.", "Wiki-Revision nicht gefunden.");
+		m.put("Wiki submodule URL is not configured.", "Wiki-Submodul-URL ist nicht konfiguriert.");
+		m.put("in", "in");
 	}
 			
 	@Override

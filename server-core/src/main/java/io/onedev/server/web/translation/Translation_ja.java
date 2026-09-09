@@ -201,7 +201,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add GPG keys here to verify commits/tags signed by you", "あなたが署名したコミット/タグを確認するために、ここにGPGキーを追加してください");
 		m.put("Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified.", 
 			"信頼されるGPG公開鍵をここに追加してください。信頼された鍵で署名されたコミットは確認済みとして表示されます。");
-		m.put("Add Home page", "ホームページを追加");
 		m.put("Add Issue...", "問題を追加...");
 		m.put("Add Issues to Iteration", "イテレーションに問題を追加");
 		m.put("Add New", "新規追加");
@@ -235,6 +234,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add files to current directory", "現在のディレクトリにファイルを追加");
 		m.put("Add files via upload", "アップロードでファイルを追加");
 		m.put("Add groovy script", "Groovyスクリプトを追加");
+		m.put("Add home page", "ホームページを追加");
 		m.put("Add issue description template", "課題説明テンプレートを追加");
 		m.put("Add issue link", "課題リンクを追加");
 		m.put("Add issue state", "課題状態を追加");
@@ -1762,6 +1762,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("History", "履歴");
 		m.put("History of comparing revisions is unrelated", "リビジョン比較の履歴は無関係です");
 		m.put("History of target branch and source branch is unrelated", "ターゲットブランチとソースブランチの履歴は無関係です");
+		m.put("Home page not found", "ホームページが見つかりません");
 		m.put("Host name or ip address of remote machine to run commands via SSH", "SSHでコマンドを実行するリモートマシンのホスト名またはIPアドレス");
 		m.put("Hours Per Day", "1日あたりの時間");
 		m.put("How to Publish", "公開方法");
@@ -3395,8 +3396,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"レポート形式が変更されました。このビルドを再実行して新しい形式でレポートを生成できます");
 		m.put("Repository Sync", "リポジトリ同期");
-		m.put("Repository folder containing Markdown wiki pages. Leave empty to inherit from parent (defaults to wiki). Use Home.md for the home page and _Sidebar.md for the sidebar", 
-			"Markdown ウィキページを含むリポジトリフォルダ。親から継承する場合は空のままにします（デフォルトは wiki）。ホームページには Home.md を、サイドバーには _Sidebar.md を使用します");
 		m.put("Reprovision workspace", "ワークスペースを再プロビジョン");
 		m.put("Request Body", "リクエストボディ");
 		m.put("Request For Changes", "変更のリクエスト");
@@ -4914,7 +4913,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"内部パスワードログインフォームを無効化し、SSOログインのみを使用するかどうか。\n<b class=\"text-info\">TIPS:</b> ロックアウトされた場合、コマンドラインで<code>bin/enable-internal-login</code>を実行することで内部ログインを再有効化できます。");
 		m.put("Whether or not to enable code management for the project", "プロジェクトのコード管理を有効にするかどうか");
 		m.put("Whether or not to enable issue management for the project", "プロジェクトの課題管理を有効にするかどうか");
-		m.put("Whether or not to enable wiki management for the project", "プロジェクトのウィキ管理を有効にするかどうか");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"プルリクエストが異なるプロジェクトから開かれた場合にLFSオブジェクトを取得するかどうか");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -5243,7 +5241,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("week:Tue", "火");
 		m.put("week:Wed", "水");
 		m.put("widget:Tabs", "タブ");
-		m.put("wiki", "ウィキ");
 		m.put("workspaces", "ワークスペース");
 		m.put("you may show this page later via incompatibilities link in help menu", "ヘルプメニューの互換性リンクから後でこのページを表示できます");
 		m.put("{0} Lines", "{0} 行");
@@ -5282,8 +5279,21 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Add home page", "ホームページを追加");
-		m.put("Home page not found", "ホームページが見つかりません");
+		m.put("Cannot display wiki pages hosted on other servers.", "他のサーバーにホストされているWikiページを表示できません。");
+		m.put("No permission to access wiki project.", "Wikiプロジェクトへのアクセス権がありません。");
+		m.put("Open target wiki home page", "対象のWikiホームページを開く");
+		m.put("Repository Root", "リポジトリルート");
+		m.put("Specified Path", "指定されたパス");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
+			"Wikiページを保存するリポジトリフォルダを指定してください。親から継承する場合は空のままにします。\nプロジェクトリポジトリにWikiページを保存しない場合、指定されたフォルダ\nはGitサブモジュールである可能性があります。");
+		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "このWikiはサブモジュールとしてリンクされています。対象プロジェクトのWikiを訪問するにはクリックしてください。");
+		m.put("Use folder 'wiki'", "フォルダ 'wiki' を使用");
+		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
+			"プロジェクトのWiki管理を有効にするかどうか。Wikiページは\nプロジェクトにアクセスできるすべてのユーザーが利用可能です。");
+		m.put("Wiki project not found.", "Wikiプロジェクトが見つかりません。");
+		m.put("Wiki revision not found.", "Wikiリビジョンが見つかりません。");
+		m.put("Wiki submodule URL is not configured.", "WikiサブモジュールURLが設定されていません。");
+		m.put("in", "内");
 	}
 		
 	@Override

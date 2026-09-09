@@ -227,7 +227,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Add GPG keys here to verify commits/tags signed by you", "在此添加 GPG 密钥以验证由您签名的提交/标签");
 		m.put("Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified.", 
 			"添加 GPG 公钥到受信任的公钥列表中。受信任的公钥签名的提交将显示为已验证。");
-		m.put("Add Home page", "添加主页");
 		m.put("Add Issue...", "添加工单...");
 		m.put("Add Issues to Iteration", "将工单添加到迭代");
 		m.put("Add New", "添加");
@@ -261,6 +260,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Add files to current directory", "添加文件到当前目录");
 		m.put("Add files via upload", "通过上传添加文件");
 		m.put("Add groovy script", "添加 Groovy 脚本");
+		m.put("Add home page", "添加主页");
 		m.put("Add issue description template", "添加工单描述模板");
 		m.put("Add issue link", "添加工单链接");
 		m.put("Add issue state", "添加工单状态");
@@ -1788,6 +1788,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("History", "历史");
 		m.put("History of comparing revisions is unrelated", "比较的版本历史不相关");
 		m.put("History of target branch and source branch is unrelated", "目标分支和源分支的历史记录不相关");
+		m.put("Home page not found", "未找到主页");
 		m.put("Host name or ip address of remote machine to run commands via SSH", "远程机器的名称或 IP 地址，用于通过 SSH 运行命令");
 		m.put("Hours Per Day", "每天小时数");
 		m.put("How to Publish", "如何发布");
@@ -3421,8 +3422,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"报告格式已更改。您可以重新运行此构建以生成新格式的报告");
 		m.put("Repository Sync", "仓库同步");
-		m.put("Repository folder containing Markdown wiki pages. Leave empty to inherit from parent (defaults to wiki). Use Home.md for the home page and _Sidebar.md for the sidebar", 
-			"包含 Markdown wiki 页面的存储库文件夹。留空以继承父级设置（默认为 wiki）。使用 Home.md 作为主页，使用 _Sidebar.md 作为侧边栏");
 		m.put("Reprovision workspace", "重新配置工作区");
 		m.put("Request Body", "请求体");
 		m.put("Request For Changes", "请求更改");
@@ -4940,7 +4939,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"是否禁用内部密码登录表单并仅使用 SSO 登录。\n<b class=\"text-info\">提示：</b>如果您被锁定，可以通过运行 <code>bin/enable-internal-login</code> 从命令\n行重新启用内部登录");
 		m.put("Whether or not to enable code management for the project", "是否为项目启用代码管理");
 		m.put("Whether or not to enable issue management for the project", "是否为项目启用工单管理");
-		m.put("Whether or not to enable wiki management for the project", "是否启用项目的 wiki 管理");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"如果启用此选项，git lfs 命令需要安装在 OneDev 服务器上（即使此步骤在其他节点上运行）");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -5269,7 +5267,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("week:Tue", "周二");
 		m.put("week:Wed", "周三");
 		m.put("widget:Tabs", "标签页");
-		m.put("wiki", "wiki");
 		m.put("workspaces", "工作区");
 		m.put("you may show this page later via incompatibilities link in help menu", "您可以稍后通过帮助菜单中的不兼容性链接显示此页面");
 		m.put("{0} Lines", "{0} 行");
@@ -5308,8 +5305,21 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Add home page", "添加主页");
-		m.put("Home page not found", "未找到主页");
+		m.put("Cannot display wiki pages hosted on other servers.", "无法显示托管在其他服务器上的 wiki 页面。");
+		m.put("No permission to access wiki project.", "没有权限访问 wiki 项目。");
+		m.put("Open target wiki home page", "打开目标 wiki 首页");
+		m.put("Repository Root", "仓库根目录");
+		m.put("Specified Path", "指定路径");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
+			"指定用于存储 wiki 页面的仓库文件夹。留空以继承自父级。\n如果您不想将 wiki 页面存储在项目仓库中，指定的文件夹\n可以是一个 Git 子模块");
+		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "此 wiki 被链接为一个子模块。点击访问目标项目中的 wiki");
+		m.put("Use folder 'wiki'", "使用文件夹 'wiki'");
+		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
+			"是否为项目启用 wiki 管理。wiki 页面\n对有项目访问权限的所有用户可见");
+		m.put("Wiki project not found.", "未找到 wiki 项目。");
+		m.put("Wiki revision not found.", "未找到 wiki 修订版本。");
+		m.put("Wiki submodule URL is not configured.", "未配置 wiki 子模块 URL。");
+		m.put("in", "在");
 	}
 		
 	@Override
