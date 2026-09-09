@@ -19,6 +19,7 @@ test.describe.configure({ mode: 'default' });
 
 const body = (page) => page.locator('.wiki-content .markdown-rendered');
 const editor = (page) => page.locator('.wiki .markdown-editor textarea');
+const pageName = (page) => page.getByRole('textbox', { name: 'Name *', exact: true });
 
 async function editHome(page, wikiProject, markdown) {
   await page.goto(`${wikiProject.name}/~wiki/main/Home?edit=true`);
@@ -150,9 +151,9 @@ test('creates a missing wiki page using the plus icon', async ({ page, wikiProje
   await expect(link).toHaveAttribute('href', /\/~wiki\/main\/Some-Page$/);
   await expect(body(page).locator('a + .missing')).toHaveText('!!missing!!');
   await body(page).getByTitle('Add this page', { exact: true }).click();
-  await expect(page.locator('.wiki .bean-editor .property-name input')).toBeVisible();
-  await expect(page.locator('.wiki .bean-editor .property-name input')).toBeEditable();
-  await expect(page.locator('.wiki .bean-editor .property-name input')).toHaveValue('Some-Page');
+  await expect(pageName(page)).toBeVisible();
+  await expect(pageName(page)).toBeEditable();
+  await expect(pageName(page)).toHaveValue('Some Page');
   await editor(page).fill('# Some Page\n\nCreated from a missing link.');
   await page.getByRole('button', { name: 'Save page', exact: true }).click();
   await expect(body(page)).toContainText('Created from a missing link.');
@@ -289,7 +290,7 @@ for (const deletedPage of ['Delete-me', 'Home']) {
 test('renames an existing wiki page while saving content', async ({ page, wikiProject }) => {
   await wikiProject.putFile('wiki/Rename-source.md', '# Original content');
   await page.goto(`${wikiProject.name}/~wiki/main/Rename-source?edit=true`);
-  const name = page.locator('.wiki .bean-editor .property-name input');
+  const name = pageName(page);
   await expect(name).toHaveValue('Rename-source');
   await name.fill('Guides/Renamed page');
   await editor(page).fill('# Renamed content');
@@ -305,7 +306,7 @@ test('renames an existing wiki page while saving content', async ({ page, wikiPr
 
 test('rejects renaming a wiki page to an existing name', async ({ page, wikiProject }) => {
   await page.goto(`${wikiProject.name}/~wiki/main/Another-page?edit=true`);
-  await page.locator('.wiki .bean-editor .property-name input').fill('Home');
+  await pageName(page).fill('Home');
   await editor(page).fill('# Must not overwrite Home');
   await page.getByRole('button', { name: 'Save page', exact: true }).click();
   await expect(page.getByText('A page with this name already exists.', { exact: true })).toBeVisible();
@@ -323,7 +324,7 @@ for (const entry of ['empty repository', 'missing home']) {
       await api.putFile(project, 'wiki/Guide.md', '# Guide');
     await page.goto(`${project.name}/~wiki/${entry === 'empty repository' ? '' : 'main/Home'}`);
     await page.getByRole('link', { name: 'Add home page', exact: true }).click();
-    const name = page.locator('.wiki .bean-editor .property-name input');
+    const name = pageName(page);
     await expect(name).toBeVisible();
     await expect(name).toBeEditable();
     await expect(name).toHaveValue('Home');
