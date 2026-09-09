@@ -662,6 +662,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Cannot delete yourself", "自分自身を削除できません");
 		m.put("Cannot disable root account", "ルートアカウントを無効化できません");
 		m.put("Cannot disable yourself", "自分自身を無効化できません");
+		m.put("Cannot display wiki pages hosted on other servers.", "他のサーバーにホストされているWikiページを表示できません。");
 		m.put("Cannot find issue board: ", "課題ボードが見つかりません:");
 		m.put("Cannot move issue as it has workspaces", "ワークスペースがあるため、課題を移動できません");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "プロジェクト\"{0}\"を自身またはその子孫の下に移動することはできません");
@@ -2448,6 +2449,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No one", "誰もいない");
 		m.put("No packages to delete", "削除するパッケージなし");
 		m.put("No parent", "親なし");
+		m.put("No permission to access wiki project.", "Wikiプロジェクトへのアクセス権がありません。");
 		m.put("No prefix", "プレフィックスなし");
 		m.put("No previous successful build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a> to calculate fixed issues since", 
 			"<a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">同じストリーム</a>で以前の成功したビルドがなく、修正された課題を計算できません。");
@@ -2570,6 +2572,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Only users able to authenticate via password can be linked", "パスワードで認証できるユーザーのみリンク可能");
 		m.put("Open", "オープン");
 		m.put("Open new pull request", "新しいプルリクエストを開く");
+		m.put("Open target wiki home page", "対象のWikiホームページを開く");
 		m.put("Open terminal", "ターミナルを開く");
 		m.put("Open terminal of current running step", "現在実行中のステップのターミナルを開く");
 		m.put("OpenID", "OpenID");
@@ -3395,6 +3398,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Report Name", "レポート名");
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"レポート形式が変更されました。このビルドを再実行して新しい形式でレポートを生成できます");
+		m.put("Repository Root", "リポジトリルート");
 		m.put("Repository Sync", "リポジトリ同期");
 		m.put("Reprovision workspace", "ワークスペースを再プロビジョン");
 		m.put("Request Body", "リクエストボディ");
@@ -3768,6 +3772,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Spec", "仕様");
 		m.put("Spec name", "仕様名");
 		m.put("Spec not found in workspace project hierarchy", "ワークスペースプロジェクト階層に仕様が見つかりません");
+		m.put("Specified Path", "指定されたパス");
 		m.put("Specified Value", "指定された値");
 		m.put("Specified choices", "指定された選択肢");
 		m.put("Specified default value", "指定されたデフォルト値");
@@ -4148,6 +4153,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"使用するモデル名を指定します。<b class='text-danger'>注意:</b> 現在、OneDevは\nチャット完了APIを持つモデルのみをサポートしています。OpenAIの新しい応答APIを持つモデルはまだサポートされていません");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSHサーバーがクライアントとの接続を確立するために使用する秘密鍵（PEM形式）を指定してください。");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
+			"Wikiページを保存するリポジトリフォルダを指定してください。親から継承する場合は空のままにします。\nプロジェクトリポジトリにWikiページを保存しない場合、指定されたフォルダ\nはGitサブモジュールである可能性があります。");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"グループメンバーシップ情報を取得する戦略を指定してください。LDAPグループに適切な権限を付与するには、同じ名前のOneDevグループを定義する必要があります。グループメンバーシップをOneDev側で管理したい場合は、<tt>グループを取得しない</tt>戦略を使用してください。");
 		m.put("Specify timeout in seconds when communicating with mail server", "メールサーバーと通信する際のタイムアウトを秒単位で指定してください。");
@@ -4503,6 +4510,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This user is authenticating via internal database.", "このユーザーは内部データベースを介して認証しています");
 		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
 			"このユーザーは現在外部システムを介して認証しています。パスワードを設定すると内部データベースの使用に切り替わります");
+		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "このWikiはサブモジュールとしてリンクされています。対象プロジェクトのWikiを訪問するにはクリックしてください。");
 		m.put("This wiki page does not exist at this revision.", "このウィキページはこのリビジョンでは存在しません。");
 		m.put("This will deactivate current subscription and all enterprise features will be disabled, do you want to continue?", 
 			"これにより現在のサブスクリプションが無効化され、すべてのエンタープライズ機能が無効になります。続行しますか？");
@@ -4758,6 +4766,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Use default", "デフォルトを使用");
 		m.put("Use default sidebar?", "デフォルトのサイドバーを使用しますか？");
 		m.put("Use default storage class", "デフォルトのストレージクラスを使用");
+		m.put("Use folder 'wiki'", "フォルダ 'wiki' を使用");
 		m.put("Use generated branch name", "生成されたブランチ名を使用");
 		m.put("Use generated title and description", "生成されたタイトルと説明を使用");
 		m.put("Use job token as user name so that OneDev can know which build is ${permission.equals(\"write\")? \"deploying\": \"using\"} packages", 
@@ -4913,6 +4922,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"内部パスワードログインフォームを無効化し、SSOログインのみを使用するかどうか。\n<b class=\"text-info\">TIPS:</b> ロックアウトされた場合、コマンドラインで<code>bin/enable-internal-login</code>を実行することで内部ログインを再有効化できます。");
 		m.put("Whether or not to enable code management for the project", "プロジェクトのコード管理を有効にするかどうか");
 		m.put("Whether or not to enable issue management for the project", "プロジェクトの課題管理を有効にするかどうか");
+		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
+			"プロジェクトのWiki管理を有効にするかどうか。Wikiページは\nプロジェクトにアクセスできるすべてのユーザーが利用可能です。");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"プルリクエストが異なるプロジェクトから開かれた場合にLFSオブジェクトを取得するかどうか");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -4962,7 +4973,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Wiki Management", "ウィキ管理");
 		m.put("Wiki Setting", "ウィキ設定");
 		m.put("Wiki Settings", "ウィキ設定");
+		m.put("Wiki project not found.", "Wikiプロジェクトが見つかりません。");
+		m.put("Wiki revision not found.", "Wikiリビジョンが見つかりません。");
 		m.put("Wiki settings updated", "ウィキ設定が更新されました");
+		m.put("Wiki submodule URL is not configured.", "WikiサブモジュールURLが設定されていません。");
 		m.put("Will be prompted to set up two-factor authentication upon next login", "次回のログイン時に二要素認証の設定を求められます");
 		m.put("Window", "ウィンドウ");
 		m.put("Window Memory", "ウィンドウメモリ");
@@ -5114,6 +5128,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("has any value of", "任意の値を持っています");
 		m.put("head", "ヘッド");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
+		m.put("in", "内");
 		m.put("in current commit", "現在のコミット内");
 		m.put("ineffective", "無効");
 		m.put("inherited", "継承済み");
@@ -5279,21 +5294,20 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Cannot display wiki pages hosted on other servers.", "他のサーバーにホストされているWikiページを表示できません。");
-		m.put("No permission to access wiki project.", "Wikiプロジェクトへのアクセス権がありません。");
-		m.put("Open target wiki home page", "対象のWikiホームページを開く");
-		m.put("Repository Root", "リポジトリルート");
-		m.put("Specified Path", "指定されたパス");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
-			"Wikiページを保存するリポジトリフォルダを指定してください。親から継承する場合は空のままにします。\nプロジェクトリポジトリにWikiページを保存しない場合、指定されたフォルダ\nはGitサブモジュールである可能性があります。");
-		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "このWikiはサブモジュールとしてリンクされています。対象プロジェクトのWikiを訪問するにはクリックしてください。");
-		m.put("Use folder 'wiki'", "フォルダ 'wiki' を使用");
-		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
-			"プロジェクトのWiki管理を有効にするかどうか。Wikiページは\nプロジェクトにアクセスできるすべてのユーザーが利用可能です。");
-		m.put("Wiki project not found.", "Wikiプロジェクトが見つかりません。");
-		m.put("Wiki revision not found.", "Wikiリビジョンが見つかりません。");
-		m.put("Wiki submodule URL is not configured.", "WikiサブモジュールURLが設定されていません。");
-		m.put("in", "内");
+		m.put("1. Add below to build.gradle (Groovy)", "1. 以下を build.gradle (Groovy) に追加してください");
+		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
+			"2. コマンドラインから公開したい場合は、以下を <code>$HOME/.gradle/gradle.properties</code> に追加してください");
+		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"3. CI/CD ジョブの場合、以下のコードをコマンドステップで使用することで、カスタム gradle.properties を利用する方が便利です:");
+		m.put("Add below to allow accessing via http protocol", "HTTP プロトコル経由でアクセスを許可するために以下を追加してください");
+		m.put("Add below to build.gradle (Groovy)", "以下を build.gradle (Groovy) に追加してください");
+		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
+			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を $HOME/.gradle/gradle.properties に追加してください");
+		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"CI/CD ジョブの場合、以下のコードをコマンドステップで使用することで、カスタム gradle.properties を利用する方が便利です:");
+		m.put("Gradle", "Gradle");
+		m.put("Maven", "Maven");
+		m.put("Or below to build.gradle.kts (Kotlin)", "または以下を build.gradle.kts (Kotlin) に追加してください");
 	}
 		
 	@Override

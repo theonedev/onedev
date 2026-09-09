@@ -688,6 +688,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Cannot delete yourself", "不能删除自己");
 		m.put("Cannot disable root account", "不能禁用根账户");
 		m.put("Cannot disable yourself", "不能禁用自己");
+		m.put("Cannot display wiki pages hosted on other servers.", "无法显示托管在其他服务器上的 wiki 页面。");
 		m.put("Cannot find issue board: ", "找不到工单看板：");
 		m.put("Cannot move issue as it has workspaces", "无法移动工单，因为它有工作区");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
@@ -2474,6 +2475,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No one", "无任何人");
 		m.put("No packages to delete", "没有可删除的包");
 		m.put("No parent", "无父级");
+		m.put("No permission to access wiki project.", "没有权限访问 wiki 项目。");
 		m.put("No prefix", "无前缀");
 		m.put("No previous successful build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a> to calculate fixed issues since", 
 			"还没有<a href=\"https://docs.onedev.io/concepts#构建流\" class=\"link-primary\" target=\"_blank\">相同流上的</a>成功构建，所以无法计算修复的工单");
@@ -2596,6 +2598,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Only users able to authenticate via password can be linked", "只有能够通过密码认证的用户才能被链接");
 		m.put("Open", "打开");
 		m.put("Open new pull request", "创建新的合并请求");
+		m.put("Open target wiki home page", "打开目标 wiki 首页");
 		m.put("Open terminal", "打开终端");
 		m.put("Open terminal of current running step", "打开当前运行步骤的终端");
 		m.put("OpenID", "OpenID");
@@ -3421,6 +3424,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Report Name", "报告名称");
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"报告格式已更改。您可以重新运行此构建以生成新格式的报告");
+		m.put("Repository Root", "仓库根目录");
 		m.put("Repository Sync", "仓库同步");
 		m.put("Reprovision workspace", "重新配置工作区");
 		m.put("Request Body", "请求体");
@@ -3794,6 +3798,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Spec", "规范");
 		m.put("Spec name", "规范名称");
 		m.put("Spec not found in workspace project hierarchy", "在工作区项目层次结构中未找到规范");
+		m.put("Specified Path", "指定路径");
 		m.put("Specified Value", "指定值");
 		m.put("Specified choices", "指定选项");
 		m.put("Specified default value", "指定默认值");
@@ -4174,6 +4179,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定要使用的模型名称。<b class='text-danger'>注意：</b>目前 OneDev 仅支持\n具有聊天完成 API 的模型。尚不支持具有新响应 API 的 OpenAI 模型。");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"指定用于与客户端建立连接的 SSH 服务器使用的私钥（在 PEM 格式中）");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
+			"指定用于存储 wiki 页面的仓库文件夹。留空以继承自父级。\n如果您不想将 wiki 页面存储在项目仓库中，指定的文件夹\n可以是一个 Git 子模块");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"指定查询组成员信息的策略。要为 LDAP 组分配适当权限，应定义一个同名的 OneDev 组。如果您希望在 OneDev 端管理组成员关系，请使用策略 <tt>不查询组</tt>");
 		m.put("Specify timeout in seconds when communicating with mail server", "指定与邮件服务器通信时的超时时间（秒）");
@@ -4529,6 +4536,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This user is authenticating via internal database.", "此用户通过内部数据库进行身份验证。");
 		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
 			"该用户当前通过外部系统进行身份验证。设置密码将切换到使用内部数据库");
+		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "此 wiki 被链接为一个子模块。点击访问目标项目中的 wiki");
 		m.put("This wiki page does not exist at this revision.", "此 wiki 页面在此修订版中不存在。");
 		m.put("This will deactivate current subscription and all enterprise features will be disabled, do you want to continue?", 
 			"这将停用当前订阅，所有企业功能将被禁用，您确定要继续吗？");
@@ -4784,6 +4792,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Use default", "使用默认");
 		m.put("Use default sidebar?", "使用默认侧边栏？");
 		m.put("Use default storage class", "使用默认存储类");
+		m.put("Use folder 'wiki'", "使用文件夹 'wiki'");
 		m.put("Use generated branch name", "使用生成的分支名称");
 		m.put("Use generated title and description", "使用生成的标题和描述");
 		m.put("Use job token as user name so that OneDev can know which build is ${permission.equals(\"write\")? \"deploying\": \"using\"} packages", 
@@ -4939,6 +4948,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"是否禁用内部密码登录表单并仅使用 SSO 登录。\n<b class=\"text-info\">提示：</b>如果您被锁定，可以通过运行 <code>bin/enable-internal-login</code> 从命令\n行重新启用内部登录");
 		m.put("Whether or not to enable code management for the project", "是否为项目启用代码管理");
 		m.put("Whether or not to enable issue management for the project", "是否为项目启用工单管理");
+		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
+			"是否为项目启用 wiki 管理。wiki 页面\n对有项目访问权限的所有用户可见");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"如果启用此选项，git lfs 命令需要安装在 OneDev 服务器上（即使此步骤在其他节点上运行）");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -4988,7 +4999,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Wiki Management", "Wiki 管理");
 		m.put("Wiki Setting", "Wiki 设置");
 		m.put("Wiki Settings", "Wiki 设置");
+		m.put("Wiki project not found.", "未找到 wiki 项目。");
+		m.put("Wiki revision not found.", "未找到 wiki 修订版本。");
 		m.put("Wiki settings updated", "Wiki 设置已更新");
+		m.put("Wiki submodule URL is not configured.", "未配置 wiki 子模块 URL。");
 		m.put("Will be prompted to set up two-factor authentication upon next login", "下次登录时将提示设置两阶段验证");
 		m.put("Window", "窗口");
 		m.put("Window Memory", "窗口内存");
@@ -5140,6 +5154,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("has any value of", "具有下列任何值");
 		m.put("head", "头部");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
+		m.put("in", "在");
 		m.put("in current commit", "在当前提交中");
 		m.put("ineffective", "无效");
 		m.put("inherited", "继承");
@@ -5305,21 +5320,20 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Cannot display wiki pages hosted on other servers.", "无法显示托管在其他服务器上的 wiki 页面。");
-		m.put("No permission to access wiki project.", "没有权限访问 wiki 项目。");
-		m.put("Open target wiki home page", "打开目标 wiki 首页");
-		m.put("Repository Root", "仓库根目录");
-		m.put("Specified Path", "指定路径");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
-			"指定用于存储 wiki 页面的仓库文件夹。留空以继承自父级。\n如果您不想将 wiki 页面存储在项目仓库中，指定的文件夹\n可以是一个 Git 子模块");
-		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "此 wiki 被链接为一个子模块。点击访问目标项目中的 wiki");
-		m.put("Use folder 'wiki'", "使用文件夹 'wiki'");
-		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
-			"是否为项目启用 wiki 管理。wiki 页面\n对有项目访问权限的所有用户可见");
-		m.put("Wiki project not found.", "未找到 wiki 项目。");
-		m.put("Wiki revision not found.", "未找到 wiki 修订版本。");
-		m.put("Wiki submodule URL is not configured.", "未配置 wiki 子模块 URL。");
-		m.put("in", "在");
+		m.put("1. Add below to build.gradle (Groovy)", "1. 添加以下内容到 build.gradle (Groovy)");
+		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
+			"2. 如果您想从命令行发布，请将以下内容添加到 <code>$HOME/.gradle/gradle.properties</code>");
+		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"3. 对于 CI/CD 任务，使用自定义 gradle.properties 更加方便，例如通过以下代码在命令步骤中实现：");
+		m.put("Add below to allow accessing via http protocol", "添加以下内容以允许通过 http 协议访问");
+		m.put("Add below to build.gradle (Groovy)", "添加以下内容到 build.gradle (Groovy)");
+		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
+			"如果您想从命令行编译项目，也请将以下内容添加到 $HOME/.gradle/gradle.properties");
+		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"对于 CI/CD 任务，使用自定义 gradle.properties 更加方便，例如通过以下代码在命令步骤中实现：");
+		m.put("Gradle", "Gradle");
+		m.put("Maven", "Maven");
+		m.put("Or below to build.gradle.kts (Kotlin)", "或者以下内容到 build.gradle.kts (Kotlin)");
 	}
 		
 	@Override

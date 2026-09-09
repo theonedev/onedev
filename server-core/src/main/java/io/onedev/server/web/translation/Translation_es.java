@@ -662,6 +662,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Cannot delete yourself", "No se puede eliminar a sí mismo");
 		m.put("Cannot disable root account", "No se puede deshabilitar la cuenta raíz");
 		m.put("Cannot disable yourself", "No se puede deshabilitar a sí mismo");
+		m.put("Cannot display wiki pages hosted on other servers.", "No se pueden mostrar páginas wiki alojadas en otros servidores.");
 		m.put("Cannot find issue board: ", "No se puede encontrar el tablero de problemas:");
 		m.put("Cannot move issue as it has workspaces", "No se puede mover el problema ya que tiene espacios de trabajo");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "No se puede mover el proyecto \"{0}\" para que esté bajo sí mismo o sus descendientes");
@@ -2448,6 +2449,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("No one", "No hay nadie");
 		m.put("No packages to delete", "No hay paquetes para eliminar");
 		m.put("No parent", "No hay padre");
+		m.put("No permission to access wiki project.", "No tiene permiso para acceder al proyecto wiki.");
 		m.put("No prefix", "Sin prefijo");
 		m.put("No previous successful build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a> to calculate fixed issues since", 
 			"No hay compilación exitosa previa en <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">la misma secuencia</a> para calcular problemas solucionados desde entonces");
@@ -2570,6 +2572,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Only users able to authenticate via password can be linked", "Solo los usuarios que pueden autenticarse mediante contraseña pueden ser vinculados");
 		m.put("Open", "Abrir");
 		m.put("Open new pull request", "Abrir nueva solicitud de extracción");
+		m.put("Open target wiki home page", "Abrir la página de inicio del wiki objetivo");
 		m.put("Open terminal", "Abrir terminal");
 		m.put("Open terminal of current running step", "Abrir terminal del paso en ejecución actual");
 		m.put("OpenID", "OpenID");
@@ -3395,6 +3398,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Report Name", "Nombre del informe");
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"Formato del informe cambiado. Puede volver a ejecutar esta compilación para generar el informe en el nuevo formato");
+		m.put("Repository Root", "Raíz del repositorio");
 		m.put("Repository Sync", "Sincronización del repositorio");
 		m.put("Reprovision workspace", "Reprovisionar espacio de trabajo");
 		m.put("Request Body", "Cuerpo de la solicitud");
@@ -3768,6 +3772,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Spec", "Especificación");
 		m.put("Spec name", "Nombre de la Especificación");
 		m.put("Spec not found in workspace project hierarchy", "Especificación no encontrada en la jerarquía del proyecto del espacio de trabajo");
+		m.put("Specified Path", "Ruta especificada");
 		m.put("Specified Value", "Valor especificado");
 		m.put("Specified choices", "Opciones especificadas");
 		m.put("Specified default value", "Valor predeterminado especificado");
@@ -4148,6 +4153,8 @@ public class Translation_es extends TranslationResourceBundle {
 			"Especifique el nombre del modelo a usar. <b class='text-danger'>NOTA: </b> Actualmente OneDev solo soporta\nmodelos con API de completaciones de chat. Los modelos de OpenAI con la nueva API de respuestas no están soportados aún");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"Especifique la clave privada (en formato PEM) utilizada por el servidor SSH para establecer conexiones con el cliente");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
+			"Especifique la carpeta del repositorio para almacenar las páginas wiki. Déjelo vacío para heredar del padre.\nSi no desea almacenar las páginas wiki en el repositorio del proyecto, la carpeta especificada\npuede ser un submódulo de Git");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"Especifique la estrategia para recuperar información de membresía de grupo. Para otorgar permisos apropiados a un grupo LDAP, se debe definir un grupo de OneDev con el mismo nombre. Use la estrategia <tt>No Recuperar Grupos</tt> si desea gestionar las membresías de grupo en el lado de OneDev");
 		m.put("Specify timeout in seconds when communicating with mail server", "Especifique el tiempo de espera en segundos al comunicarse con el servidor de correo");
@@ -4503,6 +4510,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("This user is authenticating via internal database.", "Este usuario se está autenticando a través de la base de datos interna.");
 		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
 			"Este usuario se está autenticando actualmente a través de un sistema externo. Configurar una contraseña cambiará a usar la base de datos interna");
+		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "Este wiki está vinculado como un submódulo. Haga clic para visitar el wiki en el proyecto objetivo");
 		m.put("This wiki page does not exist at this revision.", "Esta página wiki no existe en esta revisión.");
 		m.put("This will deactivate current subscription and all enterprise features will be disabled, do you want to continue?", 
 			"Esto desactivará la suscripción actual y todas las funciones empresariales serán deshabilitadas, ¿desea continuar?");
@@ -4758,6 +4766,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Use default", "Usar predeterminado");
 		m.put("Use default sidebar?", "¿Usar barra lateral predeterminada?");
 		m.put("Use default storage class", "Usar clase de almacenamiento predeterminada");
+		m.put("Use folder 'wiki'", "Usar carpeta 'wiki'");
 		m.put("Use generated branch name", "Usar nombre de rama generado");
 		m.put("Use generated title and description", "Usar título y descripción generados");
 		m.put("Use job token as user name so that OneDev can know which build is ${permission.equals(\"write\")? \"deploying\": \"using\"} packages", 
@@ -4913,6 +4922,8 @@ public class Translation_es extends TranslationResourceBundle {
 			"Si deshabilitar o no el formulario de inicio de sesión con contraseña interna y usar solo inicio de sesión SSO.\n<b class=\"text-info\">CONSEJOS:</b> Si está bloqueado, el inicio de sesión interno se puede volver a habilitar desde la línea\nde comandos ejecutando <code>bin/enable-internal-login</code>");
 		m.put("Whether or not to enable code management for the project", "Si se habilita o no la gestión de código para el proyecto");
 		m.put("Whether or not to enable issue management for the project", "Si se habilita o no la gestión de problemas para el proyecto");
+		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
+			"Habilitar o no la gestión del wiki para el proyecto. Las páginas wiki\nson accesibles para todos los usuarios con acceso al proyecto");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"Si se deben obtener objetos LFS si la solicitud de extracción se abre desde un proyecto diferente o no");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -4962,7 +4973,10 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Wiki Management", "Gestión del Wiki");
 		m.put("Wiki Setting", "Configuración del Wiki");
 		m.put("Wiki Settings", "Configuraciones del Wiki");
+		m.put("Wiki project not found.", "Proyecto wiki no encontrado.");
+		m.put("Wiki revision not found.", "Revisión del wiki no encontrada.");
 		m.put("Wiki settings updated", "Configuraciones del wiki actualizadas");
+		m.put("Wiki submodule URL is not configured.", "La URL del submódulo del wiki no está configurada.");
 		m.put("Will be prompted to set up two-factor authentication upon next login", "Se le pedirá configurar la autenticación de dos factores en el próximo inicio de sesión");
 		m.put("Window", "Ventana");
 		m.put("Window Memory", "Memoria de Ventana");
@@ -5114,6 +5128,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("has any value of", "tiene algún valor de");
 		m.put("head", "cabecera");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
+		m.put("in", "en");
 		m.put("in current commit", "en el commit actual");
 		m.put("ineffective", "ineficaz");
 		m.put("inherited", "heredado");
@@ -5279,21 +5294,20 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Cannot display wiki pages hosted on other servers.", "No se pueden mostrar páginas wiki alojadas en otros servidores.");
-		m.put("No permission to access wiki project.", "No tiene permiso para acceder al proyecto wiki.");
-		m.put("Open target wiki home page", "Abrir la página de inicio del wiki objetivo");
-		m.put("Repository Root", "Raíz del repositorio");
-		m.put("Specified Path", "Ruta especificada");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
-			"Especifique la carpeta del repositorio para almacenar las páginas wiki. Déjelo vacío para heredar del padre.\nSi no desea almacenar las páginas wiki en el repositorio del proyecto, la carpeta especificada\npuede ser un submódulo de Git");
-		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "Este wiki está vinculado como un submódulo. Haga clic para visitar el wiki en el proyecto objetivo");
-		m.put("Use folder 'wiki'", "Usar carpeta 'wiki'");
-		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
-			"Habilitar o no la gestión del wiki para el proyecto. Las páginas wiki\nson accesibles para todos los usuarios con acceso al proyecto");
-		m.put("Wiki project not found.", "Proyecto wiki no encontrado.");
-		m.put("Wiki revision not found.", "Revisión del wiki no encontrada.");
-		m.put("Wiki submodule URL is not configured.", "La URL del submódulo del wiki no está configurada.");
-		m.put("in", "en");
+		m.put("1. Add below to build.gradle (Groovy)", "1. Agrega lo siguiente a build.gradle (Groovy)");
+		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
+			"2. Agrega lo siguiente a <code>$HOME/.gradle/gradle.properties</code> si deseas publicar desde la línea de comandos");
+		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"3. Para un trabajo de CI/CD, es más conveniente usar un gradle.properties personalizado, por ejemplo, mediante el siguiente código en un paso de comando:");
+		m.put("Add below to allow accessing via http protocol", "Agrega lo siguiente para permitir el acceso a través del protocolo http");
+		m.put("Add below to build.gradle (Groovy)", "Agrega lo siguiente a build.gradle (Groovy)");
+		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
+			"También agrega lo siguiente a $HOME/.gradle/gradle.properties si deseas compilar el proyecto desde la línea de comandos");
+		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"Para un trabajo de CI/CD, es más conveniente usar un gradle.properties personalizado, por ejemplo, mediante el siguiente código en un paso de comando:");
+		m.put("Gradle", "Gradle");
+		m.put("Maven", "Maven");
+		m.put("Or below to build.gradle.kts (Kotlin)", "O lo siguiente a build.gradle.kts (Kotlin)");
 	}
 		
 	@Override

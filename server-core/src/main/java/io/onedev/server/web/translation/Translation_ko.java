@@ -662,6 +662,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Cannot delete yourself", "자신을 삭제할 수 없습니다");
 		m.put("Cannot disable root account", "루트 계정을 비활성화할 수 없습니다");
 		m.put("Cannot disable yourself", "자신을 비활성화할 수 없습니다");
+		m.put("Cannot display wiki pages hosted on other servers.", "다른 서버에 호스팅된 위키 페이지를 표시할 수 없습니다.");
 		m.put("Cannot find issue board: ", "이슈 보드를 찾을 수 없습니다:");
 		m.put("Cannot move issue as it has workspaces", "작업 공간이 있어 이슈를 이동할 수 없습니다");
 		m.put("Cannot move project \"{0}\" to be under itself or its descendants", "프로젝트 \"{0}\"를 자신 또는 하위 프로젝트 아래로 이동할 수 없습니다");
@@ -2448,6 +2449,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No one", "아무도 없음");
 		m.put("No packages to delete", "삭제할 패키지 없음");
 		m.put("No parent", "상위 없음");
+		m.put("No permission to access wiki project.", "위키 프로젝트에 접근할 권한이 없습니다.");
 		m.put("No prefix", "접두사 없음");
 		m.put("No previous successful build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a> to calculate fixed issues since", 
 			"<a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">동일 스트림</a>에서 이전 성공적인 빌드 없음");
@@ -2570,6 +2572,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Only users able to authenticate via password can be linked", "비밀번호로 인증할 수 있는 사용자만 연결할 수 있습니다");
 		m.put("Open", "열기");
 		m.put("Open new pull request", "새 풀 리퀘스트 열기");
+		m.put("Open target wiki home page", "대상 위키 홈 페이지 열기");
 		m.put("Open terminal", "터미널 열기");
 		m.put("Open terminal of current running step", "현재 실행 중인 단계의 터미널 열기");
 		m.put("OpenID", "OpenID");
@@ -3395,6 +3398,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Report Name", "보고서 이름");
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"보고서 형식이 변경되었습니다. 새 형식으로 보고서를 생성하려면 이 빌드를 다시 실행하십시오");
+		m.put("Repository Root", "저장소 루트");
 		m.put("Repository Sync", "저장소 동기화");
 		m.put("Reprovision workspace", "작업 공간 재프로비저닝");
 		m.put("Request Body", "요청 본문");
@@ -3768,6 +3772,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Spec", "사양");
 		m.put("Spec name", "사양 이름");
 		m.put("Spec not found in workspace project hierarchy", "작업 공간 프로젝트 계층에서 사양을 찾을 수 없음");
+		m.put("Specified Path", "지정된 경로");
 		m.put("Specified Value", "지정된 값");
 		m.put("Specified choices", "지정된 선택 항목");
 		m.put("Specified default value", "지정된 기본값");
@@ -4148,6 +4153,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"사용할 모델 이름을 지정하십시오. <b class='text-danger'>참고:</b> 현재 OneDev는\n채팅 완료 API가 있는 모델만 지원합니다. OpenAI의 새로운 응답 API가 있는 모델은 아직 지원되지 않습니다");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSH 서버가 클라이언트와 연결을 설정하는 데 사용하는 개인 키(PEM 형식)를 지정하십시오.");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
+			"위키 페이지를 저장할 저장소 폴더를 지정하세요. 상위에서 상속받으려면 비워 두세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다.");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"그룹 멤버십 정보를 검색하는 전략을 지정하십시오. LDAP 그룹에 적절한 권한을 부여하려면 동일한 이름의 OneDev 그룹을 정의해야 합니다. 그룹 멤버십을 OneDev 측에서 관리하려면 <tt>그룹 검색 안 함</tt> 전략을 사용하십시오.");
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
@@ -4503,6 +4510,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This user is authenticating via internal database.", "이 사용자는 내부 데이터베이스를 통해 인증 중입니다.");
 		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
 			"이 사용자는 현재 외부 시스템을 통해 인증 중입니다. 비밀번호를 설정하면 내부 데이터베이스를 사용하도록 전환됩니다");
+		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "이 위키는 서브모듈로 연결되어 있습니다. 대상 프로젝트의 위키를 방문하려면 클릭하세요.");
 		m.put("This wiki page does not exist at this revision.", "이 위키 페이지는 이 리비전에 존재하지 않습니다.");
 		m.put("This will deactivate current subscription and all enterprise features will be disabled, do you want to continue?", 
 			"이 작업은 현재 구독을 비활성화하며 모든 엔터프라이즈 기능이 비활성화됩니다. 계속하시겠습니까?");
@@ -4758,6 +4766,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Use default", "기본값 사용");
 		m.put("Use default sidebar?", "기본 사이드바를 사용하시겠습니까?");
 		m.put("Use default storage class", "기본 스토리지 클래스 사용");
+		m.put("Use folder 'wiki'", "'wiki' 폴더 사용");
 		m.put("Use generated branch name", "생성된 브랜치 이름 사용");
 		m.put("Use generated title and description", "생성된 제목 및 설명 사용");
 		m.put("Use job token as user name so that OneDev can know which build is ${permission.equals(\"write\")? \"deploying\": \"using\"} packages", 
@@ -4913,6 +4922,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"내부 비밀번호 로그인 양식을 비활성화하고 SSO 로그인만 사용할지 여부.\n<b class=\"text-info\">팁:</b> 잠금 해제된 경우, 명령줄에서 <code>bin/enable-internal-login</code>을 실행하여 내부 로그인을 다시 활성화할 수 있습니다");
 		m.put("Whether or not to enable code management for the project", "프로젝트에 대한 코드 관리를 활성화할지 여부");
 		m.put("Whether or not to enable issue management for the project", "프로젝트에 대한 문제 관리를 활성화할지 여부");
+		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
+			"프로젝트에 대한 위키 관리를 활성화할지 여부. 위키 페이지는\n프로젝트에 접근할 수 있는 모든 사용자에게 접근 가능합니다.");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
 			"풀 리퀘스트가 다른 프로젝트에서 열렸을 경우 LFS 객체를 가져올지 여부");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
@@ -4962,7 +4973,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Wiki Management", "위키 관리");
 		m.put("Wiki Setting", "위키 설정");
 		m.put("Wiki Settings", "위키 설정들");
+		m.put("Wiki project not found.", "위키 프로젝트를 찾을 수 없습니다.");
+		m.put("Wiki revision not found.", "위키 리비전을 찾을 수 없습니다.");
 		m.put("Wiki settings updated", "위키 설정이 업데이트되었습니다.");
+		m.put("Wiki submodule URL is not configured.", "위키 서브모듈 URL이 구성되지 않았습니다.");
 		m.put("Will be prompted to set up two-factor authentication upon next login", "다음 로그인 시 이중 인증 설정을 요청받게 됩니다");
 		m.put("Window", "창");
 		m.put("Window Memory", "창 메모리");
@@ -5114,6 +5128,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("has any value of", "값이 존재합니다");
 		m.put("head", "헤드");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
+		m.put("in", "에서");
 		m.put("in current commit", "현재 커밋에서");
 		m.put("ineffective", "비효율적");
 		m.put("inherited", "상속됨");
@@ -5279,21 +5294,20 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Cannot display wiki pages hosted on other servers.", "다른 서버에 호스팅된 위키 페이지를 표시할 수 없습니다.");
-		m.put("No permission to access wiki project.", "위키 프로젝트에 접근할 권한이 없습니다.");
-		m.put("Open target wiki home page", "대상 위키 홈 페이지 열기");
-		m.put("Repository Root", "저장소 루트");
-		m.put("Specified Path", "지정된 경로");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
-			"위키 페이지를 저장할 저장소 폴더를 지정하세요. 상위에서 상속받으려면 비워 두세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다.");
-		m.put("This wiki is linked as a submodule. Click to visit wiki in the target project", "이 위키는 서브모듈로 연결되어 있습니다. 대상 프로젝트의 위키를 방문하려면 클릭하세요.");
-		m.put("Use folder 'wiki'", "'wiki' 폴더 사용");
-		m.put("Whether or not to enable wiki management for the project. Wiki pages\nare accessible to all users with access to the project", 
-			"프로젝트에 대한 위키 관리를 활성화할지 여부. 위키 페이지는\n프로젝트에 접근할 수 있는 모든 사용자에게 접근 가능합니다.");
-		m.put("Wiki project not found.", "위키 프로젝트를 찾을 수 없습니다.");
-		m.put("Wiki revision not found.", "위키 리비전을 찾을 수 없습니다.");
-		m.put("Wiki submodule URL is not configured.", "위키 서브모듈 URL이 구성되지 않았습니다.");
-		m.put("in", "에서");
+		m.put("1. Add below to build.gradle (Groovy)", "1. 아래 내용을 build.gradle (Groovy)에 추가하세요.");
+		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
+			"2. 명령줄에서 게시하려면 <code>$HOME/.gradle/gradle.properties</code>에 아래 내용을 추가하세요.");
+		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"3. CI/CD 작업의 경우, 명령 단계에서 아래 코드와 같이 사용자 정의 gradle.properties를 사용하는 것이 더 편리합니다:");
+		m.put("Add below to allow accessing via http protocol", "HTTP 프로토콜을 통해 액세스할 수 있도록 아래 내용을 추가하세요.");
+		m.put("Add below to build.gradle (Groovy)", "build.gradle (Groovy)에 아래 내용을 추가하세요.");
+		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
+			"명령줄에서 프로젝트를 컴파일하려면 $HOME/.gradle/gradle.properties에 아래 내용을 추가하세요.");
+		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"CI/CD 작업의 경우, 명령 단계에서 아래 코드와 같이 사용자 정의 gradle.properties를 사용하는 것이 더 편리합니다:");
+		m.put("Gradle", "Gradle");
+		m.put("Maven", "Maven");
+		m.put("Or below to build.gradle.kts (Kotlin)", "또는 아래 내용을 build.gradle.kts (Kotlin)에 추가하세요.");
 	}
 		
 	@Override
