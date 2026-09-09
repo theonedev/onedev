@@ -105,13 +105,17 @@ public class WikiLinkResolver {
 	}
 
 	private @Nullable String addPageUrl(String path) {
+		return addPageUrl(path, path);
+	}
+
+	private @Nullable String addPageUrl(String path, String originalPath) {
 		if (!Objects.equals(folder, project.getWikiFolder().getPath()) || !WikiUtils.isUnderFolder(folder, path)
 				|| !SecurityUtils.canEditWikiPage(project, revision, path))
 			return null;
 		String destination = pageName(path);
 		var params = ProjectWikiPage.paramsOf(project, revision, destination);
 		params.add("new", true);
-		params.add("initial-name", destination);
+		params.add("initial-name", pageName(originalPath));
 		params.add("return-page", returnPage);
 		return RequestCycle.get().urlFor(ProjectWikiPage.class, params).toString();
 	}

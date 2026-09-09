@@ -292,6 +292,9 @@ public class ProjectWikiPage extends ProjectPage {
 
 		Form<Void> form = new Form<>("form");
 		var name = Model.of(creating ? getPageParameters().get("initial-name").toString("") : page);
+		boolean focusContent = !name.getObject().isBlank();
+		if (focusContent)
+			form.add(AttributeModifier.append("class", "no-autofocus"));
 		nameInput = new TextField<>("name", name);
 		nameInput.setRequired(true).setLabel(Model.of(_T("Page name")));
 		nameInput.add(validatable -> {
@@ -310,7 +313,7 @@ public class ProjectWikiPage extends ProjectPage {
 		nameFeedback.setOutputMarkupId(true);
 		form.add(nameFeedback);
 		var contentInput = newContentEditor("content", Model.of(
-				(creating || content == null ? "" : content).getBytes(StandardCharsets.UTF_8)));
+				(creating || content == null ? "" : content).getBytes(StandardCharsets.UTF_8)), focusContent);
 		contentInput.setLabel(Model.of(_T("Content")));
 		contentInput.add(validatable -> {
 			if (validatable.getValue().length == 0)
@@ -361,9 +364,13 @@ public class ProjectWikiPage extends ProjectPage {
 		return nameInput.hasRawInput() ? nameInput.getRawInput() : nameInput.getModelObject();
 	}
 
-	private BlobMarkdownEditor newContentEditor(String id, IModel<byte[]> text) {
+	private BlobMarkdownEditor newContentEditor(String id, IModel<byte[]> text, boolean focusContent) {
 		String path = WikiUtils.pagePath(folder, page);
 		return new BlobMarkdownEditor(id, text, null) {
+			@Override
+			protected boolean isAutofocus() {
+				return focusContent;
+			}
 
 			private String getEditorPath() {
 				String pageName = getEditedPageName();

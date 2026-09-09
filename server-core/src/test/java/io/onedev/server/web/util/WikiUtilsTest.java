@@ -51,7 +51,7 @@ public class WikiUtilsTest {
 				"<p>[[../Sibling#intro|Up]] [[../../README]] [[./Child]] [[Home]] [[../../../outside]]</p>",
 				destination -> WikiUtils.resolvePagePath("wiki/guide/Page.md", destination),
 				path -> "/files/" + path, path -> path.equals("wiki/Sibling.md"),
-				path -> "/add/" + path, "/icons#plus");
+				(path, originalPath) -> "/add/" + originalPath, "/icons#plus");
 		var document = Jsoup.parseBodyFragment(html);
 		assertEquals("/files/wiki/Sibling.md#intro", document.selectFirst("a").attr("href"));
 		assertEquals("/add/wiki/Sibling.md", document.selectFirst("a.add-missing").attr("href"));

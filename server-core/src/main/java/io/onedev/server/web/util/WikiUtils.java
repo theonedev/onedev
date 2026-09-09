@@ -1,6 +1,7 @@
 package io.onedev.server.web.util;
 
 import java.util.ArrayList;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -93,7 +94,8 @@ public class WikiUtils {
 	/** Resolve wiki names and anchors consistently in both wiki and repository views. */
 	public static String resolvePageLinks(String html, Function<String, String> urlOf,
 			Predicate<String> missing, Function<String, String> addUrlOf, String addIconHref) {
-		return resolvePageLinks(html, Function.identity(), urlOf, missing, addUrlOf, addIconHref);
+		return resolvePageLinks(html, Function.identity(), urlOf, missing,
+				(path, originalPath) -> addUrlOf.apply(path), addIconHref);
 	}
 
 	public static String resolvePagePath(String currentPath, String destination) {
@@ -108,22 +110,23 @@ public class WikiUtils {
 	}
 
 	public static String resolvePageLinks(String html, Function<String, String> pathOf, Function<String, String> urlOf,
-			Predicate<String> missing, Function<String, String> addUrlOf, String addIconHref) {
+			Predicate<String> missing, BiFunction<String, String, String> addUrlOf, String addIconHref) {
 		return linkPages(html, reference -> {
 			int hash = reference.indexOf('#');
 			String destination = hash >= 0 ? reference.substring(0, hash) : reference;
 			String anchor = hash >= 0 ? reference.substring(hash) : "";
 			if (destination.isEmpty())
 				return new ResolvedLink(anchor, false, null);
-			destination = destination.replace(' ', '-');
 			try {
-				destination = pathOf.apply(destination);
+				String originalPath = pathOf.apply(destination);
+				destination = pathOf.apply(destination.replace(' ', '-'));
 				validatePath(destination);
 				String url = urlOf.apply(destination);
 				if (url == null)
 					return null;
 				boolean isMissing = missing.test(destination);
-				return new ResolvedLink(url + anchor, isMissing, isMissing ? addUrlOf.apply(destination) : null);
+				return new ResolvedLink(url + anchor, isMissing,
+						isMissing ? addUrlOf.apply(destination, originalPath) : null);
 			} catch (IllegalArgumentException | NotAcceptableException e) {
 				return null;
 			}

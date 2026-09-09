@@ -130,6 +130,8 @@ public class WikiLinkResolverTest {
 		var cycle = mock(RequestCycle.class);
 		when(cycle.urlFor(eq(ProjectWikiPage.class), any(PageParameters.class))).thenAnswer(it -> {
 			PageParameters params = it.getArgument(1);
+			if (params.get("new").toBoolean(false))
+				assertEquals("guide/Getting started-guide", params.get("initial-name").toString());
 			return url("~wiki", params) + (params.get("new").toBoolean(false) ? "?new=true" : "");
 		});
 		when(cycle.urlFor(any(RawBlobResourceReference.class), any(PageParameters.class)))
@@ -138,10 +140,10 @@ public class WikiLinkResolverTest {
 				var sprite = mockStatic(SpriteImage.class); var security = mockStatic(SecurityUtils.class)) {
 			requestCycle.when(RequestCycle::get).thenReturn(cycle);
 			sprite.when(() -> SpriteImage.getVersionedHref(io.onedev.server.web.asset.icon.IconScope.class, "plus")).thenReturn("/icons.svg#plus");
-			security.when(() -> SecurityUtils.canEditWikiPage(project, "main", "guide/Setup.md")).thenReturn(true);
-			var document = Jsoup.parseBodyFragment(WikiLinkResolver.resolveWikiLinks("[[guide/Setup]]", context));
-			assertEquals("/project/~wiki/main/guide/Setup", document.selectFirst("a").attr("href"));
-			assertEquals("/project/~wiki/main/guide/Setup?new=true", document.selectFirst("a.add-missing").attr("href"));
+			security.when(() -> SecurityUtils.canEditWikiPage(project, "main", "guide/Getting-started-guide.md")).thenReturn(true);
+			var document = Jsoup.parseBodyFragment(WikiLinkResolver.resolveWikiLinks("[[guide/Getting started-guide#intro|Start]]", context));
+			assertEquals("/project/~wiki/main/guide/Getting-started-guide#intro", document.selectFirst("a").attr("href"));
+			assertEquals("/project/~wiki/main/guide/Getting-started-guide?new=true", document.selectFirst("a.add-missing").attr("href"));
 			var resolver = new WikiLinkResolver(project, "main", null, "guide/Setup.md", "guide/Setup");
 			document = Jsoup.parseBodyFragment(resolver.resolve("<a href='../Home.md'>Home</a><img src='../logo.png'>"));
 			assertEquals("/project/~wiki/main/Home", document.selectFirst("a").attr("href"));
