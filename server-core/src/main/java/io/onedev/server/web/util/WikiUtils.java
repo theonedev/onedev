@@ -17,11 +17,31 @@ import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.markdown.LinkUtils;
 import io.onedev.server.util.HtmlUtils;
+import io.onedev.server.util.UrlUtils;
 import io.onedev.server.validation.validator.PathValidator;
 
 public class WikiUtils {
 
 	private static final Pattern REFERENCE = Pattern.compile("\\[\\[([^\\]\\r\\n]+)\\]\\]");
+
+	/** Resolve Git-relative URLs against the containing repository, keeping the configured server root. */
+	public static @Nullable String submoduleProjectPath(String serverUrl, String projectPath, @Nullable String url) {
+		if (url == null)
+			return null;
+		try {
+			String root = serverUrl.replaceAll("/+$", "") + "/";
+			var target = java.net.URI.create(url);
+			if (url.startsWith("./") || url.startsWith("../"))
+				target = java.net.URI.create(root + projectPath + "/").resolve(target);
+			String normalized = target.normalize().toString();
+			if (!normalized.startsWith(root) || target.getQuery() != null || target.getFragment() != null)
+				return null;
+			String path = UrlUtils.decodePath(normalized.substring(root.length()));
+			return path.isEmpty() ? null : path.replaceAll("/+$", "");
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
 
 	public static boolean isUnderFolder(@Nullable String folder, String path) {
 		return path != null && (folder == null || path.startsWith(folder + "/"));

@@ -60,6 +60,7 @@ import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.Submodule;
 import io.onedev.server.git.exception.BlobEditException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
@@ -70,6 +71,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.ConventionalCommitChecker;
 import io.onedev.server.search.commit.PathCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.FilenameUtils;
@@ -101,7 +104,10 @@ import io.onedev.server.web.util.WikiUtils;
 public class ProjectWikiPage extends ProjectPage {
 	private String revision;
 	private String page;
-	private final @Nullable String folder;
+	private @Nullable String folder;
+	private boolean submodule;
+	private Long wikiProjectId;
+	private String wikiWarning;
 	private final boolean editing;
 	private final boolean creating;
 	private String returnPage;
@@ -144,6 +150,47 @@ public class ProjectWikiPage extends ProjectPage {
 		return OneDev.getInstance(GitService.class);
 	}
 
+	private Project getWikiProject() {
+		return wikiProjectId != null ? OneDev.getInstance(ProjectService.class).load(wikiProjectId) : getProject();
+	}
+
+	private void resolveWikiProject() {
+		if (commitId == null || folder == null)
+			return;
+		var ident = git().getBlobIdent(getProject(), commitId, folder);
+		if (ident == null || !ident.isGitLink())
+			return;
+		submodule = true;
+		var target = Submodule.fromString(getProject().getBlob(ident, true).getText().getContent());
+		commitId = null;
+		if (target.getUrl() == null) {
+			wikiWarning = _T("Wiki submodule URL is not configured.");
+			return;
+		}
+		String serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
+		String projectPath = WikiUtils.submoduleProjectPath(serverUrl, getProject().getPath(), target.getUrl());
+		if (projectPath == null) {
+			wikiWarning = _T("Cannot display wiki pages hosted on other servers.");
+			return;
+		}
+		var project = OneDev.getInstance(ProjectService.class).findByPath(projectPath);
+		if (project == null && projectPath.endsWith(".git"))
+			project = OneDev.getInstance(ProjectService.class).findByPath(projectPath.substring(0, projectPath.length() - 4));
+		if (project == null) {
+			wikiWarning = _T("Wiki project not found.");
+		} else if (!SecurityUtils.canReadCode(project)) {
+			wikiWarning = _T("No permission to access wiki project.");
+		} else {
+			wikiProjectId = project.getId();
+			folder = null;
+			commitId = project.getObjectId(target.getCommitId(), false);
+			if (commitId == null || project.getRevCommit(commitId, false) == null) {
+				commitId = null;
+				wikiWarning = _T("Wiki revision not found.");
+			}
+		}
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -164,6 +211,11 @@ public class ProjectWikiPage extends ProjectPage {
 		});
 		if (revision != null)
 			commitId = getProject().getObjectId(revision, true).copy();
+		resolveWikiProject();
+		var wikiWarningContainer = new WebMarkupContainer("wikiWarning");
+		wikiWarningContainer.setVisible(wikiWarning != null);
+		wikiWarningContainer.add(new Label("message", wikiWarning));
+		add(wikiWarningContainer);
 		String path = WikiUtils.pagePath(folder, page);
 		String content = read(page);
 		if ((editing || creating) && !canEdit(path))
@@ -171,15 +223,15 @@ public class ProjectWikiPage extends ProjectPage {
 		if (commitId != null && content == null && !page.equals("Home") && !editing && !creating)
 			throw new NotFoundException("Wiki page not found: " + page);
 
-		boolean missingHome = content == null && !editing && !creating;
+		boolean missingHome = wikiWarning == null && content == null && !editing && !creating;
 		WebMarkupContainer empty = new WebMarkupContainer("empty");
-		empty.setVisible(getProject().getDefaultBranch() == null && !editing && !creating);
+		empty.setVisible(wikiWarning == null && getProject().getDefaultBranch() == null && !editing && !creating);
 		empty.add(link("addHome", "Home", true, false)
 				.setVisible(canEdit(WikiUtils.pagePath(folder, "Home"))));
 		add(empty);
 
 		WebMarkupContainer wiki = new WebMarkupContainer("wiki");
-		wiki.setVisible(!empty.isVisible());
+		wiki.setVisible(wikiWarning == null && !empty.isVisible());
 		wiki.setOutputMarkupId(true);
 		add(wiki);
 		wiki.add(new RevisionPicker("revision", new LoadableDetachableModel<Project>() {
@@ -553,9 +605,9 @@ public class ProjectWikiPage extends ProjectPage {
 			}
 		}.setVisible(canEdit(WikiUtils.pagePath(folder, "New-page"))));
 		actions.add(new ViewStateAwarePageLink<Void>("history", ProjectCommitsPage.class,
-				ProjectCommitsPage.paramsOf(getProject(), new PathCriteria(List.of(path)).toString(),
+				ProjectCommitsPage.paramsOf(getWikiProject(), new PathCriteria(List.of(path)).toString(),
 						commitId != null ? commitId.name() : null))
-				.setVisible(SecurityUtils.canReadCode(getProject()) && content != null));
+				.setVisible(SecurityUtils.canReadCode(getWikiProject()) && content != null));
 		actions.add(link("edit", page, true, false).setVisible(canEdit(path)));
 		actions.add(new AjaxLink<Void>("delete") {
 			@Override
@@ -585,7 +637,8 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private void selectPage(AjaxRequestTarget target, String destination) {
-		if (editing || creating || !isPermitted())
+		if (editing || creating || !isPermitted() || wikiWarning != null
+				|| submodule && !SecurityUtils.canReadCode(getWikiProject()))
 			throw new UnauthorizedException();
 		WikiUtils.pagePath(folder, destination);
 		String content = read(destination);
@@ -776,19 +829,19 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private String read(String name) {
-		if (commitId == null)
+		if (commitId == null || submodule && !SecurityUtils.canReadCode(getWikiProject()))
 			return null;
-		var blob = getProject().getBlob(new BlobIdent(commitId.name(), WikiUtils.pagePath(folder, name), FileMode.REGULAR_FILE.getBits()), false);
+		var blob = getWikiProject().getBlob(new BlobIdent(commitId.name(), WikiUtils.pagePath(folder, name), FileMode.REGULAR_FILE.getBits()), false);
 		if (blob == null || blob.getText() == null || blob.getLfsPointer() != null || !blob.getIdent().isFile())
 			return null;
 		return blob.getText().getContent();
 	}
 
 	private void collectPages(@Nullable String directory, List<String> pages) {
-		var ident = directory != null ? git().getBlobIdent(getProject(), commitId, directory)
+		var ident = directory != null ? git().getBlobIdent(getWikiProject(), commitId, directory)
 				: new BlobIdent(commitId.name(), null, FileMode.TREE.getBits());
 		if (ident != null && ident.isTree()) {
-			for (var child : git().getChildren(getProject(), commitId, directory, BlobIdentFilter.ALL, false)) {
+			for (var child : git().getChildren(getWikiProject(), commitId, directory, BlobIdentFilter.ALL, false)) {
 				if (child.isTree()) {
 					collectPages(child.path, pages);
 				} else if (child.isFile() && child.path.endsWith(".md")) {
@@ -812,8 +865,9 @@ public class ProjectWikiPage extends ProjectPage {
 		if (markdown == null)
 			return "";
 		var service = OneDev.getInstance(MarkdownService.class);
-		String html = service.process(service.render(markdown), getProject(), null, null, false);
-		return new WikiLinkResolver(getProject(), revision, folder, currentPath, returnPage).resolve(html);
+		String html = service.process(service.render(markdown), getWikiProject(), null, null, false);
+		return new WikiLinkResolver(getProject(), revision, folder, currentPath, returnPage,
+				getWikiProject(), submodule && commitId != null ? commitId.name() : revision, submodule).resolve(html);
 	}
 
 	private static String folderOf(String path) {
@@ -822,7 +876,7 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private boolean canEdit(String path) {
-		return Objects.equals(folder, getProject().getWikiFolder().getPath()) && SecurityUtils.canEditWikiPage(getProject(), revision, path);
+		return !submodule && Objects.equals(folder, getProject().getWikiFolder().getPath()) && SecurityUtils.canEditWikiPage(getProject(), revision, path);
 	}
 
 	private void save(Form<?> form, String name, String text, String message, boolean delete, boolean existed) {

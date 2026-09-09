@@ -26,6 +26,20 @@ import io.onedev.server.security.permission.WriteCode;
 public class WikiUtilsTest {
 
 	@Test
+	public void resolvesOnlySubmodulesUnderConfiguredServerRoot() {
+		assertEquals("team/wiki", WikiUtils.submoduleProjectPath("https://host/onedev", "team/app", "https://host/onedev/team/wiki"));
+		assertEquals("team/wiki", WikiUtils.submoduleProjectPath("https://host/onedev/", "team/app", "../wiki"));
+		assertEquals("team/wiki.git", WikiUtils.submoduleProjectPath("https://host", "team/app", "https://host/team/wiki.git"));
+		for (String url : new String[] {"https://other/team/wiki", "https://host.evil/onedev/team/wiki",
+				"https://host/onedev-other/wiki", "http://host/onedev/wiki", "ssh://host/onedev/wiki",
+				"git@host:team/wiki", "//other/wiki", "../../../wiki", "https://host/onedev/../wiki",
+				"https://host/onedev/wiki?query", null}) {
+			assertEquals(null, WikiUtils.submoduleProjectPath("https://host/onedev", "team/app", url));
+		}
+	}
+
+
+	@Test
 	public void insertsWikiReferencesRelativeToCurrentPage() {
 		assertEquals("[[../Home|Home]]", WikiUtils.pageReference("wiki", "wiki/Guides/Page.md", "wiki/Home.md", null));
 		assertEquals("[[../Home|Home]]", WikiUtils.pageReference("wiki", "wiki/Guides/Page.md", "wiki/Home.md", ""));

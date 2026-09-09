@@ -151,6 +151,36 @@ public class WikiLinkResolverTest {
 		}
 	}
 
+	@Test
+	public void submoduleLinksKeepWikiNavigationButReadTargetCommitWithoutCreationActions() {
+		var project = mock(Project.class);
+		var target = mock(Project.class);
+		when(project.getPath()).thenReturn("project");
+		var cycle = mock(RequestCycle.class);
+		when(cycle.urlFor(eq(ProjectWikiPage.class), any(PageParameters.class)))
+				.thenAnswer(it -> url("~wiki", it.getArgument(1)));
+		when(cycle.urlFor(any(RawBlobResourceReference.class), any(PageParameters.class))).thenAnswer(it -> {
+			PageParameters params = it.getArgument(1);
+			assertEquals("pinned", params.get("revision").toString());
+			return "/target/raw/" + params.get("file");
+		});
+		try (var requestCycle = mockStatic(RequestCycle.class); var sprite = mockStatic(SpriteImage.class);
+				var security = mockStatic(SecurityUtils.class)) {
+			requestCycle.when(RequestCycle::get).thenReturn(cycle);
+			security.when(() -> SecurityUtils.canModifyFile(any(), any(), any())).thenReturn(true);
+			security.when(() -> SecurityUtils.canEditWikiPage(any(), any(), any())).thenReturn(true);
+			var resolver = new WikiLinkResolver(project, "main", null, "Home.md", "Home", target, "pinned", true);
+			var document = Jsoup.parseBodyFragment(resolver.resolve(
+					"[[Missing]] <a href='Guide.md'>Guide</a><img src='logo.png'><a href='missing.pdf'>File</a>"));
+			assertEquals("/project/~wiki/main/Missing", document.selectFirst("a").attr("href"));
+			assertEquals(1, document.select("a[href=/project/~wiki/main/Guide]").size());
+			assertEquals("/target/raw/logo.png", document.selectFirst("img").attr("src"));
+			assertTrue(document.select("a.add-missing").isEmpty());
+			verify(target).getBlob(argThat(it -> "pinned".equals(it.revision) && "Missing.md".equals(it.path)), eq(false));
+			verify(target, atLeastOnce()).getMode(eq("pinned"), anyString());
+		}
+	}
+
 	private static String url(String route, PageParameters params) {
 		String path = java.util.stream.IntStream.range(0, params.getIndexedCount())
 				.mapToObj(i -> params.get(i).toString()).collect(java.util.stream.Collectors.joining("/"));

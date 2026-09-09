@@ -25,6 +25,9 @@ import io.onedev.server.web.resource.RawBlobResourceReference;
 public class WikiLinkResolver {
 
 	private final Project project;
+	private final Project wikiProject;
+	private final String wikiRevision;
+	private final boolean readOnly;
 	private final String revision;
 	private final @Nullable String folder;
 	private final String currentPath;
@@ -32,6 +35,14 @@ public class WikiLinkResolver {
 
 	public WikiLinkResolver(Project project, @Nullable String revision, @Nullable String folder,
 			String currentPath, String returnPage) {
+		this(project, revision, folder, currentPath, returnPage, project, revision, false);
+	}
+
+	public WikiLinkResolver(Project project, @Nullable String revision, @Nullable String folder,
+			String currentPath, String returnPage, Project wikiProject, @Nullable String wikiRevision, boolean readOnly) {
+		this.wikiProject = wikiProject;
+		this.wikiRevision = wikiRevision;
+		this.readOnly = readOnly;
 		this.project = project;
 		this.revision = revision;
 		this.folder = folder;
@@ -61,7 +72,7 @@ public class WikiLinkResolver {
 	public String resolve(String html) {
 		html = WikiUtils.resolveRelativeLinks(html, currentPath,
 				path -> fileUrl(path, false), path -> fileUrl(path, true),
-				path -> project.getMode(revision, path) == 0, this::addFileUrl, addIconHref());
+				path -> wikiProject.getMode(wikiRevision, path) == 0, this::addFileUrl, addIconHref());
 		return resolvePageLinks(html);
 	}
 
@@ -69,7 +80,7 @@ public class WikiLinkResolver {
 	public String resolvePageLinks(String html) {
 		return WikiUtils.resolvePageLinks(html,
 				destination -> WikiUtils.resolvePagePath(currentPath, destination), this::pageUrl,
-				path -> project.getBlob(new BlobIdent(revision, path), false) == null,
+				path -> wikiProject.getBlob(new BlobIdent(wikiRevision, path), false) == null,
 				this::addPageUrl, addIconHref());
 	}
 
@@ -90,13 +101,13 @@ public class WikiLinkResolver {
 		if (!image && path.endsWith(".md"))
 			return pageUrl(path);
 		return RequestCycle.get().urlFor(new RawBlobResourceReference(),
-				RawBlobResource.paramsOf(project, new BlobIdent(revision, path))).toString();
+				RawBlobResource.paramsOf(wikiProject, new BlobIdent(wikiRevision, path))).toString();
 	}
 
 	private String repositoryUrl(String path, boolean image) {
-		int mode = project.getMode(revision, path);
-		var ident = new BlobIdent(revision, path, mode != 0 ? mode : FileMode.REGULAR_FILE.getBits());
-		var params = ProjectBlobPage.paramsOf(project, ident);
+		int mode = wikiProject.getMode(wikiRevision, path);
+		var ident = new BlobIdent(wikiRevision, path, mode != 0 ? mode : FileMode.REGULAR_FILE.getBits());
+		var params = ProjectBlobPage.paramsOf(wikiProject, ident);
 		if (image)
 			params.add("raw", true);
 		var cycle = RequestCycle.get();
@@ -109,7 +120,7 @@ public class WikiLinkResolver {
 	}
 
 	private @Nullable String addPageUrl(String path, String originalPath) {
-		if (!Objects.equals(folder, project.getWikiFolder().getPath()) || !WikiUtils.isUnderFolder(folder, path)
+		if (readOnly || !Objects.equals(folder, project.getWikiFolder().getPath()) || !WikiUtils.isUnderFolder(folder, path)
 				|| !SecurityUtils.canEditWikiPage(project, revision, path))
 			return null;
 		String destination = pageName(path);
@@ -121,7 +132,7 @@ public class WikiLinkResolver {
 	}
 
 	private @Nullable String addFileUrl(String path) {
-		if (!SecurityUtils.canModifyFile(project, revision, path))
+		if (readOnly || !SecurityUtils.canModifyFile(project, revision, path))
 			return null;
 		var state = new ProjectBlobPage.State(new BlobIdent(revision, currentPath, FileMode.REGULAR_FILE.getBits()));
 		state.mode = Mode.ADD;
