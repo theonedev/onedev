@@ -33,6 +33,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -42,6 +43,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.validation.ValidationError;
 import org.eclipse.jgit.lib.FileMode;
 import org.jspecify.annotations.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
@@ -74,6 +76,7 @@ import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.RevisionAndPath;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.BlobMarkdownEditor;
@@ -94,8 +97,6 @@ import io.onedev.server.web.util.DefaultCommitMessage;
 import io.onedev.server.web.util.DefaultCommitMessage.Operation;
 import io.onedev.server.web.util.WikiLinkResolver;
 import io.onedev.server.web.util.WikiUtils;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
 
 public class ProjectWikiPage extends ProjectPage {
 	private String revision;
@@ -109,7 +110,7 @@ public class ProjectWikiPage extends ProjectPage {
 
 	private WebMarkupContainer navigation;
 
-	private BeanEditor pageEditor;
+	private TextField<String> nameInput;
 
 	private AbstractPostAjaxBehavior navigateBehavior;
 
@@ -289,17 +290,64 @@ public class ProjectWikiPage extends ProjectPage {
 		});
 		wiki.add(view);
 
-		var bean = new WikiEditBean();
-		bean.setName(creating ? getPageParameters().get("initial-name").toString("") : page);
-		bean.setContent(creating || content == null ? "" : content);
-		pageEditor = BeanContext.edit("editor", bean);
 		Form<Void> form = new Form<>("form");
-		form.add(pageEditor);
+		var name = Model.of(creating ? getPageParameters().get("initial-name").toString("") : page);
+		nameInput = new TextField<>("name", name);
+		nameInput.setRequired(true).setLabel(Model.of(_T("Page name")));
+		nameInput.add(validatable -> {
+			String normalized = validatable.getValue().replace(' ', '-');
+			try {
+				String editedPath = WikiUtils.pagePath(folder, normalized);
+				if ((creating || !normalized.equals(page)) && commitId != null
+						&& getProject().getBlob(new BlobIdent(commitId.name(), editedPath), false) != null)
+					validatable.error(new ValidationError().setMessage(_T("A page with this name already exists.")));
+			} catch (IllegalArgumentException | io.onedev.server.exception.NotAcceptableException e) {
+				validatable.error(new ValidationError().setMessage(_T(e.getMessage())));
+			}
+		});
+		form.add(nameInput);
+		var nameFeedback = new FencedFeedbackPanel("nameFeedback", nameInput);
+		nameFeedback.setOutputMarkupId(true);
+		form.add(nameFeedback);
+		var contentInput = newContentEditor("content", Model.of(
+				(creating || content == null ? "" : content).getBytes(StandardCharsets.UTF_8)));
+		contentInput.setLabel(Model.of(_T("Content")));
+		contentInput.add(validatable -> {
+			if (validatable.getValue().length == 0)
+				validatable.error(new ValidationError().addKey("Required"));
+		});
+		form.add(contentInput);
+		form.add(new FencedFeedbackPanel("contentFeedback", contentInput));
+		var message = Model.of("");
+		var messageInput = newCommitMessageInput(message, name, false, !creating && content != null);
+		messageInput.setLabel(Model.of(_T("Commit message")));
+		messageInput.add(validatable -> {
+			String error = getProject().getBranchProtection(revision != null ? revision : "main", SecurityUtils.getAuthUser())
+					.checkCommitMessage(validatable.getValue(), false);
+			if (error != null)
+				validatable.error(new ValidationError().setMessage(error));
+		});
+		form.add(messageInput);
+		form.add(new FencedFeedbackPanel("messageFeedback", messageInput));
+		nameInput.add(new OnTypingDoneBehavior() {
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				target.add(nameFeedback);
+				String placeholder = defaultCommitMessage(getEditedPageName(), false, !creating && content != null);
+				target.appendJavaScript("$('#" + messageInput.getMarkupId() + "').attr('placeholder', '"
+						+ JavaScriptEscape.escapeJavaScript(placeholder) + "');");
+			}
+
+			@Override
+			protected void onError(AjaxRequestTarget target, RuntimeException e) {
+				onTypingDone(target);
+			}
+		});
 		form.add(new Button("save") {
 			@Override
 			public void onSubmit() {
-				save(form, bean.getName(), bean.getContent(),
-						bean.getCommitMessage(), false, content != null);
+				save(form, name.getObject(), new String(contentInput.getModelObject(), StandardCharsets.UTF_8),
+						message.getObject(), false, content != null);
 			}
 		});
 		form.setVisible(editing || creating);
@@ -310,15 +358,13 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private String getEditedPageName() {
-		var bean = (WikiEditBean) pageEditor.getConvertedInput();
-		if (bean == null)
-			bean = (WikiEditBean) pageEditor.getModelObject();
-		return bean.getName();
+		return nameInput.hasRawInput() ? nameInput.getRawInput() : nameInput.getModelObject();
 	}
 
-	public BlobMarkdownEditor newContentEditor(String id, IModel<byte[]> text) {
+	private BlobMarkdownEditor newContentEditor(String id, IModel<byte[]> text) {
 		String path = WikiUtils.pagePath(folder, page);
 		return new BlobMarkdownEditor(id, text, null) {
+
 			private String getEditorPath() {
 				String pageName = getEditedPageName();
 				if (pageName != null && !pageName.isBlank()) {
@@ -430,26 +476,6 @@ public class ProjectWikiPage extends ProjectPage {
 				return ProjectWikiPage.this.render(markdown, getEditorPath());
 			}
 		};
-	}
-
-	public String getDefaultPageCommitMessage(String name) {
-		return defaultCommitMessage(name, false, !creating && read(page) != null);
-	}
-
-	String getRevision() {
-		return revision;
-	}
-
-	String getPageName() {
-		return page;
-	}
-
-	boolean isCreating() {
-		return creating;
-	}
-
-	ObjectId getCommitId() {
-		return commitId;
 	}
 
 	private WebMarkupContainer newActions(String path, String content) {

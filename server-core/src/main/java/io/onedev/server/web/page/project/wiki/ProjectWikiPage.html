@@ -66,7 +66,21 @@
             </div>
             <form wicket:id="form" class="leave-confirm overflow-auto p-4">
                 <div wicket:id="feedback"></div>
-                <div wicket:id="editor"></div>
+                <div class="form-group">
+                    <label wicket:for="name"><wicket:t>Name</wicket:t> <span class="text-danger">*</span></label>
+                    <input wicket:id="name" type="text" class="form-control">
+                    <div wicket:id="nameFeedback"></div>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="content"><wicket:t>Content</wicket:t> <span class="text-danger">*</span></label>
+                    <div wicket:id="content"></div>
+                    <div wicket:id="contentFeedback"></div>
+                </div>
+                <div class="form-group">
+                    <label wicket:for="message"><wicket:t>Commit message</wicket:t></label>
+                    <textarea wicket:id="message" class="form-control" rows="3"></textarea>
+                    <div wicket:id="messageFeedback"></div>
+                </div>
                 <input wicket:id="save" type="submit" class="btn btn-primary" t:value="Save page">
                 <a wicket:id="cancel" class="btn btn-light ml-2"><wicket:t>Cancel</wicket:t></a>
             </form>
