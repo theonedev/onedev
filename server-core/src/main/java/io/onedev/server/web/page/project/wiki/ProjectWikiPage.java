@@ -540,7 +540,8 @@ public class ProjectWikiPage extends ProjectPage {
 	private WebMarkupContainer newActions(String path, String content) {
 		actions = new WebMarkupContainer("actions");
 		actions.setOutputMarkupPlaceholderTag(true);
-		actions.setVisible(!editing && !creating && content != null);
+		actions.setVisible(!editing && !creating
+				&& (content != null || submodule && wikiProjectId != null && commitId != null));
 
 		actions.add(new MenuLink("add") {
 			@Override
@@ -615,8 +616,20 @@ public class ProjectWikiPage extends ProjectPage {
 				showDeleteConfirm(target, page, null);
 			}
 		}.setVisible(canEdit(path) && content != null));
+		actions.add(newSubmoduleLink());
 
 		return actions;
+	}
+
+	private Component newSubmoduleLink() {
+		var link = new BookmarkablePageLink<Void>("submodule", ProjectWikiPage.class,
+				getSubmoduleParams());
+		return link.setVisible(submodule && wikiProjectId != null && commitId != null)
+				.setOutputMarkupPlaceholderTag(true);
+	}
+
+	private PageParameters getSubmoduleParams() {
+		return paramsOf(getWikiProject(), commitId != null ? commitId.name() : null, "Home");
 	}
 
 	private Component newSidebarEdit() {

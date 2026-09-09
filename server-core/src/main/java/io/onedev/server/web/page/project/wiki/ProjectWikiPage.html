@@ -17,12 +17,15 @@
                     <div wicket:id="subtitle" class="text-muted ml-2"><wicket:t>in</wicket:t> <span wicket:id="folder"></span></div>
                 </div>
             </div>
-            <div wicket:id="actions" class="py-2 d-flex align-items-center ml-3">
-                <div class="btn-group">
-                <a wicket:id="history" class="btn btn-light btn-hover-primary btn-sm btn-icon" t:data-tippy-content="Page history"><wicket:svg href="clock" class="icon"></wicket:svg></a>
-                <a wicket:id="edit" class="btn btn-light btn-hover-primary btn-sm btn-icon" t:data-tippy-content="Edit page"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-                <a wicket:id="add" class="btn btn-light btn-hover-primary btn-sm btn-icon" t:data-tippy-content="Add page or upload files"><wicket:svg href="plus" class="icon"></wicket:svg></a>
-                <a wicket:id="delete" class="btn btn-light btn-hover-danger btn-sm btn-icon" t:data-tippy-content="Delete page"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+            <div class="py-2 d-flex align-items-center ml-3">
+                <div wicket:id="actions" class="d-flex align-items-center">
+                    <div class="btn-group">
+                        <a wicket:id="history" class="btn btn-light btn-hover-primary btn-sm btn-icon" t:data-tippy-content="Page history"><wicket:svg href="clock" class="icon"></wicket:svg></a>
+                        <a wicket:id="edit" class="btn btn-light btn-hover-primary btn-sm btn-icon" t:data-tippy-content="Edit page"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+                        <a wicket:id="add" class="btn btn-light btn-hover-primary btn-sm btn-icon" t:data-tippy-content="Add page or upload files"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+                        <a wicket:id="delete" class="btn btn-light btn-hover-danger btn-sm btn-icon" t:data-tippy-content="Delete page"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+                        <a wicket:id="submodule" class="btn btn-light btn-hover-primary btn-sm btn-icon" t:data-tippy-content="This wiki is linked as a submodule. Click to visit wiki in the target project" t:aria-label="Open target wiki home page"><wicket:svg href="folder-embed" class="icon"></wicket:svg></a>
+                    </div>
                 </div>
             </div>
         </div>
