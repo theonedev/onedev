@@ -1,6 +1,8 @@
 package io.onedev.server.model;
 
-import io.onedev.server.model.support.WikiSetting;
+import io.onedev.server.model.support.wiki.WikiFolder;
+import io.onedev.server.model.support.wiki.WikiSetting;
+import io.onedev.server.model.support.wiki.SpecifiedPath;
 
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static io.onedev.server.model.Project.PROP_NAME;
@@ -1062,7 +1064,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.codeManagement = codeManagement;
 	}
 
-	@Editable(order=275, description="Whether or not to enable wiki management for the project")
+	@Editable(order=275, description="""
+			Whether or not to enable wiki management for the project. Wiki pages 
+			are accessible to all users with access to the project""")
 	@DependsOn(property="codeManagement")
 	public boolean isWikiManagement() {
 		return wikiManagement;
@@ -1169,12 +1173,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.wikiSetting = wikiSetting;
 	}
 
-	public String getWikiFolder() {
+	public WikiFolder getWikiFolder() {
 		for (Project current = this; current != null; current = current.getParent()) {
 			if (current.getWikiSetting().getFolder() != null)
 				return current.getWikiSetting().getFolder();
 		}
-		return "wiki";
+		return new SpecifiedPath();
 	}
 
 	public CodeAnalysisSetting getCodeAnalysisSetting() {

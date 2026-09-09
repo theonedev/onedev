@@ -12,8 +12,10 @@ import org.jsoup.Jsoup;
 import org.junit.Test;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.wiki.SpecifiedPath;
+import io.onedev.server.model.support.wiki.WikiSetting;
+import io.onedev.server.model.support.wiki.RepositoryRoot;
 import io.onedev.server.model.Role;
-import io.onedev.server.model.support.WikiSetting;
 import io.onedev.server.model.support.role.CodePrivilege;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.SecurityUtils;
@@ -114,13 +116,21 @@ public class WikiUtilsTest {
 		Project parent = new Project();
 		Project child = new Project();
 		child.setParent(parent);
-		assertEquals("wiki", child.getWikiFolder());
-		parent.getWikiSetting().setFolder("documentation");
-		assertEquals("documentation", child.getWikiFolder());
-		child.getWikiSetting().setFolder("docs/wiki");
-		assertEquals("docs/wiki", child.getWikiFolder());
+		assertEquals("wiki", child.getWikiFolder().getPath());
+		parent.getWikiSetting().setFolder(specifiedPath("documentation"));
+		assertEquals("documentation", child.getWikiFolder().getPath());
+		child.getWikiSetting().setFolder(specifiedPath("docs/wiki"));
+		assertEquals("docs/wiki", child.getWikiFolder().getPath());
 		child.getWikiSetting().setFolder(null);
-		assertEquals("documentation", child.getWikiFolder());
+		assertEquals("documentation", child.getWikiFolder().getPath());
+		child.getWikiSetting().setFolder(new RepositoryRoot());
+		org.junit.Assert.assertNull(child.getWikiFolder().getPath());
+		child.getWikiSetting().setFolder(null);
+		parent.getWikiSetting().setFolder(new RepositoryRoot());
+		org.junit.Assert.assertNull(child.getWikiFolder().getPath());
+		parent.getWikiSetting().setFolder(null);
+		assertTrue(parent.getWikiFolder() instanceof SpecifiedPath);
+		assertEquals("wiki", child.getWikiFolder().getPath());
 	}
 
 	@Test
@@ -141,7 +151,7 @@ public class WikiUtilsTest {
 	public void projectAccessReadsOnlyEnabledWikiFiles() {
 		var project = mock(Project.class);
 		when(project.isWikiManagement()).thenReturn(true);
-		when(project.getWikiFolder()).thenReturn("docs/wiki");
+		when(project.getWikiFolder()).thenReturn(specifiedPath("docs/wiki"));
 		var subject = mock(org.apache.shiro.subject.Subject.class);
 		when(subject.isPermitted(any(ProjectPermission.class))).thenAnswer(invocation ->
 				((ProjectPermission) invocation.getArgument(0)).getPrivilege() instanceof AccessProject);
@@ -150,6 +160,9 @@ public class WikiUtilsTest {
 		assertTrue(SecurityUtils.canReadFile(subject, project, "docs/wiki/image.png"));
 		assertFalse(SecurityUtils.canReadFile(subject, project, "private.txt"));
 		assertFalse(SecurityUtils.canReadFile(subject, project, "docs/wiki-other/Home.md"));
+		when(project.getWikiFolder()).thenReturn(new RepositoryRoot());
+		assertTrue(SecurityUtils.canReadFile(subject, project, "Home.md"));
+		assertTrue(SecurityUtils.canReadFile(subject, project, "images/logo.png"));
 		when(project.isWikiManagement()).thenReturn(false);
 		assertFalse(SecurityUtils.canReadFile(subject, project, "docs/wiki/Home.md"));
 		when(project.isWikiManagement()).thenReturn(true);
@@ -197,17 +210,41 @@ public class WikiUtilsTest {
 	public void validatesFolderAsRelativePath() {
 		try (var factory = javax.validation.Validation.buildDefaultValidatorFactory()) {
 			var setting = new WikiSetting();
-			setting.setFolder("../outside");
+			setting.setFolder(specifiedPath("../outside"));
 			var violations = factory.getValidator().validate(setting);
 			assertEquals(1, violations.size());
-			assertEquals("folder", violations.iterator().next().getPropertyPath().toString());
-			setting.setFolder("/absolute");
+			assertEquals("folder.path", violations.iterator().next().getPropertyPath().toString());
+			setting.setFolder(specifiedPath("/absolute"));
 			assertEquals(1, factory.getValidator().validate(setting).size());
-			setting.setFolder("docs/wiki");
+			setting.setFolder(specifiedPath("docs/wiki"));
+			assertTrue(factory.getValidator().validate(setting).isEmpty());
+			setting.setFolder(specifiedPath(""));
+			assertFalse(factory.getValidator().validate(setting).isEmpty());
+			setting.setFolder(specifiedPath(null));
+			assertFalse(factory.getValidator().validate(setting).isEmpty());
+			setting.setFolder(new RepositoryRoot());
 			assertTrue(factory.getValidator().validate(setting).isEmpty());
 			setting.setFolder(null);
 			assertTrue(factory.getValidator().validate(setting).isEmpty());
 		}
+	}
+
+	private static SpecifiedPath specifiedPath(String path) {
+		var folder = new SpecifiedPath();
+		folder.setPath(path);
+		return folder;
+	}
+
+	@Test
+	public void supportsRepositoryRootPaths() {
+		assertEquals("Home.md", WikiUtils.pagePath(null, "Home"));
+		assertEquals("guide/Setup.md", WikiUtils.pagePath(null, "guide/Setup"));
+		assertTrue(WikiUtils.isUnderFolder(null, "Home.md"));
+		assertTrue(WikiUtils.isUnderFolder(null, "images/logo.png"));
+		assertFalse(WikiUtils.isUnderFolder(null, null));
+		assertEquals("[[../Home|Home]]", WikiUtils.pageReference(null, "guide/Setup.md", "Home.md", null));
+		assertThrows(io.onedev.server.exception.NotAcceptableException.class,
+				() -> WikiUtils.pagePath(null, "../secret"));
 	}
 
 }

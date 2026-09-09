@@ -13,7 +13,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.WikiSetting;
+import io.onedev.server.model.support.wiki.WikiSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;

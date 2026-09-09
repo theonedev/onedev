@@ -1,7 +1,5 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.model.support.WikiSetting;
-
 import static io.onedev.server.util.DateUtils.parseISO8601Date;
 import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.time.ZoneId.systemDefault;
@@ -63,6 +61,7 @@ import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
+import io.onedev.server.model.support.wiki.WikiSetting;
 import io.onedev.server.model.support.workspace.ProjectWorkspaceSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;

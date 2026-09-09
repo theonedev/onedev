@@ -13,6 +13,8 @@ import org.jsoup.Jsoup;
 import org.junit.Test;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.wiki.SpecifiedPath;
+import io.onedev.server.model.support.wiki.RepositoryRoot;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -28,7 +30,7 @@ public class WikiLinkResolverTest {
 	public void wikiReferencesResolveInViewsAndEditorPreviews() {
 		Project project = mock(Project.class);
 		when(project.getPath()).thenReturn("project");
-		when(project.getWikiFolder()).thenReturn("docs/wiki");
+		when(project.getWikiFolder()).thenReturn(specifiedPath("docs/wiki"));
 		BlobRenderContext context = mock(BlobRenderContext.class);
 		when(context.getProject()).thenReturn(project);
 		when(context.getBlobIdent()).thenReturn(new BlobIdent("main", "docs/wiki/Home.md"));
@@ -57,7 +59,7 @@ public class WikiLinkResolverTest {
 	@Test
 	public void previewUsesEditedPathToDetermineWhetherFileIsWiki() {
 		Project project = mock(Project.class);
-		when(project.getWikiFolder()).thenReturn("docs/wiki");
+		when(project.getWikiFolder()).thenReturn(specifiedPath("docs/wiki"));
 		BlobRenderContext context = mock(BlobRenderContext.class);
 		when(context.getProject()).thenReturn(project);
 		when(context.getBlobIdent()).thenReturn(new BlobIdent("main", "docs/wiki/Home.md"));
@@ -75,7 +77,7 @@ public class WikiLinkResolverTest {
 	public void routesOrdinaryLinksImagesAndWikiReferencesConsistently() {
 		Project project = mock(Project.class);
 		when(project.getPath()).thenReturn("project");
-		when(project.getWikiFolder()).thenReturn("wiki");
+		when(project.getWikiFolder()).thenReturn(specifiedPath("wiki"));
 		when(project.getMode(eq("main"), anyString())).thenReturn(FileMode.REGULAR_FILE.getBits());
 		RequestCycle cycle = mock(RequestCycle.class);
 		UrlRenderer renderer = mock(UrlRenderer.class);
@@ -116,9 +118,46 @@ public class WikiLinkResolverTest {
 		}
 	}
 
+	@Test
+	public void routesRepositoryRootPagesAndCreationLinks() {
+		var project = mock(Project.class);
+		when(project.getPath()).thenReturn("project");
+		when(project.getWikiFolder()).thenReturn(new RepositoryRoot());
+		var context = mock(BlobRenderContext.class);
+		when(context.getProject()).thenReturn(project);
+		when(context.getMode()).thenReturn(Mode.VIEW);
+		when(context.getBlobIdent()).thenReturn(new BlobIdent("main", "Home.md"));
+		var cycle = mock(RequestCycle.class);
+		when(cycle.urlFor(eq(ProjectWikiPage.class), any(PageParameters.class))).thenAnswer(it -> {
+			PageParameters params = it.getArgument(1);
+			return url("~wiki", params) + (params.get("new").toBoolean(false) ? "?new=true" : "");
+		});
+		when(cycle.urlFor(any(RawBlobResourceReference.class), any(PageParameters.class)))
+				.thenAnswer(it -> "/raw/" + ((PageParameters) it.getArgument(1)).get("file"));
+		try (var requestCycle = mockStatic(RequestCycle.class);
+				var sprite = mockStatic(SpriteImage.class); var security = mockStatic(SecurityUtils.class)) {
+			requestCycle.when(RequestCycle::get).thenReturn(cycle);
+			sprite.when(() -> SpriteImage.getVersionedHref(io.onedev.server.web.asset.icon.IconScope.class, "plus")).thenReturn("/icons.svg#plus");
+			security.when(() -> SecurityUtils.canEditWikiPage(project, "main", "guide/Setup.md")).thenReturn(true);
+			var document = Jsoup.parseBodyFragment(WikiLinkResolver.resolveWikiLinks("[[guide/Setup]]", context));
+			assertEquals("/project/~wiki/main/guide/Setup", document.selectFirst("a").attr("href"));
+			assertEquals("/project/~wiki/main/guide/Setup?new=true", document.selectFirst("a.add-missing").attr("href"));
+			var resolver = new WikiLinkResolver(project, "main", null, "guide/Setup.md", "guide/Setup");
+			document = Jsoup.parseBodyFragment(resolver.resolve("<a href='../Home.md'>Home</a><img src='../logo.png'>"));
+			assertEquals("/project/~wiki/main/Home", document.selectFirst("a").attr("href"));
+			assertEquals("/raw/logo.png", document.selectFirst("img").attr("src"));
+		}
+	}
+
 	private static String url(String route, PageParameters params) {
 		String path = java.util.stream.IntStream.range(0, params.getIndexedCount())
 				.mapToObj(i -> params.get(i).toString()).collect(java.util.stream.Collectors.joining("/"));
 		return "/project/" + route + "/" + path + (params.get("raw").toBoolean(false) ? "?raw=true" : "");
 	}
+	private static SpecifiedPath specifiedPath(String path) {
+		var folder = new SpecifiedPath();
+		folder.setPath(path);
+		return folder;
+	}
+
 }

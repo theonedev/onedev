@@ -10,11 +10,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
-import javax.validation.ConstraintValidatorContext;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.AttributeModifier;
@@ -43,6 +43,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
+import org.jspecify.annotations.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -99,7 +100,7 @@ import io.onedev.server.web.editable.BeanEditor;
 public class ProjectWikiPage extends ProjectPage {
 	private String revision;
 	private String page;
-	private final String folder;
+	private final @Nullable String folder;
 	private final boolean editing;
 	private final boolean creating;
 	private String returnPage;
@@ -129,7 +130,7 @@ public class ProjectWikiPage extends ProjectPage {
 		}
 		revision = revisionAndPath.getRevision();
 		page = revisionAndPath.getPath() != null ? revisionAndPath.getPath() : "Home";
-		folder = getProject().getWikiFolder();
+		folder = getProject().getWikiFolder().getPath();
 		WikiUtils.pagePath(folder, page);
 		editing = params.get("edit").toBoolean(false);
 		creating = params.get("new").toBoolean(false);
@@ -288,16 +289,16 @@ public class ProjectWikiPage extends ProjectPage {
 		});
 		wiki.add(view);
 
-		var bean = new WikiPageBean();
+		var bean = new WikiEditBean();
 		bean.setName(creating ? getPageParameters().get("initial-name").toString("") : page);
-		bean.setContent((creating || content == null ? "" : content).getBytes(StandardCharsets.UTF_8));
+		bean.setContent(creating || content == null ? "" : content);
 		pageEditor = BeanContext.edit("editor", bean);
 		Form<Void> form = new Form<>("form");
 		form.add(pageEditor);
 		form.add(new Button("save") {
 			@Override
 			public void onSubmit() {
-				save(form, bean.getName(), new String(bean.getContent(), StandardCharsets.UTF_8),
+				save(form, bean.getName(), bean.getContent(),
 						bean.getCommitMessage(), false, content != null);
 			}
 		});
@@ -309,9 +310,9 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private String getEditedPageName() {
-		var bean = (WikiPageBean) pageEditor.getConvertedInput();
+		var bean = (WikiEditBean) pageEditor.getConvertedInput();
 		if (bean == null)
-			bean = (WikiPageBean) pageEditor.getModelObject();
+			bean = (WikiEditBean) pageEditor.getModelObject();
 		return bean.getName();
 	}
 
@@ -413,7 +414,7 @@ public class ProjectWikiPage extends ProjectPage {
 
 					@Override
 					public void onSelect(AjaxRequestTarget target, String selectedPath, boolean image, String label) {
-						if (!image && selectedPath.startsWith(folder + "/") && selectedPath.endsWith(".md")) {
+						if (!image && WikiUtils.isUnderFolder(folder, selectedPath) && selectedPath.endsWith(".md")) {
 							insertText(target, WikiUtils.pageReference(folder, getEditorPath(), selectedPath, label));
 						} else {
 							var ident = new BlobIdent(revision, selectedPath, FileMode.REGULAR_FILE.getBits());
@@ -435,32 +436,20 @@ public class ProjectWikiPage extends ProjectPage {
 		return defaultCommitMessage(name, false, !creating && read(page) != null);
 	}
 
-	public boolean validatePage(WikiPageBean bean, ConstraintValidatorContext context) {
-		String name = bean.getName();
-		if (name == null || name.isBlank())
-			return true; // The name property's constraint supplies this error.
-		name = name.trim().replace(' ', '-');
-		if (PathValidator.checkPath(io.onedev.server.annotation.Path.Type.RELATIVE, name) != null)
-			return true;
-		boolean valid = true;
-		if ((creating || !name.equals(page)) && commitId != null
-				&& getProject().getBlob(new BlobIdent(commitId.name(), WikiUtils.pagePath(folder, name)), false) != null) {
-			context.disableDefaultConstraintViolation();
-			context.buildConstraintViolationWithTemplate(_T("A page with this name already exists."))
-					.addPropertyNode("name").addConstraintViolation();
-			valid = false;
-		}
-		String message = bean.getCommitMessage();
-		if (message == null || message.isBlank())
-			message = getDefaultPageCommitMessage(name);
-		String error = getProject().getBranchProtection(revision != null ? revision : "main", SecurityUtils.getAuthUser())
-				.checkCommitMessage(message, false);
-		if (error != null) {
-			context.disableDefaultConstraintViolation();
-			context.buildConstraintViolationWithTemplate(error).addPropertyNode("commitMessage").addConstraintViolation();
-			valid = false;
-		}
-		return valid;
+	String getRevision() {
+		return revision;
+	}
+
+	String getPageName() {
+		return page;
+	}
+
+	boolean isCreating() {
+		return creating;
+	}
+
+	ObjectId getCommitId() {
+		return commitId;
 	}
 
 	private WebMarkupContainer newActions(String path, String content) {
@@ -762,14 +751,15 @@ public class ProjectWikiPage extends ProjectPage {
 		return blob.getText().getContent();
 	}
 
-	private void collectPages(String directory, List<String> pages) {
-		var ident = git().getBlobIdent(getProject(), commitId, directory);
+	private void collectPages(@Nullable String directory, List<String> pages) {
+		var ident = directory != null ? git().getBlobIdent(getProject(), commitId, directory)
+				: new BlobIdent(commitId.name(), null, FileMode.TREE.getBits());
 		if (ident != null && ident.isTree()) {
 			for (var child : git().getChildren(getProject(), commitId, directory, BlobIdentFilter.ALL, false)) {
 				if (child.isTree()) {
 					collectPages(child.path, pages);
 				} else if (child.isFile() && child.path.endsWith(".md")) {
-					String name = child.path.substring(folder.length() + 1, child.path.length() - 3);
+					String name = child.path.substring(folder != null ? folder.length() + 1 : 0, child.path.length() - 3);
 					if (!name.equals("_Sidebar"))
 						pages.add(name);
 				}
@@ -799,7 +789,7 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private boolean canEdit(String path) {
-		return folder.equals(getProject().getWikiFolder()) && SecurityUtils.canEditWikiPage(getProject(), revision, path);
+		return Objects.equals(folder, getProject().getWikiFolder().getPath()) && SecurityUtils.canEditWikiPage(getProject(), revision, path);
 	}
 
 	private void save(Form<?> form, String name, String text, String message, boolean delete, boolean existed) {

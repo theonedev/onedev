@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.wiki;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
@@ -8,24 +10,26 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.wiki.ProjectWikiPage;
 
-public class WikiPageContentPropertyEditor extends PropertyEditor<byte[]> {
+public class WikiPropertyEditor extends PropertyEditor<String> {
 
 	private BlobMarkdownEditor input;
 
-	public WikiPageContentPropertyEditor(String id, PropertyDescriptor descriptor, IModel<byte[]> model) {
+	public WikiPropertyEditor(String id, PropertyDescriptor descriptor, IModel<String> model) {
 		super(id, descriptor, model);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		input = findParent(ProjectWikiPage.class).newContentEditor("input", Model.of(getModelObject()));
+		String content = getModelObject();
+		input = findParent(ProjectWikiPage.class).newContentEditor("input", Model.of(
+				content != null ? content.getBytes(StandardCharsets.UTF_8) : new byte[0]));
 		add(input);
 	}
 
 	@Override
-	protected byte[] convertInputToValue() {
-		return input.getConvertedInput();
+	protected String convertInputToValue() {
+		return new String(input.getConvertedInput(), StandardCharsets.UTF_8);
 	}
 
 	@Override

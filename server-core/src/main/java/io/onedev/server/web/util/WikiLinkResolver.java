@@ -1,5 +1,7 @@
 package io.onedev.server.web.util;
 
+import java.util.Objects;
+
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.FileMode;
@@ -24,11 +26,11 @@ public class WikiLinkResolver {
 
 	private final Project project;
 	private final String revision;
-	private final String folder;
+	private final @Nullable String folder;
 	private final String currentPath;
 	private final String returnPage;
 
-	public WikiLinkResolver(Project project, @Nullable String revision, String folder,
+	public WikiLinkResolver(Project project, @Nullable String revision, @Nullable String folder,
 			String currentPath, String returnPage) {
 		this.project = project;
 		this.revision = revision;
@@ -47,11 +49,11 @@ public class WikiLinkResolver {
 		String path = blobIdent.path;
 		if (context.getMode() == BlobRenderContext.Mode.ADD || context.getMode() == BlobRenderContext.Mode.EDIT)
 			path = context.getNewPath();
-		String folder = project.getWikiFolder();
-		if (path == null || !path.startsWith(folder + "/") || !path.endsWith(".md"))
+		String folder = project.getWikiFolder().getPath();
+		if (path == null || !WikiUtils.isUnderFolder(folder, path) || !path.endsWith(".md"))
 			return html;
 
-		String currentPage = path.substring(folder.length() + 1, path.length() - 3);
+		String currentPage = path.substring(folder != null ? folder.length() + 1 : 0, path.length() - 3);
 		return new WikiLinkResolver(project, blobIdent.revision, folder, path, currentPage).resolvePageLinks(html);
 	}
 
@@ -72,7 +74,7 @@ public class WikiLinkResolver {
 	}
 
 	private String pageName(String path) {
-		return path.substring(folder.length() + 1, path.length() - 3);
+		return path.substring(folder != null ? folder.length() + 1 : 0, path.length() - 3);
 	}
 
 	private String pageUrl(String path) {
@@ -103,7 +105,7 @@ public class WikiLinkResolver {
 	}
 
 	private @Nullable String addPageUrl(String path) {
-		if (!folder.equals(project.getWikiFolder()) || !WikiUtils.isUnderFolder(folder, path)
+		if (!Objects.equals(folder, project.getWikiFolder().getPath()) || !WikiUtils.isUnderFolder(folder, path)
 				|| !SecurityUtils.canEditWikiPage(project, revision, path))
 			return null;
 		String destination = pageName(path);

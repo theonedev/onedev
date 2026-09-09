@@ -3,6 +3,8 @@ package io.onedev.server.security;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import io.onedev.server.web.util.WikiUtils;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -297,7 +299,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canReadFile(Subject subject, Project project, String file) {
 		return canReadCode(subject, project) 
 				|| project.isWikiManagement() 
-					&& file.startsWith(project.getWikiFolder() + "/") 
+					&& WikiUtils.isUnderFolder(project.getWikiFolder().getPath(), file)
 					&& canAccessProject(subject, project);
 	}
 

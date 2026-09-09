@@ -32,8 +32,13 @@
             </div>
             <div wicket:id="view" class="wiki-view flex-grow-1 d-flex overflow-hidden">
                 <main class="wiki-content flex-grow-1 overflow-auto p-4">
+                    <wicket:enclosure>
+                    <div class="alert alert-notice alert-light-warning">
+                        <wicket:t>Home page not found</wicket:t>
+                        <a wicket:id="addHome" class="ml-2" t:data-tippy-content="Add home page" t:aria-label="Add home page"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+                    </div>
+                    </wicket:enclosure>
                     <div wicket:id="body"></div>
-                    <a wicket:id="addHome" class="d-inline-block mt-3"><wicket:t>Add Home page</wicket:t></a>
                 </main>
                 <aside wicket:id="navigation" class="wiki-navigation markdown-outline side need-width">
                     <div class="ui-resizable-handle ui-resizable-w flex-shrink-0"></div>

@@ -22,8 +22,8 @@ public class WikiUtils {
 
 	private static final Pattern REFERENCE = Pattern.compile("\\[\\[([^\\]\\r\\n]+)\\]\\]");
 
-	public static boolean isUnderFolder(String folder, String path) {
-		return path != null && path.startsWith(folder + "/");
+	public static boolean isUnderFolder(@Nullable String folder, String path) {
+		return path != null && (folder == null || path.startsWith(folder + "/"));
 	}
 
 	public static void validatePath(String path) {
@@ -32,10 +32,11 @@ public class WikiUtils {
 			throw new NotAcceptableException(error);
 	}
 
-	public static String pagePath(String folder, String page) {
-		validatePath(folder);
+	public static String pagePath(@Nullable String folder, String page) {
+		if (folder != null)
+			validatePath(folder);
 		validatePath(page);
-		return normalizePath(folder + "/" + page + ".md");
+		return normalizePath((folder != null ? folder + "/" : "") + page + ".md");
 	}
 
 	/** Use the same path for permission checks and Git writes. */
@@ -47,8 +48,8 @@ public class WikiUtils {
 		return normalized;
 	}
 
-	public static String pageReference(String folder, String currentPath, String path, String text) {
-		if (!path.startsWith(folder + "/") || !path.endsWith(".md"))
+	public static String pageReference(@Nullable String folder, String currentPath, String path, String text) {
+		if (!isUnderFolder(folder, path) || !path.endsWith(".md"))
 			throw new IllegalArgumentException("Not a wiki page");
 		validatePath(path);
 		int slash = currentPath.lastIndexOf('/');
