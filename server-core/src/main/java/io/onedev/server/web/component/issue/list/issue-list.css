@@ -12,6 +12,11 @@
 	margin-right: 0.5rem;
 	padding: 0.25rem 0.4rem;
 }
+.issue-list .issue-progress {
+	vertical-align: middle;
+	position: relative;
+	top: -2px;
+}
 .issue-list .issue-progress .completion-rate {
 	width: 18px !important;
 	height: 18px !important;
@@ -72,5 +77,5 @@
 .issue-list>div>.body tr.issue .issue-item .dropdown-aware-open .workspaces,
 .issue-list>div>.body tr.issue .issue-item:hover .pin,
 .issue-list>div>.body tr.issue .issue-item .dropdown-aware-open .pin {
-	display: inline-flex !important;
+	display: inline !important;
 }
