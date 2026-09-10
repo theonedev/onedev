@@ -139,7 +139,7 @@ public abstract class IssueProgressPanel extends Panel {
 	@Override
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
-		if (getIssue().getTotalEstimatedTime() == 0 && getStopWatch() == null)
+		if (getIssue().getTotalEstimatedTime() == 0)
 			tag.append("class", "no-estimate", " ");
 	}
 

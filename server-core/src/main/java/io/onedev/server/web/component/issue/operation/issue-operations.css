@@ -5,3 +5,7 @@
     line-height: 1.35;
 	display: block;
 }
+.issue-operations .issue-progress .completion-rate {
+	width: 30px !important;
+	height: 30px !important;
+}

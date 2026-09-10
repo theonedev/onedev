@@ -127,7 +127,6 @@ import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.progress.QueriedIssuesProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
-import io.onedev.server.web.component.issue.workspaces.IssueWorkspacesLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
@@ -1954,15 +1953,6 @@ public abstract class IssueListPanel extends Panel {
 					
 				});
 				
-				fragment.add(new IssueWorkspacesLink("workspaces") {
-
-					@Override
-					protected Issue getIssue() {
-						return (Issue) fragment.getDefaultModelObject();
-					}
-					
-				});
-
 				fragment.add(new AjaxLink<Void>("pin") {
 
 					@Override

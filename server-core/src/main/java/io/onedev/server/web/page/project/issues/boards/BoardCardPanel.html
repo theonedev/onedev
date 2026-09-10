@@ -2,17 +2,19 @@
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="contentFrag">
 		<div class="issue-item">
-			<div class="primary dropdown-aware mb-3">
+			<div class="primary mb-3">
 				<span wicket:id="dragHandle" class="drag-indicator drag-handle mr-1"><wicket:svg href="grip" class="icon"/></span>
 				<span wicket:id="numberAndTitle" class="font-weight-bold mr-1"></span>
-				<span wicket:id="progress" class="mr-2"></span>
-				<a wicket:id="workspaces" class="workspaces mr-2" t:data-tippy-content="Workspaces on this issue"><wicket:svg href="workspace" class="icon"></wicket:svg></a>
 				<a wicket:id="showDetail" t:data-tippy-content="Click to show issue details" class="show-detail"><wicket:svg href="ellipsis" class="icon"/></a>
 			</div>
 			<div class="secondary d-flex align-items-center flex-wrap mb-n2">
 				<div wicket:id="fields" class="field mr-1 mr-last-child-0"></div>
-				<div class="avatars ml-auto d-flex align-items-center flex-wrap">
-					<div wicket:id="avatars" class="avatar"></div>
+				<div class="flex-grow-1" aria-hidden="true"></div>
+				<div class="d-flex align-items-center flex-nowrap">
+					<div class="avatars d-flex align-items-center flex-nowrap">
+						<div wicket:id="avatars" class="avatar"></div>
+					</div>
+					<span wicket:id="progress" class="progress-container mb-2 flex-shrink-0"></span>
 				</div>
 			</div>
 			<wicket:enclosure child="links">

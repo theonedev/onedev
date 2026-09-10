@@ -38,14 +38,13 @@
 	</div>
 	<wicket:fragment wicket:id="contentFrag">
 		<div class="primary d-flex mb-3">
-			<div class="mr-4 flex-grow-1 dropdown-aware">
+			<div class="mr-4 flex-grow-1">
 				<span class="mr-2">
 					<span wicket:id="title" class="title"></span>
 					<span wicket:id="number" class="number ml-1 text-muted"></span>
 					<a wicket:id="link" class="d-none"></a>
 				</span>
 				<span wicket:id="labels" class="mr-2"></span>
-				<a wicket:id="workspaces" class="workspaces mr-2" t:data-tippy-content="Workspaces on source branch"><wicket:svg href="workspace" class="icon"/></a>
 			</div>
 			<div class="flex-shrink-0 d-none d-lg-block text-muted">
 				<span class="comments" t:data-tippy-content="Comments">

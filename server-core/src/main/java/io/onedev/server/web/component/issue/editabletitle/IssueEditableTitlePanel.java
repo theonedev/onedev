@@ -8,7 +8,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
-import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.page.base.BasePage;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -150,15 +149,6 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			
 		});
 		
-		titleViewer.add(new IssueProgressPanel("progress") {
-
-			@Override
-			protected Issue getIssue() {
-				return IssueEditableTitlePanel.this.getIssue();
-			}
-			
-		});
-
 		titleViewer.setOutputMarkupId(true);
 		
 		return titleViewer;

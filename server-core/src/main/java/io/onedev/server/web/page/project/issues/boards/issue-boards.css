@@ -160,10 +160,13 @@
 	width: 19px !important;
 	height: 19px !important;
 }
-
-.board-card .avatars>.avatar:last-child .value {
+.board-card .avatars>.avatar:last-child .value:last-child {
 	margin-right: 0 !important;
 }
+.board-card .avatars:has(.value) + .progress-container {
+	margin-left: 0.5rem;
+}
+
 
 .board-card-detail .modal-header h5 {
 	width: 100%;
@@ -181,13 +184,6 @@
 	display: none;
 }
 
-.board-card .issue-item .no-estimate,
-.board-card .issue-item .workspaces {
+.board-card .issue-item .no-estimate {
 	display: none !important;
-}
-.board-card .issue-item:hover .no-estimate,
-.board-card .issue-item .dropdown-aware-open .no-estimate,
-.board-card .issue-item:hover .workspaces,
-.board-card .issue-item .dropdown-aware-open .workspaces {
-	display: inline !important;
 }

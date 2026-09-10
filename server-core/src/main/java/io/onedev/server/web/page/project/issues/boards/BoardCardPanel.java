@@ -53,7 +53,6 @@ import io.onedev.server.web.component.issue.link.IssueLinksPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
-import io.onedev.server.web.component.issue.workspaces.IssueWorkspacesLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -284,15 +283,6 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			
 		});
 		
-		fragment.add(new IssueWorkspacesLink("workspaces") {
-
-			@Override
-			protected Issue getIssue() {
-				return issueModel.getObject();
-			}
-			
-		});
-
 		var linksPanel = new IssueLinksPanel("links") {
 
 			@Override

@@ -1,7 +1,7 @@
 <wicket:extend>
 	<div wicket:id="pinnedIssues" class="pinned-issues d-flex flex-wrap">
 		<div wicket:id="pinnedIssues" class="card pinned-issue flex-grow-1">
-			<div wicket:id="content" class="card-body"></div>
+			<div wicket:id="content" class="card-body issue-item"></div>
 		</div>
 	</div>
 	<div class="side-main">
@@ -9,18 +9,18 @@
 		<div wicket:id="issues" class="main"></div>
 	</div>
 	<wicket:fragment wicket:id="pinnedIssueFrag">
-		<div class="primary d-flex align-items-center flex-wrap row-gap-2 position-relative mb-3">
+		<div class="primary row-gap-2 position-relative mb-3">
 			<span wicket:id="numberAndTitle" class="mr-2"></span>
-			<span wicket:id="progress" class="d-flex align-items-center mr-2"></span>
 			<span wicket:id="links" class="links d-flex align-items-center"/>
 			<a wicket:id="unpin" t:data-tippy-content="Unpin this issue" class="unpin btn btn-icon btn-xs btn-light btn-hover-primary"><wicket:svg href="unpin" class="icon flip-x"/></a>
 		</div>
-		<div class="secondary d-flex flex-wrap">
+		<div class="secondary d-flex flex-wrap align-items-baseline">
 			<div wicket:id="fields" class="field"></div>
+			<span wicket:id="progress" class="mr-2 mb-2"></span>
 		</div>
 		<wicket:enclosure child="linkedIssues">
 			<div class="linked-issues pl-3">
-				<div wicket:id="linkedIssues" class="linked-issue"><div wicket:id="content"></div></div>
+				<div wicket:id="linkedIssues" class="linked-issue"><div wicket:id="content" class="issue-item"></div></div>
 			</div>
 		</wicket:enclosure>
 	</wicket:fragment>

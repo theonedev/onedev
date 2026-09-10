@@ -6,13 +6,18 @@
 	min-width: 480px;
 }
 .pinned-issue .primary {
-	padding-right: 20px;
+	padding-right: 25px;
 }
 .pinned-issue .primary .number, .pinned-issue .primary .title {
 	font-size: 1.2rem;
 	font-weight: 500;
 }
-.pinned-issue .primary .issue-progress .completion-rate {
+.pinned-issue .issue-progress {
+	vertical-align: middle;
+	position: relative;
+	top: -1px;
+}
+.pinned-issue .issue-progress .completion-rate {
 	width: 18px !important;
 	height: 18px !important;
 }
@@ -55,4 +60,7 @@
 }
 .pinned-issue .linked-issue .unpin {
 	display: none;
+}
+.pinned-issue .issue-item .no-estimate {
+	display: none !important;
 }

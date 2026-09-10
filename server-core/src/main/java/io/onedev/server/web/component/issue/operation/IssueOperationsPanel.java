@@ -13,6 +13,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.issue.IssueStateBadge;
+import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 
 public abstract class IssueOperationsPanel extends Panel {
@@ -49,6 +50,15 @@ public abstract class IssueOperationsPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		add(new IssueProgressPanel("progress") {
+
+			@Override
+			protected Issue getIssue() {
+				return IssueOperationsPanel.this.getIssue();
+			}
+
+		});
 		
 		add(new ChangeObserver() {
 			

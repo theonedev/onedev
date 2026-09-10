@@ -15,7 +15,7 @@
 .issue-list .issue-progress {
 	vertical-align: middle;
 	position: relative;
-	top: -2px;
+	top: -1px;
 }
 .issue-list .issue-progress .completion-rate {
 	width: 18px !important;
@@ -33,9 +33,6 @@
 	margin-top: 4px;
 }
 
-.issue-list .number {
-	margin-right: 0.25rem;
-}
 .issue-list .number, .issue-list .title {
 	font-size: 1.175rem;
 	font-weight: 500;	
@@ -67,14 +64,9 @@
 }
 
 .issue-list>div>.body tr.issue .issue-item .no-estimate,
-.issue-list>div>.body tr.issue .issue-item .workspaces,
 .issue-list>div>.body tr.issue .issue-item .pin {
 	display: none !important;
 }
-.issue-list>div>.body tr.issue .issue-item:hover .no-estimate,
-.issue-list>div>.body tr.issue .issue-item .dropdown-aware-open .no-estimate,
-.issue-list>div>.body tr.issue .issue-item:hover .workspaces,
-.issue-list>div>.body tr.issue .issue-item .dropdown-aware-open .workspaces,
 .issue-list>div>.body tr.issue .issue-item:hover .pin,
 .issue-list>div>.body tr.issue .issue-item .dropdown-aware-open .pin {
 	display: inline !important;
