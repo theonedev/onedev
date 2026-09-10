@@ -33,10 +33,15 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** A edição Enterprise está desativada porque não há meses de usuário restantes. Solicite mais para ativar **");
 		m.put("1 Year", "1 Ano");
+		m.put("1. Add below to build.gradle (Groovy)", "1. Adicione o seguinte ao build.gradle (Groovy)");
 		m.put("1. Use below repositories in project pom.xml", "1. Use os repositórios abaixo no pom.xml do projeto");
 		m.put("1w 1d 1h 1m", "1s 1d 1h 1m");
+		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
+			"2. Adicione o seguinte ao <code>$HOME/.gradle/gradle.properties</code> se você quiser publicar pela linha de comando");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. Adicione o seguinte ao <code>$HOME/.m2/settings.xml</code> se quiser implantar a partir da linha de comando");
+		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"3. Para um trabalho de CI/CD, é mais conveniente usar um gradle.properties personalizado, por exemplo, através do código abaixo em um passo de comando:");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. Para trabalho de CI/CD, é mais conveniente usar um settings.xml personalizado, por exemplo, via o código abaixo em um passo de comando:");
 		m.put("5 Years", "5 Anos");
@@ -223,7 +228,9 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Add all commits from source branch to target branch with a merge commit", "Adicionar todos os commits da branch de origem à branch de destino com um commit de merge");
 		m.put("Add assignee...", "Adicionar responsável...");
 		m.put("Add before", "Adicionar antes");
+		m.put("Add below to allow accessing via http protocol", "Adicione o seguinte para permitir o acesso via protocolo http");
 		m.put("Add below to allow accessing via http protocol in new Maven versions", "Adicionar abaixo para permitir acesso via protocolo http em novas versões do Maven");
+		m.put("Add below to build.gradle (Groovy)", "Adicione o seguinte ao build.gradle (Groovy)");
 		m.put("Add child project", "Adicionar projeto filho");
 		m.put("Add comment", "Adicionar comentário");
 		m.put("Add comment on this selection", "Adicionar comentário nesta seleção");
@@ -332,6 +339,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Allowed Self Sign-Up Email Domain", "Domínio de Email Permitido para Auto Cadastro");
 		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
 			"Também aceita vinculação entre projetos no formato <code>projectpath#100</code> ou <code>PROJECTKEY-100</code>");
+		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
+			"Também adicione o seguinte ao $HOME/.gradle/gradle.properties se você quiser compilar o projeto pela linha de comando");
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"Além disso, adicione abaixo ao $HOME/.m2/settings.xml se você quiser compilar o projeto a partir da linha de comando");
 		m.put("Always", "Sempre");
@@ -1594,6 +1603,8 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Para o trabalho de CI/CD, adicione este pacote ao Cargo.toml e execute o comando abaixo para instalar o pacote via etapa de comando");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"Para trabalho CI/CD, adicione este pacote ao requirements.txt e execute o comando abaixo para instalar o pacote via etapa de comando");
+		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"Para um trabalho de CI/CD, é mais conveniente usar um gradle.properties personalizado, por exemplo, através do código abaixo em um passo de comando:");
 		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"Para trabalho de CI/CD, é mais conveniente usar um settings.xml personalizado, por exemplo, através do código abaixo em um passo de comando:");
 		m.put("For CI/CD job, run below to add package registry via command step", "Para o trabalho de CI/CD, execute o comando abaixo para adicionar o registro de pacotes via etapa de comando");
@@ -1702,6 +1713,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Google Test Report", "Relatório de Teste do Google");
 		m.put("Gpg", "Gpg");
 		m.put("Gpg Key", "Chave Gpg");
+		m.put("Gradle", "Gradle");
 		m.put("Great, your mail service configuration is working", "Ótimo, a configuração do serviço de e-mail está funcionando");
 		m.put("Groovy Script", "Script Groovy");
 		m.put("Groovy Scripts", "Scripts Groovy");
@@ -2230,6 +2242,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Markdown", "Markdown");
 		m.put("Markdown Report", "Relatório Markdown");
 		m.put("Markdown from file", "Markdown de arquivo");
+		m.put("Maven", "Maven");
 		m.put("Maven(s)", "Maven(s)");
 		m.put("Max Code Search Entries", "Máximo de Entradas de Pesquisa de Código");
 		m.put("Max Commit Message Line Length", "Comprimento Máximo da Linha da Mensagem de Commit");
@@ -2892,6 +2905,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"Opcionalmente especifique o diretório de trabalho do contêiner. Deixe vazio para usar o diretório de trabalho padrão do contêiner");
 		m.put("Options", "Opções");
+		m.put("Or below to build.gradle.kts (Kotlin)", "Ou o seguinte ao build.gradle.kts (Kotlin)");
 		m.put("Or manually enter the secret key below in your authenticator app", "Ou insira manualmente a chave secreta abaixo no seu aplicativo autenticador");
 		m.put("Order By", "Ordenar Por");
 		m.put("Order More User Months", "Ordenar Mais Meses de Usuário");
@@ -5294,20 +5308,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("1. Add below to build.gradle (Groovy)", "1. Adicione o seguinte ao build.gradle (Groovy)");
-		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
-			"2. Adicione o seguinte ao <code>$HOME/.gradle/gradle.properties</code> se você quiser publicar pela linha de comando");
-		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
-			"3. Para um trabalho de CI/CD, é mais conveniente usar um gradle.properties personalizado, por exemplo, através do código abaixo em um passo de comando:");
-		m.put("Add below to allow accessing via http protocol", "Adicione o seguinte para permitir o acesso via protocolo http");
-		m.put("Add below to build.gradle (Groovy)", "Adicione o seguinte ao build.gradle (Groovy)");
-		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
-			"Também adicione o seguinte ao $HOME/.gradle/gradle.properties se você quiser compilar o projeto pela linha de comando");
-		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
-			"Para um trabalho de CI/CD, é mais conveniente usar um gradle.properties personalizado, por exemplo, através do código abaixo em um passo de comando:");
-		m.put("Gradle", "Gradle");
-		m.put("Maven", "Maven");
-		m.put("Or below to build.gradle.kts (Kotlin)", "Ou o seguinte ao build.gradle.kts (Kotlin)");
+		m.put("New", "Novo");
+		m.put("Old", "Antigo");
 	}
 		
 	@Override

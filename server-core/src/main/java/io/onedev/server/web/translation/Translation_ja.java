@@ -33,10 +33,15 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 残りのユーザ月がないため、エンタープライズ版は無効化されています。有効化するには追加注文してください **");
 		m.put("1 Year", "1年");
+		m.put("1. Add below to build.gradle (Groovy)", "1. 以下を build.gradle (Groovy) に追加してください");
 		m.put("1. Use below repositories in project pom.xml", "1. プロジェクトの pom.xml に以下のリポジトリを使用してください");
 		m.put("1w 1d 1h 1m", "1w 1d 1h 1m");
+		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
+			"2. コマンドラインから公開したい場合は、以下を <code>$HOME/.gradle/gradle.properties</code> に追加してください");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. コマンドラインからデプロイする場合、<code>$HOME/.m2/settings.xml</code> に以下を追加してください");
+		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"3. CI/CD ジョブの場合、以下のコードをコマンドステップで使用することで、カスタム gradle.properties を利用する方が便利です:");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. CI/CD ジョブでは、カスタム settings.xml を使用する方が便利です。例えば、以下のコードをコマンドステップで使用してください:");
 		m.put("5 Years", "5年");
@@ -223,7 +228,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add all commits from source branch to target branch with a merge commit", "ソースブランチのすべてのコミットをマージコミットでターゲットブランチに追加");
 		m.put("Add assignee...", "担当者を追加...");
 		m.put("Add before", "前に追加");
+		m.put("Add below to allow accessing via http protocol", "HTTP プロトコル経由でアクセスを許可するために以下を追加してください");
 		m.put("Add below to allow accessing via http protocol in new Maven versions", "新しいMavenバージョンでHTTPプロトコル経由のアクセスを許可するために以下を追加");
+		m.put("Add below to build.gradle (Groovy)", "以下を build.gradle (Groovy) に追加してください");
 		m.put("Add child project", "子プロジェクトを追加");
 		m.put("Add comment", "コメントを追加");
 		m.put("Add comment on this selection", "この選択にコメントを追加");
@@ -332,6 +339,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Allowed Self Sign-Up Email Domain", "許可されたセルフサインアップメールドメイン");
 		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
 			"<code>projectpath#100</code> または <code>PROJECTKEY-100</code> の形式でクロスプロジェクトリンクも受け付けます");
+		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
+			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を $HOME/.gradle/gradle.properties に追加してください");
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を$HOME/.m2/settings.xmlに追加してください");
 		m.put("Always", "常に");
@@ -1594,6 +1603,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"CI/CDジョブの場合、このパッケージをCargo.tomlに追加し、コマンドステップで以下を実行してパッケージをインストールします");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"CI/CDジョブの場合、requirements.txtにこのパッケージを追加し、以下のコマンドステップでパッケージをインストールしてください");
+		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"CI/CD ジョブの場合、以下のコードをコマンドステップで使用することで、カスタム gradle.properties を利用する方が便利です:");
 		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"CI/CDジョブでは、カスタムsettings.xmlを使用する方が便利です。例えば、コマンドステップで以下のコードを使用します：");
 		m.put("For CI/CD job, run below to add package registry via command step", "CI/CDジョブの場合、コマンドステップで以下を実行してパッケージレジストリを追加します");
@@ -1702,6 +1713,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Google Test Report", "Googleテストレポート");
 		m.put("Gpg", "Gpg");
 		m.put("Gpg Key", "Gpgキー");
+		m.put("Gradle", "Gradle");
 		m.put("Great, your mail service configuration is working", "素晴らしい、メールサービスの設定が機能しています");
 		m.put("Groovy Script", "Groovyスクリプト");
 		m.put("Groovy Scripts", "Groovyスクリプト群");
@@ -2230,6 +2242,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Markdown", "Markdown");
 		m.put("Markdown Report", "Markdownレポート");
 		m.put("Markdown from file", "ファイルからのMarkdown");
+		m.put("Maven", "Maven");
 		m.put("Maven(s)", "Maven(s)");
 		m.put("Max Code Search Entries", "最大コード検索エントリ数");
 		m.put("Max Commit Message Line Length", "最大コミットメッセージ行長");
@@ -2892,6 +2905,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"必要に応じてコンテナの作業ディレクトリを指定します。空欄の場合はコンテナのデフォルトの作業ディレクトリが使用されます");
 		m.put("Options", "オプション");
+		m.put("Or below to build.gradle.kts (Kotlin)", "または以下を build.gradle.kts (Kotlin) に追加してください");
 		m.put("Or manually enter the secret key below in your authenticator app", "または、以下のシークレットキーを認証アプリに手動で入力してください");
 		m.put("Order By", "並び替え");
 		m.put("Order More User Months", "さらに多くのユーザーモンスを注文");
@@ -5294,20 +5308,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("1. Add below to build.gradle (Groovy)", "1. 以下を build.gradle (Groovy) に追加してください");
-		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
-			"2. コマンドラインから公開したい場合は、以下を <code>$HOME/.gradle/gradle.properties</code> に追加してください");
-		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
-			"3. CI/CD ジョブの場合、以下のコードをコマンドステップで使用することで、カスタム gradle.properties を利用する方が便利です:");
-		m.put("Add below to allow accessing via http protocol", "HTTP プロトコル経由でアクセスを許可するために以下を追加してください");
-		m.put("Add below to build.gradle (Groovy)", "以下を build.gradle (Groovy) に追加してください");
-		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
-			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を $HOME/.gradle/gradle.properties に追加してください");
-		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
-			"CI/CD ジョブの場合、以下のコードをコマンドステップで使用することで、カスタム gradle.properties を利用する方が便利です:");
-		m.put("Gradle", "Gradle");
-		m.put("Maven", "Maven");
-		m.put("Or below to build.gradle.kts (Kotlin)", "または以下を build.gradle.kts (Kotlin) に追加してください");
+		m.put("New", "新規");
+		m.put("Old", "旧");
 	}
 		
 	@Override

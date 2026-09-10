@@ -33,10 +33,15 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 엔터프라이즈 에디션은 남은 사용자 월이 없어 비활성화되었습니다. 활성화하려면 추가 주문하세요 **");
 		m.put("1 Year", "1년");
+		m.put("1. Add below to build.gradle (Groovy)", "1. 아래 내용을 build.gradle (Groovy)에 추가하세요.");
 		m.put("1. Use below repositories in project pom.xml", "1. 프로젝트 pom.xml에 아래 저장소를 사용하세요");
 		m.put("1w 1d 1h 1m", "1주 1일 1시간 1분");
+		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
+			"2. 명령줄에서 게시하려면 <code>$HOME/.gradle/gradle.properties</code>에 아래 내용을 추가하세요.");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. 명령줄에서 배포하려면 <code>$HOME/.m2/settings.xml</code>에 아래 내용을 추가하세요");
+		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"3. CI/CD 작업의 경우, 명령 단계에서 아래 코드와 같이 사용자 정의 gradle.properties를 사용하는 것이 더 편리합니다:");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. CI/CD 작업에서는 사용자 정의 settings.xml을 사용하는 것이 더 편리합니다. 예를 들어 명령 단계에서 아래 코드를 통해 가능합니다:");
 		m.put("5 Years", "5년");
@@ -223,7 +228,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Add all commits from source branch to target branch with a merge commit", "소스 브랜치의 모든 커밋을 병합 커밋으로 대상 브랜치에 추가");
 		m.put("Add assignee...", "담당자 추가...");
 		m.put("Add before", "이전에 추가");
+		m.put("Add below to allow accessing via http protocol", "HTTP 프로토콜을 통해 액세스할 수 있도록 아래 내용을 추가하세요.");
 		m.put("Add below to allow accessing via http protocol in new Maven versions", "새로운 Maven 버전에서 HTTP 프로토콜을 통해 액세스할 수 있도록 아래를 추가");
+		m.put("Add below to build.gradle (Groovy)", "build.gradle (Groovy)에 아래 내용을 추가하세요.");
 		m.put("Add child project", "하위 프로젝트 추가");
 		m.put("Add comment", "댓글 추가");
 		m.put("Add comment on this selection", "이 선택에 댓글 추가");
@@ -332,6 +339,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Allowed Self Sign-Up Email Domain", "허용된 자체 가입 이메일 도메인");
 		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
 			"<code>projectpath#100</code> 또는 <code>PROJECTKEY-100</code> 형식의 프로젝트 간 링크도 허용됩니다");
+		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
+			"명령줄에서 프로젝트를 컴파일하려면 $HOME/.gradle/gradle.properties에 아래 내용을 추가하세요.");
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"프로젝트를 명령줄에서 컴파일하려면 아래 내용을 $HOME/.m2/settings.xml에 추가하세요");
 		m.put("Always", "항상");
@@ -1594,6 +1603,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"CI/CD 작업의 경우, 이 패키지를 Cargo.toml에 추가하고 아래 명령 단계를 실행하여 패키지를 설치하세요");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"CI/CD 작업의 경우, requirements.txt에 이 패키지를 추가하고 아래 명령 단계를 실행하여 패키지를 설치하세요");
+		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"CI/CD 작업의 경우, 명령 단계에서 아래 코드와 같이 사용자 정의 gradle.properties를 사용하는 것이 더 편리합니다:");
 		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"CI/CD 작업의 경우, 아래 코드와 같이 명령 단계에서 사용자 정의 settings.xml을 사용하는 것이 더 편리합니다:");
 		m.put("For CI/CD job, run below to add package registry via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 패키지 레지스트리를 추가하세요");
@@ -1702,6 +1713,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Google Test Report", "구글 테스트 보고서");
 		m.put("Gpg", "Gpg");
 		m.put("Gpg Key", "Gpg 키");
+		m.put("Gradle", "Gradle");
 		m.put("Great, your mail service configuration is working", "메일 서비스 구성이 정상적으로 작동합니다");
 		m.put("Groovy Script", "그루비 스크립트");
 		m.put("Groovy Scripts", "그루비 스크립트들");
@@ -2230,6 +2242,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Markdown", "마크다운");
 		m.put("Markdown Report", "마크다운 보고서");
 		m.put("Markdown from file", "파일에서 가져온 마크다운");
+		m.put("Maven", "Maven");
 		m.put("Maven(s)", "Maven(s)");
 		m.put("Max Code Search Entries", "최대 코드 검색 항목");
 		m.put("Max Commit Message Line Length", "최대 커밋 메시지 라인 길이");
@@ -2892,6 +2905,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"선택적으로 컨테이너의 작업 디렉토리를 지정하십시오. 컨테이너의 기본 작업 디렉토리를 사용하려면 비워두십시오.");
 		m.put("Options", "옵션");
+		m.put("Or below to build.gradle.kts (Kotlin)", "또는 아래 내용을 build.gradle.kts (Kotlin)에 추가하세요.");
 		m.put("Or manually enter the secret key below in your authenticator app", "또는 아래의 비밀 키를 인증 앱에 수동으로 입력하세요");
 		m.put("Order By", "정렬 기준");
 		m.put("Order More User Months", "더 많은 사용자 월 정렬");
@@ -5294,20 +5308,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("1. Add below to build.gradle (Groovy)", "1. 아래 내용을 build.gradle (Groovy)에 추가하세요.");
-		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
-			"2. 명령줄에서 게시하려면 <code>$HOME/.gradle/gradle.properties</code>에 아래 내용을 추가하세요.");
-		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
-			"3. CI/CD 작업의 경우, 명령 단계에서 아래 코드와 같이 사용자 정의 gradle.properties를 사용하는 것이 더 편리합니다:");
-		m.put("Add below to allow accessing via http protocol", "HTTP 프로토콜을 통해 액세스할 수 있도록 아래 내용을 추가하세요.");
-		m.put("Add below to build.gradle (Groovy)", "build.gradle (Groovy)에 아래 내용을 추가하세요.");
-		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
-			"명령줄에서 프로젝트를 컴파일하려면 $HOME/.gradle/gradle.properties에 아래 내용을 추가하세요.");
-		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
-			"CI/CD 작업의 경우, 명령 단계에서 아래 코드와 같이 사용자 정의 gradle.properties를 사용하는 것이 더 편리합니다:");
-		m.put("Gradle", "Gradle");
-		m.put("Maven", "Maven");
-		m.put("Or below to build.gradle.kts (Kotlin)", "또는 아래 내용을 build.gradle.kts (Kotlin)에 추가하세요.");
+		m.put("New", "새로운");
+		m.put("Old", "오래된");
 	}
 		
 	@Override

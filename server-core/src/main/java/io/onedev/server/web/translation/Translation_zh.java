@@ -59,10 +59,15 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 企业版已禁用，因为没有剩余的用户月数。订购更多以启用 **");
 		m.put("1 Year", "1 年");
+		m.put("1. Add below to build.gradle (Groovy)", "1. 添加以下内容到 build.gradle (Groovy)");
 		m.put("1. Use below repositories in project pom.xml", "1. 在项目 pom.xml 中使用以下仓库");
 		m.put("1w 1d 1h 1m", "1w 1d 1h 1m");
+		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
+			"2. 如果您想从命令行发布，请将以下内容添加到 <code>$HOME/.gradle/gradle.properties</code>");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. 如果要从命令行部署，请将以下内容添加到 <code>$HOME/.m2/settings.xml</code>");
+		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"3. 对于 CI/CD 任务，使用自定义 gradle.properties 更加方便，例如通过以下代码在命令步骤中实现：");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. 对于 CI/CD 任务，使用自定义 settings.xml 更方便，例如在命令步骤中使用以下代码");
 		m.put("5 Years", "5 年");
@@ -249,7 +254,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Add all commits from source branch to target branch with a merge commit", "将源分支的所有提交添加到目标分支，并创建合并提交");
 		m.put("Add assignee...", "添加分配人员...");
 		m.put("Add before", "添加到前面");
+		m.put("Add below to allow accessing via http protocol", "添加以下内容以允许通过 http 协议访问");
 		m.put("Add below to allow accessing via http protocol in new Maven versions", "添加以下内容以在新 Maven 版本中允许通过 http 协议访问");
+		m.put("Add below to build.gradle (Groovy)", "添加以下内容到 build.gradle (Groovy)");
 		m.put("Add child project", "添加子项目");
 		m.put("Add comment", "添加评论");
 		m.put("Add comment on this selection", "在此选择上添加评论");
@@ -358,6 +365,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Allowed Self Sign-Up Email Domain", "允许自助注册的邮箱域名");
 		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
 			"也接受以 <code>projectpath#100</code> 或 <code>PROJECTKEY-100</code> 形式的跨项目链接");
+		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
+			"如果您想从命令行编译项目，也请将以下内容添加到 $HOME/.gradle/gradle.properties");
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"如果您想从命令行编译项目，请将以下内容添加到 $HOME/.m2/settings.xml");
 		m.put("Always", "总是");
@@ -1620,6 +1629,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"对于 CI/CD 任务，将此包添加到 Cargo.toml 并运行以下命令步骤安装该包");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"对于 CI/CD 任务，将此包添加到 requirements.txt 中，并运行以下命令通过命令步骤安装包");
+		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
+			"对于 CI/CD 任务，使用自定义 gradle.properties 更加方便，例如通过以下代码在命令步骤中实现：");
 		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"对于 CI/CD 任务，使用自定义 settings.xml 更方便，例如通过在命令步骤中使用以下代码：");
 		m.put("For CI/CD job, run below to add package registry via command step", "对于 CI/CD 任务，运行以下命令步骤添加包注册表");
@@ -1728,6 +1739,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Google Test Report", "Google 测试报告");
 		m.put("Gpg", "Gpg");
 		m.put("Gpg Key", "Gpg 密钥");
+		m.put("Gradle", "Gradle");
 		m.put("Great, your mail service configuration is working", "太好了，您的邮件服务配置正常工作");
 		m.put("Groovy Script", "Groovy 脚本");
 		m.put("Groovy Scripts", "Groovy 脚本");
@@ -2256,6 +2268,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Markdown", "Markdown");
 		m.put("Markdown Report", "Markdown 报告");
 		m.put("Markdown from file", "Markdown（基于文件）");
+		m.put("Maven", "Maven");
 		m.put("Maven(s)", "Maven");
 		m.put("Max Code Search Entries", "最大代码搜索条目");
 		m.put("Max Commit Message Line Length", "最大提交消息行长度");
@@ -2918,6 +2931,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"可选择指定容器的默认工作目录。留空则使用容器的默认工作目录");
 		m.put("Options", "选项");
+		m.put("Or below to build.gradle.kts (Kotlin)", "或者以下内容到 build.gradle.kts (Kotlin)");
 		m.put("Or manually enter the secret key below in your authenticator app", "或者在您的身份验证应用中手动输入下面的密钥");
 		m.put("Order By", "排序");
 		m.put("Order More User Months", "购买更多用户月数");
@@ -5320,20 +5334,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("1. Add below to build.gradle (Groovy)", "1. 添加以下内容到 build.gradle (Groovy)");
-		m.put("2. Add below to <code>$HOME/.gradle/gradle.properties</code> if you want to publish from command line", 
-			"2. 如果您想从命令行发布，请将以下内容添加到 <code>$HOME/.gradle/gradle.properties</code>");
-		m.put("3. For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
-			"3. 对于 CI/CD 任务，使用自定义 gradle.properties 更加方便，例如通过以下代码在命令步骤中实现：");
-		m.put("Add below to allow accessing via http protocol", "添加以下内容以允许通过 http 协议访问");
-		m.put("Add below to build.gradle (Groovy)", "添加以下内容到 build.gradle (Groovy)");
-		m.put("Also add below to $HOME/.gradle/gradle.properties if you want to compile project from command line", 
-			"如果您想从命令行编译项目，也请将以下内容添加到 $HOME/.gradle/gradle.properties");
-		m.put("For CI/CD job, it is more convenient to use a custom gradle.properties, for instance via below code in a command step:", 
-			"对于 CI/CD 任务，使用自定义 gradle.properties 更加方便，例如通过以下代码在命令步骤中实现：");
-		m.put("Gradle", "Gradle");
-		m.put("Maven", "Maven");
-		m.put("Or below to build.gradle.kts (Kotlin)", "或者以下内容到 build.gradle.kts (Kotlin)");
+		m.put("New", "新建");
+		m.put("Old", "旧");
 	}
 		
 	@Override
