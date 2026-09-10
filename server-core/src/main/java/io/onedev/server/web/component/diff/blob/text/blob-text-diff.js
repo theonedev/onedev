@@ -2,7 +2,7 @@ onedev.server.blobTextDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, oldPath, newPath, 
 						 callback, blameMessageCallback, markRange, openComment, 
-						 annotationInfo, commentContainerId, translations) {
+						 annotationInfo, commentContainerId, translations, symbolContext) {
 		onedev.server.blobTextDiff.translations = translations;
 		var $container = $("#" + containerId);
 		$container.data("commentContainerId", commentContainerId);
@@ -475,6 +475,7 @@ onedev.server.blobTextDiff = {
 		    }
 		}
 		
+		onedev.server.diffSymbolContext.init($container, symbolContext, translations);
 		onedev.server.blobTextDiff.highlightCommentTrigger($container);				
 		
 		if (markRange) {
@@ -498,6 +499,7 @@ onedev.server.blobTextDiff = {
 		}		
 		
 		onedev.server.blobTextDiff.highlightSyntax($container);
+		onedev.server.diffSymbolContext.update($container);
 	},
 	highlightSyntax($container) {
 		var oldBlobPath = $container.data("oldPath");
@@ -507,12 +509,12 @@ onedev.server.blobTextDiff = {
 			var $this = $(this);
 			var $firstCodeTr;
 			if ($this.is("tbody")) {
-				if ($this.children().first().hasClass("code"))
-					$firstCodeTr = $this.children().first();
+				if ($this.children().first().is(".code, .diff-symbol-hunk"))
+					$firstCodeTr = $this.children(".code").first();
 				else
 					return;
 			} else if ($this.next().length != 0){
-				$firstCodeTr = $this.next();
+				$firstCodeTr = $this.nextAll(".code").first();
 			} else {
 				return;
 			}
@@ -523,7 +525,7 @@ onedev.server.blobTextDiff = {
 			else
 				$lastCodeTr = $container.find("tbody>tr:last-child");
 
-			var $codeTrs = $firstCodeTr.nextUntil($lastCodeTr).add($firstCodeTr).add($lastCodeTr);
+			var $codeTrs = $firstCodeTr.nextUntil($lastCodeTr).add($firstCodeTr).add($lastCodeTr).filter(".code");
 			if ($codeTrs.not(".syntaxHighlighted").length == 0)
 				return;
 			
@@ -626,6 +628,7 @@ onedev.server.blobTextDiff = {
 	},
 	expand: function(containerId, blockIndex, expandedHtml) {
 		var $container = $("#" + containerId);
+		$container.find("tr.diff-symbol-hunk").remove();
 		var $expanderTr = $container.find(".expander" + blockIndex);
 		var $prevTr = $expanderTr.prev();
 		var $nextTr = $expanderTr.next();
@@ -680,6 +683,7 @@ onedev.server.blobTextDiff = {
 			processBlames(1);
 		}
 		
+		onedev.server.diffSymbolContext.refresh($container);
 		onedev.server.blobTextDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
 		onedev.server.blobTextDiff.highlightSyntax($container);
 		$container.find("td.expander a").each(function() {

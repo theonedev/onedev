@@ -18,8 +18,10 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.Strings;
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -41,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.ibm.icu.text.SpoofChecker;
 
+import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
@@ -56,6 +59,7 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.CodeCommentService;
@@ -83,6 +87,48 @@ import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
 
 public class BlobTextDiffPanel extends Panel implements ChatToolAware {
+
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(BlobTextDiffPanel.class);
+
+	private static final MetaDataKey<Map<String, List<List<Object>>>> SYMBOL_CONTEXT_CACHE = new MetaDataKey<>() {};
+
+	@Inject
+	private CodeSearchService codeSearchService;
+
+	private List<List<Object>> getSymbolContext(boolean old) {
+		var ident = old ? change.getOldBlobIdent() : change.getNewBlobIdent();
+		if (ident.path == null || SymbolExtractorRegistry.getExtractor(ident.path) == null
+				|| old && (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
+				|| !old && change.getType() == ChangeType.DELETE)
+			return List.of();
+		var cache = RequestCycle.get().getMetaData(SYMBOL_CONTEXT_CACHE);
+		if (cache == null) {
+			cache = new HashMap<>();
+			RequestCycle.get().setMetaData(SYMBOL_CONTEXT_CACHE, cache);
+		}
+		var blob = old ? change.getOldBlob() : change.getNewBlob();
+		var key = change.getProject().getId() + ":" + blob.getBlobId().name() + ":" + ident.path;
+		return cache.computeIfAbsent(key, it -> {
+			try {
+				var symbols = codeSearchService.getSymbols(change.getProject(), blob.getBlobId(), ident.path);
+				return DiffSymbolContext.build(symbols, blob.getText().getLines().size());
+			} catch (Exception e) {
+				logger.debug("Unable to load diff symbol context for {}", ident.path, e);
+				return List.of();
+			}
+		});
+	}
+
+	private String getSymbolContextJson() {
+		return convertToJson(Map.of("old", getSymbolContext(true), "new", getSymbolContext(false))).replace("<", "\\u003c");
+	}
+
+	public void refreshSymbolContext(IPartialPageRequestHandler handler) {
+		// Update only the labels so expanded lines, selections and comments stay intact.
+		handler.appendJavaScript(String.format("onedev.server.diffSymbolContext.init($('#%s'), %s, %s);",
+				getMarkupId(), getSymbolContextJson(),
+				convertToJson(Map.of("old-context", _T("Old"), "new-context", _T("New")))));
+	}
 
 	@Inject
 	private SettingService settingService;
@@ -491,6 +537,8 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 				explicit("param6"), explicit("param7"), explicit("param8")); 
 
 		var translations = new HashMap<String, String>();
+		translations.put("old-context", _T("Old"));
+		translations.put("new-context", _T("New"));
 		translations.put("unable-to-comment", _T("Unable to comment"));
 		translations.put("perma-link", _T("Permanent link of this selection")); 
 		translations.put("copy-to-clipboard", _T("Copy selected text to clipboard")); 
@@ -511,7 +559,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		translations.put("add-problem-comment", _T("Add comment"));
 
 		var jsonOfMarkRange = convertToJson(markRange);
-		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s);", 
+		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s);",
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, 
 				change.getNewBlobIdent().revision,
@@ -520,7 +568,8 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 				callback, blameMessageBehavior.getCallback(),
 				jsonOfMarkRange, convertToJson(openCommentInfo), 
 				convertToJson(annotationInfoModel.getObject()), 
-				commentContainerId, convertToJson(translations));
+				commentContainerId, convertToJson(translations),
+				getSymbolContextJson());
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 

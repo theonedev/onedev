@@ -170,3 +170,73 @@
 .blob-text-diff>.text-diff {
 	table-layout: fixed;
 }
+
+.blob-text-diff .symbol-context-label {
+	display: flex;
+	align-items: baseline;
+	gap: 0.6rem;
+	min-width: 0;
+	padding: 0.25rem 0.6rem;
+	font-size: 0.9rem;
+	line-height: 1.5;
+}
+.blob-text-diff .symbol-context-side {
+	flex: none;
+	color: var(--gray);
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.blob-text-diff .symbol-context-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.blob-text-diff>.diff-symbol-sticky {
+	position: sticky;
+	z-index: 4;
+	background: var(--light);
+	border: 1px solid var(--light-gray);
+}
+.blob-text-diff>.diff-symbol-sticky.split {
+	display: flex;
+}
+.blob-text-diff>.diff-symbol-sticky.split>.symbol-context-label {
+	width: 50%;
+	flex: none;
+}
+.blob-text-diff>.diff-symbol-sticky.split>.new {
+	flex: 1;
+	border-left: 1px solid var(--light-gray);
+}
+.blob-text-diff .symbol-context-label.empty,
+.blob-text-diff>.diff-symbol-sticky.empty {
+	display: none;
+}
+.blob-text-diff>.diff-symbol-sticky.split>.symbol-context-label.empty {
+	display: flex;
+	visibility: hidden;
+}
+.blob-text-diff>.diff-symbol-sticky.common>.new,
+.blob-text-diff>.diff-symbol-sticky.common .symbol-context-side {
+	display: none;
+}
+.blob-text-diff>.diff-symbol-sticky.split.common>.old {
+	width: 100%;
+}
+.blob-text-diff>.text-diff>tbody>tr.diff-symbol-hunk>td {
+	padding: 0;
+	background: var(--light);
+	border-top: 1px solid var(--light-gray);
+	border-bottom: 1px solid var(--light-gray);
+}
+.dark-mode .blob-text-diff>.diff-symbol-sticky {
+	background: var(--dark-mode-light-dark);
+	border-color: var(--dark-mode-lighter-dark);
+}
+.dark-mode .blob-text-diff>.diff-symbol-sticky.split>.new,
+.dark-mode .blob-text-diff>.text-diff>tbody>tr.diff-symbol-hunk>td {
+	border-color: var(--dark-mode-lighter-dark);
+}
+.dark-mode .blob-text-diff>.text-diff>tbody>tr.diff-symbol-hunk>td {
+	background: var(--dark-mode-light-dark);
+}

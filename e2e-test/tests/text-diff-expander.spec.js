@@ -12,6 +12,7 @@ test('expands text-diff gaps with directional arrows', async ({ page, api }) => 
 
   const commitUrl = `${project.name}/~commits/${commitHash}`;
   await page.goto(commitUrl);
+  await expect(page.locator('.diff-symbol-sticky, .diff-symbol-hunk')).toHaveCount(0);
   const expanders = page.locator('tr.expander');
   await expect(expanders).toHaveCount(3);
   const startRow = expanders.first();

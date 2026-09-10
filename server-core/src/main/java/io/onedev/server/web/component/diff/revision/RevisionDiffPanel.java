@@ -30,6 +30,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.nested.BranchItem;
@@ -117,6 +118,7 @@ import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.diff.blob.BlobAnnotationSupport;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.blob.BlobDiffReviewSupport;
+import io.onedev.server.web.component.diff.blob.text.BlobTextDiffPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
@@ -396,6 +398,15 @@ public abstract class RevisionDiffPanel extends Panel {
 				super.onInitialize();
 
 				add(new ChangeObserver() {
+
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
+						super.onObservableChanged(handler, changedObservables);
+						RevisionDiffPanel.this.visitChildren(BlobTextDiffPanel.class, (IVisitor<BlobTextDiffPanel, Void>) (panel, visit) -> {
+							if (panel.isVisibleInHierarchy())
+								panel.refreshSymbolContext(handler);
+						});
+					}
 					
 					@Override
 					public Collection<String> findObservables() {
