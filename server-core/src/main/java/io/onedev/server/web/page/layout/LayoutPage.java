@@ -575,6 +575,12 @@ public abstract class LayoutPage extends BasePage {
 		sidebar.add(new AjaxLink<Void>("checkUpdate") {
 
 			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getLoginUser() != null);
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				getUpdateCheckService().clearCache();
 				throw new RedirectToUrlException(checkUpdateUrl);
@@ -920,7 +926,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getSettingService().getSystemSetting().isDisableAutoUpdateCheck());
+				setVisible(getLoginUser() != null && !getSettingService().getSystemSetting().isDisableAutoUpdateCheck());
 			}
 
 		});
