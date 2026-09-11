@@ -1,3 +1,9 @@
 <wicket:panel>
-	<div wicket:id="pullRequests" class="issue-pull-requests"></div>
+	<div class="h6"><wicket:t>Pull Requests</wicket:t></div>
+	<ul class="list-unstyled mb-0">
+		<li wicket:id="pullRequests" class="py-2 border-top d-flex align-items-center">
+			<a wicket:id="link" class="mr-2"><span wicket:id="title"></span></a>
+			<span wicket:id="status" class="ml-auto flex-shrink-0"></span>
+		</li>
+	</ul>
 </wicket:panel>

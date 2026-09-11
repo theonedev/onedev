@@ -1,6 +1,0 @@
-.issue-pull-requests .pull-request-list>.head {
-	display: none;
-}
-.issue-pull-requests .pull-request-list table>tbody>tr:first-child>td {
-	border-top: none;
-}

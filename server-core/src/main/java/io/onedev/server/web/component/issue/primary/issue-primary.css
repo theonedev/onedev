@@ -1,6 +1,16 @@
+.issue-primary>.related-info-separator {
+	display: none;
+	border-top: 1px dashed;
+}
+.issue-primary:has(>.links, >.issue-pull-requests)>.related-info-separator {
+	display: block;
+}
 .issue-primary>.links>li>.body>li>.action {
 	display: none;
 }
 .issue-primary>.links>li>.body>li:hover>.action {
 	display: inline-block;
+}
+.issue-primary>.links .issue-state>.icon {
+	height: 1em;
 }

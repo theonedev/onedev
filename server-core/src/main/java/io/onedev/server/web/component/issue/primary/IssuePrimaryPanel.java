@@ -47,6 +47,7 @@ import org.unbescape.html.HtmlEscape;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.model.Issue;
+import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
@@ -334,6 +335,13 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 		});
         
+		add(new IssuePullRequestsPanel("pullRequests", new LoadableDetachableModel<Issue>() {
+			@Override
+			protected Issue load() {
+				return getIssue();
+			}
+		}));
+
 		var linksContainer = new WebMarkupContainer("links") {
 
 			@Override
@@ -710,7 +718,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 			protected Issue load() {
 				return issueService.load(linkedIssueId);
 			}
-		}, true).add(AttributeAppender.append("class", "badge-sm")));
+		}, true));
 		
 		fragment.add(stateLink);
 		

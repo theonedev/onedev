@@ -5,8 +5,9 @@
 			<wicket:t>opened <span wicket:id="submitDate"></span></wicket:t>
 			<span wicket:id="submitOnBehalfOf"></span>
 		</div>
-		<div wicket:id="description"></div>        
-		<ul wicket:id="links" class="links list-unstyled mt-4 mb-0 border-top pt-4">
+		<div wicket:id="description"></div>
+		<div class="related-info-separator border-primary mx-n4 mt-3"></div>
+		<ul wicket:id="links" class="links list-unstyled mt-4 mb-0">
 			<li wicket:id="links" class="mb-4 mb-last-child-0">
 				<div class="head h6 d-flex align-items-center">
 					<span wicket:id="name" class="flex-shrink-0 mr-2"></span>
@@ -14,9 +15,10 @@
 				</div>
 				<ul class="body linked-issues list-unstyled mb-0">
 					<li wicket:id="linkedIssues" class="py-2 border-top d-flex align-items-center"></li>
-				</ul>	
+				</ul>
 			</li>
-		</ul>	
+		</ul>
+		<div wicket:id="pullRequests" class="issue-pull-requests mt-4"></div>
 	</div>
 	<wicket:fragment wicket:id="moreIssueActionsFrag">
 		<wicket:enclosure>
