@@ -799,10 +799,6 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			cache.put(project.getId(), project.getFacade());
 		}
 
-		Map<Long, ProjectLastActivityDate> lastEventDates = new HashMap<>();
-		for (ProjectLastActivityDate lastEventDate : lastEventDateService.query())
-			lastEventDates.put(lastEventDate.getId(), lastEventDate);
-
 		logger.info("Checking projects...");
 		
 		replicas = hazelcastInstance.getMap("projectReplicas");
