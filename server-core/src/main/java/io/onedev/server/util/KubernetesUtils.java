@@ -222,7 +222,7 @@ public final class KubernetesUtils {
 					} else {
 						var timestampAndMessage = parseTimestampAndMessage(line);
 						var timestamp = timestampAndMessage.getLeft();
-						if (timestamp == null || lastInstantRef.get() == null || timestamp.isAfter(lastInstantRef.get())) {
+						if (timestamp == null || lastInstantRef.get() == null || !timestamp.isBefore(lastInstantRef.get())) {
 							if (timestamp != null) 
 								lastInstantRef.set(timestamp);
 							var message = timestampAndMessage.getRight();
