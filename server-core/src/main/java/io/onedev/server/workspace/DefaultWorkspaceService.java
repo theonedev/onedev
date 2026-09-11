@@ -25,6 +25,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -190,7 +192,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private volatile Thread thread;
 
-	private volatile boolean checkImmediately;
+	private final Semaphore checkSignal = new Semaphore(0);
 
 	private volatile String taskId;
 
@@ -247,7 +249,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	public void on(WorkspaceEvent event) {
 		if (event instanceof WorkspaceCreated || event instanceof WorkspacePending) {
 			clusterService.submitToServer(clusterService.getLeaderServerAddress(), () -> {
-				checkImmediately = true;
+				checkSignal.release();
 				return null;
 			});
 		}
@@ -279,7 +281,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				transactionService.runAfterCommit(() -> {
 					clusterService.submitToServer(projectServer, (ClusterTask<Void>) () -> {
 						try {
-							checkImmediately = true;
+							checkSignal.release();
 
 							// Delete workspace storage after workspace server is removed to
 							// give a chance for cache to be uploaded
@@ -500,6 +502,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			taskScheduler.unschedule(taskId);		
 		Thread copy = thread;
 		thread = null;
+		checkSignal.release();
 
 		logger.info("Stopping workspaces...");
 		for (var taskFuture: workspaceTaskFutures.values()) 
@@ -650,10 +653,11 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 						}
 					}
 				});
-				int count = 0;
-				while (!checkImmediately && count++ < CHECK_INTERVAL) 
-					Thread.sleep(1000);
-				checkImmediately = false;
+				// Wake for changes or shutdown without interrupting an in-progress check.
+				if (thread != null || !workspaceFutures.isEmpty()) {
+					checkSignal.tryAcquire(CHECK_INTERVAL, TimeUnit.SECONDS);
+					checkSignal.drainPermits();
+				}
 			} catch (Throwable t) {
 				if (ExceptionUtils.find(t, ServerNotFoundException.class) == null 
 						&& ExceptionUtils.find(t, InterruptedException.class) == null) {

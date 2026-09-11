@@ -290,11 +290,11 @@ jobs:
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - secret: false
-      valuesProvider:
+    - valuesProvider:
         type: SpecifiedValues
         values:
         - - server-product/target/sandbox
+      secret: false
       name: Scan Path
     condition: SUCCESSFUL
     optional: false
@@ -377,9 +377,6 @@ jobs:
   - type: BranchUpdateTrigger
     branches: main
     userMatch: anyone
-    projects: onedev/server
-  - type: PullRequestUpdateTrigger
-    branches: main
     projects: onedev/server
   retryCondition: never
   maxRetries: 3

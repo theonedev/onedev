@@ -28,6 +28,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -243,7 +244,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	private volatile Thread thread;
 
-	private volatile boolean checkImmediately;
+	private final Semaphore checkSignal = new Semaphore(0);
 
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
 
@@ -1043,7 +1044,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					innerBuild.setCanceller(userService.load(userId));
 					buildService.update(innerBuild);
 				});
-				checkImmediately = true;
+				checkSignal.release();
 			}
 			return null;
 		});
@@ -1207,6 +1208,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	public void on(SystemStopping event) {
 		Thread copy = thread;
 		thread = null;
+		checkSignal.release();
 		if (copy != null) {
 			try {
 				copy.join();
@@ -1223,7 +1225,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	public void on(BuildEvent event) {
 		if (event instanceof BuildSubmitted || event instanceof BuildPending || event instanceof BuildFinished) {
 			clusterService.submitToServer(clusterService.getLeaderServerAddress(), () -> {
-				checkImmediately = true;
+				checkSignal.release();
 				return null;
 			});
 		}
@@ -1343,10 +1345,11 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						}
 					}
 				});
-				int count = 0;
-				while (!checkImmediately && count++ < CHECK_INTERVAL) 
-					Thread.sleep(1000);
-				checkImmediately = false;
+				// Wake for changes or shutdown without interrupting an in-progress check.
+				if (thread != null || !jobFutures.isEmpty()) {
+					checkSignal.tryAcquire(CHECK_INTERVAL, TimeUnit.SECONDS);
+					checkSignal.drainPermits();
+				}
 			} catch (Throwable t) {
 				if (ExceptionUtils.find(t, ServerNotFoundException.class) == null) {
 					logException("Error checking builds", t);
