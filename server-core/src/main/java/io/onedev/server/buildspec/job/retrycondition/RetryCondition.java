@@ -37,6 +37,7 @@ import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.FieldO
 import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.NotCriteriaContext;
 import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.OrCriteriaContext;
 import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.ParensCriteriaContext;
+import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.TimedOutCriteriaContext;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
@@ -92,6 +93,11 @@ public class RetryCondition extends Criteria<RetryContext> {
 		} else {
 			criteria = new RetryConditionBaseVisitor<Criteria<RetryContext>>() {
 	
+				@Override
+				public Criteria<RetryContext> visitTimedOutCriteria(TimedOutCriteriaContext ctx) {
+					return new TimedOutCriteria();
+				}
+
 				@Override
 				public Criteria<RetryContext> visitParensCriteria(ParensCriteriaContext ctx) {
 					return visit(ctx.criteria()).withParens(true);

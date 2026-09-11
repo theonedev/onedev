@@ -331,7 +331,7 @@ public class Job implements NamedElement, Validatable {
 	}
 	
 	@Editable(order=10500, group="More Settings", description="Specify timeout in seconds. It counts from " +
-			"the time when job is submitted")
+			"the time when job starts running")
 	public long getTimeout() {
 		return timeout;
 	}

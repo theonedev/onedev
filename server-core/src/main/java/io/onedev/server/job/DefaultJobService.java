@@ -110,6 +110,7 @@ import io.onedev.server.event.project.ScheduledTimeReaches;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.event.project.build.BuildPending;
+import io.onedev.server.event.project.build.BuildRunning;
 import io.onedev.server.event.project.build.BuildSubmitted;
 import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
@@ -143,6 +144,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.IssueService;
 import io.onedev.server.service.ProjectService;
@@ -163,6 +165,8 @@ import nl.altindag.ssl.SSLFactory;
 
 @Singleton
 public class DefaultJobService implements JobService, Runnable, CodePullAuthorizationSource, Serializable {
+
+	private static final int SEQUENTIAL_LOCK_LEASE_SECONDS = 60;
 
 	private static final int CHECK_INTERVAL = 5; 
 
@@ -249,6 +253,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
 
 	private volatile IMap<String, String> jobServers;
+
+	private final Map<String, AtomicReference<Date>> jobRunningDates = new ConcurrentHashMap<>();
 	
 	private volatile IMap<String, Date> sequentialKeys;
 
@@ -607,11 +613,10 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		return executorService.submit(() -> {
 			int retried = 0;
 			while (true) {
-				long beginTime = System.currentTimeMillis();
 				if (sequentialKey != null) {
 					jobLogger.log("Locking sequential group...");
 					while (true) {
-						if (sequentialKeys.putIfAbsent(sequentialKey, new Date(), timeout, TimeUnit.MILLISECONDS) != null)
+						if (sequentialKeys.putIfAbsent(sequentialKey, new Date(), SEQUENTIAL_LOCK_LEASE_SECONDS, TimeUnit.SECONDS) != null)
 							Thread.sleep(1000);
 						else
 							break;
@@ -622,17 +627,33 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				jobActions.put(jobToken, actions);
 				logService.addLogger(jobToken, jobLogger);
 				serverStepThreads.put(jobToken, new ArrayList<>());
+				Throwable throwable = null;
 				try {
+					var runningDateRef = new AtomicReference<Date>();
+					jobRunningDates.put(jobToken, runningDateRef);
 					var future = executorService.submit(() -> jobExecutor.execute(jobContext, jobLogger));
-					Throwable throwable = null;
 					try {
-						var waitTime = timeout - (System.currentTimeMillis() - beginTime);
-						if (waitTime > 0) {
-							if (future.get(waitTime, TimeUnit.MILLISECONDS))
-								return true;
-						} else {
-							future.cancel(true);
-							throwable = new TimeoutException();
+						Date runningDate = null;
+						while (true) {
+							if (runningDate == null)
+								runningDate = runningDateRef.get();
+							// Renew independently of job timeout, including while the job is pending.
+							if (sequentialKey != null)
+								sequentialKeys.setTtl(sequentialKey, SEQUENTIAL_LOCK_LEASE_SECONDS, TimeUnit.SECONDS);
+							long waitTime = 1000;
+							if (runningDate != null) {
+								var remainingTime = timeout - (System.currentTimeMillis() - runningDate.getTime());
+								if (remainingTime <= 0)
+									throw new TimeoutException();
+								waitTime = sequentialKey != null ? Math.min(waitTime, remainingTime) : remainingTime;
+							}
+							try {
+								if (future.get(waitTime, TimeUnit.MILLISECONDS))
+									return true;
+								break;
+							} catch (TimeoutException ignored) {
+								// Recheck the running deadline and renew the sequential lock lease.
+							}
 						}
 					} catch (Throwable t) {
 						if (!future.isDone())
@@ -643,15 +664,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 							throwable = t;
 					}
 					
-					if (!checkRetry(job, jobContext, jobLogger, throwable, retried)) {
-						if (throwable != null)
-							throw ExceptionUtils.unchecked(throwable);
-						else
-							return false;
-					} else {
-						retried++;
-					}
 				} finally {
+					jobRunningDates.remove(jobToken);
 					Collection<Thread> threads = serverStepThreads.remove(jobToken);
 					synchronized (threads) {
 						for (Thread thread : threads)
@@ -664,6 +678,14 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						sequentialKeys.remove(sequentialKey);
 
 					jobTerminalService.terminateShells(buildId);
+				}
+				if (!checkRetry(job, jobContext, jobLogger, throwable, retried)) {
+					if (throwable != null)
+						throw ExceptionUtils.unchecked(throwable);
+					else
+						return false;
+				} else {
+					retried++;
 				}
 			}
 		});
@@ -684,7 +706,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 				});
 			}
-			return retryCondition.matches(new RetryContext(buildService.load(jobContext.getBuildId()), errorMessage.get()));
+			return retryCondition.matches(new RetryContext(buildService.load(jobContext.getBuildId()),
+					errorMessage.get(), throwable != null && find(throwable, TimeoutException.class) != null));
 		})) {
 			if (throwable != null)
 				log(throwable, jobLogger);
@@ -1396,6 +1419,28 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				return jobContext.getProjectId().equals(project.getId());
 		}
 		return false;
+	}
+
+	@Override
+	public void notifyJobRunning(Long buildId, @Nullable Long agentId) {
+		var runningDate = new Date();
+		var projectAndToken = transactionService.call(() -> {
+			var build = buildService.load(buildId);
+			build.setStatus(Status.RUNNING);
+			build.setRunningDate(runningDate);
+			if (agentId != null)
+				build.setAgent(OneDev.getInstance(AgentService.class).load(agentId));
+			buildService.update(build);
+			listenerRegistry.post(new BuildRunning(build));
+			return Map.entry(build.getProject().getId(), build.getToken());
+		});
+		var jobToken = projectAndToken.getValue();
+		projectService.submitToActiveServer(projectAndToken.getKey(), () -> {
+			var runningDateRef = jobRunningDates.get(jobToken);
+			if (runningDateRef != null)
+				runningDateRef.set(runningDate);
+			return null;
+		});
 	}
 
 	@Override

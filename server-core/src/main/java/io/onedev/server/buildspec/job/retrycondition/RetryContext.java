@@ -10,9 +10,16 @@ public class RetryContext {
 	
 	private final String errorMessage;
 	
-	public RetryContext(Build build, @Nullable String errorMessage) {
+	private final boolean timedOut;
+
+	public RetryContext(Build build, @Nullable String errorMessage, boolean timedOut) {
 		this.build = build;
 		this.errorMessage = errorMessage;
+		this.timedOut = timedOut;
+	}
+
+	public boolean isTimedOut() {
+		return timedOut;
 	}
 
 	public Build getBuild() {

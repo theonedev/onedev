@@ -29,6 +29,8 @@ public interface JobService {
 	void resume(Build build);
 
 	boolean runJob(JobContext jobContext, JobRunnable runnable);
+
+	void notifyJobRunning(Long buildId, @Nullable Long agentId);
 	
 	JobShell openShell(Build build, JobTerminal terminal);
 	

@@ -5,7 +5,8 @@ condition
     ;
 
 criteria
-    : criteriaField=Quoted WS+ operator=(IsEmpty|IsNotEmpty) #FieldOperatorCriteria
+    : TimedOut #TimedOutCriteria
+    | criteriaField=Quoted WS+ operator=(IsEmpty|IsNotEmpty) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Contains|Is|IsNot) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -13,6 +14,10 @@ criteria
     | LParens WS* criteria WS* RParens #ParensCriteria
     ;
 	
+TimedOut
+	: 'timed' WS+ 'out'
+	;
+
 Never
 	: 'never'
 	;
