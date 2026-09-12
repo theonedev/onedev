@@ -1,6 +1,3 @@
-.pull-request-detail>.card-body>.main>.sticky-tabs-row {
-	margin-bottom: 0 !important;
-}
 .pull-request-detail>.card-body>.main>.activities>.activity {
 	border-left: 4px solid white;
 }
@@ -18,7 +15,8 @@
 	border-top-color: var(--dark-mode-light-dark);
 }
 .pull-request-detail>.card-body>.main>.activities>.activity:first-child {
-	border-top: none;
+	border-top-width: 2px;
+	border-top-style: dashed;
 }
 .pull-request-detail>.card-body>.main>.activities>.activity>div {
 	padding: 16px 0 16px 8px;

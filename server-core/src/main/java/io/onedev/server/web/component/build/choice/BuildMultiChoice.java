@@ -22,10 +22,9 @@ public class BuildMultiChoice extends Select2MultiChoice<Build> {
 			getSettings().setPlaceholder("Choose builds...");
 		else
 			getSettings().setPlaceholder("Not specified");
-		getSettings().setFormatResult("onedev.server.buildChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.buildChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.buildChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.buildChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.buildChoiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

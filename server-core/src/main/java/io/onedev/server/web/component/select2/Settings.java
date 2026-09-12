@@ -39,40 +39,41 @@ public final class Settings implements Serializable {
 
 	private AbstractSelect2Choice<?, ?> select2;
 	
-	/**
-	 * Some predefined width option values
-	 */
 	public static class Widths {
-		public static String OFF = "off";
-		public static String COPY = "copy";
-		public static String RESOLVE = "resolve";
-		public static String ELEMENT = "element";
+		public static final String STYLE = "style";
+		public static final String RESOLVE = "resolve";
+		public static final String ELEMENT = "element";
+		public static final String AUTO = "auto";
 	}
 
-	private Integer minimumInputLength, minimumResultsForSearch;
-	private Integer maximumSelectionSize;
+	private Integer minimumInputLength;
+	private Integer minimumResultsForSearch;
+	private Integer maximumSelectionLength;
 	private Object placeholder;
 	private Boolean allowClear;
 	private Boolean multiple;
 	private Boolean closeOnSelect;
-	private String id, matcher, tokenizer;
-	private String sortResults;
-	private String formatSelection, formatSelectionTooBig, formatResult, formatNoMatches, formatInputTooShort,
-			formatResultCssClass, formatLoadMore, formatSearching, escapeMarkup;
-	private String createSearchChoice;
-	private String initSelection;
-	private String query;
+	private String matcher;
+	private String tokenizer;
+	private String sorter;
+	private String templateSelection;
+	private String templateResult;
+	private String escapeMarkup;
+	private String createTag;
 	private String width;
-	private Boolean openOnEnter;
-	private String containerCss, dropdownCss, containerCssClass, dropdownCssClass;
-
-	private AjaxSettings ajax;
+	private String selectionCssClass;
+	private String dropdownCssClass;
 	private String data;
-	private String tags;
-	private String separator;
+	private Boolean tags;
 	private String[] tokenSeparators;
 	private Boolean dropdownAutoWidth;
-	
+	private String noResults;
+	private String inputTooShort;
+	private String maximumSelected;
+	private String loadingMore;
+	private String searching;
+	private AjaxSettings ajax;
+
 	public Settings(AbstractSelect2Choice<?, ?> select2) {
 		this.select2 = select2;
 	}
@@ -83,50 +84,43 @@ public final class Settings implements Serializable {
 			writer.object();
 			Json.writeObject(writer, "minimumInputLength", minimumInputLength);
 			Json.writeObject(writer, "minimumResultsForSearch", minimumResultsForSearch);
-			Json.writeObject(writer, "maximumSelectionSize", maximumSelectionSize);
+			Json.writeObject(writer, "maximumSelectionLength", maximumSelectionLength);
 			Json.writeObject(writer, "placeholder", placeholder);
 			Json.writeObject(writer, "allowClear", allowClear);
 			Json.writeObject(writer, "multiple", multiple);
 			Json.writeObject(writer, "closeOnSelect", closeOnSelect);
-			Json.writeFunction(writer, "id", id);
 			Json.writeFunction(writer, "matcher", matcher);
 			Json.writeFunction(writer, "tokenizer", tokenizer);
-			Json.writeFunction(writer, "sortResults", sortResults);
-			Json.writeFunction(writer, "formatSelection", formatSelection);
-			Json.writeFunction(writer, "formatResult", formatResult);
-			Json.writeFunction(writer, "formatNoMatches", formatNoMatches);
-			Json.writeFunction(writer, "formatInputTooShort", formatInputTooShort);
-			Json.writeFunction(writer, "formatResultCssClass", formatResultCssClass);
-			Json.writeFunction(writer, "formatSelectionTooBig", formatSelectionTooBig);
-			Json.writeFunction(writer, "formatLoadMore", formatLoadMore);
-			Json.writeFunction(writer, "formatSearching", formatSearching);
+			Json.writeFunction(writer, "sorter", sorter);
+			Json.writeFunction(writer, "templateSelection", templateSelection);
+			Json.writeFunction(writer, "templateResult", templateResult);
 			Json.writeFunction(writer, "escapeMarkup", escapeMarkup);
-			Json.writeFunction(writer, "createSearchChoice", createSearchChoice);
-			Json.writeFunction(writer, "initSelection", initSelection);
-			Json.writeFunction(writer, "query", query);
+			Json.writeFunction(writer, "createTag", createTag);
 			Json.writeObject(writer, "width", width);
-			Json.writeObject(writer, "openOnEnter", openOnEnter);
-			Json.writeFunction(writer, "containerCss", containerCss);
-			Json.writeObject(writer, "containerCssClass", containerCssClass);
-			Json.writeFunction(writer, "dropdownCss", dropdownCss);
+			Json.writeObject(writer, "selectionCssClass", selectionCssClass);
 			Json.writeObject(writer, "dropdownCssClass", dropdownCssClass);
-			Json.writeObject(writer, "separator", separator);
+			Json.writeFunction(writer, "data", data);
+			Json.writeObject(writer, "tags", tags);
 			Json.writeObject(writer, "tokenSeparators", tokenSeparators);
 			Json.writeObject(writer, "dropdownAutoWidth", dropdownAutoWidth);
+			writer.key("language").object();
+			Json.writeFunction(writer, "noResults", noResults);
+			Json.writeFunction(writer, "inputTooShort", inputTooShort);
+			Json.writeFunction(writer, "maximumSelected", maximumSelected);
+			Json.writeFunction(writer, "loadingMore", loadingMore);
+			Json.writeFunction(writer, "searching", searching);
+			writer.endObject();
 			if (ajax != null) {
 				writer.key("ajax");
 				ajax.toJson(writer);
 			}
-			Json.writeFunction(writer, "data", data);
-			Json.writeFunction(writer, "tags", tags);
 			writer.endObject();
-
 			return writer.toString();
 		} catch (JSONException e) {
 			throw new RuntimeException("Could not convert Select2 settings object to Json", e);
 		}
 	}
-	
+
 	public Integer getMinimumInputLength() {
 		return minimumInputLength;
 	}
@@ -141,6 +135,14 @@ public final class Settings implements Serializable {
 
 	public void setMinimumResultsForSearch(Integer minimumResultsForSearch) {
 		this.minimumResultsForSearch = minimumResultsForSearch;
+	}
+
+	public Integer getMaximumSelectionLength() {
+		return maximumSelectionLength;
+	}
+
+	public void setMaximumSelectionLength(Integer maximumSelectionLength) {
+		this.maximumSelectionLength = maximumSelectionLength;
 	}
 
 	public Object getPlaceholder() {
@@ -175,109 +177,6 @@ public final class Settings implements Serializable {
 		this.closeOnSelect = closeOnSelect;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getFormatSelection() {
-		return formatSelection;
-	}
-
-	public void setFormatSelection(String formatSelection) {
-		this.formatSelection = formatSelection;
-	}
-
-	public String getFormatResult() {
-		return formatResult;
-	}
-
-	public void setFormatResult(String formatResult) {
-		this.formatResult = formatResult;
-	}
-
-	public String getFormatNoMatches() {
-		return formatNoMatches;
-	}
-
-	public void setFormatNoMatches(String formatNoMatches) {
-		this.formatNoMatches = formatNoMatches;
-	}
-
-	public String getFormatInputTooShort() {
-		return formatInputTooShort;
-	}
-
-	public void setFormatInputTooShort(String formatInputTooShort) {
-		this.formatInputTooShort = formatInputTooShort;
-	}
-
-	public String getCreateSearchChoice() {
-		return createSearchChoice;
-	}
-
-	public void setCreateSearchChoice(String createSearchChoice) {
-		this.createSearchChoice = createSearchChoice;
-	}
-
-	public String getInitSelection() {
-		return initSelection;
-	}
-
-	public void setInitSelection(String initSelection) {
-		this.initSelection = initSelection;
-	}
-
-	public String getQuery() {
-		return query;
-	}
-
-	public void setQuery(String query) {
-		this.query = query;
-	}
-
-	public AjaxSettings getAjax() {
-		return getAjax(false);
-	}
-
-	public AjaxSettings getAjax(boolean createIfNotSet) {
-		if (createIfNotSet && ajax == null) {
-			ajax = new AjaxSettings();
-		}
-		return ajax;
-	}
-
-	public void setAjax(AjaxSettings ajax) {
-		this.ajax = ajax;
-	}
-
-	public String getData() {
-		return data;
-	}
-
-	public void setData(String data) {
-		this.data = data;
-	}
-
-	public String getTags() {
-		return tags;
-	}
-
-	public void setTags(String tags) {
-		this.tags = tags;
-	}
-
-	public Integer getMaximumSelectionSize() {
-		return maximumSelectionSize;
-	}
-
-	public void setMaximumSelectionSize(Integer maximumSelectionSize) {
-		this.maximumSelectionSize = maximumSelectionSize;
-	}
-
 	public String getMatcher() {
 		return matcher;
 	}
@@ -294,44 +193,28 @@ public final class Settings implements Serializable {
 		this.tokenizer = tokenizer;
 	}
 
-	public String getSortResults() {
-		return sortResults;
+	public String getSorter() {
+		return sorter;
 	}
 
-	public void setSortResults(String sortResults) {
-		this.sortResults = sortResults;
+	public void setSorter(String sorter) {
+		this.sorter = sorter;
 	}
 
-	public String getFormatSelectionTooBig() {
-		return formatSelectionTooBig;
+	public String getTemplateSelection() {
+		return templateSelection;
 	}
 
-	public void setFormatSelectionTooBig(String formatSelectionTooBig) {
-		this.formatSelectionTooBig = formatSelectionTooBig;
+	public void setTemplateSelection(String templateSelection) {
+		this.templateSelection = templateSelection;
 	}
 
-	public String getFormatResultCssClass() {
-		return formatResultCssClass;
+	public String getTemplateResult() {
+		return templateResult;
 	}
 
-	public void setFormatResultCssClass(String formatResultCssClass) {
-		this.formatResultCssClass = formatResultCssClass;
-	}
-
-	public String getFormatLoadMore() {
-		return formatLoadMore;
-	}
-
-	public void setFormatLoadMore(String formatLoadMore) {
-		this.formatLoadMore = formatLoadMore;
-	}
-
-	public String getFormatSearching() {
-		return formatSearching;
-	}
-
-	public void setFormatSearching(String formatSearching) {
-		this.formatSearching = formatSearching;
+	public void setTemplateResult(String templateResult) {
+		this.templateResult = templateResult;
 	}
 
 	public String getEscapeMarkup() {
@@ -342,6 +225,14 @@ public final class Settings implements Serializable {
 		this.escapeMarkup = escapeMarkup;
 	}
 
+	public String getCreateTag() {
+		return createTag;
+	}
+
+	public void setCreateTag(String createTag) {
+		this.createTag = createTag;
+	}
+
 	public String getWidth() {
 		return width;
 	}
@@ -350,36 +241,12 @@ public final class Settings implements Serializable {
 		this.width = width;
 	}
 
-	public Boolean getOpenOnEnter() {
-		return openOnEnter;
+	public String getSelectionCssClass() {
+		return selectionCssClass;
 	}
 
-	public void setOpenOnEnter(Boolean openOnEnter) {
-		this.openOnEnter = openOnEnter;
-	}
-
-	public String getContainerCss() {
-		return containerCss;
-	}
-
-	public void setContainerCss(String containerCss) {
-		this.containerCss = containerCss;
-	}
-
-	public String getDropdownCss() {
-		return dropdownCss;
-	}
-
-	public void setDropdownCss(String dropdownCss) {
-		this.dropdownCss = dropdownCss;
-	}
-
-	public String getContainerCssClass() {
-		return containerCssClass;
-	}
-
-	public void setContainerCssClass(String containerCssClass) {
-		this.containerCssClass = containerCssClass;
+	public void setSelectionCssClass(String selectionCssClass) {
+		this.selectionCssClass = selectionCssClass;
 	}
 
 	public String getDropdownCssClass() {
@@ -390,12 +257,20 @@ public final class Settings implements Serializable {
 		this.dropdownCssClass = dropdownCssClass;
 	}
 
-	public String getSeparator() {
-		return separator;
+	public String getData() {
+		return data;
 	}
 
-	public void setSeparator(String separator) {
-		this.separator = separator;
+	public void setData(String data) {
+		this.data = data;
+	}
+
+	public Boolean getTags() {
+		return tags;
+	}
+
+	public void setTags(Boolean tags) {
+		this.tags = tags;
 	}
 
 	public String[] getTokenSeparators() {
@@ -413,7 +288,61 @@ public final class Settings implements Serializable {
 	public void setDropdownAutoWidth(Boolean dropdownAutoWidth) {
 		this.dropdownAutoWidth = dropdownAutoWidth;
 	}
-	
+
+	public String getNoResults() {
+		return noResults;
+	}
+
+	public void setNoResults(String noResults) {
+		this.noResults = noResults;
+	}
+
+	public String getInputTooShort() {
+		return inputTooShort;
+	}
+
+	public void setInputTooShort(String inputTooShort) {
+		this.inputTooShort = inputTooShort;
+	}
+
+	public String getMaximumSelected() {
+		return maximumSelected;
+	}
+
+	public void setMaximumSelected(String maximumSelected) {
+		this.maximumSelected = maximumSelected;
+	}
+
+	public String getLoadingMore() {
+		return loadingMore;
+	}
+
+	public void setLoadingMore(String loadingMore) {
+		this.loadingMore = loadingMore;
+	}
+
+	public String getSearching() {
+		return searching;
+	}
+
+	public void setSearching(String searching) {
+		this.searching = searching;
+	}
+
+	public AjaxSettings getAjax() {
+		return getAjax(false);
+	}
+
+	public AjaxSettings getAjax(boolean createIfNotSet) {
+		if (createIfNotSet && ajax == null)
+			ajax = new AjaxSettings();
+		return ajax;
+	}
+
+	public void setAjax(AjaxSettings ajax) {
+		this.ajax = ajax;
+	}
+
 	public void configurePlaceholder(PropertyDescriptor propertyDescriptor) {
 		HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(select2)));
 		try {

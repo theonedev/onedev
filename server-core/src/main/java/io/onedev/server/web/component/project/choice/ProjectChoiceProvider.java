@@ -33,6 +33,7 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 	
 	@Override
 	public void toJson(Project choice, JSONWriter writer) throws JSONException {
+		writer.key("text").value(choice.getPath());
 		writer.key("id").value(choice.getId());
 		writer.key("path");
 		writer.value(HtmlEscape.escapeHtml5(choice.getPath()));

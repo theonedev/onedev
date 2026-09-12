@@ -232,7 +232,7 @@ onedev.server = {
 			 */
 			setTimeout(function() {
 				// do not use :visible selector directly for performance reason 
-				var focusibleSelector = "input[type=text], input[type=password], input:not([type]), textarea, .CodeMirror";
+				var focusibleSelector = "input[type=text], input[type=password], input:not([type]), textarea, .select2-selection--single, .CodeMirror";
 				var attentionSelector = ".feedbackPanelERROR";
                 var $attention = $containers.find(attentionSelector).addBack(attentionSelector).filter(":visible:first");
                 if ($attention.length == 0) {
@@ -248,7 +248,7 @@ onedev.server = {
 					var $focusable = $attention.find(focusibleSelector).addBack(focusibleSelector).filter(":visible");
 					if ($focusable.hasClass("CodeMirror") && $focusable[0].CodeMirror.options.readOnly == false) {
 						$focusable[0].CodeMirror.focus();					
-                    } else if ($focusable.length != 0 && !$focusable.hasClass("select2-input") 
+                    } else if ($focusable.length != 0 && !$focusable.hasClass("select2-search__field")
 							&& $focusable.closest(".no-autofocus").length == 0) {						
 						$focusable.focus();
 					} else {
@@ -267,7 +267,7 @@ onedev.server = {
 									if ($this.closest(".inplace-property-edit").length != 0) {
 										$this.focus();
 										focused = true;
-										$this.closest(".select2-container").next("input").select2("open");
+										$this.closest(".select2-container").prev("select").select2("open");
 									} 
 								} else {
 									$this.focus();
@@ -637,7 +637,7 @@ onedev.server = {
 		 * When these are open, do not steal Escape for blur-first behavior.
 		 */
 		isEscapeConsumedByWidget: function() {
-			return $(".select2-drop:visible").length != 0
+			return $(".select2-dropdown:visible").length != 0
 					|| $(".dropdown.open").length != 0
 					|| $("body>.floating").length != 0
 					|| $(".pcr-app.visible").length != 0

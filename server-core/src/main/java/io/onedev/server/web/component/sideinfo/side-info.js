@@ -88,7 +88,7 @@ onedev.server.sideInfo = {
 			if ($(".flatpickr-calendar.open").length == 0
 					&& $(".pcr-app.visible").length == 0
 					&& $container.find(".dropdown-open").length == 0
-					&& $(".select2-drop:visible").length == 0) {
+					&& $(".select2-dropdown:visible").length == 0) {
 				var x = e.pageX;
 				var y = e.pageY;
 
@@ -104,7 +104,7 @@ onedev.server.sideInfo = {
 			if (onedev.server.sideInfo.isOverlayMode($container)
 					&& e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0
 					&& $container.find(".dropdown-open").length == 0
-					&& $(".select2-drop:visible").length == 0
+					&& $(".select2-dropdown:visible").length == 0
 					&& $(".flatpickr-calendar.open").length == 0
 					&& $(".pcr-app.visible").length == 0) {
 				onedev.server.sideInfo.close($container);

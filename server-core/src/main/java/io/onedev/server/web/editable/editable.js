@@ -10,8 +10,8 @@ onedev.server.editable = {
 			var $parent = $(this).parent();
             $parent.toggleClass("expanded");
 			// Fix the issue that placeholder is not displayed after showing the group
-			$parent.find(".select2-container-multi+input").each(function() {
-				$(this).data("select2").clearSearch();				
+			$parent.find("select[multiple].select2-hidden-accessible").each(function() {
+				$(this).trigger("change.select2");
 			});
 			$parent.find(".visible-aware").trigger("visible");
         });

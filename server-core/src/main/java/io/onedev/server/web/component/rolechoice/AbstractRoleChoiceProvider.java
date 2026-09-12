@@ -21,6 +21,7 @@ public abstract class AbstractRoleChoiceProvider extends ChoiceProvider<Role> {
 
 	@Override
 	public void toJson(Role choice, JSONWriter writer) throws JSONException {
+		writer.key("text").value(choice.getName());
 		writer.key("id").value(choice.getId()).key("name").value(HtmlEscape.escapeHtml5(choice.getName()));
 		if (choice.getDescription() != null)
 			writer.key("description").value(HtmlEscape.escapeHtml5(choice.getDescription()));

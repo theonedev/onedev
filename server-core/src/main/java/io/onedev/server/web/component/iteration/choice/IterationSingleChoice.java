@@ -26,10 +26,9 @@ public class IterationSingleChoice extends Select2Choice<Iteration> {
 			getSettings().setPlaceholder(_T("Choose iteration..."));
 		else
 			getSettings().setPlaceholder(_T("Not specified"));
-		getSettings().setFormatResult("onedev.server.iterationChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.iterationChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.iterationChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.iterationChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.iterationChoiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

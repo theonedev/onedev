@@ -33,10 +33,9 @@ public class StringSingleChoice extends Select2Choice<String> {
 		super.onInitialize();
 		
 		getSettings().setAllowClear(!isRequired());
-		getSettings().setFormatResult("onedev.server.choiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.choiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.choiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.choiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.choiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 
 }

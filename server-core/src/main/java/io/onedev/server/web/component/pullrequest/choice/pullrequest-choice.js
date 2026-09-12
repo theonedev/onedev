@@ -1,6 +1,6 @@
 onedev.server.pullRequestChoiceFormatter = {
 	formatPullRequest: function(request) {
-		return request.title + " (" + request.reference +")";
+		return request.title.escapeHtml() + " (" + request.reference +")";
 	},
 	formatSelection: function(request) {
 		return onedev.server.pullRequestChoiceFormatter.formatPullRequest(request);

@@ -14,15 +14,16 @@ package io.onedev.server.web.component.select2;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Collection;
 
 import org.apache.wicket.IResourceListener;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
-import org.apache.wicket.markup.html.form.HiddenField;
+import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.Request;
@@ -32,6 +33,7 @@ import org.apache.wicket.util.string.Strings;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
+import io.onedev.server.web.component.select2.json.JsonBuilder;
 import io.onedev.server.web.editable.InplacePropertyEditPanel;
 
 /**
@@ -44,7 +46,7 @@ import io.onedev.server.web.editable.InplacePropertyEditPanel;
  * @param <M>
  *            type of model object
  */
-abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IResourceListener {
+abstract class AbstractSelect2Choice<T, M> extends FormComponent<M> implements IResourceListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -155,62 +157,70 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 	}
 
 	@Override
+	protected void onComponentTag(ComponentTag tag) {
+		super.onComponentTag(tag);
+		checkComponentTag(tag, "select");
+		if (Boolean.TRUE.equals(settings.getMultiple()))
+			tag.put("multiple", "multiple");
+	}
+
+	@Override
+	public void onComponentTagBody(MarkupStream markupStream, ComponentTag openTag) {
+		replaceComponentTagBody(markupStream, openTag, "");
+	}
+
+	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		// initialize select2
 		response.render(JavaScriptHeaderItem.forReference(new Select2ResourceReference()));
-
-		if (findParent(InplacePropertyEditPanel.class) != null) {
-			response.render(OnDomReadyHeaderItem.forScript(JQuery.execute("$('#%s').select2(%s);", 
-					getJquerySafeMarkupId(), settings.toJson())));
-		} else {
-			// Use OnLoad instead of OnDomReady here as otherwise the placeholder 
-			// of multi-choice cannot be displayed in a modal dialog
-			response.render(OnLoadHeaderItem.forScript(JQuery.execute("$('#%s').select2(%s);", 
-					getJquerySafeMarkupId(), settings.toJson())));
+		JsonBuilder selection = new JsonBuilder();
+		selection.array();
+		for (T choice : getSelections()) {
+			selection.object();
+			getProvider().toJson(choice, selection);
+			selection.endObject();
 		}
-
-		// select current value
-
-		renderInitializationScript(response);
+		selection.endArray();
+		String script = JQuery.execute("onedev.server.select2.init($('#%s'), %s, %s);",
+				getJquerySafeMarkupId(), settings.toJson(), selection.toJson());
+		if (findParent(InplacePropertyEditPanel.class) != null) {
+			response.render(OnDomReadyHeaderItem.forScript(script));
+		} else {
+			// Wait for modal dialogs to be visible before sizing the search field.
+			response.render(OnLoadHeaderItem.forScript(script));
+		}
 	}
 
 	/**
-	 * Renders script used to initialize the value of Select2 after it is
-	 * created so it matches the current model object.
-	 * 
-	 * @param response
-	 *            header response
+	 * Returns the submitted selection after validation, or the current model value.
 	 */
-	protected abstract void renderInitializationScript(IHeaderResponse response);
+	protected abstract Collection<T> getSelections();
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new DragAndDropBehavior());
-		
 		// configure the ajax callbacks
 
 		AjaxSettings ajax = settings.getAjax(true);
 
 		ajax.setData(String.format(
-				"function(term, page) { return { select2_term: term, select2_page:page, '%s':true, '%s':[window.location.protocol, '//', window.location.host, window.location.pathname].join('')}; }",
+				"function(params) { return { select2_term: params.term || '', select2_page: params.page || 1, '%s':true, '%s':[window.location.protocol, '//', window.location.host, window.location.pathname].join('')}; }",
 				WebRequest.PARAM_AJAX, WebRequest.PARAM_AJAX_BASE_URL));
 
-		ajax.setResults("function(data, page) { return data; }");
+		ajax.setProcessResults("function(data) { return data; }");
 
 		// configure the localized strings/renderers
-		getSettings().setFormatNoMatches("function() { return '" + getEscapedJsString("noMatches") + "';}");
-		getSettings().setFormatInputTooShort("function(input, min) { return min - input.length == 1 ? '"
+		getSettings().setNoResults("function() { return '" + getEscapedJsString("noMatches") + "';}");
+		getSettings().setInputTooShort("function(args) { return args.minimum - args.input.length == 1 ? '"
 				+ getEscapedJsString("inputTooShortSingular") + "' : '" + getEscapedJsString("inputTooShortPlural")
-				+ "'.replace('{number}', min - input.length); }");
-		getSettings().setFormatSelectionTooBig(
-				"function(limit) { return limit == 1 ? '" + getEscapedJsString("selectionTooBigSingular") + "' : '"
-						+ getEscapedJsString("selectionTooBigPlural") + "'.replace('{limit}', limit); }");
-		getSettings().setFormatLoadMore("function() { return '" + getEscapedJsString("loadMore") + "';}");
-		getSettings().setFormatSearching("function() { return '" + getEscapedJsString("searching") + "';}");
+				+ "'.replace('{number}', args.minimum - args.input.length); }");
+		getSettings().setMaximumSelected(
+				"function(args) { return args.maximum == 1 ? '" + getEscapedJsString("selectionTooBigSingular") + "' : '"
+						+ getEscapedJsString("selectionTooBigPlural") + "'.replace('{limit}', args.maximum); }");
+		getSettings().setLoadingMore("function() { return '" + getEscapedJsString("loadMore") + "';}");
+		getSettings().setSearching("function() { return '" + getEscapedJsString("searching") + "';}");
 	}
 
 	@Override
@@ -218,25 +228,6 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 		super.onConfigure();
 
 		getSettings().getAjax().setUrl(urlFor(IResourceListener.INTERFACE, null));
-	}
-
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (event.getPayload() instanceof AjaxRequestTarget) {
-
-			AjaxRequestTarget target = (AjaxRequestTarget) event.getPayload();
-
-			if (target.getComponents().contains(this)) {
-
-				// if this component is being repainted by ajax, directly, we
-				// must destroy Select2 so it removes
-				// its elements from DOM
-
-				target.prependJavaScript(JQuery.execute("$('#%s').select2('destroy');", getJquerySafeMarkupId()));
-			}
-		}
 	}
 
 	@Override
@@ -277,7 +268,8 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 				json.endObject();
 			}
 			json.endArray();
-			json.key("more").value(response.getHasMore()).endObject();
+			json.key("pagination").object().key("more").value(response.getHasMore()).endObject();
+			json.endObject();
 		} catch (JSONException e) {
 			throw new RuntimeException("Could not write Json response", e);
 		}

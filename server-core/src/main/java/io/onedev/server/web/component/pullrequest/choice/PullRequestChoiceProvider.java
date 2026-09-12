@@ -8,7 +8,6 @@ import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.jspecify.annotations.Nullable;
-import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
 
@@ -38,10 +37,12 @@ public abstract class PullRequestChoiceProvider extends ChoiceProvider<PullReque
 
 	@Override
 	public void toJson(PullRequest choice, JSONWriter writer) throws JSONException {
+		// Select2 uses title for native tooltips as well; escape in the HTML formatter.
+		writer.key("text").value(choice.getTitle() + " (" + choice.getReference().toString(getProject()) + ")");
 		writer
 			.key("id").value(choice.getId())
 			.key("reference").value(choice.getReference().toString(getProject()))
-			.key("title").value(Emojis.getInstance().apply(HtmlEscape.escapeHtml5(choice.getTitle())));
+			.key("title").value(Emojis.getInstance().apply(choice.getTitle()));
 	}
 
 	@Override

@@ -399,8 +399,8 @@ public abstract class IssueSidePanel extends Panel {
 				super.onInitialize();
 				
 				getSettings().setPlaceholder(_T("Add to iteration..."));
-				getSettings().setFormatResult("onedev.server.iterationChoiceFormatter.formatResult");
-				getSettings().setFormatSelection("onedev.server.iterationChoiceFormatter.formatSelection");
+				getSettings().setTemplateResult("onedev.server.iterationChoiceFormatter.formatResult");
+				getSettings().setTemplateSelection("onedev.server.iterationChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.iterationChoiceFormatter.escapeMarkup");
 			}
 			

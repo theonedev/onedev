@@ -1,17 +1,17 @@
 <wicket:extend>
     <div class="form-group">
         <label class="control-label"><wicket:t>State</wicket:t></label>
-        <input wicket:id="state" type="hidden" class="form-control">
+        <select wicket:id="state" class="form-control"></select>
     </div>    
     <div wicket:id="customFields" class="form-group"></div>
     <div class="form-group">
         <label class="control-label"><wicket:t>Submitted By</wicket:t></label>
-        <input wicket:id="submittedBy" type="hidden" class="form-control">
+        <select wicket:id="submittedBy" class="form-control"></select>
     </div>    
     <wicket:enclosure>
         <div class="form-group">
             <label class="control-label"><wicket:t>Iteration</wicket:t></label>
-            <input wicket:id="iteration" type="hidden" class="form-control">
+            <select wicket:id="iteration" class="form-control"></select>
         </div>        
     </wicket:enclosure>
     <div class="form-group">
@@ -36,6 +36,6 @@
     </div>    
     <wicket:fragment wicket:id="choiceFieldFrag">
         <label wicket:id="label" class="control-label"></label>
-        <input wicket:id="choice" type="hidden" class="form-control">
+        <select wicket:id="choice" class="form-control"></select>
     </wicket:fragment>   
 </wicket:extend>

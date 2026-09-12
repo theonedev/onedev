@@ -35,6 +35,8 @@ public abstract class BuildChoiceProvider extends ChoiceProvider<Build> {
 
 	@Override
 	public void toJson(Build choice, JSONWriter writer) throws JSONException {
+		writer.key("text").value(choice.getJobName() + (choice.getVersion() != null ? ": " + choice.getVersion() : "")
+				+ " (" + choice.getReference().toString(getProject()) + ")");
 		writer
 			.key("id").value(choice.getId())
 			.key("reference").value(choice.getReference().toString(getProject()))

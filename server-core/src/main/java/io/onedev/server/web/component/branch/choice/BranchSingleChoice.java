@@ -27,10 +27,9 @@ public class BranchSingleChoice extends Select2Choice<String> {
 			getSettings().setPlaceholder(_T("Choose branch..."));
 		else
 			getSettings().setPlaceholder(_T("Not specified"));
-		getSettings().setFormatResult("onedev.server.branchChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.branchChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.branchChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.branchChoiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

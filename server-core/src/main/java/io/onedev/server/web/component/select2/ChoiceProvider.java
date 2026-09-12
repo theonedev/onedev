@@ -64,9 +64,8 @@ public abstract class ChoiceProvider<T> implements IDetachable {
 	 * Converts the specified choice to Json.
 	 * 
 	 * <p>
-	 * At the very least each choice should contain an {@code id} attribute. If
-	 * no custom rendering function is specified, the {@code text} attribute
-	 * should also be provided
+	 * Each choice must contain an {@code id} and a plain-text {@code text}
+	 * attribute, including choices with custom rendering functions
 	 * </p>
 	 * 
 	 * <p>

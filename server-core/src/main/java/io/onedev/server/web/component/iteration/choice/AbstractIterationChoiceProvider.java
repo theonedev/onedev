@@ -21,6 +21,7 @@ public abstract class AbstractIterationChoiceProvider extends ChoiceProvider<Ite
 	
 	@Override
 	public void toJson(Iteration choice, JSONWriter writer) throws JSONException {
+		writer.key("text").value(choice.getName());
 		writer.key("id").value(choice.getId()).key("name").value(HtmlEscape.escapeHtml5(choice.getName()));
 		writer.key("statusName").value(choice.getStatusName());
 		if (choice.isClosed()) 

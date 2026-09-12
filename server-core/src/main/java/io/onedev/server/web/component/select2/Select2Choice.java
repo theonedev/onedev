@@ -17,17 +17,12 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.string.Strings;
-import org.json.JSONException;
-
-import io.onedev.server.web.component.select2.json.JsonBuilder;
 
 /**
  * Single-select Select2 component. Should be attached to a
- * {@code <input type='hidden'/>} element.
+ * {@code <select></select>} element.
  * 
  * @author igor
  * 
@@ -62,7 +57,8 @@ public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 	@Override
 	public void convertInput() {
 
-		String input = getWebRequest().getRequestParameters().getParameterValue(getInputName()).toString();
+		String[] inputs = getInputAsArray();
+		String input = inputs != null && inputs.length != 0 ? inputs[0] : null;
 		
 		if (Strings.isEmpty(input)) {
 			setConvertedInput(null);
@@ -76,7 +72,7 @@ public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 	}
 
 	@Override
-	protected void renderInitializationScript(IHeaderResponse response) {
+	protected Collection<T> getSelections() {
 		T value;
 		if (hasRawInput()) {
 			convertInput();
@@ -84,21 +80,6 @@ public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 		} else {
 			value = getModelObject();
 		}
-		if (value != null) {
-
-			JsonBuilder selection = new JsonBuilder();
-
-			try {
-				selection.object();
-				getProvider().toJson(value, selection);
-				selection.endObject();
-			} catch (JSONException e) {
-				throw new RuntimeException("Error converting model object to Json", e);
-			}
-			response.render(OnLoadHeaderItem.forScript(
-					JQuery.execute("$('#%s').select2('data', %s);", getJquerySafeMarkupId(), selection.toJson())));
-		} else {
-			clearInput();
-		}
+		return value != null ? Collections.singletonList(value) : Collections.emptyList();
 	}
 }

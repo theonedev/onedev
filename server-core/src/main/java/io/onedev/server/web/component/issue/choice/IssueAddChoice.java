@@ -19,8 +19,8 @@ public abstract class IssueAddChoice extends SelectToActChoice<Issue> {
 		super.onInitialize();
 		
 		getSettings().setPlaceholder(getPlaceholder());
-		getSettings().setFormatResult("onedev.server.issueChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.issueChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.issueChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.issueChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.issueChoiceFormatter.escapeMarkup");
 	}
 

@@ -134,8 +134,8 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 				super.onInitialize();
 				
 				getSettings().setPlaceholder(_T("Authorize user..."));
-				getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
-				getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
+				getSettings().setTemplateResult("onedev.server.userChoiceFormatter.formatResult");
+				getSettings().setTemplateSelection("onedev.server.userChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");
 			}
 			

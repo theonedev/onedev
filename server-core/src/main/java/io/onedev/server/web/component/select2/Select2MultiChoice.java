@@ -15,20 +15,13 @@ package io.onedev.server.web.component.select2;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
-import org.apache.shiro.util.StringUtils;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.util.string.Strings;
-import org.json.JSONException;
-
-import io.onedev.server.web.component.select2.json.JsonBuilder;
 
 /**
  * Multi-select Select2 component. Should be attached to a
- * {@code <input type='hidden'/>} element.
+ * {@code <select></select>} element.
  * 
  * @author igor
  * 
@@ -54,13 +47,13 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 	@Override
 	public void convertInput() {
 
-		String input = getWebRequest().getRequestParameters().getParameterValue(getInputName()).toString();
+		String[] input = getInputAsArray();
 
 		final Collection<T> choices;
-		if (Strings.isEmpty(input)) {
+		if (input == null || input.length == 0) {
 			choices = new ArrayList<T>();
 		} else {
-			choices = getProvider().toChoices(Arrays.asList(StringUtils.split(input, '\n')));
+			choices = getProvider().toChoices(Arrays.asList(input));
 		}
 
 		setConvertedInput(choices);
@@ -91,54 +84,14 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 	}
 
 	@Override
-	protected String getModelValue() {
-		Collection<T> values = getModelObject();
-
-		// if values is null or empty set value attribute to an empty string
-		// rather then '[]' which does not make sense
-		if (values == null || values.isEmpty()) {
-			return "";
-		}
-
-		return super.getModelValue();
-	}
-
-	@Override
-	protected void renderInitializationScript(IHeaderResponse response) {
-		response.render(JavaScriptHeaderItem.forReference(new DragSortResourceReference()));
-		
-		Collection<? extends T> choices;
-		
-        if (hasRawInput()) { // Add this as otherwise cleared options will occur again after validation if the field is required 
-            convertInput();
-            choices = getConvertedInput();
-        } else {
-            choices = getModelObject();
-        }
-		
-		if (choices != null && !choices.isEmpty()) {
-
-			JsonBuilder selection = new JsonBuilder();
-
-			try {
-				selection.array();
-				for (T choice : choices) {
-					selection.object();
-					getProvider().toJson(choice, selection);
-					selection.endObject();
-				}
-				selection.endArray();
-			} catch (JSONException e) {
-				throw new RuntimeException("Error converting model object to Json", e);
-			}
-
-			response.render(OnLoadHeaderItem.forScript(
-					JQuery.execute("$('#%s').select2('data', %s);", getJquerySafeMarkupId(), selection.toJson())));
+	protected Collection<T> getSelections() {
+		Collection<T> choices;
+		if (hasRawInput()) {
+			convertInput();
+			choices = getConvertedInput();
 		} else {
-			clearInput();
+			choices = getModelObject();
 		}
-		String script = String.format("onedev.server.select2DragSort.onWindowLoad('%s');", getMarkupId());
-		response.render(OnLoadHeaderItem.forScript(script));
+		return choices != null ? choices : Collections.emptyList();
 	}
-
 }

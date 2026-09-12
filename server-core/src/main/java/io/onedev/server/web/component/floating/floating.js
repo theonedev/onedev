@@ -8,7 +8,9 @@ onedev.server.floating = {
 			if ($(".flatpickr-calendar.open").length == 0 
 					&& $(".pcr-app.visible").length == 0 
 					&& $floating.find(".dropdown-open").length == 0
-					&& $(".select2-drop:visible").length == 0) {
+					// Select2 may detach its dropdown before this mouseup reaches the document.
+					&& $(e.target).closest(".select2-dropdown").length == 0
+					&& $(".select2-dropdown:visible").length == 0) {
 				/*
 				 * Close the floating panel if mouse clicks outside of the floating. Also we 
 				 * do not close the panel if mouse clicks on the element triggering this 
@@ -37,7 +39,7 @@ onedev.server.floating = {
 		$floating.data("keydown", function(e) {
 			if (e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0 
 					&& $floating.find(".dropdown-open").length == 0
-					&& $(".select2-drop:visible").length == 0 
+					&& $(".select2-dropdown:visible").length == 0
 					&& $(".flatpickr-calendar.open").length == 0
 					&& $(".pcr-app.visible").length == 0) {
 				$floating.data("closeCallback")();
@@ -75,12 +77,24 @@ onedev.server.floating = {
 			}
 		});
 		$(document).on("afterElementReplace", $floating.data("afterElementReplace"));
+		if (alignment && $floating.hasClass("inplace-property-edit")) {
+			// Selections can wrap without an Ajax replacement, changing the editor height.
+			var contentResizeObserver = new ResizeObserver(function() {
+				$floating.data("afterElementReplace")();
+			});
+			contentResizeObserver.observe($floating.children(".content")[0]);
+			$floating.data("contentResizeObserver", contentResizeObserver);
+		}
 	}, 
 	
 	close: function(floatingId) {
 		var $floating = $("#" + floatingId);
 		
 		if ($floating.length != 0) {
+			var contentResizeObserver = $floating.data("contentResizeObserver");
+			if (contentResizeObserver)
+				contentResizeObserver.disconnect();
+
 			var $trigger = $floating.data("trigger");
 			var mouseUpOrTouchStartEvent = $floating.data("mouseUpOrTouchStartEvent");
 			if ($trigger && mouseUpOrTouchStartEvent) {

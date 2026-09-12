@@ -30,9 +30,9 @@ public final class AjaxSettings implements Serializable {
 
 	private CharSequence url;
 	private String dataType = "json";
-	private int quietMillis = 100;
+	private int delay = 100;
 	private String data;
-	private String results;
+	private String processResults;
 	/** whether or not to use traditional parameter encoding. */
 	private Boolean traditional;
 
@@ -40,8 +40,8 @@ public final class AjaxSettings implements Serializable {
 		writer.object();
 		Json.writeFunction(writer, "data", data);
 		Json.writeObject(writer, "dataType", dataType);
-		Json.writeObject(writer, "quietMillis", quietMillis);
-		Json.writeFunction(writer, "results", results);
+		Json.writeObject(writer, "delay", delay);
+		Json.writeFunction(writer, "processResults", processResults);
 		Json.writeObject(writer, "url", url);
 		Json.writeObject(writer, "traditional", traditional);
 		writer.endObject();
@@ -55,16 +55,16 @@ public final class AjaxSettings implements Serializable {
 		this.dataType = dataType;
 	}
 
-	public void setQuietMillis(int quietMillis) {
-		this.quietMillis = quietMillis;
+	public void setDelay(int delay) {
+		this.delay = delay;
 	}
 
 	public void setData(String data) {
 		this.data = data;
 	}
 
-	public void setResults(String results) {
-		this.results = results;
+	public void setProcessResults(String processResults) {
+		this.processResults = processResults;
 	}
 
 	public CharSequence getUrl() {
@@ -75,16 +75,16 @@ public final class AjaxSettings implements Serializable {
 		return dataType;
 	}
 
-	public int getQuietMillis() {
-		return quietMillis;
+	public int getDelay() {
+		return delay;
 	}
 
 	public String getData() {
 		return data;
 	}
 
-	public String getResults() {
-		return results;
+	public String getProcessResults() {
+		return processResults;
 	}
 
 	public boolean isTraditional() {

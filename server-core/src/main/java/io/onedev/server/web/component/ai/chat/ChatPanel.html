@@ -6,7 +6,7 @@
 	</div>
 	<div class="body d-flex flex-column flex-grow-1 p-4 position-relative" style="overflow: hidden;">
 		<div wicket:id="chatSelectorContainer" class="chat-selector d-flex flex-shrink-0 mb-3">
-			<input wicket:id="chatSelector" t:placeholder="New chat" type="hidden" class="form-control">
+			<select wicket:id="chatSelector" t:placeholder="New chat" class="form-control"></select>
 			<a wicket:id="newChat" t:data-tippy-content="New chat" class="btn btn-light btn-hover-primary btn-icon flex-shrink-0"><wicket:svg href="plus" class="icon icon-lg"></wicket:svg></a>
 			<a wicket:id="deleteChat" t:data-tippy-content="Delete chat" class="btn btn-light btn-hover-danger btn-icon flex-shrink-0"><wicket:svg href="trash" class="icon icon-lg"></wicket:svg></a>
 		</div>

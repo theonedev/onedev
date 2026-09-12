@@ -1,10 +1,10 @@
 onedev.server.branchChoiceFormatter = {
 	formatSelection: function(branch) {
-		return branch.name;
+		return branch.name.escapeHtml();
 	},
 	
 	formatResult: function(branch) {
-		return branch.name;
+		return branch.name.escapeHtml();
 	},
 	
 	escapeMarkup: function(m) {

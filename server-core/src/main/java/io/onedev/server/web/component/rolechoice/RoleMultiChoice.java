@@ -24,10 +24,9 @@ public class RoleMultiChoice extends Select2MultiChoice<Role> {
 			getSettings().setPlaceholder(_T("Choose roles..."));
 		else
 			getSettings().setPlaceholder(_T("Not specified"));
-		getSettings().setFormatResult("onedev.server.roleChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.roleChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.roleChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.roleChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.roleChoiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

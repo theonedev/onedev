@@ -16,8 +16,8 @@ public abstract class SelectPackToActChoice extends SelectToActChoice<Pack> {
 		super.onInitialize();
 		
 		getSettings().setPlaceholder(getPlaceholder());
-		getSettings().setFormatResult("onedev.server.packChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.packChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.packChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.packChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.packChoiceFormatter.escapeMarkup");
 	}
 

@@ -24,10 +24,9 @@ public class BuildSingleChoice extends Select2Choice<Build> {
 			getSettings().setPlaceholder(_T("Choose build..."));
 		else
 			getSettings().setPlaceholder(_T("Not specified"));
-		getSettings().setFormatResult("onedev.server.buildChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.buildChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.buildChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.buildChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.buildChoiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

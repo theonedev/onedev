@@ -6,7 +6,7 @@ onedev.server.modal = {
 		
 		$modal.data("keydown", function(e) {
 			if (e.keyCode == 27 
-					&& $(".select2-drop:visible").length == 0 
+					&& $(".select2-dropdown:visible").length == 0
 					&& $(".fullscreen, .halfscreen").length == 0
 					&& $(".dropdown.open").length == 0
 					&& $("body>.floating").length == 0 

@@ -47,7 +47,7 @@ public abstract class SelectToActChoice<T> extends Select2Choice<T> {
 					onSelect(target, selection);
 					selection = null;
 				}
-				String script = String.format("setTimeout(function(){$('#%s').select2('data', null);}, 0);", getMarkupId());
+				String script = String.format("setTimeout(function(){$('#%s').val(null).trigger('change.select2');}, 0);", getMarkupId());
 				target.appendJavaScript(script);
 			}
 					

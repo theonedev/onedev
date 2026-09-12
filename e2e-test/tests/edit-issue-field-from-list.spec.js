@@ -19,5 +19,13 @@ test('admin can edit an issue field from the issue list', async ({ page, api }) 
   await field.click();
 
   expect(indicatorErrors).toEqual([]);
-  await expect(page.locator('.floating.inplace-property-edit')).toBeVisible();
+  const editor = page.locator('.floating.inplace-property-edit');
+  await expect(editor).toBeVisible();
+  await expect(editor.locator('.select2-selection__rendered')).toHaveText('Bug');
+  await editor.locator('.select2-selection').click();
+  await page.getByRole('option', { name: 'New Feature', exact: true }).click();
+  await expect(editor).toBeHidden();
+  await expect(field).toHaveText('New Feature');
+  await page.reload();
+  await expect(field).toHaveText('New Feature');
 });

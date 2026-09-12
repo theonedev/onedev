@@ -23,10 +23,9 @@ public class PullRequestSingleChoice extends Select2Choice<PullRequest> {
 			getSettings().setPlaceholder(_T("Choose pull request..."));
 		else
 			getSettings().setPlaceholder(_T("Not specified"));
-		getSettings().setFormatResult("onedev.server.pullRequestChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.pullRequestChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.pullRequestChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.pullRequestChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.pullRequestChoiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 	
 	@Override

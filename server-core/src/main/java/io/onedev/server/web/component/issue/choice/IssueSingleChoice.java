@@ -23,10 +23,9 @@ public class IssueSingleChoice extends Select2Choice<Issue> {
 			getSettings().setPlaceholder(_T("Choose issue..."));
 		else
 			getSettings().setPlaceholder(_T("Not specified"));
-		getSettings().setFormatResult("onedev.server.issueChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.issueChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.issueChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.issueChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.issueChoiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

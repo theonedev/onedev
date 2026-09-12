@@ -24,10 +24,9 @@ public class GroupMultiChoice extends Select2MultiChoice<Group> {
 			getSettings().setPlaceholder(_T("Choose groups..."));
 		else
 			getSettings().setPlaceholder(_T("Not specified"));
-		getSettings().setFormatResult("onedev.server.groupChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.groupChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.groupChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");
-		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

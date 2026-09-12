@@ -38,7 +38,7 @@ public class StringListEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().setContainerCssClass("string-list");
+				getSettings().setSelectionCssClass("string-list");
 				getSettings().setDropdownCssClass("string-list");
 				getSettings().configurePlaceholder(descriptor);
 			}

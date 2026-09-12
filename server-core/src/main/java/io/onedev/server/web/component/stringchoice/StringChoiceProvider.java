@@ -67,7 +67,7 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 		var name = displayNamesModel.getObject().get(choice);
 		if (name == null)
 			name = choice;
-		writer.key("id").value(choice).key("name").value(name);
+		writer.key("id").value(choice).key("text").value(name).key("name").value(name);
 		var description = descriptionsModel.getObject().get(choice);
 		if (description != null)
 			writer.key("description").value(description);

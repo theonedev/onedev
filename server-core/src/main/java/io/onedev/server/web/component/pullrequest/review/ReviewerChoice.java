@@ -37,8 +37,8 @@ public abstract class ReviewerChoice extends SelectToActChoice<User> {
 		super.onInitialize();
 		
 		getSettings().setPlaceholder(_T("Add reviewer..."));
-		getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
-		getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
+		getSettings().setTemplateResult("onedev.server.userChoiceFormatter.formatResult");
+		getSettings().setTemplateSelection("onedev.server.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");
 	}
 
