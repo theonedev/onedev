@@ -127,6 +127,7 @@ public abstract class IssueSidePanel extends Panel {
 		addOrReplace(newIterationsContainer());
 		addOrReplace(newBranchContainer());
 		addOrReplace(newVotesContainer());
+		addOrReplace(new Label("workspaceCount", getIssue().getWorkspaces().size()));
 		addOrReplace(new IssueWorkspacesLink("workspaces") {
 
 			@Override

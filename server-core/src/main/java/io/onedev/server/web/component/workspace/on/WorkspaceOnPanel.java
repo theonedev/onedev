@@ -10,8 +10,8 @@ import io.onedev.server.model.Workspace;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.commit.CommitLink;
-import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
-import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
 public class WorkspaceOnPanel extends GenericPanel<Workspace> {
 
@@ -25,12 +25,12 @@ public class WorkspaceOnPanel extends GenericPanel<Workspace> {
 
 		var workspace = getModelObject();
 		if (workspace.getIssue() != null) {
-			add(new BookmarkablePageLink<Void>("link", IssueDetailPage.class,
-					IssueDetailPage.paramsOf(workspace.getIssue()))
+			add(new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class,
+					IssueActivitiesPage.paramsOf(workspace.getIssue()))
 					.setBody(Model.of(workspace.getOnDescription())));
 		} else if (workspace.getRequest() != null) {
-			add(new BookmarkablePageLink<Void>("link", PullRequestDetailPage.class,
-					PullRequestDetailPage.paramsOf(workspace.getRequest()))
+			add(new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class,
+					PullRequestActivitiesPage.paramsOf(workspace.getRequest()))
 					.setBody(Model.of(workspace.getOnDescription())));
 		} else if (workspace.getBranch() != null) {
 			add(new BranchLink("link", new ProjectAndBranch(workspace.getProject(), workspace.getBranch())) {

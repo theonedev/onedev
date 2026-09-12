@@ -1105,6 +1105,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 				});
 				fragment.add(newWorkspacesLink());
+				fragment.add(new Label("workspaceCount", new AbstractReadOnlyModel<Integer>() {
+
+					@Override
+					public Integer getObject() {
+						return getPullRequest().getWorkspaces().size();
+					}
+
+				}));
 				fragment.add(new PullRequestJobsPanel("jobs") {
 
 					@Override
