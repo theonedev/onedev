@@ -7,6 +7,9 @@
 .pull-request-detail>.card-body>.main>.primary>.description {
 	margin-bottom: 0 !important;
 }
+.pull-request-detail>.card-body>.main>.primary>.summary {
+	border-top: 1px dashed var(--primary);
+}
 .pull-request-detail>.card-body>.main>.primary>.summary>div {
 	margin-bottom: 1rem;
 }
