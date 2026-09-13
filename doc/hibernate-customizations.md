@@ -1,4 +1,4 @@
-# Hibernate customization regression tests
+# Why OneDev overrides Hibernate
 
 OneDev overrides seven Hibernate classes in `server-core/src/main/java/org/hibernate`.
 The reasons below were checked against Git history and the source jars for the
@@ -14,7 +14,8 @@ versions in `pom.xml`: Hibernate ORM 5.4.24.Final and Hibernate Validator 6.2.5.
 | `validator.internal.engine.constraintvalidation.ConstraintTree` | Validate the shape of interpolative settings before runtime variables are available: substitute `@Interpolative.exampleVar` and unescape `@@` before other validators run. Apply this to strings and collections, while leaving syntax errors to `InterpolativeValidator`. Introduced with #222 in `0dd7555781`; the real create-tag scenario was added in #1242 (`52dca1aab9`). | `HibernateValidationInterpolationTest`: real `CreateTagStep` names, escaped at signs, custom example values, invalid literals, malformed interpolation, null values, and collections. Assertions also ensure validation does not modify the bean or the reported invalid value. |
 | `validator.internal.metadata.core.MetaConstraint` | Expose the active constraint's getter metadata to `ConstraintTree` with a thread-local stack. Added alongside interpolation in `0dd7555781`; nested validation must restore the previous constraint and exceptions must clean it up. | `HibernateValidationInterpolationTest`: interpolation through the public validator API, nested validation, exception cleanup, and isolation between concurrent validation threads. |
 
-The validation tests are in `io/onedev/server/validation`. They use a real
+The validation tests are in `server-core/src/test/java/io/onedev/server/validation`.
+They use a real
 `ValidatorFactory` and small beans so they need neither a running OneDev server
 nor a database. These behaviors intentionally differ from standard Bean Validation.
 
@@ -25,8 +26,8 @@ The tests also record two distinctions in the existing `ValidatorImpl` behavior:
 - A child annotation replaces the parent in property metadata, `validateValue`,
   and explicit-group validation, but default-group bean/property validation still
   checks the parent's attributes when the child redeclares the same annotation type.
-  Parent getter annotations whose
-  types are absent from the overriding getter are skipped.
+  Parent getter annotations whose types are absent from the overriding getter
+  are skipped.
 - Default-group validation bypasses the class-validation failure guard: class
   validators still run after property or nested validation failures. Explicit
   non-default groups suppress them; sequences stop after a failing group.
