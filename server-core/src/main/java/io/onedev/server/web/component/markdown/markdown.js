@@ -678,49 +678,31 @@ onedev.server.markdown = {
 	    } 	    
 
 	    if (canReferenceEntity) {
-			var referenceQueryPattern = "[^\\s!\"#$%&'()*+,./:;<=>?@\\[\\\\\\]^`{|}~]*";
-			function normalizeReferenceQuery(query) {
-				// Let users type sentence-like reference queries with hyphens while searching terms as words.
-				return query.replace(/-/g, " ");
+			var referenceQueryPattern = "[^\\s!\"#$%&'()*,/:;<=>?@\\[\\\\\\]^`{|}~]*";
+			function matchReferenceQuery(flag, subtext) {
+				var match = matchReference(flag, subtext);
+				return match ? match.query : null;
 			}
-			function matchReferenceQuery(flag, subtext, shouldStartWithSpace) {
-				if (flag === '-') {
-					// Do not let the project-key trigger steal hyphens inside a # reference query.
-					var match = new RegExp("(^|[^#\\w-]+)((pull\\s*request|pr|issue|build|workspace)\\s+)?" + projectKeyPattern + "-(?<query>" + referenceQueryPattern + ")$", "i").exec(subtext);
-					if (match)
-						return normalizeReferenceQuery(match.groups.query);
-					else
-						return null;
-				}
-				flag = flag.replace(/[\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-				if (shouldStartWithSpace)
-					flag = "(?:^|\\s|\\W)" + flag;
-				var match = new RegExp(flag + "(" + referenceQueryPattern + ")$").exec(subtext);
-				if (match)
-					return normalizeReferenceQuery(match[1]);
-				else
-					return null;
-			}
-	    	function matchReference(atChar) {
-	    		var input = $input.val().substring(0, $input.caret());
-	    		var match;
-			if (atChar === '#')
-				match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?<project>" + projectPathPattern + ")?#(?<query>" + referenceQueryPattern + ")$", 'gi').exec(input);
-			else
-				match = new RegExp("(^|[^#\\w-]+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?<project>" + projectKeyPattern + ")-(?<query>" + referenceQueryPattern + ")$", 'gi').exec(input);					
-	    		if (match) {
+			function matchReference(atChar, input) {
+				if (input === undefined)
+					input = $input.val().substring(0, $input.caret());
+				var match = new RegExp("(^|[^#\\w-]+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?:(?<projectPath>" + projectPathPattern + ")?#|(?<projectKey>" + projectKeyPattern + ")-)(?<query>" + referenceQueryPattern + ")$", 'i').exec(input);
+				if (match && atChar === (match.groups.projectKey ? '-' : '#')) {
+					var type = match.groups.type;
+					var query = match.groups.query;
+					if ((!type || type.toLowerCase() !== "build") && /[-.+_]/.test(query))
+						return;
 					var index = match.index + match[1].length;
 					if (match[2])
 						index += match[2].length;
-	    			var type = match.groups.type;
-	    			return {
-	    				type: type,
-	    				project: match.groups.project,
-	    				query: normalizeReferenceQuery(match.groups.query),
+					return {
+						type: type,
+						project: match.groups.projectKey || match.groups.projectPath,
+						query: query,
 						index: index
-	    			}
-	    		}
-	    	}
+					}
+				}
+			}
 			function remoteFilterReference(atChar, query, renderCallback) {
 				$container.data("atWhoReferenceRenderCallback", renderCallback);
 				var match = matchReference(atChar);
