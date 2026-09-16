@@ -1,150 +1,205 @@
 .SimplePage {
-	background: url(/~img/mesh.jpg) no-repeat left top fixed;
-	background-size: cover;
-}
-.SimplePage.dark-mode {
-	background: url(/~img/dark-mesh.jpg) no-repeat left top fixed;
-	background-size: cover;
+	--simple-input-background: white;
+	--simple-input-color: #495057;
+	background: #f5f7fa;
 }
 .SimplePage>body {
+	min-height: 100vh;
 	background: transparent;
 	display: flex;
+	padding: 40px 20px;
 }
 .SimplePage .main {
-	padding: 1.75rem;
+	width: 440px;
+	min-width: 0;
 	margin: auto;
+	max-width: 100%;
+	padding: 36px 40px 28px;
+	background: white;
+	border: 1px solid #e5e9f0;
+	border-radius: 16px;
+	box-shadow: 0 8px 32px rgba(30, 45, 70, 0.05);
 }
-.SimplePage:not(.force-ordinary-style) .main {
-	width: 480px;
+.SimplePage .main .brand-logo {
+	width: 56px;
+	height: 56px;
+	margin-bottom: 24px;
+}
+.SimplePage .main>.title {
+	margin-bottom: 28px;
+}
+.SimplePage .main>.title h3 {
+	font-size: 24px;
+	font-weight: 600;
+	line-height: 1.3;
+	margin-bottom: 0;
+}
+.SimplePage .main .sub-title {
+	margin-top: 12px;
+	font-weight: 400;
+	line-height: 1.6;
+}
+.SimplePage .main .form-group {
+	margin-bottom: 20px;
+}
+.SimplePage .main .form-group>label {
+	display: block;
+	font-weight: 500;
+	margin-bottom: 8px;
+}
+.SimplePage:not(.force-ordinary-style) .main .form-control {
+	padding: 12px 14px;
+	height: auto;
+	background: var(--simple-input-background);
+	color: var(--simple-input-color);
+	border: 1px solid #cdd5df;
+	border-radius: 8px;
+	line-height: 1.5;
+}
+.SimplePage:not(.force-ordinary-style) .main .form-control:focus {
+	background: var(--simple-input-background);
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.14) !important;
+}
+/* Keep browser autofill consistent with the other fields, including on focus. */
+.SimplePage:not(.force-ordinary-style) .main .form-control:is(:autofill, :-webkit-autofill) {
+	-webkit-text-fill-color: var(--simple-input-color);
+	caret-color: var(--simple-input-color);
+	box-shadow: inset 0 0 0 1000px var(--simple-input-background) !important;
+}
+.SimplePage:not(.force-ordinary-style) .main .form-control:is(:autofill, :-webkit-autofill):focus {
+	box-shadow: inset 0 0 0 1000px var(--simple-input-background),
+		0 0 0 3px rgba(54, 153, 255, 0.14) !important;
+}
+.SimplePage .main .text-muted {
+	color: #667085 !important;
+}
+.SimplePage.dark-mode {
+	--simple-input-background: var(--dark-mode-dark);
+	--simple-input-color: white;
+	background: #151521;
+}
+.SimplePage.dark-mode .main {
+	background: var(--dark-mode-dark);
+	border-color: #323248;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control {
+	border-color: #474761;
+}
+.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control:focus {
+	border-color: var(--primary);
+}
+.SimplePage.dark-mode .main .text-muted {
+	color: #a8adc1 !important;
+}
+
+.SimplePage.force-ordinary-style .main,
+.SimplePage.InUseErrorPage .main {
+	width: 760px;
 }
 .SimplePage.GeneralErrorPage .main {
 	width: 900px;
 }
-
-.SimplePage.InUseErrorPage .main {
-	width: auto;
-}
-
-.force-ordinary-style .bean-editor {
-	text-align: left !important;
-}
-.SimplePage .main .brand-logo {
-	margin-bottom: 3rem;
-	width: 100px;
-	height: 100px;
-}
-.dark-mode.SimplePage .main .brand-logo {
-	color: white;
-}
-.SimplePage .main .title {
-	margin-bottom: 5rem;
-}
-.SimplePage:not(.force-ordinary-style) .main .btn:not(.btn-block) {
-	padding: 1rem 2.25rem;
-	margin: 0.75rem 1rem;
-}
-.SimplePage .main .signup {
-	margin-top: 2.5rem;
-}
-.SimplePage .main .sso {
-	margin-top: 4rem;
-}
-.SimplePage.LoginPage.internal-login-disabled .main .title,
-.SimplePage.LoginPage.internal-login-disabled .main form,
-.SimplePage.LoginPage.internal-login-disabled .main .signup {
-	display: none;
-}
-.SimplePage.LoginPage.internal-login-disabled .main .sso {
-	margin-top: 2rem;
-}
-.SimplePage .main .sso img {
-	width: 24px;
-	height: 24px;
-}
+.SimplePage .bean-editor,
+.SimplePage .main .form-group,
 .SimplePage .main .feedbackPanel {
 	text-align: left;
-	margin-bottom: 1.5rem;
 }
-.SimplePage:not(.force-ordinary-style) .main .form-group {
-	margin-bottom: 1.5rem;
+.SimplePage .main .feedbackPanel {
+	margin-bottom: 20px;
+}
+.SimplePage .main .simple-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: 24px;
+}
+.SimplePage .main .simple-actions>.simple-cancel {
+	background: transparent;
+	border-color: transparent;
+	color: #667085;
+}
+.SimplePage.dark-mode .main .simple-actions>.simple-cancel {
+	color: #a8adc1;
+}
+.SimplePage .main .simple-actions>.simple-cancel:hover,
+.SimplePage .main .simple-actions>.simple-cancel:focus-visible {
+	background: var(--light-primary);
+	color: var(--primary);
+}
+.SimplePage.dark-mode .main .simple-actions>.simple-cancel:hover,
+.SimplePage.dark-mode .main .simple-actions>.simple-cancel:focus-visible {
+	background: var(--dark-mode-light-primary);
+}
+.SimplePage .main>.btn,
+.SimplePage .main .simple-actions>.btn,
+.SimplePage .main .actions>.btn,
+.SimplePage .main .wizard>.foot .btn {
+	padding: 12px 16px;
+	border-radius: 8px;
+}
+.SimplePage .main .actions,
+.SimplePage .main .wizard>.foot {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 12px;
+}
+.SimplePage .main .wizard>.foot .btn {
+	margin: 0;
+}
+.SimplePage .main .wizard>.head {
 	text-align: left;
+	margin-bottom: 24px;
 }
-.SimplePage:not(.force-ordinary-style) .main .form-control {
-	padding: 1rem 2rem;
-	background-color: var(--light);
-    border-color: var(--light);
-    color: var(--gray-dark);
-	height: auto;
+.SimplePage .main .wizard>.head>.title {
+	font-size: 18px;
+	font-weight: 600;
+	margin: 0 0 8px;
 }
-.SimplePage:not(.force-ordinary-style) .main .select2-selection--single {
-	padding: 0.4rem 1rem;
-	background-color: var(--light);
-    border-color: var(--light);
-    color: var(--gray-dark);
-	height: auto;
-}
-.SimplePage:not(.force-ordinary-style) .select2-dropdown {
-	background-color: var(--light);
-}
-.SimplePage:not(.force-ordinary-style) .select2-dropdown input {
-	border-color: var(--light-gray);
-	background-color: var(--light-gray);
-}
-.SimplePage.dark-mode:not(.force-ordinary-style) .main .select2-selection--single {
-    background-color: var(--dark-mode-dark);
-    border: 1px solid #323248;	
-	color: white;
-}
-.SimplePage.dark-mode:not(.force-ordinary-style) .select2-dropdown {
-	background-color: var(--dark-mode-dark);
-	border: 1px solid #323248;
-}
-.SimplePage.dark-mode:not(.force-ordinary-style) .select2-dropdown input {
-    background-color: var(--dark-mode-dark);
-    border-color: #474761;	
-}
-
-.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control {
-    color: white;
-}
-.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control {
-    background-color: var(--dark-mode-dark);
-    border: 1px solid #323248;	
-}
-.SimplePage:not(.force-ordinary-style) .main .form-control:focus {
-    background-color: var(--light-gray);
-    border-color: var(--light-gray);
-}
-.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control:focus {
-    background-color: var(--dark-mode-dark);
-    border-color: #474761;	
-}
-.SimplePage .main .wizard .title {
-	margin-top: -6rem;
-	color: var(--muted);
-}
-
-.SimplePage .main .error-detail {
-	margin-top: 2rem;
+.SimplePage .main .error-detail,
+.SimplePage.InUseErrorPage .main pre {
 	text-align: left;
 	white-space: pre-wrap;
-	word-wrap: break-word;
+	overflow-wrap: anywhere;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-.SimplePage .main .error-detail+.copy {
-	right: 1.2rem;
-	top: 1rem;
-	background: var(--light);
+.SimplePage .main .error-detail {
+	margin-top: 24px;
+	max-height: 50vh;
+	overflow: auto;
+	padding-right: 40px;
 }
-.SimplePage.dark-mode .main .error-detail+.copy {
-	background: #323248;
+.SimplePage .main .error-detail+.copy {
+	right: 24px;
+	top: 0;
+}
+.SimplePage.dark-mode .main .brand-logo {
+	color: white;
 }
 .SimplePage a.input-clear {
 	top: 11px;
 }
-.PageNotFoundErrorPage h3 {
-	font-size: 3rem;
+.SimplePage:not(.force-ordinary-style) .main .select2-selection--single {
+	padding: 8px 14px;
+	height: auto;
+	background: white;
+	border: 1px solid #cdd5df;
+	border-radius: 8px;
 }
-.PageNotFoundErrorPage .sub-title {
-	font-size: 1.5rem !important;
+.SimplePage.dark-mode:not(.force-ordinary-style) .main .select2-selection--single,
+.SimplePage.dark-mode:not(.force-ordinary-style) .select2-dropdown,
+.SimplePage.dark-mode:not(.force-ordinary-style) .select2-dropdown input {
+	background: var(--simple-input-background);
+	color: white;
+	border-color: #474761;
+}
+@media (max-width: 480px) {
+	.SimplePage>body {
+		padding: 24px 16px;
+	}
+	.SimplePage .main {
+		padding: 28px 24px 24px;
+	}
 }

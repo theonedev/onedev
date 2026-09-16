@@ -1,7 +1,9 @@
 <wicket:extend>
 	<form wicket:id="form">
 		<div wicket:id="editor"></div>
-		<input wicket:id="save" class="btn btn-primary mr-2" t:value="Sign Up" type="submit">
-		<a wicket:id="cancel" class="btn btn-light-primary"><wicket:t>Cancel</wicket:t></a>
+		<div class="simple-actions">
+			<input wicket:id="save" class="btn btn-primary" t:value="Sign Up" type="submit">
+			<a wicket:id="cancel" class="btn simple-cancel"><wicket:t>Cancel</wicket:t></a>
+		</div>
 	</form>
 </wicket:extend>

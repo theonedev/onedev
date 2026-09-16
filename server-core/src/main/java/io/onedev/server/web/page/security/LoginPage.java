@@ -36,6 +36,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.CssResourceReference;
 
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
@@ -46,7 +47,6 @@ import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
-import io.onedev.server.web.page.simple.SimpleCssResourceReference;
 import io.onedev.server.web.page.simple.SimplePage;
 
 public class LoginPage extends SimplePage {
@@ -78,7 +78,7 @@ public class LoginPage extends SimplePage {
 	
 	private String errorMessage;
 	
-	private String subTitle = _T("Enter your details to login to your account");
+	private String subTitle;
 
 	private boolean disableInternalLogin;
 	
@@ -337,7 +337,7 @@ public class LoginPage extends SimplePage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new SimpleCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new CssResourceReference(LoginPage.class, "login.css")));
 	}
 
 	@Override

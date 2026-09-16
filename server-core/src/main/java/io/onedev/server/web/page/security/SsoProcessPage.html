@@ -4,8 +4,10 @@
     <wicket:fragment wicket:id="tabContentFrag">
         <form wicket:id="form">
             <div wicket:id="editor"></div>
-            <input class="btn btn-primary mr-2" t:value="Ok" type="submit">
-            <a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+            <div class="simple-actions">
+                <input class="btn btn-primary" t:value="Ok" type="submit">
+                <a wicket:id="cancel" class="btn simple-cancel">Cancel</a>
+            </div>
         </form>    
     </wicket:fragment>
 </wicket:extend>

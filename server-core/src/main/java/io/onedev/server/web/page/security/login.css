@@ -1,0 +1,54 @@
+.SimplePage.LoginPage .main .btn.btn-primary {
+	display: block;
+	width: 100%;
+	margin: 4px 0 0;
+	padding: 12px 16px;
+	border-radius: 8px;
+}
+.SimplePage.LoginPage .main .signup {
+	margin-top: 24px;
+}
+.SimplePage.LoginPage .main .sso {
+	margin-top: 24px;
+	padding-top: 24px;
+	border-top: 1px solid #e5e9f0;
+}
+.SimplePage.LoginPage .main .sso .btn {
+	padding: 12px 16px;
+	border: 1px solid #cdd5df;
+	border-radius: 8px;
+	background: transparent;
+}
+.SimplePage.LoginPage .main .sso .btn:hover {
+	background: var(--light);
+}
+.SimplePage.LoginPage .main .sso .btn:last-child {
+	margin-bottom: 0 !important;
+}
+.SimplePage.LoginPage.internal-login-disabled .main .sso {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
+}
+.SimplePage.LoginPage .main .foot {
+	margin-top: 28px;
+	font-size: 12px;
+}
+.SimplePage.LoginPage.dark-mode .main .sso,
+.SimplePage.LoginPage.dark-mode .main .sso .btn {
+	border-color: #474761;
+}
+.SimplePage.LoginPage.internal-login-disabled .main>.title,
+.SimplePage.LoginPage.internal-login-disabled .main form,
+.SimplePage.LoginPage.internal-login-disabled .main .signup {
+	display: none;
+}
+.SimplePage.LoginPage .main .sso img {
+	width: 24px;
+	height: 24px;
+}
+/* Only the bundled monochrome marks need a light variant on dark surfaces. */
+.SimplePage.LoginPage.dark-mode .main .sso img[src="/wicket/resource/io.onedev.server.plugin.sso.openid.GitHubConnector/octocat.png"],
+.SimplePage.LoginPage.dark-mode .main .sso img[src="/wicket/resource/io.onedev.server.plugin.sso.openid.TwitchConnector/twitch.png"] {
+	filter: brightness(0) invert(1);
+}

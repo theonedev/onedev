@@ -1,29 +1,31 @@
 <wicket:extend>	
 	<div wicket:id="content"></div>
-	<div class="foot pt-2 mt-5 border-top font-size-xs text-muted">Powered by <a href="https://onedev.io" class="text-muted text-hover-primary">OneDev</a></div>
+	<div class="foot text-muted">Powered by <a href="https://onedev.io" class="text-muted text-hover-primary">OneDev</a></div>
 	<wicket:fragment wicket:id="passwordCheckFrag">
 		<form wicket:id="form" method="post">
 			<div wicket:id="feedback"></div>
 			<div class="form-group">
-				<input wicket:id="userName" autocomplete="username" type="text" class="form-control" t:placeholder="Login name or email address">
+				<label wicket:for="userName"><wicket:t>Login name or email address</wicket:t> <span class="text-danger">*</span></label>
+				<input wicket:id="userName" autocomplete="username" type="text" class="form-control">
 			</div>
 			<div class="form-group">
-				<input wicket:id="password" autocomplete="current-password" type="password" class="form-control" t:placeholder="Password">
+				<label wicket:for="password"><wicket:t>Password</wicket:t> <span class="text-danger">*</span></label>
+				<input wicket:id="password" autocomplete="current-password" type="password" class="form-control">
 			</div>
 			<div class="form-group d-flex flex-wrap justify-content-between">
 				<div class="checkbox-inline">
-					<label class="checkbox text-muted">
+					<label class="checkbox">
 						<input wicket:id="rememberMe" id="rememberMe" type="checkbox" class="form-check-input">
 						<wicket:t>Remember Me</wicket:t>
 					</label>
 				</div>
-				<a wicket:id="forgetPassword" class="text-muted text-hover-primary"><wicket:t>Forgot Password?</wicket:t></a>
+				<a wicket:id="forgetPassword"><wicket:t>Forgot Password?</wicket:t></a>
 			</div>
 			<button class="btn btn-primary font-weight-bold" type="submit"><wicket:t>Sign in</wicket:t></button>
 		</form>
 		<wicket:enclosure child="registerUser">
 			<div class="signup">
-				<span class="opacity-50 mr-3"><wicket:t>Don't have an account yet?</wicket:t></span> <a wicket:id="registerUser" class="text-muted text-hover-primary font-weight-bold"><wicket:t>Sign Up!</wicket:t></a>
+				<span class="text-muted mr-1"><wicket:t>Don't have an account yet?</wicket:t></span> <a wicket:id="registerUser" class="font-weight-bold"><wicket:t>Sign Up!</wicket:t></a>
 			</div>
 		</wicket:enclosure>
 		<wicket:enclosure child="ssoButtons">
@@ -36,6 +38,7 @@
 		<form wicket:id="form" method="post">
 			<div wicket:id="feedback"></div>
 			<div class="form-group">
+				<label wicket:for="passcode"><wicket:t>Passcode</wicket:t> <span class="text-danger">*</span></label>
 				<input wicket:id="passcode" autocomplete="one-time-code" type="text" class="form-control" t:placeholder="6-digits passcode">
 			</div>
 			<button class="btn btn-primary font-weight-bold" type="submit"><wicket:t>Verify</wicket:t></button>
@@ -51,6 +54,7 @@
 		<form wicket:id="form" method="post">
 			<div wicket:id="feedback"></div>
 			<div class="form-group">
+				<label wicket:for="recoveryCode"><wicket:t>Recovery code</wicket:t> <span class="text-danger">*</span></label>
 				<input wicket:id="recoveryCode" type="text" class="form-control" t:placeholder="Recovery code">
 			</div>
 			<button class="btn btn-primary font-weight-bold" type="submit"><wicket:t>Verify</wicket:t></button>
