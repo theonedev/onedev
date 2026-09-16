@@ -405,7 +405,7 @@ public class PullRequestResource {
 		if (user == null)
 			throw new UnauthorizedException();
 
-		pullRequestReviewService.review(user, request, true, note);
+		pullRequestReviewService.review(user, request, false, note);
 
 		return Response.ok().build();
 	}
