@@ -36,8 +36,9 @@ abstract class WorkspaceSpecEditPanel extends Panel {
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 				var errorMessage = onSave(target, spec);
 				if (errorMessage != null) {
 					form.error(errorMessage);
@@ -46,8 +47,9 @@ abstract class WorkspaceSpecEditPanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onError(target);
 				target.add(form);
 			}
 

@@ -7,10 +7,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import com.google.common.collect.Sets;
 
@@ -145,7 +145,7 @@ public class DefaultAlertService extends BaseEntityService<Alert> implements Ale
 	@Transactional
 	@Override
 	public void clear() {
-		var query = getSession().createQuery("delete from Alert");
+		var query = getSession().createMutationQuery("delete from Alert");
 		query.executeUpdate();
 		webSocketService.notifyObservablesChange(Sets.newHashSet(Alert.getChangeObservable()), WicketUtils.getPageKey());		
 	}

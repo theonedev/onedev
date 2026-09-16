@@ -18,7 +18,7 @@ import io.onedev.server.util.XmlUtils;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;

@@ -4,7 +4,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.PackQuery;
 import io.onedev.server.model.support.NamedQuery;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 @Editable
 public class NamedPackQuery implements NamedQuery {

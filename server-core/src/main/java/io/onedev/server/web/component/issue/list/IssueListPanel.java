@@ -58,8 +58,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -337,7 +336,7 @@ public abstract class IssueListPanel extends Panel {
 					public void setObject(EntityQuery<Issue> object) {
 						IssueListPanel.this.getFeedbackMessages().clear();
 						queryStringModel.setObject(object.toString());
-						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						var target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 						target.add(queryInput);
 						doQuery(target);
 					}
@@ -384,7 +383,7 @@ public abstract class IssueListPanel extends Panel {
 							query = new IssueQuery();
 						query.setSorts(object);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 						target.add(queryInput);
 						doQuery(target);
 					}
@@ -451,7 +450,7 @@ public abstract class IssueListPanel extends Panel {
 		if (getProject() != null)
 			option.withCurrentProjectCriteria(true);
 		
-		queryInput.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
+		queryInput.add(new IssueQueryBehavior(new IModel<Project>() {
 
 			@Override
 			public Project getObject() {
@@ -489,8 +488,8 @@ public abstract class IssueListPanel extends Panel {
 		queryForm.add(new AjaxButton("submit") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				IssueListPanel.this.getFeedbackMessages().clear();
 				doQuery(target);
 			}
@@ -590,8 +589,8 @@ public abstract class IssueListPanel extends Panel {
 				form.add(new AjaxButton("save") {
 
 					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
+					protected void onSubmit(AjaxRequestTarget target) {
+						super.onSubmit(target);
 						modal.close();
 						if (getProject() != null) {
 							var oldAuditContent = getAuditContent(getProject());
@@ -2038,7 +2037,6 @@ public abstract class IssueListPanel extends Panel {
 					} else {
 						fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME, true) {
 
-							@SuppressWarnings("deprecation")
 							@Override
 							protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
 								return new AttachAjaxIndicatorListener(

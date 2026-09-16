@@ -18,7 +18,7 @@ import io.onedev.server.persistence.SessionService;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;

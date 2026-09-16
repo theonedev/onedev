@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
@@ -55,7 +54,7 @@ public class CodeCommentQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					InputAssistBehavior inputAssist = new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
+					InputAssistBehavior inputAssist = new CodeCommentQueryBehavior(new IModel<Project>() {
 
 						@Override
 						public Project getObject() {

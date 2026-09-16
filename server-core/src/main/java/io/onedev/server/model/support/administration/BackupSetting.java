@@ -3,9 +3,9 @@ package io.onedev.server.model.support.administration;
 import java.io.Serializable;
 import java.text.ParseException;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import org.quartz.CronExpression;
 
 import io.onedev.server.validation.Validatable;

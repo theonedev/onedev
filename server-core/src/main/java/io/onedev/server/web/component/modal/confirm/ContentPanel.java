@@ -11,7 +11,7 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
@@ -34,7 +34,7 @@ abstract class ContentPanel extends Panel {
 			}
 			
 		});
-		add(new Label("message", new AbstractReadOnlyModel<String>() {
+		add(new Label("message", new IModel<String>() {
 
 			@Override
 			public String getObject() {

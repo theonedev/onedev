@@ -32,7 +32,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
@@ -172,8 +171,8 @@ public class ProblemReportPage extends BuildReportPage {
 				}
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+					super.onSubmit(target);
 					pushState(target);
 					parseFilePatterns();
 					target.add(feedback);
@@ -236,7 +235,7 @@ public class ProblemReportPage extends BuildReportPage {
 					};
 					toggleLink.add(groupKey.render("key"));
 						
-					toggleLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+					toggleLink.add(AttributeAppender.append("class", new IModel<String>() {
 
 						@Override
 						public String getObject() {

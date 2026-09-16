@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.annotation.ChoiceProvider;
@@ -66,8 +66,7 @@ public class JobDependency implements Serializable {
 	@ParamSpecProvider("getParamSpecs")
 	@VariableOption(withBuildVersion=false, withDynamicVariables=false)
 	@OmitName
-	@Valid
-	public List<ParamInstances> getParamMatrix() {
+	public List<@Valid ParamInstances> getParamMatrix() {
 		return paramMatrix;
 	}
 

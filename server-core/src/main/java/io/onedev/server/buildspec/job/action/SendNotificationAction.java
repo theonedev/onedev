@@ -1,6 +1,6 @@
 package io.onedev.server.buildspec.job.action;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.event.project.build.BuildFinished;

@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler.RedirectPolicy;
+import org.apache.wicket.core.request.mapper.MapperUtils;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.IWritableRequestParameters;
@@ -113,6 +114,23 @@ public class RestartResponseAtInterceptPageException extends ResetResponseExcept
 	}
 
 	/**
+	 * Replace the session during login while retaining only the intercepted request.
+	 * Wicket 10 clears session metadata during replacement. Keeping this entry
+	 * allows login to resume without retaining unrelated metadata or skipping
+	 * session destruction listeners and application-specific session cleanup.
+	 */
+	public static void replaceSessionPreservingOriginalDestination()
+	{
+		Session session = Session.get();
+		InterceptData data = InterceptData.get();
+		session.replaceSession();
+		if (data != null)
+		{
+			session.setMetaData(InterceptData.key, data);
+		}
+	}
+
+	/**
 	 * INTERNAL CLASS, DO NOT USE
 	 * 
 	 * @author igor.vaynberg
@@ -189,7 +207,7 @@ public class RestartResponseAtInterceptPageException extends ResetResponseExcept
 			}
 		}
 
-		private static final MetaDataKey<InterceptData> key = new MetaDataKey<InterceptData>()
+		private static final MetaDataKey<InterceptData> key = new MetaDataKey<>()
 		{
 			private static final long serialVersionUID = 1L;
 		};
@@ -202,8 +220,13 @@ public class RestartResponseAtInterceptPageException extends ResetResponseExcept
 		{
 			String url = RequestCycle.get().getUrlRenderer().renderUrl(data.originalUrl);
 			Url parsedUrl = Url.parse(url);
-			// Fix issue ##1301
-			parsedUrl.getQueryParameters().removeIf(it -> it.getName().contains(".IBehaviorListener."));
+			// Do not replay an expired Ajax callback after login (#1301). Wicket 10
+			// encodes the behavior id numerically instead of naming IBehaviorListener.
+			parsedUrl.getQueryParameters().removeIf(parameter -> {
+				var info = MapperUtils.parsePageComponentInfoParameter(parameter);
+				return info != null && info.getComponentInfo() != null
+						&& info.getComponentInfo().getBehaviorId() != null;
+			});
 			throw new NonResettingRestartException(parsedUrl.toString());
 		}
 	}

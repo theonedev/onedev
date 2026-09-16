@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.pullrequest;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.annotation.Editable;

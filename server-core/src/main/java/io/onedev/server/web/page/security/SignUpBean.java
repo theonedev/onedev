@@ -6,8 +6,8 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.model.User;
 import io.onedev.server.util.patternset.PatternSet;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 
 @Editable
 public class SignUpBean extends User {

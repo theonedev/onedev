@@ -31,20 +31,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.eclipse.jgit.lib.ObjectId;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.jspecify.annotations.Nullable;
 import org.quartz.ScheduleBuilder;
@@ -433,9 +433,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			CriteriaBuilder builder = getSession().getCriteriaBuilder();
 			CriteriaQuery<ProjectWorkspaceStatusStat> criteriaQuery = builder.createQuery(ProjectWorkspaceStatusStat.class);
 			Root<Workspace> root = criteriaQuery.from(Workspace.class);
-			criteriaQuery.multiselect(
+			criteriaQuery.select(builder.construct(ProjectWorkspaceStatusStat.class,
 					root.get(Workspace.PROP_PROJECT).get(Project.PROP_ID),
-					root.get(Workspace.PROP_STATUS), builder.count(root));
+					root.get(Workspace.PROP_STATUS), builder.count(root)));
 			criteriaQuery.groupBy(root.get(Workspace.PROP_PROJECT), root.get(Workspace.PROP_STATUS));
 			criteriaQuery.where(root.get(Workspace.PROP_PROJECT).in(projects));
 			criteriaQuery.orderBy(builder.asc(root.get(Workspace.PROP_STATUS)));
@@ -544,7 +544,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Sessional
 	protected Map<Long, Long> queryPendingOrActive() {
 		Query<?> query = getSession().createQuery("select id, project.id from Workspace where "
-				+ "status=:pending or status=:active");
+				+ "status=:pending or status=:active", Object[].class);
 		query.setParameter("pending", Workspace.Status.PENDING);
 		query.setParameter("active", Workspace.Status.ACTIVE);
 		

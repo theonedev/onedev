@@ -8,7 +8,7 @@ import io.onedev.server.util.GroovyUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.*;
 
 @Editable(name="Evaluate script to get value or secret")

@@ -1,12 +1,12 @@
 package io.onedev.server.xodus;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.util.patternset.PatternSet;

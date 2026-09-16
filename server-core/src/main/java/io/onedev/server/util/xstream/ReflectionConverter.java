@@ -2,8 +2,8 @@ package io.onedev.server.util.xstream;
 
 import java.lang.reflect.Field;
 
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -19,17 +19,17 @@ public class ReflectionConverter extends com.thoughtworks.xstream.converters.ref
 	public ReflectionConverter(Mapper mapper, ReflectionProvider reflectionProvider) {
 		super(mapper, reflectionProvider);
 	}
-	
+
     @SuppressWarnings("rawtypes")
 	public ReflectionConverter(Mapper mapper, ReflectionProvider reflectionProvider, Class type) {
-    	super(mapper, reflectionProvider, type);
+		super(mapper, reflectionProvider, type);
     }
-    
+
 	@Override
 	protected void marshallField(MarshallingContext context, Object newObj, Field field) {
-		if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null) 
+		if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null)
 			super.marshallField(context, ((AbstractEntity) newObj).getId(), field);
-		else 
+		else
 			super.marshallField(context, newObj, field);
 	}
 
@@ -43,5 +43,5 @@ public class ReflectionConverter extends com.thoughtworks.xstream.converters.ref
 			return super.unmarshallField(context, result, type, field);
 		}
 	}
-	
+
 }

@@ -2,6 +2,7 @@ package io.onedev.server.util.facade;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jspecify.annotations.Nullable;
 
@@ -13,6 +14,12 @@ import io.onedev.server.util.MapProxy;
 public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 
 	private static final long serialVersionUID = 1L;
+
+	// Keep only lookup hints: email addresses can change on another cluster node.
+	private final Map<String, Long> idsByValue = new ConcurrentHashMap<>();
+
+	// Validate each hint against the replicated record, including primary-address changes.
+	private final Map<Long, Long> primaryIdsByUser = new ConcurrentHashMap<>();
 	
 	public EmailAddressCache(Map<Long, EmailAddressFacade> delegate) {
 		super(delegate);
@@ -35,18 +42,36 @@ public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 				return null;
 		}
 
-		for (EmailAddressFacade facade: values()) {
-			if (facade.getValue().equals(value))
+		var id = idsByValue.get(value);
+		if (id != null) {
+			var facade = get(id);
+			if (facade != null && facade.getValue().equals(value))
 				return facade;
+			idsByValue.remove(value, id);
+		}
+		for (EmailAddressFacade facade: values()) {
+			if (facade.getValue().equals(value)) {
+				idsByValue.put(value, facade.getId());
+				return facade;
+			}
 		}
 		return null;
 	}
 	
 	@Nullable
 	public EmailAddressFacade findPrimary(Long userId) {
-		for (EmailAddressFacade facade: values()) {
-			if (facade.isPrimary() && facade.getOwnerId().equals(userId)) 
+		var id = primaryIdsByUser.get(userId);
+		if (id != null) {
+			var facade = get(id);
+			if (facade != null && facade.isPrimary() && facade.getOwnerId().equals(userId))
 				return facade;
+			primaryIdsByUser.remove(userId, id);
+		}
+		for (EmailAddressFacade facade: values()) {
+			if (facade.isPrimary() && facade.getOwnerId().equals(userId)) {
+				primaryIdsByUser.put(userId, facade.getId());
+				return facade;
+			}
 		}
 		return null;
 	}

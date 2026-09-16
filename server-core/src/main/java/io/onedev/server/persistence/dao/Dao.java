@@ -4,7 +4,6 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.SessionService;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.criterion.DetachedCriteria;
 
 import java.util.List;
 
@@ -39,11 +38,12 @@ public interface Dao {
 	 * If the id of the entity is null or zero, add it to the datastore and
 	 * assign it an id; otherwise, update the corresponding entity in the
 	 * data store with the properties of this entity. In either case the entity
-	 * passed to this method will be attached to the session.
+	 * passed to this method will be attached to the session if new. For a detached
+	 * existing entity, its state is merged into the session's managed instance.
 	 * <p>
 	 * If an entity to update is already attached to the session, this method
-	 * will have no effect. If an entity to update has the same id as another
-	 * instance already attached to the session, an error will be thrown.
+	 * will have no effect. Subsequent changes to a detached input are not tracked;
+	 * load the entity in the current session before making further changes.
 	 * 
 	 * @param entity
 	 * 			the entity to be saved
@@ -62,7 +62,7 @@ public interface Dao {
 	 * Query with specified criteria.
 	 * 
 	 * @param criteria
-	 * 			hibernate {@link DetachedCriteria}
+	 * 			hibernate {@link io.onedev.server.persistence.dao.EntityCriteria}
 	 * @param firstResult
 	 * 			first result of the query. Set to 0 if this value should be ignored
 	 * @param maxResults
@@ -94,7 +94,7 @@ public interface Dao {
 	 * Count entities of specified class matching specified criteria. 
 	 * 
 	 * @return
-	 * 			number of entities matching specified {@link DetachedCriteria}
+	 * 			number of entities matching specified {@link io.onedev.server.persistence.dao.EntityCriteria}
 	 */
 	<T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria);
 	

@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 
 import io.onedev.server.buildspec.Import;
 import io.onedev.server.web.editable.BeanContext;

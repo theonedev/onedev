@@ -6,8 +6,8 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 
-import javax.validation.Validator;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 

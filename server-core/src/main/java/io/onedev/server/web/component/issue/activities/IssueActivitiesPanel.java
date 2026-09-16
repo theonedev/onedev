@@ -9,8 +9,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.servlet.http.Cookie;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.Cookie;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -28,8 +28,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import io.onedev.server.web.component.RepeatingView;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -192,7 +192,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 				updateActivities(handler);
 			}
 			
-			@SuppressWarnings("deprecation")
 			private void updateActivities(IPartialPageRequestHandler handler) {
 				Component prevActivityRow = null;
 				IssueActivity lastActivity = null;
@@ -272,8 +271,9 @@ public abstract class IssueActivitiesPanel extends Panel {
 			form.add(new AjaxSubmitLink("save") {
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+					super.onSubmit(target);
 					String content = input.getModelObject();
 					if (content.length() > IssueComment.MAX_CONTENT_LEN) {
 						error(_T("Comment too long"));
@@ -300,8 +300,9 @@ public abstract class IssueActivitiesPanel extends Panel {
 				}
 
 				@Override
-				protected void onError(AjaxRequestTarget target, Form<?> form) {
-					super.onError(target, form);
+				protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+					super.onError(target);
 					target.add(form);
 				}
 				
@@ -375,7 +376,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			}
 
 		});
-		showCommentsLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		showCommentsLink.add(AttributeAppender.append("class", new IModel<String>() {
 			@Override
 			public String getObject() {
 				return showComments?"active":"";

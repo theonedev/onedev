@@ -12,10 +12,10 @@ import org.apache.shiro.web.mgt.DefaultWebSubjectFactory;
 import org.apache.shiro.web.subject.WebSubjectContext;
 import org.apache.shiro.web.subject.support.WebDelegatingSubject;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import java.util.Collection;
 import java.util.Set;
 

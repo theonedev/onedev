@@ -3,8 +3,8 @@ package io.onedev.server.plugin.imports.url;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.Strings;
 import org.apache.http.client.utils.URIBuilder;

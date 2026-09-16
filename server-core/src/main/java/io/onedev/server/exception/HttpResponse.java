@@ -1,8 +1,8 @@
 package io.onedev.server.exception;
 
 import org.jspecify.annotations.Nullable;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.Map;
 
 public class HttpResponse {

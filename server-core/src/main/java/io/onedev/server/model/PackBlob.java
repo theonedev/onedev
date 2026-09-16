@@ -5,23 +5,23 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(
 	indexes={
-		@Index(columnList="o_project_id"), @Index(columnList= PackBlob.PROP_SHA256_HASH),
+		@Index(columnList="project_id"), @Index(columnList= PackBlob.PROP_SHA256_HASH),
 		@Index(columnList= PackBlob.PROP_CREATE_DATE)}, 
-	uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PackBlob.PROP_SHA256_HASH})})
+	uniqueConstraints={@UniqueConstraint(columnNames={"project_id", PackBlob.PROP_SHA256_HASH})})
 public class PackBlob extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

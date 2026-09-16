@@ -18,32 +18,32 @@ import io.onedev.server.web.page.base.BasePage;
 public abstract class ModalPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
-	
+
 	private boolean inited;
-	
+
 	public ModalPanel(IPartialPageRequestHandler handler) {
 		this(handler, null);
 	}
-	
+
 	public ModalPanel(IPartialPageRequestHandler handler, IModel<?> model) {
 		super(((BasePage)handler.getPage()).getRootComponents().newChildId(), model);
-		
-		BasePage page = (BasePage) handler.getPage(); 
+
+		BasePage page = (BasePage) handler.getPage();
 		page.getRootComponents().add(this);
 		handler.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
 		handler.add(this);
 	}
-	
+
 	@Override
 	protected void onBeforeRender() {
 		if (!inited) {
 			WebMarkupContainer dialog = new WebMarkupContainer("dialog");
 			add(dialog);
-			
+
 			dialog.add(newContent(CONTENT_ID));
 
 			dialog.add(AttributeAppender.append("class", getCssClass()));
-			
+
 			inited = true;
 		}
 		super.onBeforeRender();
@@ -52,45 +52,45 @@ public abstract class ModalPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
 		add(new AbstractPostAjaxBehavior() {
-			
+
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				ModalPanel.this.remove();
 				onClosed();
 			}
-			
+
 			@Override
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 
 				response.render(JavaScriptHeaderItem.forReference(new ModalResourceReference()));
-				
-				String script = String.format("onedev.server.modal.onDomReady('%s', %s);", 
+
+				String script = String.format("onedev.server.modal.onDomReady('%s', %s);",
 						getMarkupId(true), getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 
 		});
-		
+
 		add(AttributeAppender.append("class", "modal"));
 		setOutputMarkupId(true);
 	}
-	
+
 	protected abstract Component newContent(String id);
-	
+
 	protected String getCssClass() {
 		return "modal-lg";
 	}
 
 	public Component getContent() {
-		return get(CONTENT_ID); 
+		return get(CONTENT_ID);
 	}
-	
+
 	public final void close() {
-		AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-		
+		AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
+
 		if (target != null) {
 			String script = String.format("onedev.server.modal.close($('#%s'), false);", getMarkupId(true));
 			target.appendJavaScript(script);
@@ -98,8 +98,8 @@ public abstract class ModalPanel extends Panel {
 		remove();
 		onClosed();
 	}
-	
+
 	protected void onClosed() {
 	}
-	
+
 }

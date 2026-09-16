@@ -16,7 +16,7 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

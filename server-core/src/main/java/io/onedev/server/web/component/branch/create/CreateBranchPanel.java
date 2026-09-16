@@ -51,8 +51,9 @@ public abstract class CreateBranchPanel extends Panel {
 		form.add(new AjaxButton("create") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 				
 				Project project = projectModel.getObject();
 				User user = SecurityUtils.getAuthUser();
@@ -79,8 +80,9 @@ public abstract class CreateBranchPanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onError(target);
 				target.add(form);
 			}
 

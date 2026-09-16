@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.workspace.spec.shell;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.k8shelper.PosixFacility;
 import io.onedev.k8shelper.ShellFacility;

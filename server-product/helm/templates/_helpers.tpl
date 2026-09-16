@@ -128,7 +128,6 @@ Set dilect and driver env variables based database type
 {{- $dbTypeMap := dict "mysql" (dict "dialect" "org.hibernate.dialect.MySQL5InnoDBDialect" "driver" "com.mysql.cj.jdbc.Driver")
                      "postgresql" (dict "dialect" "io.onedev.server.persistence.PostgreSQLDialect" "driver" "org.postgresql.Driver")
                      "mariadb" (dict "dialect" "org.hibernate.dialect.MySQL5InnoDBDialect" "driver" "org.mariadb.jdbc.Driver")
-                     "mssql" (dict "dialect" "org.hibernate.dialect.SQLServer2012Dialect" "driver" "com.microsoft.sqlserver.jdbc.SQLServerDriver")
    -}}
 {{- with index $dbTypeMap $dbType }}
   - name: hibernate_dialect

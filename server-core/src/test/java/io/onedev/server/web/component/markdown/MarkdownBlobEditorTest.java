@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.markdown;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
 import java.nio.charset.StandardCharsets;
@@ -8,7 +8,7 @@ import static org.mockito.Mockito.*;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;

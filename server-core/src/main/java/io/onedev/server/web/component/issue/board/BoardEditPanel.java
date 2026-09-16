@@ -63,8 +63,9 @@ public abstract class BoardEditPanel extends Panel {
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 				if (boardIndex != -1) { 
 					BoardSpec oldBoard = boards.get(boardIndex);
 					if (!board.getName().equals(oldBoard.getName()) && getBoard(board.getName()) != null) {
@@ -90,8 +91,8 @@ public abstract class BoardEditPanel extends Panel {
 			}
 			
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(BoardEditPanel.this);
 			}
 			

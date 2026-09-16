@@ -30,6 +30,13 @@ onedev.server.select2 = {
 		}
 		$select.select2(settings);
 		var instance = $select.data("select2");
+		var positionDropdown = instance.dropdown._positionDropdown;
+		instance.dropdown._positionDropdown = function() {
+			// Measure at the final width: the loading message can wrap in the
+			// unsized dropdown and leave a gap when it opens above the input.
+			this._resizeDropdown();
+			positionDropdown.call(this);
+		};
 		instance.$container.find("textarea").addClass("no-autosize");
 		// Preserve layout/validation classes previously copied by Select2 3.x.
 		instance.$container.addClass(($select.attr("class") || "")

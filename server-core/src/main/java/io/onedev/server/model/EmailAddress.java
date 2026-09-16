@@ -1,14 +1,14 @@
 package io.onedev.server.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -23,7 +23,7 @@ import io.onedev.server.util.facade.EmailAddressFacade;
 
 @Editable
 @Entity
-@Table(indexes={@Index(columnList="o_owner_id"), @Index(columnList="value")})
+@Table(indexes={@Index(columnList="owner_id"), @Index(columnList="value")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class EmailAddress extends AbstractEntity {
     

@@ -3,7 +3,7 @@ package io.onedev.server.web.component.user.aisetting;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import org.jspecify.annotations.Nullable;
 

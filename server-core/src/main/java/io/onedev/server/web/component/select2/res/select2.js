@@ -2021,7 +2021,7 @@ S2.define('select2/selection/allowClear',[
 
     this.$element.trigger('input').trigger('change');
 
-    this.trigger('toggle', {});
+    this.trigger(this.options.get('multiple') ? 'toggle' : 'close', {});
   };
 
   AllowClear.prototype._handleKeyboardClear = function (_, evt, container) {

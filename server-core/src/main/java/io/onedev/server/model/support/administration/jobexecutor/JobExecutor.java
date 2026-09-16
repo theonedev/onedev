@@ -2,7 +2,7 @@ package io.onedev.server.model.support.administration.jobexecutor;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.jspecify.annotations.Nullable;
 

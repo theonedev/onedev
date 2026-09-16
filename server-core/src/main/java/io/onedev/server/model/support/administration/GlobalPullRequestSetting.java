@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 
@@ -34,8 +34,7 @@ public class GlobalPullRequestSetting implements Serializable {
 		namedQueries.add(new NamedPullRequestQuery("All", null));
 	}
 	
-	@Valid
-	public List<NamedPullRequestQuery> getNamedQueries() {
+	public List<@Valid NamedPullRequestQuery> getNamedQueries() {
 		return namedQueries;
 	}
 

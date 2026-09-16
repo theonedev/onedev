@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import org.jspecify.annotations.Nullable;
 
@@ -310,8 +310,7 @@ public class GlobalIssueSetting implements Serializable {
 	}
 	
 	@NotNull
-	@Valid
-	public List<StateSpec> getStateSpecs() {
+	public List<@Valid StateSpec> getStateSpecs() {
 		return stateSpecs;
 	}
 
@@ -320,8 +319,7 @@ public class GlobalIssueSetting implements Serializable {
 	}
 
 	@NotNull
-	@Valid
-	public List<TransitionSpec> getTransitionSpecs() {
+	public List<@Valid TransitionSpec> getTransitionSpecs() {
 		return transitionSpecs;
 	}
 
@@ -331,8 +329,7 @@ public class GlobalIssueSetting implements Serializable {
 
 	@Editable
 	@NotNull
-	@Valid
-	public List<FieldSpec> getFieldSpecs() {
+	public List<@Valid FieldSpec> getFieldSpecs() {
 		return fieldSpecs;
 	}
 
@@ -704,8 +701,7 @@ public class GlobalIssueSetting implements Serializable {
 	}
 	
 	@NotNull
-	@Valid
-	public List<BoardSpec> getBoardSpecs() {
+	public List<@Valid BoardSpec> getBoardSpecs() {
 		return boardSpecs;
 	}
 
@@ -742,8 +738,7 @@ public class GlobalIssueSetting implements Serializable {
 	}
 
 	@NotNull
-	@Valid
-	public List<NamedIssueQuery> getNamedQueries() {
+	public List<@Valid NamedIssueQuery> getNamedQueries() {
 		return namedQueries;
 	}
 
@@ -752,8 +747,7 @@ public class GlobalIssueSetting implements Serializable {
 	}
 	
 	@NotNull
-	@Valid
-	public List<IssueTemplate> getIssueTemplates() {
+	public List<@Valid IssueTemplate> getIssueTemplates() {
 		return issueTemplates;
 	}
 

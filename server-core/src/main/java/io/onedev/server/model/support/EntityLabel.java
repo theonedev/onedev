@@ -1,6 +1,6 @@
 package io.onedev.server.model.support;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.LabelSpec;

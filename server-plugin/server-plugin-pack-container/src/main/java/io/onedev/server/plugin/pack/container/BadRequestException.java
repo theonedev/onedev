@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.pack.container;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
 public class BadRequestException extends ClientException {
 

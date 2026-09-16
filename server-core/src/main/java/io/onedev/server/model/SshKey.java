@@ -6,15 +6,15 @@ import java.security.PublicKey;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
@@ -34,7 +34,7 @@ import io.onedev.server.validation.Validatable;
 
 @Editable
 @Entity
-@Table(indexes={@Index(columnList="o_owner_id"), @Index(columnList="fingerprint")})
+@Table(indexes={@Index(columnList="owner_id"), @Index(columnList="fingerprint")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @ClassValidating
 public class SshKey extends AbstractEntity implements Validatable {

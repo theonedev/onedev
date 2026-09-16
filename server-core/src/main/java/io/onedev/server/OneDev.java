@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
@@ -28,8 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Provider;
-import com.hazelcast.core.HazelcastInstance;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AppLoader;
@@ -136,8 +134,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			sessionFactoryService.start();
 			taskScheduler.start();
 
-			var databasePopulated = clusterService.getHazelcastInstance().getCPSubsystem()
-					.getAtomicLong("databasePopulated");
+			var databasePopulated = clusterService.getAtomicLong("databasePopulated");
 			// Do not use database lock as schema update will commit transaction immediately
 			// in MySQL
 			clusterService.initWithLead(databasePopulated, () -> {
@@ -240,8 +237,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	}
 
 	private List<ManualConfig> checkData() {
-		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
-		var lock = hazelcastInstance.getCPSubsystem().getLock("checkData");
+		var lock = clusterService.getLock("checkData");
 		lock.lock();
 		try {
 			return dataService.checkData();

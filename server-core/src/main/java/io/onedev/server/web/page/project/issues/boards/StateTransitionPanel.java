@@ -54,8 +54,8 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 		form.add(new AjaxButton("ok") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				
 				Collection<String> editableFields = FieldUtils.getEditableFields(
 						getIssue().getProject(), transition.getPromptFields());
@@ -66,8 +66,9 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onError(target);
 				target.add(form);
 			}
 

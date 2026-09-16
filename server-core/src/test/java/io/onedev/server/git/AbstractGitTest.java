@@ -15,7 +15,7 @@ import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.util.FS;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +74,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 		});
 		
 		String gitError = GitUtils.checkError("git");
-	    Assert.assertTrue(gitError, gitError == null);
+	    Assertions.assertTrue(gitError == null, gitError);
 	}
 
 	protected void deleteDir(File dir, int retries) {

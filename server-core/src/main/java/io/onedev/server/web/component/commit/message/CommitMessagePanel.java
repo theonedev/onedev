@@ -11,7 +11,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -95,7 +94,7 @@ public abstract class CommitMessagePanel extends Panel {
 			
 		}).setEscapeModelStrings(false));
 
-		add(new Label("detail", new AbstractReadOnlyModel<String>() {
+		add(new Label("detail", new IModel<String>() {
 
 			@Override
 			public String getObject() {

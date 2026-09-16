@@ -9,7 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.hibernate.proxy.HibernateProxyHelper;
+import io.onedev.server.util.HibernateProxyHelper;
 
 import com.google.common.collect.Lists;
 

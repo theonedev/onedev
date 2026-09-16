@@ -1,6 +1,6 @@
 package io.onedev.server.security;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.apache.shiro.web.config.ShiroFilterConfiguration;
 

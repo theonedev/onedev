@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -23,7 +23,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -111,7 +111,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Label("label", new AbstractReadOnlyModel<String>() {
+				add(new Label("label", new IModel<String>() {
 
 					@Override
 					public String getObject() {
@@ -143,13 +143,13 @@ public class AgentOverviewPage extends AgentDetailPage {
 		add(new Label("osArch", getAgent().getOsArch()));
 		add(new AgentStatusBadge("status", agentModel));
 
-		add(new Label("accessToken", new AbstractReadOnlyModel<>() {
+		add(new Label("accessToken", new IModel<>() {
 			@Override
 			public Object getObject() {
 				return getAgent().getToken().getValue();
 			}
 		}));
-		add(new CopyToClipboardLink("copyAccessToken", new AbstractReadOnlyModel<>() {
+		add(new CopyToClipboardLink("copyAccessToken", new IModel<>() {
 			@Override
 			public String getObject() {
 				return getAgent().getToken().getValue();

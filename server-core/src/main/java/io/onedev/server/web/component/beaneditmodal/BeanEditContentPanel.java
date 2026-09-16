@@ -39,7 +39,7 @@ abstract class BeanEditContentPanel extends Panel {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 
 		};
@@ -74,8 +74,9 @@ abstract class BeanEditContentPanel extends Panel {
 			}
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 				var errorMessage = onSave(target);
 				if (errorMessage != null) {
 					form.error(errorMessage);

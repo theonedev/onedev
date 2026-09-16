@@ -46,7 +46,7 @@ onedev:
 database:
   # database.external -- Set to **true** when using external database
   external: false
-  # database.type-- Required: Set type of external database. Possible values `mysql`, `mariadb`, `postgresql`, `mssql`
+  # database.type-- Required: Set type of external database. Possible values `mysql`, `mariadb`, `postgresql`
   # [external databases](https://docs.onedev.io/installation-guide/run-as-docker-container#use-external-database)
   type: "mysql"
   # database.host -- IP address or hostname of database

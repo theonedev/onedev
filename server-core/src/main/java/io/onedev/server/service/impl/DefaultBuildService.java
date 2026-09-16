@@ -1,6 +1,5 @@
 package io.onedev.server.service.impl;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static edu.emory.mathcs.backport.java.util.Collections.sort;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
@@ -25,7 +24,7 @@ import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 import static java.lang.Long.valueOf;
 import static java.util.Arrays.asList;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -50,23 +49,23 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -74,11 +73,11 @@ import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.glassfish.jersey.client.ClientProperties;
 import org.hibernate.Session;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.MatchMode;
+import io.onedev.server.persistence.dao.Order;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
-import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.hibernate.query.sqm.tree.domain.SqmPath;
 import org.jspecify.annotations.Nullable;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -387,7 +386,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	@Override
 	public Map<Long, Long> queryUnfinished() {
 		Query<?> query = getSession().createQuery("select id, project.id from Build where "
-				+ "status=:waiting or status=:pending or status=:running");
+				+ "status=:waiting or status=:pending or status=:running", Object[].class);
 		query.setParameter("waiting", Build.Status.WAITING);
 		query.setParameter("pending", Build.Status.PENDING);
 		query.setParameter("running", Build.Status.RUNNING);
@@ -549,7 +548,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 		var groupPath = group.getPath(root.get(PROP_FINISH_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 
-		criteriaQuery.multiselect(newArrayList(
+		criteriaQuery.select(builder.array(
 				groupPath,
 				builder.avg(root.get(PROP_PENDING_DURATION)),
 				builder.avg(root.get(PROP_RUNNING_DURATION))));
@@ -581,7 +580,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 		var groupPath = group.getPath(root.get(PROP_FINISH_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 
-		criteriaQuery.multiselect(newArrayList(groupPath, builder.count(root)));
+		criteriaQuery.select(builder.array(groupPath, builder.count(root)));
 		
 		Map<Integer, Integer> stats = new HashMap<>();
 		for (var result: getSession().createQuery(criteriaQuery).getResultList()) 
@@ -665,7 +664,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	@SuppressWarnings("rawtypes")
 	private void applyOrders(From<Build, Build> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder, 
 			EntityQuery<Build> query) {
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		List<jakarta.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: query.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
@@ -675,8 +674,8 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 
 		boolean found = false;
 		for (var order: orders) {
-			if (order.getExpression() instanceof SingularAttributePath 
-					&& ((SingularAttributePath) order.getExpression()).getAttribute().getName().equals(Build.PROP_SUBMIT_DATE)) {
+			if (order.getExpression() instanceof SqmPath
+					&& ((SqmPath) order.getExpression()).getReferencedPathSource().getPathName().equals(Build.PROP_SUBMIT_DATE)) {
 				found = true;
 				break;
 			}
@@ -745,7 +744,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	private void fillStatus(Project project, Collection<ObjectId> commitIds, 
 			Map<ObjectId, Map<String, Collection<StatusInfo>>> commitStatuses) {
 		Query<?> query = getSession().createQuery("select commitHash, jobName, status, refName, request.id from Build "
-				+ "where project=:project and commitHash in :commitHashes");
+				+ "where project=:project and commitHash in :commitHashes", Object[].class);
 		query.setParameter("project", project);
 		query.setParameter("commitHashes", commitIds.stream().map(it->it.name()).collect(Collectors.toList()));
 		for (Object[] row: (List<Object[]>)query.list()) {
@@ -854,9 +853,9 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
         cache = hazelcastInstance.getMap("buildCache");
         jobNames = hazelcastInstance.getMap("jobNames");
 
-		var buildCacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildCacheInited");
+		var buildCacheInited = clusterService.getAtomicLong("buildCacheInited");
 		clusterService.initWithLead(buildCacheInited, () -> {
-			Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
+			Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build", Object[].class);
 			for (Object[] fields : (List<Object[]>) query.list()) {
 				Long buildId = (Long) fields[0];
 				Long projectId = (Long) fields[1];
@@ -891,7 +890,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 		List<Selection<?>> selections = new ArrayList<>();
 		for (String field: fields)
 			selections.add(root.get(field));
-		query.multiselect(selections);
+		query.select(builder.array(selections.toArray(Selection<?>[]::new)));
 		
 		return query;
 	}
@@ -1013,7 +1012,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	@Override
 	public Collection<Build> query(Agent agent, Status status) {
 		EntityCriteria<Build> criteria = EntityCriteria.of(Build.class);
-		EntityCriteria<Build> agentCriteria = criteria.createCriteria(Build.PROP_AGENT, org.hibernate.sql.JoinType.INNER_JOIN);
+		EntityCriteria<Build> agentCriteria = criteria.createCriteria(Build.PROP_AGENT, jakarta.persistence.criteria.JoinType.INNER);
 		if (status != null) 
 			agentCriteria.add(Restrictions.eq(Build.PROP_STATUS, status));
 		return query(criteria);
@@ -1028,10 +1027,10 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 			CriteriaBuilder builder = getSession().getCriteriaBuilder();
 			CriteriaQuery<ProjectBuildStatusStat> criteriaQuery = builder.createQuery(ProjectBuildStatusStat.class);
 			Root<Build> root = criteriaQuery.from(Build.class);
-			criteriaQuery.multiselect(
+			criteriaQuery.select(builder.construct(ProjectBuildStatusStat.class,
 					root.get(Build.PROP_PROJECT).get(Project.PROP_ID), 
 					root.get(Build.PROP_STATUS), 
-					builder.count(root));
+					builder.count(root)));
 			criteriaQuery.groupBy(root.get(Build.PROP_PROJECT), root.get(Build.PROP_STATUS));
 			
 			criteriaQuery.where(root.get(Build.PROP_PROJECT).in(projects));

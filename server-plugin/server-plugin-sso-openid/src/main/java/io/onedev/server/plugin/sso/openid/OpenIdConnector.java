@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotEmpty;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authc.AuthenticationException;
@@ -387,9 +387,8 @@ public class OpenIdConnector extends SsoConnector {
 	}
 	
 	protected ProviderMetadata discoverProviderMetadata() {
-		try {
-			JsonNode json = OneDev.getInstance(ObjectMapper.class).readTree(
-					new URI(getConfigurationDiscoveryUrl()).toURL());
+		try (var input = new URI(getConfigurationDiscoveryUrl()).toURL().openStream()) {
+			JsonNode json = OneDev.getInstance(ObjectMapper.class).readTree(input);
 			var endSessionEndpointNode = json.get("end_session_endpoint");
 			return new ProviderMetadata(
 					json.get("issuer").asText(),

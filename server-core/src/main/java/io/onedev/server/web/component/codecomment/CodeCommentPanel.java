@@ -30,11 +30,11 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
@@ -242,14 +242,14 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 					}
 
 					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
+					protected void onError(AjaxRequestTarget target) {
+						super.onError(target);
 						target.add(feedback);
 					}
 
 					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
+					protected void onSubmit(AjaxRequestTarget target) {
+						super.onSubmit(target);
 
 						String content = contentInput.getModelObject();
 						if (content.length() > CodeComment.MAX_CONTENT_LEN) {
@@ -439,7 +439,6 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 		add(new ChangeObserver() {
 			
 			@Override
-			@SuppressWarnings("deprecation")
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				Component prevActivityContainer;
 				if (activitiesView.size() > 0)
@@ -486,7 +485,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			
 		});
 
-		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
+		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
 
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
@@ -605,14 +604,14 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(feedback);
 			}
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				
 				String content = contentInput.getModelObject();
 				if (content != null && content.length() > CodeCommentReply.MAX_CONTENT_LEN) {
@@ -808,7 +807,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 				public void setObject(String object) {
 					CodeCommentReply reply = getReply();
 					reply.setContent(object);
-					onSaveCommentReply(RequestCycle.get().find(AjaxRequestTarget.class), reply);
+					onSaveCommentReply(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null), reply);
 				}
 				
 			}, null) {
@@ -886,14 +885,14 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 					form.add(new AjaxButton("save") {
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
+						protected void onError(AjaxRequestTarget target) {
+							super.onError(target);
 							target.add(feedback);
 						}
 
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
+						protected void onSubmit(AjaxRequestTarget target) {
+							super.onSubmit(target);
 							
 							String content = contentInput.getModelObject();
 							if (content.length() > CodeCommentReply.MAX_CONTENT_LEN) {

@@ -33,7 +33,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.*;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
@@ -143,7 +143,7 @@ public abstract class RevisionSelector extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("title", new AbstractReadOnlyModel<>() {
+		add(new Label("title", new IModel<>() {
 			@Override
 			public Object getObject() {
 				return getTitle();

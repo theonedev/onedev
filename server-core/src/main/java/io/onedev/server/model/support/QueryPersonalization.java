@@ -3,7 +3,7 @@ package io.onedev.server.model.support;
 import java.util.ArrayList;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;

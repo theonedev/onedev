@@ -3,20 +3,19 @@ package io.onedev.server.persistence;
 import static io.onedev.commons.utils.FileUtils.loadProperties;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hibernate.cfg.AvailableSettings.DIALECT;
-import static org.hibernate.cfg.AvailableSettings.DRIVER;
-import static org.hibernate.cfg.AvailableSettings.PASS;
-import static org.hibernate.cfg.AvailableSettings.URL;
-import static org.hibernate.cfg.AvailableSettings.USER;
+import static org.hibernate.cfg.AvailableSettings.JAKARTA_JDBC_DRIVER;
+import static org.hibernate.cfg.AvailableSettings.JAKARTA_JDBC_PASSWORD;
+import static org.hibernate.cfg.AvailableSettings.JAKARTA_JDBC_URL;
+import static org.hibernate.cfg.AvailableSettings.JAKARTA_JDBC_USER;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Strings;
 import org.hibernate.cfg.Environment;
-
-import io.onedev.commons.utils.StringUtils;
 
 public class HibernateConfig extends Properties {
 
@@ -24,8 +23,15 @@ public class HibernateConfig extends Properties {
 
 	private static final String ENV_PASS_FILE ="hibernate_connection_password_file";
 	
+	// Existing installations and deployment manifests still use these OneDev configuration keys.
+	private static final Map<String, String> LEGACY_CONNECTION_SETTINGS = Map.of(
+			"hibernate.connection.driver_class", JAKARTA_JDBC_DRIVER,
+			"hibernate.connection.url", JAKARTA_JDBC_URL,
+			"hibernate.connection.username", JAKARTA_JDBC_USER,
+			"hibernate.connection.password", JAKARTA_JDBC_PASSWORD);
+
 	private static final String[] ENVS = new String[] {
-			DIALECT, DRIVER, URL, USER, PASS, "hibernate.hikari.leakDetectionThreshold",
+			DIALECT, JAKARTA_JDBC_DRIVER, JAKARTA_JDBC_URL, JAKARTA_JDBC_USER, JAKARTA_JDBC_PASSWORD, "hibernate.hikari.leakDetectionThreshold",
 			"hibernate.hikari.maxLifetime", "hibernate.hikari.connectionTimeout",
 			"hibernate.hikari.maximumPoolSize", "hibernate.hikari.validationTimeout",
 			"hibernate.show_sql", "hibernate.query.plan_cache_max_size",
@@ -35,27 +41,36 @@ public class HibernateConfig extends Properties {
 	public HibernateConfig(File installDir) {
 		File file = new File(installDir, "conf/hibernate.properties");
 		putAll(loadProperties(file));
-		put("hibernate.cache.hazelcast.shutdown_on_session_factory_close", "false");
+		LEGACY_CONNECTION_SETTINGS.forEach((legacy, current) -> {
+			Object value = remove(legacy);
+			if (value != null)
+				putIfAbsent(current, value);
+		});
+		if ("org.hibernate.dialect.MySQL5InnoDBDialect".equals(getProperty(DIALECT)))
+			put(DIALECT, "org.hibernate.dialect.MySQLDialect");
 		
 		String value = System.getenv(ENV_PASS_FILE);
 		if (value != null) {
 			try {
-				setProperty(PASS, FileUtils.readFileToString(new File(value), UTF_8).trim());
+				setProperty(JAKARTA_JDBC_PASSWORD, FileUtils.readFileToString(new File(value), UTF_8).trim());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
+		LEGACY_CONNECTION_SETTINGS.forEach((legacy, current) -> {
+			String override = System.getenv(legacy.replace('.', '_'));
+			if (override != null)
+				setProperty(current, override);
+		});
 		for (String env: ENVS) {
 			value = System.getenv(env.replace('.', '_'));
 			if (value != null)
 				setProperty(env, value);
 		}
 		
-		String url = getProperty(URL);
+		String url = getProperty(JAKARTA_JDBC_URL);
 		url = Strings.CS.replace(url, "${installDir}", installDir.getAbsolutePath());
-		if (url.contains(":sqlserver:") && !url.toLowerCase().contains("selectMethod=cursor".toLowerCase()))
-			url = StringUtils.stripEnd(url, ";") + ";selectMethod=cursor";
-		setProperty(URL, url);
+		setProperty(JAKARTA_JDBC_URL, url);
 	}
 
 	public String getDialect() {
@@ -63,19 +78,19 @@ public class HibernateConfig extends Properties {
 	}
 
 	public String getDriver() {
-		return getProperty(Environment.DRIVER);
+		return getProperty(Environment.JAKARTA_JDBC_DRIVER);
 	}
 
 	public String getUrl() {
-		return getProperty(Environment.URL);
+		return getProperty(Environment.JAKARTA_JDBC_URL);
 	}
 
 	public String getUser() {
-		return getProperty(Environment.USER);
+		return getProperty(Environment.JAKARTA_JDBC_USER);
 	}
 
 	public String getPassword() {
-		return getProperty(Environment.PASS);
+		return getProperty(Environment.JAKARTA_JDBC_PASSWORD);
 	}
 	
 	public static boolean isHSQLDialect(String dialect) {

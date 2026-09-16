@@ -1,10 +1,10 @@
 package io.onedev.server.model;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import java.util.Date;
 
 import static io.onedev.server.model.AgentLastUsedDate.PROP_VALUE;

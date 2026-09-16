@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.Size;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.constraints.Size;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;

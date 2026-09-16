@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;

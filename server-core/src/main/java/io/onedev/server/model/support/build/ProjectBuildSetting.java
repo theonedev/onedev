@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
@@ -46,8 +46,7 @@ public class ProjectBuildSetting implements Serializable {
 	
 	private transient GlobalBuildSetting globalSetting;
 	
-	@Valid
-	public List<JobProperty> getJobProperties() {
+	public List<@Valid JobProperty> getJobProperties() {
 		return jobProperties;
 	}
 
@@ -55,8 +54,7 @@ public class ProjectBuildSetting implements Serializable {
 		this.jobProperties = jobProperties;
 	}
 
-	@Valid
-	public List<JobSecret> getJobSecrets() {
+	public List<@Valid JobSecret> getJobSecrets() {
 		return jobSecrets;
 	}
 
@@ -64,8 +62,7 @@ public class ProjectBuildSetting implements Serializable {
 		this.jobSecrets = jobSecrets;
 	}
 	
-	@Valid
-	public List<BuildPreservation> getBuildPreservations() {
+	public List<@Valid BuildPreservation> getBuildPreservations() {
 		return buildPreservations;
 	}
 
@@ -73,8 +70,7 @@ public class ProjectBuildSetting implements Serializable {
 		this.buildPreservations = buildPreservations;
 	}
 
-	@Valid
-	public List<DefaultFixedIssueFilter> getDefaultFixedIssueFilters() {
+	public List<@Valid DefaultFixedIssueFilter> getDefaultFixedIssueFilters() {
 		return defaultFixedIssueFilters;
 	}
 
@@ -108,9 +104,8 @@ public class ProjectBuildSetting implements Serializable {
 		this.listParams = listParams;
 	}
 
-	@Valid
 	@Nullable
-	public List<NamedBuildQuery> getNamedQueries() {
+	public List<@Valid NamedBuildQuery> getNamedQueries() {
 		return namedQueries;
 	}
 

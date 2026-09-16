@@ -39,7 +39,7 @@ public class AfterCriteria extends CommitCriteria {
 	public boolean matches(RefUpdated event) {
 		RevCommit commit = event.getProject().getRevCommit(event.getNewCommitId(), true);
 		for (String value: values) {
-			if (!commit.getCommitterIdent().getWhen().after(DateUtils.parseRelaxed(value)))
+			if (!commit.getCommitterIdent().getWhenAsInstant().isAfter(DateUtils.parseRelaxed(value).toInstant()))
 				return false;
 		}
 		return true;

@@ -35,7 +35,6 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -212,7 +211,7 @@ public abstract class QuickSearchPanel extends Panel {
 		};
 		result.setOutputMarkupPlaceholderTag(true);
 		
-		result.add(new ListView<QueryHit>("symbolHits", new AbstractReadOnlyModel<List<QueryHit>>() {
+		result.add(new ListView<QueryHit>("symbolHits", new IModel<List<QueryHit>>() {
 
 			@Override
 			public List<QueryHit> getObject() {

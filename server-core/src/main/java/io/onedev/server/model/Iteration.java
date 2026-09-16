@@ -7,15 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
@@ -26,8 +26,8 @@ import io.onedev.server.rest.annotation.Immutable;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_project_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", Iteration.PROP_NAME})}
+		indexes={@Index(columnList="project_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"project_id", Iteration.PROP_NAME})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Iteration extends AbstractEntity {

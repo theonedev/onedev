@@ -1,7 +1,7 @@
 package io.onedev.server.exception.handler;
 
-import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 
 import io.onedev.server.exception.HttpResponse;
 

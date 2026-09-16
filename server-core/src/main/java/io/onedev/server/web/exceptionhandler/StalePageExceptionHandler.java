@@ -4,7 +4,7 @@ import io.onedev.server.exception.HttpResponse;
 import io.onedev.server.exception.handler.AbstractExceptionHandler;
 import org.apache.wicket.core.request.mapper.StalePageException;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class StalePageExceptionHandler extends AbstractExceptionHandler<StalePageException> {
 	

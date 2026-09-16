@@ -293,12 +293,12 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 		AjaxButton commitButton = new AjaxButton("commitButton", form) {
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+			protected void onSubmit(AjaxRequestTarget target) {
 				doCommit(target, repository, false);
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
+			protected void onError(AjaxRequestTarget target) {
 				refreshAll(target);
 			}
 		};
@@ -308,12 +308,12 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 		AjaxButton amendButton = new AjaxButton("amendButton", form) {
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+			protected void onSubmit(AjaxRequestTarget target) {
 				doCommit(target, repository, true);
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
+			protected void onError(AjaxRequestTarget target) {
 				refreshAll(target);
 			}
 		};

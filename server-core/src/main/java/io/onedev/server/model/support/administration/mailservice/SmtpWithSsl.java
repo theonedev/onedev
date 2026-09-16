@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.administration.mailservice;
 
-import com.sun.mail.util.MailSSLSocketFactory;
+import org.eclipse.angus.mail.util.MailSSLSocketFactory;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.security.TrustCertsSSLSocketFactory;
 

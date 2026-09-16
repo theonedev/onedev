@@ -86,8 +86,9 @@ public abstract class ObsoleteUpdateAwarePanel extends Panel {
 		form.add(new AjaxButton("ok") {
 
 			@Override
-			public void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			public void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 				
 				PullRequestUpdate latestUpdate = getLatestUpdate();
 				PullRequest request = latestUpdate.getRequest();
@@ -122,8 +123,9 @@ public abstract class ObsoleteUpdateAwarePanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onError(target);
 				target.add(form);
 			}
 			

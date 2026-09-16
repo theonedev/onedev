@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

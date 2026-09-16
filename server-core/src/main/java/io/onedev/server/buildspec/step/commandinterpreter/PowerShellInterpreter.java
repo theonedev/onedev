@@ -6,7 +6,7 @@ import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 @Editable(order=300, name="PowerShell")
 public class PowerShellInterpreter extends Interpreter {

@@ -6,7 +6,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 
 import static io.onedev.server.web.translation.Translation._T;
 
@@ -37,7 +37,7 @@ public class PolymorphicPropertyViewer extends Panel {
 		super.onInitialize();
 		
 		add(new Label("type", _T(EditableUtils.getDisplayName(propertyValue.getClass()))));
-		add(new Label("typeDescription", new AbstractReadOnlyModel<String>() {
+		add(new Label("typeDescription", new IModel<String>() {
 
 			@Override
 			public String getObject() {

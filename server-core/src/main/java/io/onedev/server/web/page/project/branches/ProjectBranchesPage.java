@@ -16,7 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
@@ -44,7 +44,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -342,7 +341,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				
 				String url = RequestCycle.get().urlFor(ProjectBranchesPage.class, params).toString();
 
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				if (typing)
 					replaceState(target, url, query);
 				else
@@ -385,8 +384,9 @@ public class ProjectBranchesPage extends ProjectPage {
 				form.add(new AjaxButton("create") {
 
 					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
+					protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+						super.onSubmit(target);
 						
 						String branchName = helperBean.getName();
 						User user = Preconditions.checkNotNull(getLoginUser());
@@ -414,8 +414,9 @@ public class ProjectBranchesPage extends ProjectPage {
 					}
 
 					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
+					protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+						super.onError(target);
 						target.add(form);
 					}
 
@@ -744,7 +745,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			@Override
 			public IModel<RefFacade> model(RefFacade object) {
 				String branch = GitUtils.ref2branch(object.getName());
-				return new AbstractReadOnlyModel<RefFacade>() {
+				return new IModel<RefFacade>() {
 
 					@Override
 					public RefFacade getObject() {

@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.inject.Singleton;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 import com.google.common.base.Preconditions;
 
@@ -31,12 +30,12 @@ public class DefaultIssueFieldService extends BaseEntityService<IssueField> impl
 				ids.add(field.getId());
 		}
 		if (!ids.isEmpty()) {
-			Query query = getSession().createQuery("delete from IssueField where issue = :issue and id not in (:ids)");
+			var query = getSession().createMutationQuery("delete from IssueField where issue = :issue and id not in (:ids)");
 			query.setParameter("issue", issue);
 			query.setParameter("ids", ids);
 			query.executeUpdate();
 		} else {
-			Query query = getSession().createQuery("delete from IssueField where issue = :issue");
+			var query = getSession().createMutationQuery("delete from IssueField where issue = :issue");
 			query.setParameter("issue", issue);
 			query.executeUpdate();
 		}
@@ -57,7 +56,7 @@ public class DefaultIssueFieldService extends BaseEntityService<IssueField> impl
 	@Transactional
 	@Override
 	public void onRenameGroup(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueField set value=:newName where type=:type and value=:oldName");
+		var query = getSession().createMutationQuery("update IssueField set value=:newName where type=:type and value=:oldName");
 		query.setParameter("type", FieldSpec.GROUP);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
@@ -67,7 +66,7 @@ public class DefaultIssueFieldService extends BaseEntityService<IssueField> impl
 	@Transactional
 	@Override
 	public void onRenameUser(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueField set value=:newName where type=:type and value=:oldName");
+		var query = getSession().createMutationQuery("update IssueField set value=:newName where type=:type and value=:oldName");
 		query.setParameter("type", FieldSpec.USER);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);

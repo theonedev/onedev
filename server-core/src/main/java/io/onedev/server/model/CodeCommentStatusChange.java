@@ -2,21 +2,21 @@ package io.onedev.server.model;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import io.onedev.server.model.support.CompareContext;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="o_comment_id"), @Index(columnList="o_user_id"), 
-		@Index(columnList="o_pullRequest_id")})
+		@Index(columnList="comment_id"), @Index(columnList="user_id"),
+		@Index(columnList="pullRequest_id")})
 public class CodeCommentStatusChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

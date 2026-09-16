@@ -327,7 +327,8 @@ usage() {
 	echo
 	echo "Commands:"
 	echo "  run      Build, start the dev server, and rebuild automatically when files change"
-	echo "  stop     Stop the running development server"
+	echo "  prod     Build and start with Wicket production mode, without hot loading or watching"
+	echo "  stop     Stop the server started by run or prod"
 	echo "  build    Build with Maven when needed, otherwise compile changed files with ECJ"
 	echo "  rebuild  Clean and build all modules while preserving the development sandbox"
 	echo "  test     Run tests with Maven"
@@ -340,7 +341,7 @@ usage() {
 
 is_command() {
 	case "$1" in
-		build|rebuild|clean|install|test|package|run|stop) return 0 ;;
+		build|rebuild|clean|install|test|package|run|prod|stop) return 0 ;;
 		*) return 1 ;;
 	esac
 }
@@ -361,6 +362,7 @@ fi
 maven_commands=()
 maven_arguments=()
 run_requested=false
+run_mode=run
 run_arguments=()
 while [ "$#" -gt 0 ]; do
 	command=$1
@@ -390,9 +392,10 @@ while [ "$#" -gt 0 ]; do
 			flush_maven_commands
 			stop_server
 			;;
-		run)
+		run|prod)
 			flush_maven_commands
 			run_requested=true
+			run_mode=$command
 			run_arguments=("$@")
 			break
 			;;
@@ -413,29 +416,40 @@ if running_server; then
 	echo "Development server is already running (PID $server_pid). Use ./dev.sh stop first." >&2
 	exit 1
 fi
-watch_reference=$(mktemp "${TMPDIR:-/tmp}/onedev-watch.XXXXXX")
-touch "$watch_reference"
-trap 'rm -f "$watch_reference"' EXIT
+watch_reference=
+watcher_pid=
+if [ "$run_mode" = run ]; then
+	watch_reference=$(mktemp "${TMPDIR:-/tmp}/onedev-watch.XXXXXX")
+	touch "$watch_reference"
+	trap 'rm -f "$watch_reference"' EXIT
+fi
 build_project
 
 if [ -z "${classpath:-}" ]; then
 	build_classpath
 fi
-hotswap_agent=$(ensure_artifact org.hotswapagent hotswap-agent "$HOTSWAP_AGENT_VERSION")
-
-hotswap_options="-javaagent:$hotswap_agent=autoHotswap=true"
-if java -XX:+AllowEnhancedClassRedefinition -version >/dev/null 2>&1; then
-	hotswap_options="-XX:+AllowEnhancedClassRedefinition $hotswap_options"
+if [ "$run_mode" = prod ]; then
+	java_options="-Dprod=true"
+	echo "Production mode enabled. Hot loading and automatic rebuilding are disabled." >&2
 else
-	echo "Warning: this JVM only supports hot loading method-body changes." >&2
-	echo "Use a JetBrains Runtime with AllowEnhancedClassRedefinition for structural changes." >&2
+	hotswap_agent=$(ensure_artifact org.hotswapagent hotswap-agent "$HOTSWAP_AGENT_VERSION")
+	# Jackson's HotswapAgent hook calls hashCode before Wicket's ByteBuddy proxy is initialized.
+	java_options="-javaagent:$hotswap_agent=autoHotswap=true,disablePlugin=JacksonPlugin"
+	if java -XX:+AllowEnhancedClassRedefinition -version >/dev/null 2>&1; then
+		java_options="-XX:+AllowEnhancedClassRedefinition $java_options"
+	else
+		echo "Warning: this JVM only supports hot loading method-body changes." >&2
+		echo "Use a JetBrains Runtime with AllowEnhancedClassRedefinition for structural changes." >&2
+	fi
+	echo "HotswapAgent enabled. Watching source files for changes." >&2
+	watch_and_build "$watch_reference" &
+	watcher_pid=$!
 fi
 
-echo "HotswapAgent enabled. Watching source files for changes." >&2
-watch_and_build "$watch_reference" &
-watcher_pid=$!
 cleanup_run() {
-	kill "$watcher_pid" 2>/dev/null || true
+	if [ -n "$watcher_pid" ]; then
+		kill "$watcher_pid" 2>/dev/null || true
+	fi
 	if [ -n "${java_pid:-}" ]; then
 		kill "$java_pid" 2>/dev/null || true
 		wait "$java_pid" 2>/dev/null || true
@@ -443,14 +457,18 @@ cleanup_run() {
 			rm -f "$SERVER_PID_FILE"
 		fi
 	fi
-	wait "$watcher_pid" 2>/dev/null || true
-	rm -f "$watch_reference"
+	if [ -n "$watcher_pid" ]; then
+		wait "$watcher_pid" 2>/dev/null || true
+	fi
+	if [ -n "$watch_reference" ]; then
+		rm -f "$watch_reference"
+	fi
 }
 trap cleanup_run EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-java $MAVEN_OPTS $hotswap_options "-Donedev.dev.root=$ROOT" -cp "$classpath" \
+java $MAVEN_OPTS $java_options "-Donedev.dev.root=$ROOT" -cp "$classpath" \
 	io.onedev.commons.bootstrap.Bootstrap "$@" <&0 &
 java_pid=$!
 echo "$java_pid" > "$SERVER_PID_FILE"

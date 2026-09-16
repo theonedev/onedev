@@ -5,7 +5,6 @@ import java.util.Collection;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.jspecify.annotations.Nullable;
@@ -38,7 +37,7 @@ public class WorkspaceStatusIcon extends SpriteImage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {

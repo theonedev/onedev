@@ -1,6 +1,6 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.k8shelper.InterpreterFacade;
 import io.onedev.k8shelper.WindowsBatchInterpreterFacade;

@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.BranchName;
@@ -76,8 +76,7 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
-	@Valid
-	public List<BoardSpec> getBoardSpecs() {
+	public List<@Valid BoardSpec> getBoardSpecs() {
 		return boardSpecs;
 	}
 
@@ -86,8 +85,7 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
-	@Valid
-	public List<NamedIssueQuery> getNamedQueries() {
+	public List<@Valid NamedIssueQuery> getNamedQueries() {
 		return namedQueries;
 	}
 
@@ -95,8 +93,7 @@ public class ProjectIssueSetting implements Serializable {
 		this.namedQueries = namedQueries;
 	}
 
-	@Valid
-	public Map<String, TimesheetSetting> getTimesheetSettings() {
+	public Map<String, @Valid TimesheetSetting> getTimesheetSettings() {
 		return timesheetSettings;
 	}
 
@@ -105,8 +102,7 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@NotNull
-	@Valid
-	public List<TransitionSpec> getTransitionSpecs() {
+	public List<@Valid TransitionSpec> getTransitionSpecs() {
 		return transitionSpecs;
 	}
 

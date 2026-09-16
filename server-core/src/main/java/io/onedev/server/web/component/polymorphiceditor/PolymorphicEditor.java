@@ -17,7 +17,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
@@ -165,7 +164,7 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 		});
 		typeSelectorContainer.add(typeSelector);
 		
-		typeSelectorContainer.add(new Label("typeDescription", new AbstractReadOnlyModel<String>() {
+		typeSelectorContainer.add(new Label("typeDescription", new IModel<String>() {
 
 			@Override
 			public String getObject() {

@@ -6,18 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotAcceptableException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAcceptableException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
@@ -263,7 +263,7 @@ public class SettingResource {
 	@Api(order=1900)
 	@Path("/groovy-scripts")
 	@POST
-    public Response setGroovyScripts(@NotNull @Valid List<GroovyScript> groovyScripts) {
+    public Response setGroovyScripts(@NotNull List<@Valid GroovyScript> groovyScripts) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingService.getGroovyScripts()).toXML();
@@ -290,7 +290,7 @@ public class SettingResource {
 	@Api(order=2100)
 	@Path("/job-executors")
 	@POST
-    public Response setJobExecutors(@NotNull @Valid List<JobExecutor> jobExecutors) {
+    public Response setJobExecutors(@NotNull List<@Valid JobExecutor> jobExecutors) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingService.getJobExecutors()).toXML();
@@ -415,7 +415,7 @@ public class SettingResource {
 	@Api(order=2800)
 	@Path("/contributed-settings")
 	@POST
-    public Response setContributedSettings(@NotNull @Valid List<ContributedAdministrationSetting> contributedSettings) {
+    public Response setContributedSettings(@NotNull List<@Valid ContributedAdministrationSetting> contributedSettings) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = getAuditContent(settingService.getContributedSettings());

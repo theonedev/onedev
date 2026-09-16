@@ -3,8 +3,8 @@ package io.onedev.server.web.page.project.setting.authorization;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleChoice;

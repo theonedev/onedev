@@ -1,16 +1,17 @@
 package org.apache.wicket;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.ILinkListener;
+import org.apache.wicket.core.request.handler.ListenerRequestHandler;
+import org.apache.wicket.core.request.handler.PageAndComponentProvider;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.util.tester.WicketTester;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.onedev.server.util.ComponentHierarchical;
 import io.onedev.server.util.HierarchicalContext;
@@ -20,17 +21,17 @@ public class ComponentContextCustomizationTest {
 	private WicketTester tester;
 	private HierarchicalContext outer;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		tester = new WicketTester();
 		outer = new HierarchicalContext(new ComponentHierarchical(new Label("outer")));
 		HierarchicalContext.push(outer);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		try {
-			assertSame("Callback must restore the enclosing context", outer, HierarchicalContext.get());
+			assertSame(outer, HierarchicalContext.get(), "Callback must restore the enclosing context");
 		} finally {
 			HierarchicalContext.pop();
 			tester.destroy();
@@ -71,7 +72,7 @@ public class ComponentContextCustomizationTest {
 			private static final long serialVersionUID = 1L;
 		}.add(link);
 		assertSame(failure, assertThrows(WicketRuntimeException.class,
-				() -> ILinkListener.INTERFACE.invoke(link)));
+				() -> new ListenerRequestHandler(new PageAndComponentProvider(link.getPage(), link)).respond(tester.getRequestCycle())));
 	}
 
 	@Test
@@ -79,13 +80,14 @@ public class ComponentContextCustomizationTest {
 		var owner = new Label("owner");
 		var behavior = new Behavior() {
 			@Override
-			public boolean canCallListenerInterface(Component component, java.lang.reflect.Method method) {
+			public boolean canCallListener(Component component) {
 				assertSame(owner, HierarchicalContext.get().findData(Label.class));
 				return false;
 			}
 		};
+		new WebPage() { }.add(owner);
 		owner.add(behavior);
 		assertThrows(org.apache.wicket.core.request.handler.ListenerInvocationNotAllowedException.class,
-				() -> ILinkListener.INTERFACE.invoke(owner, behavior));
+				() -> new ListenerRequestHandler(new PageAndComponentProvider(owner.getPage(), owner), owner.getBehaviorId(behavior)).respond(tester.getRequestCycle()));
 	}
 }

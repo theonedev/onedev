@@ -6,8 +6,8 @@ import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static jakarta.ws.rs.core.Response.Status.NO_CONTENT;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -21,11 +21,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;

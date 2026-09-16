@@ -36,6 +36,21 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- Give Hazelcast in the test JVM access to required Java internals. -->
+					<argLine>
+						--add-modules=java.se
+						--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED
+						--add-opens=java.base/java.lang=ALL-UNNAMED
+						--add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+						--add-opens=java.management/sun.management=ALL-UNNAMED
+						--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+					</argLine>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>io.onedev</groupId>
 				<artifactId>plugin-maven</artifactId>
 				<version>2.8.0</version>
@@ -117,6 +132,58 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm-commons</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm-analysis</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm-tree</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm-util</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.hk2</groupId>
+				<artifactId>hk2-api</artifactId>
+				<version>${hk2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.hk2</groupId>
+				<artifactId>hk2-utils</artifactId>
+				<version>${hk2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.hk2</groupId>
+				<artifactId>hk2-locator</artifactId>
+				<version>${hk2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.hk2</groupId>
+				<artifactId>guice-bridge</artifactId>
+				<version>${hk2.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>io.onedev</groupId>
 				<artifactId>commons-bootstrap</artifactId>
 				<version>${commons.version}</version>
@@ -148,9 +215,9 @@
 				<version>${commons.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.activation</groupId>
-				<artifactId>activation</artifactId>
-				<version>1.1.1</version>
+				<groupId>jakarta.activation</groupId>
+				<artifactId>jakarta.activation-api</artifactId>
+				<version>2.1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -183,18 +250,28 @@
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlets</artifactId>
+				<groupId>org.eclipse.jetty.compression</groupId>
+				<artifactId>jetty-compression-server</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlet</artifactId>
+				<groupId>org.eclipse.jetty.compression</groupId>
+				<artifactId>jetty-compression-gzip</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jetty.websocket</groupId>
-				<artifactId>websocket-server</artifactId>
+				<groupId>org.eclipse.jetty.ee11</groupId>
+				<artifactId>jetty-ee11-servlets</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.ee11</groupId>
+				<artifactId>jetty-ee11-servlet</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.ee11.websocket</groupId>
+				<artifactId>jetty-ee11-websocket-jetty-server</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
@@ -255,25 +332,30 @@
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
 				<artifactId>hibernate-validator</artifactId>
-				<version>6.2.5.Final</version>
+				<version>9.1.3.Final</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
+				<groupId>jakarta.validation</groupId>
+				<artifactId>jakarta.validation-api</artifactId>
+				<version>3.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.expressly</groupId>
+				<artifactId>expressly</artifactId>
+				<version>6.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.el</groupId>
+				<artifactId>jakarta.el-api</artifactId>
+				<version>6.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-jcache</artifactId>
-				<version>${hibernate.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-entitymanager</artifactId>
-				<version>${hibernate.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
+				<groupId>org.hibernate.orm</groupId>
 				<artifactId>hibernate-hikaricp</artifactId>
 				<version>${hibernate.version}</version>
 			</dependency>
@@ -285,7 +367,7 @@
 			<dependency>
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
-				<version>2.7.9</version>
+				<version>7.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -323,9 +405,9 @@
 				<version>33.5.0-jre</version>
 			</dependency>
 			<dependency>
-				<groupId>commons-fileupload</groupId>
-				<artifactId>commons-fileupload</artifactId>
-				<version>1.6.0</version>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-fileupload2-jakarta-servlet6</artifactId>
+				<version>2.0.0-M5</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-validator</groupId>
@@ -343,11 +425,6 @@
 				<version>4.5.13</version>
 			</dependency>
 			<dependency>
-				<groupId>org.glassfish.hk2</groupId>
-				<artifactId>guice-bridge</artifactId>
-				<version>2.5.0</version>
-			</dependency>
-			<dependency>
 				<groupId>org.jetbrains.xodus</groupId>
 				<artifactId>xodus-entity-store</artifactId>
 				<version>2.0.1</version>
@@ -358,9 +435,9 @@
 				<version>${tika.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.sun.mail</groupId>
-				<artifactId>javax.mail</artifactId>
-				<version>1.6.2</version>
+				<groupId>org.eclipse.angus</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>2.0.5</version>
 			</dependency>
 			<dependency>
 				<groupId>joda-time</groupId>
@@ -370,7 +447,7 @@
 			<dependency>
 				<groupId>org.yaml</groupId>
 				<artifactId>snakeyaml</artifactId>
-				<version>2.2</version>
+				<version>2.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -452,16 +529,8 @@
 				<artifactId>shiro-guice</artifactId>
 				<version>${shiro.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>2.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish</groupId>
-				<artifactId>javax.el</artifactId>
-				<version>3.0.0</version>
-			</dependency>
+
+
 			<dependency>
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
@@ -578,36 +647,6 @@
 				<version>20231013</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.dataformat</groupId>
-				<artifactId>jackson-dataformat-yaml</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-annotations</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.jaxrs</groupId>
-				<artifactId>jackson-jaxrs-json-provider</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>io.onedev</groupId>
 				<artifactId>agent</artifactId>
 				<version>${agent.version}</version>
@@ -625,7 +664,7 @@
 			<dependency>
 				<groupId>net.bytebuddy</groupId>
 				<artifactId>byte-buddy</artifactId>
-				<version>1.12.14</version>
+				<version>1.18.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>
@@ -635,12 +674,12 @@
 			<dependency>
 				<groupId>com.hazelcast</groupId>
 				<artifactId>hazelcast</artifactId>
-				<version>5.3.8</version>
+				<version>5.7.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.hazelcast</groupId>
 				<artifactId>hazelcast-hibernate53</artifactId>
-				<version>2.2.1</version>
+				<version>5.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.dhatim</groupId>
@@ -681,22 +720,24 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>4.2.1</commons.version>
-		<agent.version>3.2.10</agent.version>
-		<slf4j.version>2.0.9</slf4j.version>
+		<commons.version>4.2.2</commons.version>
+		<agent.version>3.3.0</agent.version>
+		<slf4j.version>2.0.17</slf4j.version>
 		<logback.version>1.4.14</logback.version>
-		<antlr.version>4.7.2</antlr.version>
-		<jetty.version>9.4.57.v20241219</jetty.version>
-		<wicket.version>7.18.0</wicket.version>
-		<jersey.version>2.38</jersey.version>
-		<hibernate.version>5.4.24.Final</hibernate.version>
+		<antlr.version>4.13.2</antlr.version>
+		<jetty.version>12.1.13</jetty.version>
+		<wicket.version>10.11.0</wicket.version>
+		<jersey.version>4.0.2</jersey.version>
+		<hibernate.version>7.4.8.Final</hibernate.version>
 		<lucene.version>8.7.0</lucene.version>
-		<shiro.version>1.13.0</shiro.version>
-		<jgit.version>6.10.1.202505221210-r</jgit.version>
+		<shiro.version>3.0.1</shiro.version>
+		<jgit.version>7.8.0.202609011348-r</jgit.version>
 		<flexmark.version>0.64.8</flexmark.version>
 		<groovy.version>3.0.25</groovy.version>
-		<servlet.version>3.1.0</servlet.version>
-		<jackson.version>2.18.8</jackson.version>
+		<servlet.version>6.1.0</servlet.version>
+		<jackson.version>2.22.2</jackson.version>
+		<asm.version>9.10.1</asm.version>
+		<hk2.version>4.0.2</hk2.version>
 		<tika.version>3.2.2</tika.version>
 		<langchain4j.version>1.14.1</langchain4j.version>
 		<bouncycastle.version>1.84</bouncycastle.version>

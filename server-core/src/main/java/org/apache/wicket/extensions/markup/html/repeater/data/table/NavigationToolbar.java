@@ -17,10 +17,10 @@
 package org.apache.wicket.extensions.markup.html.repeater.data.table;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.markup.html.WebComponent;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 
 /**
  * Toolbar that displays links used to navigate the pages of the datatable as well as a message
@@ -54,16 +54,7 @@ public class NavigationToolbar extends AbstractToolbar
 			
 		};
 		add(span);
-		span.add(AttributeModifier.replace("colspan", new AbstractReadOnlyModel<String>()
-		{
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public String getObject()
-			{
-				return String.valueOf(table.getColumns().size()).intern();
-			}
-		}));
+		span.add(AttributeModifier.replace("colspan", (IModel<String>) () -> String.valueOf(table.getColumns().size()).intern()));
 
 	}
 
@@ -83,16 +74,16 @@ public class NavigationToolbar extends AbstractToolbar
 	}
 
 	/**
-	 * Factory method used to create the navigator label that will be used by the datatable
+	 * Factory method used to create the navigator label.
 	 * 
 	 * @param navigatorId
 	 *            component id navigator label should be created with
 	 * @param table
-	 *            dataview used by datatable
+	 *            DataTable used by datatable
 	 * @return navigator label that will be used to navigate the data table
 	 * 
 	 */
-	protected WebComponent newNavigatorLabel(final String navigatorId, final DataTable<?, ?> table)
+	protected Component newNavigatorLabel(final String navigatorId, final DataTable<?, ?> table)
 	{
 		return new NavigatorLabel(navigatorId, table);
 	}

@@ -8,17 +8,17 @@ import io.onedev.server.security.ExceptionHandleFilter;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.codec.Base64;
+import org.apache.shiro.lang.codec.Base64;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.util.WebUtils;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.ws.rs.core.HttpHeaders;
 
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 import static org.apache.shiro.SecurityUtils.getSubject;

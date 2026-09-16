@@ -1,8 +1,31 @@
 package io.onedev.server.buildspec.param;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.SerializationUtils;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.param.instance.*;
+import io.onedev.server.buildspec.param.instance.ParamInstance;
+import io.onedev.server.buildspec.param.instance.ParamInstances;
+import io.onedev.server.buildspec.param.instance.ParamMap;
+import io.onedev.server.buildspec.param.instance.SpecifiedValue;
+import io.onedev.server.buildspec.param.instance.SpecifiedValues;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.spec.SecretParam;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
@@ -11,17 +34,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang.SerializationUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.jspecify.annotations.Nullable;
-import javax.validation.ValidationException;
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import jakarta.validation.ValidationException;
 
 public class ParamUtils {
 	
@@ -175,7 +188,7 @@ public class ParamUtils {
 	
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public static Class<? extends Serializable> loadBeanClass(String className) {
+	public static Class<? extends Serializable> loadParamBeanClass(String className) {
 		if (className.startsWith(PARAM_BEAN_CLASS_NAME_PREFIX)) {
 			byte[] bytes;
 			try {

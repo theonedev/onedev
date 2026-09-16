@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -31,13 +31,12 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.validation.IErrorMessageSource;
 import org.apache.wicket.validation.IValidationError;
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.EmailAddress;
@@ -174,8 +173,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 		var primarySubmit = new AjaxButton("submit") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				var emailAddress = newEmailAddress(primaryForm, primaryInput.getModelObject());
 				if (emailAddress != null) {
 					emailAddressService.create(emailAddress);
@@ -188,8 +187,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(primaryForm);
 			}
 
@@ -232,7 +231,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 		primaryForm.setOutputMarkupId(true);
 		ordinaryContainer.add(primaryForm);
 
-		backupEmailAddressesSection.add(new ListView<EmailAddress>("list", new AbstractReadOnlyModel<>() {
+		backupEmailAddressesSection.add(new ListView<EmailAddress>("list", new IModel<>() {
 
 			@Override
 			public List<EmailAddress> getObject() {
@@ -302,8 +301,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 		var backupSubmit = new AjaxButton("submit") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				var emailAddress = newEmailAddress(backupForm, backupInput.getModelObject());
 				if (emailAddress != null) {
 					emailAddressService.create(emailAddress);
@@ -315,8 +314,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(backupForm);
 			}
 		};
@@ -349,6 +348,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 			@Override
 			protected void onConfigure() {
+				super.onConfigure();
 				setVisible(getUser().isKeepEmailAddressesPrivate());
 			}
 

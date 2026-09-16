@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;

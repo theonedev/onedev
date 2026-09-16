@@ -30,9 +30,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.Nullable;
@@ -121,8 +121,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 	@Editable(order=400, description="Specify registry logins if necessary. For built-in registry, " +
 			"use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and " +
 			"access token for password")
-	@Valid
-	public List<RegistryLogin> getRegistryLogins() {
+	public List<@Valid RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
 

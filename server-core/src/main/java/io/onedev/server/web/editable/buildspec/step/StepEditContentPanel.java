@@ -42,7 +42,7 @@ abstract class StepEditContentPanel extends Panel {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 			
 		};
@@ -94,8 +94,8 @@ abstract class StepEditContentPanel extends Panel {
 			}
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				onSave(target);
 			}
 			

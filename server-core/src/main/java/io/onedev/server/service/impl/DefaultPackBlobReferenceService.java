@@ -6,9 +6,9 @@ import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import com.google.common.base.Preconditions;
 

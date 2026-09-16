@@ -57,7 +57,7 @@ class GuiceProxyTargetLocator implements IProxyTargetLocator
 	}
 
 	@Override
-	public Object locateProxyTarget()
+	public <T> T locateProxyTarget()
 	{
 		Injector injector = getInjector();
 
@@ -81,8 +81,10 @@ class GuiceProxyTargetLocator implements IProxyTargetLocator
 				return null;
 			}
 		}
-
-		return injector.getInstance(key);
+		
+		// Resolve the declared field type and check the injected instance at the reflection boundary.
+		Class<T> targetClass = WicketObjects.resolveClass(key.getTypeLiteral().getRawType().getName());
+		return targetClass.cast(injector.getInstance(key));
 	}
 
 	private Key<?> newGuiceKey()

@@ -37,7 +37,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -309,14 +309,12 @@ public abstract class CommandPalettePanel extends Panel {
 						super.onComponentTag(tag);
 						if (url != null) {
 							if (url.startsWith("/")) {
-								tag.put("onclick", String.format("javascript:window.location='%s';", url));
+								tag.put("onclick", String.format("window.location='%s';", JavaScriptEscape.escapeJavaScript(url)));
 							} else {
 								String projectPath = ((ProjectPage)getPage()).getProject().getPath();
-								tag.put("onclick", String.format("javascript:window.location='/%s/%s';", projectPath, url));
+								tag.put("onclick", String.format("window.location='%s';", JavaScriptEscape.escapeJavaScript(String.format("/%s/%s", projectPath, url))));
 							}
 						}
-						else
-							tag.put("onclick", "javascript:void(0);");
 						if (searchBase != null)
 							tag.put("data-completion", searchBase);
 					}

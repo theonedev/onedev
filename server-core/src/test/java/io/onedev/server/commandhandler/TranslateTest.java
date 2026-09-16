@@ -1,14 +1,14 @@
 package io.onedev.server.commandhandler;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TranslateTest {
 
@@ -111,7 +111,7 @@ public class TranslateTest {
                 "\t\tm.put(\"container:image\", \"translated Image <<<translation context: container>>>\");\n" + 
                 "\t\tm.put(\"world\", \"translated world\");\n" + 
                 "}";
-            Assert.assertEquals(expected, translated);
+            Assertions.assertEquals(expected, translated);
         }
     
 }

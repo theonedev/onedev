@@ -47,8 +47,8 @@ abstract class NewBoardPanel extends Panel {
 		form.add(new AjaxButton("create") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				int indexWithSameName = BoardSpec.getBoardIndex(boards, newBoard.getName());
 				if (indexWithSameName != -1) {
 					editor.error(new Path(new PathNode.Named("name")),
@@ -69,8 +69,8 @@ abstract class NewBoardPanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(NewBoardPanel.this);
 			}
 			

@@ -11,7 +11,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.loader.AppLoader;
@@ -74,7 +73,7 @@ public class PasswordEditPanel extends GenericPanel<User> {
 		add(form);
 		
 		form.add(BeanContext.edit("editor", bean, excludedProperties, true));
-		form.add(new Button("submit").add(AttributeAppender.append("value", new AbstractReadOnlyModel<>() {
+		form.add(new Button("submit").add(AttributeAppender.append("value", new IModel<>() {
 			@Override
 			public String getObject() {
 				return getUser().getPassword()!=null?_T("Change"):_T("Set");

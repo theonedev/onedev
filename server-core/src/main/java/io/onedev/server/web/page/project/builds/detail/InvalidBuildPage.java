@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;

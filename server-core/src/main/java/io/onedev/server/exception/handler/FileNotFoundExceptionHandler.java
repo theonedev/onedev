@@ -2,7 +2,7 @@ package io.onedev.server.exception.handler;
 
 import java.io.FileNotFoundException;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import io.onedev.server.exception.HttpResponse;
 

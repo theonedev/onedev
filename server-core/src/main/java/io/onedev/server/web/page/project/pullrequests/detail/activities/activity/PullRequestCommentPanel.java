@@ -5,7 +5,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.util.Collection;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -13,7 +13,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,7 +73,7 @@ class PullRequestCommentPanel extends Panel {
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(getComment().getDate()))));
 		
-		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
+		add(new SinceChangesLink("changes", new IModel<PullRequest>() {
 
 			@Override
 			public PullRequest getObject() {

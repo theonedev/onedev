@@ -1,6 +1,6 @@
 package io.onedev.server.validation;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 public interface Validatable {
 	

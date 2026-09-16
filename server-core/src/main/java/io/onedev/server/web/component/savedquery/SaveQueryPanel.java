@@ -33,7 +33,7 @@ public abstract class SaveQueryPanel extends Panel {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 			
 		};
@@ -45,8 +45,8 @@ public abstract class SaveQueryPanel extends Panel {
 			form.add(new AjaxButton("saveForMine") {
 	
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+					super.onSubmit(target);
 					myQuerySupport.onSave(target, bean.getName());
 				}
 				
@@ -58,8 +58,8 @@ public abstract class SaveQueryPanel extends Panel {
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				onSave(target, bean.getName());
 			}
 

@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -37,7 +37,7 @@ public abstract class AccessTokenListPanel extends Panel {
 		container = new WebMarkupContainer("tokens");
 		container.setOutputMarkupId(true);
 		add(container);
-		container.add(new ListView<>("tokens", new AbstractReadOnlyModel<List<AccessToken>>() {
+		container.add(new ListView<>("tokens", new IModel<List<AccessToken>>() {
 
 			@Override
 			public List<AccessToken> getObject() {

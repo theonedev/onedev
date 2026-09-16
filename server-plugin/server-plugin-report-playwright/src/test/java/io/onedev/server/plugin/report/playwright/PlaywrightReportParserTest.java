@@ -1,10 +1,10 @@
 package io.onedev.server.plugin.report.playwright;
 
 import static io.onedev.server.codequality.UnitTestReport.ARTIFACTS;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,9 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,8 +34,8 @@ public class PlaywrightReportParserTest {
 	private static final String ARTIFACT_DIR =
 			"confidential-issue-Issue-R-14762-d-view-a-confidential-issue-chromium";
 
-	@Rule
-	public TemporaryFolder temp = new TemporaryFolder();
+	@TempDir
+	public File temp;
 
 	@Test
 	public void shouldParseReport() {
@@ -57,8 +56,8 @@ public class PlaywrightReportParserTest {
 
 			};
 
-			File inputDir = temp.newFolder("input");
-			File reportDir = temp.newFolder("report");
+			File inputDir = Files.createDirectory(temp.toPath().resolve("input")).toFile();
+			File reportDir = Files.createDirectory(temp.toPath().resolve("report")).toFile();
 			copyResource(ARTIFACT_DIR + "/test-failed-1.png", inputDir);
 			copyResource(ARTIFACT_DIR + "/error-context.md", inputDir);
 			UnitTestReport report = new UnitTestReport(
@@ -124,7 +123,7 @@ public class PlaywrightReportParserTest {
 			((com.fasterxml.jackson.databind.node.ObjectNode) unsafeRootNode.path("suites").get(0)
 					.path("specs").get(0).path("tests").get(0).path("results").get(0)
 					.path("attachments").get(0)).put("path", "/outside-workdir/screenshot.png");
-			File unsafeReportDir = temp.newFolder("unsafe-report");
+			File unsafeReportDir = Files.createDirectory(temp.toPath().resolve("unsafe-report")).toFile();
 			PlaywrightReportParser.parse(build, unsafeRootNode, inputDir, unsafeReportDir, null);
 			assertFalse(new File(unsafeReportDir,
 					ARTIFACTS + "/" + ARTIFACT_DIR + "/test-failed-1.png").exists());

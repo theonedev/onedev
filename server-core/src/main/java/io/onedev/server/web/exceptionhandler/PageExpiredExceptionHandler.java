@@ -4,7 +4,7 @@ import io.onedev.server.exception.HttpResponse;
 import io.onedev.server.exception.handler.AbstractExceptionHandler;
 import org.apache.wicket.protocol.http.PageExpiredException;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class PageExpiredExceptionHandler extends AbstractExceptionHandler<PageExpiredException> {
 	

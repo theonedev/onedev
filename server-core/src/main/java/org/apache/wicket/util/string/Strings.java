@@ -18,17 +18,11 @@ package org.apache.wicket.util.string;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 import org.apache.wicket.util.lang.Args;
 
@@ -53,31 +47,12 @@ import org.apache.wicket.util.lang.Args;
  * 
  * @author Jonathan Locke
  */
-@SuppressWarnings("removal")
 public final class Strings
 {
-	/**
-	 * The line separator for the current platform.
-	 */
-	public static final String LINE_SEPARATOR;
-
 	/** A table of hex digits */
 	private static final char[] HEX_DIGIT = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			'A', 'B', 'C', 'D', 'E', 'F' };
-	private static final Set<Character> NONCHARACTERS = Collections.unmodifiableSet(new HashSet<Character>()
-	{
-		private static final long serialVersionUID = 1L;
 
-		{
-			for (int i = 0x0000FDD0; i <= 0x0000FDEF; ++i)
-			{
-				add((char)i);
-			}
-			add((char)0x0000FFFE);
-			// all other non-characters are out of range of (char)
-		}
-	});
-	
 	private static final Pattern HTML_NUMBER_REGEX = Pattern.compile("&#\\d+;");
 	
 	private static final String[] NO_STRINGS = new String[0];
@@ -94,19 +69,9 @@ public final class Strings
 	 * Constructs something like <em>;jsessionid=</em>. This is what {@linkplain Strings#stripJSessionId(String)}
 	 * actually uses.
 	 */
-	private static final String SESSION_ID_PARAM = ';' + SESSION_ID_PARAM_NAME + '=';
-
-	static
-	{
-		LINE_SEPARATOR = AccessController.doPrivileged(new PrivilegedAction<String>()
-		{
-			@Override
-			public String run()
-			{
-				return System.getProperty("line.separator");
-			}
-		});
-	}
+	// the field is not 'final' because we need to modify it in a unit test
+	// see https://github.com/openjdk/jdk/pull/5027#issuecomment-968177213
+	private static String SESSION_ID_PARAM = ';' + SESSION_ID_PARAM_NAME + '=';
 
 	/**
 	 * Private constructor prevents construction.
@@ -320,7 +285,7 @@ public final class Strings
 	 * @param escapeSpaces
 	 *            True to replace ' ' with nonbreaking space
 	 * @param convertToHtmlUnicodeEscapes
-	 *            True to convert non-7 bit characters to unicode HTML (&#...)
+	 *            True to convert non-7 bit characters to unicode HTML (&amp;#...)
 	 * @return The escaped string
 	 */
 	public static CharSequence escapeMarkup(final CharSequence s, final boolean escapeSpaces,
@@ -331,14 +296,19 @@ public final class Strings
 			return null;
 		}
 
-		int len = s.length();
+		final int len = s.length();
+		if (len == 0)
+		{
+			return s;
+		}
+
 		final AppendingStringBuffer buffer = new AppendingStringBuffer((int)(len * 1.1));
 
 		for (int i = 0; i < len; i++)
 		{
 			final char c = s.charAt(i);
 
-			if (NONCHARACTERS.contains(c))
+			if (Character.getType(c) == Character.UNASSIGNED)
 			{
 				continue;
 			}
@@ -565,8 +535,26 @@ public final class Strings
 	 */
 	public static boolean isEmpty(final CharSequence string)
 	{
-		return (string == null) || (string.length() == 0) ||
-			(string.toString().trim().length() == 0);
+		return string == null || string.length() == 0 ||
+			(string.charAt(0) <= ' ' && string.toString().trim().isEmpty());
+	}
+
+	/**
+	 * Checks whether the <code>string</code> is considered empty. Empty means that the string may
+	 * contain whitespace, but no visible characters.
+	 *
+	 * "\n\t " is considered empty, while " a" is not.
+	 *
+	 * Note: This method overloads {@link #isEmpty(CharSequence)} for performance reasons.
+	 *
+	 * @param string
+	 *            The string
+	 * @return True if the string is null or ""
+	 */
+	public static boolean isEmpty(final String string)
+	{
+		return string == null || string.isEmpty() ||
+			(string.charAt(0) <= ' ' && string.trim().isEmpty());
 	}
 
 	/**
@@ -660,7 +648,7 @@ public final class Strings
 		{
 			return "";
 		}
-		return join(separator, fragments.toArray(new String[fragments.size()]));
+		return join(separator, fragments.toArray(new String[0]));
 	}
 
 	/**
@@ -685,19 +673,21 @@ public final class Strings
 		else
 		{
 			// two or more elements
-			StringBuilder buff = new StringBuilder(128);
+			AppendingStringBuffer buff = new AppendingStringBuffer(128);
 			if (fragments[0] != null)
 			{
 				buff.append(fragments[0]);
 			}
+			boolean separatorNotEmpty = !Strings.isEmpty(separator);
 			for (int i = 1; i < fragments.length; i++)
 			{
 				String fragment = fragments[i];
-				if ((fragments[i - 1] != null) || (fragment != null))
+				String previousFragment = fragments[i - 1];
+				if (previousFragment != null || fragment != null)
 				{
-					boolean lhsClosed = fragments[i - 1].endsWith(separator);
+					boolean lhsClosed = previousFragment.endsWith(separator);
 					boolean rhsClosed = fragment.startsWith(separator);
-					if (!Strings.isEmpty(separator) && lhsClosed && rhsClosed)
+					if (separatorNotEmpty && lhsClosed && rhsClosed)
 					{
 						buff.append(fragment.substring(1));
 					}
@@ -770,7 +760,7 @@ public final class Strings
 
 		// If searchFor is null or the empty string, then there is nothing to
 		// replace, so returning s is the only option here.
-		if ((searchFor == null) || "".equals(searchFor))
+		if ((searchFor == null) || searchFor.length() == 0)
 		{
 			return s;
 		}
@@ -792,43 +782,12 @@ public final class Strings
 		}
 		else
 		{
-			// Allocate a AppendingStringBuffer that will hold one replacement
-			// with a
-			// little extra room.
-			int size = s.length();
-			final int replaceWithLength = replaceWith.length();
-			final int searchForLength = searchFor.length();
-			if (replaceWithLength > searchForLength)
-			{
-				size += (replaceWithLength - searchForLength);
-			}
-			final AppendingStringBuffer buffer = new AppendingStringBuffer(size + 16);
-
-			int pos = 0;
-			do
-			{
-				// Append text up to the match
-				append(buffer, s, pos, matchIndex);
-
-				// Add replaceWith text
-				buffer.append(replaceWith);
-
-				// Find next occurrence, if any
-				pos = matchIndex + searchForLength;
-				matchIndex = search(s, searchString, pos);
-			}
-			while (matchIndex != -1);
-
-			// Add tail of s
-			buffer.append(s.subSequence(pos, s.length()));
-
-			// Return processed buffer
-			return buffer;
+			return s.toString().replace(searchString, replaceWith);
 		}
 	}
 
 	/**
-	 * Replace HTML numbers like &#20540 by the appropriate character.
+	 * Replace HTML numbers like &amp;#20540; by the appropriate character.
 	 * 
 	 * @param str
 	 *            The text to be evaluated
@@ -865,15 +824,30 @@ public final class Strings
 	 */
 	public static String[] split(final String s, final char c)
 	{
-		if (s == null || s.length() == 0)
+		if (s == null || s.isEmpty())
 		{
 			return NO_STRINGS;
 		}
+
+		int pos = s.indexOf(c);
+		if (pos == -1)
+		{
+			return new String[] { s };
+		}
+
+		int next = s.indexOf(c, pos + 1);
+		if (next == -1)
+		{
+			return new String[] { s.substring(0, pos), s.substring(pos + 1) };
+		}
+
 		final List<String> strings = new ArrayList<>();
-		int pos = 0;
+		strings.add(s.substring(0, pos));
+		strings.add(s.substring(pos + 1, next));
 		while (true)
 		{
-			int next = s.indexOf(c, pos);
+			pos = next + 1;
+			next = s.indexOf(c, pos);
 			if (next == -1)
 			{
 				strings.add(s.substring(pos));
@@ -883,7 +857,6 @@ public final class Strings
 			{
 				strings.add(s.substring(pos, next));
 			}
-			pos = next + 1;
 		}
 		final String[] result = new String[strings.size()];
 		strings.toArray(result);
@@ -908,7 +881,7 @@ public final class Strings
 
 		// Stripping a null or empty string from the end returns the
 		// original string.
-		if ((ending == null) || "".equals(ending))
+		if (ending == null || ending.isEmpty())
 		{
 			return s;
 		}
@@ -947,7 +920,7 @@ public final class Strings
 		}
 
 		// http://.../abc;jsessionid=...?param=...
-		int ixSemiColon = url.toLowerCase(Locale.ROOT).indexOf(SESSION_ID_PARAM);
+		int ixSemiColon = url.indexOf(SESSION_ID_PARAM);
 		if (ixSemiColon == -1)
 		{
 			return url;
@@ -1021,7 +994,7 @@ public final class Strings
 	 */
 	public static String toEscapedUnicode(final String unicodeString)
 	{
-		if ((unicodeString == null) || (unicodeString.length() == 0))
+		if (unicodeString == null || unicodeString.isEmpty())
 		{
 			return unicodeString;
 		}
@@ -1031,7 +1004,7 @@ public final class Strings
 		for (int x = 0; x < len; x++)
 		{
 			char aChar = unicodeString.charAt(x);
-			if (NONCHARACTERS.contains(aChar))
+			if (Character.getType(aChar) == Character.UNASSIGNED)
 			{
 				continue;
 			}
@@ -1115,11 +1088,14 @@ public final class Strings
 			return null;
 		}
 
-		final AppendingStringBuffer buffer = new AppendingStringBuffer();
+		final int len = s.length();
+
+		// allocate a buffer that is 10% larger than the original string to account for markup
+		final AppendingStringBuffer buffer = new AppendingStringBuffer((int) (len * 1.1) + 16);
 		int newlineCount = 0;
 
 		buffer.append("<p>");
-		for (int i = 0; i < s.length(); i++)
+		for (int i = 0; i < len; i++)
 		{
 			final char c = s.charAt(i);
 
@@ -1244,6 +1220,7 @@ public final class Strings
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static void append(final AppendingStringBuffer buffer, final CharSequence s,
 		final int from, final int to)
 	{
@@ -1270,9 +1247,7 @@ public final class Strings
 	private static void outputThrowable(final Throwable cause, final AppendingStringBuffer sb,
 		final boolean stopAtWicketServlet)
 	{
-		// append message instead of cause to avoid including the whole html template
 		sb.append(cause.getMessage());
-		
 		sb.append("\n");
 		StackTraceElement[] trace = cause.getStackTrace();
 		for (int i = 0; i < trace.length; i++)

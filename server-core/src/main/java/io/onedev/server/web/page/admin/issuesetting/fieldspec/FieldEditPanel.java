@@ -53,7 +53,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 			
 		};
@@ -78,8 +78,9 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 
 				FieldSpec field = bean.getField();
 				if (fieldIndex != -1) { 

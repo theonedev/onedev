@@ -14,11 +14,11 @@ import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.jspecify.annotations.Nullable;
@@ -118,8 +118,7 @@ public class BuildSpec implements Serializable, Validatable {
 	private transient Map<String, JobProperty> propertyMap;
 	
 	@Editable
-	@Valid
-	public List<Job> getJobs() {
+	public List<@Valid Job> getJobs() {
 		return jobs;
 	}
 
@@ -129,8 +128,7 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 	
 	@Editable
-	@Valid
-	public List<StepTemplate> getStepTemplates() {
+	public List<@Valid StepTemplate> getStepTemplates() {
 		return stepTemplates;
 	}
 
@@ -140,8 +138,7 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
-	@Valid
-	public List<Service> getServices() {
+	public List<@Valid Service> getServices() {
 		return services;
 	}
 
@@ -151,8 +148,7 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
-	@Valid
-	public List<JobProperty> getProperties() {
+	public List<@Valid JobProperty> getProperties() {
 		return properties;
 	}
 
@@ -162,8 +158,7 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
-	@Valid
-	public List<Import> getImports() {
+	public List<@Valid Import> getImports() {
 		return imports;
 	}
 

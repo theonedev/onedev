@@ -44,7 +44,7 @@ abstract class IssueCreationSettingEditPanel extends Panel {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 			
 		};
@@ -71,8 +71,8 @@ abstract class IssueCreationSettingEditPanel extends Panel {
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 
 				if (settingIndex != -1) 
 					settings.set(settingIndex, setting);

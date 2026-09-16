@@ -2,10 +2,10 @@ package io.onedev.server.service.impl;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Iteration;

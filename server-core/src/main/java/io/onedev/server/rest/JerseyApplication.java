@@ -1,6 +1,6 @@
 package io.onedev.server.rest;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.jersey.CommonProperties;

@@ -37,17 +37,15 @@ public class StringRadioChoice extends FormComponentPanel<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		radioGroup = new RadioGroup<>("radioGroup", Model.of(getModelObject())) {
-			@Override
-			protected boolean wantOnSelectionChangedNotifications() {
-				return StringRadioChoice.this.wantOnSelectionChangedNotifications();
-			}
-
-			@Override
-			protected void onSelectionChanged(String newSelection) {
-				StringRadioChoice.this.onSelectionChanged(newSelection);
-			}
-		};
+        radioGroup = new RadioGroup<>("radioGroup", Model.of(getModelObject()));
+        if (wantOnSelectionChangedNotifications()) {
+            radioGroup.add(new org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior() {
+                @Override
+                protected void onUpdate(org.apache.wicket.ajax.AjaxRequestTarget target) {
+                    StringRadioChoice.this.onSelectionChanged(radioGroup.getModelObject());
+                }
+            });
+        }
 		radioGroup.setRenderBodyOnly(false);
 		radioGroup.setLabel(getLabel());
 		for (var behavior: behaviors)

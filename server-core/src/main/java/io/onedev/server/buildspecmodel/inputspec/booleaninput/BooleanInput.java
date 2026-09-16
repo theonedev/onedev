@@ -3,7 +3,7 @@ package io.onedev.server.buildspecmodel.inputspec.booleaninput;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import org.jspecify.annotations.Nullable;
 

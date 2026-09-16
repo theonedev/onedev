@@ -7,11 +7,11 @@ import io.onedev.server.model.Build;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CloverReportParserTest {
 

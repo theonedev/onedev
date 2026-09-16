@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.job.trigger;
 import java.util.Collection;
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;

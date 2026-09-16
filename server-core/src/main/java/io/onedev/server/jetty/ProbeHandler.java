@@ -1,15 +1,17 @@
 package io.onedev.server.jetty;
 
-import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.function.BooleanSupplier;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
 
-public class ProbeHandler extends AbstractHandler {
+public class ProbeHandler extends Handler.Abstract {
 
 	public static final String HEALTH_PATH = "/healthz";
 
@@ -22,34 +24,34 @@ public class ProbeHandler extends AbstractHandler {
 	}
 
 	@Override
-	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+	public boolean handle(Request request, Response response, Callback callback) {
+		String target = request.getHttpURI().getPath();
 		if (target.equals(HEALTH_PATH) || target.equals(READINESS_PATH)) {
 			if (request.getMethod().equals("GET") || request.getMethod().equals("HEAD")) {
 				if (target.equals(HEALTH_PATH)) {
-					respond(baseRequest, response, HttpServletResponse.SC_OK);
+					respond(request, response, callback, HttpServletResponse.SC_OK);
 				} else {
-					respond(baseRequest, response, readiness.getAsBoolean()
+					respond(request, response, callback, readiness.getAsBoolean()
 							? HttpServletResponse.SC_OK
 							: HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 				}
 			} else {
-				response.setHeader("Allow", "GET, HEAD");
-				respond(baseRequest, response, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+				response.getHeaders().put("Allow", "GET, HEAD");
+				respond(request, response, callback, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 			}
+			return true;
 		}
+		return false;
 	}
 
-	private void respond(Request baseRequest, HttpServletResponse response, int status) throws IOException {
+	private void respond(Request request, Response response, Callback callback, int status) {
 		response.setStatus(status);
-		response.setContentType("text/plain");
-		response.setCharacterEncoding("UTF-8");
-		response.setHeader("Cache-Control", "no-store");
-		if (status == HttpServletResponse.SC_OK)
-			response.getWriter().println("ok");
-		else if (status == HttpServletResponse.SC_SERVICE_UNAVAILABLE)
-			response.getWriter().println("not ready");
-		baseRequest.setHandled(true);
+		response.getHeaders().put("Content-Type", "text/plain;charset=UTF-8");
+		response.getHeaders().put("Cache-Control", "no-store");
+		String body = status == HttpServletResponse.SC_OK ? "ok\n"
+				: status == HttpServletResponse.SC_SERVICE_UNAVAILABLE ? "not ready\n" : "";
+		response.write(true, request.getMethod().equals("HEAD") ? null
+				: ByteBuffer.wrap(body.getBytes(StandardCharsets.UTF_8)), callback);
 	}
 
 }

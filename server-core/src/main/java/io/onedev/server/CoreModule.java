@@ -15,21 +15,21 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Singleton;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
-import javax.persistence.Version;
-import javax.validation.Configuration;
-import javax.validation.Path;
-import javax.validation.Path.Node;
-import javax.validation.TraversableResolver;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
+import jakarta.validation.Configuration;
+import jakarta.validation.Path;
+import jakarta.validation.Path.Node;
+import jakarta.validation.TraversableResolver;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.guice.aop.ShiroAopModule;
@@ -42,19 +42,18 @@ import org.apache.shiro.web.servlet.ShiroFilter;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
-import org.eclipse.jetty.server.session.SessionDataStoreFactory;
+import org.eclipse.jetty.session.SessionDataStoreFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
-import org.hibernate.collection.internal.PersistentBag;
+import org.hibernate.collection.spi.PersistentBag;
 import org.hibernate.type.Type;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.matcher.AbstractMatcher;
+import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -70,7 +69,6 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.ai.BuildSpecSchemaResource;
 import io.onedev.server.ai.ChatToolsContribution;
@@ -383,6 +381,7 @@ import io.onedev.server.util.oauth.DefaultOAuthTokenService;
 import io.onedev.server.util.oauth.OAuthTokenService;
 import io.onedev.server.util.xstream.CollectionConverter;
 import io.onedev.server.util.xstream.HibernateProxyConverter;
+import io.onedev.server.util.xstream.HibernateProxyMapper;
 import io.onedev.server.util.xstream.MapConverter;
 import io.onedev.server.util.xstream.ObjectMapperConverter;
 import io.onedev.server.util.xstream.ReflectionConverter;
@@ -820,7 +819,7 @@ public class CoreModule extends AbstractPluginModule {
 	    TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 	    requestInjection(transactionInterceptor);
 	    
-	    bindInterceptor(Matchers.any(), new AbstractMatcher<AnnotatedElement>() {
+	    bindInterceptor(Matchers.any(), new Matcher<AnnotatedElement>() {
 
 			@Override
 			public boolean matches(AnnotatedElement element) {
@@ -832,7 +831,7 @@ public class CoreModule extends AbstractPluginModule {
 	    SessionInterceptor sessionInterceptor = new SessionInterceptor();
 	    requestInjection(sessionInterceptor);
 	    
-	    bindInterceptor(Matchers.any(), new AbstractMatcher<AnnotatedElement>() {
+	    bindInterceptor(Matchers.any(), new Matcher<AnnotatedElement>() {
 
 			@Override
 			public boolean matches(AnnotatedElement element) {
@@ -844,26 +843,23 @@ public class CoreModule extends AbstractPluginModule {
 	    contribute(PersistListener.class, new PersistListener() {
 			
 			@Override
-			public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
-					throws CallbackException {
+			public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
 				return false;
 			}
 			
 			@Override
-			public boolean onLoad(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
-					throws CallbackException {
+			public boolean onLoad(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
 				return false;
 			}
 			
 			@Override
 			public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
-					String[] propertyNames, Type[] types) throws CallbackException {
+					String[] propertyNames, Type[] types) {
 				return false;
 			}
 			
 			@Override
-			public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
-					throws CallbackException {
+			public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
 			}
 
 		});
@@ -878,7 +874,7 @@ public class CoreModule extends AbstractPluginModule {
 
 					@Override
 					protected MapperWrapper wrapMapper(MapperWrapper next) {
-						return new MapperWrapper(next) {
+						return new MapperWrapper(new HibernateProxyMapper(next)) {
 							
 							@Override
 							public boolean shouldSerializeMember(Class definedIn, String fieldName) {
@@ -897,8 +893,6 @@ public class CoreModule extends AbstractPluginModule {
 									return super.serializedClass(type);
 								else if (type == PersistentBag.class)
 									return super.serializedClass(ArrayList.class);
-								else if (type.getName().contains("$HibernateProxy$"))
-									return StringUtils.substringBefore(type.getName(), "$HibernateProxy$");
 								else
 									return super.serializedClass(type);
 							}

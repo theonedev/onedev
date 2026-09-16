@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import io.onedev.server.annotation.Editable;
 

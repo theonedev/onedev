@@ -6,10 +6,10 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.List;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.constraints.NotEmpty;
 
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 
 import com.google.common.base.Splitter;
 

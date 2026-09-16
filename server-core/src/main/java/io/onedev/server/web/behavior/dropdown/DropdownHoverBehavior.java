@@ -73,7 +73,7 @@ public abstract class DropdownHoverBehavior extends AbstractPostAjaxBehavior {
 				protected void onClosed() {
 					super.onClosed();
 	
-					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 					if (target != null) {
 						String script = String.format("onedev.server.dropdownHover.closed('%s', '%s');", 
 								getComponent().getMarkupId(true), getMarkupId(true));

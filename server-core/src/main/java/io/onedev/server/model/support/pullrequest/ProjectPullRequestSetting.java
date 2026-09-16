@@ -9,7 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.annotation.Editable;
@@ -34,8 +34,7 @@ public class ProjectPullRequestSetting implements Serializable {
 	private Boolean deleteSourceBranchAfterMerge;
 	
 	@Nullable
-	@Valid
-	public List<NamedPullRequestQuery> getNamedQueries() {
+	public List<@Valid NamedPullRequestQuery> getNamedQueries() {
 		return namedQueries;
 	}
 

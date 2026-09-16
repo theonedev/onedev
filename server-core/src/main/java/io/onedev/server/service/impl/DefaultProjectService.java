@@ -49,16 +49,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -73,9 +73,9 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
-import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.hibernate.query.sqm.tree.domain.SqmPath;
 import org.jspecify.annotations.Nullable;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -452,19 +452,19 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			Collection<Project> forkChildren = fork.getForkDescendants();
 			forkChildren.add(fork);
 			for (Project forkChild : forkChildren) {
-				Query<?> query = getSession().createQuery(String.format("update Issue set %s=:fork where %s=:descendant",
+				var query = getSession().createMutationQuery(String.format("update Issue set %s=:fork where %s=:descendant",
 						Issue.PROP_NUMBER_SCOPE, Issue.PROP_PROJECT));
 				query.setParameter("fork", fork);
 				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
 
-				query = getSession().createQuery(String.format("update Build set %s=:fork where %s=:descendant",
+				query = getSession().createMutationQuery(String.format("update Build set %s=:fork where %s=:descendant",
 						Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
 				query.setParameter("fork", fork);
 				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
 
-				query = getSession().createQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
+				query = getSession().createMutationQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
 						PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
 				query.setParameter("fork", fork);
 				query.setParameter("descendant", forkChild);
@@ -472,7 +472,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			}
 		}
 
-		Query<?> query = getSession().createQuery(String.format("update Project set %s=null where %s=:forkedFrom",
+		var query = getSession().createMutationQuery(String.format("update Project set %s=null where %s=:forkedFrom",
 				Project.PROP_FORKED_FROM, Project.PROP_FORKED_FROM));
 		query.setParameter("forkedFrom", project);
 		query.executeUpdate();
@@ -483,7 +483,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				pullRequestService.discard(user, request, "Source project is deleted.");
 		}
 
-		query = getSession().createQuery(String.format("update PullRequest set %s=null where %s=:sourceProject",
+		query = getSession().createMutationQuery(String.format("update PullRequest set %s=null where %s=:sourceProject",
 				PullRequest.PROP_SOURCE_PROJECT, PullRequest.PROP_SOURCE_PROJECT));
 		query.setParameter("sourceProject", project);
 		query.executeUpdate();
@@ -1031,11 +1031,11 @@ public class DefaultProjectService extends BaseEntityService<Project>
 
 		var found = false;
 		for (var order: orders) {
-			if (order.getExpression() instanceof SingularAttributePath) {
-				var expr = (SingularAttributePath) order.getExpression();
-				if (expr.getAttribute().getName().equals(ProjectLastActivityDate.PROP_VALUE) 
-						&& expr.getPathSource() instanceof SingularAttributePath 
-						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(Project.PROP_LAST_ACTIVITY_DATE)) {
+			if (order.getExpression() instanceof SqmPath) {
+				var expr = (SqmPath) order.getExpression();
+				if (expr.getReferencedPathSource().getPathName().equals(ProjectLastActivityDate.PROP_VALUE)
+						&& expr.getLhs() instanceof SqmPath
+						&& ((SqmPath) expr.getLhs()).getReferencedPathSource().getPathName().equals(Project.PROP_LAST_ACTIVITY_DATE)) {
 					found = true;
 					break;
 				}

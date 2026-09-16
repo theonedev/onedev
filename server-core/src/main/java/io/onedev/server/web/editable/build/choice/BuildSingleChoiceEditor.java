@@ -2,7 +2,7 @@ package io.onedev.server.web.editable.build.choice;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;

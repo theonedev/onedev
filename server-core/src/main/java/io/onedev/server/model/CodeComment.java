@@ -13,16 +13,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
@@ -45,8 +45,8 @@ import io.onedev.server.xodus.VisitInfoService;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="o_project_id"), @Index(columnList="o_user_id"),
-		@Index(columnList="o_pullRequest_id"),
+		@Index(columnList="project_id"), @Index(columnList="user_id"),
+		@Index(columnList="pullRequest_id"),
 		@Index(columnList=Mark.PROP_COMMIT_HASH), @Index(columnList=Mark.PROP_PATH), 
 		@Index(columnList=PROP_CREATE_DATE), @Index(columnList= LastActivity.COLUMN_DATE)})
 public class CodeComment extends ProjectBelonging implements AttachmentStorageSupport {

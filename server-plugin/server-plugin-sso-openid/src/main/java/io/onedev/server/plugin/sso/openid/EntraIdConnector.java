@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.core.MediaType;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.ws.rs.core.MediaType;
 
 import org.apache.shiro.authc.AuthenticationException;
 

@@ -32,7 +32,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -443,7 +443,6 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
         
         moreContainer.add(new AjaxLink<Void>("link") {
 
-            @SuppressWarnings("deprecation")
             @Override
             public void onClick(AjaxRequestTarget target) {
                 target.add(moreContainer);

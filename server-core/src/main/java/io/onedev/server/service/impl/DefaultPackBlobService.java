@@ -13,7 +13,7 @@ import static io.onedev.server.model.PackBlob.getPacksRelativeDirPath;
 import static io.onedev.server.model.PackBlobReference.PROP_PACK_BLOB;
 import static io.onedev.server.util.Digest.SHA256;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.apache.commons.io.IOUtils.copy;
 
 import java.io.BufferedOutputStream;
@@ -32,24 +32,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Root;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Root;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 import org.glassfish.jersey.client.ClientProperties;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -258,7 +258,7 @@ public class DefaultPackBlobService extends BaseEntityService<PackBlob>
 		CriteriaQuery<Object[]> referenceAndBlobQuery = builder.createQuery(Object[].class);
 		Root<PackBlobReference> referenceRoot = referenceAndBlobQuery.from(PackBlobReference.class);
 		Join<PackBlob, PackBlob> blobJoin = referenceRoot.join(PackBlobReference.PROP_PACK_BLOB, JoinType.INNER);
-		referenceAndBlobQuery.multiselect(referenceRoot, blobJoin);
+		referenceAndBlobQuery.select(builder.array(referenceRoot, blobJoin));
 		referenceAndBlobQuery.where(referenceRoot.get(PackBlobReference.PROP_PACK).in(packs));
 
 		for (var pack : packs)

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
 
-import org.apache.wicket.IResourceListener;
+import org.apache.wicket.IRequestListener;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -46,7 +46,7 @@ import io.onedev.server.web.editable.InplacePropertyEditPanel;
  * @param <M>
  *            type of model object
  */
-abstract class AbstractSelect2Choice<T, M> extends FormComponent<M> implements IResourceListener {
+abstract class AbstractSelect2Choice<T, M> extends FormComponent<M> implements IRequestListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -227,11 +227,11 @@ abstract class AbstractSelect2Choice<T, M> extends FormComponent<M> implements I
 	protected void onConfigure() {
 		super.onConfigure();
 
-		getSettings().getAjax().setUrl(urlFor(IResourceListener.INTERFACE, null));
+		getSettings().getAjax().setUrl(urlForListener(null));
 	}
 
 	@Override
-	public void onResourceRequested() {
+	public void onRequest() {
 		// this is the callback that retrieves matching choices used to populate
 		// the dropdown
 

@@ -11,8 +11,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.persistence.EntityNotFoundException;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -31,7 +31,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -222,7 +221,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("caption", new AbstractReadOnlyModel<String>() {
+		add(new Label("caption", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -242,7 +241,7 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		add(new Label("number", "#" + getBuild().getNumber()));
 		
-		add(new BuildStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
+		add(new BuildStatusIcon("statusIcon", new IModel<Status>() {
 
 			@Override
 			public Status getObject() {
@@ -257,7 +256,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			}
 			
 		});
-		add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
+		add(new Label("statusLabel", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -493,7 +492,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		};
 		
-		jobNotFoundContainer.add(new Label("message", new AbstractReadOnlyModel<String>() {
+		jobNotFoundContainer.add(new Label("message", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -516,7 +515,7 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		add(jobNotFoundContainer);
 		
-		add(new MarkdownViewer("description", new AbstractReadOnlyModel<>() {
+		add(new MarkdownViewer("description", new IModel<>() {
 
 			@Override
 			public String getObject() {

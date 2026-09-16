@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;

@@ -22,7 +22,7 @@ import org.apache.wicket.util.file.Files;
 import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
-import org.apache.wicket.util.time.Time;
+import java.time.Instant;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -59,7 +59,7 @@ public class SpriteResourceStream implements IResourceStream {
 	}
 	
 	@Override
-	public Time lastModifiedTime() {
+	public Instant lastModifiedTime() {
 		if (getCodeSource().isFile()) { 
 			return Files.getLastModified(getCodeSource());
 		} else {
@@ -67,11 +67,11 @@ public class SpriteResourceStream implements IResourceStream {
 			File packageDir = new File(getCodeSource(), packagePath);
 			
 			if (packageDir.exists()) {
-				Time time = Files.getLastModified(getCodeSource());
+				Instant time = Files.getLastModified(getCodeSource());
 				for (File file: packageDir.listFiles()) {
 					if (file.getName().endsWith(".svg")) {
-						Time childTime = Files.getLastModified(file);
-						if (childTime.after(time))
+						Instant childTime = Files.getLastModified(file);
+						if (childTime.isAfter(time))
 							time = childTime;
 					}
 				}

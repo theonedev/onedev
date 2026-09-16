@@ -190,10 +190,10 @@ public class PlainTextDiffPanel extends Panel {
     
     private String expanderLink(String cssClass, String tooltip, String svg, int blockIndex,
             String direction) {
-        String script = String.format("javascript:$('#%s').data('callback')('expand', %d, '%s');",
+        String script = String.format("$('#%s').data('callback')('expand', %d, '%s'); return false;",
                 getMarkupId(), blockIndex, direction);
         return "<a class='" + cssClass + "' aria-label='" + tooltip
-                + "' data-tippy-content='" + tooltip + "' href=\"" + script + "\">" + svg + "</a>";
+                + "' data-tippy-content='" + tooltip + "' href='#' onclick=\"" + script + "\">" + svg + "</a>";
     }
 
     private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines,

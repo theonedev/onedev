@@ -4,7 +4,7 @@ import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;

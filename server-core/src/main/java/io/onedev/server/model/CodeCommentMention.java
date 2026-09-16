@@ -1,11 +1,11 @@
 package io.onedev.server.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_comment_id"), @Index(columnList="o_user_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_comment_id", "o_user_id"})}
+		indexes={@Index(columnList="comment_id"), @Index(columnList="user_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"comment_id", "user_id"})}
 )
 public class CodeCommentMention extends AbstractEntity {
 

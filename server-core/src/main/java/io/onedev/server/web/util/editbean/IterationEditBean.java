@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;

@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.support.administration.AiSetting;

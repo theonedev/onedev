@@ -1,6 +1,5 @@
 package io.onedev.server.service.impl;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.model.AbstractEntity.PROP_ID;
 import static io.onedev.server.model.IssueStateHistory.PROP_DATE;
 import static io.onedev.server.model.IssueStateHistory.PROP_DURATION;
@@ -15,19 +14,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 import org.apache.shiro.subject.Subject;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Order;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.jetbrains.annotations.Nullable;
 
 import io.onedev.server.service.IssueService;
@@ -118,7 +117,7 @@ public class DefaultIssueStateHistoryService extends BaseEntityService<IssueStat
 		var statePath = root.get(PROP_STATE);
 		criteriaQuery.groupBy(timePath, statePath);
 
-		criteriaQuery.multiselect(newArrayList(
+		criteriaQuery.select(builder.array(
 				timePath, statePath, builder.avg(root.get(PROP_DURATION))));
 
 		Map<Integer, Map<String, Integer>> stats = new HashMap<>();
@@ -152,7 +151,7 @@ public class DefaultIssueStateHistoryService extends BaseEntityService<IssueStat
 		var statePath = root.get(PROP_STATE);
 		criteriaQuery.groupBy(timePath, statePath);
 
-		criteriaQuery.multiselect(newArrayList(timePath, statePath, builder.count(root)));
+		criteriaQuery.select(builder.array(timePath, statePath, builder.count(root)));
 
 		Map<Integer, Map<String, Integer>> stats = new HashMap<>();
 		for (var result: getSession().createQuery(criteriaQuery).getResultList()) {
@@ -179,7 +178,7 @@ public class DefaultIssueStateHistoryService extends BaseEntityService<IssueStat
 		var statePath = root.get(PROP_STATE);
 
 		if (startDate != null) {
-			criteriaQuery.multiselect(newArrayList(root.get(PROP_ISSUE).get(Issue.PROP_ID), statePath));
+			criteriaQuery.select(builder.array(root.get(PROP_ISSUE).get(Issue.PROP_ID), statePath));
 
 			Subquery<Date> subquery = criteriaQuery.subquery(Date.class);
 			Root<IssueStateHistory> subRoot = subquery.from(IssueStateHistory.class);
@@ -199,7 +198,7 @@ public class DefaultIssueStateHistoryService extends BaseEntityService<IssueStat
 			}
 		}
 
-		criteriaQuery.multiselect(newArrayList(root.get(PROP_ISSUE).get(Issue.PROP_ID), statePath));
+		criteriaQuery.select(builder.array(root.get(PROP_ISSUE).get(Issue.PROP_ID), statePath));
 								
 		var predicates = new ArrayList<Predicate>(issuePredicates);
 		if (startDate != null)
@@ -212,7 +211,7 @@ public class DefaultIssueStateHistoryService extends BaseEntityService<IssueStat
 
 		var timePath = statsGroup.getPath(root.get(PROP_TIME_GROUPS));
 
-		criteriaQuery.multiselect(newArrayList(timePath, statePath, root.get(PROP_ISSUE).get(Issue.PROP_ID)));
+		criteriaQuery.select(builder.array(timePath, statePath, root.get(PROP_ISSUE).get(Issue.PROP_ID)));
 
 		Map<Integer, Map<String, Integer>> stats = new HashMap<>();
 		

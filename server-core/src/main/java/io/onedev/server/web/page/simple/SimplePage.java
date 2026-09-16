@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
@@ -23,7 +23,7 @@ public abstract class SimplePage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		add(newPageLogo("logo"));
-		add(new Label("title", new AbstractReadOnlyModel<String>() {
+		add(new Label("title", new IModel<String>() {
 
 			@Override
 			public String getObject() {

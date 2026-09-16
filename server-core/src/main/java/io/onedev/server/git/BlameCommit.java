@@ -68,7 +68,7 @@ public class BlameCommit implements Serializable {
 		return MoreObjects.toStringHelper(this)
 				.add("hash", hash)
 				.add("committer", committer.getName())
-				.add("date", committer.getWhen())
+				.add("date", Date.from(committer.getWhenAsInstant()))
 				.add("messageSummary", subject)
 				.toString();
 	}

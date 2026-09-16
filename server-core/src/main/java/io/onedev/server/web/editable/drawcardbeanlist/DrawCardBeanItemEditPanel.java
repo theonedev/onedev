@@ -77,7 +77,7 @@ public abstract class DrawCardBeanItemEditPanel<T extends Serializable> extends 
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 
 		};
@@ -110,8 +110,9 @@ public abstract class DrawCardBeanItemEditPanel<T extends Serializable> extends 
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 
 				T item = extractItem(editingBean);
 				validateItem(editor, item);

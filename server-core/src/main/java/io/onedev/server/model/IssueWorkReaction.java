@@ -1,18 +1,18 @@
 package io.onedev.server.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.EntityReaction;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_work_id"), @Index(columnList="o_user_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_work_id", "o_user_id", "emoji"})}
+		indexes={@Index(columnList="work_id"), @Index(columnList="user_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"work_id", "user_id", "emoji"})}
 )
 public class IssueWorkReaction extends EntityReaction {
 

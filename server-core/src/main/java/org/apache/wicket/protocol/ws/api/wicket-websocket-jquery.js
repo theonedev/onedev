@@ -68,14 +68,26 @@
 				}
 				url = protocol + '//' + document.location.hostname + _port + WWS.contextPath + WWS.filterPrefix + '/wicket/websocket';
 
+				if (WWS.sessionId !== '') {
+					url += ';jsessionid=' + encodeURIComponent(WWS.sessionId);
+				}
+
 				if (WWS.pageId !== false) {
 					url += '?pageId=' + encodeURIComponent(WWS.pageId);
 				} else if (WWS.resourceName) {
 					url += '?resourceName=' + encodeURIComponent(WWS.resourceName);
+					if (WWS.connectionToken) {
+						url += '&connectionToken=' + encodeURIComponent(WWS.connectionToken);
+					}
+				}
+
+				if (WWS.context) {
+					url += '&context=' + encodeURIComponent(WWS.context);
 				}
 
 				url += '&wicket-ajax-baseurl=' + encodeURIComponent(WWS.baseUrl);
 				url += '&wicket-app-name=' + encodeURIComponent(WWS.appName);
+
 				self.ws = new WebSocket(url);
 
 				self.ws.onopen = function (evt) {
@@ -115,16 +127,16 @@
 					if (self.ws) {
 						self.ws.close();
 						self.ws = null;
-						Wicket.Event.publish(topics.Closed, evt);
 					}
+					Wicket.Event.publish(topics.Closed, evt);
 				};
 
 				self.ws.onerror = function (evt) {
 					if (self.ws) {
 						self.ws.close();
 						self.ws = null;
-						Wicket.Event.publish(topics.Error, evt);
 					}
+					Wicket.Event.publish(topics.Error, evt);
 				};
 			} else {
 				var errMessage = '[WebSocket.initialize] WebSocket is not supported in your browser!';

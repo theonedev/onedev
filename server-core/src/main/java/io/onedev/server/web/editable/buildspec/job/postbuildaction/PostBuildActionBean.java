@@ -2,7 +2,7 @@ package io.onedev.server.web.editable.buildspec.job.postbuildaction;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.annotation.Editable;

@@ -2,7 +2,7 @@ package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.annotation.Editable;

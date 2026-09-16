@@ -6,8 +6,8 @@ import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.WorkingPeriod;
 import io.onedev.server.service.SettingService;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import static io.onedev.server.web.translation.Translation._T;
 

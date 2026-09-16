@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
@@ -89,8 +89,7 @@ public class Service implements NamedElement {
 
 	@Editable(order=300, name="Environment Variables", description="Optionally specify environment variables of "
 			+ "the service")
-	@Valid
-	public List<EnvVar> getEnvVars() {
+	public List<@Valid EnvVar> getEnvVars() {
 		return envVars;
 	}
 

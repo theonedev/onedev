@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.my.aisetting;
 
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
@@ -16,7 +16,7 @@ public class MyModelSettingPage extends MyAiSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ModelSettingPanel("content", new AbstractReadOnlyModel<User>() {
+		add(new ModelSettingPanel("content", new IModel<User>() {
 
 			@Override
 			public User getObject() {

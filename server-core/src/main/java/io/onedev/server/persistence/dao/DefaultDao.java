@@ -8,18 +8,16 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import org.hibernate.Criteria;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
 
 @Singleton
-@SuppressWarnings("unchecked")
 public class DefaultDao implements Dao, Serializable {
 
 	private final SessionService sessionService;
@@ -35,34 +33,37 @@ public class DefaultDao implements Dao, Serializable {
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T get(Class<T> entityClass, Long entityId) {
-		return (T) getSession().get(entityClass, entityId);
+		return getSession().find(entityClass, entityId);
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T load(Class<T> entityClass, Long entityId) {
-		return (T) getSession().load(entityClass, entityId);
+		return getSession().getReference(entityClass, entityId);
 	}
 
 	@Transactional
 	@Override
 	public void persist(AbstractEntity entity) {
 		boolean wasNew = entity.isNew();
-		getSession().saveOrUpdate(entity);
+		if (wasNew)
+			getSession().persist(entity);
+		else if (!getSession().contains(entity))
+			entity = getSession().merge(entity);
 		listenerRegistry.post(new EntityPersisted(entity, wasNew));
 	}
 
 	@Transactional
 	@Override
 	public void remove(AbstractEntity entity) {
-		getSession().delete(entity);
+		getSession().remove(entity);
 		listenerRegistry.post(new EntityRemoved(entity));
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> List<T> query(EntityCriteria<T> entityCriteria, int firstResult, int maxResults) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
+		Query<T> criteria = entityCriteria.getExecutableCriteria(getSession());
 		criteria.setFirstResult(firstResult);
 		criteria.setMaxResults(maxResults);
 		return criteria.list();
@@ -77,7 +78,7 @@ public class DefaultDao implements Dao, Serializable {
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T find(EntityCriteria<T> entityCriteria) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
+		Query<T> criteria = entityCriteria.getExecutableCriteria(getSession());
 		criteria.setFirstResult(0);
 		criteria.setMaxResults(1);
 		return (T) criteria.uniqueResult();
@@ -86,9 +87,7 @@ public class DefaultDao implements Dao, Serializable {
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
-		criteria.setProjection(Projections.rowCount());
-		return ((Long) criteria.uniqueResult()).intValue();
+		return Math.toIntExact(entityCriteria.count(getSession()));
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {

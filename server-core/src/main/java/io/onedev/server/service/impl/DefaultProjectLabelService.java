@@ -7,9 +7,9 @@ import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.ProjectLabel;
 import io.onedev.server.persistence.annotation.Sessional;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Collection;
 

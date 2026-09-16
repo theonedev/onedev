@@ -18,12 +18,12 @@
 
 package io.onedev.server.jetty;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.eclipse.jetty.server.session.AbstractSessionDataStoreFactory;
-import org.eclipse.jetty.server.session.SessionDataStore;
-import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.session.AbstractSessionDataStoreFactory;
+import org.eclipse.jetty.session.SessionDataStore;
+import org.eclipse.jetty.session.SessionManager;
 
 import io.onedev.server.cluster.ClusterService;
 
@@ -38,7 +38,7 @@ public class DefaultSessionDataStoreFactory extends AbstractSessionDataStoreFact
 	}
 
     @Override
-    public SessionDataStore getSessionDataStore(SessionHandler handler) {
+    public SessionDataStore getSessionDataStore(SessionManager handler) {
         ClusterSessionDataStore sessionDataStore = new ClusterSessionDataStore();
         sessionDataStore.setSessionDataMap(clusterService.getHazelcastInstance().getMap("jettySessionData"));
         return sessionDataStore;

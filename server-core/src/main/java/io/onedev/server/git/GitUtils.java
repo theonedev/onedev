@@ -303,7 +303,7 @@ public class GitUtils {
 	}
 
 	public static PersonIdent newPersonIdent(String name, String email, Date when) {
-		return new PersonIdent(name, email, when.getTime(), SystemReader.getInstance().getTimezone(when.getTime()));
+		return new PersonIdent(name, email, when.toInstant(), SystemReader.getInstance().getTimeZoneAt(when.toInstant()));
 	}
 
 	/**

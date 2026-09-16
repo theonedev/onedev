@@ -47,7 +47,7 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 			
 		};
@@ -94,8 +94,9 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 
 				if (getSpec().getOpposite() != null && getSpec().getName().equals(getSpec().getOpposite().getName())) {
 					String errorMessage = _T("Name and name on the other side should be different");

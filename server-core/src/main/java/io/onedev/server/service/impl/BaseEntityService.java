@@ -10,7 +10,7 @@ import org.hibernate.Session;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.util.ReflectionUtils;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public abstract class BaseEntityService<T extends AbstractEntity> implements EntityService<T> {
 

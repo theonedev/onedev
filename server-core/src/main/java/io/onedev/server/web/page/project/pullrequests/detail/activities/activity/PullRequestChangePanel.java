@@ -4,7 +4,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -56,7 +56,7 @@ class PullRequestChangePanel extends Panel {
 		}
 		add(mergeCommit);
 
-		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
+		add(new SinceChangesLink("changes", new IModel<PullRequest>() {
 
 			@Override
 			public PullRequest getObject() {

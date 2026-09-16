@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;

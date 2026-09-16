@@ -28,6 +28,7 @@ import org.apache.wicket.protocol.ws.api.AbstractWebSocketProcessor;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.message.IWebSocketPushMessage;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ import io.onedev.server.persistence.SessionService;
  *
  * @since 6.2
  */
-public class WebSocketConnection implements IWebSocketConnection {
+public class WebSocketConnection extends org.apache.wicket.protocol.ws.api.AbstractWebSocketConnection {
 
 	private final Logger logger = LoggerFactory.getLogger(WebSocketConnection.class);
 	
@@ -58,6 +59,7 @@ public class WebSocketConnection implements IWebSocketConnection {
 	
 	public WebSocketConnection(Session session, AbstractWebSocketProcessor webSocketProcessor, PageKey pageKey, Subject subject)
 	{
+		super(webSocketProcessor);
 		this.webSocketProcessor = webSocketProcessor;
 		this.session = session;
 		this.pageKey = pageKey;
@@ -76,7 +78,7 @@ public class WebSocketConnection implements IWebSocketConnection {
 	@Override
 	public void close(int code, String reason) {
 		if (isOpen()) {
-			session.close(code, reason);
+			session.close(code, reason, Callback.NOOP);
 		}
 	}
 
@@ -88,7 +90,7 @@ public class WebSocketConnection implements IWebSocketConnection {
 	public IWebSocketConnection sendMessage(String message) throws IOException {
 		checkClosed();
 
-		session.getRemote().sendStringByFuture(message);
+		session.sendText(message, Callback.NOOP);
 		return this;
 	}
 
@@ -97,9 +99,37 @@ public class WebSocketConnection implements IWebSocketConnection {
 		checkClosed();
 
 		ByteBuffer buf = ByteBuffer.wrap(message, offset, length);
-		session.getRemote().sendBytesByFuture(buf);
+		session.sendBinary(buf, Callback.NOOP);
 		return this;
 	}
+
+    @Override
+    public java.util.concurrent.Future<Void> sendMessageAsync(String message) {
+        return sendMessageAsync(message, -1);
+    }
+
+    @Override
+    public java.util.concurrent.Future<Void> sendMessageAsync(String message, long timeout) {
+        var callback = new Callback.Completable();
+        session.sendText(message, callback);
+        if (timeout >= 0)
+            callback.orTimeout(timeout, java.util.concurrent.TimeUnit.MILLISECONDS);
+        return callback;
+    }
+
+    @Override
+    public java.util.concurrent.Future<Void> sendMessageAsync(byte[] message, int offset, int length) {
+        return sendMessageAsync(message, offset, length, -1);
+    }
+
+    @Override
+    public java.util.concurrent.Future<Void> sendMessageAsync(byte[] message, int offset, int length, long timeout) {
+        var callback = new Callback.Completable();
+        session.sendBinary(ByteBuffer.wrap(message, offset, length), callback);
+        if (timeout >= 0)
+            callback.orTimeout(timeout, java.util.concurrent.TimeUnit.MILLISECONDS);
+        return callback;
+    }
 
 	private void checkClosed() {
 		if (!isOpen()) {

@@ -3,13 +3,13 @@ package io.onedev.server.model;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_user_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", "o_user_id"})})
+		indexes={@Index(columnList="issue_id"), @Index(columnList="user_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"issue_id", "user_id"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Stopwatch extends AbstractEntity {
 	

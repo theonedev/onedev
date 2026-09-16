@@ -6,7 +6,7 @@ import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.model.Project.ATTACHMENT_DIR;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -22,16 +22,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 import org.glassfish.jersey.client.ClientProperties;
 import org.quartz.CronScheduleBuilder;

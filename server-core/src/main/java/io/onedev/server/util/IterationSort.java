@@ -1,7 +1,7 @@
 package io.onedev.server.util;
 
 import org.eclipse.jgit.util.StringUtils;
-import org.hibernate.criterion.Order;
+import io.onedev.server.persistence.dao.Order;
 
 import io.onedev.server.model.Iteration;
 

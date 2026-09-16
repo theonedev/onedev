@@ -5,7 +5,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
-import javax.mail.Message;
+import jakarta.mail.Message;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;

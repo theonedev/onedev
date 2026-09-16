@@ -69,7 +69,7 @@ public class BuildChangesPage extends BuildDetailPage {
 				PageParameters params = getPageParameters();
 				params.set(PARAM_QUERY, query);
 				CharSequence url = RequestCycle.get().urlFor(BuildChangesPage.class, params);
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null), url.toString(), query);
 			}
 			
 		}) {

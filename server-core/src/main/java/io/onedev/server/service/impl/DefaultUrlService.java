@@ -18,8 +18,8 @@ import org.apache.wicket.util.encoding.UrlEncoder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

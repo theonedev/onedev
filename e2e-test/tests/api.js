@@ -63,6 +63,14 @@ export class FixturesApi {
     return { id, title, url: `${project.name}/~issues/${issue.number}` };
   }
 
+  async createIssueComment(issue, content) {
+    const user = await this.json('get', '~api/users/me');
+    const id = await this.json('post', '~api/issue-comments', {
+      data: { issueId: issue.id, userId: user.id, content },
+    });
+    return { id, content, url: `${issue.url}#IssueComment-${id}` };
+  }
+
   async authorizeIssueUser(issue, user, authorizer = admin) {
     return this.json('post', '~api/issue-authorizations', {
       data: { issueId: issue.id, userId: user.id },

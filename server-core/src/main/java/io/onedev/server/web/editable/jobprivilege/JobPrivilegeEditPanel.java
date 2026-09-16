@@ -19,20 +19,20 @@ import io.onedev.server.web.editable.BeanEditor;
 abstract class JobPrivilegeEditPanel extends Panel {
 
 	private final List<JobPrivilege> privileges;
-	
+
 	private final int privilegeIndex;
-	
+
 	public JobPrivilegeEditPanel(String id, List<JobPrivilege> privileges, int privilegeIndex) {
 		super(id);
-	
+
 		this.privileges = privileges;
 		this.privilegeIndex = privilegeIndex;
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
 		JobPrivilege privilege;
 		if (privilegeIndex != -1)
 			privilege = privileges.get(privilegeIndex);
@@ -44,13 +44,13 @@ abstract class JobPrivilegeEditPanel extends Panel {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
-			
+
 		};
-		
+
 		form.add(new FencedFeedbackPanel("feedback", form));
-		
+
 		form.add(new AjaxLink<Void>("close") {
 
 			@Override
@@ -63,30 +63,31 @@ abstract class JobPrivilegeEditPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				onCancel(target);
 			}
-			
+
 		});
-		
+
 		BeanEditor editor = BeanContext.edit("editor", privilege);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 
 				if (editor.isValid()) {
 					if (privilegeIndex != -1)
 						privileges.set(privilegeIndex, privilege);
-					else 
+					else
 						privileges.add(privilege);
 					onSave(target);
 				} else {
 					target.add(form);
 				}
 			}
-			
+
 		});
-		
+
 		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override
@@ -99,15 +100,15 @@ abstract class JobPrivilegeEditPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				onCancel(target);
 			}
-			
+
 		});
 		form.setOutputMarkupId(true);
-		
+
 		add(form);
 	}
 
 	protected abstract void onSave(AjaxRequestTarget target);
-	
+
 	protected abstract void onCancel(AjaxRequestTarget target);
 
 }

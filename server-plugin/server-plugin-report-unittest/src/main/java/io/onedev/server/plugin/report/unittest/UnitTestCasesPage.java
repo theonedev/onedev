@@ -221,8 +221,8 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 				}
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+					super.onSubmit(target);
 					pushState(target);
 					testSuitePatterns = parseTestSuitePatterns();
 					if (testSuitePatterns == null)
@@ -304,8 +304,8 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 				}
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+					super.onSubmit(target);
 					pushState(target);
 					namePatterns = parseNamePatterns();
 					if (namePatterns == null)

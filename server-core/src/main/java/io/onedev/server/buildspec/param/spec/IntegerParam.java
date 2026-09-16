@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.param.spec;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import io.onedev.server.buildspecmodel.inputspec.integerinput.IntegerInput;
 import io.onedev.server.buildspecmodel.inputspec.integerinput.defaultvalueprovider.DefaultValueProvider;

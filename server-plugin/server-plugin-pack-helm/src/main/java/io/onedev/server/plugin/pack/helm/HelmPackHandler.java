@@ -1,10 +1,10 @@
 package io.onedev.server.plugin.pack.helm;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_CREATED;
-import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
+import static jakarta.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -16,13 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
@@ -157,11 +156,11 @@ public class HelmPackHandler implements PackHandler {
             var contentType = request.getHeader("Content-Type");
             if (contentType != null && (contentType.contains("multipart/form-data") || contentType.contains("application/x-www-form-urlencoded"))) {
                 try {
-                    var upload = new ServletFileUpload();
+                    var upload = new JakartaServletFileUpload<>();
                     var items = upload.getItemIterator(request);
                     if (items.hasNext()) {
                         var item = items.next();
-                        try (var is = item.openStream()) {
+                        try (var is = item.getInputStream()) {
                             var copied = IOUtils.copyWithMaxSize(is, baos, MAX_FILE_SIZE);
                             if (copied == -1)
                                 throw new ClientException(SC_NOT_ACCEPTABLE, "Chart archive exceeds maximum size: " + MAX_FILE_SIZE);
@@ -171,7 +170,7 @@ public class HelmPackHandler implements PackHandler {
                     } else {
                         throw new ClientException(SC_BAD_REQUEST, "Chart archive not found");
                     }
-                } catch (FileUploadException|IOException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             } else {

@@ -19,7 +19,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -225,7 +224,7 @@ public class FolderViewPanel extends Panel {
 			}
 			
 		};
-		readmeContainer.add(new Label("title", new AbstractReadOnlyModel<String>() {
+		readmeContainer.add(new Label("title", new IModel<String>() {
 
 			@Override
 			public String getObject() {

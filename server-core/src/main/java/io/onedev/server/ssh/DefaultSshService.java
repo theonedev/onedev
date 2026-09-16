@@ -11,8 +11,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.keyverifier.RequiredServerKeyVerifier;

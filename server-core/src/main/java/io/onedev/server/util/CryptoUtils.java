@@ -4,7 +4,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.service.SettingService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.shiro.crypto.AesCipherService;
+import org.apache.shiro.crypto.cipher.AesCipherService;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -53,7 +53,7 @@ public class CryptoUtils {
 	}
 	
 	public static byte[] decrypt(byte[] data) {
-		return cipherService.decrypt(data, getCipherKey()).getBytes();
+		return cipherService.decrypt(data, getCipherKey()).getClonedBytes();
 	}
 	
 	private static class KeyPair {

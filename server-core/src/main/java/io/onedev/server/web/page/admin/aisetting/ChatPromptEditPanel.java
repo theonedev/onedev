@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -75,7 +75,7 @@ public class ChatPromptEditPanel extends Panel {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 
 		};
@@ -84,8 +84,9 @@ public class ChatPromptEditPanel extends Panel {
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 				savePrompt("changed");
 				getSession().success(_T("Chat prompt has been saved"));
 				target.add(form);
@@ -106,7 +107,8 @@ public class ChatPromptEditPanel extends Panel {
 			}
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
 				setPrompt(defaultValue);
 				savePrompt("reverted");
 				getSession().success(_T("Chat prompt has been reverted to default"));

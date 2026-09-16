@@ -18,8 +18,10 @@ package org.apache.wicket.core.request.mapper;
 
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.StringTokenizer;
+import java.util.function.Supplier;
 
 import org.apache.wicket.core.util.lang.WicketObjects;
 import org.apache.wicket.request.IRequestHandler;
@@ -28,16 +30,12 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.IPageParametersEncoder;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.IResource;
-import org.apache.wicket.request.resource.MetaInfStaticResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
-import org.apache.wicket.request.resource.ResourceReferenceRegistry;
+import org.apache.wicket.request.resource.*;
 import org.apache.wicket.request.resource.caching.IResourceCachingStrategy;
 import org.apache.wicket.request.resource.caching.IStaticCacheableResource;
 import org.apache.wicket.request.resource.caching.ResourceUrl;
 import org.apache.wicket.resource.ResourceUtil;
 import org.apache.wicket.resource.bundles.ResourceBundleReference;
-import org.apache.wicket.util.IProvider;
 import org.apache.wicket.util.lang.Args;
 import org.apache.wicket.util.lang.Checks;
 import org.apache.wicket.util.string.Strings;
@@ -61,12 +59,12 @@ import org.apache.wicket.util.string.Strings;
  */
 public class BasicResourceReferenceMapper extends AbstractResourceReferenceMapper
 {
+	private static final Map<String, String> classNames = new ConcurrentHashMap<>();
+
 	protected final IPageParametersEncoder pageParametersEncoder;
 
 	/** resource caching strategy */
-	protected final IProvider<? extends IResourceCachingStrategy> cachingStrategy;
-	
-	private static Map<String, String> classNames = new ConcurrentHashMap<>();
+	protected final Supplier<? extends IResourceCachingStrategy> cachingStrategy;
 
 	/**
 	 * Construct.
@@ -75,7 +73,7 @@ public class BasicResourceReferenceMapper extends AbstractResourceReferenceMappe
 	 * @param cachingStrategy
 	 */
 	public BasicResourceReferenceMapper(IPageParametersEncoder pageParametersEncoder,
-		IProvider<? extends IResourceCachingStrategy> cachingStrategy)
+		Supplier<? extends IResourceCachingStrategy> cachingStrategy)
 	{
 		this.pageParametersEncoder = Args.notNull(pageParametersEncoder, "pageParametersEncoder");
 		this.cachingStrategy = cachingStrategy;
@@ -93,11 +91,13 @@ public class BasicResourceReferenceMapper extends AbstractResourceReferenceMappe
 			// extract the PageParameters from URL if there are any
 			PageParameters pageParameters = extractPageParameters(request, segmentsSize,
 					pageParametersEncoder);
+			if (pageParameters != null)
+			{
+				pageParameters.setLocale(resolveLocale());
+			}
 
 			String normalizedClassName = url.getSegments().get(2);
-			String className = classNames.get(normalizedClassName);
-			if (className == null)
-				className = normalizedClassName;
+			String className = classNames.getOrDefault(normalizedClassName, normalizedClassName);
 			StringBuilder name = new StringBuilder(segmentsSize * 2);
 
 			for (int i = 3; i < segmentsSize; ++i)
@@ -134,9 +134,17 @@ public class BasicResourceReferenceMapper extends AbstractResourceReferenceMappe
 
 			if (scope != null && scope.getPackage() != null)
 			{
+				ResourceReference.UrlAttributes sanitized = attributes.sanitize(scope, name.toString());
+				boolean createIfNotFound = false;
+				if (sanitized != null)
+				{
+					attributes = sanitized;
+					createIfNotFound = true;
+				}
+
 				ResourceReference res = getContext().getResourceReferenceRegistry()
 					.getResourceReference(scope, name.toString(), attributes.getLocale(),
-						attributes.getStyle(), attributes.getVariation(), true, true);
+						attributes.getStyle(), attributes.getVariation(), true, createIfNotFound);
 
 				if (res != null)
 				{
@@ -200,30 +208,15 @@ public class BasicResourceReferenceMapper extends AbstractResourceReferenceMappe
 			List<String> segments = url.getSegments();
 			segments.add(getContext().getNamespace());
 			segments.add(getContext().getResourceIdentifier());
-			
 			String className = getClassName(reference.getScope());
-			
-			/* 
-			 * Avoid using mixed case in url as some agents will convert url to lower case
-			 */
-			String normalizedClassName = className.toLowerCase();
+			String normalizedClassName = className.toLowerCase(Locale.ROOT);
 			classNames.put(normalizedClassName, className);
 			segments.add(normalizedClassName);
 
 			// setup resource parameters
-			PageParameters parameters = referenceRequestHandler.getPageParameters();
-
-			if (parameters == null)
-			{
-				parameters = new PageParameters();
-			}
-			else
-			{
-				parameters = new PageParameters(parameters);
-
-				// need to remove indexed parameters otherwise the URL won't be able to decode
-				parameters.clearIndexed();
-			}
+			PageParameters parameters = new PageParameters(referenceRequestHandler.getPageParameters());
+			// need to remove indexed parameters otherwise the URL won't be able to decode
+			parameters.clearIndexed();
 
 			ResourceUtil.encodeResourceReferenceAttributes(url, reference);
 

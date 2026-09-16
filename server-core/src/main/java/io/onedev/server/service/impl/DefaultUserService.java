@@ -24,16 +24,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
-import org.hibernate.ReplicationMode;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,7 +168,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	@Transactional
 	@Override
 	public void replicate(User user) {
-		getSession().replicate(user, ReplicationMode.OVERWRITE);
+		getSession().merge(user);
 		idService.useId(User.class, user.getId());
 		var facade = user.getFacade();
 		if (facade.getId() > 0)
@@ -236,107 +235,107 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	public void delete(User user) {
 		checkUsage(user);
     	
-    	Query<?> query = getSession().createQuery("update PullRequest set submitter=:unknown where submitter=:submitter");
+		var query = getSession().createMutationQuery("update PullRequest set submitter=:unknown where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 
-		query = getSession().createQuery("update Pack set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update Pack set user=:unknown where user=:user");
 		query.setParameter("user", user);
 		query.setParameter("unknown", getUnknown());
 		query.executeUpdate();
 
-		query = getSession().createQuery("update Audit set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update Audit set user=:unknown where user=:user");
 		query.setParameter("user", user);
 		query.setParameter("unknown", getUnknown());
 		query.executeUpdate();
 		
-    	query = getSession().createQuery("update Build set submitter=:unknown where submitter=:submitter");
+		query = getSession().createMutationQuery("update Build set submitter=:unknown where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Build set canceller=:unknown where canceller=:canceller");
+		query = getSession().createMutationQuery("update Build set canceller=:unknown where canceller=:canceller");
     	query.setParameter("canceller", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set lastActivity.user=:unknown where lastActivity.user=:user");
+		query = getSession().createMutationQuery("update PullRequest set lastActivity.user=:unknown where lastActivity.user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 
-    	query = getSession().createQuery("update PullRequestReaction set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update PullRequestReaction set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 		
-    	query = getSession().createQuery("update PullRequestChange set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update PullRequestChange set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequestComment set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update PullRequestComment set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 
-    	query = getSession().createQuery("update PullRequestCommentReaction set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update PullRequestCommentReaction set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 		
-    	query = getSession().createQuery("update CodeComment set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update CodeComment set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeComment set lastActivity.user=:unknown where lastActivity.user=:user");
+		query = getSession().createMutationQuery("update CodeComment set lastActivity.user=:unknown where lastActivity.user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeCommentReply set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update CodeCommentReply set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeCommentStatusChange set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update CodeCommentStatusChange set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Issue set submitter=:unknown where submitter=:submitter");
+		query = getSession().createMutationQuery("update Issue set submitter=:unknown where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Issue set lastActivity.user=:unknown where lastActivity.user=:user");
+		query = getSession().createMutationQuery("update Issue set lastActivity.user=:unknown where lastActivity.user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 
-    	query = getSession().createQuery("update IssueReaction set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update IssueReaction set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 		
-    	query = getSession().createQuery("update IssueComment set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update IssueComment set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update IssueCommentReaction set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update IssueCommentReaction set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 
-    	query = getSession().createQuery("update IssueWorkReaction set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update IssueWorkReaction set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
 
-    	query = getSession().createQuery("update IssueChange set user=:unknown where user=:user");
+		query = getSession().createMutationQuery("update IssueChange set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();

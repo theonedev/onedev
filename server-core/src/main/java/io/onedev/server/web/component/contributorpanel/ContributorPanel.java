@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.contributorpanel;
 
+import java.util.Date;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -35,8 +37,8 @@ public class ContributorPanel extends Panel {
 			fragment.add(new PersonIdentPanel("committer", committer, "Committer", Mode.NAME));
 		}
 		fragment.add(new PersonIdentPanel("author", author, "Author", Mode.NAME));
-		fragment.add(new Label("date", DateUtils.formatAge(committer.getWhen()))
-			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(committer.getWhen()))));
+		fragment.add(new Label("date", DateUtils.formatAge(Date.from(committer.getWhenAsInstant())))
+			.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(Date.from(committer.getWhenAsInstant())))));
 		add(fragment);
 	}
 

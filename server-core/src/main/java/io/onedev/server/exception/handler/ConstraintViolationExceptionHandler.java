@@ -4,7 +4,7 @@ import io.onedev.server.exception.HttpResponse;
 
 import org.hibernate.exception.ConstraintViolationException;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class ConstraintViolationExceptionHandler extends AbstractExceptionHandler<ConstraintViolationException> {
 	

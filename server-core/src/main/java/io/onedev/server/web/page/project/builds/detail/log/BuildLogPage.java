@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.project.builds.detail.log;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.link.ResourceLink;

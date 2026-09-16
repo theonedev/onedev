@@ -101,7 +101,7 @@ public class InvitationListPage extends AdministrationPage {
 				
 				String url = RequestCycle.get().urlFor(InvitationListPage.class, params).toString();
 
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				if (typing)
 					replaceState(target, url, query);
 				else

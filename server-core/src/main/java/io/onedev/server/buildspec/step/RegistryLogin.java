@@ -7,7 +7,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;

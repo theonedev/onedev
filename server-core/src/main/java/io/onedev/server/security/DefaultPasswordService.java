@@ -3,7 +3,7 @@ package io.onedev.server.security;
 import io.onedev.commons.utils.StringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.regex.Pattern;
 
 @Singleton

@@ -22,7 +22,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -395,7 +394,7 @@ public abstract class BuildSidePanel extends Panel {
 		} else {
 			labelsContainer.add(new WebMarkupContainer("head"));
 		}
-		labelsContainer.add(new EntityLabelsPanel<BuildLabel>("body", new AbstractReadOnlyModel<Build>() {
+		labelsContainer.add(new EntityLabelsPanel<BuildLabel>("body", new IModel<Build>() {
 
 			@Override
 			public Build getObject() {
@@ -475,7 +474,7 @@ public abstract class BuildSidePanel extends Panel {
 					String title = Emojis.getInstance().apply(request.getTitle());
 					link.add(new Label("label", "#" + request.getNumber() + " " + title));
 					add(link);
-					add(new RequestStatusBadge("status", new AbstractReadOnlyModel<PullRequest>() {
+					add(new RequestStatusBadge("status", new IModel<PullRequest>() {
 	
 						@Override
 						public PullRequest getObject() {
@@ -491,6 +490,7 @@ public abstract class BuildSidePanel extends Panel {
 			
 			@Override
 			protected void onConfigure() {
+				super.onConfigure();
 				setVisible(getBuild().getRequest() != null && SecurityUtils.canReadCode(getProject()));
 			}
 			

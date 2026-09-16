@@ -9,7 +9,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import java.util.List;
@@ -24,7 +23,7 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 	public void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<>("commits", new AbstractReadOnlyModel<List<ProjectScopedCommit>>() {
+		add(new ListView<>("commits", new IModel<List<ProjectScopedCommit>>() {
 
 			@Override
 			public List<ProjectScopedCommit> getObject() {

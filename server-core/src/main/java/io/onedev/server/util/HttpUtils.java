@@ -3,8 +3,8 @@ package io.onedev.server.util;
 import org.apache.commons.codec.binary.Base64;
 
 import org.jspecify.annotations.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.HttpHeaders;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.substringAfter;

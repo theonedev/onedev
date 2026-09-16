@@ -20,7 +20,7 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
@@ -1010,6 +1010,8 @@ public class Upgrade extends AbstractPlugin {
 			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, UTF_8);
 			hibernateProps = Strings.CS.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
 					"hibernate.hikari.autoCommit=true");
+			hibernateProps = Strings.CS.replace(hibernateProps, "javax.persistence.validation.mode",
+					"jakarta.persistence.validation.mode");
 			hibernateProps = Strings.CS.replace(hibernateProps, "GitPlex", "OneDev");
 			hibernateProps = Strings.CS.replace(hibernateProps, "TurboDev", "OneDev");
 
@@ -1039,6 +1041,8 @@ public class Upgrade extends AbstractPlugin {
 					"com.hazelcast.hibernate.HazelcastLocalCacheRegionFactory");
 			hibernateProps = Strings.CS.replace(hibernateProps, "org.hibernate.cache.jcache.JCacheRegionFactory", 
 					"com.hazelcast.hibernate.HazelcastLocalCacheRegionFactory");
+			hibernateProps = Strings.CS.replace(hibernateProps, "com.hazelcast.hibernate.HazelcastLocalCacheRegionFactory",
+					"io.onedev.server.persistence.HazelcastLocalCacheRegionFactory");
 			if (!hibernateProps.contains("hibernate.cache.auto_evict_collection_cache=true")) {
 				hibernateProps += "hibernate.cache.auto_evict_collection_cache=true\r\n";
 				hibernateProps += "hibernate.javax.cache.provider=org.ehcache.jsr107.EhcacheCachingProvider\r\n"; 

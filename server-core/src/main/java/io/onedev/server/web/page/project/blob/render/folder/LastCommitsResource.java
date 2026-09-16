@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.blob.render.folder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
+import io.onedev.server.git.LastCommitsOfChildren;
 import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.EmailAddress;
@@ -19,7 +20,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 
 import org.jspecify.annotations.Nullable;
 import java.io.IOException;

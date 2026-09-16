@@ -7,7 +7,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.text.MessageFormat;
 import java.util.Collection;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -16,6 +16,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.mgt.RememberMeManager;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -30,7 +31,7 @@ import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
@@ -97,8 +98,7 @@ public class LoginPage extends SimplePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		// replace session to avoid session fixation attack
-		getSession().replaceSession();
+		RestartResponseAtInterceptPageException.replaceSessionPreservingOriginalDestination();
 
 		String serverUrl = settingService.getSystemSetting().getServerUrl();
 		var ssoProviders = ssoProviderService.query();

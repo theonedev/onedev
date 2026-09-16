@@ -4,10 +4,10 @@ import static io.onedev.server.model.ProjectLastActivityDate.PROP_VALUE;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 
 /**
  * Maintain high dynamic data in a separate table to avoid project second-level 

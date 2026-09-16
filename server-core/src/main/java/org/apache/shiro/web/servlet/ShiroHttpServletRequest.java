@@ -21,41 +21,48 @@ package org.apache.shiro.web.servlet;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.shiro.subject.support.DisabledSessionException;
 import org.apache.shiro.web.util.WebUtils;
-import org.apache.wicket.request.cycle.RequestCycle;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
 
 
 /**
  * A {@code ShiroHttpServletRequest} wraps the Servlet container's original {@code ServletRequest} instance, but ensures
  * that all {@link HttpServletRequest} invocations that require Shiro's support ({@link #getRemoteUser getRemoteUser},
- * {@link #getSession getSession}, etc) can be executed first by Shiro as necessary before allowing the underlying
+ * {@link #getSession getSession}, etc.) can be executed first by Shiro as necessary before allowing the underlying
  * Servlet container instance's method to be invoked.
  *
  * @since 0.2
  */
+@SuppressWarnings({"checkstyle:JavadocVariable"})
 public class ShiroHttpServletRequest extends HttpServletRequestWrapper {
 
     //The following 7 constants support the Shiro's implementation of the Servlet Specification
     public static final String COOKIE_SESSION_ID_SOURCE = "cookie";
     public static final String URL_SESSION_ID_SOURCE = "url";
-    public static final String REFERENCED_SESSION_ID = ShiroHttpServletRequest.class.getName() + "_REQUESTED_SESSION_ID";
-    public static final String REFERENCED_SESSION_ID_IS_VALID = ShiroHttpServletRequest.class.getName() + "_REQUESTED_SESSION_ID_VALID";
-    public static final String REFERENCED_SESSION_IS_NEW = ShiroHttpServletRequest.class.getName() + "_REFERENCED_SESSION_IS_NEW";
-    public static final String REFERENCED_SESSION_ID_SOURCE = ShiroHttpServletRequest.class.getName() + "REFERENCED_SESSION_ID_SOURCE";
-    public static final String IDENTITY_REMOVED_KEY = ShiroHttpServletRequest.class.getName() + "_IDENTITY_REMOVED_KEY";
-    public static final String SESSION_ID_URL_REWRITING_ENABLED = ShiroHttpServletRequest.class.getName() + "_SESSION_ID_URL_REWRITING_ENABLED";
+    public static final String REFERENCED_SESSION_ID = ShiroHttpServletRequest.class.getName()
+            + "_REQUESTED_SESSION_ID";
+    public static final String REFERENCED_SESSION_ID_IS_VALID = ShiroHttpServletRequest.class.getName()
+            + "_REQUESTED_SESSION_ID_VALID";
+    public static final String REFERENCED_SESSION_IS_NEW = ShiroHttpServletRequest.class.getName()
+            + "_REFERENCED_SESSION_IS_NEW";
+    public static final String REFERENCED_SESSION_ID_SOURCE = ShiroHttpServletRequest.class.getName()
+            + "REFERENCED_SESSION_ID_SOURCE";
+    public static final String IDENTITY_REMOVED_KEY = ShiroHttpServletRequest.class.getName()
+            + "_IDENTITY_REMOVED_KEY";
+    public static final String SESSION_ID_URL_REWRITING_ENABLED = ShiroHttpServletRequest.class.getName()
+            + "_SESSION_ID_URL_REWRITING_ENABLED";
 
-    protected ServletContext servletContext = null;
+    protected ServletContext servletContext;
 
-    protected HttpSession session = null;
-    protected boolean httpSessions = true;
+    protected HttpSession session;
+    protected boolean httpSessions;
 
     public ShiroHttpServletRequest(HttpServletRequest wrapped, ServletContext servletContext, boolean httpSessions) {
         super(wrapped);
@@ -71,10 +78,10 @@ public class ShiroHttpServletRequest extends HttpServletRequestWrapper {
         String remoteUser;
         Object scPrincipal = getSubjectPrincipal();
         if (scPrincipal != null) {
-            if (scPrincipal instanceof String) {
-                return (String) scPrincipal;
-            } else if (scPrincipal instanceof Principal) {
-                remoteUser = ((Principal) scPrincipal).getName();
+            if (scPrincipal instanceof String string) {
+                return string;
+            } else if (scPrincipal instanceof Principal principal) {
+                remoteUser = principal.getName();
             } else {
                 remoteUser = scPrincipal.toString();
             }
@@ -110,8 +117,8 @@ public class ShiroHttpServletRequest extends HttpServletRequestWrapper {
         Principal userPrincipal;
         Object scPrincipal = getSubjectPrincipal();
         if (scPrincipal != null) {
-            if (scPrincipal instanceof Principal) {
-                userPrincipal = (Principal) scPrincipal;
+            if (scPrincipal instanceof Principal principal) {
+                userPrincipal = principal;
             } else {
                 userPrincipal = new ObjectPrincipal(scPrincipal);
             }
@@ -143,7 +150,7 @@ public class ShiroHttpServletRequest extends HttpServletRequestWrapper {
             httpSession = super.getSession(false);
             if (httpSession == null && create) {
                 //Shiro 1.2: assert that creation is enabled (SHIRO-266):
-                if (RequestCycle.get() != null || WebUtils._isSessionCreationEnabled(this)) {
+                if (RequestCycle.get() != null || WebUtils.isSessionCreationEnabled(this)) {
                     httpSession = super.getSession(create);
                 } else {
                     throw newNoSessionCreationException();
@@ -151,16 +158,16 @@ public class ShiroHttpServletRequest extends HttpServletRequestWrapper {
             }
         } else {
             boolean existing = getSubject().getSession(false) != null;
-            
+
             if (this.session == null || !existing) {
                 Session shiroSession = getSubject().getSession(create);
                 if (shiroSession != null) {
                     this.session = new ShiroHttpSession(shiroSession, this, this.servletContext);
-                    if (!existing) {
-                        setAttribute(REFERENCED_SESSION_IS_NEW, Boolean.TRUE);
-                    }
                 } else if (this.session != null) {
                     this.session = null;
+                }
+                if (shiroSession != null && !existing) {
+                    setAttribute(REFERENCED_SESSION_IS_NEW, Boolean.TRUE);
                 }
             }
             httpSession = this.session;
@@ -177,11 +184,11 @@ public class ShiroHttpServletRequest extends HttpServletRequestWrapper {
      * @since 1.2
      */
     private DisabledSessionException newNoSessionCreationException() {
-        String msg = "Session creation has been disabled for the current request.  This exception indicates " +
-                "that there is either a programming error (using a session when it should never be " +
-                "used) or that Shiro's configuration needs to be adjusted to allow Sessions to be created " +
-                "for the current request.  See the " + DisabledSessionException.class.getName() + " JavaDoc " +
-                "for more.";
+        String msg = "Session creation has been disabled for the current request.  This exception indicates "
+                + "that there is either a programming error (using a session when it should never be "
+                + "used) or that Shiro's configuration needs to be adjusted to allow Sessions to be created "
+                + "for the current request.  See the " + DisabledSessionException.class.getName() + " JavaDoc "
+                + "for more.";
         return new DisabledSessionException(msg);
     }
 
@@ -216,14 +223,15 @@ public class ShiroHttpServletRequest extends HttpServletRequestWrapper {
         }
     }
 
+    @Deprecated
     public boolean isRequestedSessionIdFromUrl() {
         return isRequestedSessionIdFromURL();
     }
 
     private class ObjectPrincipal implements java.security.Principal {
-        private Object object = null;
+        private Object object;
 
-        public ObjectPrincipal(Object object) {
+        ObjectPrincipal(Object object) {
             this.object = object;
         }
 
@@ -240,8 +248,7 @@ public class ShiroHttpServletRequest extends HttpServletRequestWrapper {
         }
 
         public boolean equals(Object o) {
-            if (o instanceof ObjectPrincipal) {
-                ObjectPrincipal op = (ObjectPrincipal) o;
+            if (o instanceof ObjectPrincipal op) {
                 return getObject().equals(op.getObject());
             }
             return false;

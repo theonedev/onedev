@@ -132,8 +132,8 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 			}
 			
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				pushState(target);
 				parseQuery();
 				target.add(feedback);

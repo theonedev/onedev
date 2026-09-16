@@ -10,7 +10,7 @@ import static io.onedev.server.model.Pack.PROP_VERSION;
 import static io.onedev.server.model.Pack.SORT_FIELDS;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static java.lang.Math.min;
-import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,18 +22,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import org.apache.shiro.subject.Subject;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.jspecify.annotations.Nullable;
 
@@ -101,7 +101,7 @@ public class DefaultPackService extends BaseEntityService<Pack>
 
 	private void applyOrders(From<Pack, Pack> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder,
 							 List<EntitySort> sorts) {
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		List<jakarta.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: sorts) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
@@ -213,9 +213,9 @@ public class DefaultPackService extends BaseEntityService<Pack>
 			CriteriaBuilder builder = getSession().getCriteriaBuilder();
 			CriteriaQuery<ProjectPackTypeStat> criteriaQuery = builder.createQuery(ProjectPackTypeStat.class);
 			Root<Pack> root = criteriaQuery.from(Pack.class);
-			criteriaQuery.multiselect(
+			criteriaQuery.select(builder.construct(ProjectPackTypeStat.class,
 					root.get(Pack.PROP_PROJECT).get(Project.PROP_ID),
-					root.get(Pack.PROP_TYPE), builder.count(root));
+					root.get(Pack.PROP_TYPE), builder.count(root)));
 			criteriaQuery.groupBy(root.get(PROP_PROJECT), root.get(Pack.PROP_TYPE));
 
 			criteriaQuery.where(root.get(PROP_PROJECT).in(projects));
@@ -293,7 +293,7 @@ public class DefaultPackService extends BaseEntityService<Pack>
 		criteria.add(Restrictions.eq(PROP_TYPE, type));
 		criteria.add(Restrictions.ilike(PROP_NAME, name.toLowerCase()));
 		if (sortComparator == null)
-			criteria.addOrder(org.hibernate.criterion.Order.asc(PROP_ID));
+			criteria.addOrder(io.onedev.server.persistence.dao.Order.asc(PROP_ID));
 		var packs = query(criteria);
 		if (sortComparator != null)
 			packs.sort(sortComparator);
@@ -308,11 +308,10 @@ public class DefaultPackService extends BaseEntityService<Pack>
 		criteria.add(Restrictions.eq(PROP_TYPE, type));
 		if (includePrerelease != null)
 			criteria.add(Restrictions.eq(PROP_PRERELEASE, includePrerelease));
-		criteria.addOrder(org.hibernate.criterion.Order.asc(PROP_ID));
+		criteria.addOrder(io.onedev.server.persistence.dao.Order.asc(PROP_ID));
 		return query(criteria);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
 	public List<Pack> queryLatests(Project project, String type, String nameTerm,
@@ -332,7 +331,7 @@ public class DefaultPackService extends BaseEntityService<Pack>
 		
 		queryString += " order by p1.name";
 
-		Query<Pack> query = getSession().createQuery(queryString);
+		Query<Pack> query = getSession().createQuery(queryString, Pack.class);
 		query.setParameter("project", project);
 		query.setParameter("type", type);
 		if (nameTerm != null)

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import com.google.common.collect.Lists;
 

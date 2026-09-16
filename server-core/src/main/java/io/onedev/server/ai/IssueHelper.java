@@ -225,7 +225,7 @@ public class IssueHelper {
     public static void setFieldValues(Map<String, Serializable> data, JsonNode fieldsNode) {
         if (fieldsNode == null || !fieldsNode.isObject())
             return;
-        var fields = fieldsNode.fields();
+        var fields = fieldsNode.properties().iterator();
         while (fields.hasNext()) {
             var entry = fields.next();
             setFieldValue(data, entry.getKey(), entry.getValue());

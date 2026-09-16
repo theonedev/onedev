@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -360,7 +360,7 @@ public class ProjectListPanel extends Panel {
 					public void setObject(EntityQuery<Project> object) {
 						ProjectListPanel.this.getFeedbackMessages().clear();
 						queryStringModel.setObject(object.toString());
-						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						var target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 						target.add(queryInput);
 						doQuery(target);
 					}
@@ -395,7 +395,7 @@ public class ProjectListPanel extends Panel {
 							query = new ProjectQuery();
 						query.setSorts(object);
 						queryStringModel.setObject(query.toString());
-						var target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						var target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 						target.add(queryInput);
 						doQuery(target);
 					}
@@ -1102,8 +1102,8 @@ public class ProjectListPanel extends Panel {
 		queryForm.add(new AjaxButton("submit") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				doQuery(target);
 			}
 			

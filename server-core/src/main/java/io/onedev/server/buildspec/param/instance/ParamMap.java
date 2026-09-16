@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.apache.wicket.Component;
 
@@ -35,8 +35,7 @@ public class ParamMap implements Serializable {
 	@ParamSpecProvider("getParamSpecs")
 	@VariableOption(withBuildVersion=false, withDynamicVariables=false)
 	@OmitName
-	@Valid
-	public List<ParamInstance> getParams() {
+	public List<@Valid ParamInstance> getParams() {
 		return params;
 	}
 

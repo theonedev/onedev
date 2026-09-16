@@ -2,7 +2,7 @@ package io.onedev.server.rest.resource.support;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 public abstract class FileEditRequest implements Serializable {
 

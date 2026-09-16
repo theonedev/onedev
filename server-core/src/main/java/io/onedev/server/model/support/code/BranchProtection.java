@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
@@ -212,8 +212,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Editable(order=700, description="Optionally specify path protection rules")
-	@Valid
-	public List<FileProtection> getFileProtections() {
+	public List<@Valid FileProtection> getFileProtections() {
 		return fileProtections;
 	}
 

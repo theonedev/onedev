@@ -6,7 +6,7 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.text.MessageFormat;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;

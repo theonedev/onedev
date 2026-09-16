@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -46,8 +46,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -760,7 +759,7 @@ public abstract class PullRequestListPanel extends Panel {
 					public void setObject(EntityQuery<PullRequest> object) {
 						PullRequestListPanel.this.getFeedbackMessages().clear();
 						queryStringModel.setObject(object.toString());
-						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						var target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 						target.add(queryInput);
 						doQuery(target);
 					}
@@ -798,7 +797,7 @@ public abstract class PullRequestListPanel extends Panel {
 							query = new PullRequestQuery();
 						query.setSorts(object);
 						queryStringModel.setObject(query.toString());
-						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						var target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 						target.add(queryInput);
 						doQuery(target);
 					}
@@ -814,7 +813,7 @@ public abstract class PullRequestListPanel extends Panel {
 			extraActionsView.add(renderer.render(extraActionsView.newChildId()));
 		
 		queryInput = new TextField<String>("input", queryStringModel);
-		queryInput.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<>() {
+		queryInput.add(new PullRequestQueryBehavior(new IModel<>() {
 
 			@Override
 			public Project getObject() {
@@ -851,8 +850,8 @@ public abstract class PullRequestListPanel extends Panel {
 		queryForm.add(new AjaxButton("submit") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				PullRequestListPanel.this.getFeedbackMessages().clear();
 				doQuery(target);
 			}

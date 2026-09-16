@@ -8,8 +8,8 @@ import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.
 import io.onedev.server.model.User;
 import io.onedev.server.util.EditContext;
 
-import javax.validation.Validator;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.stream.Collectors;
 

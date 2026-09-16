@@ -5,7 +5,7 @@ import io.onedev.server.annotation.OmitName;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 

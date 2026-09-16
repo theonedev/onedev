@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.issue.workspaces;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;

@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.pack.container;
 
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
 
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.server.OneDev;

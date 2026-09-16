@@ -3,8 +3,8 @@ package io.onedev.server.validation.validator;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.ReservedOptions;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;

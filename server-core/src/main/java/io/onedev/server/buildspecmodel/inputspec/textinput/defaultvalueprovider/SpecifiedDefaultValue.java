@@ -3,7 +3,7 @@ package io.onedev.server.buildspecmodel.inputspec.textinput.defaultvalueprovider
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {

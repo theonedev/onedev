@@ -5,10 +5,10 @@ import static java.lang.String.format;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import io.onedev.server.service.CodeCommentTouchService;
 import io.onedev.server.service.ProjectService;
@@ -50,7 +50,7 @@ public class DefaultCodeCommentTouchService extends BaseEntityService<CodeCommen
 		transactionService.runAfterCommit(() -> transactionService.runAsync(() -> {
             var innerProject = projectService.load(projectId);
             if (!newComment) {
-                var query = getSession().createQuery(format("delete from CodeCommentTouch where project=:project and %s=:%s", PROP_COMMENT_ID, PROP_COMMENT_ID));
+                var query = getSession().createMutationQuery(format("delete from CodeCommentTouch where project=:project and %s=:%s", PROP_COMMENT_ID, PROP_COMMENT_ID));
                 query.setParameter("project", innerProject);
                 query.setParameter(PROP_COMMENT_ID, commentId);
                 query.executeUpdate();

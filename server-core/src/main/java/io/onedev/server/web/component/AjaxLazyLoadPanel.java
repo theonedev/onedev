@@ -6,7 +6,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.web.page.base.BasePage;
 
-public abstract class AjaxLazyLoadPanel extends org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel {
+public abstract class AjaxLazyLoadPanel extends org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel<Component> {
 
 	private static final long serialVersionUID = 1L;
 

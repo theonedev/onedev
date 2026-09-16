@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Hibernate;
 import org.hibernate.query.Query;
@@ -134,7 +134,7 @@ public class DefaultIssueLinkService extends BaseEntityService<IssueLink> implem
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
 		Root<IssueLink> root = criteriaQuery.from(IssueLink.class);
-		criteriaQuery.multiselect(root, root.get(IssueLink.PROP_SOURCE), root.get(IssueLink.PROP_TARGET));
+		criteriaQuery.select(builder.array(root, root.get(IssueLink.PROP_SOURCE), root.get(IssueLink.PROP_TARGET)));
 		
 		criteriaQuery.where(builder.or(
 				builder.equal(root.get(IssueLink.PROP_SOURCE), issue), 

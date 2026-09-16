@@ -210,7 +210,7 @@ public class Representer extends SafeRepresenter {
           NodeTuple tuple = iter.next();
           Node keyNode = tuple.getKeyNode();
           if (keyNode.getNodeId() == NodeId.mapping && !t.equals(member.getClass())) {
-            mnode.getValue().add(0, new NodeTuple(
+            ((MappingNode) keyNode).getValue().add(0, new NodeTuple(
               new ScalarNode(Tag.STR, "type"), 
               new ScalarNode(Tag.STR, member.getClass().getSimpleName())));
           }

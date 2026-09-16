@@ -1,8 +1,6 @@
 /*
- * Hibernate Validator, declare and validate application constraints
- *
- * License: Apache License, Version 2.0
- * See the license.txt file in the root directory or <http://www.apache.org/licenses/LICENSE-2.0>.
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.validator.internal.engine.constraintvalidation;
 
@@ -11,13 +9,13 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
-import javax.validation.ConstraintDeclarationException;
-import javax.validation.ConstraintValidator;
-import javax.validation.ValidationException;
+import jakarta.validation.ConstraintDeclarationException;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ValidationException;
 
 import org.hibernate.validator.internal.engine.validationcontext.ValidationContext;
 import org.hibernate.validator.internal.engine.valuecontext.ValueContext;
@@ -44,7 +42,7 @@ import io.onedev.server.annotation.Interpolative;
  * @author Guillaume Smet
  * @author Marko Bekhta
  */
-public abstract class ConstraintTree<A extends Annotation> {
+public abstract sealed class ConstraintTree<A extends Annotation> permits SimpleConstraintTree, ComposingConstraintTree {
 
 	private static final Log LOG = LoggerFactory.make( MethodHandles.lookup() );
 
@@ -79,23 +77,10 @@ public abstract class ConstraintTree<A extends Annotation> {
 		}
 	}
 
-	public final boolean validateConstraints(ValidationContext<?> validationContext, ValueContext<?, ?> valueContext) {
-		List<ConstraintValidatorContextImpl> violatedConstraintValidatorContexts = new ArrayList<>( 5 );
-		validateConstraints( validationContext, valueContext, violatedConstraintValidatorContexts );
-		if ( !violatedConstraintValidatorContexts.isEmpty() ) {
-			for ( ConstraintValidatorContextImpl constraintValidatorContext : violatedConstraintValidatorContexts ) {
-				for ( ConstraintViolationCreationContext constraintViolationCreationContext : constraintValidatorContext.getConstraintViolationCreationContexts() ) {
-					validationContext.addConstraintFailure(
-							valueContext, constraintViolationCreationContext, constraintValidatorContext.getConstraintDescriptor()
-					);
-				}
-			}
-			return false;
-		}
-		return true;
-	}
+	public abstract boolean validateConstraints(ValidationContext<?> validationContext, ValueContext<?, ?> valueContext);
 
-	protected abstract void validateConstraints(ValidationContext<?> validationContext, ValueContext<?, ?> valueContext, Collection<ConstraintValidatorContextImpl> violatedConstraintValidatorContexts);
+	protected abstract void validateConstraints(ValidationContext<?> validationContext, ValueContext<?, ?> valueContext,
+			Collection<ConstraintValidatorContextImpl> violatedConstraintValidatorContexts);
 
 	public final ConstraintDescriptorImpl<A> getDescriptor() {
 		return descriptor;
@@ -139,7 +124,7 @@ public abstract class ConstraintTree<A extends Annotation> {
 				validator = defaultInitializedConstraintValidator;
 
 				if ( validator == null ) {
-					synchronized ( this ) {
+					synchronized (this) {
 						validator = defaultInitializedConstraintValidator;
 						if ( validator == null ) {
 							validator = validationContext.getConstraintValidatorManager().getInitializedValidator(
@@ -179,7 +164,7 @@ public abstract class ConstraintTree<A extends Annotation> {
 	 * 		otherwise.
 	 */
 	@SuppressWarnings("unchecked")
-	protected final <V> Optional<ConstraintValidatorContextImpl> validateSingleConstraint(
+	protected final <V> ConstraintValidatorContextImpl validateSingleConstraint(
 			ValueContext<?, ?> valueContext,
 			ConstraintValidatorContextImpl constraintValidatorContext,
 			ConstraintValidator<A, V> validator) {
@@ -190,7 +175,7 @@ public abstract class ConstraintTree<A extends Annotation> {
 				try {
 					if (MetaConstraint.get().getLocation() instanceof GetterConstraintLocation) {
 						GetterConstraintLocation location = (GetterConstraintLocation) MetaConstraint.get().getLocation();
-						Method method = ReflectionUtils.findMethod(location.getDeclaringClass(), 
+						Method method = ReflectionUtils.findMethod(location.getConstrainable().getDeclaringClass(),
 								location.getConstrainable().getName()); 
 						Interpolative interpolative = method.getAnnotation(Interpolative.class);
 						if (interpolative != null) {
@@ -224,9 +209,9 @@ public abstract class ConstraintTree<A extends Annotation> {
 		if ( !isValid ) {
 			//We do not add these violations yet, since we don't know how they are
 			//going to influence the final boolean evaluation
-			return Optional.of( constraintValidatorContext );
+			return constraintValidatorContext;
 		}
-		return Optional.empty();
+		return null;
 	}
 
 	@Override

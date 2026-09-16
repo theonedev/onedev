@@ -1,6 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec.textinput.defaultvalueprovider;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.annotation.Editable;

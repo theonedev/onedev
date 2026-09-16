@@ -2,8 +2,8 @@ package io.onedev.server.buildspec.step;
 
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CheckoutFacade;

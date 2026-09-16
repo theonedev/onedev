@@ -1,6 +1,6 @@
 package io.onedev.server.model.support;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.User;

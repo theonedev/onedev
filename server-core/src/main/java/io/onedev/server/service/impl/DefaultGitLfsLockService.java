@@ -1,8 +1,8 @@
 package io.onedev.server.service.impl;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import com.google.common.base.Preconditions;
 

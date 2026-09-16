@@ -2,7 +2,7 @@ package io.onedev.server.git.location;
 
 import java.io.Serializable;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;

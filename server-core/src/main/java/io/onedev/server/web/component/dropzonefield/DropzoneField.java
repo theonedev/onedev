@@ -6,7 +6,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.upload.UploadService;
-import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload2.core.FileUploadException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
@@ -89,7 +89,8 @@ public class DropzoneField extends FormComponentPanel<String> {
 						upload = new FileUpload(uploadId, new ArrayList<>());
 						getUploadService().cacheUpload(upload);
 					}
-					upload.getItems().addAll(multiPartRequest.getFiles().get("file"));
+					for (var item : multiPartRequest.getFiles().get("file"))
+						upload.getItems().add(item);
 	            } catch (FileUploadException e) {
 	            	throw new RuntimeException(e);
 	            }
@@ -114,7 +115,11 @@ public class DropzoneField extends FormComponentPanel<String> {
 					for (var it = upload.getItems().iterator(); it.hasNext();) {
 						var item = it.next();
 						if (item.getName().equals(fileName)) {
-							item.delete();
+							try {
+                                item.delete();
+                            } catch (java.io.IOException e) {
+                                throw new RuntimeException("Unable to delete uploaded file", e);
+                            }
 							it.remove();
 						}
 					}

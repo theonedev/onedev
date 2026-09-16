@@ -57,17 +57,17 @@ public class RefFacade implements Comparable<RefFacade>, Serializable {
 	public int compareTo(RefFacade other) {
 		Date date;
 		if (obj instanceof RevTag && ((RevTag)obj).getTaggerIdent() != null) {
-			date =  ((RevTag)obj).getTaggerIdent().getWhen();
+			date =  Date.from(((RevTag)obj).getTaggerIdent().getWhenAsInstant());
 		} else if (peeledObj instanceof RevCommit) {
-			date = ((RevCommit)peeledObj).getCommitterIdent().getWhen();
+			date = Date.from(((RevCommit)peeledObj).getCommitterIdent().getWhenAsInstant());
 		} else {
 			date = null;
 		}
 		Date otherDate;
 		if (other.obj instanceof RevTag && ((RevTag)other.obj).getTaggerIdent() != null) {
-			otherDate =  ((RevTag)other.obj).getTaggerIdent().getWhen();
+			otherDate =  Date.from(((RevTag)other.obj).getTaggerIdent().getWhenAsInstant());
 		} else if (other.peeledObj instanceof RevCommit) {
-			otherDate = ((RevCommit)other.peeledObj).getCommitterIdent().getWhen();
+			otherDate = Date.from(((RevCommit)other.peeledObj).getCommitterIdent().getWhenAsInstant());
 		} else {
 			otherDate = null;
 		}

@@ -111,16 +111,6 @@ public class ServerConfig {
 						String dbHost = StringUtils.substringBefore(tempStr, "/");
 						dbPorts.put(dbHost, 3306);
 					}
-				} else if (dbUrl.startsWith("sqlserver")) {
-					if (tempStr.contains(":")) {
-						String dbHost = StringUtils.substringBefore(tempStr, ":");
-						tempStr = StringUtils.substringAfter(tempStr, ":");
-						tempStr = StringUtils.substringBefore(tempStr, ";");
-						dbPorts.put(dbHost, parseInt(tempStr));
-					} else {
-						String dbHost = StringUtils.substringBefore(tempStr, ";");
-						dbPorts.put(dbHost, 1433);
-					}
 				} else {
 					tempStr = StringUtils.substringBefore(tempStr, "/");
 					for (var part: Splitter.on(",").omitEmptyStrings().trimResults().split(tempStr)) {

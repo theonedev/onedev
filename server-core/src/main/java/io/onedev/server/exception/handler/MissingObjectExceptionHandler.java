@@ -1,6 +1,6 @@
 package io.onedev.server.exception.handler;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.jgit.errors.MissingObjectException;
 

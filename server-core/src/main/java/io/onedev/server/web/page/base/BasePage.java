@@ -16,8 +16,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import javax.inject.Inject;
-import javax.servlet.http.Cookie;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
@@ -42,7 +42,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
 import org.apache.wicket.protocol.ws.api.event.WebSocketPushPayload;
@@ -275,12 +275,11 @@ public abstract class BasePage extends WebPage {
 		
 				try {
 					response.render(OnDomReadyHeaderItem.forScript(
-						String.format("onedev.server.onDomReady('%s', '%s', %s, %s, %d, %d, %s);",
+						String.format("onedev.server.onDomReady('%s', '%s', %s, %s, %d, %s);",
 								String.valueOf(OneDev.getInstance().getBootDate().getTime()),
 								SpriteImage.getVersionedHref(IconScope.class, null),
 								popStateBehavior.getCallbackFunction(explicit("data")).toString(), 
 								objectMapper.writeValueAsString(getRemoveAutosaveKeys()),
-								WebSocketService.KEEP_ALIVE_INTERVAL*2000,
 								sessionKeepAliveInterval,
 								objectMapper.writeValueAsString(translations))));
 				} catch (JsonProcessingException e) {
@@ -558,7 +557,7 @@ public abstract class BasePage extends WebPage {
 	}
 	
 	public void removeAutosaveKey(String autosaveKey) {
-		var target = RequestCycle.get().find(AjaxRequestTarget.class);
+		var target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 		if (target != null) {
 			target.prependJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 		} else {

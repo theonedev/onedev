@@ -45,6 +45,7 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.util.Tuple;
 
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.annotation.Editable;
@@ -81,8 +82,8 @@ public abstract class BaseConstructor {
   protected Composer composer;
   final Map<Node, Object> constructedObjects;
   private final Set<Node> recursiveObjects;
-  private final ArrayList<RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>>> maps2fill;
-  private final ArrayList<RecursiveTuple<Set<Object>, Object>> sets2fill;
+  private final ArrayList<Tuple<Map<Object, Object>, Tuple<Object, Object>>> maps2fill;
+  private final ArrayList<Tuple<Set<Object>, Object>> sets2fill;
 
   /**
    * the tag for the root node
@@ -91,6 +92,7 @@ public abstract class BaseConstructor {
   private PropertyUtils propertyUtils;
   private boolean explicitPropertyUtils;
   private boolean allowDuplicateKeys = true;
+  private boolean warnOnDuplicateKeys = false;
   private boolean wrappedToRootException = false;
 
   private boolean enumCaseSensitive = false;
@@ -120,9 +122,8 @@ public abstract class BaseConstructor {
     }
     constructedObjects = new HashMap<Node, Object>();
     recursiveObjects = new HashSet<Node>();
-    maps2fill =
-        new ArrayList<RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>>>();
-    sets2fill = new ArrayList<RecursiveTuple<Set<Object>, Object>>();
+    maps2fill = new ArrayList<Tuple<Map<Object, Object>, Tuple<Object, Object>>>();
+    sets2fill = new ArrayList<Tuple<Set<Object>, Object>>();
     typeDefinitions = new HashMap<Class<? extends Object>, TypeDescription>();
     typeTags = new HashMap<Tag, Class<? extends Object>>();
 
@@ -220,14 +221,14 @@ public abstract class BaseConstructor {
    */
   private void fillRecursive() {
     if (!maps2fill.isEmpty()) {
-      for (RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>> entry : maps2fill) {
-        RecursiveTuple<Object, Object> key_value = entry._2();
+      for (Tuple<Map<Object, Object>, Tuple<Object, Object>> entry : maps2fill) {
+        Tuple<Object, Object> key_value = entry._2();
         entry._1().put(key_value._1(), key_value._2());
       }
       maps2fill.clear();
     }
     if (!sets2fill.isEmpty()) {
-      for (RecursiveTuple<Set<Object>, Object> value : sets2fill) {
+      for (Tuple<Set<Object>, Object> value : sets2fill) {
         value._1().add(value._2());
       }
       sets2fill.clear();
@@ -264,7 +265,7 @@ public abstract class BaseConstructor {
     Object data = (constructedObjects.containsKey(node)) ? constructedObjects.get(node)
         : constructor.construct(node);
 
-    finalizeConstruction(node, data);
+    data = finalizeConstruction(node, data);
     constructedObjects.put(node, data);
     recursiveObjects.remove(node);
     if (node.isTwoStepsConstruction()) {
@@ -585,6 +586,11 @@ public abstract class BaseConstructor {
       if (key != null) {
         try {
           key.hashCode();// check circular dependencies
+        } catch (StackOverflowError e) {
+          // the key (in)directly contains itself; do not call key.toString() here as it would
+          // recurse over the same self-referential structure and may overflow the stack again
+          throw new ConstructorException("while constructing a mapping", node.getStartMark(),
+              "found recursive key that is not allowed", tuple.getKeyNode().getStartMark(), e);
         } catch (Exception e) {
           throw new ConstructorException("while constructing a mapping", node.getStartMark(),
               "found unacceptable key " + key, tuple.getKeyNode().getStartMark(), e);
@@ -611,7 +617,7 @@ public abstract class BaseConstructor {
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected void postponeMapFilling(Map<Object, Object> mapping, Object key, Object value) {
-    maps2fill.add(0, new RecursiveTuple(mapping, new RecursiveTuple(key, value)));
+    maps2fill.add(0, new Tuple(mapping, new Tuple(key, value)));
   }
 
   protected void constructSet2ndStep(MappingNode node, Set<Object> set) {
@@ -622,6 +628,11 @@ public abstract class BaseConstructor {
       if (key != null) {
         try {
           key.hashCode();// check circular dependencies
+        } catch (StackOverflowError e) {
+          // the key (in)directly contains itself; do not call key.toString() here as it would
+          // recurse over the same self-referential structure and may overflow the stack again
+          throw new ConstructorException("while constructing a Set", node.getStartMark(),
+              "found recursive key that is not allowed", tuple.getKeyNode().getStartMark(), e);
         } catch (Exception e) {
           throw new ConstructorException("while constructing a Set", node.getStartMark(),
               "found unacceptable key " + key, tuple.getKeyNode().getStartMark(), e);
@@ -641,7 +652,7 @@ public abstract class BaseConstructor {
    * does not observe value hashCode changes.
    */
   protected void postponeSetFilling(Set<Object> set, Object key) {
-    sets2fill.add(0, new RecursiveTuple<Set<Object>, Object>(set, key));
+    sets2fill.add(0, new Tuple<Set<Object>, Object>(set, key));
   }
 
   public void setPropertyUtils(PropertyUtils propertyUtils) {
@@ -678,25 +689,6 @@ public abstract class BaseConstructor {
     return typeDefinitions.put(definition.getType(), definition);
   }
 
-  private static class RecursiveTuple<T, K> {
-
-    private final T _1;
-    private final K _2;
-
-    public RecursiveTuple(T _1, K _2) {
-      this._1 = _1;
-      this._2 = _2;
-    }
-
-    public K _2() {
-      return _2;
-    }
-
-    public T _1() {
-      return _1;
-    }
-  }
-
   public final boolean isExplicitPropertyUtils() {
     return explicitPropertyUtils;
   }
@@ -707,6 +699,14 @@ public abstract class BaseConstructor {
 
   public void setAllowDuplicateKeys(boolean allowDuplicateKeys) {
     this.allowDuplicateKeys = allowDuplicateKeys;
+  }
+
+  public boolean isWarnOnDuplicateKeys() {
+    return warnOnDuplicateKeys;
+  }
+
+  public void setWarnOnDuplicateKeys(boolean warnOnDuplicateKeys) {
+    this.warnOnDuplicateKeys = warnOnDuplicateKeys;
   }
 
   public boolean isWrappedToRootException() {

@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.sourceformat;
 
 import org.jspecify.annotations.Nullable;
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;

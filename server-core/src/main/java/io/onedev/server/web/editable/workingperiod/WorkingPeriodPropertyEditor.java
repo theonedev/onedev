@@ -15,7 +15,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 

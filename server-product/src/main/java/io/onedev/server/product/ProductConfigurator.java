@@ -1,6 +1,6 @@
 package io.onedev.server.product;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -28,6 +28,7 @@ public class ProductConfigurator implements ServerConfigurator {
 	@Override
 	public void configure(Server server) {
 		HttpConfiguration configuration = new HttpConfiguration();
+		configuration.setRelativeRedirectAllowed(true);
 		configuration.setRequestHeaderSize(REQUEST_HEADER_SIZE);
 		configuration.setSendServerVersion(false);
 		

@@ -1,17 +1,15 @@
 package io.onedev.server.validation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import javax.validation.groups.Default;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.Default;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HibernateValidationInheritanceTest extends HibernateValidationTestSupport {
 
@@ -30,27 +28,36 @@ public class HibernateValidationInheritanceTest extends HibernateValidationTestS
 	}
 
 	@Test
-	public void defaultGroupRetainsParentConstraintsOfTheSameType() {
-		// Unlike validateValue and explicit groups, default-group bean/property validation
-		// also checks the parent's annotation when the child redeclares the same type.
+	public void childGetterReplacesConstraintAttributesForEveryValidationPath() {
 		var bean = new ChildSize();
 		for (Class<?> group : new Class<?>[] {Default.class, Checks.class}) {
 			bean.name = "abc";
 			for (var violations : List.of(validator.validate(bean, group),
 					validator.validateProperty(bean, "name", group))) {
-				if (group == Default.class) {
-					assertPaths(violations, "name");
-					assertEquals("parent size", violations.iterator().next().getMessage());
-				} else {
-					assertPaths(violations);
-				}
+				assertPaths(violations);
 			}
 			bean.name = "a";
 			for (var violations : List.of(validator.validate(bean, group),
 					validator.validateProperty(bean, "name", group))) {
-				assertPaths(violations, group == Default.class ? new String[] {"name", "name"} : new String[] {"name"});
-				assertEquals(group == Default.class ? Set.of("parent size", "child size") : Set.of("child size"), violations.stream()
-						.map(it -> it.getMessage()).collect(Collectors.toSet()));
+				assertPaths(violations, "name");
+				assertEquals("child size", violations.iterator().next().getMessage());
+			}
+		}
+	}
+
+	@Test
+	public void ungroupedOverridesReplaceParentConstraintsAndRemainInherited() {
+		for (var bean : List.of(new UngroupedChildSize(), new InheritedChildSize())) {
+			bean.name = "abc";
+			assertPaths(validator.validate(bean));
+			assertPaths(validator.validateProperty(bean, "name"));
+			assertPaths(validator.validateValue(bean.getClass(), "name", "abc"));
+			bean.name = "a";
+			for (var violations : List.of(validator.validate(bean),
+					validator.validateProperty(bean, "name"),
+					validator.validateValue(bean.getClass(), "name", "a"))) {
+				assertPaths(violations, "name");
+				assertEquals("child size", violations.iterator().next().getMessage());
 			}
 		}
 	}
@@ -98,6 +105,26 @@ public class HibernateValidationInheritanceTest extends HibernateValidationTestS
 		}
 	}
 
+	public static class UngroupedParentSize {
+		String name;
+
+		@Size(min = 5, message = "parent size")
+		public String getName() {
+			return name;
+		}
+	}
+
+	public static class UngroupedChildSize extends UngroupedParentSize {
+		@Override
+		@Size(min = 2, message = "child size")
+		public String getName() {
+			return super.getName();
+		}
+	}
+
+	public static class InheritedChildSize extends UngroupedChildSize {
+	}
+
 	public static class RequiredName {
 		@NotNull
 		public String getName() {
@@ -124,8 +151,7 @@ public class HibernateValidationInheritanceTest extends HibernateValidationTestS
 			return child;
 		}
 
-		@Valid
-		public List<RequiredName> getChildren() {
+		public List<@Valid RequiredName> getChildren() {
 			return children;
 		}
 	}
@@ -153,8 +179,7 @@ public class HibernateValidationInheritanceTest extends HibernateValidationTestS
 		}
 
 		@Override
-		@Valid
-		public List<RequiredName> getChildren() {
+		public List<@Valid RequiredName> getChildren() {
 			return super.getChildren();
 		}
 	}

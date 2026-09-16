@@ -2,9 +2,9 @@ package io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.defaultvaluep
 
 import java.util.List;
 
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
 

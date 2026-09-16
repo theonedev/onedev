@@ -12,7 +12,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.protocol.http.WebSession;
 
 import io.onedev.commons.utils.WordUtils;
@@ -125,7 +125,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			
 		});
 		
-		add(new Label("current", new AbstractReadOnlyModel<String>() {
+		add(new Label("current", new IModel<String>() {
 
 			@Override
 			public String getObject() {

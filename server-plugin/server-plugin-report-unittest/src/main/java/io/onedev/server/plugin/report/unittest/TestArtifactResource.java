@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;

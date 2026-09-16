@@ -23,7 +23,7 @@ import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import org.jspecify.annotations.Nullable;
@@ -47,7 +47,7 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 		var first = (AbstractLink) get("first");
 		first.add(new Label("pageNumber", "1"));
 		first.add(AttributeModifier.replace("data-page-index", "0"));
-		first.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		first.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -57,7 +57,7 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 		}));
 
 		var last = (AbstractLink) get("last");
-		last.add(new Label("pageNumber", new AbstractReadOnlyModel<String>() {
+		last.add(new Label("pageNumber", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -65,7 +65,7 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 			}
 
 		}));
-		last.add(AttributeModifier.replace("data-page-index", new AbstractReadOnlyModel<String>() {
+		last.add(AttributeModifier.replace("data-page-index", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -73,7 +73,7 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 			}
 
 		}));
-		last.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		last.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -172,7 +172,7 @@ public class OnePagingNavigator extends AjaxPagingNavigator {
 	}
 
 	private <T extends AbstractLink> T disableListenerHref(T link) {
-		link.add(new AttributeModifier("href", "javascript:;") {
+		link.add(new AttributeModifier("href", "#") {
 			@Override
 			public boolean isEnabled(Component component) {
 				return component.isEnabledInHierarchy();

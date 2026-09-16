@@ -52,7 +52,7 @@ public abstract class AjaxActionTab extends ActionTab {
 	
 	@Override
 	protected final void onSelect(Component tabLink) {
-		AjaxRequestTarget target = Preconditions.checkNotNull(RequestCycle.get().find(AjaxRequestTarget.class));
+		AjaxRequestTarget target = Preconditions.checkNotNull(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 		target.add(tabLink.findParent(Tabbable.class));
 		onSelect(target, tabLink);
 	}

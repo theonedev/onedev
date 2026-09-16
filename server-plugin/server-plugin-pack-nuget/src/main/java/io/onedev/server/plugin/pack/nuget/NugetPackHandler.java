@@ -9,14 +9,14 @@ import static io.onedev.server.util.UrlUtils.decodeQuery;
 import static io.onedev.server.util.UrlUtils.encodePath;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.stream.Collectors.toList;
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
-import static javax.servlet.http.HttpServletResponse.SC_CREATED;
-import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
-import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
+import static jakarta.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static jakarta.servlet.http.HttpServletResponse.SC_NO_CONTENT;
+import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -37,13 +37,12 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.dom4j.Document;
@@ -206,7 +205,7 @@ public class NugetPackHandler implements PackHandler {
 				sessionService.run(() -> {
 					checkProject(projectId, true);
 				});
-				var upload = new ServletFileUpload();
+				var upload = new JakartaServletFileUpload<>();
 				try {
 					var items = upload.getItemIterator(request);
 					if (items.hasNext()) {
@@ -214,7 +213,7 @@ public class NugetPackHandler implements PackHandler {
 						var tempFile = FileUtils.createTempFile("upload", "nuget");
 						try {
 							try (
-									var is = item.openStream();
+									var is = item.getInputStream();
 									var os = new BufferedOutputStream(new FileOutputStream(tempFile), BUFFER_SIZE)) {
 								IOUtils.copy(is, os, BUFFER_SIZE);
 							}
@@ -326,7 +325,7 @@ public class NugetPackHandler implements PackHandler {
 					} else {
 						throw new ClientException(SC_BAD_REQUEST);
 					}
-				} catch (FileUploadException | IOException e) {
+				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			} else if (isDelete) {

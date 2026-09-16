@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import io.onedev.server.annotation.Editable;
 
@@ -16,8 +16,7 @@ public class ProjectWorkspaceSetting implements Serializable {
 	private List<NamedWorkspaceQuery> namedQueries;
 
 	@Nullable
-	@Valid
-	public List<NamedWorkspaceQuery> getNamedQueries() {
+	public List<@Valid NamedWorkspaceQuery> getNamedQueries() {
 		return namedQueries;
 	}
 

@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
@@ -39,15 +38,15 @@ import org.apache.wicket.Localizer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.core.util.lang.WicketObjects;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.form.AutoLabelResolver.AutoLabelMarker;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.IObjectClassAwareModel;
 import org.apache.wicket.model.IPropertyReflectionAwareModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.Request;
-import org.apache.wicket.request.parameter.EmptyRequestParameters;
 import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.convert.IConverter;
 import org.apache.wicket.util.lang.Args;
@@ -105,7 +104,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public abstract class FormComponent<T> extends LabeledWebMarkupContainer implements
-	IFormVisitorParticipant, IFormModelUpdateListener, IGenericComponent<T>
+	IFormVisitorParticipant, IFormModelUpdateListener, IGenericComponent<T, FormComponent<T>>
 {
 	private static final Logger logger = LoggerFactory.getLogger(FormComponent.class);
 
@@ -118,18 +117,15 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	{
 		private final Set<String> triedKeys = new LinkedHashSet<>();
 
-		/**
-		 * @see org.apache.wicket.validation.IErrorMessageSource#getMessage(String, java.util.Map)
-		 */
 		@Override
 		public String getMessage(String key, Map<String, Object> vars)
 		{
 			final FormComponent<T> formComponent = FormComponent.this;
 
-			// Use the following log4j config for detailed logging on the property resolution
-			// process
-			// log4j.logger.org.apache.wicket.resource.loader=DEBUG
-			// log4j.logger.org.apache.wicket.Localizer=DEBUG
+			// Use the following slf4j-simple config for detailed logging
+			// on the property resolution process
+			// org.slf4j.simpleLogger.log.org.apache.wicket.resource.loader=DEBUG
+			// org.slf4j.simpleLogger.log.org.apache.wicket.Localizer=DEBUG
 
 			final Localizer localizer = formComponent.getLocalizer();
 
@@ -305,6 +301,13 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 		}
 	}
 
+	@Override
+	protected void onBeforeRender()
+	{
+		// WICKET-7101 update related auto-label
+		getRequestCycle().find(IPartialPageRequestHandler.class).ifPresent(handler -> updateAutoLabels(handler, true));
+		super.onBeforeRender();
+	}
 
 	/**
 	 * Adapter that makes this component appear as {@link IValidatable}
@@ -544,14 +547,13 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 * @see #add(IValidator)
 	 * @return form component for chaining
 	 */
-	@SuppressWarnings("unlikely-arg-type")
 	public final FormComponent<T> remove(final IValidator<? super T> validator)
 	{
 		Args.notNull(validator, "validator");
 		Behavior match = null;
 		for (Behavior behavior : getBehaviors())
 		{
-			if (behavior.equals(validator))
+			if (validator instanceof Behavior validatorBehavior && behavior.equals(validatorBehavior))
 			{
 				match = behavior;
 				break;
@@ -589,6 +591,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 *             if validator is null
 	 * @see IValidator
 	 */
+	// The varargs array is only iterated; it is never modified or retained.
 	@SafeVarargs
 	public final FormComponent<T> add(final IValidator<? super T>... validators)
 	{
@@ -642,7 +645,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	/**
 	 * Clears the user input.
 	 */
-	public final void clearInput()
+	public void clearInput()
 	{
 		rawInput = NO_RAW_INPUT;
 	}
@@ -776,12 +779,12 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 		{
 			if (values != null && values.length == 1 && values[0] == null)
 			{
-				// we the key got passed in (otherwise values would be null),
+				// the key got passed in (otherwise values would be null),
 				// but the value was set to null.
 				// As the servlet spec isn't clear on what to do with 'empty'
 				// request values - most return an empty string, but some null -
 				// we have to workaround here and deliberately set to an empty
-				// string if the the component is not nullable (text components)
+				// string if the component is not nullable (text components)
 				return EMPTY_STRING_ARRAY;
 			}
 		}
@@ -799,37 +802,11 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 */
 	protected List<StringValue> getParameterValues(String inputName)
 	{
-		String method = Form.METHOD_POST;
-		final Request request = getRequest();
-		if (getRequest().getContainerRequest() instanceof HttpServletRequest)
-		{
-			method = ((HttpServletRequest)getRequest().getContainerRequest()).getMethod();
-		}
-		else
-		{
-			final Form<?> form = findParent(Form.class);
-			if (form != null)
-			{
-				method = form.getMethod();
-			}
-		}
-
-		final IRequestParameters parameters;
-		switch (method.toLowerCase(Locale.ROOT))
-		{
-			case Form.METHOD_POST:
-				parameters = request.getPostParameters();
-				break;
-			case Form.METHOD_GET:
-				parameters = request.getQueryParameters();
-				break;
-			default:
-				parameters = EmptyRequestParameters.INSTANCE;
-		}
+		final IRequestParameters parameters = Form.getRequestParameters(this);
 
 		return parameters.getParameterValues(inputName);
 	}
-	
+
 	/**
 	 * Gets the string to be used for the <tt>name</tt> attribute of the form element. Generated
 	 * using the path from the form to the component, excluding the form itself. Override it if you
@@ -980,7 +957,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 * Gets whether this component's input can be null. By default, components that do not get input
 	 * will have null values passed in for input. However, component TextField is an example
 	 * (possibly the only one) that never gets a null passed in, even if the field is left empty
-	 * UNLESS it had attribute <code>disabled="disabled"</code> set.
+	 * UNLESS it has attribute <code>disabled="disabled"</code> set.
 	 * 
 	 * @return True if this component's input can be null. Returns true by default.
 	 */
@@ -1079,6 +1056,8 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	}
 
 	/**
+	 * THIS METHOD IS NOT PART OF THE WICKET PUBLIC API. DO NOT USE IT!
+	 *
 	 * Sets the value for a form component.
 	 * 
 	 * @param value
@@ -1101,7 +1080,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 		if (!required && getType() != null && getType().isPrimitive())
 		{
 			throw new WicketRuntimeException(
-					"FormComponent has to be required when the type is primitive class: " + this);
+				"FormComponent has to be required when the type is primitive class: " + this);
 		}
 		if (required != isRequired())
 		{
@@ -1425,7 +1404,6 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 *            Tag to modify
 	 * @see org.apache.wicket.Component#onComponentTag(ComponentTag)
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onComponentTag(final ComponentTag tag)
 	{
@@ -1434,11 +1412,6 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 		if (!isEnabledInHierarchy())
 		{
 			onDisabled(tag);
-		}
-
-		if (isRequired())
-		{
-			onRequired(tag);
 		}
 
 		super.onComponentTag(tag);
@@ -1453,7 +1426,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	protected void onDetach()
 	{
 		super.onDetach();
-//		convertedInput = null;
+		// Keep converted input when the component is serialized between requests.
 	}
 
 	/**
@@ -1467,17 +1440,6 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	protected void onDisabled(final ComponentTag tag)
 	{
 		tag.put("disabled", "disabled");
-	}
-
-	/**
-	 * Called by {@link #onComponentTag(ComponentTag)} when the component is required.
-	 * 
-	 * @param tag
-	 *            the tag that is being rendered
-	 */
-	@Deprecated
-	protected void onRequired(final ComponentTag tag)
-	{
 	}
 
 	/**
@@ -1605,39 +1567,14 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 		return new ValidatableAdapter();
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public final IModel<T> getModel()
-	{
-		return (IModel<T>)getDefaultModel();
-	}
-
-	@Override
-	public final void setModel(IModel<T> model)
-	{
-		setDefaultModel(model);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public final T getModelObject()
-	{
-		return (T)getDefaultModelObject();
-	}
-
-	@Override
-	public final void setModelObject(T object)
-	{
-		setDefaultModelObject(object);
-	}
-
 	/**
 	 * Updates auto label css classes such as error/required during ajax updates when the labels may
 	 * not be directly repainted in the response.
 	 * 
-	 * @param target
+	 * @param target The {@link IPartialPageRequestHandler}
+	 * @param checkAuto if true then we check is the related auto-label is marked as auto before updating it.
 	 */
-	public final void updateAutoLabels(AjaxRequestTarget target)
+	public final void updateAutoLabels(IPartialPageRequestHandler target, boolean checkAuto)
 	{
 		AutoLabelMarker marker = getMetaData(AutoLabelResolver.MARKER_KEY);
 	
@@ -1647,15 +1584,64 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 			return;
 		}
 
+		if (checkAuto)
+		{
+			if (!marker.isAuto())
+			{
+				return;
+			}
+			marker.updateFrom(this, target);
+			return;
+		}
+
 		marker.updateFrom(this, target);
+	}
+
+
+	/**
+	 * @deprecated method in favor of the one receiving {@link IPartialPageRequestHandler}
+	 */
+	@Deprecated(since = "9.17.0, 10.0.0", forRemoval = true)
+	public final void updateAutoLabels(AjaxRequestTarget target)
+	{
+		updateAutoLabels(target, false);
+	}
+
+	/**
+	 * @return if this form component is visited during the form processing
+	 */
+	public boolean isFormParticipant()
+	{
+		Component parent = getParent();
+		boolean outsideParentForm = false;
+		while (parent != null)
+		{
+			if (parent instanceof IFormVisitorParticipant && !((IFormVisitorParticipant)parent).processChildren() && !outsideParentForm)
+			{
+				return false;
+			}
+			if (parent instanceof Form form)
+			{
+				if (!form.wantSubmitOnParentFormSubmit())
+				{
+					return false;
+				}
+				if (form == this.getForm())
+				{
+					outsideParentForm = true;
+				}
+			}
+			parent = parent.getParent();
+		}
+		return true;
 	}
 
 	/**
 	 * Update the model of a {@link FormComponent} containing a {@link Collection}.
 	 * 
-	 * If the model object does not yet exists, a new {@link ArrayList} is filled with the converted
+	 * If the model object does not yet exists, a new suitable collection is filled with the converted
 	 * input and used as the new model object. Otherwise the existing collection is modified
-	 * in-place, then {@link Model#setObject(Object)} is called with the same instance: it allows
+	 * in-place, then {@link IModel#setObject(Object)} is called with the same instance: it allows
 	 * the Model to be notified of changes even when {@link Model#getObject()} returns a different
 	 * {@link Collection} at every invocation.
 	 * 
@@ -1677,7 +1663,14 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 		Collection<S> collection = formComponent.getModelObject();
 		if (collection == null)
 		{
-			collection = new ArrayList<>(convertedInput);
+			Class<?> hint = null;
+			if (formComponent.getModel() instanceof IObjectClassAwareModel) {
+				hint = ((IObjectClassAwareModel<?>)formComponent.getModel()).getObjectClass();
+			}
+			if (hint == null) {
+				hint = List.class;
+			}
+			collection = newCollection(hint, convertedInput);
 			formComponent.setModelObject(collection);
 		}
 		else
@@ -1699,7 +1692,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 					logger.debug("An error occurred while trying to modify the collection attached to "
 							+ formComponent, unmodifiable);
 				}
-				collection = new ArrayList<>(convertedInput); 
+				collection = newCollection(collection.getClass(), convertedInput);
 			}
 			
 			try
@@ -1721,6 +1714,23 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 			}
 			
 			formComponent.modelChanged();
+		}
+	}
+
+	/**
+	 * Creates a new collection.
+	 *
+	 * @param hint type deciding the type of the returned collection
+	 * @param  elements elements for the new collection
+	 * @return collection
+	 * @throws IllegalArgumentException if type is not supported
+	 */
+	private static <S> Collection<S> newCollection(Class<?> hint, Collection<S> elements)
+	{
+		if (Set.class.isAssignableFrom(hint)) {
+			return new LinkedHashSet<>(elements);
+		} else {
+			return new ArrayList<>(elements);
 		}
 	}
 }

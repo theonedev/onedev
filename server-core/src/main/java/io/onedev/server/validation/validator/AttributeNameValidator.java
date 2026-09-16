@@ -2,8 +2,8 @@ package io.onedev.server.validation.validator;
 
 import java.util.regex.Pattern;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import io.onedev.server.model.Agent;
 import io.onedev.server.annotation.AttributeName;

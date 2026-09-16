@@ -2,9 +2,9 @@ package io.onedev.server.web.component.diff.revision;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.web.component.diff.revision.RevisionDiffPanel.getChildren;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RevisionDiffPanelTest {
 

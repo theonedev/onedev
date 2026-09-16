@@ -3,23 +3,23 @@ package io.onedev.server.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="o_user_id"), @Index(columnList="o_request_id"), 
-				@Index(columnList="o_comment_id")},
+				@Index(columnList="user_id"), @Index(columnList="request_id"),
+				@Index(columnList="comment_id")},
 		uniqueConstraints={
-				@UniqueConstraint(columnNames={"o_user_id", "o_request_id", "o_comment_id"})}
+				@UniqueConstraint(columnNames={"user_id", "request_id", "comment_id"})}
 )
 public class PendingSuggestionApply extends AbstractEntity {
 

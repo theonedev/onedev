@@ -16,16 +16,16 @@
  */
 package io.onedev.server.web.websocket;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.ws.api.AbstractWebSocketProcessor;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import java.nio.ByteBuffer;
+import org.eclipse.jetty.websocket.api.Callback;
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +35,15 @@ import io.onedev.server.persistence.SessionService;
 
 /**
  * An {@link org.apache.wicket.protocol.ws.api.IWebSocketProcessor processor} that integrates with
- * Jetty 9.x {@link Session web socket} implementation.
+ * Jetty 12 {@link Session web socket} implementation.
  *
  * @since 6.2
  */
-public class WebSocketProcessor extends AbstractWebSocketProcessor implements WebSocketListener {
+public class WebSocketProcessor extends AbstractWebSocketProcessor implements Session.Listener.AutoDemanding {
 	
 	private static final Logger logger = LoggerFactory.getLogger(WebSocketProcessor.class);
 
-	private final ServletUpgradeRequest request;
+	private final Subject subject;
 	
 	/**
 	 * Constructor.
@@ -55,18 +55,19 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	 * @param application
 	 *            the current Wicket Application
 	 */
-	public WebSocketProcessor(final ServletUpgradeRequest upgradeRequest,
-		final ServletUpgradeResponse upgradeResponse, final WebApplication application) {
+	public WebSocketProcessor(final JettyServerUpgradeRequest upgradeRequest,
+		final JettyServerUpgradeResponse upgradeResponse, final WebApplication application) {
 		super(upgradeRequest.getHttpServletRequest(), application);
 		
-		this.request = upgradeRequest;
+		this.subject = (Subject) upgradeRequest.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
 	}
 
 	@Override
-	public void onWebSocketConnect(final Session session) {
+	public void onWebSocketOpen(final Session session) {
+        // Jetty 12 defaults to 30 seconds, which races our 30-second keep-alive schedule.
+        session.setIdleTimeout(java.time.Duration.ofSeconds(WebSocketService.KEEP_ALIVE_INTERVAL * 3L));
 		run(() -> {
 			PageKey pageKey = new PageKey(getSessionId(), getRegistryKey());
-			Subject subject = (Subject) request.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
 			WebSocketConnection connection = new WebSocketConnection(session, WebSocketProcessor.this, pageKey, subject);
 			onConnect(connection);
 		});
@@ -74,9 +75,13 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	
 	private void run(Runnable runnable) {
 		SessionService sessionService = OneDev.getInstance(SessionService.class);
-		Subject subject = (Subject) request.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
-		ThreadContext.bind(subject);
-		sessionService.run(runnable);
+        var threadState = new org.apache.shiro.subject.support.SubjectThreadState(subject);
+        threadState.bind();
+        try {
+            sessionService.run(runnable);
+        } finally {
+            threadState.restore();
+        }
 	}
 	
 	@Override
@@ -86,9 +91,16 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	}
 
 	@Override
-	public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
-		run(() -> onMessage(payload, offset, len));
-	}
+	public void onWebSocketBinary(ByteBuffer payload, Callback callback) {
+        byte[] bytes = new byte[payload.remaining()];
+        payload.get(bytes);
+        try {
+            run(() -> onMessage(bytes, 0, bytes.length));
+            callback.succeed();
+        } catch (Throwable t) {
+            callback.fail(t);
+        }
+    }
 
 	@Override
 	public void onWebSocketClose(final int statusCode, final String reason) {
@@ -104,7 +116,7 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 
 	@Override
 	public void onOpen(Object connection) {
-		onWebSocketConnect((Session)connection);
+		onWebSocketOpen((Session)connection);
 	}
 
 }

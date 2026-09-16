@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import java.util.Date;
+
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
@@ -89,8 +91,8 @@ class PullRequestUpdatePanel extends Panel {
 				});
 
 				var committer = commit.getCommitterIdent();
-				item.add(new Label("date", DateUtils.formatAge(committer.getWhen()))
-						.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(committer.getWhen()))));
+				item.add(new Label("date", DateUtils.formatAge(Date.from(committer.getWhenAsInstant())))
+						.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(Date.from(committer.getWhenAsInstant())))));
 
 				item.add(new SignatureStatusPanel("signature") {
 					

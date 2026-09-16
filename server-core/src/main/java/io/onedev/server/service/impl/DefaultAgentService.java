@@ -16,16 +16,16 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.Strings;
 import org.eclipse.jetty.websocket.api.Session;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -127,11 +127,10 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 		osNames = hazelcastInstance.getMap("agentOsNames");
 		osArchs = hazelcastInstance.getMap("agentOsArchs");
 		
-		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("agentCacheInited");
+		var cacheInited = clusterService.getAtomicLong("agentCacheInited");
 		clusterService.initWithLead(cacheInited, () -> {
-			@SuppressWarnings("unchecked")
 			Query<Object[]> query = dao.getSession().createQuery(String.format("select %s, %s from Agent",
-					Agent.PROP_OS_NAME, Agent.PROP_OS_ARCH));
+					Agent.PROP_OS_NAME, Agent.PROP_OS_ARCH), Object[].class);
 			for (Object[] row: query.list()) {
 				osNames.put((String) row[0], (String) row[0]);
 				osArchs.put((String) row[1], (String) row[1]);
@@ -220,7 +219,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 		if (prevSession != null) {
 			try {
 				prevSession.disconnect();
-			} catch (IOException ignored) {
+			} catch (RuntimeException ignored) {
 			}
 		}
 		
@@ -240,7 +239,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 	}
 
 	private void removeReferences(Agent agent) {
-		Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
+		var query = getSession().createMutationQuery("update Build set agent=null where agent=:agent");
 		query.setParameter("agent", agent);
 		query.executeUpdate();
 	}
@@ -299,7 +298,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 		if (query.getCriteria() != null)
 			criteriaQuery.where(query.getCriteria().getPredicate(null, criteriaQuery, root, builder));
 
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		List<jakarta.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: query.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));

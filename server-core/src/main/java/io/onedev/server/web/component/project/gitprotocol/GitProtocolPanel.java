@@ -2,7 +2,7 @@ package io.onedev.server.web.component.project.gitprotocol;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import io.onedev.server.ServerConfig;
 import org.apache.wicket.Component;

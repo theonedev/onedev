@@ -14,7 +14,7 @@ import io.onedev.server.service.BuildService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.persistence.SessionService;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.List;
 

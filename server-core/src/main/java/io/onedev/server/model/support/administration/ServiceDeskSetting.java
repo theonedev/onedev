@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
@@ -42,8 +42,7 @@ public class ServiceDeskSetting implements Serializable {
 	@Editable(order=300, description="Specify issue creation settings. For a particular sender and project, " +
 			"the first matching entry will take effect. Issue creation will be disallowed if no matching " +
 			"entry found")
-	@Valid
-	public List<IssueCreationSetting> getIssueCreationSettings() {
+	public List<@Valid IssueCreationSetting> getIssueCreationSettings() {
 		return issueCreationSettings;
 	}
 

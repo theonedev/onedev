@@ -5,7 +5,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;

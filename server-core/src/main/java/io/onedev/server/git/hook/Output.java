@@ -2,7 +2,7 @@ package io.onedev.server.git.hook;
 
 import java.io.IOException;
 
-import javax.servlet.ServletOutputStream;
+import jakarta.servlet.ServletOutputStream;
 
 public class Output {
 

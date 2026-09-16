@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -76,9 +76,8 @@ public class CacheConfig implements Serializable {
 	}
 
 	@Editable(order=300, name="Cache Entries", description = "Specify cache entries")
-	@Valid
 	@Size(min=1, max=100)
-	public List<CacheEntry> getEntries() {
+	public List<@Valid CacheEntry> getEntries() {
 		return entries;
 	}
 

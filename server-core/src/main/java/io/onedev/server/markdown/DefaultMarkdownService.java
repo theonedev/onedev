@@ -26,8 +26,8 @@ import io.onedev.server.web.resource.AttachmentResource;
 import org.jsoup.nodes.Element;
 
 import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

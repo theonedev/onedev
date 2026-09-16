@@ -3,7 +3,7 @@ package io.onedev.server.model.support.issue.field.spec;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.dateinput.DateInput;

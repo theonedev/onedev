@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.subject.Subject;
@@ -29,14 +29,14 @@ import org.apache.wicket.Application;
 import org.apache.wicket.Page;
 import org.apache.wicket.protocol.ws.WebSocketSettings;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Order;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hazelcast.cp.IAtomicLong;
+import io.onedev.server.cluster.ClusterAtomicLong;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
@@ -133,9 +133,9 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 	 * Use cluster wide id for anonymous chats and messages as we use id to route 
 	 * websocket observable changes to correct connections
 	 */
-	private volatile IAtomicLong nextAnonymousChatId;
+	private volatile ClusterAtomicLong nextAnonymousChatId;
 
-	private volatile IAtomicLong nextAnonymousChatMessageId;
+	private volatile ClusterAtomicLong nextAnonymousChatMessageId;
 
 	private final Map<String, Map<Long, ChatRespondingImpl>> respondings = new ConcurrentHashMap<>();
 	
@@ -523,8 +523,8 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 
 	@Listen
 	public void on(SystemStarting event) {
-		nextAnonymousChatId = clusterService.getHazelcastInstance().getCPSubsystem().getAtomicLong("nextAnonymousChatId");
-		nextAnonymousChatMessageId = clusterService.getHazelcastInstance().getCPSubsystem().getAtomicLong("nextAnonymousChatMessageId");
+		nextAnonymousChatId = clusterService.getAtomicLong("nextAnonymousChatId");
+		nextAnonymousChatMessageId = clusterService.getAtomicLong("nextAnonymousChatMessageId");
 		if (clusterService.isLeaderServer()) {
 			nextAnonymousChatId.set(1L);
 			nextAnonymousChatMessageId.set(1L);

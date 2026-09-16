@@ -1,9 +1,13 @@
-CVE-2026-0603
-CVE-2024-53299
-CVE-2024-57699
-CVE-2026-2332
-CVE-2026-49268
-CVE-2026-10050
+# Hazelcast maintainers report that their shipped JSON paths do not use polymorphic
+# typing with a configured type validator, required by CVE-2026-54512 and CVE-2026-54513.
+# See https://github.com/hazelcast/hazelcast/issues/26597
+# Reviewed Hazelcast 5.7.0 sources and packaged callers: no use of its shaded databind.
+# OneDev's own ObjectMapper uses patched Jackson 2.22.2.
+CVE-2026-54512
+CVE-2026-54513
 
-GHSA-72hv-8253-57qq
+# Hazelcast 5.7.0 shades jackson-core 2.21.2 and 3.1.2; fixed in 2.21.4 and 3.1.4.
+# Reviewed JSON paths use synchronous createParser calls (including jackson-jr);
+# no callers of the affected non-blocking parsers were found in the packaged build.
+# Reassess these exceptions when changing Hazelcast or its JSON usage.
 GHSA-r7wm-3cxj-wff9

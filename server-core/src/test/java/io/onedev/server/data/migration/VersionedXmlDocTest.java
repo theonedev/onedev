@@ -3,10 +3,10 @@ package io.onedev.server.data.migration;
 import com.thoughtworks.xstream.XStream;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.AppLoaderMocker;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VersionedXmlDocTest extends AppLoaderMocker {
 

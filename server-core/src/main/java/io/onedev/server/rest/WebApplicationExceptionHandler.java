@@ -5,7 +5,7 @@ import io.onedev.server.exception.HttpResponseBody;
 import io.onedev.server.exception.handler.AbstractExceptionHandler;
 import org.eclipse.jetty.http.HttpStatus;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 public class WebApplicationExceptionHandler extends AbstractExceptionHandler<WebApplicationException> {
 

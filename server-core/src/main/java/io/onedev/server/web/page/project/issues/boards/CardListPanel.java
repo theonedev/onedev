@@ -16,7 +16,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.util.visit.IVisitor;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -132,7 +132,6 @@ abstract class CardListPanel extends Panel {
 	private BoardCardPanel newCard(Long issueId) {
 		return new BoardCardPanel(String.valueOf(issueId), issueId) {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			protected Cursor getCursor() {
 				IssueQuery query = getQuery();
@@ -217,7 +216,6 @@ abstract class CardListPanel extends Panel {
 	void onCardDropped(AjaxRequestTarget target, Long issueId, int cardIndex, boolean accepted) {
 		findParent(RepeatingView.class).visitChildren(CardListPanel.class, (IVisitor<CardListPanel, Void>) (cardListPanel, visit) -> {
 			for (int i=0; i<cardListPanel.cardsView.size(); i++) {
-				@SuppressWarnings("deprecation")
 				var card = (BoardCardPanel) cardListPanel.cardsView.get(i);
 				if (card.getIssueId().equals(issueId)) {
 					if (accepted) {
@@ -246,7 +244,6 @@ abstract class CardListPanel extends Panel {
 		});
 	}
 	
-	@SuppressWarnings("deprecation")
 	private void moveCard(int fromIndex, int toIndex) {
 		if (fromIndex < toIndex) {
 			for (int i=0; i<toIndex-fromIndex; i++)
@@ -257,7 +254,6 @@ abstract class CardListPanel extends Panel {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	private Issue getIssue(int cardIndex) {
 		return getIssueService().load(((BoardCardPanel) cardsView.get(cardIndex)).getIssueId());
 	}

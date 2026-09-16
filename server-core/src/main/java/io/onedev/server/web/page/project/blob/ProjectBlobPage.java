@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +39,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
@@ -709,7 +708,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 
 	private QuickSearchPanel newQuickSearchPanel(String id, ModalPanel modal) {
-		return new QuickSearchPanel(id, projectModel, new AbstractReadOnlyModel<String>() {
+		return new QuickSearchPanel(id, projectModel, new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -751,7 +750,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		 */
 		advancedSearchPanelModal = modal;
 		if (advancedSearchPanel == null) {
-			advancedSearchPanel = new AdvancedSearchPanel(id, projectModel, new AbstractReadOnlyModel<String>() {
+			advancedSearchPanel = new AdvancedSearchPanel(id, projectModel, new IModel<String>() {
 	
 				@Override
 				public String getObject() {
@@ -1643,7 +1642,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			else if (getProject().isCommitSignatureRequiredButNoSigningKey(user, blobIdent.revision)) 
 				signRequired = true;
 			
-			BlobContent blobContent = new BlobContent(item.get(), FileMode.REGULAR_FILE.getBits());
+			BlobContent blobContent = new BlobContent(FileUpload.readBytes(item), FileMode.REGULAR_FILE.getBits());
 			newBlobs.put(blobPath, blobContent);
 		}
 

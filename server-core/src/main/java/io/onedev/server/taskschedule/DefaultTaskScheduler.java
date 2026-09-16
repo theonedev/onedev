@@ -3,7 +3,7 @@ package io.onedev.server.taskschedule;
 import java.util.Properties;
 import java.util.UUID;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;

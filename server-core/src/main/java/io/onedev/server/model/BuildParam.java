@@ -4,14 +4,14 @@ import static io.onedev.server.model.BuildParam.PROP_NAME;
 import static io.onedev.server.model.BuildParam.PROP_VALUE;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
 
@@ -21,8 +21,8 @@ import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
  */
 @Entity
 @Table(
-		indexes={@Index(columnList="o_build_id"), @Index(columnList=PROP_NAME), @Index(columnList=PROP_VALUE)}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_build_id", PROP_NAME, PROP_VALUE})})
+		indexes={@Index(columnList="build_id"), @Index(columnList=PROP_NAME), @Index(columnList=PROP_VALUE)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"build_id", PROP_NAME, PROP_VALUE})})
 public class BuildParam extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

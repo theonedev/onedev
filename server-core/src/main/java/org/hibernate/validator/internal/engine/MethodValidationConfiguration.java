@@ -1,8 +1,6 @@
 /*
- * Hibernate Validator, declare and validate application constraints
- *
- * License: Apache License, Version 2.0
- * See the license.txt file in the root directory or <http://www.apache.org/licenses/LICENSE-2.0>.
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.validator.internal.engine;
 
@@ -21,7 +19,7 @@ import org.hibernate.validator.internal.util.CollectionHelper;
 import org.hibernate.validator.internal.util.stereotypes.Immutable;
 
 /**
- * These properties modify the behavior of the {@code Validator} with respect to the Jakarta Bean Validation
+ * These properties modify the behavior of the {@code Validator} with respect to the Jakarta Validation
  * specification section 5.6.5. In particular:
  * <pre>
  * "Out of the box, a conforming Bean Validation provider must throw a
@@ -168,7 +166,7 @@ public class MethodValidationConfiguration {
 		 * Define whether overriding methods that override constraints should throw a {@code ConstraintDefinitionException}.
 		 * The default value is {@code false}, i.e. do not allow.
 		 *
-		 * See Section 5.6.5 of the Jakarta Bean Validation Specification, specifically
+		 * See Section 5.6.5 of the Jakarta Validation Specification, specifically
 		 * <pre>
 		 * "In sub types (be it sub classes/interfaces or interface implementations), no parameter constraints may
 		 * be declared on overridden or implemented methods, nor may parameters be marked for cascaded validation.
@@ -206,7 +204,7 @@ public class MethodValidationConfiguration {
 		 * Define whether parallel methods that define constraints should throw a {@code ConstraintDefinitionException}. The
 		 * default value is {@code false}, i.e. do not allow.
 		 *
-		 * See Section 5.6.5 of the Jakarta Bean Validation Specification, specifically
+		 * See Section 5.6.5 of the Jakarta Validation Specification, specifically
 		 * "If a sub type overrides/implements a method originally defined in several parallel types of the hierarchy
 		 * (e.g. two interfaces not extending each other, or a class and an interface not implemented by said class),
 		 * no parameter constraints may be declared for that method at all nor parameters be marked for cascaded validation.

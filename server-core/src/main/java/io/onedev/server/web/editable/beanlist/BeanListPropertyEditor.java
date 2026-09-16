@@ -21,10 +21,9 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -150,10 +149,9 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		
 		add(new AjaxButton("addElement") {
 
-			@SuppressWarnings("deprecation")
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				markFormDirty(target);
 				
 				Component lastRow;
@@ -201,7 +199,6 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		
 		add(new SortBehavior() {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				markFormDirty(target);
@@ -270,8 +267,8 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		row.add(new AjaxButton("deleteElement") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				markFormDirty(target);
 				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
 				rows.remove(row);

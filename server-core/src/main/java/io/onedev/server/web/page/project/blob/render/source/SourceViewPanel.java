@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.source;
 
+import java.util.Date;
+
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
@@ -15,8 +17,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import javax.inject.Inject;
-import javax.servlet.http.Cookie;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.Cookie;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.Component;
@@ -44,7 +46,6 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -407,7 +408,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(AttributeAppender.replace("data-tippy-content", new AbstractReadOnlyModel<String>() {
+				add(AttributeAppender.replace("data-tippy-content", new IModel<String>() {
 
 					@Override
 					public String getObject() {
@@ -612,14 +613,14 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					form.add(new AjaxButton("save") {
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
+						protected void onError(AjaxRequestTarget target) {
+							super.onError(target);
 							target.add(feedback);
 						}
 
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
+						protected void onSubmit(AjaxRequestTarget target) {
+							super.onSubmit(target);
 							
 							String content = contentInput.getModelObject();
 							if (content.length() > CodeComment.MAX_CONTENT_LEN) {
@@ -1011,7 +1012,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			for (BlameBlock blame: gitService.blame(
 					context.getProject(), context.getCommit().copy(), context.getBlobIdent().path, null)) {
 				BlameInfo blameInfo = new BlameInfo();
-				blameInfo.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
+				blameInfo.commitDate = DateUtils.formatDate(Date.from(blame.getCommit().getCommitter().getWhenAsInstant()));
 				blameInfo.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());
 				blameInfo.hash = blame.getCommit().getHash();
 				blameInfo.abbreviatedHash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);

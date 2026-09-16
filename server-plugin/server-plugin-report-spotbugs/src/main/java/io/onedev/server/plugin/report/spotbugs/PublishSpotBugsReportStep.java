@@ -22,7 +22,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;

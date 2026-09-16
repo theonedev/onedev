@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandFacade;
@@ -100,8 +100,7 @@ public class CommandStep extends Step {
 			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
 			"<code>@job_token@</code> for user name, and access token secret for password secret")
 	@DependsOn(property="runInContainer")
-	@Valid
-	public List<RegistryLogin> getRegistryLogins() {
+	public List<@Valid RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
 
@@ -111,8 +110,7 @@ public class CommandStep extends Step {
 	
 	@Editable(order=9900, name="Environment Variables", group="More Settings", description="Optionally specify environment "
 			+ "variables for this step")
-	@Valid
-	public List<EnvVar> getEnvVars() {
+	public List<@Valid EnvVar> getEnvVars() {
 		return envVars;
 	}
 

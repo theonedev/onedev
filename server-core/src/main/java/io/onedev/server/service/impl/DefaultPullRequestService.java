@@ -1,7 +1,6 @@
 package io.onedev.server.service.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_DATE;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_TIME_GROUPS;
 import static io.onedev.server.model.PullRequest.PROP_DURATION;
@@ -32,15 +31,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,10 +47,10 @@ import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Criterion;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
-import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.hibernate.query.sqm.tree.domain.SqmPath;
 import org.joda.time.DateTime;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -244,20 +243,20 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 		gitService.deleteRefs(request.getTargetProject(), refs);
 
-    	Query<?> query = getSession().createQuery(String.format(
+		var query = getSession().createMutationQuery(String.format(
     			"update CodeComment set %s=null where %s=:request",
     			CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
     			CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
     	query.setParameter("request", request);
     	query.executeUpdate();
 
-    	query = getSession().createQuery(String.format("update CodeCommentReply set %s=null where %s=:request",
+		query = getSession().createMutationQuery(String.format("update CodeCommentReply set %s=null where %s=:request",
     			CodeCommentReply.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
     			CodeCommentReply.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
     	query.setParameter("request", request);
     	query.executeUpdate();
 
-    	query = getSession().createQuery(String.format("update CodeCommentStatusChange set %s=null where %s=:request",
+		query = getSession().createMutationQuery(String.format("update CodeCommentStatusChange set %s=null where %s=:request",
     			CodeCommentStatusChange.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
     			CodeCommentStatusChange.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
     	query.setParameter("request", request);
@@ -1036,11 +1035,11 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 		var found = false;
 		for (var order: orders) {
-			if (order.getExpression() instanceof SingularAttributePath) {
-				var expr = (SingularAttributePath) order.getExpression();
-				if (expr.getAttribute().getName().equals(LastActivity.PROP_DATE) 
-						&& expr.getPathSource() instanceof SingularAttributePath 
-						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(PullRequest.PROP_LAST_ACTIVITY)) {
+			if (order.getExpression() instanceof SqmPath) {
+				var expr = (SqmPath) order.getExpression();
+				if (expr.getReferencedPathSource().getPathName().equals(LastActivity.PROP_DATE)
+						&& expr.getLhs() instanceof SqmPath
+						&& ((SqmPath) expr.getLhs()).getReferencedPathSource().getPathName().equals(PullRequest.PROP_LAST_ACTIVITY)) {
 					found = true;
 					break;
 				}
@@ -1132,9 +1131,9 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 			CriteriaBuilder builder = getSession().getCriteriaBuilder();
 			CriteriaQuery<ProjectPullRequestStatusStat> criteriaQuery = builder.createQuery(ProjectPullRequestStatusStat.class);
 			Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
-			criteriaQuery.multiselect(
+			criteriaQuery.select(builder.construct(ProjectPullRequestStatusStat.class,
 					root.get(PullRequest.PROP_TARGET_PROJECT).get(Project.PROP_ID),
-					root.get(PROP_STATUS), builder.count(root));
+					root.get(PROP_STATUS), builder.count(root)));
 			criteriaQuery.groupBy(root.get(PullRequest.PROP_TARGET_PROJECT), root.get(PROP_STATUS));
 
 			criteriaQuery.where(root.get(PullRequest.PROP_TARGET_PROJECT).in(projects));
@@ -1163,7 +1162,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		var groupPath = statsGroup.getPath(root.get(PROP_CLOSE_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 
-		criteriaQuery.multiselect(newArrayList(
+		criteriaQuery.select(builder.array(
 				groupPath,
 				builder.avg(root.get(PROP_DURATION))));
 
@@ -1196,7 +1195,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		var groupPath = statsGroup.getPath(root.get(PROP_SUBMIT_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 
-		criteriaQuery.multiselect(newArrayList(groupPath, builder.count(root)));
+		criteriaQuery.select(builder.array(groupPath, builder.count(root)));
 
 		Map<Integer, Integer> openStats = new HashMap<>();
 		for (var result: getSession().createQuery(criteriaQuery).getResultList())
@@ -1212,7 +1211,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		groupPath = statsGroup.getPath(root.get(PROP_CLOSE_TIME_GROUPS));
 		criteriaQuery.groupBy(groupPath);
 
-		criteriaQuery.multiselect(newArrayList(groupPath, builder.count(root)));
+		criteriaQuery.select(builder.array(groupPath, builder.count(root)));
 
 		Map<Integer, Integer> mergeStats = new HashMap<>();
 		for (var result: getSession().createQuery(criteriaQuery).getResultList())
@@ -1325,9 +1324,9 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Override
 	public List<PullRequest> queryAfter(Long projectId, Long afterRequestId, int count) {
 		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(org.hibernate.criterion.Restrictions.eq(PullRequest.PROP_TARGET_PROJECT + ".id", projectId));
-		criteria.add(org.hibernate.criterion.Restrictions.gt("id", afterRequestId));
-		criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+		criteria.add(io.onedev.server.persistence.dao.Restrictions.eq(PullRequest.PROP_TARGET_PROJECT + ".id", projectId));
+		criteria.add(io.onedev.server.persistence.dao.Restrictions.gt("id", afterRequestId));
+		criteria.addOrder(io.onedev.server.persistence.dao.Order.asc("id"));
 		return query(criteria, 0, count);
 	}
 

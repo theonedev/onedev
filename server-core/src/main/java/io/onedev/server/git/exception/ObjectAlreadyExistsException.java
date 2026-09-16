@@ -2,7 +2,7 @@ package io.onedev.server.git.exception;
 
 import io.onedev.server.exception.HttpResponseAwareException;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class ObjectAlreadyExistsException extends HttpResponseAwareException {
 

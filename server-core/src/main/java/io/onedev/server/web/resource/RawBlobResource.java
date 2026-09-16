@@ -8,8 +8,8 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-import javax.persistence.EntityNotFoundException;
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.ws.rs.core.HttpHeaders;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;

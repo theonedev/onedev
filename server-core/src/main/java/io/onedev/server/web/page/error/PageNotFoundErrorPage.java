@@ -2,7 +2,7 @@ package io.onedev.server.web.page.error;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;

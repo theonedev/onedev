@@ -1,5 +1,7 @@
 package io.onedev.server.ai.tools.code;
 
+import java.util.Date;
+
 import static io.onedev.server.ai.ToolUtils.convertToJson;
 
 import java.util.List;
@@ -52,11 +54,11 @@ public abstract class CommitDetailTool implements TaskTool {
 			"author", Map.of(
 				"name", authorIdent.getName(),
 				"emailAddress", authorIdent.getEmailAddress(),
-				"date", authorIdent.getWhen()),
+				"date", Date.from(authorIdent.getWhenAsInstant())),
 			"committer", Map.of(
 				"name", committerIdent.getName(),
 				"emailAddress", committerIdent.getEmailAddress(),
-				"date", committerIdent.getWhen()),
+				"date", Date.from(committerIdent.getWhenAsInstant())),
 			"parents", List.of(commit.getParents()).stream().map(RevCommit::name).toList(),
 			"link", OneDev.getInstance(UrlService.class).urlFor(project, commit.copy(), true));
 	}

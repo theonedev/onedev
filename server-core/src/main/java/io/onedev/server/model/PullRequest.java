@@ -49,19 +49,19 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
@@ -109,9 +109,9 @@ import io.onedev.server.xodus.VisitInfoService;
 @Table(
 		indexes={
 				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_UUID), 
-				@Index(columnList=PROP_NUMBER), @Index(columnList="o_targetProject_id"), 
+				@Index(columnList=PROP_NUMBER), @Index(columnList="targetProject_id"),
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList= LastActivity.COLUMN_DATE), 
-				@Index(columnList="o_sourceProject_id"), @Index(columnList="o_submitter_id"), 
+				@Index(columnList="sourceProject_id"), @Index(columnList="submitter_id"),
 				@Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH), @Index(columnList=PROP_SUBMIT_MONTH), 
 				@Index(columnList=PROP_SUBMIT_WEEK), @Index(columnList=PROP_SUBMIT_DAY), 
 				@Index(columnList=PROP_CLOSE_MONTH), @Index(columnList=PROP_CLOSE_WEEK), 
@@ -121,8 +121,8 @@ import io.onedev.server.xodus.VisitInfoService;
 				@Index(columnList=PROP_CONFUSED_COUNT), @Index(columnList=PROP_HEART_COUNT),
 				@Index(columnList=PROP_EYES_COUNT),
 				@Index(columnList=PROP_TICK_COUNT),
-				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_numberScope_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
+				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="numberScope_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 public class PullRequest extends ProjectBelonging 

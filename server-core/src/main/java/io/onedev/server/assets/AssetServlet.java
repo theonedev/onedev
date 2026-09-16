@@ -3,21 +3,15 @@ package io.onedev.server.assets;
 import java.io.IOException;
 import java.net.URL;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jetty.http.HttpContent;
-import org.eclipse.jetty.http.HttpFields;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.server.ResourceService;
-import org.eclipse.jetty.server.Response;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.ee11.servlet.ResourceServlet;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletMapping;
 import org.eclipse.jetty.util.resource.Resource;
 
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -27,58 +21,49 @@ import io.onedev.commons.bootstrap.Bootstrap;
  * @author robin
  *
  */
-public abstract class AssetServlet extends DefaultServlet {
+public abstract class AssetServlet extends ResourceServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static ThreadLocal<HttpServletRequest> requestHolder = new ThreadLocal<HttpServletRequest>();
+    private org.eclipse.jetty.util.resource.ResourceFactory.Closeable resourceFactory;
 
-	public AssetServlet() {
-		super(new ResourceService() {
-			
-			@Override
-			protected void putHeaders(HttpServletResponse response, HttpContent content, long contentLength) {
-				super.putHeaders(response, content, contentLength);
-								
-				HttpFields fields;
-				if (response instanceof Response)
-					fields = ((Response) response).getHttpFields();
-				else
-					fields = ((Response)((HttpServletResponseWrapper) response).getResponse()).getHttpFields();
-				
-				HttpServletRequest request = requestHolder.get();
-				if (request == null)
-					return;
-				
-				String requestUri = request.getRequestURI();
-				if (request.getDispatcherType() == DispatcherType.ERROR) {
-					/*
-					 * Do not cache error page and also makes sure that error page is not eligible for 
-					 * modification check. That is, error page will be always retrieved.
-					 */
-		            fields.put(HttpHeader.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
-				} else if (requestUri.equals("/favicon.ico")) {
-					/*
-					 * Make sure favicon request is cached. Otherwise, it will be requested for every 
-					 * page request.
-					 */
-					fields.put(HttpHeader.CACHE_CONTROL, "max-age=86400,public");
-				} else if (requestUri.equals("/prefetch.json")) {
-					fields.put(HttpHeader.CONTENT_TYPE, "application/speculationrules+json");
-				}
-				
-				/*
-				 * Some browsers enforce a JavaScript MIME type for module scripts. Jetty's default
-				 * mime mapping does not always include .mjs, which breaks dynamic imports (for
-				 * instance, pdf.js modules).
-				 */
-				if (requestUri.endsWith(".mjs"))
-					fields.put(HttpHeader.CONTENT_TYPE, "text/javascript");
-			}
-			
-		});
-	}
-	
+    private org.eclipse.jetty.http.content.ValidatingCachingHttpContentFactory contentFactory;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        resourceFactory = org.eclipse.jetty.util.resource.ResourceFactory.closeable();
+        var context = ServletContextHandler.getServletContextHandler(getServletContext());
+        var pool = new org.eclipse.jetty.io.ByteBufferPool.Sized(context.getServer().getByteBufferPool());
+        contentFactory = new org.eclipse.jetty.http.content.ValidatingCachingHttpContentFactory(path -> {
+            Resource resource = getResource(org.eclipse.jetty.util.URIUtil.decodePath(path));
+            if (resource == null || !resource.exists())
+                return null;
+            String type = context.getMimeTypes().getMimeByExtension(path);
+            if (path.endsWith(".mjs"))
+                type = "text/javascript";
+            else if (path.equals("/prefetch.json"))
+                type = "application/speculationrules+json";
+            return new org.eclipse.jetty.http.content.ResourceHttpContent(resource, type, pool);
+        }, 1000, pool);
+        contentFactory.setMaxCacheSize(Integer.parseInt(getInitParameter("maxCacheSize")));
+        contentFactory.setMaxCachedFileSize(Integer.parseInt(getInitParameter("maxCachedFileSize")));
+        contentFactory.setMaxCachedFiles(Integer.parseInt(getInitParameter("maxCachedFiles")));
+        getResourceService().setHttpContentFactory(contentFactory);
+    }
+
+    @Override
+    public void destroy() {
+        try {
+            super.destroy();
+        } finally {
+            if (contentFactory != null)
+                contentFactory.flushCache();
+            if (resourceFactory != null)
+                resourceFactory.close();
+        }
+    }
+
 	@Override
 	public String getInitParameter(String name) {
 		String value = super.getInitParameter(name);
@@ -95,20 +80,26 @@ public abstract class AssetServlet extends DefaultServlet {
 				return "false";
 			if (name.equals("dirAllowed"))
 			    return "false";
-			if (name.equals("cacheControl")) {
-		        if (!Bootstrap.sandboxMode || Bootstrap.prodMode)
-			        return "max-age=86400,public";
-		        else
-		        	return "must-revalidate,no-cache,no-store";
-			}
+
 			return null;
 		}
 	}
 
-	@Override
+    @Override
+    protected String getEncodedPathInContext(HttpServletRequest request, boolean included) {
+        String servletPath = included
+                ? (String) request.getAttribute(jakarta.servlet.RequestDispatcher.INCLUDE_SERVLET_PATH)
+                : request.getServletPath();
+        String pathInfo = included
+                ? (String) request.getAttribute(jakarta.servlet.RequestDispatcher.INCLUDE_PATH_INFO)
+                : request.getPathInfo();
+        if (servletPath == null)
+            servletPath = request.getServletPath();
+        return org.eclipse.jetty.util.URIUtil.encodePath(servletPath + (pathInfo != null ? pathInfo : ""));
+    }
+
 	public final Resource getResource(String pathInContext) {
-		ServletContextHandler.Context context = (ServletContextHandler.Context) getServletContext();
-		ServletContextHandler contextHandler = (ServletContextHandler) context.getContextHandler();
+		ServletContextHandler contextHandler = ServletContextHandler.getServletContextHandler(getServletContext());
 		
 		for (ServletMapping mapping: contextHandler.getServletHandler().getServletMappings()) {
 			if (mapping.getServletName().equals(getServletName())) {
@@ -129,7 +120,8 @@ public abstract class AssetServlet extends DefaultServlet {
 					}
 					if (relativePath != null) {
 						relativePath = StringUtils.stripStart(relativePath, "/");
-						Resource resource = Resource.newResource(loadResource(relativePath));
+						URL url = loadResource(relativePath);
+						Resource resource = url != null ? resourceFactory.newResource(url) : null;
 						if (resource != null && resource.exists())
 							return resource;
 					}
@@ -153,14 +145,17 @@ public abstract class AssetServlet extends DefaultServlet {
 	 */
 	protected abstract URL loadResource(String relativePath);
 	
-	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		try {
-			requestHolder.set(request);
-			super.service(request, response);
-		} finally {
-			requestHolder.remove();
-		}
-	}
-
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String cacheControl = getInitParameter("cacheControl");
+        if (cacheControl == null)
+            cacheControl = !Bootstrap.sandboxMode || Bootstrap.prodMode
+                    ? "max-age=86400,public" : "must-revalidate,no-cache,no-store";
+        if (request.getDispatcherType() == DispatcherType.ERROR)
+            cacheControl = "must-revalidate,no-cache,no-store";
+        else if (request.getRequestURI().equals("/favicon.ico"))
+            cacheControl = "max-age=86400,public";
+        response.setHeader("Cache-Control", cacheControl);
+        super.service(request, response);
+    }
 }

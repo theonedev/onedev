@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.activation.MimetypesFileTypeMap;
+import jakarta.activation.MimetypesFileTypeMap;
 import org.jspecify.annotations.Nullable;
 
-import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload2.core.FileUploadException;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -37,7 +37,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -134,8 +133,8 @@ abstract class InsertUrlPanel extends Panel {
 		form.add(new AjaxButton("insert", form) {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				if (StringUtils.isBlank(linkUrl)) {
 					if (isImage)
 						error(_T("Image URL should be specified"));
@@ -235,7 +234,7 @@ abstract class InsertUrlPanel extends Panel {
 			Set<BlobIdent> filePickerState = getPickerState(commitId, currentBlob,
 					WebSession.get().getMetaData(FILE_PICKER_STATE));
 			
-			IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
+			IModel<Project> projectModel = new IModel<Project>() {
 
 				@Override
 				public Project getObject() {
@@ -396,7 +395,7 @@ abstract class InsertUrlPanel extends Panel {
 				protected void onSubmit() {
 					super.onSubmit();
 					
-					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 					String attachmentName;
 					var upload = getUploadService().getUpload(uploadId);
 					try {
@@ -522,8 +521,9 @@ abstract class InsertUrlPanel extends Panel {
 			form.add(new AjaxButton("insert") {
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+					super.onSubmit(target);
 
 					String commitMessage = InsertUrlPanel.this.commitMessage;
 					if (StringUtils.isBlank(commitMessage))
@@ -551,8 +551,8 @@ abstract class InsertUrlPanel extends Panel {
 				}
 
 				@Override
-				protected void onError(AjaxRequestTarget target, Form<?> form) {
-					super.onError(target, form);
+				protected void onError(AjaxRequestTarget target) {
+					super.onError(target);
 					target.add(feedback);
 				}
 				
@@ -586,8 +586,8 @@ abstract class InsertUrlPanel extends Panel {
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 					Component content = newInputUrlPanel();
-					target.add(content);
 					fragment.replace(content);
+					target.add(content);
 					WebSession.get().setMetaData(ACTIVE_TAB, tabInputUrl);
 				}
 				
@@ -599,8 +599,8 @@ abstract class InsertUrlPanel extends Panel {
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 					Component content = newPickExistingPanel();
-					target.add(content);
 					fragment.replace(content);
+					target.add(content);
 					WebSession.get().setMetaData(ACTIVE_TAB, tabPickExisting);
 				}
 				
@@ -612,8 +612,8 @@ abstract class InsertUrlPanel extends Panel {
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 					Component content = newUploadPanel();
-					target.add(content);
 					fragment.replace(content);
+					target.add(content);
 					WebSession.get().setMetaData(ACTIVE_TAB, tabUpload);
 				}
 				

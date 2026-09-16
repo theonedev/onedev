@@ -5,7 +5,7 @@ import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.ScriptChoice;
 import io.onedev.server.util.GroovyUtils;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 @Editable(order=400, name="Evaluate script to get default value")
 public class ScriptingDefaultValue implements DefaultValueProvider {

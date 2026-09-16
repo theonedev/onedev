@@ -1,13 +1,13 @@
 package io.onedev.server.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import io.onedev.server.model.support.EntityReaction;
 
 @Entity
 @Table(
-        indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id")},
-        uniqueConstraints={@UniqueConstraint(columnNames={"o_request_id", "o_user_id", "emoji"})}
+        indexes={@Index(columnList="request_id"), @Index(columnList="user_id")},
+        uniqueConstraints={@UniqueConstraint(columnNames={"request_id", "user_id", "emoji"})}
 )
 public class PullRequestReaction extends EntityReaction {
 

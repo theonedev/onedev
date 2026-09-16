@@ -4,11 +4,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import com.google.common.base.Preconditions;
-import com.hazelcast.cp.IAtomicLong;
+import io.onedev.server.cluster.ClusterAtomicLong;
 
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
@@ -48,7 +48,7 @@ public class DefaultLinkSpecService extends BaseEntityService<LinkSpec> implemen
 		idCache = hazelcastInstance.getMap("linkSpecIds");
 		cache = hazelcastInstance.getMap("linkSpecCache");
 		
-		IAtomicLong cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("linkSpecCacheInited");
+		ClusterAtomicLong cacheInited = clusterService.getAtomicLong("linkSpecCacheInited");
 		clusterService.initWithLead(cacheInited, () -> {
 			for (LinkSpec spec : query(true))
 				updateCache(spec.getFacade());

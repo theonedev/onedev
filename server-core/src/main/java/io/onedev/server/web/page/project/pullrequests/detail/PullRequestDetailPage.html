@@ -68,7 +68,7 @@
 						<div wicket:id="hasMergeConflict" class="has-merge-conflict text-warning">
 							<wicket:svg href="exclamation-circle" class="icon"></wicket:svg> <wicket:t>There are merge conflicts.</wicket:t>
 							<wicket:enclosure child="resolveInstructions">
-								<wicket:t>Please follow <a wicket:id="resolveInstructions" class="link-primary" href="javascript:void(0);">this instruction</a> to resolve the conflicts</wicket:t>
+								<wicket:t>Please follow <a wicket:id="resolveInstructions" class="link-primary" href="#">this instruction</a> to resolve the conflicts</wicket:t>
 							</wicket:enclosure>
 						</div>
 						<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-warning">
@@ -231,7 +231,7 @@
 			<wicket:enclosure child="synchronize">
 			<div class="synchronize d-flex align-items-center mr-3">
 				<a wicket:id="synchronize" class="btn btn-light-primary mr-2"><wicket:t>Synchronize</wicket:t></a>
-				<a href="javascript:void(0)" class="help text-muted text-hover-primary" t:data-tippy-content="In case the pull request status is out of sync with underlying repository, you may synchronize them manually here">
+				<a href="#" class="help text-muted text-hover-primary" t:data-tippy-content="In case the pull request status is out of sync with underlying repository, you may synchronize them manually here">
 					<wicket:svg href="question-circle-o" class="icon"/>
 				</a>
 			</div>

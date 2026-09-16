@@ -1,6 +1,6 @@
 package io.onedev.server.util.jackson.git;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.eclipse.jgit.lib.ObjectId;
 

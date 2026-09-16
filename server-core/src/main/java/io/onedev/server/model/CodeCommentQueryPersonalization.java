@@ -7,13 +7,13 @@ import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "o_user_id"})}
+		indexes={@Index(columnList="project_id"), @Index(columnList="user_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"project_id", "user_id"})}
 )
 public class CodeCommentQueryPersonalization extends AbstractEntity implements QueryPersonalization<NamedCodeCommentQuery> {
 

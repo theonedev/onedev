@@ -8,8 +8,8 @@ import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.jetbrains.annotations.Nullable;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.Set;
 

@@ -17,15 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -44,10 +44,10 @@ import io.onedev.server.service.AgentService;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="o_token_id"), @Index(columnList=PROP_IP_ADDRESS),
+		@Index(columnList="token_id"), @Index(columnList=PROP_IP_ADDRESS),
 		@Index(columnList=PROP_PAUSED), @Index(columnList=PROP_NAME), 
 		@Index(columnList=PROP_OS_NAME), @Index(columnList=PROP_OS_VERSION), 
-		@Index(columnList=PROP_OS_ARCH), @Index(columnList="o_lastUsedDate_id")}) 
+		@Index(columnList=PROP_OS_ARCH), @Index(columnList="lastUsedDate_id")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Agent extends AbstractEntity {
 	

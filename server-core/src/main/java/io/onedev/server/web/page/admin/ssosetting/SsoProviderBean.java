@@ -2,8 +2,8 @@ package io.onedev.server.web.page.admin.ssosetting;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;

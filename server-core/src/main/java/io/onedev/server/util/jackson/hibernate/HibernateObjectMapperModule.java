@@ -16,8 +16,8 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
 import org.hibernate.proxy.HibernateProxy;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class HibernateObjectMapperModule extends Module {

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Embeddable

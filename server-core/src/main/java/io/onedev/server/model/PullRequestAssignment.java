@@ -2,18 +2,18 @@ package io.onedev.server.model;
 
 import io.onedev.server.rest.annotation.Immutable;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_user_id"), @Index(columnList="o_request_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_user_id", "o_request_id"})}
+		indexes={@Index(columnList="user_id"), @Index(columnList="request_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"user_id", "request_id"})}
 )
 public class PullRequestAssignment extends AbstractEntity {
 

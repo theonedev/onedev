@@ -3,7 +3,7 @@ package io.onedev.server.exception.handler;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.exception.HttpResponse;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class ExplicitExceptionHandler extends AbstractExceptionHandler<ExplicitException> {
 	

@@ -4,8 +4,8 @@ import io.onedev.server.annotation.TagName;
 import io.onedev.server.git.GitUtils;
 import org.eclipse.jgit.lib.Repository;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class TagNameValidator implements ConstraintValidator<TagName, String> {
 	

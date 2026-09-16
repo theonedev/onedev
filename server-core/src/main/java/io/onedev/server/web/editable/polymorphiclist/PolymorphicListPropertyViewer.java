@@ -13,7 +13,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 
 import io.onedev.server.annotation.ExcludedProperties;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
@@ -60,7 +60,7 @@ public class PolymorphicListPropertyViewer extends Panel {
 				var value = item.getModelObject();
 
 				item.add(new Label("type", EditableUtils.getDisplayName(value.getClass())));
-				item.add(new Label("typeDescription", new AbstractReadOnlyModel<String>() {
+				item.add(new Label("typeDescription", new IModel<String>() {
 
 					@Override
 					public String getObject() {

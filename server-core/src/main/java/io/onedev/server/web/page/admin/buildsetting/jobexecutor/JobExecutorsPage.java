@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jspecify.annotations.Nullable;
 
@@ -47,7 +47,7 @@ public class JobExecutorsPage extends AdministrationPage {
 		container = new WebMarkupContainer("jobExecutorSetting");
 		container.setOutputMarkupId(true);
 		add(container);
-		container.add(new ListView<>("executors", new AbstractReadOnlyModel<List<JobExecutor>>() {
+		container.add(new ListView<>("executors", new IModel<List<JobExecutor>>() {
 
 			@Override
 			public List<JobExecutor> getObject() {

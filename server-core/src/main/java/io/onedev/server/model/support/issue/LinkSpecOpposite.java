@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;

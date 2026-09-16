@@ -1,25 +1,25 @@
 package org.apache.wicket.markup.html.form;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.tester.WicketTester;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class FormComponentCustomizationTest {
 
 	private WicketTester tester;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		tester = new WicketTester();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		tester.destroy();
 	}

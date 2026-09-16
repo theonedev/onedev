@@ -30,7 +30,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -143,7 +142,7 @@ public class CoverageReportPage extends BuildReportPage {
 
 			}));
 
-			fragment.add(new Label("itemsTitle", new AbstractReadOnlyModel<String>() {
+			fragment.add(new Label("itemsTitle", new IModel<String>() {
 
 				@Override
 				public String getObject() {
@@ -174,7 +173,7 @@ public class CoverageReportPage extends BuildReportPage {
 				}
 
 			});
-			input.add(AttributeAppender.append("placeholder", new AbstractReadOnlyModel<String>() {
+			input.add(AttributeAppender.append("placeholder", new IModel<String>() {
 
 				@Override
 				public String getObject() {
@@ -283,8 +282,8 @@ public class CoverageReportPage extends BuildReportPage {
 				}
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+					super.onSubmit(target);
 					pushState(target);
 					parseFilterPatterns();
 					target.add(feedback);

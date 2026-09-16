@@ -2,9 +2,9 @@ package io.onedev.server.service.impl;
 
 import java.util.List;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.persistence.annotation.Transactional;

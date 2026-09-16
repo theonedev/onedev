@@ -50,7 +50,7 @@ abstract class BuildOptionContentPanel extends Panel implements ProjectScopedCom
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 			
 		};
@@ -117,8 +117,9 @@ abstract class BuildOptionContentPanel extends Panel implements ProjectScopedCom
 		form.add(new AjaxButton("ok") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 				if (selectedRefNames.isEmpty()) {
 					refNamesView.error(_T("At least one branch or tag should be selected"));
 					target.add(form);

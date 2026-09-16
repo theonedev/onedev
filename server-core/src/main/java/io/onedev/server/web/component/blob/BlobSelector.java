@@ -17,7 +17,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -82,7 +81,7 @@ public abstract class BlobSelector extends Panel {
 				return Model.of(object);
 			}
 
-		}, new AbstractReadOnlyModel<Set<BlobIdent>>() {
+		}, new IModel<Set<BlobIdent>>() {
 
 			@Override
 			public Set<BlobIdent> getObject() {

@@ -2,8 +2,8 @@ package io.onedev.server.exception.handler;
 
 import io.onedev.server.exception.HttpResponse;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ValidationException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ValidationException;
 
 public class ValidationExceptionHandler extends AbstractExceptionHandler<ValidationException> {
 	

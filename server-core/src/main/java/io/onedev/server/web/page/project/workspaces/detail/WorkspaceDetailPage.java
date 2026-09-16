@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.persistence.EntityNotFoundException;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -27,7 +27,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -149,7 +148,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 		head.add(new Label("spec", workspace.getSpecName()));
 		head.add(new InvalidWorkspaceSpecIcon("invalidSpec", workspaceModel));
 
-		head.add(new WorkspaceStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
+		head.add(new WorkspaceStatusIcon("statusIcon", new IModel<Status>() {
 
 			@Override
 			public Status getObject() {
@@ -157,7 +156,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 			}
 	
 		}));
-		head.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
+		head.add(new Label("statusLabel", new IModel<String>() {
 
 			@Override
 			public String getObject() {

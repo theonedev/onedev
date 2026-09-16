@@ -15,10 +15,10 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.oauth.RefreshTokenAccessor;
 import org.jetbrains.annotations.Nullable;
 
-import javax.mail.Message;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
+import jakarta.mail.Message;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

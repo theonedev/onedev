@@ -6,8 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.bouncycastle.openpgp.PGPPublicKey;
 
@@ -48,7 +48,7 @@ public class DefaultGpgKeyService extends BaseEntityService<GpgKey> implements G
     public void on(SystemStarting event) {
 		var hazelcastInstance = clusterService.getHazelcastInstance();
     	entityIds = hazelcastInstance.getMap("gpgKeyEntityIds");
-    	var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("gpgKeyCacheInited");
+        var cacheInited = clusterService.getAtomicLong("gpgKeyCacheInited");
 		clusterService.initWithLead(cacheInited, () -> {
 			for (GpgKey key: query()) {
 				for (Long keyId: key.getKeyIds())

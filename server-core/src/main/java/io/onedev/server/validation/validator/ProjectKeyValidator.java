@@ -2,8 +2,8 @@ package io.onedev.server.validation.validator;
 
 import io.onedev.server.annotation.ProjectKey;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 public class ProjectKeyValidator implements ConstraintValidator<ProjectKey, String> {

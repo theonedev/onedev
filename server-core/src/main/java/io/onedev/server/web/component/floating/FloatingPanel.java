@@ -110,7 +110,7 @@ public abstract class FloatingPanel extends Panel {
 	}
 	
 	public final void close() {
-		AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+		AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 		if (target != null) {
 			String script = String.format("onedev.server.floating.close('%s');", getMarkupId(true));
 			target.appendJavaScript(script);

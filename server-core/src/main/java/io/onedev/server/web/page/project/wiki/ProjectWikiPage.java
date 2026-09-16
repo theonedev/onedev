@@ -741,7 +741,7 @@ public class ProjectWikiPage extends ProjectPage {
 			String type = FileExtension.getExtension(path);
 			if (protection.getDisallowedFileTypes().stream().anyMatch(it -> it.equalsIgnoreCase(type)))
 				throw new BlobEditException(MessageFormat.format(_T("Not allowed file type: {0}"), type));
-			blobs.put(path, new BlobContent(item.get(), FileMode.REGULAR_FILE.getBits()));
+			blobs.put(path, new BlobContent(FileUpload.readBytes(item), FileMode.REGULAR_FILE.getBits()));
 		}
 		ObjectId previousCommitId = commitId != null ? commitId : ObjectId.zeroId();
 		try {
@@ -767,7 +767,7 @@ public class ProjectWikiPage extends ProjectPage {
 				deleteForm.add(newCommitMessageInput(message, Model.of(name), true, true));
 				deleteForm.add(new AjaxButton("confirm") {
 					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> submittedForm) {
+					protected void onSubmit(AjaxRequestTarget target) {
 						save(deleteForm::error, name, null, message.getObject(), true, true, destination);
 						if (deleteForm.hasError())
 							target.add(deleteForm);
@@ -776,7 +776,7 @@ public class ProjectWikiPage extends ProjectPage {
 					}
 
 					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> submittedForm) {
+					protected void onError(AjaxRequestTarget target) {
 						target.add(deleteForm);
 					}
 				}.add(new Label("label", destination != null ? _T("Use default") : _T("Delete page"))));
@@ -793,7 +793,7 @@ public class ProjectWikiPage extends ProjectPage {
 			@Override
 			protected void onClosed() {
 				actions.setVisible(true);
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				if (target != null)
 					target.add(actions);
 			}
@@ -938,7 +938,7 @@ public class ProjectWikiPage extends ProjectPage {
 			if (delete) {
 				commitId = newCommitId;
 				revision = branchName;
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				selectPage(target, selectedPage);
 				List<String> pages = new ArrayList<>();
 				collectPages(folder, pages);

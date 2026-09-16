@@ -90,7 +90,8 @@ public abstract class TestButton extends TaskButton {
 	}
 
 	@Override
-	protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+	protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
 		if (editor.isValid()) {
 			if (testData != null && !(testData instanceof Testable.None)) {
 				String title = EditableUtils.getDisplayName(testData.getClass());

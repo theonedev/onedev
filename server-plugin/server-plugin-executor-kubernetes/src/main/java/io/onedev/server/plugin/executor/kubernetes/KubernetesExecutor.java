@@ -44,8 +44,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -146,8 +146,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	@Editable(order=200, description="Specify registry logins if necessary. For built-in registry, " +
 			"use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and " +
 			"access token for password")
-	@Valid
-	public List<RegistryLogin> getRegistryLogins() {
+	public List<@Valid RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
 
@@ -255,8 +254,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	}
 
 	@Editable(order=500, group = "More Settings", description="Optionally specify node selector of the job pods")
-	@Valid
-	public List<NodeSelectorEntry> getNodeSelector() {
+	public List<@Valid NodeSelectorEntry> getNodeSelector() {
 		return nodeSelector;
 	}
 
@@ -278,8 +276,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	@Editable(order=25000, group="More Settings", description="Optionally specify where to run service pods "
 			+ "specified in job. The first matching locator will be used. If no any locators are found, "
 			+ "node selector of the executor will be used")
-	@Valid
-	public List<ServiceLocator> getServiceLocators() {
+	public List<@Valid ServiceLocator> getServiceLocators() {
 		return serviceLocators;
 	}
 

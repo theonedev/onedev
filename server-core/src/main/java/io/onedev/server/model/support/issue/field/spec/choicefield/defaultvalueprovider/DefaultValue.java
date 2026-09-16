@@ -8,8 +8,8 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-import javax.validation.Validator;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

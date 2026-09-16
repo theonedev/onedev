@@ -9,9 +9,9 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;

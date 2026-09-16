@@ -41,8 +41,8 @@ class AddAgentPanel extends Panel {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 				Component content = newDockerInstructions();
-				target.add(content);
 				AddAgentPanel.this.replace(content);
+				target.add(content);
 			}
 			
 		});
@@ -51,8 +51,8 @@ class AddAgentPanel extends Panel {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 				Component content = newBareMetalInstructions();
-				target.add(content);
 				AddAgentPanel.this.replace(content);
+				target.add(content);
 			}
 			
 		});

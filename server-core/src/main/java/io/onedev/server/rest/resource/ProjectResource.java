@@ -14,29 +14,29 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.Id;
-import javax.validation.Valid;
-import javax.validation.Validator;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotAcceptableException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.Id;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAcceptableException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -377,8 +377,11 @@ public class ProjectResource {
 	@Path("/{projectId}/setting")
     @POST
     public Response updateSetting(@PathParam("projectId") Long projectId, @NotNull ProjectSetting setting) {
-		for (var boardSpec: setting.getIssueSetting().getBoardSpecs())
-			boardSpec.populateEditColumns();
+		var boardSpecs = setting.getIssueSetting().getBoardSpecs();
+		if (boardSpecs != null) {
+			for (var boardSpec: boardSpecs)
+				boardSpec.populateEditColumns();
+		}
 		var violations = validator.validate(setting);
 		if (!violations.isEmpty()) {
 			var violation = violations.iterator().next();
@@ -700,8 +703,7 @@ public class ProjectResource {
 		
 		private ArrayList<ContributedProjectSetting> contributedSettings = new ArrayList<>();
 
-		@Valid
-		public ArrayList<BranchProtection> getBranchProtections() {
+		public ArrayList<@Valid BranchProtection> getBranchProtections() {
 			return branchProtections;
 		}
 
@@ -709,8 +711,7 @@ public class ProjectResource {
 			this.branchProtections = branchProtections;
 		}
 
-		@Valid
-		public ArrayList<TagProtection> getTagProtections() {
+		public ArrayList<@Valid TagProtection> getTagProtections() {
 			return tagProtections;
 		}
 
@@ -773,8 +774,7 @@ public class ProjectResource {
 			this.workspaceSetting = workspaceSetting;
 		}
 
-		@Valid
-		public ArrayList<NamedCommitQuery> getNamedCommitQueries() {
+		public ArrayList<@Valid NamedCommitQuery> getNamedCommitQueries() {
 			return namedCommitQueries;
 		}
 
@@ -782,8 +782,7 @@ public class ProjectResource {
 			this.namedCommitQueries = namedCommitQueries;
 		}
 
-		@Valid
-		public ArrayList<NamedCodeCommentQuery> getNamedCodeCommentQueries() {
+		public ArrayList<@Valid NamedCodeCommentQuery> getNamedCodeCommentQueries() {
 			return namedCodeCommentQueries;
 		}
 
@@ -791,8 +790,7 @@ public class ProjectResource {
 			this.namedCodeCommentQueries = namedCodeCommentQueries;
 		}
 
-		@Valid
-		public ArrayList<WebHook> getWebHooks() {
+		public ArrayList<@Valid WebHook> getWebHooks() {
 			return webHooks;
 		}
 
@@ -800,8 +798,7 @@ public class ProjectResource {
 			this.webHooks = webHooks;
 		}
 
-		@Valid
-		public ArrayList<ContributedProjectSetting> getContributedSettings() {
+		public ArrayList<@Valid ContributedProjectSetting> getContributedSettings() {
 			return contributedSettings;
 		}
 

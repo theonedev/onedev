@@ -2,22 +2,22 @@ package io.onedev.server.model;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.ValidationException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.ValidationException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_source_id"), @Index(columnList="o_target_id"), @Index(columnList="o_spec_id")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_source_id", "o_target_id", "o_spec_id"})})
+		indexes={@Index(columnList="source_id"), @Index(columnList="target_id"), @Index(columnList="spec_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"source_id", "target_id", "spec_id"})})
 public class IssueLink extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

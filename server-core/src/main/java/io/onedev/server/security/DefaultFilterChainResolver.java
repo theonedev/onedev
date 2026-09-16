@@ -2,8 +2,8 @@ package io.onedev.server.security;
 
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import io.onedev.server.pack.PackFilter;
 import org.apache.shiro.web.filter.mgt.FilterChainManager;

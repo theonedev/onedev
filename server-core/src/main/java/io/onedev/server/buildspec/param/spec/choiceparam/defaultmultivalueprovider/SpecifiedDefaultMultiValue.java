@@ -3,9 +3,9 @@ package io.onedev.server.buildspec.param.spec.choiceparam.defaultmultivalueprovi
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
 

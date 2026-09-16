@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import io.onedev.server.git.LastCommitsOfChildren;
 import io.onedev.server.model.support.wiki.WikiFolder;
 import io.onedev.server.model.support.wiki.WikiSetting;
 import io.onedev.server.model.support.wiki.SpecifiedPath;
@@ -28,22 +29,22 @@ import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.Validator;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
@@ -56,7 +57,6 @@ import org.apache.wicket.util.encoding.UrlEncoder;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.annotations.Cache;
@@ -156,11 +156,11 @@ import io.onedev.server.xodus.CommitInfoService;
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"),
-				@Index(columnList="o_lastActivityDate_id"), @Index(columnList=PROP_NAME), 
+				@Index(columnList="parent_id"), @Index(columnList="forkedFrom_id"),
+				@Index(columnList="lastActivityDate_id"), @Index(columnList=PROP_NAME),
 				@Index(columnList=PROP_PATH)
 		}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
+		uniqueConstraints={@UniqueConstraint(columnNames={"parent_id", PROP_NAME})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
@@ -428,8 +428,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Column(length=65535)
 	private ProjectAiSetting aiSetting = new ProjectAiSetting();
 	
-	// SQL Server does not allow duplicate null values for unique column. So we use 
-	// special prefix to indicate null
 	@Column(unique=true)
 	private String serviceDeskEmailAddress;
 	

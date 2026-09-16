@@ -8,23 +8,25 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import javax.servlet.DispatcherType;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.tika.mime.MimeTypes;
 import org.eclipse.jetty.http.HttpCookie.SameSite;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.session.DefaultSessionIdManager;
-import org.eclipse.jetty.server.session.HouseKeeper;
-import org.eclipse.jetty.server.session.SessionDataStoreFactory;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.compression.gzip.GzipCompression;
+import org.eclipse.jetty.compression.server.CompressionConfig;
+import org.eclipse.jetty.compression.server.CompressionHandler;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.session.DefaultSessionIdManager;
+import org.eclipse.jetty.session.HouseKeeper;
+import org.eclipse.jetty.session.SessionDataStoreFactory;
+import org.eclipse.jetty.ee11.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +93,7 @@ public class DefaultJettyService implements JettyService, Serializable {
 			throw ExceptionUtils.unchecked(e);
 		}
         sessionIdManager.setSessionHouseKeeper(houseKeeper);
-        server.setSessionIdManager(sessionIdManager);
+        server.addBean(sessionIdManager, true);
 
 		server.addBean(sessionDataStoreFactory);
 		
@@ -99,6 +101,7 @@ public class DefaultJettyService implements JettyService, Serializable {
         servletContextHandler.setMaxFormContentSize(MAX_CONTENT_SIZE);
 
         servletContextHandler.setClassLoader(OneDev.class.getClassLoader());
+		org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
         
         servletContextHandler.setErrorHandler(new ErrorPageErrorHandler());
         servletContextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
@@ -109,6 +112,7 @@ public class DefaultJettyService implements JettyService, Serializable {
 		var sessionTimeout = DEFAULT_SESSION_TIMEOUT;
 		if (settingService.getSystemSetting() != null && settingService.getSystemSetting().getSessionTimeout() != null) 
 			sessionTimeout = settingService.getSystemSetting().getSessionTimeout() * 60;
+
 		servletContextHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);		
 
         /*
@@ -129,19 +133,15 @@ public class DefaultJettyService implements JettyService, Serializable {
         servletContextHandler.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 
 		ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
+		errorHandler.setBufferSize(64 * 1024);
 	    errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/~errors/404");
 	    servletContextHandler.setErrorHandler(errorHandler);
 
-        GzipHandler gzipHandler = new GzipHandler();
-		gzipHandler.setHandler(servletContextHandler);
-		gzipHandler.setIncludedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
-		gzipHandler.setExcludedMimeTypes(MimeTypes.OCTET_STREAM);
-
-		var handlers = new HandlerList();
+		var handlers = new Handler.Sequence();
 		handlers.addHandler(new ProbeHandler(() -> OneDev.getInstance().isReady()
 				&& !OneDev.getInstance().isStopping()
 				&& !OneDev.getMaintenanceFile(Bootstrap.installDir).exists()));
-		handlers.addHandler(gzipHandler);
+		handlers.addHandler(newCompressionHandler(servletContextHandler));
         server.setHandler(handlers);
         
         for (ServerConfigurator configurator: serverConfiguratorsProvider.get()) 
@@ -154,6 +154,22 @@ public class DefaultJettyService implements JettyService, Serializable {
 				throw ExceptionUtils.unchecked(e);
 			}
 		}
+	}
+
+	static CompressionHandler newCompressionHandler(Handler handler) {
+		var compression = new CompressionHandler(handler);
+		var gzip = new GzipCompression();
+		gzip.setMinCompressSize(32);
+		compression.putCompression(gzip);
+		compression.putConfiguration("/*", CompressionConfig.builder()
+				.compressIncludeMethod(HttpMethod.GET.name())
+				.compressIncludeMethod(HttpMethod.POST.name())
+				.compressIncludeMethod(HttpMethod.PUT.name())
+				.compressExcludeMimeType(MimeTypes.OCTET_STREAM)
+				// The former GzipHandler only compressed responses; keep request bodies intact.
+				.decompressExcludePath("/*")
+				.build());
+		return compression;
 	}
 
 	@Override

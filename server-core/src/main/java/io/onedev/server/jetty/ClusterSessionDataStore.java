@@ -19,10 +19,10 @@
 package io.onedev.server.jetty;
 
 import com.hazelcast.map.IMap;
-import org.eclipse.jetty.server.session.AbstractSessionDataStore;
-import org.eclipse.jetty.server.session.SessionContext;
-import org.eclipse.jetty.server.session.SessionData;
-import org.eclipse.jetty.server.session.UnreadableSessionDataException;
+import org.eclipse.jetty.session.AbstractSessionDataStore;
+import org.eclipse.jetty.session.SessionContext;
+import org.eclipse.jetty.session.SessionData;
+import org.eclipse.jetty.session.UnreadableSessionDataException;
 import org.eclipse.jetty.util.annotation.ManagedObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +47,7 @@ public class ClusterSessionDataStore extends AbstractSessionDataStore {
 			if (logger.isDebugEnabled())
 				logger.debug("Loading session {} from hazelcast", id);
 
-			SessionData sd = sessionDataMap.get(id);
-			return sd;
+			return sessionDataMap.get(id);
 		} catch (Exception e) {
 			throw new UnreadableSessionDataException(id, _context, e);
 		}
@@ -85,8 +84,7 @@ public class ClusterSessionDataStore extends AbstractSessionDataStore {
 	}
 
 	@Override
-	public Set<String> doGetExpired(Set<String> candidates) {
-		var now = System.currentTimeMillis();
+	public Set<String> doCheckExpired(Set<String> candidates, long now) {
 
 		return candidates.stream().filter(candidate -> {
 			try {
@@ -122,7 +120,7 @@ public class ClusterSessionDataStore extends AbstractSessionDataStore {
 	}
 
 	@Override
-	public boolean exists(String id)
+	public boolean doExists(String id)
 			throws Exception {
 		SessionData sd = load(id);
 		if (sd == null)
@@ -134,4 +132,19 @@ public class ClusterSessionDataStore extends AbstractSessionDataStore {
 			return sd.getExpiry() > System.currentTimeMillis(); //not expired yet
 	}
 	
+    @Override
+    public Set<String> doGetExpired(long timeLimit) {
+        return sessionDataMap.values(com.hazelcast.query.Predicates.and(
+                com.hazelcast.query.Predicates.greaterThan("expiry", 0L),
+                com.hazelcast.query.Predicates.lessEqual("expiry", timeLimit)))
+                .stream().map(SessionData::getId).collect(Collectors.toSet());
+    }
+
+    @Override
+    public void doCleanOrphans(long timeLimit) {
+        sessionDataMap.removeAll(com.hazelcast.query.Predicates.and(
+                com.hazelcast.query.Predicates.greaterThan("expiry", 0L),
+                com.hazelcast.query.Predicates.lessEqual("expiry", timeLimit)));
+    }
+
 }

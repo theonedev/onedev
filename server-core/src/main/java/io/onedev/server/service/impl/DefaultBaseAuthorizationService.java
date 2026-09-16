@@ -3,7 +3,7 @@ package io.onedev.server.service.impl;
 import java.util.Collection;
 import java.util.List;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import com.google.common.base.Preconditions;
 

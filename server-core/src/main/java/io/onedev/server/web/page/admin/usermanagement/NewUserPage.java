@@ -4,7 +4,7 @@ import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Component;

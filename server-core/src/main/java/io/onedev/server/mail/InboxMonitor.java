@@ -1,6 +1,6 @@
 package io.onedev.server.mail;
 
-import javax.mail.Message;
+import jakarta.mail.Message;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 

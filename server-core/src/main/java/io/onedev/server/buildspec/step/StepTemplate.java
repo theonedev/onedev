@@ -3,8 +3,8 @@ package io.onedev.server.buildspec.step;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
@@ -52,8 +52,7 @@ public class StepTemplate implements NamedElement {
 	}
 	
 	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>")
-	@Valid
-	public List<Step> getSteps() {
+	public List<@Valid Step> getSteps() {
 		return steps;
 	}
 
@@ -62,8 +61,7 @@ public class StepTemplate implements NamedElement {
 	}
 
 	@Editable(order=300, name="Parameter Specs", description="Optionally define parameter specifications of the step template")
-	@Valid
-	public List<ParamSpec> getParamSpecs() {
+	public List<@Valid ParamSpec> getParamSpecs() {
 		return paramSpecs;
 	}
 

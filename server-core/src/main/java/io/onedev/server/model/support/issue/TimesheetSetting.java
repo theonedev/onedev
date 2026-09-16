@@ -10,7 +10,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 

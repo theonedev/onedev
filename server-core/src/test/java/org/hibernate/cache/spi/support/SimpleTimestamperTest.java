@@ -1,7 +1,7 @@
 package org.hibernate.cache.spi.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SimpleTimestamperTest {
 
@@ -60,7 +60,7 @@ public class SimpleTimestamperTest {
 			var distinct = new HashSet<Long>();
 			for (var result : executor.invokeAll(tasks)) {
 				for (long timestamp : result.get())
-					assertTrue("Duplicate cache timestamp", distinct.add(timestamp));
+					assertTrue(distinct.add(timestamp), "Duplicate cache timestamp");
 			}
 			assertEquals(40000, distinct.size());
 		} finally {

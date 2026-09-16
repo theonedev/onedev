@@ -2,7 +2,7 @@ package io.onedev.server.web.component.user.aisetting;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.GenericPanel;

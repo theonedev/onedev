@@ -8,13 +8,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.Root;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -73,7 +73,7 @@ public class DefaultIssueTouchService extends BaseEntityService<IssueTouch>
 					criteriaDelete.where(
 							builder.equal(root.get(PROP_PROJECT), innerProject),
 							root.get(PROP_ISSUE_ID).in(partition));
-					getSession().createQuery(criteriaDelete).executeUpdate();
+					getSession().createMutationQuery(criteriaDelete).executeUpdate();
 				}
 			}
 			

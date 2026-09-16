@@ -6,7 +6,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.rest.annotation.Immutable;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;

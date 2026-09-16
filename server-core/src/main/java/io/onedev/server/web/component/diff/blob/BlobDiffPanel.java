@@ -6,7 +6,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.text.MessageFormat;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Component;
@@ -20,7 +20,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -182,19 +181,19 @@ public class BlobDiffPanel extends Panel {
 				}
 
 			};
-			toggleReviewedLink.add(new SpriteImage("icon", new AbstractReadOnlyModel<>() {
+			toggleReviewedLink.add(new SpriteImage("icon", new IModel<>() {
 				@Override
 				public String getObject() {
 					return reviewed ? "tick-box" : "square";
 				}
 			}));
-			toggleReviewedLink.add(AttributeAppender.append("data-tippy-content", new AbstractReadOnlyModel<String>() {
+			toggleReviewedLink.add(AttributeAppender.append("data-tippy-content", new IModel<String>() {
 				@Override
 				public String getObject() {
 					return reviewed ? _T("Set unreviewed") : _T("Set reviewed");
 				}
 			}));
-			toggleReviewedLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+			toggleReviewedLink.add(AttributeAppender.append("class", new IModel<String>() {
 				@Override
 				public String getObject() {
 					return reviewed ? "link-primary" : "";
@@ -224,7 +223,7 @@ public class BlobDiffPanel extends Panel {
 				target.add(this);
 			}
 
-		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		}.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -356,7 +355,7 @@ public class BlobDiffPanel extends Panel {
 				}
 			}
 		}
-		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		add(AttributeAppender.append("class", new IModel<String>() {
 			@Override
 			public String getObject() {
 				return collapsed ? "blob-diff collapsed" : "blob-diff";

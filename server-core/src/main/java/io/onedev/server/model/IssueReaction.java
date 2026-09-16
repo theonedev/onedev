@@ -1,13 +1,13 @@
 package io.onedev.server.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import io.onedev.server.model.support.EntityReaction;
 
 @Entity
 @Table(
-        indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_user_id")},
-        uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", "o_user_id", "emoji"})}
+        indexes={@Index(columnList="issue_id"), @Index(columnList="user_id")},
+        uniqueConstraints={@UniqueConstraint(columnNames={"issue_id", "user_id", "emoji"})}
 )
 public class IssueReaction extends EntityReaction {
 

@@ -8,14 +8,14 @@ import java.util.Collection;
 
 import org.jspecify.annotations.Nullable;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -24,7 +24,7 @@ import io.onedev.server.rest.annotation.Immutable;
 import io.onedev.server.util.facade.PullRequestCommentFacade;
 
 @Entity
-@Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id"),
+@Table(indexes={@Index(columnList="request_id"), @Index(columnList="user_id"),
 		@Index(columnList=PROP_MESSAGE_ID)})
 public class PullRequestComment extends EntityComment {
 	

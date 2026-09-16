@@ -6,23 +6,23 @@ import static io.onedev.server.model.IssueField.PROP_TYPE;
 import static io.onedev.server.model.IssueField.PROP_VALUE;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
 
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="o_issue_id"), @Index(columnList=PROP_NAME), @Index(columnList=PROP_VALUE), 
+				@Index(columnList="issue_id"), @Index(columnList=PROP_NAME), @Index(columnList=PROP_VALUE),
 				@Index(columnList=PROP_TYPE), @Index(columnList=PROP_ORDINAL)}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", PROP_NAME, PROP_VALUE})})
+		uniqueConstraints={@UniqueConstraint(columnNames={"issue_id", PROP_NAME, PROP_VALUE})})
 public class IssueField extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

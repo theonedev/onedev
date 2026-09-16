@@ -94,8 +94,9 @@ public class ProjectImportPage extends LayoutPage {
 					}
 
 					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
+					protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+						super.onError(target);
 						target.add(form);
 					}
 
@@ -114,8 +115,9 @@ public class ProjectImportPage extends LayoutPage {
 					}
 
 					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
+					protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+						super.onError(target);
 						target.add(form);
 					}
 

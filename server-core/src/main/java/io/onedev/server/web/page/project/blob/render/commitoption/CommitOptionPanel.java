@@ -195,8 +195,9 @@ public class CommitOptionPanel extends Panel {
 		AjaxButton saveButton = new AjaxButton("save") {
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onError(target);
 				target.add(form);
 			}
 
@@ -217,8 +218,8 @@ public class CommitOptionPanel extends Panel {
 			}
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				
 				if (save(target)) {
 					String script = String.format(""

@@ -1,164 +1,124 @@
 package io.onedev.server.persistence.dao;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
-import org.apache.commons.lang3.SerializationUtils;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
-import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
 import org.hibernate.Session;
-import org.hibernate.criterion.CriteriaSpecification;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projection;
-import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.internal.CriteriaImpl;
-import org.hibernate.sql.JoinType;
-import org.hibernate.transform.ResultTransformer;
+import org.hibernate.query.Query;
 
 import io.onedev.server.model.AbstractEntity;
 
-public class EntityCriteria<T extends AbstractEntity> implements CriteriaSpecification, Serializable {
-	
-	private final CriteriaImpl impl;
-	
-	private final Criteria criteria;
-	
-	protected EntityCriteria(String entityName) {
-		impl = new CriteriaImpl(entityName, null);
-		criteria = impl;
-	}
-	
-	protected EntityCriteria(String entityName, String alias) {
-		impl = new CriteriaImpl(entityName, alias, null);
-		criteria = impl;
-	}
-	
-	protected EntityCriteria(CriteriaImpl impl, Criteria criteria) {
-		this.impl = impl;
-		this.criteria = criteria;
-	}
-	
-	/**
-	 * Get an executable instance of <literal>Criteria</literal>,
-	 * to actually run the query.
-	 */
-	public Criteria getExecutableCriteria(Session session) {
-		CriteriaImpl clone = (CriteriaImpl) SerializationUtils.clone(impl);
-		clone.setSession( ( SessionImplementor ) session );
-		return clone;
-	}
-	
-	public static <T extends AbstractEntity> EntityCriteria<T> of(Class<T> clazz) {
-		return new EntityCriteria<T>(clazz.getName());
-	}
-	
-	public static <T extends AbstractEntity> EntityCriteria<T> of(Class<T> clazz, String alias) {
-		return new EntityCriteria<T>(clazz.getName(), alias );
-	}
-	
-	public EntityCriteria<T> add(Criterion criterion) {
-		criteria.add(criterion);
-		return this;
-	}
+/** Serializable query description, independent of a Hibernate session. */
+public class EntityCriteria<T extends AbstractEntity> implements Serializable {
+    private final Class<T> entityClass;
+    private final String alias;
+    private final List<Criterion> restrictions = new ArrayList<>();
+    private final List<Order> orders = new ArrayList<>();
+    private final List<Association> associations = new ArrayList<>();
+    private boolean cacheable;
+    private CacheMode cacheMode;
+    private String cacheRegion;
 
-	public EntityCriteria<T> addOrder(Order order) {
-		criteria.addOrder(order);
-		return this;
-	}
-	
-	public void setCacheable(boolean cacheable) {
-		criteria.setCacheable(cacheable);
-	}
-	
-	public void setCacheMode(CacheMode cacheMode) {
-		criteria.setCacheMode(cacheMode);
-	}
-	
-	public void setCacheRegion(String cacheRegion) {
-		criteria.setCacheRegion(cacheRegion);
-	}
+    private record Association(String path, JoinType joinType, EntityCriteria<?> criteria) implements Serializable {}
 
-	public EntityCriteria<T> createAlias(String associationPath, String alias)
-	throws HibernateException {
-		criteria.createAlias(associationPath, alias);
-		return this;
-	}
-
-	public Criteria createCriteria(String associationPath, String alias)
-	throws HibernateException {
-		return criteria.createCriteria(associationPath, alias);
-	}
-
-	public Criteria createCriteria(String associationPath)
-	throws HibernateException {
-		return criteria.createCriteria(associationPath);
-	}
-
-	public String getAlias() {
-		return criteria.getAlias();
-	}
-
-	public EntityCriteria<T> setFetchMode(String associationPath, FetchMode mode)
-	throws HibernateException {
-		criteria.setFetchMode(associationPath, mode);
-		return this;
-	}
-
-	public EntityCriteria<T> setProjection(Projection projection) {
-		criteria.setProjection(projection);
-		return this;
-	}
-
-	public EntityCriteria<T> setResultTransformer(ResultTransformer resultTransformer) {
-		criteria.setResultTransformer(resultTransformer);
-		return this;
-	}
-	
-	public String toString() {
-		return "DetachableCriteria(" + criteria.toString() + ')';
-	}
-	
-	CriteriaImpl getCriteriaImpl() {
-		return impl;
-	}
-
-    public EntityCriteria<T> createAlias(String associationPath, String alias, JoinType joinType) throws HibernateException {
-        criteria.createAlias(associationPath, alias, joinType);
-        return this;
-    }
-	
-	public EntityCriteria<T> createAlias(String associationPath, String alias, JoinType joinType, Criterion withClause) throws HibernateException {
-		criteria.createAlias(associationPath, alias, joinType, withClause);
-		return this;
-	}
-	
-	public EntityCriteria<T> createCriteria(String associationPath, JoinType joinType) throws HibernateException {
-        return new EntityCriteria<T>(impl, criteria.createCriteria(associationPath, joinType));
+    private EntityCriteria(Class<T> entityClass, String alias) {
+        this.entityClass = entityClass;
+        this.alias = alias;
     }
 
-    public EntityCriteria<T> createCriteria(String associationPath, String alias, JoinType joinType) throws HibernateException {
-        return new EntityCriteria<T>(impl, criteria.createCriteria(associationPath, alias, joinType));
+    public static <T extends AbstractEntity> EntityCriteria<T> of(Class<T> type) {
+        return of(type, null);
     }
-	
-	public EntityCriteria<T> createCriteria(String associationPath, String alias, JoinType joinType, Criterion withClause) throws HibernateException {
-		return new EntityCriteria<T>(impl, criteria.createCriteria(associationPath, alias, joinType, withClause));
-	}
 
-	public EntityCriteria<T> setComment(String comment) {
-        criteria.setComment(comment);
+    public static <T extends AbstractEntity> EntityCriteria<T> of(Class<T> type, String alias) {
+        return new EntityCriteria<>(type, alias);
+    }
+
+    public EntityCriteria<T> add(Criterion criterion) { restrictions.add(criterion); return this; }
+    public EntityCriteria<T> addOrder(Order order) { orders.add(order); return this; }
+    public void setCacheable(boolean cacheable) { this.cacheable = cacheable; }
+    public void setCacheMode(CacheMode cacheMode) { this.cacheMode = cacheMode; }
+    public void setCacheRegion(String cacheRegion) { this.cacheRegion = cacheRegion; }
+    public String getAlias() { return alias; }
+
+    public EntityCriteria<T> createAlias(String path, String alias, JoinType joinType) {
+        associations.add(new Association(path, joinType, new EntityCriteria<>(entityClass, alias)));
         return this;
     }
 
-    public EntityCriteria<T> setLockMode(LockMode lockMode) {
-        criteria.setLockMode(lockMode);
-        return this;
+    public EntityCriteria<T> createCriteria(String path) { return createCriteria(path, JoinType.INNER); }
+
+    public EntityCriteria<T> createCriteria(String path, JoinType joinType) {
+        var child = new EntityCriteria<>(entityClass, null);
+        associations.add(new Association(path, joinType, child));
+        return child;
     }
 
-    public EntityCriteria<T> setLockMode(String alias, LockMode lockMode) {
-        criteria.setLockMode(alias, lockMode);
-        return this;
+    private Path<?> path(From<?, ?> from, String name, Map<String, From<?, ?>> aliases) {
+        String[] parts = name.split("\\.");
+        Path<?> result = aliases.getOrDefault(parts[0], from);
+        int first = aliases.containsKey(parts[0]) ? 1 : 0;
+        for (int i = first; i < parts.length; i++) result = result.get(parts[i]);
+        return result;
+    }
+
+    private void collect(CriteriaBuilder builder, From<?, ?> from, Map<String, From<?, ?>> aliases,
+            List<Predicate> predicates, List<jakarta.persistence.criteria.Order> queryOrders) {
+        if (alias != null) aliases.put(alias, from);
+        // Register aliases before evaluating restrictions, which may refer to them.
+        Map<Association, From<?, ?>> joins = new HashMap<>();
+        for (var association : associations) {
+            String[] parts = association.path().split("\\.");
+            From<?, ?> join = aliases.getOrDefault(parts[0], from);
+            int first = aliases.containsKey(parts[0]) ? 1 : 0;
+            for (int i = first; i < parts.length; i++) join = join.join(parts[i], association.joinType());
+            joins.put(association, join);
+            if (association.criteria().alias != null) aliases.put(association.criteria().alias, join);
+        }
+        Function<String, Path<?>> paths = name -> path(from, name, aliases);
+        for (var restriction : restrictions) predicates.add(restriction.toPredicate(builder, paths));
+        for (var order : orders) queryOrders.add(order.ascending()
+                ? builder.asc(paths.apply(order.property())) : builder.desc(paths.apply(order.property())));
+        for (var association : associations)
+            association.criteria().collect(builder, joins.get(association), aliases, predicates, queryOrders);
+    }
+
+    private <R> Query<R> build(Session session, CriteriaQuery<R> criteria, Root<T> root, boolean count) {
+        var predicates = new ArrayList<Predicate>();
+        var queryOrders = new ArrayList<jakarta.persistence.criteria.Order>();
+        collect(session.getCriteriaBuilder(), root, new HashMap<>(), predicates, queryOrders);
+        criteria.where(predicates.toArray(Predicate[]::new));
+        if (!count) criteria.orderBy(queryOrders);
+        Query<R> query = session.createQuery(criteria).setCacheable(cacheable);
+        if (cacheMode != null) query.setCacheMode(cacheMode);
+        if (cacheRegion != null) query.setCacheRegion(cacheRegion);
+        return query;
+    }
+
+    public Query<T> getExecutableCriteria(Session session) {
+        var criteria = session.getCriteriaBuilder().createQuery(entityClass);
+        Root<T> root = criteria.from(entityClass);
+        criteria.select(root);
+        return build(session, criteria, root, false);
+    }
+
+    public long count(Session session) {
+        var builder = session.getCriteriaBuilder();
+        var criteria = builder.createQuery(Long.class);
+        Root<T> root = criteria.from(entityClass);
+        criteria.select(builder.count(root));
+        return build(session, criteria, root, true).getSingleResult();
     }
 }

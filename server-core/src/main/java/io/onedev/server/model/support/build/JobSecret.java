@@ -2,8 +2,8 @@ package io.onedev.server.model.support.build;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobMatch;

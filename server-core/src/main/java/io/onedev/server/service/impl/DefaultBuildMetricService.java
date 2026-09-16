@@ -19,21 +19,21 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.persistence.metamodel.EntityType;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import jakarta.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +144,7 @@ public class DefaultBuildMetricService implements BuildMetricService {
 		
 		selections.add(buildJoin.get(PROP_FINISH_TIME_GROUPS).get(PROP_DAY));
 		
-		criteriaQuery.multiselect(selections);
+		criteriaQuery.select(builder.array(selections.toArray(Selection<?>[]::new)));
 		
 		Map<Integer, T> metrics = new HashMap<>();
 		
@@ -172,7 +172,7 @@ public class DefaultBuildMetricService implements BuildMetricService {
 		var hazelcastInstance = clusterService.getHazelcastInstance();
 		reportNames = hazelcastInstance.getMap("buildReportNames");
 		
-		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildMetricCacheInited");
+		var cacheInited = clusterService.getAtomicLong("buildMetricCacheInited");
 		clusterService.initWithLead(cacheInited, () -> {
 			EntityManagerFactory emf = dao.getSession().getEntityManagerFactory();
 			for (EntityType<?> entityType: emf.getMetamodel().getEntities()) {
@@ -180,7 +180,7 @@ public class DefaultBuildMetricService implements BuildMetricService {
 				if (BuildMetric.class.isAssignableFrom(entityClass)) {
 					String queryString = String.format("select build.%s.id, build.%s, metric.%s from %s metric inner join metric.%s build",
 							PROP_PROJECT, PROP_JOB_NAME, PROP_REPORT, entityClass.getSimpleName(), PROP_BUILD);
-					Query<?> query = dao.getSession().createQuery(queryString);
+					Query<?> query = dao.getSession().createQuery(queryString, Object[].class);
 					for (Object[] fields: (List<Object[]>)query.list())
 						populateReportNames(new Key((Long)fields[0], entityClass), (String)fields[1], (String)fields[2]);
 				}

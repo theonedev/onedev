@@ -9,8 +9,8 @@ import io.onedev.server.taskschedule.TaskScheduler;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,8 +40,14 @@ public class DefaultUploadService implements UploadService, SchedulableTask {
 	}
 	
 	private void deleteItems(FileUpload upload) {
-		for (var item: upload.getItems())
-			item.delete();
+		for (var item: upload.getItems()) {
+            try {
+                item.delete();
+            } catch (java.io.IOException e) {
+                org.slf4j.LoggerFactory.getLogger(DefaultUploadService.class)
+                        .warn("Unable to delete temporary upload {}", item.getName(), e);
+            }
+        }
 	}
 	
 	@Override

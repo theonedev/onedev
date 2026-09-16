@@ -2,7 +2,7 @@ package io.onedev.server.plugin.mail.gmail;
 
 import io.onedev.server.annotation.Editable;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 import java.io.Serializable;
 
 @Editable

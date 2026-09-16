@@ -1,6 +1,6 @@
 package io.onedev.server.exception.handler;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 

@@ -5,7 +5,6 @@ import static io.onedev.server.web.translation.Translation._T;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.codequality.Coverage;
@@ -22,7 +21,7 @@ import io.onedev.server.codequality.Coverage;
 		
 		var branchContainer = new WebMarkupContainer("branch");
 		add(branchContainer.setVisible(getCoverageInfo().getBranchPercentage() >= 0));
-		branchContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
+		branchContainer.add(new Label("label", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -30,7 +29,7 @@ import io.onedev.server.codequality.Coverage;
 			}
 			
 		}));
-		branchContainer.add(new PercentageBar("bar", new AbstractReadOnlyModel<>() {
+		branchContainer.add(new PercentageBar("bar", new IModel<>() {
 
 			@Override
 			public Integer getObject() {
@@ -41,7 +40,7 @@ import io.onedev.server.codequality.Coverage;
 		
 		var lineContainer = new WebMarkupContainer("line");
 		add(lineContainer.setVisible(getCoverageInfo().getLinePercentage() >= 0));
-		lineContainer.add(new Label("label", new AbstractReadOnlyModel<String>() {
+		lineContainer.add(new Label("label", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -49,7 +48,7 @@ import io.onedev.server.codequality.Coverage;
 			}
 			
 		}));
-		lineContainer.add(new PercentageBar("bar", new AbstractReadOnlyModel<>() {
+		lineContainer.add(new PercentageBar("bar", new IModel<>() {
 
 			@Override
 			public Integer getObject() {

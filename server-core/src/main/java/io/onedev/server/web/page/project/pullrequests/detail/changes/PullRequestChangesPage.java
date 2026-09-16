@@ -32,7 +32,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
@@ -520,7 +519,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				return fragment;
 			}
 		};
-		selectedCommitsLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
+		selectedCommitsLink.add(new Label("label", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -684,7 +683,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			public void setObject(String object) {
 				state.blameFile = object;
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 			}
 			
 		};
@@ -702,7 +701,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			public void setObject(String object) {
 				state.pathFilter = object;
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 			}
 			
 		};
@@ -721,7 +720,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			public void setObject(WhitespaceOption object) {
 				state.whitespaceOption = object;
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 			}
 
 		};

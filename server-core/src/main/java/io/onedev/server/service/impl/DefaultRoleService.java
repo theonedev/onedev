@@ -6,19 +6,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.ReplicationMode;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.MatchMode;
+import io.onedev.server.persistence.dao.Order;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
+import io.onedev.server.cluster.ClusterAtomicLong;
 
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
@@ -77,7 +76,7 @@ public class DefaultRoleService extends BaseEntityService<Role> implements RoleS
 	@Transactional
 	@Override
 	public void replicate(Role role) {
-		getSession().replicate(role, ReplicationMode.OVERWRITE);
+		getSession().merge(role);
 		idService.useId(Role.class, role.getId());
 
 		var facade = role.getFacade();
@@ -90,7 +89,7 @@ public class DefaultRoleService extends BaseEntityService<Role> implements RoleS
 		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
 		cache = new RoleCache(hazelcastInstance.getMap("roleCache"));
 
-		IAtomicLong cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("roleCacheInited"); 
+		ClusterAtomicLong cacheInited = clusterService.getAtomicLong("roleCacheInited");
 		clusterService.initWithLead(cacheInited, () -> {
 			for (var role: query())
 				cache.put(role.getId(), role.getFacade());

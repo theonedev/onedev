@@ -19,39 +19,34 @@ package org.apache.wicket.protocol.ws.api;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.Page;
+import org.apache.wicket.core.request.handler.AbstractPartialPageRequestHandler;
 import org.apache.wicket.core.request.handler.logger.PageLogData;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.page.PartialPageUpdate;
 import org.apache.wicket.page.XmlPartialPageUpdate;
 import org.apache.wicket.request.ILogData;
 import org.apache.wicket.request.IRequestCycle;
 import org.apache.wicket.request.Response;
-import org.apache.wicket.request.component.IRequestablePage;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.lang.Args;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.websocket.WebSocketService;
+import org.apache.wicket.response.StringResponse;
+import org.apache.wicket.util.lang.Args;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A handler of WebSocket requests.
  *
  * @since 6.0
  */
-public class WebSocketRequestHandler implements IWebSocketRequestHandler
+public class WebSocketRequestHandler extends AbstractPartialPageRequestHandler implements IWebSocketRequestHandler
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WebSocketRequestHandler.class);
 
-	private final Page page;
 
 	private final IWebSocketConnection connection;
 
@@ -61,7 +56,7 @@ public class WebSocketRequestHandler implements IWebSocketRequestHandler
 
 	public WebSocketRequestHandler(final Component component, final IWebSocketConnection connection)
 	{
-		this.page = Args.notNull(component, "component").getPage();
+		super(Args.notNull(component, "component").getPage());
 		this.connection = Args.notNull(connection, "connection");
 	}
 
@@ -86,6 +81,27 @@ public class WebSocketRequestHandler implements IWebSocketRequestHandler
 	}
 
 	@Override
+	public Future<Void> pushAsync(CharSequence message, long timeout)
+	{
+		if (connection.isOpen())
+		{
+			Args.notNull(message, "message");
+			return connection.sendMessageAsync(message.toString(), timeout);
+		}
+		else
+		{
+			LOG.warn("The websocket connection is already closed. Cannot push the text message '{}'", message);
+		}
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public Future<Void> pushAsync(CharSequence message)
+	{
+		return pushAsync(message, -1);
+	}
+
+	@Override
 	public void push(byte[] message, int offset, int length)
 	{
 		if (connection.isOpen())
@@ -106,14 +122,41 @@ public class WebSocketRequestHandler implements IWebSocketRequestHandler
 	}
 
 	@Override
-	public void add(Component component, String markupId)
+	public Future<Void> pushAsync(byte[] message, int offset, int length)
 	{
-		getUpdate().add(component, markupId);
+		return pushAsync(message, offset, length, -1);
 	}
 
-	private PartialPageUpdate getUpdate() {
+	@Override
+	public Future<Void> pushAsync(byte[] message, int offset, int length, long timeout)
+	{
+		if (connection.isOpen())
+		{
+			Args.notNull(message, "message");
+			return connection.sendMessageAsync(message, offset, length, timeout);
+		}
+		else
+		{
+			LOG.warn("The websocket connection is already closed. Cannot push the binary message '{}'", message);
+		}
+		return CompletableFuture.completedFuture(null);
+	}
+
+	/**
+	 * @return if <code>true</code> then EMPTY partial updates will se send. If <code>false</code> then EMPTY
+	 *    partial updates will be skipped. A possible use case is: a page receives and a push event but no one is
+	 *    listening to it, and nothing is added to {@link org.apache.wicket.protocol.ws.api.WebSocketRequestHandler}
+	 *    thus no real push to client is needed. For compatibilities this is set to true. Thus EMPTY updates are sent
+	 *    by default.
+	 */
+	protected boolean shouldPushWhenEmpty()
+	{
+		return true;
+	}
+
+	protected PartialPageUpdate getUpdate() {
 		if (update == null) {
-			update = new XmlPartialPageUpdate(page) {
+			update = new XmlPartialPageUpdate(getPage()) {
 
 				@Override
 				protected void onBeforeRespond(Response response) {
@@ -140,51 +183,6 @@ public class WebSocketRequestHandler implements IWebSocketRequestHandler
 		return update;
 	}
 
-	@Override
-	public void add(Component... components)
-	{
-		for (final Component component : components)
-		{
-			Args.notNull(component, "component");
-
-			if (component.getOutputMarkupId() == false)
-			{
-				throw new IllegalArgumentException(
-						"cannot update component that does not have setOutputMarkupId property set to true. Component: " +
-								component.toString());
-			}
-			add(component, component.getMarkupId());
-		}
-	}
-
-	@Override
-	public final void addChildren(MarkupContainer parent, Class<?> childCriteria)
-	{
-		Args.notNull(parent, "parent");
-		Args.notNull(childCriteria, "childCriteria");
-
-		parent.visitChildren(childCriteria, new IVisitor<Component, Void>()
-		{
-			@Override
-			public void component(final Component component, final IVisit<Void> visit)
-			{
-				add(component);
-				visit.dontGoDeeper();
-			}
-		});
-	}
-
-	@Override
-	public void appendJavaScript(CharSequence javascript)
-	{
-		getUpdate().appendJavaScript(javascript);
-	}
-
-	@Override
-	public void prependJavaScript(CharSequence javascript)
-	{
-		getUpdate().prependJavaScript(javascript);
-	}
 
 	@Override
 	public Collection<? extends Component> getComponents()
@@ -197,73 +195,25 @@ public class WebSocketRequestHandler implements IWebSocketRequestHandler
 	}
 
 	@Override
-	public final void focusComponent(Component component)
-	{
-		if (component != null && component.getOutputMarkupId() == false)
-		{
-			throw new IllegalArgumentException(
-					"cannot update component that does not have setOutputMarkupId property set to true. Component: " +
-							component.toString());
-		}
-		final String id = component != null ? ("'" + component.getMarkupId() + "'") : "null";
-		appendJavaScript("Wicket.Focus.setFocusOnId(" + id + ");");
-	}
-
-	@Override
-	public IHeaderResponse getHeaderResponse()
-	{
-		return getUpdate().getHeaderResponse();
-	}
-
-	@Override
-	public Page getPage()
-	{
-		return page;
-	}
-
-	@Override
-	public Integer getPageId()
-	{
-		return page.getPageId();
-	}
-
-	@Override
-	public boolean isPageInstanceCreated()
-	{
-		return true;
-	}
-
-	@Override
-	public Integer getRenderCount()
-	{
-		return page.getRenderCount();
-	}
-
-	@Override
 	public ILogData getLogData()
 	{
 		return logData;
 	}
 
-	@Override
-	public Class<? extends IRequestablePage> getPageClass()
-	{
-		return page.getPageClass();
-	}
-
-	@Override
-	public PageParameters getPageParameters()
-	{
-		return page.getPageParameters();
-	}
 
 	@Override
 	public void respond(IRequestCycle requestCycle)
 	{
-		if (update != null)
-		{
-			update.writeTo(requestCycle.getResponse(), "UTF-8");
-		}
+        if (update != null && (shouldPushWhenEmpty() || !update.isEmpty())) {
+            // see WICKET-7098
+            // A malformed XML is generated if a runtime exception happen during rendering phase of a web
+            // socket push request. Writing to a buffer allows to generate a proper XML
+            // as request's buffer will not be polluted by partial write operations
+            StringResponse bodyResponse = new StringResponse();
+            // additionally, we use the charset for the request instead of a hardcoded UTF-8
+            update.writeTo(bodyResponse, requestCycle.getRequest().getCharset().name());
+            requestCycle.getResponse().write(bodyResponse.getBuffer());
+        }
 	}
 
 	@Override
@@ -271,7 +221,7 @@ public class WebSocketRequestHandler implements IWebSocketRequestHandler
 	{
 		if (logData == null)
 		{
-			logData = new PageLogData(page);
+			logData = new PageLogData(getPage());
 		}
 
 		if (update != null) {

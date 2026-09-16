@@ -7,8 +7,8 @@ import io.onedev.server.annotation.WithTime;
 import io.onedev.server.annotation.WorkingPeriod;
 import io.onedev.server.service.SettingService;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 

@@ -1,6 +1,6 @@
 package io.onedev.server.rest.resource.support;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.rest.annotation.Api;

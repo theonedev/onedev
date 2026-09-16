@@ -30,14 +30,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -541,7 +541,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 								userCommits = deserializeUserCommits(readBytes(userCommitsStore, txn, new StringByteIterable(author.getEmailAddress())));
 								userCommitsCache.put(author.getEmailAddress(), userCommits);
 							}
-							userCommits.put(ObjectId.fromString(currentCommit.getHash()), currentCommit.getAuthor().getWhen().getTime());
+							userCommits.put(ObjectId.fromString(currentCommit.getHash()), currentCommit.getAuthor().getWhenAsInstant().toEpochMilli());
 						}
 					}
 				}

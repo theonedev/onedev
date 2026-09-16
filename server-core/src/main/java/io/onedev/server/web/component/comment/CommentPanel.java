@@ -21,7 +21,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -73,7 +72,7 @@ public abstract class CommentPanel extends Panel {
 
 			@Override
 			public void setObject(String object) {
-				onSaveComment(RequestCycle.get().find(AjaxRequestTarget.class), object);
+				onSaveComment(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null), object);
 			}
 
 		}, getContentVersionSupport()) {
@@ -86,7 +85,7 @@ public abstract class CommentPanel extends Panel {
 			
 		});
 			
-		viewer.add(new Label("noContent", new AbstractReadOnlyModel<String>() {
+		viewer.add(new Label("noContent", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -147,7 +146,7 @@ public abstract class CommentPanel extends Panel {
 				form.add(new AjaxButton("save") {
 
 					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					protected void onSubmit(AjaxRequestTarget target) {
 						try {
 							if (lastVersion != getVersion()) 
 								throw new StaleStateException("");
@@ -165,8 +164,8 @@ public abstract class CommentPanel extends Panel {
 					}
 					
 					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
+					protected void onError(AjaxRequestTarget target) {
+						super.onError(target);
 						target.add(feedback);
 					}
 					
@@ -216,7 +215,7 @@ public abstract class CommentPanel extends Panel {
 			
 		});
 
-		viewer.add(new CopyToClipboardLink("copy", new AbstractReadOnlyModel<String>() {
+		viewer.add(new CopyToClipboardLink("copy", new IModel<String>() {
 
 			@Override
 			public String getObject() {

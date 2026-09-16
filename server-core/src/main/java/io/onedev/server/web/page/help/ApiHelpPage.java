@@ -5,9 +5,9 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.lang.reflect.Method;
 
 import org.jspecify.annotations.Nullable;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;

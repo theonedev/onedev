@@ -4,7 +4,7 @@ import static io.onedev.server.util.DateUtils.formatDateTime;
 
 import java.util.Collection;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -137,8 +137,8 @@ class IssueWorkPanel extends Panel {
 		form.add(BeanContext.edit("editor", bean));
 		form.add(new AjaxButton("save") {
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				var work = getWork();
 				work.setNote(bean.getNote());
 				work.setDate(bean.getStartAt());
@@ -150,8 +150,9 @@ class IssueWorkPanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onError(target);
 				target.add(form);
 			}
 		});

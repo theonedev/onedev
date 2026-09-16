@@ -1,16 +1,16 @@
 package io.onedev.server.service.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
+import static io.onedev.server.persistence.dao.Restrictions.eq;
 
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.MatchMode;
+import io.onedev.server.persistence.dao.Order;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
@@ -114,7 +114,7 @@ public class DefaultGroupService extends BaseEntityService<Group> implements Gro
 		usage.add(settingService.onDeleteGroup(group.getName()));
 		usage.checkInUse("Group '" + group.getName() + "'");
 
-    	var query = getSession().createQuery("update SsoProvider set defaultGroup=null where defaultGroup=:group");
+		var query = getSession().createMutationQuery("update SsoProvider set defaultGroup=null where defaultGroup=:group");
     	query.setParameter("group", group);
     	query.executeUpdate();
 

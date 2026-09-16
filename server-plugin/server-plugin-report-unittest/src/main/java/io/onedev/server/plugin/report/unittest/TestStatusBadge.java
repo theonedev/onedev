@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 
 import io.onedev.server.codequality.UnitTestReport.Status;
 import io.onedev.server.web.util.TextUtils;
@@ -22,7 +22,7 @@ class TestStatusBadge extends Label {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {

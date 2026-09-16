@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.IOException;
 
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -69,7 +69,7 @@ public abstract class ArtifactUploadPanel extends Panel {
 		
 		form.add(new AjaxButton("upload") {
 
-			private String getArtifactPath(FileItem file) {
+			private String getArtifactPath(FileItem<?> file) {
 				String artifactPath = FilenameUtils.sanitizeFileName(FileUpload.getFileName(file));
 				if (directory != null)
 					artifactPath = directory + "/" + artifactPath;
@@ -77,8 +77,8 @@ public abstract class ArtifactUploadPanel extends Panel {
 			}
 			
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				
 				if (directory != null && directory.contains("..")) {
 					error(_T("'..' is not allowed in the directory"));
@@ -104,8 +104,8 @@ public abstract class ArtifactUploadPanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(feedback);
 			}
 			

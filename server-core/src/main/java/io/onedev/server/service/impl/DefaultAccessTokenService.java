@@ -3,8 +3,8 @@ package io.onedev.server.service.impl;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.apache.shiro.authc.DisabledAccountException;
 

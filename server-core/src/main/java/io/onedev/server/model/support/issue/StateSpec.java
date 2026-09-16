@@ -2,7 +2,7 @@ package io.onedev.server.model.support.issue;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.Color;
 import io.onedev.server.annotation.Editable;

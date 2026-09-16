@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -527,7 +527,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						protected void onClosed() {
 							super.onClosed();
 							AjaxRequestTarget target = 
-									Preconditions.checkNotNull(RequestCycle.get().find(AjaxRequestTarget.class));
+									Preconditions.checkNotNull(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 							target.appendJavaScript(String.format("$('#%s textarea').focus();", container.getMarkupId()));
 						}
 						

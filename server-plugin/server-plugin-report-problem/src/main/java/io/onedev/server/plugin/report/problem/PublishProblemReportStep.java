@@ -21,7 +21,7 @@ import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.Dao;
 import org.apache.commons.lang3.SerializationUtils;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.*;
 import java.util.Collection;
 import java.util.List;

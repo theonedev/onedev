@@ -487,7 +487,7 @@ public class ProjectOverviewPage extends ProjectPage {
 				params.set(PARAM_CHILD_QUERY, childrenQuery);
 				params.remove(PARAM_CHILD_PAGE);
 				CharSequence url = RequestCycle.get().urlFor(ProjectOverviewPage.class, params);
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), childrenQuery);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null), url.toString(), childrenQuery);
 			}
 
 		}, 0) {

@@ -13,7 +13,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -38,7 +38,7 @@ public class TagProtectionsPage extends ProjectSettingPage {
 		container = new WebMarkupContainer("tagProtectionSetting");
 		container.setOutputMarkupId(true);
 		add(container);
-		container.add(new ListView<>("protections", new AbstractReadOnlyModel<List<TagProtection>>() {
+		container.add(new ListView<>("protections", new IModel<List<TagProtection>>() {
 
 			@Override
 			public List<TagProtection> getObject() {

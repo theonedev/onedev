@@ -12,7 +12,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.IMarkupSourcingStrategy;
 import org.apache.wicket.markup.html.panel.PanelMarkupSourcingStrategy;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
@@ -98,7 +97,7 @@ public abstract class CommitStatusLink extends DropdownLink {
 			
 		});
 		
-		add(AttributeAppender.replace("title", new AbstractReadOnlyModel<String>() {
+		add(AttributeAppender.replace("title", new IModel<String>() {
 
 			@Override
 			public String getObject() {

@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.UserDataFacade;
@@ -38,9 +38,8 @@ public class UserData implements Serializable {
 	}
 
 	@Editable(order=200, name="Data Entries", description = "Specify data entries to persist across workspaces")
-	@Valid
 	@Size(min=1, max=100)
-	public List<UserDataEntry> getEntries() {
+	public List<@Valid UserDataEntry> getEntries() {
 		return entries;
 	}
 

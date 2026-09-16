@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
@@ -20,6 +21,9 @@ import io.onedev.server.util.Similarities;
 public class UserCache extends MapProxy<Long, UserFacade> {
 
 	private static final long serialVersionUID = 1L;
+
+	// Keep only lookup hints: the replicated map can change on another cluster node.
+	private final Map<String, Long> idsByName = new ConcurrentHashMap<>();
 	
 	public UserCache(Map<Long, UserFacade> delegate) {
 		super(delegate);
@@ -28,9 +32,18 @@ public class UserCache extends MapProxy<Long, UserFacade> {
 	@Nullable
 	public UserFacade findByName(String name) {
 		name = name.toLowerCase();
-		for (UserFacade facade: values()) {
-			if (name.equals(facade.getName()))
+		var id = idsByName.get(name);
+		if (id != null) {
+			var facade = get(id);
+			if (facade != null && name.equals(facade.getName()))
 				return facade;
+			idsByName.remove(name, id);
+		}
+		for (UserFacade facade: values()) {
+			if (name.equals(facade.getName())) {
+				idsByName.put(name, facade.getId());
+				return facade;
+			}
 		}
 		return null;
 	}

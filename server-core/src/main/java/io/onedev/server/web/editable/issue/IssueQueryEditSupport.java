@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Preconditions;
@@ -76,7 +75,7 @@ public class IssueQueryEditSupport implements EditSupport {
         					.withOrder(issueQuery.withOrder())
 							.forBoard(issueQuery.forBoard());
 		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
-		        		new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
+                        new IssueQueryBehavior(new IModel<Project>() {
 
 	        				@Override
 	        				public Project getObject() {

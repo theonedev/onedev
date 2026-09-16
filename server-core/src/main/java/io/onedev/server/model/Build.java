@@ -37,28 +37,28 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Criterion;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -108,8 +108,8 @@ import io.onedev.server.web.util.TextUtils;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), 
-				@Index(columnList="o_canceller_id"), @Index(columnList="o_request_id"),  
+		indexes={@Index(columnList="project_id"), @Index(columnList="submitter_id"),
+				@Index(columnList="canceller_id"), @Index(columnList="request_id"),
 				@Index(columnList= PROP_COMMIT_HASH), 
 				@Index(columnList=PROP_NUMBER), @Index(columnList= PROP_JOB_NAME), 
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
@@ -117,8 +117,8 @@ import io.onedev.server.web.util.TextUtils;
 				@Index(columnList=PROP_RUNNING_DATE), @Index(columnList=PROP_FINISH_DATE), 
 				@Index(columnList=PROP_FINISH_MONTH), @Index(columnList=PROP_FINISH_WEEK),
 				@Index(columnList=PROP_FINISH_DAY), @Index(columnList=PROP_VERSION), 
-				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT_HASH)},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
+				@Index(columnList="numberScope_id"), @Index(columnList="project_id, " + PROP_COMMIT_HASH)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"numberScope_id", PROP_NUMBER})}
 )
 @DynamicUpdate
 public class Build extends ProjectBelonging 

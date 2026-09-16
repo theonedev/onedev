@@ -13,7 +13,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.file.Files;

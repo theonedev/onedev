@@ -54,8 +54,9 @@ public abstract class InsertGpgKeyPanel extends Panel {
         form.add(new AjaxButton("add") {
         	
             @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
+            protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+                super.onSubmit(target);
                 
                 GpgKeyService gpgKeyService = OneDev.getInstance(GpgKeyService.class);
                 GpgKey gpgKey = (GpgKey) editor.getModelObject();
@@ -87,8 +88,9 @@ public abstract class InsertGpgKeyPanel extends Panel {
             }
             
             @Override
-            protected void onError(AjaxRequestTarget target, Form<?> form) {
-                super.onError(target, form);
+            protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+                super.onError(target);
                 target.add(form);
             }
             

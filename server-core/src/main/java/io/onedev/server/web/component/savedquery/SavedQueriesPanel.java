@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -29,7 +29,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -470,7 +470,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			
 		});		
 		
-		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -506,8 +506,9 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			form.add(new AjaxButton("save") {
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+					super.onSubmit(target);
 					
 					Set<String> names = new HashSet<>();
 					for (NamedQuery namedQuery: bean.getQueries()) {
@@ -523,8 +524,9 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				}
 
 				@Override
-				protected void onError(AjaxRequestTarget target, Form<?> form) {
-					super.onError(target, form);
+				protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+					super.onError(target);
 					target.add(form);
 				}
 				

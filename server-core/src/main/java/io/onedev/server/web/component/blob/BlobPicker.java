@@ -11,7 +11,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
@@ -40,7 +39,7 @@ public abstract class BlobPicker extends DropdownLink {
 	@Override
 	protected Component newContent(String id, FloatingPanel dropdown) {
 		if (commitModel.getObject() != null) {
-			IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
+			IModel<Project> projectModel = new IModel<Project>() {
 
 				@Override
 				public Project getObject() {

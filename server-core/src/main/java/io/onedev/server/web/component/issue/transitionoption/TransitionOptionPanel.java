@@ -59,7 +59,7 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(this);
 			}
 			
 		};
@@ -102,8 +102,8 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 		form.add(new AjaxButton("ok") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 
 				Collection<String> editableFields = FieldUtils.getEditableFields(
 						getIssue().getProject(), getTransition().getPromptFields()); 

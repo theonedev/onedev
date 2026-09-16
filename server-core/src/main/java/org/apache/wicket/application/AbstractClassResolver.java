@@ -64,7 +64,7 @@ public abstract class AbstractClassResolver implements IClassResolver
 		else if (className.equals(FieldUtils.FIELD_BEAN_CLASS_NAME_WITH_DEFAULT_VALUE))
 			return FieldUtils.getFieldBeanClass(true);
 		
-		Class<?> clazz = ParamUtils.loadBeanClass(className);
+		Class<?> clazz = ParamUtils.loadParamBeanClass(className);
 		
 		if (clazz != null)
 			return clazz;

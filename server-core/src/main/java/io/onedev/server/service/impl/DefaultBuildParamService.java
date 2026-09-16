@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -50,14 +50,14 @@ public class DefaultBuildParamService extends BaseEntityService<BuildParam> impl
 		var hazelcastInstance = clusterService.getHazelcastInstance();
 		paramNames = hazelcastInstance.getMap("buildParamNames");
 		
-		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildParamCacheInited");
+		var cacheInited = clusterService.getAtomicLong("buildParamCacheInited");
 		clusterService.initWithLead(cacheInited, () -> {
 			Map<Long, Long> projectIds = new HashMap<>();
-			Query<?> query = dao.getSession().createQuery("select id, project.id from Build");
+			Query<?> query = dao.getSession().createQuery("select id, project.id from Build", Object[].class);
 			for (Object[] fields: (List<Object[]>)query.list())
 				projectIds.put((Long)fields[0], (Long)fields[1]);
 
-			query = dao.getSession().createQuery("select build.id, name from BuildParam");
+			query = dao.getSession().createQuery("select build.id, name from BuildParam", Object[].class);
 			for (Object[] fields: (List<Object[]>)query.list()) {
 				Long projectId = projectIds.get(fields[0]);
 				if (projectId != null)

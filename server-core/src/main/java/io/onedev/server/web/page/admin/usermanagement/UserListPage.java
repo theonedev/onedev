@@ -33,7 +33,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -188,7 +187,7 @@ public class UserListPage extends AdministrationPage {
 				state.query = object;
 				var params = paramsOf(state, 0);
 				var url = RequestCycle.get().urlFor(UserListPage.class, params).toString();
-				var target = RequestCycle.get().find(AjaxRequestTarget.class);
+				var target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				if (typing)
 					replaceState(target, url, state);
 				else
@@ -829,7 +828,7 @@ public class UserListPage extends AdministrationPage {
 			}
 
 		});
-		includeDisabledLink.add(new SpriteImage("icon", new AbstractReadOnlyModel<String>() {
+		includeDisabledLink.add(new SpriteImage("icon", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -843,7 +842,7 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Label("label", new AbstractReadOnlyModel<String>() {
+				add(new Label("label", new IModel<String>() {
 
 					@Override
 					public String getObject() {

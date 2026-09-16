@@ -16,8 +16,7 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -62,7 +61,6 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -92,8 +90,8 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 		add(new AjaxButton("addElement") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				markFormDirty(target);
 
 				Component lastRow;
@@ -201,8 +199,8 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 		row.add(new AjaxButton("deleteElement") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				markFormDirty(target);
 				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
 				rows.remove(row);
@@ -231,7 +229,6 @@ public class VerticalBeanListPropertyEditor extends PropertyEditor<List<Serializ
 		return (BeanEditor) row.get("elementEditor");
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
 		int index = ((PathNode.Indexed) propertyNode).getIndex();

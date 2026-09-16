@@ -1,7 +1,7 @@
 package io.onedev.server.web.websocket;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;

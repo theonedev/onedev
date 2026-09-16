@@ -3,8 +3,8 @@ package io.onedev.server.web.websocket;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class BuildEventBroadcaster {

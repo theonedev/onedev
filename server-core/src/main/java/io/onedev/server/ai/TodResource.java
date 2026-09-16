@@ -1,6 +1,6 @@
 package io.onedev.server.ai;
 
-import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -18,23 +18,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
-import javax.validation.Validator;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotAcceptableException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAcceptableException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -563,7 +563,7 @@ public class TodResource {
     public Map<String, Object> createIssue(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("project") String projectPath, 
-                @NotNull @Valid Map<String, Serializable> data) {
+                @NotNull Map<String, @Valid Serializable> data) {
         var subject = SecurityUtils.getSubject();
         if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
@@ -1676,7 +1676,7 @@ public class TodResource {
     @POST
     public Map<String, Object> runJob(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @NotNull @Valid Map<String, Serializable> data) {
+                @NotNull Map<String, @Valid Serializable> data) {
         var subject = SecurityUtils.getSubject();
         var user = SecurityUtils.getUser(subject);
 

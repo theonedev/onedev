@@ -27,7 +27,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -184,7 +184,6 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 												return null;
 										}
 
-										@SuppressWarnings("deprecation")
 										@Override
 										protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
 											return new AttachAjaxIndicatorListener(
@@ -400,7 +399,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 				params.set(PARAM_QUERY, query);
 				params.remove(PARAM_PAGE);
 				CharSequence url = RequestCycle.get().urlFor(ProjectIssueListPage.class, params);
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null), url.toString(), query);
 			}
 			
 		}) {

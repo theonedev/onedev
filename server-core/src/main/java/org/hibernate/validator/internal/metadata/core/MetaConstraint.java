@@ -1,8 +1,6 @@
 /*
- * Hibernate Validator, declare and validate application constraints
- *
- * License: Apache License, Version 2.0
- * See the license.txt file in the root directory or <http://www.apache.org/licenses/LICENSE-2.0>.
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright Red Hat Inc. and Hibernate Authors
  */
 package org.hibernate.validator.internal.metadata.core;
 
@@ -14,7 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Stack;
 
-import javax.validation.valueextraction.ValueExtractor;
+import jakarta.validation.valueextraction.ValueExtractor;
 
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintTree;
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorManager;
@@ -106,9 +104,12 @@ public class MetaConstraint<A extends Annotation> {
 
 	private static ValueExtractionPathNode getValueExtractionPath(List<ContainerClassTypeParameterAndExtractor> valueExtractionPath) {
 		switch ( valueExtractionPath.size() ) {
-			case 0: return null;
-			case 1: return new SingleValueExtractionPathNode( valueExtractionPath.iterator().next() );
-			default: return new LinkedValueExtractionPathNode( null, valueExtractionPath );
+			case 0:
+				return null;
+			case 1:
+				return new SingleValueExtractionPathNode( valueExtractionPath.iterator().next() );
+			default:
+				return new LinkedValueExtractionPathNode( null, valueExtractionPath );
 		}
 	}
 
@@ -157,9 +158,8 @@ public class MetaConstraint<A extends Annotation> {
 
 	private boolean doValidateConstraint(ValidationContext<?> executionContext, ValueContext<?, ?> valueContext) {
 		valueContext.setConstraintLocationKind( getConstraintLocationKind() );
-		boolean validationResult = constraintTree.validateConstraints( executionContext, valueContext );
 
-		return validationResult;
+		return constraintTree.validateConstraints( executionContext, valueContext );
 	}
 
 	public ConstraintLocation getLocation() {
@@ -256,10 +256,7 @@ public class MetaConstraint<A extends Annotation> {
 				valueContext.setTypeParameter( containerClass, currentValueExtractionPathNode.getTypeParameterIndex() );
 			}
 
-			if ( nodeName != null ) {
-				valueContext.appendTypeParameterNode( nodeName );
-			}
-
+			valueContext.appendTypeParameterNode( nodeName );
 			valueContext.setCurrentValidatedValue( value );
 
 			if ( currentValueExtractionPathNode.hasNext() ) {
@@ -310,11 +307,17 @@ public class MetaConstraint<A extends Annotation> {
 
 	private interface ValueExtractionPathNode {
 		boolean hasNext();
+
 		ValueExtractionPathNode getPrevious();
+
 		ValueExtractionPathNode getNext();
+
 		Class<?> getContainerClass();
+
 		TypeVariable<?> getTypeParameter();
+
 		Integer getTypeParameterIndex();
+
 		ValueExtractorDescriptor getValueExtractorDescriptor();
 	}
 
@@ -384,7 +387,7 @@ public class MetaConstraint<A extends Annotation> {
 		private final Integer typeParameterIndex;
 		private final ValueExtractorDescriptor valueExtractorDescriptor;
 
-		private LinkedValueExtractionPathNode( ValueExtractionPathNode previous, List<ContainerClassTypeParameterAndExtractor> elements) {
+		private LinkedValueExtractionPathNode(ValueExtractionPathNode previous, List<ContainerClassTypeParameterAndExtractor> elements) {
 			ContainerClassTypeParameterAndExtractor first = elements.get( 0 );
 			this.containerClass = first.containerClass;
 			this.typeParameter = first.typeParameter;

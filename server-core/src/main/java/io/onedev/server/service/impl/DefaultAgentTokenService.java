@@ -4,10 +4,10 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentToken;

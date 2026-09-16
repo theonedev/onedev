@@ -88,7 +88,8 @@ public class AuthenticatorPage extends AdministrationPage {
 			}
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
 				if (editor.isValid()) {
 					new ModalPanel(target) {
 
@@ -102,13 +103,13 @@ public class AuthenticatorPage extends AdministrationPage {
 								@Override
 								protected void onError() {
 									super.onError();
-									RequestCycle.get().find(AjaxRequestTarget.class).add(tokenEditor);
+									RequestCycle.get().find(AjaxRequestTarget.class).orElse(null).add(tokenEditor);
 								}
 
 								@Override
 								protected void onSubmit() {
 									super.onSubmit();
-									AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);								
+									AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 									target.add(tokenEditor);
 									target.focusComponent(null);
 									close();

@@ -2,7 +2,7 @@ package io.onedev.server.plugin.pack.container;
 
 import org.jspecify.annotations.Nullable;
 
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 public class NotFoundException extends ClientException {
 

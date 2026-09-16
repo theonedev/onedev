@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.annotation.WorkspaceQuery;
@@ -59,7 +58,7 @@ public class WorkspaceQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					InputAssistBehavior inputAssist = new WorkspaceQueryBehavior(new AbstractReadOnlyModel<>() {
+					InputAssistBehavior inputAssist = new WorkspaceQueryBehavior(new IModel<>() {
 
 						@Override
 						public Project getObject() {

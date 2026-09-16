@@ -29,13 +29,12 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -129,7 +128,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 			}
 			
 		};
-		openLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		openLink.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -150,7 +149,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 			}
 			
 		};
-		closedLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		closedLink.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {

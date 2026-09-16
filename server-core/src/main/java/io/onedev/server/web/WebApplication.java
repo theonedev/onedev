@@ -1,15 +1,12 @@
 package io.onedev.server.web;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.function.Supplier;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
@@ -20,7 +17,6 @@ import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.application.IComponentInstantiationListener;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -58,12 +54,10 @@ import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandle
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.resource.JQueryResourceReference;
-import org.apache.wicket.util.IProvider;
 import org.apache.wicket.util.file.IResourceFinder;
+import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.resource.IResourceStream;
-import org.apache.wicket.util.time.Duration;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
@@ -78,6 +72,7 @@ import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.error.GeneralErrorPage;
 import io.onedev.server.web.page.error.InUseErrorPage;
+import io.onedev.server.web.page.store.PageManagerProvider;
 import io.onedev.server.web.resource.SpriteResourceReference;
 import io.onedev.server.web.resource.SpriteResourceStream;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
@@ -87,6 +82,10 @@ import io.onedev.server.web.translation.TranslationTagHandler;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
 import io.onedev.server.web.websocket.WebSocketMessages;
 import io.onedev.server.web.websocket.WebSocketService;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Singleton
 public class WebApplication extends org.apache.wicket.protocol.http.WebApplication {
@@ -109,6 +108,10 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 	@Override
 	protected void init() {
 		super.init();
+
+		// OneDev's components and Markdown integrations require unrestricted inline scripts and styles.
+		getCspSettings().blocking().disabled();
+		getCspSettings().reporting().disabled();
 
 		getDebugSettings().setAjaxDebugModeEnabled(false);
 
@@ -146,21 +149,15 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 
 		});
 		
-		getJavaScriptLibrarySettings().setJQueryReference(new JavaScriptResourceReference(
-				JQueryResourceReference.class, "jquery/jquery-3.5.1.min.js"));
+		getJavaScriptLibrarySettings().setJQueryReference(JQueryResourceReference.getV3());
 		
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
+		getStoreSettings().setMaxSizePerSession(Bytes.megabytes(50));
 		
-		/*
-		 * We disabled session store of pages to reduce memory usage at peak time. However, when
-		 * a user visits the page, the page instance may not get written to disk timely due to
-		 * page synchronous writing. So adding an in-memory cache is important to compensate the
-		 * page written latency; otherwise, user may experience odd exceptions such as 
-		 * ComponentNotFound when visit a page instance again after it is being created
-		 */
-		getStoreSettings().setInmemoryCacheSize(1000);
+		// Store pages synchronously on disk and load them on demand to reduce heap usage.
+		setPageManagerProvider(new PageManagerProvider(this));
 		
-		getRequestCycleSettings().setTimeout(Duration.minutes(30));
+		getRequestCycleSettings().setTimeout(Duration.ofMinutes(30));
 		
 		getComponentInstantiationListeners().add(new GuiceComponentInjector(this, AppLoader.injector));
 		getComponentInstantiationListeners().add(new IComponentInstantiationListener() {
@@ -204,9 +201,9 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 			}
 
 			@Override
-			public void onAfterRespond(Map<String, Component> map, IJavaScriptResponse response) {
+			public void onAfterRespond(Map<String, Component> map, AjaxRequestTarget response) {
 				if (!map.isEmpty()) {
-					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 					if (target != null)
 						OneDev.getInstance(WebSocketService.class).observe((BasePage) target.getPage());
 				}
@@ -278,8 +275,8 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 	}
 
 	@Override
-	public final IProvider<IExceptionMapper> getExceptionMapperProvider() {
-		return new IProvider<>() {
+	public final Supplier<IExceptionMapper> getExceptionMapperProvider() {
+		return new Supplier<>() {
 
 			@Override
 			public IExceptionMapper get() {

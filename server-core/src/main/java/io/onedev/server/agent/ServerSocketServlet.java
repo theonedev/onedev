@@ -1,17 +1,18 @@
 package io.onedev.server.agent;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 import java.io.IOException;
+import java.time.Duration;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServletFactory;
 
 import io.onedev.agent.Agent;
 import io.onedev.server.OneDev;
@@ -20,7 +21,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AgentTokenService;
 
 @Singleton
-public class ServerSocketServlet extends WebSocketServlet {
+public class ServerSocketServlet extends JettyWebSocketServlet {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -28,11 +29,11 @@ public class ServerSocketServlet extends WebSocketServlet {
 	private AgentTokenService tokenService;
 	
 	@Override
-	public void configure(WebSocketServletFactory factory) {
+	public void configure(JettyWebSocketServletFactory factory) {
         factory.register(ServerSocket.class);		
-        factory.getPolicy().setIdleTimeout(Agent.SOCKET_IDLE_TIMEOUT);
-        factory.getPolicy().setMaxBinaryMessageSize(Agent.MAX_MESSAGE_BYTES);
-		factory.getPolicy().setMaxTextMessageSize(Agent.MAX_MESSAGE_BYTES);
+        factory.setIdleTimeout(Duration.ofMillis(Agent.SOCKET_IDLE_TIMEOUT));
+        factory.setMaxBinaryMessageSize(Agent.MAX_MESSAGE_BYTES);
+		factory.setMaxTextMessageSize(Agent.MAX_MESSAGE_BYTES);
 	}
 
 	@Override

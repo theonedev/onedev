@@ -634,7 +634,7 @@ onedev.server.sourceView = {
             		$("<a class='hash'>" + blameInfo.abbreviatedHash + "</a>")
             				.appendTo($gutter)
             				.attr("href", blameInfo.url)
-            				.attr("onclick", "onedev.server.viewState.getFromViewAndSetToHistory();");
+                            .attr("onclick", "onedev.server.viewState.getFromViewAndSetToHistory();");
             		var $hashLink = $gutter.children("a.hash");
             		$hashLink.data("hash", blameInfo.hash);
             		$hashLink.data("line", range.from);

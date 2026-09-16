@@ -11,7 +11,6 @@ import org.jspecify.annotations.Nullable;
 
 import com.hazelcast.cluster.Member;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
 
 import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.replica.ProjectReplica;
@@ -33,7 +32,15 @@ public interface ClusterService {
 	@Nullable
 	HazelcastInstance getHazelcastInstance();
 	
-	void initWithLead(IAtomicLong data, Callable<Long> initializer);
+    default ClusterAtomicLong getAtomicLong(String name) {
+        return new ClusterAtomicLong(getHazelcastInstance(), name);
+    }
+
+    default ClusterLock getLock(String name) {
+        return new ClusterLock(getHazelcastInstance(), name);
+    }
+
+	void initWithLead(ClusterAtomicLong data, Callable<Long> initializer);
 	
 	<T> T runOnServer(Member server, ClusterTask<T> task);
 	

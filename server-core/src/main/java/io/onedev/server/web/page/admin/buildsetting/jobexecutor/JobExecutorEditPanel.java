@@ -69,8 +69,9 @@ abstract class JobExecutorEditPanel extends Panel {
 		AjaxButton saveButton = new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 				
 				JobExecutor executor = bean.getExecutor();
 				if (executorIndex != -1) { 
@@ -97,8 +98,9 @@ abstract class JobExecutorEditPanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onError(target);
 				target.add(form);
 			}
 			

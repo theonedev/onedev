@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.Iteration;

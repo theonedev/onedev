@@ -2,7 +2,6 @@ package io.onedev.server.web.editable;
 
 import java.lang.reflect.Method;
 
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
@@ -32,7 +31,7 @@ public class NotificationReceiverEditSupport implements EditSupport {
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
 					InputAssistBehavior inputAssist = new NotificationReceiverBehavior(
-							new AbstractReadOnlyModel<Project>() {
+							new IModel<Project>() {
 
 						@Override
 						public Project getObject() {

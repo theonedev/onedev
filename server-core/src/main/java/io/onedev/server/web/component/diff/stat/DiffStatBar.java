@@ -9,7 +9,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 
 public class DiffStatBar extends Panel {
 
@@ -30,7 +30,7 @@ public class DiffStatBar extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("additions", new AbstractReadOnlyModel<String>() {
+		add(new Label("additions", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -42,7 +42,7 @@ public class DiffStatBar extends Panel {
 			
 		}).setEscapeModelStrings(false));
 		
-		add(new Label("deletions", new AbstractReadOnlyModel<String>() {
+		add(new Label("deletions", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -53,7 +53,7 @@ public class DiffStatBar extends Panel {
 			}
 		}).setEscapeModelStrings(false));
 		
-		add(new Label("spacer", new AbstractReadOnlyModel<String>() {
+		add(new Label("spacer", new IModel<String>() {
 
 			@Override
 			public String getObject() {

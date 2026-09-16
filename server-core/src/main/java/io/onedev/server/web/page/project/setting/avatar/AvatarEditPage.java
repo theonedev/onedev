@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.setting.avatar;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;

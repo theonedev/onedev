@@ -4,8 +4,8 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.model.PullRequest;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class PullRequestEventBroadcaster {

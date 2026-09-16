@@ -5,7 +5,7 @@ import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.RevisionChoice;
 import io.onedev.server.web.component.createtag.CreateTagBean;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 @Editable
 public class CreateTagBeanWithRevision extends CreateTagBean {

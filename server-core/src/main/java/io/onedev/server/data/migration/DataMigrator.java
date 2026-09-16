@@ -36,7 +36,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Strings;
@@ -9399,6 +9399,27 @@ public class DataMigrator {
 				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("wikiSetting");
 					element.addElement("wikiManagement").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate244(File dataDir, Stack<Integer> versions) {
+		var oldClass = "javax.mail.internet.InternetAddress";
+		var newClass = "jakarta.mail.internet.InternetAddress";
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml") || file.getName().startsWith("IssueComments.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Node node : dom.selectNodes("//*")) {
+					var element = (Element) node;
+					if (element.getName().equals(oldClass))
+						element.setName(newClass);
+					if (oldClass.equals(element.attributeValue("class")))
+						element.addAttribute("class", newClass);
+					var reference = element.attribute("reference");
+					if (reference != null)
+						reference.setValue(Strings.CS.replace(reference.getValue(), oldClass, newClass));
 				}
 				dom.writeToFile(file, false);
 			}

@@ -1,11 +1,11 @@
 package io.onedev.server.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_request_id", "o_user_id"})}
+		indexes={@Index(columnList="request_id"), @Index(columnList="user_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"request_id", "user_id"})}
 )
 public class PullRequestMention extends AbstractEntity {
 

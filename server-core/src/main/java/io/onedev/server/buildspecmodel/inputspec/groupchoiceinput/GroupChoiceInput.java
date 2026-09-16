@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ValidationException;
-import javax.validation.Validator;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
 
 import org.jspecify.annotations.Nullable;
 

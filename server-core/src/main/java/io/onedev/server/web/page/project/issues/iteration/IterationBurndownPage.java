@@ -12,7 +12,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -98,7 +97,7 @@ public class IterationBurndownPage extends IterationDetailPage {
 	}
 
 	private void newBurndown(@Nullable AjaxRequestTarget target) {
-		var burndown = new IterationBurndownPanel("burndown", new AbstractReadOnlyModel<>() {
+		var burndown = new IterationBurndownPanel("burndown", new IModel<>() {
 			@Override
 			public Iteration getObject() {
 				return getIteration();

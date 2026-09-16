@@ -3,18 +3,18 @@ package io.onedev.server.model;
 import static io.onedev.server.model.AgentAttribute.PROP_NAME;
 import static io.onedev.server.model.AgentAttribute.PROP_VALUE;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.AttributeName;
 import io.onedev.server.annotation.Editable;
@@ -25,8 +25,8 @@ import io.onedev.server.annotation.Editable;
  */
 @Entity
 @Table(
-		indexes={@Index(columnList="o_agent_id"), @Index(columnList=PROP_NAME), @Index(columnList=PROP_VALUE)}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_agent_id", PROP_NAME})})
+		indexes={@Index(columnList="agent_id"), @Index(columnList=PROP_NAME), @Index(columnList=PROP_VALUE)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"agent_id", PROP_NAME})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class AgentAttribute extends AbstractEntity {

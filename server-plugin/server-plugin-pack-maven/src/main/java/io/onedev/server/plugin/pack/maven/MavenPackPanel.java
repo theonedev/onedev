@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MediaType;
 
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -155,16 +155,16 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 							@Override
 							protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 								Component content = newMavenInstructions(packaging, bindings, requireSettings);
-								target.add(content);
 								usageFrag.replace(content);
+								target.add(content);
 							}
 						}.setSelected(true));
 						buildToolTabs.add(new AjaxActionTab(Model.of(_T("Gradle"))) {
 							@Override
 							protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 								Component content = newGradleInstructions(bindings, canAccessAnonymously);
-								target.add(content);
 								usageFrag.replace(content);
+								target.add(content);
 							}
 						});
 						usageFrag.add(new Tabbable("buildToolTabs", buildToolTabs));

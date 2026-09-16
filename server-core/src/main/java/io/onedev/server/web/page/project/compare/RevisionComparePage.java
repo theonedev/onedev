@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -580,7 +580,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				@Override
 				public void setObject(String object) {
 					state.blameFile = object;
-					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 				}
 				
 			};
@@ -599,7 +599,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				@Override
 				public void setObject(String object) {
 					state.pathFilter = object;
-					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 				}
 				
 			};
@@ -617,7 +617,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				@Override
 				public void setObject(WhitespaceOption object) {
 					state.whitespaceOption = object;
-					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 				}
 
 			};
@@ -655,7 +655,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				@Override
 				public void setObject(String object) {
 					state.commitQuery = object;
-					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 				}
 				
 			}) {

@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
@@ -20,7 +20,7 @@ public class MyBasicSettingPage extends MyPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new BasicSettingPanel("content", new AbstractReadOnlyModel<>() {
+		add(new BasicSettingPanel("content", new IModel<>() {
 
 			@Override
 			public User getObject() {

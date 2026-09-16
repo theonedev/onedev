@@ -9,7 +9,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractTool
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
@@ -21,7 +21,7 @@ public class ListNavigationToolbar extends AbstractToolbar {
 		super(table);
 
 		var span = new WebMarkupContainer("span");
-		span.add(AttributeModifier.replace("colspan", new AbstractReadOnlyModel<String>() {
+		span.add(AttributeModifier.replace("colspan", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -29,7 +29,7 @@ public class ListNavigationToolbar extends AbstractToolbar {
 			}
 
 		}));
-		span.add(new Label("count", new AbstractReadOnlyModel<String>() {
+		span.add(new Label("count", new IModel<String>() {
 
 			@Override
 			public String getObject() {

@@ -1,8 +1,8 @@
 package io.onedev.server.validation.validator;
 
 import javax.lang.model.SourceVersion;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import io.onedev.server.annotation.EnvVarName;
 

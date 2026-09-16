@@ -5,10 +5,10 @@ import static java.lang.String.format;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
@@ -50,7 +50,7 @@ public class DefaultPullRequestTouchService extends BaseEntityService<PullReques
 		transactionService.runAfterCommit(() -> transactionService.runAsync(() -> {
             var innerProject = projectService.load(projectId);
             if (!newRequest) {
-                var query = getSession().createQuery(format("delete from PullRequestTouch where project=:project and %s=:%s", PROP_REQUEST_ID, PROP_REQUEST_ID));
+                var query = getSession().createMutationQuery(format("delete from PullRequestTouch where project=:project and %s=:%s", PROP_REQUEST_ID, PROP_REQUEST_ID));
                 query.setParameter("project", innerProject);
                 query.setParameter(PROP_REQUEST_ID, requestId);
                 query.executeUpdate();

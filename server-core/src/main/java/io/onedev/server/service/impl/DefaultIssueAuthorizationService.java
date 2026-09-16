@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.hibernate.query.Query;
 
@@ -54,12 +54,11 @@ public class DefaultIssueAuthorizationService extends BaseEntityService<IssueAut
 		dao.persist(authorization);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
 	public Set<Long> getAuthorizedIssueIds(User user) {
 		Query<Long> query = getSession().createQuery(
-				"select issue.id from IssueAuthorization where user=:user");
+				"select issue.id from IssueAuthorization where user=:user", Long.class);
 		query.setParameter("user", user);
 		return new HashSet<>(query.list());
 	}

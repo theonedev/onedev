@@ -19,7 +19,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -221,7 +220,7 @@ public abstract class PackSidePanel extends Panel {
 		} else {
 			labelsContainer.add(new WebMarkupContainer("head"));
 		}
-		labelsContainer.add(new EntityLabelsPanel<>("body", new AbstractReadOnlyModel<Pack>() {
+		labelsContainer.add(new EntityLabelsPanel<>("body", new IModel<Pack>() {
 
 			@Override
 			public Pack getObject() {

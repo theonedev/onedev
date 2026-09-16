@@ -39,7 +39,7 @@ public class BeforeCriteria extends CommitCriteria {
 	public boolean matches(RefUpdated event) {
 		RevCommit commit = event.getProject().getRevCommit(event.getNewCommitId(), true);
 		for (String value: values) {
-			if (!commit.getCommitterIdent().getWhen().before(DateUtils.parseRelaxed(value)))
+			if (!commit.getCommitterIdent().getWhenAsInstant().isBefore(DateUtils.parseRelaxed(value).toInstant()))
 				return false;
 		}
 		return true;

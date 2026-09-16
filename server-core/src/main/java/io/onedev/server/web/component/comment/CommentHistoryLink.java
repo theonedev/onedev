@@ -12,7 +12,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.hibernate.proxy.HibernateProxyHelper;
+import io.onedev.server.util.HibernateProxyHelper;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.support.CommentRevision;

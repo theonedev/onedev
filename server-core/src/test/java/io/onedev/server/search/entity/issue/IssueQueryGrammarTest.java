@@ -1,10 +1,10 @@
 package io.onedev.server.search.entity.issue;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.onedev.commons.codeassist.CodeAssist;
 import io.onedev.commons.codeassist.FenceAware;

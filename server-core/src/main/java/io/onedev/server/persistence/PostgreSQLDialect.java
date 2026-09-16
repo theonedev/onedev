@@ -2,9 +2,9 @@ package io.onedev.server.persistence;
 
 import java.sql.Types;
 
-import org.hibernate.dialect.PostgreSQL82Dialect;
-import org.hibernate.type.descriptor.sql.BinaryTypeDescriptor;
-import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
+import org.hibernate.boot.model.TypeContributions;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
 
 /**
  * Map blob to bytea to avoid below issues:
@@ -15,19 +15,20 @@ import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
  * entities with blob fields out side of a transaction even if Hibernate session 
  * is available 
  */
-public class PostgreSQLDialect extends PostgreSQL82Dialect {
+public class PostgreSQLDialect extends org.hibernate.dialect.PostgreSQLDialect {
 
-	public PostgreSQLDialect() {
-		super();
-		registerColumnType(Types.BLOB, "bytea");
+	@Override
+	protected String columnType(int sqlTypeCode) {
+		return sqlTypeCode == Types.BLOB ? "bytea" : super.columnType(sqlTypeCode);
 	}
 
 	@Override
-	public SqlTypeDescriptor remapSqlTypeDescriptor(SqlTypeDescriptor sqlTypeDescriptor) {
-		if (sqlTypeDescriptor.getSqlType() == java.sql.Types.BLOB) {
-			return BinaryTypeDescriptor.INSTANCE;
-		}
-		return super.remapSqlTypeDescriptor(sqlTypeDescriptor);
+	public void contributeTypes(TypeContributions contributions, ServiceRegistry registry) {
+		super.contributeTypes(contributions, registry);
+		// Use binary binding for nulls as well as setBytes/getBytes for values.
+		// A BLOB JDBC type binds null as oid, which PostgreSQL rejects for bytea.
+		contributions.getTypeConfiguration().getJdbcTypeRegistry()
+				.addDescriptor(Types.BLOB, VarbinaryJdbcType.INSTANCE);
 	}
 
 }

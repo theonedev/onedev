@@ -14,7 +14,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
@@ -282,7 +282,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			
 		});
 		
-		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
+		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
 						
 			@Override
 			public void onEndRequest(RequestCycle cycle) {

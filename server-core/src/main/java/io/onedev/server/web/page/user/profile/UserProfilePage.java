@@ -7,7 +7,7 @@ import java.io.Serializable;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -52,7 +52,7 @@ public class UserProfilePage extends UserPage {
     }
 
     private Component newUserProfile() {
-        return new UserProfilePanel("profile", new AbstractReadOnlyModel<User>() {
+        return new UserProfilePanel("profile", new IModel<User>() {
 
             @Override
             public User getObject() {

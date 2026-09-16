@@ -2,7 +2,7 @@ package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;

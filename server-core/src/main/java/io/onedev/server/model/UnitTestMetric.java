@@ -4,14 +4,14 @@ import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.util.MetricIndicator;
 import io.onedev.server.web.component.chart.line.LineSeries;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_build_id"), @Index(columnList= PROP_REPORT)},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_build_id", PROP_REPORT})}
+		indexes={@Index(columnList="build_id"), @Index(columnList= PROP_REPORT)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"build_id", PROP_REPORT})}
 )
 public class UnitTestMetric extends AbstractEntity implements BuildMetric {
 

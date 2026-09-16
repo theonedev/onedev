@@ -4,8 +4,8 @@ import static io.onedev.server.entityreference.ReferenceUtils.extractReferences;
 
 import java.util.Date;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

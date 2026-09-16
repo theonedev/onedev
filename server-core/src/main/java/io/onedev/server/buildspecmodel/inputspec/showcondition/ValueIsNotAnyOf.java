@@ -2,7 +2,7 @@ package io.onedev.server.buildspecmodel.inputspec.showcondition;
 
 import java.util.List;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;

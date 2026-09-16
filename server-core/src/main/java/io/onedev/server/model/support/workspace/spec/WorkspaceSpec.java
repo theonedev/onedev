@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -192,8 +192,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 			Optionally define user data for the workspace. User data populated by a workspace will be uploaded 
 			after the workspace is deleted, and can be reused by other workspaces created by same user""")
 	@DependsOn(property = "runInContainer")
-	@Valid
-	public List<UserData> getUserDatas() {
+	public List<@Valid UserData> getUserDatas() {
 		return userDatas;
 	}
 
@@ -214,8 +213,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	}
 
 	@Editable(order = 400, name = "Environment Variables", description = "Optionally specify environment variables")
-	@Valid
-	public List<EnvVar> getEnvVars() {
+	public List<@Valid EnvVar> getEnvVars() {
 		return envVars;
 	}
 
@@ -226,8 +224,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	@Editable(order = 600, name = "Shortcuts", description = """
 		Optionally specify list of shortcuts at top of workspace. When workspace is created, 
 		the first shortcut will be opened automatically""")
-	@Valid
-	public List<ShortcutConfig> getShortcutConfigs() {
+	public List<@Valid ShortcutConfig> getShortcutConfigs() {
 		return shortcutConfigs;
 	}
 
@@ -287,8 +284,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 			<code>@workspace_token@</code> for user name, and access token for password
 			""")
 	@DependsOn(property = "runInContainer")
-	@Valid
-	public List<RegistryLogin> getRegistryLogins() {
+	public List<@Valid RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
 
@@ -298,8 +294,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	@Editable(order = 1550, group = "More Settings", description = "Optionally define config files for the workspace")
 	@DependsOn(property = "runInContainer")
-	@Valid
-	public List<ConfigFile> getConfigFiles() {
+	public List<@Valid ConfigFile> getConfigFiles() {
 		return configFiles;
 	}
 
@@ -310,8 +305,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	@Editable(order = 1600, group = "More Settings", name = "Caches", description = """
 			Optionally define caches for the workspace. Cache populated by a workspace will be uploaded 
 			after the workspace is deleted, and can be used by other workspaces created after it""")
-	@Valid
-	public List<CacheConfig> getCacheConfigs() {
+	public List<@Valid CacheConfig> getCacheConfigs() {
 		return cacheConfigs;
 	}
 

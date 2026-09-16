@@ -10,7 +10,7 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -60,7 +60,7 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Label("label", new AbstractReadOnlyModel<String>() {
+				add(new Label("label", new IModel<String>() {
 					@Override
 					public String getObject() {
 						return showArchived? _T("Hide Archived"): _T("Show Archived");

@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.step;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CacheEntryFacade;

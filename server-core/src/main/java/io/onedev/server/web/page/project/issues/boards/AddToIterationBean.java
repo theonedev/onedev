@@ -7,7 +7,7 @@ import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.EditContext;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

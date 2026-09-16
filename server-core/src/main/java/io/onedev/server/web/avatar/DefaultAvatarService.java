@@ -15,8 +15,8 @@ import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.apache.commons.codec.binary.Hex;
 import org.eclipse.jgit.lib.PersonIdent;

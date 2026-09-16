@@ -11,8 +11,8 @@ import org.apache.sshd.common.digest.BuiltinDigests;
 import org.apache.sshd.server.auth.AsyncAuthException;
 import org.apache.sshd.server.session.ServerSession;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;

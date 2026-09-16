@@ -1,14 +1,14 @@
 package io.onedev.server.validation;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
@@ -108,9 +108,8 @@ public class HibernateValidationVisibilityTest extends HibernateValidationTestSu
 			return child;
 		}
 
-		@Valid
 		@DependsOn(property = "enabled")
-		public List<Child> getChildren() {
+		public List<@Valid Child> getChildren() {
 			return children;
 		}
 	}
@@ -139,10 +138,9 @@ public class HibernateValidationVisibilityTest extends HibernateValidationTestSu
 		}
 
 		@Override
-		@Valid
 		@DependsOn(property = "enabled")
 		@DependsOn(property = "mode", value = "write")
-		public List<Child> getChildren() {
+		public List<@Valid Child> getChildren() {
 			return super.getChildren();
 		}
 	}
@@ -166,9 +164,8 @@ public class HibernateValidationVisibilityTest extends HibernateValidationTestSu
 			return new Child();
 		}
 
-		@Valid
 		@ShowCondition("isVisible")
-		public List<Child> getChildren() {
+		public List<@Valid Child> getChildren() {
 			return List.of(new Child());
 		}
 

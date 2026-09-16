@@ -2,7 +2,7 @@ package io.onedev.server.service.impl;
 
 import java.util.List;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import io.onedev.server.model.DashboardVisit;
 import io.onedev.server.persistence.annotation.Transactional;

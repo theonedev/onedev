@@ -11,13 +11,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.HttpHeaders;
 
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.ImmutablePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.mgt.WebSecurityManager;
@@ -99,15 +99,25 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static final String PRINCIPAL_ANONYMOUS = "anonymous";
 	
 	public static final PrincipalCollection PRINCIPALS_ANONYMOUS = 
-			new SimplePrincipalCollection(PRINCIPAL_ANONYMOUS, "");
+			ImmutablePrincipalCollection.ofSinglePrincipal(PRINCIPAL_ANONYMOUS, "");
 	
+    public static Subject getSubject() {
+        Subject subject = ThreadContext.getSubject();
+        if (subject == null) {
+            // Shiro 3 no longer installs a VM-global security manager for web applications.
+            subject = asAnonymous();
+            ThreadContext.bind(subject);
+        }
+        return subject;
+    }
+
 	public static void checkPermission(Permission permission) {
 		if (!getSubject().isPermitted(permission))
 			throw new UnauthorizedException();
 	}
 	
 	public static PrincipalCollection asPrincipals(String principal) {
-		return new SimplePrincipalCollection(principal, "");
+		return ImmutablePrincipalCollection.ofSinglePrincipal(principal, "");
 	}
 	
 	public static Subject asSubject(PrincipalCollection principals) {

@@ -247,6 +247,7 @@ for (const mode of ['UNIFIED', 'SPLIT']) {
     await waitForContext(page, `${project.name}/~commits/${second.commitHash}`, 'run');
     // Only the in-function hunk has context. The unscoped change gets no row.
     await expect(diff.locator('.diff-symbol-hunk')).toHaveCount(1);
-    await expect(diff.locator('.diff-symbol-hunk .symbol-context-label')).toHaveText('run');
+    // Indexing can briefly render separate old/new labels before both revisions are ready.
+    await expect(diff.locator('.diff-symbol-hunk .symbol-context-label')).toHaveText(['run']);
   });
 }

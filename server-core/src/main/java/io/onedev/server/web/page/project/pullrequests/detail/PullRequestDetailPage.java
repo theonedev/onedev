@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.inject.Inject;
-import javax.persistence.EntityNotFoundException;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -54,12 +54,11 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -369,8 +368,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 
 				var user = SecurityUtils.getUser();
 				pullRequestChangeService.changeTitle(user, getPullRequest(), title);
@@ -382,8 +381,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(requestHead);
 			}
 
@@ -434,7 +433,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		summaryContainer.setOutputMarkupId(true);
 		add(summaryContainer);
 
-		summaryContainer.add(new Label("checkError", new AbstractReadOnlyModel<String>() {
+		summaryContainer.add(new Label("checkError", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -778,7 +777,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 		}.setEscapeModelStrings(false));
 
-		summaryContainer.add(new Label("requiredJobsMessage", new AbstractReadOnlyModel<String>() {
+		summaryContainer.add(new Label("requiredJobsMessage", new IModel<String>() {
 			@Override
 			public String getObject() {
 				if (getPullRequest().getBuildRequirement().isStrictMode())
@@ -831,6 +830,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected void onConfigure() {
+						super.onConfigure();
 						setVisible(buildSpec != null 
 								&& buildSpec.getJobMap().containsKey(jobName) 
 								&& (SecurityUtils.canRunJob(getProject(), jobName) || SecurityUtils.canModifyPullRequest(getPullRequest())));
@@ -981,7 +981,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		add(new SideInfoLink("moreInfoDock"));
 
-		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
+		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
 
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
@@ -1105,7 +1105,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 				});
 				fragment.add(newWorkspacesLink());
-				fragment.add(new Label("workspaceCount", new AbstractReadOnlyModel<Integer>() {
+				fragment.add(new Label("workspaceCount", new IModel<Integer>() {
 
 					@Override
 					public Integer getObject() {
@@ -1436,7 +1436,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 		mergeStrategyContainer.add(editor);
 
-		mergeStrategyContainer.add(new Label("viewer", new AbstractReadOnlyModel<String>() {
+		mergeStrategyContainer.add(new Label("viewer", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -1454,7 +1454,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		});
 
-		mergeStrategyContainer.add(new Label("help", new AbstractReadOnlyModel<String>() {
+		mergeStrategyContainer.add(new Label("help", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -1648,7 +1648,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 		autoMergeContainer.add(toggleCheck);
 
-		autoMergeContainer.add(new Label("badge", new AbstractReadOnlyModel<String>() {
+		autoMergeContainer.add(new Label("badge", new IModel<String>() {
 			@Override
 			public String getObject() {
 				return getPullRequest().getAutoMerge().isEnabled()? "ON": "OFF";
@@ -1670,7 +1670,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	private WebMarkupContainer newStatusBarContainer() {
 		WebMarkupContainer statusBarContainer = new WebMarkupContainer("statusBar");
 
-		statusBarContainer.add(new Label("status", new AbstractReadOnlyModel<String>() {
+		statusBarContainer.add(new Label("status", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -1692,7 +1692,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 				});
 
-				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+				add(AttributeAppender.append("class", new IModel<String>() {
 
 					@Override
 					public String getObject() {
@@ -1717,7 +1717,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				Fragment fragment = new Fragment(id, "cloneFrag", PullRequestDetailPage.this);
 				fragment.add(new Label("headRef", getPullRequest().getHeadRef()));
-				fragment.add(new Label("mergeRef", new AbstractReadOnlyModel<String>() {
+				fragment.add(new Label("mergeRef", new IModel<String>() {
 
 					@Override
 					public String getObject() {

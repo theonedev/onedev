@@ -1,16 +1,16 @@
 package io.onedev.server.model;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import io.onedev.server.model.support.EntityTouch;
 import static io.onedev.server.model.PullRequestTouch.*;
 
 @Entity
-@Table(indexes={@Index(columnList="o_project_id"), @Index(columnList= PROP_REQUEST_ID)})
+@Table(indexes={@Index(columnList="project_id"), @Index(columnList= PROP_REQUEST_ID)})
 public class PullRequestTouch extends EntityTouch {
 
 	private static final long serialVersionUID = 1L;

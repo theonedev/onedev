@@ -4,12 +4,12 @@ import io.onedev.server.model.support.EntityLabel;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.Immutable;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_pack_id"), @Index(columnList="o_spec_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_pack_id", "o_spec_id"})}
+		indexes={@Index(columnList="pack_id"), @Index(columnList="spec_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"pack_id", "spec_id"})}
 )
 public class PackLabel extends EntityLabel {
 

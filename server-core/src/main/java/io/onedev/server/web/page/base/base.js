@@ -348,7 +348,7 @@ onedev.server = {
 		}
 	},	
 
-	setupWebSocket: function(webSocketTimeout, sessionKeepAliveInterval) {		
+	setupWebSocket: function(sessionKeepAliveInterval) {		
 		var pageUnloading = false;
 		
 		$(window).on("beforeunload", function() {
@@ -929,7 +929,7 @@ onedev.server = {
 		else
 			return translations["{0}s"].replace("{0}", "0");
 	},
-	onDomReady: function(bootTimestamp, icons, popStateCallback, removeAutosaveKeys, webSocketTimeout, sessionKeepAliveInterval, translations) {
+	onDomReady: function(bootTimestamp, icons, popStateCallback, removeAutosaveKeys, sessionKeepAliveInterval, translations) {
 		onedev.server.translations = translations;
 
 		onedev.server.bootTimestamp = bootTimestamp;
@@ -994,7 +994,7 @@ onedev.server = {
 		
 		onedev.server.setupAjaxLoadingIndicator();
 		onedev.server.form.setupDirtyCheck();
-		onedev.server.setupWebSocket(webSocketTimeout, sessionKeepAliveInterval);
+		onedev.server.setupWebSocket(sessionKeepAliveInterval);
 		onedev.server.mouseState.track();
 		onedev.server.ajaxRequests.track();
 		onedev.server.setupInputClear();

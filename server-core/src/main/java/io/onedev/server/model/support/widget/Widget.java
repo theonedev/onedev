@@ -2,7 +2,7 @@ package io.onedev.server.model.support.widget;
 
 import io.onedev.server.annotation.Editable;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

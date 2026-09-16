@@ -1,6 +1,6 @@
 package io.onedev.server.service.impl;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueMention;

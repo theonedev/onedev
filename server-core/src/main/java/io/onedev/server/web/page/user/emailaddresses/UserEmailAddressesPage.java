@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.user.emailaddresses;
 
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
@@ -17,7 +17,7 @@ public class UserEmailAddressesPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new EmailAddressesPanel("content", new AbstractReadOnlyModel<User>() {
+		add(new EmailAddressesPanel("content", new IModel<User>() {
 
 			@Override
 			public User getObject() {

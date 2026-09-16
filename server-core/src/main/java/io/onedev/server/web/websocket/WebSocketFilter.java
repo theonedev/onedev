@@ -18,79 +18,36 @@ package io.onedev.server.web.websocket;
 
 import java.io.IOException;
 
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.protocol.ws.AbstractUpgradeFilter;
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer;
 
-/**
- * An upgrade filter that uses Jetty9's WebSocketServerFactory to decide whether
- * to upgrade or not.
- */
+/** Upgrades Wicket connections through Jetty's Jakarta Servlet WebSocket container. */
 public class WebSocketFilter extends AbstractUpgradeFilter {
 
-	public static final String SHIRO_SUBJECT = "shiro_subject"; 
-	
-	private static final Logger logger = LoggerFactory.getLogger(WebSocketFilter.class);
+    public static final String SHIRO_SUBJECT = "shiro_subject";
 
-	private WebSocketServerFactory webSocketFactory;
+    private JettyWebSocketServerContainer webSocketContainer;
 
-	private final WebSocketPolicy webSocketPolicy;
+    @Override
+    public void init(boolean isServlet, FilterConfig filterConfig) throws ServletException {
+        super.init(isServlet, filterConfig);
+        webSocketContainer = JettyWebSocketServerContainer.getContainer(filterConfig.getServletContext());
+        if (webSocketContainer == null)
+            throw new ServletException("Jetty WebSocket container is not initialized");
+    }
 
-	public WebSocketFilter(WebSocketPolicy webSocketPolicy) {
-		this.webSocketPolicy = webSocketPolicy;
-	}
-
-	@Override
-	public void init(final boolean isServlet, final FilterConfig filterConfig) throws ServletException {
-		super.init(isServlet, filterConfig);
- 
-		try {
-			webSocketFactory = new WebSocketServerFactory(getApplication().getServletContext(), webSocketPolicy);
-
-			webSocketFactory.setCreator(new WebSocketCreator() {
-				@Override
-				public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
-					return new WebSocketProcessor(req, resp, getApplication());
-				}
-
-			});
-
-			webSocketFactory.start();
-		} catch (ServletException x) {
-			throw x;
-		} catch (Exception x) {
-			throw new ServletException(x);
-		}
-	}
-
-	@Override
-	protected boolean acceptWebSocket(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		req.setAttribute(SHIRO_SUBJECT, SecurityUtils.getSubject());
-		return super.acceptWebSocket(req, resp) && webSocketFactory.acceptWebSocket(req, resp);
-	}
-
-	@Override
-	public void destroy() {
-		try {
-			if (webSocketFactory != null) {
-				webSocketFactory.stop();
-			}
-		} catch (Exception x) {
-			logger.warn("A problem occurred while stopping the web socket factory", x);
-		}
-
-		super.destroy();
-	}
+    @Override
+    protected boolean acceptWebSocket(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setAttribute(SHIRO_SUBJECT, SecurityUtils.getSubject());
+        return super.acceptWebSocket(request, response)
+                && webSocketContainer.upgrade((req, resp) -> new WebSocketProcessor(req, resp, getApplication()),
+                        request, response);
+    }
 }

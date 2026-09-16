@@ -3,8 +3,8 @@ package io.onedev.server.util;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import javax.persistence.criteria.Path;
-import javax.validation.ValidationException;
+import jakarta.persistence.criteria.Path;
+import jakarta.validation.ValidationException;
 
 import org.jspecify.annotations.Nullable;
 

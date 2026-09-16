@@ -2,8 +2,8 @@ package io.onedev.server.plugin.authenticator.ldap;
 
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;

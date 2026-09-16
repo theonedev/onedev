@@ -1,12 +1,12 @@
 package io.onedev.server.persistence;
 
-import com.hazelcast.cp.IAtomicLong;
+import io.onedev.server.cluster.ClusterAtomicLong;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.data.DataService;
 import io.onedev.server.model.AbstractEntity;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,7 +25,7 @@ public class DefaultIdService implements IdService {
 	
 	private final SessionFactoryService sessionFactoryService;
 	
-	private final Map<Class<?>, IAtomicLong> nextIds = new HashMap<>();
+	private final Map<Class<?>, ClusterAtomicLong> nextIds = new HashMap<>();
 	
 	@Inject
 	public DefaultIdService(DataService dataService, ClusterService clusterService,
@@ -58,7 +58,7 @@ public class DefaultIdService implements IdService {
 			callWithTransaction(conn, () -> {
 				for (var persistenceClass: sessionFactoryService.getMetadata().getEntityBindings()) {
 					Class<?> entityClass = persistenceClass.getMappedClass();
-					var nextId = clusterService.getHazelcastInstance().getCPSubsystem().getAtomicLong(entityClass.getName());
+					var nextId = clusterService.getAtomicLong(entityClass.getName());
 					clusterService.initWithLead(nextId, () -> getMaxId(conn, entityClass) + 1);
 					nextIds.put(entityClass, nextId);
 				}
@@ -76,16 +76,7 @@ public class DefaultIdService implements IdService {
 
 	@Override
 	public void useId(Class<?> entityClass, long id) {
-		var nextAtomicId = nextIds.get(entityClass);
-		while (true) {
-			long nextId = nextAtomicId.getAndIncrement();
-			if (id+1 > nextId) {
-				if (nextAtomicId.compareAndSet(nextId, id+1))
-					break;
-			} else {
-				break;
-			}
-		}
+        nextIds.get(entityClass).ensureAtLeast(Math.addExact(id, 1));
 	}
 
 }

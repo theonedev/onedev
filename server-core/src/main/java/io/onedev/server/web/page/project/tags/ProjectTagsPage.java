@@ -67,7 +67,6 @@ import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -183,7 +182,7 @@ public class ProjectTagsPage extends ProjectPage {
 				
 				String url = RequestCycle.get().urlFor(ProjectTagsPage.class, params).toString();
 
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				if (typing)
 					replaceState(target, url, query);
 				else
@@ -232,8 +231,9 @@ public class ProjectTagsPage extends ProjectPage {
 				form.add(new AjaxButton("create") {
 
 					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
+					protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+						super.onSubmit(target);
 						
 						String tagName = helperBean.getName();
 						User user = Preconditions.checkNotNull(getLoginUser());
@@ -267,8 +267,9 @@ public class ProjectTagsPage extends ProjectPage {
 					}
 
 					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
+					protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+						super.onError(target);
 						target.add(form);
 					}
 
@@ -395,9 +396,8 @@ public class ProjectTagsPage extends ProjectPage {
 					Label message = new Label("message", Emojis.getInstance().apply(revTag.getFullMessage()));
 					message.setOutputMarkupId(true);
 					annotatedFragment.add(message);
-					String toggleScript = String.format("$('#%s').toggle();", message.getMarkupId());
 					WebMarkupContainer messageToggle = new WebMarkupContainer("messageToggle"); 
-					messageToggle.add(AttributeAppender.append("onclick", toggleScript));
+					messageToggle.add(AttributeAppender.append("onclick", String.format("$('#%s').toggle(); return false;", message.getMarkupId())));
 					messageToggle.setVisible(StringUtils.isNotBlank(revTag.getFullMessage()));
 					annotatedFragment.add(messageToggle);
 					
@@ -493,7 +493,7 @@ public class ProjectTagsPage extends ProjectPage {
 			@Override
 			public IModel<RefFacade> model(RefFacade object) {
 				String tag = GitUtils.ref2tag(object.getName());
-				return new AbstractReadOnlyModel<RefFacade>() {
+				return new IModel<RefFacade>() {
 
 					@Override
 					public RefFacade getObject() {

@@ -6,7 +6,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.util.GroovyUtils;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;

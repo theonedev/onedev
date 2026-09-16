@@ -7,7 +7,7 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 

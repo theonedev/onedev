@@ -2,7 +2,6 @@ package io.onedev.server.web.editable;
 
 import java.lang.reflect.Method;
 
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
@@ -30,7 +29,7 @@ public class ReviewRequirementEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
+					IModel<Project> projectModel = new IModel<Project>() {
 
 						@Override
 						public Project getObject() {

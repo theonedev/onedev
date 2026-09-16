@@ -3,7 +3,7 @@ package io.onedev.server.model.support.widget;
 import io.onedev.server.annotation.Editable;
 import org.apache.wicket.Component;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 @Editable

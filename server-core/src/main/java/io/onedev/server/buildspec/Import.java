@@ -11,11 +11,11 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.revwalk.RevCommit;

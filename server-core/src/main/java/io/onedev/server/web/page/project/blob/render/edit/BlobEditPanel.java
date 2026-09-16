@@ -108,14 +108,15 @@ public abstract class BlobEditPanel extends Panel {
 				return new AjaxSubmitLink(componentId) {
 
 					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
+					protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+						super.onSubmit(target);
 						
 						if (tab == Tab.FLUSH) {
 							if (currentTab == Tab.EDIT 
 									&& editor instanceof EditCompleteAware 
 									&& !((EditCompleteAware)editor).onEditComplete(target)) {
-								onError(target, form);
+								onError(target);
 							} else {
 								onFlushed(target, editor.getModelObject());
 							}
@@ -123,7 +124,7 @@ public abstract class BlobEditPanel extends Panel {
 							if (currentTab == Tab.EDIT 
 									&& editor instanceof EditCompleteAware 
 									&& !((EditCompleteAware)editor).onEditComplete(target)) {
-								onError(target, form);
+								onError(target);
 							} else {
 								var editingContent = editor.getModelObject();
 								if (tab == Tab.EDIT) {
@@ -153,8 +154,8 @@ public abstract class BlobEditPanel extends Panel {
 					}
 
 					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
+					protected void onError(AjaxRequestTarget target) {
+						super.onError(target);
 						updateForm(target);
 						if (tab == Tab.FLUSH)
 							onFlushError(target);

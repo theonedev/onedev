@@ -13,8 +13,8 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.util.ObjectReference;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class DefaultSessionService implements SessionService {

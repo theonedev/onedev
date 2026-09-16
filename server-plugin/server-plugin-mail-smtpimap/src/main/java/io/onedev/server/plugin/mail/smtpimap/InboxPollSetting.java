@@ -5,9 +5,9 @@ import io.onedev.server.annotation.Password;
 import io.onedev.server.model.support.administration.mailservice.ImapImplicitSsl;
 import io.onedev.server.model.support.administration.mailservice.ImapSslSetting;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Editable

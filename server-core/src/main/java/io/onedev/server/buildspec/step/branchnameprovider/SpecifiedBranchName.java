@@ -2,7 +2,7 @@ package io.onedev.server.buildspec.step.branchnameprovider;
 
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.annotation.BranchName;

@@ -7,15 +7,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.jspecify.annotations.Nullable;
-import javax.mail.internet.InternetAddress;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,7 +25,7 @@ import io.onedev.server.util.facade.IssueCommentFacade;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="o_issue_id"), @Index(columnList="o_user_id"),
+		@Index(columnList="issue_id"), @Index(columnList="user_id"),
 		@Index(columnList=PROP_MESSAGE_ID)})
 public class IssueComment extends EntityComment {
 

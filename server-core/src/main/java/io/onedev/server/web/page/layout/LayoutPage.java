@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -50,7 +50,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -58,7 +57,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.Order;
+import io.onedev.server.persistence.dao.Order;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -659,7 +658,7 @@ public abstract class LayoutPage extends BasePage {
 						var fragment = new Fragment(componentId, "alertMessageFrag", LayoutPage.this);
 						fragment.add(new Label("subject", alert.getSubject()).setEscapeModelStrings(false));
 
-						var detail = new Label("detail", new AbstractReadOnlyModel<String>() {
+						var detail = new Label("detail", new IModel<String>() {
 							@Override
 							public String getObject() {
 								return rowModel.getObject().getDetail();

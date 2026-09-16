@@ -68,8 +68,8 @@ public abstract class IssueEditableTitlePanel extends Panel {
 		form.add(new AjaxButton("save") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 				
 				var user = SecurityUtils.getUser();
 				OneDev.getInstance(IssueChangeService.class).changeTitle(user, getIssue(), titleInput.getModelObject());
@@ -81,8 +81,8 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(titleEditor);
 			}
 			

@@ -1,9 +1,9 @@
 package io.onedev.server.validation.validator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.onedev.server.annotation.Path;
 
@@ -12,8 +12,8 @@ public class PathValidatorTest {
 	@Test
 	public void allowsDotsWithinPathSegments() {
 		for (String path : new String[] {"release..notes", "docs/release..notes", "..notes", "notes..", "..."}) {
-			assertNull(path, PathValidator.checkPath(Path.Type.RELATIVE, path));
-			assertNull(path, PathValidator.checkPath(Path.Type.ABSOLUTE, "/" + path));
+			assertNull(PathValidator.checkPath(Path.Type.RELATIVE, path), path);
+			assertNull(PathValidator.checkPath(Path.Type.ABSOLUTE, "/" + path), path);
 		}
 	}
 
@@ -21,8 +21,8 @@ public class PathValidatorTest {
 	public void rejectsParentDirectorySegments() {
 		for (String path : new String[] {"..", "../notes", "docs/../notes", "docs/..", "..\\notes",
 				"docs\\..\\notes", "docs\\..", "docs/..\\notes", "docs\\../notes"}) {
-			assertEquals(path, "'..' is not allowed", PathValidator.checkPath(Path.Type.RELATIVE, path));
-			assertEquals(path, "'..' is not allowed", PathValidator.checkPath(Path.Type.ABSOLUTE, "/" + path));
+			assertEquals("'..' is not allowed", PathValidator.checkPath(Path.Type.RELATIVE, path), path);
+			assertEquals("'..' is not allowed", PathValidator.checkPath(Path.Type.ABSOLUTE, "/" + path), path);
 		}
 	}
 

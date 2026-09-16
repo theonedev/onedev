@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +35,7 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -239,8 +239,8 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 										}
 
 										@Override
-										protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-											super.onSubmit(target, form);
+										protected void onSubmit(AjaxRequestTarget target) {
+											super.onSubmit(target);
 											Job job = getJobs().get(jobIndex);
 											pushState(target, "jobs/" + job.getName());
 											setupJobDetail(target, buildSpec.getJobs().indexOf(job));
@@ -250,8 +250,8 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 										}
 
 										@Override
-										protected void onError(AjaxRequestTarget target, Form<?> form) {
-											super.onError(target, form);
+										protected void onError(AjaxRequestTarget target) {
+											super.onError(target);
 											target.add(jobsEditor);
 											resizeWindow(target);
 										}
@@ -275,15 +275,15 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 													return new AjaxSubmitLink(id, form) {
 
 														@Override
-														protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-															super.onSubmit(target, form);
+														protected void onSubmit(AjaxRequestTarget target) {
+															super.onSubmit(target);
 															dropdown.close();
 															addJob(target, SerializationUtils.clone(getJobs().get(jobIndex)));
 														}
 
 														@Override
-														protected void onError(AjaxRequestTarget target, Form<?> form) {
-															super.onError(target, form);
+														protected void onError(AjaxRequestTarget target) {
+															super.onError(target);
 															target.add(jobsEditor);
 															resizeWindow(target);
 														}
@@ -346,14 +346,14 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 									AjaxSubmitLink createLink = new AjaxSubmitLink("create") {
 
 										@Override
-										protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-											super.onSubmit(target, form);
+										protected void onSubmit(AjaxRequestTarget target) {
+											super.onSubmit(target);
 											addJob(target, new Job());
 										}
 
 										@Override
-										protected void onError(AjaxRequestTarget target, Form<?> form) {
-											super.onError(target, form);
+										protected void onError(AjaxRequestTarget target) {
+											super.onError(target);
 											target.add(jobsEditor);
 											resizeWindow(target);
 										}
@@ -393,15 +393,15 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 															return new AjaxSubmitLink(id, createLink.findParent(Form.class)) {
 
 																@Override
-																protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-																	super.onSubmit(target, form);
+																protected void onSubmit(AjaxRequestTarget target) {
+																	super.onSubmit(target);
 																	addJob(target, job);
 																	dropdown.close();
 																}
 
 																@Override
-																protected void onError(AjaxRequestTarget target, Form<?> form) {
-																	super.onError(target, form);
+																protected void onError(AjaxRequestTarget target) {
+																	super.onError(target);
 																	target.add(jobsEditor.get("pipeline"));
 																	resizeWindow(target);
 																}
@@ -616,16 +616,16 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					add(new AjaxSubmitLink("jobs") {
 
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
+						protected void onSubmit(AjaxRequestTarget target) {
+							super.onSubmit(target);
 							pushState(target, "jobs");
 							setupJobsEditor(target);
 							resizeWindow(target);
 						}
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
+						protected void onError(AjaxRequestTarget target) {
+							super.onError(target);
 							target.add(getParent());
 							resizeWindow(target);
 						}
@@ -635,16 +635,16 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					add(new AjaxSubmitLink("services") {
 
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
+						protected void onSubmit(AjaxRequestTarget target) {
+							super.onSubmit(target);
 							pushState(target, "services");
 							setupServicesEditor(target);
 							resizeWindow(target);
 						}
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
+						protected void onError(AjaxRequestTarget target) {
+							super.onError(target);
 							target.add(getParent());
 							resizeWindow(target);
 						}
@@ -654,16 +654,16 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					add(new AjaxSubmitLink("stepTemplates") {
 
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
+						protected void onSubmit(AjaxRequestTarget target) {
+							super.onSubmit(target);
 							pushState(target, "step-templates");
 							setupStepTemplatesEditor(target);
 							resizeWindow(target);
 						}
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
+						protected void onError(AjaxRequestTarget target) {
+							super.onError(target);
 							target.add(getParent());
 							resizeWindow(target);
 						}
@@ -673,16 +673,16 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					add(new AjaxSubmitLink("properties") {
 						
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
+						protected void onSubmit(AjaxRequestTarget target) {
+							super.onSubmit(target);
 							pushState(target, "properties");
 							setupPropertiesEditor(target);
 							resizeWindow(target);
 						}
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
+						protected void onError(AjaxRequestTarget target) {
+							super.onError(target);
 							target.add(getParent());
 							resizeWindow(target);
 						}
@@ -692,16 +692,16 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					add(new AjaxSubmitLink("imports") {
 						
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
+						protected void onSubmit(AjaxRequestTarget target) {
+							super.onSubmit(target);
 							pushState(target, "imports");
 							setupImportsEditor(target);
 							resizeWindow(target);
 						}
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
+						protected void onError(AjaxRequestTarget target) {
+							super.onError(target);
 							target.add(getParent());
 							resizeWindow(target);
 						}
@@ -852,7 +852,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 	@Override
 	public void convertInput() {
 		if (parseResult instanceof BuildSpec) {
-			AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+			AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 			send(this, Broadcast.BREADTH, new FormSubmitted(target));
 			setConvertedInput(VersionedYamlDoc.fromBean(parseResult).toYaml().getBytes(StandardCharsets.UTF_8));
 		} else { 
@@ -1016,7 +1016,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				
 			};
 			
-			navs.add(new ListView<T>("navs", new AbstractReadOnlyModel<List<T>>() {
+			navs.add(new ListView<T>("navs", new IModel<List<T>>() {
 
 				@Override
 				public List<T> getObject() {
@@ -1032,7 +1032,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(new Label("label", new AbstractReadOnlyModel<String>() {
+							add(new Label("label", new IModel<String>() {
 
 								@Override
 								public String getObject() {
@@ -1047,8 +1047,8 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						}
 
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							super.onSubmit(target, form);
+						protected void onSubmit(AjaxRequestTarget target) {
+							super.onSubmit(target);
 							pushState(target, getUrlSegment(elementClass) + "s/" + item.getModelObject().getName());
 							setupElementDetail(target, item.getIndex());
 							target.appendJavaScript(String.format(
@@ -1057,8 +1057,8 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						}
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
-							super.onError(target, form);
+						protected void onError(AjaxRequestTarget target) {
+							super.onError(target);
 							target.add(ElementsEditor.this);
 							resizeWindow(target);
 						}
@@ -1083,15 +1083,15 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 									return new AjaxSubmitLink(id, form) {
 
 										@Override
-										protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-											super.onSubmit(target, form);
+										protected void onSubmit(AjaxRequestTarget target) {
+											super.onSubmit(target);
 											dropdown.close();
 											addElement(target, SerializationUtils.clone(getElements().get(item.getIndex())));
 										}
 
 										@Override
-										protected void onError(AjaxRequestTarget target, Form<?> form) {
-											super.onError(target, form);
+										protected void onError(AjaxRequestTarget target) {
+											super.onError(target);
 											target.add(ElementsEditor.this);
 											resizeWindow(target);
 										}
@@ -1186,8 +1186,8 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 			AjaxSubmitLink createLink = new AjaxSubmitLink("create") {
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+					super.onSubmit(target);
 					T newElement;
 					try {
 						newElement = elementClass.getDeclaredConstructor().newInstance();
@@ -1199,8 +1199,8 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				}
 
 				@Override
-				protected void onError(AjaxRequestTarget target, Form<?> form) {
-					super.onError(target, form);
+				protected void onError(AjaxRequestTarget target) {
+					super.onError(target);
 					target.add(ElementsEditor.this);
 					resizeWindow(target);
 				}

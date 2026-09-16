@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.jgit.lib.FileMode;
@@ -28,10 +28,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Criterion;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
-import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.hibernate.query.sqm.tree.domain.SqmPath;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
@@ -182,9 +182,9 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 		Date oldestDate = null;
 		for (RevCommit commit: historyCommits) {
 			PersonIdent committer = commit.getCommitterIdent();
-			if (committer != null && committer.getWhen() != null 
-					&& (oldestDate == null || committer.getWhen().before(oldestDate))) {
-				oldestDate = committer.getWhen();
+			if (committer != null
+					&& (oldestDate == null || Date.from(committer.getWhenAsInstant()).before(oldestDate))) {
+				oldestDate = Date.from(committer.getWhenAsInstant());
 			}
 		}
 		
@@ -263,7 +263,7 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 		
 		query.where(getPredicates(project, commentQuery.getCriteria(), request, query, root, builder));
 
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		List<jakarta.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: commentQuery.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(QueryUtils.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
@@ -276,11 +276,11 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 
 		var found = false;
 		for (var order: orders) {
-			if (order.getExpression() instanceof SingularAttributePath) {
-				var expr = (SingularAttributePath) order.getExpression();
-				if (expr.getAttribute().getName().equals(LastActivity.PROP_DATE) 
-						&& expr.getPathSource() instanceof SingularAttributePath 
-						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(CodeComment.PROP_LAST_ACTIVITY)) {
+			if (order.getExpression() instanceof SqmPath) {
+				var expr = (SqmPath) order.getExpression();
+				if (expr.getReferencedPathSource().getPathName().equals(LastActivity.PROP_DATE)
+						&& expr.getLhs() instanceof SqmPath
+						&& ((SqmPath) expr.getLhs()).getReferencedPathSource().getPathName().equals(CodeComment.PROP_LAST_ACTIVITY)) {
 					found = true;
 					break;
 				}

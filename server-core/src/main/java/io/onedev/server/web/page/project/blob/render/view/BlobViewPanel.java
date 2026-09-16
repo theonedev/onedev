@@ -20,7 +20,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.ContentDisposition;
 
@@ -186,7 +186,7 @@ public abstract class BlobViewPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("lines", new AbstractReadOnlyModel<String>() {
+		add(new Label("lines", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -205,7 +205,7 @@ public abstract class BlobViewPanel extends Panel {
 			
 		});
 		
-		add(new Label("charset", new AbstractReadOnlyModel<String>() {
+		add(new Label("charset", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -301,7 +301,7 @@ public abstract class BlobViewPanel extends Panel {
 		add(newExtraOptions("extraOptions"));
 		newChangeActions(null);
 		
-		add(new Label("fileTooLarge", new AbstractReadOnlyModel<String>() {
+		add(new Label("fileTooLarge", new IModel<String>() {
 
 			@Override
 			public String getObject() {

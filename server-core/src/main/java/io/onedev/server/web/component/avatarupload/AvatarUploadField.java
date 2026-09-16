@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.xml.bind.DatatypeConverter;
+import java.util.Base64;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.Broadcast;
@@ -70,7 +70,7 @@ public class AvatarUploadField extends FormComponentPanel<String> {
 	}
 	
 	public static void writeToFile(File file, String avatarData) {
-		byte[] imageBytes = DatatypeConverter.parseBase64Binary(StringUtils.substringAfter(avatarData, ","));
+		byte[] imageBytes = Base64.getDecoder().decode(StringUtils.substringAfter(avatarData, ","));
 		try {
 			BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
 			ImageIO.write(image, "png", file);

@@ -4,7 +4,6 @@ import java.util.List;
 
 import io.onedev.server.persistence.dao.EntityCriteria;
 import org.hibernate.HibernateException;
-import org.hibernate.criterion.DetachedCriteria;
 
 import io.onedev.server.model.AbstractEntity;
 
@@ -45,7 +44,7 @@ public interface EntityService<T extends AbstractEntity> {
 	 * Query with specified criteria.
 	 * 
 	 * @param criteria
-	 * 			hibernate {@link DetachedCriteria}
+	 * 			hibernate {@link io.onedev.server.persistence.dao.EntityCriteria}
 	 * @param firstResult
 	 * 			first result of the query. Set to 0 if this value should be ignored
 	 * @param maxResults
@@ -80,7 +79,7 @@ public interface EntityService<T extends AbstractEntity> {
 	 * Count entities of specified class matching specified criteria. 
 	 * 
 	 * @return
-	 * 			number of entities matching specified {@link DetachedCriteria}
+	 * 			number of entities matching specified {@link io.onedev.server.persistence.dao.EntityCriteria}
 	 */
 	int count(EntityCriteria<T> entityCriteria);
 	

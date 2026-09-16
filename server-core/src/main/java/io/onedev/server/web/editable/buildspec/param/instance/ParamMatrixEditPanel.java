@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -23,7 +23,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -239,7 +239,6 @@ class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 		super.onBeforeRender();
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -255,7 +254,7 @@ class ParamMatrixEditPanel extends PropertyEditor<List<Serializable>> {
 					try {
 						ParamUtils.validateParamValues(specifiedValues.getValues());
 					} catch (ValidationException e) {
-						if (!getFlag(FLAG_RENDERING)) {
+						if (!isRendering()) {
 							RepeatingView paramsView = (RepeatingView) get("params");
 							paramsView.get(index).get("values").error(e.getMessage());
 						}

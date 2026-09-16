@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -87,7 +87,7 @@ public class DefaultReviewedDiffService extends BaseEntityService<ReviewedDiff>
 			@Override
 			public void doWorks(List<Prioritized> works) {
 				transactionService.run(() -> {
-					var query = getSession().createQuery("delete from ReviewedDiff where date < :date");
+					var query = getSession().createMutationQuery("delete from ReviewedDiff where date < :date");
 					query.setParameter("date", new DateTime().minusDays(MAX_PRESERVE_DAYS).toDate());
 					query.executeUpdate();			
 				});

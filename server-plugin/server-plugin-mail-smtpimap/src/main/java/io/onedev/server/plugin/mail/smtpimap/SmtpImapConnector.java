@@ -9,11 +9,11 @@ import io.onedev.server.model.support.administration.mailservice.SmtpExplicitSsl
 import io.onedev.server.model.support.administration.mailservice.SmtpSslSetting;
 import org.jetbrains.annotations.Nullable;
 
-import javax.mail.Message;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.mail.Message;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;

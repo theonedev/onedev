@@ -4,8 +4,8 @@ import static io.onedev.k8shelper.ExecuteCondition.SUCCESSFUL;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.ExecuteCondition;

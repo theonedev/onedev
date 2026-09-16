@@ -9,7 +9,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.revwalk.RevObject;
@@ -34,7 +33,7 @@ public abstract class SignatureStatusPanel extends DropdownLink {
 		super.onInitialize();
 		setEscapeModelStrings(false);
 
-		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -75,6 +74,7 @@ public abstract class SignatureStatusPanel extends DropdownLink {
 
 	@Override
 	protected void onConfigure() {
+		super.onConfigure();
 		setVisible(model.getObject() != null);
 	}
 

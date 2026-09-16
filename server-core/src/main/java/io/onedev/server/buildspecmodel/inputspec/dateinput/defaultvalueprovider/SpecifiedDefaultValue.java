@@ -2,7 +2,7 @@ package io.onedev.server.buildspecmodel.inputspec.dateinput.defaultvalueprovider
 
 import java.util.Date;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;

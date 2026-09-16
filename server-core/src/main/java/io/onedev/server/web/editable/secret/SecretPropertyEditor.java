@@ -16,7 +16,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -36,7 +35,7 @@ public class SecretPropertyEditor extends PropertyEditor<String> {
 		super.onInitialize();
 
 		var input1 = new WebMarkupContainer("input1");
-		input1.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		input1.add(AttributeAppender.append("class", new IModel<String>() {
 			@Override
 			public String getObject() {
 				return masked? "form-control text-monospace masked": "form-control text-monospace";
@@ -65,13 +64,13 @@ public class SecretPropertyEditor extends PropertyEditor<String> {
 				target.add(SecretPropertyEditor.this);
 			}
 		};
-		toggleLink.add(new SpriteImage("icon", new AbstractReadOnlyModel<>() {
+		toggleLink.add(new SpriteImage("icon", new IModel<>() {
 			@Override
 			public String getObject() {
 				return masked ? "eye" : "eye-close";
 			}
 		}));
-		toggleLink.add(AttributeAppender.append("title", new AbstractReadOnlyModel<String>() {
+		toggleLink.add(AttributeAppender.append("title", new IModel<String>() {
 			@Override
 			public String getObject() {
 				return masked? "Show": "Hide";

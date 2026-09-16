@@ -2,7 +2,7 @@ package io.onedev.server.web.component.user.passwordedit;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.CurrentPassword;
 import io.onedev.server.annotation.Editable;

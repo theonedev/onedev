@@ -86,8 +86,9 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 			}
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onSubmit(target);
 
 				WorkspaceProvisioner provisioner = bean.getProvisioner();
 				if (provisonerIndex != -1) {
@@ -113,8 +114,9 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+				super.onError(target);
 				target.add(form);
 			}
 

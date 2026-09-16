@@ -1,0 +1,7 @@
+.test-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: flex-end;
+	gap: 1rem;
+	padding: 1rem;
+}

@@ -1,20 +1,20 @@
 package io.onedev.server.model;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import io.onedev.server.rest.annotation.Api;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_dependent_id"), @Index(columnList="o_dependency_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_dependent_id", "o_dependency_id"})
+		indexes={@Index(columnList="dependent_id"), @Index(columnList="dependency_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"dependent_id", "dependency_id"})
 })
 public class BuildDependence extends AbstractEntity {
 

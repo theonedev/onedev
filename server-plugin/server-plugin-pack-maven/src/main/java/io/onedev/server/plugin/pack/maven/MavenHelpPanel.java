@@ -50,16 +50,16 @@ public class MavenHelpPanel extends Panel {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 				Component content = newMavenInstructions(bindings);
-				target.add(content);
 				MavenHelpPanel.this.replace(content);
+				target.add(content);
 			}
 		}.setSelected(true));
 		buildToolTabs.add(new AjaxActionTab(Model.of(_T("Gradle"))) {
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 				Component content = newGradleInstructions(bindings);
-				target.add(content);
 				MavenHelpPanel.this.replace(content);
+				target.add(content);
 			}
 		});
 		add(new Tabbable("buildToolTabs", buildToolTabs));

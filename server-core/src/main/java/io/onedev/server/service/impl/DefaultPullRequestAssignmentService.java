@@ -2,8 +2,8 @@ package io.onedev.server.service.impl;
 
 import java.util.Date;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import com.google.common.base.Preconditions;
 import io.onedev.server.service.PullRequestAssignmentService;

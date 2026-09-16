@@ -3,17 +3,14 @@ package io.onedev.server.persistence;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
 
 @Singleton
-public class HibernateInterceptor extends EmptyInterceptor {
-
-	private static final long serialVersionUID = 1L;
+public class HibernateInterceptor implements Interceptor {
 
 	private final Set<PersistListener> listeners;
 	
@@ -23,11 +20,11 @@ public class HibernateInterceptor extends EmptyInterceptor {
 	}
 	
 	@Override
-	public boolean onLoad(Object entity, Serializable id, Object[] state, String[] propertyNames,
-			Type[] types) throws CallbackException {
+	public boolean onLoad(Object entity, Object id, Object[] state, String[] propertyNames,
+			Type[] types) {
 		boolean changed = false;
 		for (PersistListener listener: listeners) {
-			if (listener.onLoad(entity, id, state, propertyNames, types))
+			if (listener.onLoad(entity, (Serializable) id, state, propertyNames, types))
 				changed = true;
 		}
 			
@@ -35,11 +32,11 @@ public class HibernateInterceptor extends EmptyInterceptor {
 	}
 
 	@Override
-	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState,
-			Object[] previousState, String[] propertyNames, Type[] types) throws CallbackException {
+	public boolean onFlushDirty(Object entity, Object id, Object[] currentState,
+			Object[] previousState, String[] propertyNames, Type[] types) {
 		boolean changed = false;
 		for (PersistListener listener: listeners) {
-			if (listener.onFlushDirty(entity, id, currentState, previousState, propertyNames, types))
+			if (listener.onFlushDirty(entity, (Serializable) id, currentState, previousState, propertyNames, types))
 				changed = true;
 		}
 			
@@ -47,11 +44,11 @@ public class HibernateInterceptor extends EmptyInterceptor {
 	}
 
 	@Override
-	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames,
-			Type[] types) throws CallbackException {
+	public boolean onSave(Object entity, Object id, Object[] state, String[] propertyNames,
+			Type[] types) {
 		boolean changed = false;
 		for (PersistListener listener: listeners) {
-			if (listener.onSave(entity, id, state, propertyNames, types))
+			if (listener.onSave(entity, (Serializable) id, state, propertyNames, types))
 				changed = true;
 		}
 		
@@ -59,10 +56,10 @@ public class HibernateInterceptor extends EmptyInterceptor {
 	}
 
 	@Override
-	public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames,
-			Type[] types) throws CallbackException {
+	public void onDelete(Object entity, Object id, Object[] state, String[] propertyNames,
+			Type[] types) {
 		for (PersistListener listener: listeners)
-			listener.onDelete(entity, id, state, propertyNames, types);
+			listener.onDelete(entity, (Serializable) id, state, propertyNames, types);
 	}
 
 }

@@ -6,7 +6,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;

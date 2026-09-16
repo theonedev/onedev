@@ -3,12 +3,12 @@ package io.onedev.server.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 import com.google.common.base.Preconditions;
 import org.eclipse.jgit.lib.ObjectId;
@@ -98,7 +98,7 @@ public class DefaultPendingSuggestionApplyService extends BaseEntityService<Pend
 			criteriaDelete.where(builder.equal(root.get(PendingSuggestionApply.PROP_REQUEST), request));
 		}
 
-		getSession().createQuery(criteriaDelete).executeUpdate();
+		getSession().createMutationQuery(criteriaDelete).executeUpdate();
 	}
 
 	@Sessional

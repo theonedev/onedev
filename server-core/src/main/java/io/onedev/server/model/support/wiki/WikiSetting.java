@@ -2,7 +2,7 @@ package io.onedev.server.model.support.wiki;
 
 import io.onedev.server.annotation.Editable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;

@@ -25,7 +25,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Preconditions;
 
@@ -50,7 +50,7 @@ public abstract class WizardPanel extends Panel {
 		super.onInitialize();
 
 		Form<?> form = new Form<Void>("form");
-		form.add(new Label("title", new AbstractReadOnlyModel<String>() {
+		form.add(new Label("title", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -58,7 +58,7 @@ public abstract class WizardPanel extends Panel {
 			}
 			
 		}));
-		form.add(new Label("description", new AbstractReadOnlyModel<String>() {
+		form.add(new Label("description", new IModel<String>() {
 
 			@Override
 			public String getObject() {

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
@@ -24,7 +24,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -117,7 +117,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 		content.setOutputMarkupId(true);
 		add(content);
 		
-		content.add(new ListView<QueryHit>("definitions", new AbstractReadOnlyModel<>() {
+		content.add(new ListView<QueryHit>("definitions", new IModel<>() {
 
 			@Override
 			public List<QueryHit> getObject() {

@@ -1,17 +1,17 @@
 package io.onedev.server.validation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.GroupSequence;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.GroupSequence;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.groups.Default;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.onedev.server.annotation.ClassValidating;
 
@@ -21,7 +21,7 @@ public class HibernateValidationOrderTest extends HibernateValidationTestSupport
 	public void classValidationWaitsForPropertiesAndCascadedBeans() {
 		// BuildSpec.isValid runs after nested jobs/steps are validated. Cover the default,
 		// explicit group, and group-sequence paths through the customized ValidatorImpl.
-		for (Class<?> group : new Class<?>[] {Default.class, Checks.class, OrderedChecks.class}) {
+		for (Class<?> group : new Class<?>[] {Default.class, Checks.class, OrderedChecks.class, DefaultFirstChecks.class}) {
 			var root = new Root();
 			root.name = "job";
 			root.child.name = "step";
@@ -31,35 +31,61 @@ public class HibernateValidationOrderTest extends HibernateValidationTestSupport
 	}
 
 	@Test
-	public void invalidPropertySuppressesClassValidationOnlyOutsideTheDefaultGroup() {
-		for (Class<?> group : new Class<?>[] {Default.class, Checks.class, OrderedChecks.class}) {
+	public void invalidPropertySuppressesClassValidation() {
+		for (Class<?> group : new Class<?>[] {Default.class, Checks.class, OrderedChecks.class, DefaultFirstChecks.class}) {
 			var root = new Root();
 			root.child.name = "step";
 			assertPaths(validator.validate(root, group), "name");
-			// The default-group path bypasses the existing failure guard.
-			assertEquals(group == Default.class ? List.of("child", "root") : List.of(), root.calls);
+			assertEquals(List.of(), root.calls);
 		}
 	}
 
 	@Test
-	public void invalidNestedPropertySuppressesClassValidationOnlyOutsideTheDefaultGroup() {
-		for (Class<?> group : new Class<?>[] {Default.class, Checks.class, OrderedChecks.class}) {
+	public void invalidNestedPropertySuppressesClassValidation() {
+		for (Class<?> group : new Class<?>[] {Default.class, Checks.class, OrderedChecks.class, DefaultFirstChecks.class}) {
 			var root = new Root();
 			root.name = "job";
 			assertPaths(validator.validate(root, group), "child.name");
-			assertEquals(group == Default.class ? List.of("child", "root") : List.of(), root.calls);
+			assertEquals(List.of(), root.calls);
 		}
 	}
 
 	@Test
-	public void nestedClassViolationSuppressesParentValidationOnlyOutsideTheDefaultGroup() {
-		for (Class<?> group : new Class<?>[] {Default.class, Checks.class, OrderedChecks.class}) {
+	public void nestedClassViolationSuppressesParentValidation() {
+		for (Class<?> group : new Class<?>[] {Default.class, Checks.class, OrderedChecks.class, DefaultFirstChecks.class}) {
 			var root = new Root();
 			root.name = "job";
 			root.child.name = "step";
 			root.child.valid = false;
 			assertPaths(validator.validate(root, group), "child");
-			assertEquals(group == Default.class ? List.of("child", "root") : List.of("child"), root.calls);
+			assertEquals(List.of("child"), root.calls);
+		}
+	}
+
+	@Test
+	public void ungroupedClassValidationWaitsForSuccessfulPropertyValidation() {
+		var bean = new UngroupedBean();
+		assertPaths(validator.validate(bean), "name");
+		assertEquals(0, bean.calls);
+		bean.name = "job";
+		assertPaths(validator.validate(bean));
+		assertEquals(1, bean.calls);
+	}
+
+	@ClassValidating
+	public static class UngroupedBean implements Validatable {
+		String name;
+		int calls;
+
+		@NotNull
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public boolean isValid(ConstraintValidatorContext context) {
+			calls++;
+			return true;
 		}
 	}
 
@@ -68,6 +94,10 @@ public class HibernateValidationOrderTest extends HibernateValidationTestSupport
 
 	@GroupSequence({Checks.class, Default.class})
 	public interface OrderedChecks {
+	}
+
+	@GroupSequence({Default.class, Checks.class})
+	public interface DefaultFirstChecks {
 	}
 
 	@ClassValidating(groups = {Default.class, Checks.class})

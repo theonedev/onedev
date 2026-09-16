@@ -39,8 +39,8 @@ public class Path implements Serializable {
 		this(path, new PathNode.Indexed(indexedPathNode));
 	}
 	
-	public Path(javax.validation.Path path) {
-		for (javax.validation.Path.Node node: path) {
+	public Path(jakarta.validation.Path path) {
+		for (jakarta.validation.Path.Node node: path) {
 			if (node.getIndex() != null) 
 				nodes.add(new PathNode.Indexed(node.getIndex()));
 			if (node.getName() != null)

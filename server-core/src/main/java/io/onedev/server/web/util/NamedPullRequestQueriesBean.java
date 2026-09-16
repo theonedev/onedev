@@ -3,7 +3,7 @@ package io.onedev.server.web.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;

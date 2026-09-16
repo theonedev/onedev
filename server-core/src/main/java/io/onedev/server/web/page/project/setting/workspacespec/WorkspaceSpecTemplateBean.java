@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.setting.workspacespec;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;

@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.report.checkstyle;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.annotation.Editable;

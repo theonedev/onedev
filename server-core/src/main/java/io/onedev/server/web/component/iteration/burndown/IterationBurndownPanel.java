@@ -21,7 +21,6 @@ import org.jspecify.annotations.Nullable;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -167,7 +166,7 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 
 			var aggregationLink = OneDev.getInstance(SettingService.class).getIssueSetting()
 					.getTimeTrackingSetting().getAggregationLink();
-			fragment.add(new Label("message", new AbstractReadOnlyModel<String>() {
+			fragment.add(new Label("message", new IModel<String>() {
 				@Override
 				public String getObject() {
 					if (aggregationLink != null && (getIndicator().equals(ESTIMATED_TIME) || getIndicator().equals(REMAINING_TIME)))

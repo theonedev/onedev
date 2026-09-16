@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.commit;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.model.IModel;

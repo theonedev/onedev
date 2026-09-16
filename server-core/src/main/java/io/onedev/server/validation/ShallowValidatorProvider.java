@@ -1,9 +1,9 @@
 package io.onedev.server.validation;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 import io.onedev.server.annotation.Shallow;
 

@@ -18,16 +18,15 @@ import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
+
 import org.apache.shiro.authz.UnauthorizedException;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -38,7 +37,7 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
-import static javax.servlet.http.HttpServletResponse.*;
+import static jakarta.servlet.http.HttpServletResponse.*;
 
 @Singleton
 public class PypiPackHandler implements PackHandler {
@@ -99,15 +98,15 @@ public class PypiPackHandler implements PackHandler {
 		
 		if (pathSegments.isEmpty()) {
 			if (isPost) {
-				var upload = new ServletFileUpload();
+				var upload = new JakartaServletFileUpload<>();
 				try {
 					var attributes = new LinkedHashMap<String, List<String>>();
 					var items = upload.getItemIterator(request);
 					while (items.hasNext()) {
 						var item = items.next();
-						try (var is = item.openStream()) {
+						try (var is = item.getInputStream()) {
 							if (item.isFormField()) {
-								var itemValue = Streams.asString(is, UTF_8.name());
+								var itemValue = org.apache.commons.io.IOUtils.toString(is, UTF_8.name());
 								if (StringUtils.isNotBlank(itemValue)) 
 									attributes.computeIfAbsent(item.getFieldName(), k -> new ArrayList<>()).add(itemValue);
 							} else {
@@ -184,7 +183,7 @@ public class PypiPackHandler implements PackHandler {
 							}
 						}
 					}
-				} catch (IOException | FileUploadException e) {
+				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			} else {

@@ -15,8 +15,8 @@ import org.bouncycastle.crypto.signers.Ed25519Signer;
 import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.util.io.pem.PemReader;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.StringReader;
 
 import static io.onedev.server.web.translation.Translation._T;

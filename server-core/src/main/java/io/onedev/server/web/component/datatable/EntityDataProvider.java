@@ -5,7 +5,7 @@ import java.util.Iterator;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.hibernate.criterion.Order;
+import io.onedev.server.persistence.dao.Order;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.model.AbstractEntity;

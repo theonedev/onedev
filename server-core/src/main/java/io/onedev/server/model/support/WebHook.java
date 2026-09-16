@@ -10,8 +10,8 @@ import io.onedev.server.event.project.workspace.WorkspaceEvent;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.annotation.Editable;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

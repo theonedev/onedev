@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
@@ -136,8 +136,8 @@ public class ContainerPackPanel extends Panel {
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 							Component content = newArchImagePanel("content", archDigest);
-							target.add(content);
 							fragment.replace(content);
+							target.add(content);
 						}
 
 					});
@@ -223,7 +223,7 @@ public class ContainerPackPanel extends Panel {
 		var labels = new ArrayList<Pair<String, String>>();
 		var labelsNode = config.get("config").get("Labels");
 		if (labelsNode != null) {
-			for (var it = labelsNode.fields(); it.hasNext();) {
+			for (var it = labelsNode.properties().iterator(); it.hasNext();) {
 				var entry = it.next();
 				labels.add(new Pair<>(entry.getKey(), entry.getValue().asText()));
 			}

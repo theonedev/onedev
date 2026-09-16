@@ -7,7 +7,7 @@ import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
@@ -25,7 +25,7 @@ public class PypiHelpPanel extends Panel {
 		super.onInitialize();
 
 		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + PypiPackHandler.HANDLER_ID;
-		add(new CodeSnippetPanel("addRepository", new AbstractReadOnlyModel<>() {
+		add(new CodeSnippetPanel("addRepository", new IModel<>() {
 			@Override
 			public String getObject() {
 				return "" +

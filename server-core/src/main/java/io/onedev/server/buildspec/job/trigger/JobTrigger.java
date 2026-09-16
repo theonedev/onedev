@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.jspecify.annotations.Nullable;
@@ -70,8 +70,7 @@ public abstract class JobTrigger implements Serializable {
 	@Editable(order=1000)
 	@ParamSpecProvider("getParamSpecs")
 	@OmitName
-	@Valid
-	public List<ParamInstances> getParamMatrix() {
+	public List<@Valid ParamInstances> getParamMatrix() {
 		return paramMatrix;
 	}
 

@@ -643,7 +643,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			@Override
 			public void setObject(String object) {
 				state.blameFile = object;
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 			}
 
 		};
@@ -661,7 +661,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			@Override
 			public void setObject(String object) {
 				state.pathFilter = object;
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 			}
 
 		};
@@ -679,7 +679,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			@Override
 			public void setObject(WhitespaceOption object) {
 				state.whitespaceOption = object;
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				newParentsContainer(target);
 				pushState(target);
 			}

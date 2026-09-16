@@ -2,8 +2,8 @@ package io.onedev.server.validation.validator;
 
 import java.io.File;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.annotation.DataDirectory;

@@ -11,8 +11,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.servlet.http.Cookie;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -34,7 +34,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -591,7 +591,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 					form.add(new AjaxButton("save") {
 						@SuppressWarnings("unchecked")
 						@Override
-						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						protected void onSubmit(AjaxRequestTarget target) {
 							var convertedInput = issuePopulator.getConvertedInput();
 							if (convertedInput instanceof Issue) {
 								var linkIssue = (Issue) convertedInput;
@@ -636,7 +636,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 						}
 
 						@Override
-						protected void onError(AjaxRequestTarget target, Form<?> form) {
+						protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
 							target.add(form);
 						}
 					});

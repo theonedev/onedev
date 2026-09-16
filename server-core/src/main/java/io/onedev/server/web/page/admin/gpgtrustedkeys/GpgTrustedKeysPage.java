@@ -82,8 +82,8 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 		        form.add(new AjaxButton("add") {
 		        	
 		            @Override
-		            protected void onSubmit(AjaxRequestTarget target, Form<?> myform) {
-		                super.onSubmit(target, myform);
+		            protected void onSubmit(AjaxRequestTarget target) {
+		                super.onSubmit(target);
 		                
 		                BaseGpgKey bean = (BaseGpgKey) editor.getModelObject();
 		                
@@ -104,8 +104,9 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 		            }
 		            
 		            @Override
-		            protected void onError(AjaxRequestTarget target, Form<?> form) {
-		                super.onError(target, form);
+		            protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+		                super.onError(target);
 		                target.add(form);
 		            }
 		            

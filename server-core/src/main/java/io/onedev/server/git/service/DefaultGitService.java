@@ -27,8 +27,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
@@ -51,8 +51,6 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TagBuilder;
 import org.eclipse.jgit.lib.TreeFormatter;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -91,6 +89,8 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitTask;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.LastCommitsOfChildren;
+import io.onedev.server.git.LastCommitsOfChildren.Value;
 import io.onedev.server.git.Submodule;
 import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.command.GetRawCommitCommand;
@@ -115,6 +115,8 @@ public class DefaultGitService implements GitService, Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultGitService.class);
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
+
+	private static final int LAST_COMMITS_CACHE_VERSION = 3;
 	
 	private final ProjectService projectService;
 	
@@ -1240,14 +1242,23 @@ public class DefaultGitService implements GitService, Serializable {
 			
 			final Set<ObjectId> commitIds = new HashSet<>(); 
 			
-			lock.readLock().lock();
+			lock.writeLock().lock();
 			try {
-				if (cacheDir.exists()) {
-					for (String each: cacheDir.list()) 
+				File versionFile = new File(cacheDir, "version.txt");
+				String version = String.valueOf(LAST_COMMITS_CACHE_VERSION);
+				if (!versionFile.exists()
+						|| !FileUtils.readFileToString(versionFile, StandardCharsets.UTF_8).trim().equals(version)) {
+					FileUtils.cleanDir(cacheDir);
+					FileUtils.writeFile(versionFile, version, StandardCharsets.UTF_8);
+				}
+				for (String each: cacheDir.list()) {
+					if (!each.equals(versionFile.getName()))
 						commitIds.add(ObjectId.fromString(each));
-				} 	
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			} finally {
-				lock.readLock().unlock();
+				lock.writeLock().unlock();
 			}
 			
 			LastCommitsOfChildren.Cache cache;

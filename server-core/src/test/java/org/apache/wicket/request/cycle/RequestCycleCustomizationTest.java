@@ -1,6 +1,6 @@
 package org.apache.wicket.request.cycle;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.apache.wicket.markup.html.WebPage;
@@ -11,7 +11,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RequestCycleCustomizationTest {
 

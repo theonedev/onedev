@@ -7,7 +7,6 @@ import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import java.lang.reflect.AnnotatedElement;
@@ -52,7 +51,7 @@ public class PackQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					InputAssistBehavior inputAssist = new PackQueryBehavior(new AbstractReadOnlyModel<>() {
+					InputAssistBehavior inputAssist = new PackQueryBehavior(new IModel<>() {
 
 						@Override
 						public Project getObject() {

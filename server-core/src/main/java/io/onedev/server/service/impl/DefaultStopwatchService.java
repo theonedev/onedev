@@ -5,10 +5,10 @@ import static io.onedev.server.model.Stopwatch.PROP_USER;
 
 import java.util.Date;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
+import io.onedev.server.persistence.dao.Restrictions;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Issue;

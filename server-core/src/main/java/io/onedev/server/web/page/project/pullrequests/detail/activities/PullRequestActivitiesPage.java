@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.servlet.http.Cookie;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.Cookie;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -30,8 +30,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import io.onedev.server.web.component.RepeatingView;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -275,8 +275,9 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			form.add(new AjaxSubmitLink("save") {
 
 				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
+				protected void onSubmit(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+					super.onSubmit(target);
 
 					String content = input.getModelObject();
 					if (content.length() > PullRequestComment.MAX_CONTENT_LEN) {
@@ -304,8 +305,9 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				}
 
 				@Override
-				protected void onError(AjaxRequestTarget target, Form<?> form) {
-					super.onError(target, form);
+				protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+					super.onError(target);
 					target.add(form);
 				}
 
@@ -331,7 +333,6 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
 
-			@SuppressWarnings("deprecation")
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
 				Component prevActivityRow = null;
@@ -441,7 +442,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+				add(AttributeAppender.append("class", new IModel<String>() {
 					@Override
 					public String getObject() {
 						return showComments?"active":""	;

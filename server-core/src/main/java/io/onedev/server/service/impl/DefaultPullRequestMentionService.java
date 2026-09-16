@@ -1,6 +1,6 @@
 package io.onedev.server.service.impl;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestMention;

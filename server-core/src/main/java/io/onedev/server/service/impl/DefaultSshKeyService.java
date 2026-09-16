@@ -5,10 +5,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.SimpleExpression;
+import io.onedev.server.persistence.dao.Restrictions;
+import io.onedev.server.persistence.dao.Criterion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class DefaultSshKeyService extends BaseEntityService<SshKey> implements S
     @Sessional
     @Override
     public SshKey findByFingerprint(String fingerprint) {
-        SimpleExpression eq = Restrictions.eq("fingerprint", fingerprint);
+        Criterion eq = Restrictions.eq("fingerprint", fingerprint);
         EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
         entityCriteria.setCacheable(true);
         return find(entityCriteria);

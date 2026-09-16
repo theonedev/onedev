@@ -22,7 +22,7 @@ import org.apache.wicket.markup.html.link.DisabledAttributeLinkBehavior;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
@@ -122,13 +122,12 @@ public abstract class SearchResultPanel extends Panel {
 		return OneDev.getInstance(SettingService.class).getPerformanceSetting().getMaxCodeSearchEntries();
 	}
 
-	@SuppressWarnings("deprecation")
 	private void onActiveIndexChange(AjaxRequestTarget target) {
-		Component hitsContainer = blobsView.get(activeBlobIndex).get(HITS_ID);
+		Component hitsContainer = blobsView.stream().toList().get(activeBlobIndex).get(HITS_ID);
 		if (!hitsContainer.isVisibilityAllowed()) {
 			hitsContainer.setVisibilityAllowed(true);
 			target.add(hitsContainer);
-			target.add(blobsView.get(activeBlobIndex).get(EXPAND_LINK_ID));
+			target.add(blobsView.stream().toList().get(activeBlobIndex).get(EXPAND_LINK_ID));
 		} 
 
 		String activeLinkId = getMarkupId() + "-" + activeBlobIndex; 
@@ -407,7 +406,7 @@ public abstract class SearchResultPanel extends Panel {
 					protected void onInitialize() {
 						super.onInitialize();
 						
-						add(new SpriteImage("icon", new AbstractReadOnlyModel<String>() {
+						add(new SpriteImage("icon", new IModel<String>() {
 
 							@Override
 							public String getObject() {
@@ -417,7 +416,7 @@ public abstract class SearchResultPanel extends Panel {
 									return "arrow";
 							}
 							
-						}).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+						}).add(AttributeAppender.append("class", new IModel<String>() {
 
 							@Override
 							public String getObject() {

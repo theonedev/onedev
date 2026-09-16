@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -45,7 +45,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -609,7 +608,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	private Fragment newEffectiveFrag() {
 		Fragment fragment = new Fragment("status", "effectiveFrag", this);
 
-		fragment.add(new Label("description", new AbstractReadOnlyModel<String>() {
+		fragment.add(new Label("description", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -626,7 +625,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Label("label", new AbstractReadOnlyModel<String>() {
+				add(new Label("label", new IModel<String>() {
 
 					@Override
 					public String getObject() {
@@ -814,7 +813,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		
 		form.add(new FencedFeedbackPanel("titleFeedback", titleInput));
 		
-		titleInput.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		titleInput.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -867,7 +866,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			}
 		});
 		
-		descriptionInput.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		descriptionInput.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -985,13 +984,21 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		
 		container.add(new Label("help", _T(getPullRequest().getMergeStrategy().getDescription())));
 		
-		container.add(new AjaxLazyLoadPanel("status") {
+		container.add(new AjaxLazyLoadPanel<Component>("status") {
 			
 			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
-			}
+			protected void initTimer() {
+                if (getPage().getBehaviors(AjaxLazyLoadTimer.class).isEmpty()) {
+                    getPage().add(new AjaxLazyLoadTimer() {
+                        @Override
+                        protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+                            super.updateAjaxAttributes(attributes);
+                            attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
+                        }
+                    });
+                }
+                super.initTimer();
+            }
 
 			@Override
 			public Component getLazyLoadComponent(String componentId) {

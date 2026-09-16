@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
@@ -53,8 +53,7 @@ public class ServiceLocator implements Serializable {
 
 	@Editable(order=300, description="Specify node selector of this locator")
 	@Size(min=1, message="At least one entry should be specified")
-	@Valid
-	public List<NodeSelectorEntry> getNodeSelector() {
+	public List<@Valid NodeSelectorEntry> getNodeSelector() {
 		return nodeSelector;
 	}
 

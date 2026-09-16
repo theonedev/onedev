@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -27,7 +27,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -149,7 +149,6 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 								return null;
 						}
 
-						@SuppressWarnings("deprecation")
 						@Override
 						protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
 							return new AttachAjaxIndicatorListener(
@@ -175,7 +174,6 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			if (field != null && field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
 				avatarsView.add(new FieldValuesPanel(avatarsView.newChildId(), Mode.AVATAR, true) {
 
-					@SuppressWarnings("deprecation")
 					@Override
 					protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
 						return new AttachAjaxIndicatorListener(avatarsView.get(0), AttachMode.PREPEND, false);

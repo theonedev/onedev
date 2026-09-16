@@ -3,7 +3,6 @@ package io.onedev.server.web;
 import org.apache.wicket.protocol.http.IWebApplicationFactory;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WicketFilter;
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -17,7 +16,7 @@ public class DefaultWicketFilter extends WebSocketFilter {
 	
 	@Inject
 	public DefaultWicketFilter(WebApplication application) {
-		super(WebSocketPolicy.newServerPolicy());
+		super();
 		
 		this.application = application;
 		setFilterPath("");

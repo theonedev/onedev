@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -54,7 +53,7 @@ public class ServerInformationPage extends ServerDetailPage {
 			}
 		});
 		
-		add(new Label("memoryUsage", new AbstractReadOnlyModel<String>() {
+		add(new Label("memoryUsage", new IModel<String>() {
 			@Override
 			public String getObject() {
 				return serverInformationModel.getObject().memoryUsage;

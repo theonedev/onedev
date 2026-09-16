@@ -21,8 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.joda.time.DateTime;
 import org.jspecify.annotations.Nullable;

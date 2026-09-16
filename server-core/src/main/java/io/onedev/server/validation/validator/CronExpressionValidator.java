@@ -2,8 +2,8 @@ package io.onedev.server.validation.validator;
 
 import java.text.ParseException;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import io.onedev.server.annotation.CronExpression;
 

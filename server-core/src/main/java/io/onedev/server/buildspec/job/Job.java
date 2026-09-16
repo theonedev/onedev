@@ -17,10 +17,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
@@ -186,8 +186,7 @@ public class Job implements NamedElement, Validatable {
 	}
 	
 	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>")
-	@Valid
-	public List<Step> getSteps() {
+	public List<@Valid Step> getSteps() {
 		return steps;
 	}
 	
@@ -196,8 +195,7 @@ public class Job implements NamedElement, Validatable {
 	}
 
 	@Editable(order=400, name="Parameter Specs", group="Params & Triggers", description="Optionally define parameter specifications of the job")
-	@Valid
-	public List<ParamSpec> getParamSpecs() {
+	public List<@Valid ParamSpec> getParamSpecs() {
 		return paramSpecs;
 	}
 
@@ -206,8 +204,7 @@ public class Job implements NamedElement, Validatable {
 	}
 
 	@Editable(order=500, group="Params & Triggers", description="Use triggers to run the job automatically under certain conditions")
-	@Valid
-	public List<JobTrigger> getTriggers() {
+	public List<@Valid JobTrigger> getTriggers() {
 		return triggers;
 	}
 
@@ -217,8 +214,7 @@ public class Job implements NamedElement, Validatable {
 
 	@Editable(name="Job Dependencies", order=9110, group="Dependencies & Services", description="Job dependencies determines the order and "
 			+ "concurrency when run different jobs. You may also specify artifacts to retrieve from upstream jobs")
-	@Valid
-	public List<JobDependency> getJobDependencies() {
+	public List<@Valid JobDependency> getJobDependencies() {
 		return jobDependencies;
 	}
 
@@ -228,8 +224,7 @@ public class Job implements NamedElement, Validatable {
 
 	@Editable(name="Project Dependencies", order=9112, group="Dependencies & Services", description="Use project dependency to retrieve "
 			+ "artifacts from other projects")
-	@Valid
-	public List<ProjectDependency> getProjectDependencies() {
+	public List<@Valid ProjectDependency> getProjectDependencies() {
 		return projectDependencies;
 	}
 
@@ -341,8 +336,7 @@ public class Job implements NamedElement, Validatable {
 	}
 	
 	@Editable(order=10600, name="Post Build Actions", group="More Settings")
-	@Valid
-	public List<PostBuildAction> getPostBuildActions() {
+	public List<@Valid PostBuildAction> getPostBuildActions() {
 		return postBuildActions;
 	}
 	

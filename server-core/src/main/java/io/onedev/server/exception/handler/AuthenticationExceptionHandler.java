@@ -1,10 +1,14 @@
 package io.onedev.server.exception.handler;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 import org.apache.shiro.authc.AuthenticationException;
 
 import io.onedev.server.exception.HttpResponse;
+import io.onedev.server.exception.HttpResponseBody;
 import io.onedev.server.security.SecurityUtils;
 
 public class AuthenticationExceptionHandler extends AbstractExceptionHandler<AuthenticationException> {
@@ -13,8 +17,11 @@ public class AuthenticationExceptionHandler extends AbstractExceptionHandler<Aut
 
 	@Override
     public HttpResponse getResponse(AuthenticationException exception) {
+		MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
+		headers.add("WWW-Authenticate", HttpServletRequest.BASIC_AUTH + " realm=\"OneDev\"");
+		headers.add("WWW-Authenticate", "Bearer realm=\"OneDev\"");
 		return new HttpResponse(HttpServletResponse.SC_UNAUTHORIZED, 
-				SecurityUtils.AUTHENTICATION_FAILED_MESSAGE);
+				new HttpResponseBody(false, SecurityUtils.AUTHENTICATION_FAILED_MESSAGE), headers);
     }
     
 }

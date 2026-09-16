@@ -29,35 +29,37 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.validation.Validator;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.validation.Validator;
 
 import org.apache.shiro.authc.credential.PasswordService;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.hibernate.ReplicationMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
+import org.hibernate.boot.model.relational.internal.SqlStringGenerationContextImpl;
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.engine.config.spi.ConfigurationService;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.hibernate.query.Query;
-import org.hibernate.tool.hbm2ddl.SchemaExport;
-import org.hibernate.tool.schema.TargetType;
+import org.hibernate.tool.schema.internal.SchemaCreatorImpl;
+import org.hibernate.tool.schema.internal.SchemaDropperImpl;
+import org.hibernate.tool.schema.spi.GenerationTarget;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
@@ -239,6 +241,27 @@ public class DefaultDataService implements DataService, Serializable {
 		return dbDataVersion;
 	}
 	
+    private void writeSchemaScript(File file, boolean create) throws IOException {
+        var metadata = getMetadata();
+        var registry = metadata.getDatabase().getServiceRegistry();
+        var settings = new LinkedHashMap<String, Object>(registry.requireService(ConfigurationService.class).getSettings());
+        // Callers read one SQL statement per line, regardless of SQL logging format.
+        settings.put(AvailableSettings.FORMAT_SQL, false);
+        List<String> commands = new ArrayList<>();
+        // Capture SQL only. Existing filtering and transaction handling below
+        // decide which statements are executed against the database.
+        GenerationTarget target = new GenerationTarget() {
+            public void prepare() {}
+            public void accept(String command) { commands.add(command); }
+            public void release() {}
+        };
+        if (create)
+            new SchemaCreatorImpl(registry).doCreation(metadata, registry, settings, false, target);
+        else
+            new SchemaDropperImpl(registry).doDrop(metadata, registry, settings, false, target);
+        FileUtils.writeLines(file, commands);
+    }
+
 	@Override
 	public void populateDatabase(Connection conn) {
 		if (hibernateConfig.isHSQLDialect()) 
@@ -250,8 +273,7 @@ public class DefaultDataService implements DataService, Serializable {
 			File tempFile = null;
         	try {
             	tempFile = FileUtils.createTempFile("schema", ".sql");
-	        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
-	        			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
+			writeSchemaScript(tempFile, true);
 	        	List<String> sqls = new ArrayList<String>();
 	        	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
 	        		if (shouldInclude(sql))
@@ -453,7 +475,7 @@ public class DefaultDataService implements DataService, Serializable {
 	private void exportEntity(Session session, Class<?> entityType, List<Number> ids, int start, int count, int batchSize, File exportDir) {
 		logger.info("Loading table rows ({}->{}) from database...", String.valueOf(start+1), (start + count));
 		
-		Query<?> query = session.createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId order by id");
+		Query<?> query = session.createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId order by id", entityType);
 		query.setParameter("fromId", ids.get(start));
 		query.setParameter("toId", ids.get(start+count-1));
 		
@@ -483,23 +505,22 @@ public class DefaultDataService implements DataService, Serializable {
 		for (Class<?> entityType: entityTypes) {
 			File[] dataFiles = dataDir.listFiles((dir, name) -> name.startsWith(entityType.getSimpleName() + "s.xml"));
 			for (File file: dataFiles) {
-				Session session = dao.getSession();
-				Transaction transaction = session.beginTransaction();
-				try {
-					logger.info("Importing from data file '" + file.getName() + "'...");
-					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-					
-					for (Element element: dom.getRootElement().elements()) {
-						element.detach();
-						AbstractEntity entity = (AbstractEntity) new VersionedXmlDoc(DocumentHelper.createDocument(element)).toBean();
-						session.replicate(entity, ReplicationMode.EXCEPTION);
+				// Restore each batch independently, preserving its IDs and failing on duplicates.
+				try (var session = dao.getSession().getSessionFactory().openStatelessSession()) {
+					Transaction transaction = session.beginTransaction();
+					try {
+						logger.info("Importing from data file '" + file.getName() + "'...");
+						VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+						for (Element element: dom.getRootElement().elements()) {
+							element.detach();
+							AbstractEntity entity = (AbstractEntity) new VersionedXmlDoc(DocumentHelper.createDocument(element)).toBean();
+							session.insert(entity);
+						}
+						transaction.commit();
+					} catch (Exception e) {
+						transaction.rollback();
+						throw ExceptionUtils.unchecked(e);
 					}
-					session.flush();
-					session.clear();
-					transaction.commit();
-				} catch (Exception e) {
-					transaction.rollback();
-					throw ExceptionUtils.unchecked(e);
 				}
 			}
 		}
@@ -510,8 +531,7 @@ public class DefaultDataService implements DataService, Serializable {
 		File tempFile = null;
     	try {
         	tempFile = FileUtils.createTempFile("schema", ".sql");
-        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
-        			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
+			writeSchemaScript(tempFile, true);
         	List<String> sqls = new ArrayList<>();
         	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
         		if (isApplyingConstraints(sql)) {
@@ -532,8 +552,7 @@ public class DefaultDataService implements DataService, Serializable {
 		File tempFile = null;
     	try {
         	tempFile = FileUtils.createTempFile("schema", ".sql");
-        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
-        			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), getMetadata());
+			writeSchemaScript(tempFile, true);
         	List<String> sqls = new ArrayList<>();
         	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
         		if (shouldInclude(sql) && !isApplyingConstraints(sql))
@@ -550,23 +569,21 @@ public class DefaultDataService implements DataService, Serializable {
 	
 	@Override
 	public void dropConstraints(Connection conn) {
-		File tempFile = null;
-    	try {
-        	tempFile = FileUtils.createTempFile("schema", ".sql");
-        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
-        			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), getMetadata());
-        	List<String> sqls = new ArrayList<>();
-        	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
-        		if (isDroppingConstraints(sql))
-        			sqls.add(sql);
-        	}
-        	execute(conn, sqls, false);
-    	} catch (IOException e) {
-    		throw new RuntimeException(e);
-    	} finally {
-    		if (tempFile != null)
-    			tempFile.delete();
-    	}
+		var metadata = getMetadata();
+		var database = metadata.getDatabase();
+		var registry = database.getServiceRegistry();
+		var environment = registry.requireService(JdbcEnvironment.class);
+		var context = SqlStringGenerationContextImpl.fromConfigurationMap(environment, database,
+				registry.requireService(ConfigurationService.class).getSettings());
+		var exporter = environment.getDialect().getForeignKeyExporter();
+		List<String> sqls = new ArrayList<>();
+		// Full schema drops may rely on DROP TABLE CASCADE and omit foreign keys.
+		// Export them directly, including dialect-specific DROP FOREIGN KEY syntax.
+		for (var table : metadata.collectTableMappings()) {
+			for (var foreignKey : table.getForeignKeyCollection())
+				Collections.addAll(sqls, exporter.getSqlDropStrings(foreignKey, metadata, context));
+		}
+		execute(conn, sqls, false);
 	}
 	
 	@Override
@@ -574,8 +591,7 @@ public class DefaultDataService implements DataService, Serializable {
 		File tempFile = null;
     	try {
         	tempFile = FileUtils.createTempFile("schema", ".sql");
-        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
-        			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), getMetadata());
+			writeSchemaScript(tempFile, false);
         	List<String> sqls = new ArrayList<>();
         	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
         		sqls.add(sql);
@@ -593,10 +609,6 @@ public class DefaultDataService implements DataService, Serializable {
 		return sql.toLowerCase().contains(" foreign key ");
 	}
 
-	private boolean isDroppingConstraints(String sql) {
-		return sql.toLowerCase().contains(" drop constraint ");
-	}
-	
 	private boolean shouldInclude(String sql) {
 		// some databases will create index on foreign keys automatically, so 
 		// we skip creating indexes for those

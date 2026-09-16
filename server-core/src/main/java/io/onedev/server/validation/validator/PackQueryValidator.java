@@ -4,8 +4,8 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.PackQuery;
 import io.onedev.server.model.Project;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class PackQueryValidator implements ConstraintValidator<PackQuery, String> {
 

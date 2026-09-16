@@ -2,7 +2,7 @@ package io.onedev.server.git;
 
 import java.util.Map;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.apache.sshd.server.command.Command;
 import org.eclipse.jgit.transport.RemoteConfig;

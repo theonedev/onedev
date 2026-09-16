@@ -122,7 +122,7 @@ public class GroupListPage extends AdministrationPage {
 				
 				String url = RequestCycle.get().urlFor(GroupListPage.class, params).toString();
 
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				if (typing)
 					replaceState(target, url, query);
 				else

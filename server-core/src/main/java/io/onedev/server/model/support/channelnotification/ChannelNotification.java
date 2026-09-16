@@ -2,8 +2,8 @@ package io.onedev.server.model.support.channelnotification;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 
 import io.onedev.server.annotation.BuildQuery;
 import io.onedev.server.annotation.CodeCommentQuery;

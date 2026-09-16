@@ -3,7 +3,7 @@ package io.onedev.server.model.support.administration.workspaceprovisioner;
 import java.io.Serializable;
 import java.util.concurrent.Future;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.jspecify.annotations.Nullable;
 

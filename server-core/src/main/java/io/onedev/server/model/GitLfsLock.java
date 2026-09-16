@@ -4,14 +4,14 @@ import static io.onedev.server.model.GitLfsLock.PROP_PATH;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -24,8 +24,8 @@ import io.onedev.server.annotation.Editable;
  */
 @Entity
 @Table(
-		indexes={@Index(columnList="o_owner_id"), @Index(columnList="o_project_id"), @Index(columnList=PROP_PATH)},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_PATH})})
+		indexes={@Index(columnList="owner_id"), @Index(columnList="project_id"), @Index(columnList=PROP_PATH)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"project_id", PROP_PATH})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class GitLfsLock extends AbstractEntity {

@@ -96,7 +96,7 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 				protected void onClosed() {
 					super.onClosed();
 
-					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 					if (target != null) {
 						var markupId = DropdownLink.this.getMarkupId(true);
 						String script = String.format("""

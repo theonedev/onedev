@@ -23,7 +23,6 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -115,7 +114,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		add(titleInput);
 		add(new FencedFeedbackPanel("titleFeedback", titleInput));
 		
-		titleInput.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		titleInput.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -206,7 +205,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 		lastDescriptionTemplate = getDescriptionTemplate(issue);
 		add(descriptionInput = newDescriptionInput(lastDescriptionTemplate));
-		descriptionInput.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		descriptionInput.add(AttributeAppender.append("class", new IModel<String>() {
 
 			@Override
 			public String getObject() {

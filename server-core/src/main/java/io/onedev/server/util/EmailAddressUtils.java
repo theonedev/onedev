@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.InternetAddress;
 
 public class EmailAddressUtils {
 	

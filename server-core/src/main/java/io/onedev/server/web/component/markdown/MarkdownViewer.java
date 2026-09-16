@@ -1,10 +1,12 @@
 package io.onedev.server.web.component.markdown;
 
+import java.util.Date;
+
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -158,7 +160,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
 		
-		if (RequestCycle.get().find(AjaxRequestTarget.class) != null) {
+		if (RequestCycle.get().find(AjaxRequestTarget.class).orElse(null) != null) {
 			/*
 			 *  Render it as html will cause issue when markdown contains some html
 			 *  entities such as "&#27;" and when the component is rendered via ajax. 
@@ -304,8 +306,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 					if (commit != null && SecurityUtils.canReadCode(commitProject)) {
 						String script = String.format("onedev.server.markdown.renderCommitTooltip('%s', '%s', '%s', '%s');",
 								JavaScriptEscape.escapeJavaScript(commit.getAuthorIdent().getName()), 
-								JavaScriptEscape.escapeJavaScript(DateUtils.formatAge(commit.getCommitterIdent().getWhen())),
-								JavaScriptEscape.escapeJavaScript(DateUtils.formatDateTime(commit.getCommitterIdent().getWhen())),
+								JavaScriptEscape.escapeJavaScript(DateUtils.formatAge(Date.from(commit.getCommitterIdent().getWhenAsInstant()))),
+								JavaScriptEscape.escapeJavaScript(DateUtils.formatDateTime(Date.from(commit.getCommitterIdent().getWhenAsInstant()))),
 								JavaScriptEscape.escapeJavaScript(commit.getFullMessage()));
 						target.appendJavaScript(script);
 					} else {

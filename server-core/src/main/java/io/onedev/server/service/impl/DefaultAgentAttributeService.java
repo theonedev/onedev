@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -43,9 +43,9 @@ public class DefaultAgentAttributeService extends BaseEntityService<AgentAttribu
 
 		var hazelcastInstance = clusterService.getHazelcastInstance();
 		attributeNames = hazelcastInstance.getMap("agentAttributeNames");
-		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("agentAttributeCacheInited");
+		var cacheInited = clusterService.getAtomicLong("agentAttributeCacheInited");
 		clusterService.initWithLead(cacheInited, () -> {
-			Query<?> query = dao.getSession().createQuery("select name from AgentAttribute");
+			Query<?> query = dao.getSession().createQuery("select name from AgentAttribute", String.class);
 			for (Object name: query.list())
 				attributeNames.put((String) name, (String) name);
 			return 1L;

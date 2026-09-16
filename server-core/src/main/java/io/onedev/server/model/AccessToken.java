@@ -12,7 +12,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -23,8 +23,8 @@ import static io.onedev.server.security.SecurityUtils.asPrincipals;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_owner_id"), @Index(columnList = "value")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_owner_id", "name"})})
+		indexes={@Index(columnList="owner_id"), @Index(columnList = "value")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"owner_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class AccessToken extends AbstractEntity implements AuthenticationInfo {
 

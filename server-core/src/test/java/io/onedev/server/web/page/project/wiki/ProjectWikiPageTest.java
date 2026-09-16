@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.project.wiki;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;

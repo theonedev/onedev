@@ -9,13 +9,13 @@ import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.MAX_VALUE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
-import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_IMPLEMENTED;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_CONFLICT;
+import static jakarta.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_IMPLEMENTED;
+import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -36,17 +36,17 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpUtils;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.util.UrlEncoded;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.fileupload.util.Streams;
+
 import org.apache.shiro.authz.UnauthorizedException;
 import org.jspecify.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
@@ -249,9 +249,9 @@ public class GemPackHandler implements PackHandler {
 			String name;
 			String version;
 			try {
-				var params = HttpUtils.parseQueryString(Streams.asString(request.getInputStream(), UTF_8.name()));
-				name = params.get("gem_name")[0];
-				version = params.get("version")[0];
+				var params = UrlEncoded.decodeQuery(org.apache.commons.io.IOUtils.toString(request.getInputStream(), UTF_8.name()));
+				name = params.getValue("gem_name", 0);
+				version = params.getValue("version", 0);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

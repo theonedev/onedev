@@ -1,6 +1,6 @@
 package io.onedev.server.jetty;
 
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 
 import io.onedev.commons.loader.ExtensionPoint;
 

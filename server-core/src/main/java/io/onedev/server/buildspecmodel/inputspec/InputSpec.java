@@ -238,7 +238,7 @@ public abstract class InputSpec implements Serializable {
 		buffer.append("import io.onedev.server.util.*;\n");
 		buffer.append("import io.onedev.server.util.facade.*;\n");
 		buffer.append("import java.util.*;\n");
-		buffer.append("import javax.validation.constraints.*;\n");
+		buffer.append("import jakarta.validation.constraints.*;\n");
 		buffer.append("import org.hibernate.validator.constraints.*;\n");
 		buffer.append("\n");
 		buffer.append("@Editable(name=").append("\"").append(description).append("\", translatable=false)\n");

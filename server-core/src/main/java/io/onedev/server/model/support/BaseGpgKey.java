@@ -4,13 +4,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
-import javax.persistence.Lob;
-import javax.persistence.MappedSuperclass;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.persistence.Column;
+import jakarta.persistence.Lob;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.bouncycastle.openpgp.PGPPublicKey;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.util.GpgUtils;

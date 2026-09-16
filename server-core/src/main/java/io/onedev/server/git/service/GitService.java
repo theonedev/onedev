@@ -10,7 +10,6 @@ import io.onedev.server.model.support.code.BranchProtection;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import org.jspecify.annotations.Nullable;

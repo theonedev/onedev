@@ -41,7 +41,7 @@ public class SequenceGenerator {
 			Long nextSequence = getNextSequences().get(key);
 			if (nextSequence == null) {
 				Query<?> query = dao.getSession().createQuery(String.format("select max(%s) from %s where %s=:numberScope", 
-						AbstractEntity.PROP_NUMBER, sequenceClass.getSimpleName(), AbstractEntity.PROP_NUMBER_SCOPE));
+						AbstractEntity.PROP_NUMBER, sequenceClass.getSimpleName(), AbstractEntity.PROP_NUMBER_SCOPE), Long.class);
 				query.setParameter(AbstractEntity.PROP_NUMBER_SCOPE, sequenceScope);
 				
 				Object result = query.uniqueResult();

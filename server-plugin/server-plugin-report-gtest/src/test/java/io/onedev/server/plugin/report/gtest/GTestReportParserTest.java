@@ -7,13 +7,13 @@ import io.onedev.server.codequality.UnitTestReport.Status;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import org.eclipse.jgit.lib.ObjectId;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GTestReportParserTest {
 

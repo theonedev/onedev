@@ -1,6 +1,6 @@
 package io.onedev.server.rest;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 import org.glassfish.jersey.server.ResourceConfig;
 

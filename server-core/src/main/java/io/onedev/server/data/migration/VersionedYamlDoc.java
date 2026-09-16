@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hibernate.proxy.HibernateProxyHelper;
+import io.onedev.server.util.HibernateProxyHelper;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -188,6 +188,7 @@ public class VersionedYamlDoc extends MappingNode {
 	
 	private static class OneYaml extends Yaml {
 
+		@SuppressWarnings("deprecation")
 		OneYaml() {
 			super(newConstructor(), newRepresenter());
 			

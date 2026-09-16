@@ -48,8 +48,8 @@ public abstract class InsertSshKeyPanel extends Panel {
         form.add(new AjaxButton("add") {
         	
             @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> myform) {
-                super.onSubmit(target, myform);
+            protected void onSubmit(AjaxRequestTarget target) {
+                super.onSubmit(target);
                 
                 SshKeyService sshKeyService = OneDev.getInstance(SshKeyService.class);
                 SshKey sshKey = (SshKey) editor.getModelObject();
@@ -69,8 +69,9 @@ public abstract class InsertSshKeyPanel extends Panel {
             }
             
             @Override
-            protected void onError(AjaxRequestTarget target, Form<?> form) {
-                super.onError(target, form);
+            protected void onError(AjaxRequestTarget target) {
+				Form<?> form = getForm();
+                super.onError(target);
                 target.add(form);
             }
             

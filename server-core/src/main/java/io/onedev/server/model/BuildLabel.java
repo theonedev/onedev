@@ -1,20 +1,20 @@
 package io.onedev.server.model;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.EntityLabel;
 import io.onedev.server.rest.annotation.Api;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_build_id"), @Index(columnList="o_spec_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_build_id", "o_spec_id"})}
+		indexes={@Index(columnList="build_id"), @Index(columnList="spec_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"build_id", "spec_id"})}
 )
 public class BuildLabel extends EntityLabel {
 

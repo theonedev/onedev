@@ -72,8 +72,8 @@ public abstract class BlobUploadPanel extends Panel {
 		form.add(new AjaxButton("upload") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			protected void onSubmit(AjaxRequestTarget target) {
+				super.onSubmit(target);
 
 				String commitMessage = BlobUploadPanel.this.commitMessage;
 				if (StringUtils.isBlank(commitMessage))
@@ -88,8 +88,8 @@ public abstract class BlobUploadPanel extends Panel {
 			}
 
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				super.onError(target, form);
+			protected void onError(AjaxRequestTarget target) {
+				super.onError(target);
 				target.add(feedback);
 			}
 			

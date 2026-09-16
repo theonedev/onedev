@@ -4,7 +4,7 @@ import io.onedev.server.exception.HttpResponse;
 
 import org.hibernate.ObjectNotFoundException;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class ObjectNotFoundExceptionHandler extends AbstractExceptionHandler<ObjectNotFoundException> {
 	

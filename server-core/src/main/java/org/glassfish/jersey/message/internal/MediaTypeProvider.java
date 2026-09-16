@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2019 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2020 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -19,9 +19,9 @@ package org.glassfish.jersey.message.internal;
 import java.text.ParseException;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import org.glassfish.jersey.internal.LocalizationMessages;
 import org.glassfish.jersey.spi.HeaderDelegateProvider;
@@ -80,7 +80,7 @@ public class MediaTypeProvider implements HeaderDelegateProvider<MediaType> {
     }
 
     /**
-     * Create a new {@link javax.ws.rs.core.MediaType} instance from a header reader.
+     * Create a new {@link jakarta.ws.rs.core.MediaType} instance from a header reader.
      *
      * @param reader header reader.
      * @return new {@code MediaType} instance.

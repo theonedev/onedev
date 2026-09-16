@@ -1,6 +1,6 @@
 package io.onedev.server.service.impl;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentMention;

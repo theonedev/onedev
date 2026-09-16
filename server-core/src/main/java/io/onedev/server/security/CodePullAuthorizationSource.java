@@ -1,6 +1,6 @@
 package io.onedev.server.security;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import io.onedev.server.model.Project;
 

@@ -1,17 +1,17 @@
 package io.onedev.server.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import io.onedev.commons.utils.StringUtils;
 
 @Entity
-@Table(indexes={@Index(columnList="o_chat_id")})
+@Table(indexes={@Index(columnList="chat_id")})
 public class ChatMessage extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;

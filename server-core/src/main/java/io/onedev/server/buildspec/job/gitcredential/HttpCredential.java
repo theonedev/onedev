@@ -3,9 +3,9 @@ package io.onedev.server.buildspec.job.gitcredential;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.HttpCloneInfo;

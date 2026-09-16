@@ -1,7 +1,7 @@
 package io.onedev.server.web.upload;
 
 import io.onedev.server.OneDev;
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.wicket.util.string.Strings;
 
 import java.util.Date;
@@ -13,9 +13,9 @@ public class FileUpload {
 	
 	private final Date date = new Date();
 	
-	private final List<FileItem> items;
+	private final List<FileItem<?>> items;
 	
-	public FileUpload(String id, List<FileItem> items) {
+	public FileUpload(String id, List<FileItem<?>> items) {
 		this.id = id;
 		this.items = items;
 	}
@@ -24,7 +24,7 @@ public class FileUpload {
 		return id;
 	}
 
-	public List<FileItem> getItems() {
+	public List<FileItem<?>> getItems() {
 		return items;
 	}
 
@@ -36,7 +36,15 @@ public class FileUpload {
 		OneDev.getInstance(UploadService.class).clearUpload(id);
 	}
 
-	public static String getFileName(FileItem file) {
+    public static byte[] readBytes(FileItem<?> item) {
+        try {
+            return item.get();
+        } catch (java.io.IOException e) {
+            throw io.onedev.commons.utils.ExceptionUtils.unchecked(e);
+        }
+    }
+
+	public static String getFileName(FileItem<?> file) {
 		String name = file.getName();
 
 		// when uploading from localhost some browsers will specify the entire path, we strip it

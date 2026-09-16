@@ -3,7 +3,7 @@ package io.onedev.server.model;
 import io.onedev.server.model.support.TimeGroups;
 
 import org.jspecify.annotations.Nullable;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 import static io.onedev.server.model.IssueStateHistory.PROP_DATE;
@@ -12,7 +12,7 @@ import static io.onedev.server.model.support.TimeGroups.*;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="o_issue_id"), @Index(columnList=PROP_STATE), 
+		@Index(columnList="issue_id"), @Index(columnList=PROP_STATE),
 		@Index(columnList=PROP_DATE), @Index(columnList=PROP_MONTH), 
 		@Index(columnList=PROP_WEEK), @Index(columnList=PROP_DAY),
 })
