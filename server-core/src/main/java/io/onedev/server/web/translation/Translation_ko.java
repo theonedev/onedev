@@ -54,8 +54,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">사용자</a>의 비밀번호를 재설정합니다");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to verify email for", 
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">사용자</a>의 이메일을 확인합니다");
-		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
-			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 스타일 마크다운</a>이 허용되며, <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid 및 katex 지원</a>이 포함됩니다.");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 스타일 마크다운</a>이 허용되며, <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml 및 katex 지원</a>이 포함됩니다.");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
@@ -210,7 +208,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Add Issues to Iteration", "반복에 문제 추가");
 		m.put("Add New", "새로 추가");
 		m.put("Add New Board", "새 보드 추가");
-		m.put("Add New Email Address", "새 이메일 주소 추가");
 		m.put("Add New Timesheet", "새로운 근무시간표 추가");
 		m.put("Add Provisioner", "프로비저너 추가");
 		m.put("Add Rule", "규칙 추가");
@@ -281,7 +278,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Added to group", "그룹에 추가됨");
 		m.put("Additional Job Privileges", "추가 작업 권한");
 		m.put("Additional Privileges", "추가 권한");
-		m.put("Additions", "추가 사항");
 		m.put("Administration", "관리");
 		m.put("Administrative permission over a project", "프로젝트에 대한 관리 권한");
 		m.put("Advanced Search", "고급 검색");
@@ -549,7 +545,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Branding", "브랜딩");
 		m.put("Branding settings updated", "브랜딩 설정이 업데이트되었습니다");
 		m.put("Browse Code", "코드 탐색");
-		m.put("Browse code", "코드 탐색");
 		m.put("Bug Report", "버그 보고");
 		m.put("Build", "빌드");
 		m.put("Build #{0} already finished", "빌드 #{0}는 이미 완료되었습니다");
@@ -950,7 +945,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy Selected Issues To...", "선택된 이슈를 복사하여...");
 		m.put("Copy as Markdown", "Markdown으로 복사");
 		m.put("Copy dashboard", "대시보드 복사");
-		m.put("Copy issue number and title", "이슈 번호와 제목 복사");
 		m.put("Copy permanent link", "영구 링크 복사");
 		m.put("Copy public key", "공개 키 복사");
 		m.put("Copy selected text to clipboard", "선택된 텍스트를 클립보드에 복사");
@@ -1162,7 +1156,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Deleted source branch", "소스 브랜치 삭제됨");
 		m.put("Deletion not allowed due to branch protection rule", "브랜치 보호 규칙으로 인해 삭제가 허용되지 않음");
 		m.put("Deletion not allowed due to tag protection rule", "태그 보호 규칙으로 인해 삭제가 허용되지 않음");
-		m.put("Deletions", "삭제 항목");
 		m.put("Denied", "거부됨");
 		m.put("Dependencies & Services", "종속성 및 서비스");
 		m.put("Dependency Management", "종속성 관리");
@@ -1410,7 +1403,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enter New Password", "새 비밀번호 입력");
 		m.put("Enter description here", "여기에 설명을 입력하세요");
 		m.put("Enter your details to create your account", "계정을 생성하려면 세부 정보를 입력하세요");
-		m.put("Enter your details to login to your account", "계정에 로그인하려면 세부 정보를 입력하세요");
 		m.put("Enter your user name or email to reset password", "비밀번호를 재설정하려면 사용자 이름 또는 이메일을 입력하세요");
 		m.put("Entitle to All Users and Projects", "모든 사용자 및 프로젝트에 권한 부여");
 		m.put("Entitled Groups", "권한이 부여된 그룹");
@@ -1666,7 +1658,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Generic LDAP", "일반 LDAP");
 		m.put("Get", "가져오기");
 		m.put("Get Groups Using Attribute", "속성을 사용하여 그룹 가져오기");
-		m.put("Git", "깃");
 		m.put("Git Command Line", "깃 명령줄");
 		m.put("Git Credential", "깃 자격 증명");
 		m.put("Git LFS Storage", "깃 LFS 저장소");
@@ -1675,8 +1666,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Git Pack Config", "깃 팩 구성");
 		m.put("Git Path", "깃 경로");
 		m.put("Git command failed with exit code", "Git 명령이 종료 코드와 함께 실패했습니다");
-		m.put("Git email address will be used as git author/committer for commits created on web UI", 
-			"깃 이메일 주소는 웹 UI에서 생성된 커밋의 작성자/커미터로 사용됩니다");
 		m.put("Git pack config updated", "깃 팩 구성이 업데이트되었습니다");
 		m.put("GitHub", "깃허브");
 		m.put("GitHub API URL", "깃허브 API URL");
@@ -2139,7 +2128,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Line", "라인");
 		m.put("Line: ", "라인:");
 		m.put("Lines", "라인들");
-		m.put("Link", "링크");
 		m.put("Link / upload", "링크 / 업로드");
 		m.put("Link Existing User", "기존 사용자 연결");
 		m.put("Link Spec", "링크 사양");
@@ -2362,6 +2350,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Network Options", "네트워크 옵션");
 		m.put("Never", "절대 없음");
 		m.put("Never expire", "만료되지 않음");
+		m.put("New", "새로운");
 		m.put("New Board", "새 보드");
 		m.put("New Invitation Bean", "새 초대 Bean");
 		m.put("New Issue", "새 이슈");
@@ -2560,6 +2549,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("OS/ARCH", "운영 체제/아키텍처");
 		m.put("Offline", "오프라인");
 		m.put("Ok", "확인");
+		m.put("Old", "오래된");
 		m.put("Old Name", "이전 이름");
 		m.put("Old Password", "이전 비밀번호");
 		m.put("On", "켜짐");
@@ -2837,7 +2827,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 작업 실행자에 정의된 레지스트리 로그인을 재정의하세요. 내장 레지스트리의 경우, 레지스트리 URL로 <code>@server_url@</code>, 사용자 이름으로 <code>@job_token@</code>, 비밀번호 비밀로 액세스 토큰 비밀을 사용하세요.");
 		m.put("Optionally specify registry logins to override those defined in workspace provisioner.\nFor built-in registry, use <code>@server_url@</code> for registry url,\n<code>@workspace_token@</code> for user name, and access token for password\n", 
 			"워크스페이스 프로비저너에 정의된 것을 재정의할 레지스트리 로그인을 선택적으로 지정합니다.\n내장 레지스트리의 경우, 레지스트리 URL에 <code>@server_url@</code>을 사용하고,\n사용자 이름에 <code>@workspace_token@</code>을 사용하며, 비밀번호에는 액세스 토큰을 사용하십시오\n");
-		m.put("Optionally specify relative directory to put uploaded files", "선택적으로 업로드된 파일을 저장할 상대 디렉터리를 지정하세요.");
 		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to clone code into. Leave empty to use job working directory itself", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a> 아래에 코드를 클론할 상대 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
 		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to scan. Leave empty to use job working directory itself", 
@@ -3028,7 +3017,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"퍼지 검색을 수행 중입니다. 검색 텍스트를 '~'로 감싸 추가 조건을 추가하세요. 예: ~검색할 텍스트~ 및 미해결");
 		m.put("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)", 
 			"퍼지 검색을 수행 중입니다. 검색 텍스트를 '~'로 감싸 추가 조건을 추가하세요. 예: ~검색할 텍스트~ 작성자(robin)");
-		m.put("Permanent link", "영구 링크");
 		m.put("Permanent link of this selection", "이 선택의 영구 링크");
 		m.put("Permission denied", "권한이 거부되었습니다");
 		m.put("Permission will be checked upon actual operation", "실제 작업 시 권한이 확인됩니다");
@@ -3106,7 +3094,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Populate Tag Mappings", "태그 매핑 채우기");
 		m.put("Port", "포트");
 		m.put("Port Accessors", "포트 접근자");
-		m.put("Port Mappings", "포트 매핑");
 		m.put("Possible definitions", "가능한 정의");
 		m.put("Post", "게시");
 		m.put("Post Build Action", "빌드 후 작업");
@@ -3142,8 +3129,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Primary email address added", "기본 이메일 주소가 추가되었습니다");
 		m.put("Primary email address changed", "기본 이메일 주소가 변경되었습니다");
 		m.put("Primary email address of your account is not specified yet", "계정의 기본 이메일 주소가 아직 지정되지 않았습니다");
-		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
-			"기본 이메일 주소는 알림을 받거나, gravatar를 표시하는 데 사용됩니다 (활성화된 경우)");
 		m.put("Primary or alias email address of above account to be used as sender address of various email notifications. User can also reply to this address to post issue or pull request comments via email if <code>Check Incoming Email</code> option is enabled below", 
 			"위 계정의 기본 또는 별칭 이메일 주소는 다양한 이메일 알림의 발신 주소로 사용됩니다. 아래에서 <code>수신 이메일 확인</code> 옵션이 활성화된 경우, 사용자는 이 주소로 문제 또는 풀 리퀘스트 댓글을 이메일로 답변할 수 있습니다");
 		m.put("Principal name of the account to login into office 365 mail server to send/receive emails. Make sure this account <b>owns</b> the registered application indicated by application id above", 
@@ -3210,7 +3195,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Prune Builder Cache", "빌더 캐시 정리");
 		m.put("Prune image cache of docker buildx builder. This step calls docker builder prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
 			"도커 buildx 빌더의 이미지 캐시를 정리합니다. 이 단계는 서버 도커 실행자 또는 원격 도커 실행자에서 지정된 buildx 빌더의 캐시를 제거하기 위해 도커 빌더 정리 명령을 호출합니다");
-		m.put("Public", "공개");
 		m.put("Public Key", "공개 키");
 		m.put("Public Roles", "공개 역할");
 		m.put("Publish", "게시");
@@ -3406,7 +3390,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Reopened pull request \"{0}\" ({1})", "풀 리퀘스트 \"{0}\" ({1})를 다시 열었습니다");
 		m.put("Replace With", "교체");
 		m.put("Replica Count", "복제 수");
-		m.put("Replicas", "복제본");
 		m.put("Replied to comment on file \"{0}\" in project \"{1}\"", "프로젝트 \"{1}\"의 파일 \"{0}\"에 대한 댓글에 답변했습니다");
 		m.put("Reply", "답변");
 		m.put("Report Name", "보고서 이름");
@@ -3474,8 +3457,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Reviewers", "리뷰어");
 		m.put("Revision", "개정");
 		m.put("Revision indexing in progress...", "개정 색인 생성 중...");
-		m.put("Revision indexing in progress... (symbol navigation in revisions will be accurate after indexed)", 
-			"개정 색인 생성 중... (개정의 기호 탐색은 색인 생성 후 정확해집니다)");
 		m.put("Right", "오른쪽");
 		m.put("Role", "역할");
 		m.put("Role \"{0}\" deleted", "역할 \"{0}\" 삭제됨");
@@ -3759,7 +3740,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Smtp Ssl Setting", "Smtp Ssl 설정");
 		m.put("Smtp With Ssl", "Smtp Ssl 사용");
 		m.put("Some builds are {0}", "일부 빌드는 {0} 상태입니다");
-		m.put("Some jobs are hidden due to permission policy", "권한 정책으로 인해 일부 작업이 숨겨져 있습니다");
 		m.put("Some local changes would be overwritten by merge", "일부 로컬 변경 사항이 병합으로 덮어쓰여질 수 있습니다");
 		m.put("Some one changed the content you are editing. Reload the page and try again.", "편집 중인 내용이 다른 사람에 의해 변경되었습니다. 페이지를 새로고침하고 다시 시도하세요.");
 		m.put("Some other pull requests are opening to this branch", "이 브랜치로 열려 있는 다른 풀 리퀘스트가 있습니다");
@@ -4172,7 +4152,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"그룹 멤버십 정보를 검색하는 전략을 지정하십시오. LDAP 그룹에 적절한 권한을 부여하려면 동일한 이름의 OneDev 그룹을 정의해야 합니다. 그룹 멤버십을 OneDev 측에서 관리하려면 <tt>그룹 검색 안 함</tt> 전략을 사용하십시오.");
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
-		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "작업이 제출된 시점부터의 타임아웃(초)을 지정하십시오.");
 		m.put("Specify title of the issue", "이슈 제목을 지정하십시오.");
 		m.put("Specify uid:gid to run container as", "컨테이너를 실행할 uid:gid 지정");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack API의 URL을 지정하십시오. 예를 들어 <tt>http://localhost:8080/api</tt>.");
@@ -4555,8 +4534,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"중복을 피하기 위해 여기 표시된 추정/남은 시간은 \"{0}\"에서 집계된 시간을 포함하지 않습니다");
 		m.put("To avoid duplication, spent time showing here does not include those aggregated from \"{0}\"", 
 			"중복을 피하기 위해 여기 표시된 소요 시간은 \"{0}\"에서 집계된 시간을 포함하지 않습니다");
-		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
-			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [, 화살표 키 또는 페이지 업/다운을 사용하세요. 종료하려면 q를 누르세요.");
 		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
 			"이 터미널에서 스크롤하려면 ctrl+b를 누른 후 [를 누르세요. 마우스 휠, 페이지 업/다운 또는 화살표 키를 사용하고, q를 눌러 종료하세요.");
 		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
@@ -4567,7 +4544,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Toggle change history", "변경 기록 토글");
 		m.put("Toggle comments", "댓글 토글");
 		m.put("Toggle commits", "커밋 토글");
-		m.put("Toggle dark mode", "다크 모드 토글");
 		m.put("Toggle detail message", "상세 메시지 토글");
 		m.put("Toggle fixed width font", "고정 폭 글꼴 토글");
 		m.put("Toggle full screen", "전체 화면 토글");
@@ -4730,7 +4706,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unsupported ssh signature algorithm: ", "지원되지 않는 ssh 서명 알고리즘:");
 		m.put("Unsupported ssh signature version: ", "지원되지 않는 ssh 서명 버전:");
 		m.put("Unverified", "검증되지 않음");
-		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "검증되지 않은 이메일 주소는 위 기능에 <b>적용되지 않습니다</b>");
 		m.put("Unviewed code comment activity", "확인되지 않은 코드 댓글 활동");
 		m.put("Unvote", "투표 취소");
 		m.put("Unwatched. Click to watch", "관찰 취소됨. 클릭하여 관찰");
@@ -4888,8 +4863,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"프로젝트를 승인하면 모든 하위 프로젝트에 지정된 역할이 승인됩니다");
 		m.put("When authorize a user, the user will also be authorized with the role for all child projects", 
 			"사용자를 승인하면 해당 사용자는 모든 하위 프로젝트에 대해 역할이 승인됩니다");
-		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
-			"사용자가 Git 커밋의 작성자/커미터인지 확인할 때 여기에 나열된 모든 이메일이 확인됩니다");
 		m.put("When evaluating this template, below variables will be available:", "이 템플릿을 평가할 때 아래 변수가 사용 가능합니다:");
 		m.put("When forking from the UI, the default target project will be created as\n&lt;default fork root&gt;/&lt;account name&gt;/&lt;project name&gt; if specified\n(users forking need permission to create child projects under the fork\nroot), or &lt;account name&gt;/&lt;project name&gt; otherwise (need permission\nto create root projects)", 
 			"UI에서 포크할 때, 기본 대상 프로젝트는\n&lt;기본 포크 루트&gt;/&lt;계정 이름&gt;/&lt;프로젝트 이름&gt;으로 생성됩니다.\n(포크하는 사용자는 포크 루트 아래에서 하위 프로젝트를 생성할 권한이 필요합니다),\n또는 &lt;계정 이름&gt;/&lt;프로젝트 이름&gt;으로 생성됩니다 (루트 프로젝트를 생성할 권한이 필요합니다).");
@@ -5029,9 +5002,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Workspaces at this tag", "이 태그의 워크스페이스");
 		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
 			"이 프로비저너로 생성된 워크스페이스는 OneDev 프로세스와 동일한 권한을 가집니다.\n'**', '*' 또는 '?'를 사용하여 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매치</a>를 수행하세요.\n여러 프로젝트는 공백으로 구분해야 합니다.<br>\n<b class='text-danger'>경고</b>: 이 프로비저너로 생성된 워크스페이스는 OneDev 프로세스와 동일한 권한을 가집니다.\n이 프로비저너를 사용할 수 있는 프로젝트가 신뢰할 수 있는 프로젝트인지 확인하세요.");
-		m.put("Workspaces on source branch", "소스 브랜치의 작업공간");
 		m.put("Workspaces on this branch", "이 브랜치의 워크스페이스들");
-		m.put("Workspaces on this issue", "이 이슈의 작업공간");
 		m.put("Write", "쓰기");
 		m.put("YAML", "YAML");
 		m.put("Yes", "예");
@@ -5305,11 +5276,21 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{0}m", "{0}분");
 		m.put("{0}s", "{0}초");
 		m.put("{0}w", "{0}주");
-		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
-		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
-		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("New", "새로운");
-		m.put("Old", "오래된");
+		m.put("Anywhere", "어디서나");
+		m.put("Compare and set", "비교 및 설정");
+		m.put("Exact", "정확히");
+		m.put("Increment", "증가");
+		m.put("Max", "최대값");
+		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
+			"풀 리퀘스트를 표시할 프로젝트를 선택적으로 지정하세요. 모든 접근 가능한 프로젝트의 풀 리퀘스트를 표시하려면 비워 두세요");
+		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
+			"충돌을 해결하려면 <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">이 지침</a>을 따르세요");
+		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
+			"리비전 색인 작업 진행 중... (색인이 완료되면 심볼 탐색 및 리비전 내 컨텍스트가 사용 가능해집니다)");
+		m.put("Specify timeout in seconds. It counts from the time when job starts running", "초 단위로 타임아웃을 지정하세요. 작업이 실행되기 시작한 시점부터 계산됩니다");
+		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
+		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
+		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
 	}
 		
 	@Override

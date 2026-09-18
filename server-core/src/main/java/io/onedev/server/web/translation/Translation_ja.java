@@ -54,8 +54,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">ユーザー</a>のパスワードをリセットするため");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to verify email for", 
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">ユーザー</a>のメールを確認するため");
-		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
-			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub フレーバードマークダウン</a>が使用可能で、<a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid と katex のサポート</a>があります。");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub風マークダウン</a>が使用可能で、<a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml、katexのサポート</a>があります。");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
@@ -210,7 +208,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add Issues to Iteration", "イテレーションに問題を追加");
 		m.put("Add New", "新規追加");
 		m.put("Add New Board", "新しいボードを追加");
-		m.put("Add New Email Address", "新しいメールアドレスを追加");
 		m.put("Add New Timesheet", "新しいタイムシートを追加");
 		m.put("Add Provisioner", "プロビジョナーを追加");
 		m.put("Add Rule", "ルールを追加");
@@ -281,7 +278,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Added to group", "グループに追加されました");
 		m.put("Additional Job Privileges", "追加のジョブ特権");
 		m.put("Additional Privileges", "追加の特権");
-		m.put("Additions", "追加");
 		m.put("Administration", "管理");
 		m.put("Administrative permission over a project", "プロジェクトに対する管理権限");
 		m.put("Advanced Search", "高度な検索");
@@ -549,7 +545,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Branding", "ブランディング");
 		m.put("Branding settings updated", "ブランディング設定が更新されました");
 		m.put("Browse Code", "コードを閲覧");
-		m.put("Browse code", "コードを閲覧");
 		m.put("Bug Report", "バグ報告");
 		m.put("Build", "ビルド");
 		m.put("Build #{0} already finished", "ビルド#{0}はすでに終了しています");
@@ -950,7 +945,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy Selected Issues To...", "選択された課題を...にコピー");
 		m.put("Copy as Markdown", "Markdownとしてコピー");
 		m.put("Copy dashboard", "ダッシュボードをコピー");
-		m.put("Copy issue number and title", "課題番号とタイトルをコピー");
 		m.put("Copy permanent link", "永久リンクをコピー");
 		m.put("Copy public key", "公開鍵をコピー");
 		m.put("Copy selected text to clipboard", "選択されたテキストをクリップボードにコピー");
@@ -1162,7 +1156,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Deleted source branch", "ソースブランチを削除済み");
 		m.put("Deletion not allowed due to branch protection rule", "ブランチ保護ルールにより削除は許可されていません");
 		m.put("Deletion not allowed due to tag protection rule", "タグ保護ルールにより削除は許可されていません");
-		m.put("Deletions", "削除");
 		m.put("Denied", "拒否");
 		m.put("Dependencies & Services", "依存関係とサービス");
 		m.put("Dependency Management", "依存関係管理");
@@ -1410,7 +1403,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enter New Password", "新しいパスワードを入力");
 		m.put("Enter description here", "ここに説明を入力してください");
 		m.put("Enter your details to create your account", "アカウントを作成するために詳細を入力してください");
-		m.put("Enter your details to login to your account", "アカウントにログインするための詳細を入力してください");
 		m.put("Enter your user name or email to reset password", "パスワードをリセットするには、ユーザー名またはメールを入力してください");
 		m.put("Entitle to All Users and Projects", "すべてのユーザーとプロジェクトに権限を付与");
 		m.put("Entitled Groups", "権限を持つグループ");
@@ -1666,7 +1658,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Generic LDAP", "汎用LDAP");
 		m.put("Get", "取得");
 		m.put("Get Groups Using Attribute", "属性を使用してグループを取得");
-		m.put("Git", "Git");
 		m.put("Git Command Line", "Gitコマンドライン");
 		m.put("Git Credential", "Git資格情報");
 		m.put("Git LFS Storage", "Git LFSストレージ");
@@ -1675,8 +1666,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Git Pack Config", "Gitパック設定");
 		m.put("Git Path", "Gitパス");
 		m.put("Git command failed with exit code", "Gitコマンドが終了コードで失敗しました");
-		m.put("Git email address will be used as git author/committer for commits created on web UI", 
-			"Gitのメールアドレスは、Web UIで作成されたコミットのGit作成者/コミッターとして使用されます");
 		m.put("Git pack config updated", "Gitパック設定が更新されました");
 		m.put("GitHub", "GitHub");
 		m.put("GitHub API URL", "GitHub API URL");
@@ -2139,7 +2128,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Line", "行");
 		m.put("Line: ", "行:");
 		m.put("Lines", "行数");
-		m.put("Link", "リンク");
 		m.put("Link / upload", "リンク / アップロード");
 		m.put("Link Existing User", "既存ユーザーをリンク");
 		m.put("Link Spec", "リンク仕様");
@@ -2362,6 +2350,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Network Options", "ネットワークオプション");
 		m.put("Never", "決して");
 		m.put("Never expire", "期限切れなし");
+		m.put("New", "新規");
 		m.put("New Board", "新しいボード");
 		m.put("New Invitation Bean", "新しい招待Bean");
 		m.put("New Issue", "新しい課題");
@@ -2560,6 +2549,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("OS/ARCH", "OS/ARCH");
 		m.put("Offline", "オフライン");
 		m.put("Ok", "OK");
+		m.put("Old", "旧");
 		m.put("Old Name", "旧名称");
 		m.put("Old Password", "旧パスワード");
 		m.put("On", "オン");
@@ -2837,7 +2827,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、ジョブエグゼキューターで定義されたものを上書きするためのレジストリログインを指定してください。組み込みレジストリの場合、レジストリURLには<code>@server_url@</code>、ユーザー名には<code>@job_token@</code>、パスワードシークレットにはアクセストークンシークレットを使用してください。");
 		m.put("Optionally specify registry logins to override those defined in workspace provisioner.\nFor built-in registry, use <code>@server_url@</code> for registry url,\n<code>@workspace_token@</code> for user name, and access token for password\n", 
 			"ワークスペースプロビジョナーで定義されたものを上書きするためのレジストリログインをオプションで指定します。\n組み込みレジストリの場合、レジストリURLには<code>@server_url@</code>を、\nユーザー名には<code>@workspace_token@</code>を、パスワードにはアクセストークンを使用します\n");
-		m.put("Optionally specify relative directory to put uploaded files", "オプションで、アップロードされたファイルを配置する相対ディレクトリを指定してください。");
 		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to clone code into. Leave empty to use job working directory itself", 
 			"オプションで、コードをクローンするための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to scan. Leave empty to use job working directory itself", 
@@ -3028,7 +3017,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"あいまい検索を実行中です。検索テキストを'~'で囲むことで条件を追加できます。例: ~検索するテキスト~ および 未解決");
 		m.put("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)", 
 			"あいまい検索を実行中です。検索テキストを'~'で囲むことで条件を追加できます。例: ~検索するテキスト~ 著者(robin)");
-		m.put("Permanent link", "永久リンク");
 		m.put("Permanent link of this selection", "この選択の永久リンク");
 		m.put("Permission denied", "権限が拒否されました");
 		m.put("Permission will be checked upon actual operation", "実際の操作時に権限が確認されます");
@@ -3106,7 +3094,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Populate Tag Mappings", "タグマッピングを入力");
 		m.put("Port", "ポート");
 		m.put("Port Accessors", "ポートアクセサー");
-		m.put("Port Mappings", "ポートマッピング");
 		m.put("Possible definitions", "可能な定義");
 		m.put("Post", "投稿");
 		m.put("Post Build Action", "ビルド後のアクション");
@@ -3142,8 +3129,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Primary email address added", "プライマリメールアドレスが追加されました");
 		m.put("Primary email address changed", "プライマリメールアドレスが変更されました");
 		m.put("Primary email address of your account is not specified yet", "アカウントの主メールアドレスはまだ指定されていません");
-		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
-			"主メールアドレスは通知の受信、Gravatarの表示（有効化されている場合）などに使用されます");
 		m.put("Primary or alias email address of above account to be used as sender address of various email notifications. User can also reply to this address to post issue or pull request comments via email if <code>Check Incoming Email</code> option is enabled below", 
 			"上記アカウントの主メールアドレスまたはエイリアスメールアドレスは、各種メール通知の送信元アドレスとして使用されます。<code>Check Incoming Email</code>オプションが有効化されている場合、ユーザーはこのアドレスに返信して問題やプルリクエストのコメントをメールで投稿することもできます");
 		m.put("Principal name of the account to login into office 365 mail server to send/receive emails. Make sure this account <b>owns</b> the registered application indicated by application id above", 
@@ -3210,7 +3195,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Prune Builder Cache", "ビルダーキャッシュの削除");
 		m.put("Prune image cache of docker buildx builder. This step calls docker builder prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
 			"Docker buildxビルダーのイメージキャッシュを削除します。このステップは、サーバーDockerエグゼキューターまたはリモートDockerエグゼキューターで指定されたbuildxビルダーのキャッシュを削除するためにdocker builder pruneコマンドを呼び出します");
-		m.put("Public", "公開");
 		m.put("Public Key", "公開鍵");
 		m.put("Public Roles", "公開の役割");
 		m.put("Publish", "公開");
@@ -3406,7 +3390,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Reopened pull request \"{0}\" ({1})", "プルリクエスト\"{0}\"({1})を再オープンしました");
 		m.put("Replace With", "置き換え");
 		m.put("Replica Count", "レプリカ数");
-		m.put("Replicas", "レプリカ");
 		m.put("Replied to comment on file \"{0}\" in project \"{1}\"", "プロジェクト\"{1}\"のファイル\"{0}\"に対するコメントに返信しました");
 		m.put("Reply", "返信");
 		m.put("Report Name", "レポート名");
@@ -3474,8 +3457,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Reviewers", "レビュアー");
 		m.put("Revision", "リビジョン");
 		m.put("Revision indexing in progress...", "リビジョンのインデックス作成中...");
-		m.put("Revision indexing in progress... (symbol navigation in revisions will be accurate after indexed)", 
-			"リビジョンのインデックス作成中...(リビジョン内のシンボルナビゲーションはインデックス作成後に正確になります)");
 		m.put("Right", "右");
 		m.put("Role", "役割");
 		m.put("Role \"{0}\" deleted", "役割\"{0}\"が削除されました");
@@ -3759,7 +3740,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Smtp Ssl Setting", "Smtp SSL設定");
 		m.put("Smtp With Ssl", "Smtp SSL使用");
 		m.put("Some builds are {0}", "一部のビルドは{0}です");
-		m.put("Some jobs are hidden due to permission policy", "許可ポリシーにより一部のジョブが非表示になっています");
 		m.put("Some local changes would be overwritten by merge", "マージによっていくつかのローカル変更が上書きされます");
 		m.put("Some one changed the content you are editing. Reload the page and try again.", "編集している内容が誰かによって変更されました。ページをリロードして再試行してください。");
 		m.put("Some other pull requests are opening to this branch", "このブランチに対して他のプルリクエストが開かれています");
@@ -4172,7 +4152,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"グループメンバーシップ情報を取得する戦略を指定してください。LDAPグループに適切な権限を付与するには、同じ名前のOneDevグループを定義する必要があります。グループメンバーシップをOneDev側で管理したい場合は、<tt>グループを取得しない</tt>戦略を使用してください。");
 		m.put("Specify timeout in seconds when communicating with mail server", "メールサーバーと通信する際のタイムアウトを秒単位で指定してください。");
-		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "ジョブが送信されてからのタイムアウトを秒単位で指定してください。");
 		m.put("Specify title of the issue", "問題のタイトルを指定してください。");
 		m.put("Specify uid:gid to run container as", "コンテナを実行するためのuid:gidを指定してください");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack APIのURLを指定してください。例: <tt>http://localhost:8080/api</tt>");
@@ -4555,8 +4534,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"重複を避けるため、ここに表示される推定/残り時間には\"{0}\"から集計されたものは含まれていません");
 		m.put("To avoid duplication, spent time showing here does not include those aggregated from \"{0}\"", 
 			"重複を避けるため、ここに表示される費やした時間には\"{0}\"から集計されたものは含まれていません");
-		m.put("To scroll in this terminal, press ctrl+b then [, and use arrow keys or page up/down. Press q to exit.", 
-			"このターミナルでスクロールするには、ctrl+bを押してから[を押し、矢印キーまたはページアップ/ダウンを使用してください。終了するにはqを押してください。");
 		m.put("To scroll in this terminal, press ctrl+b then [. Use the mouse wheel, page up/down, or arrow keys, and press q to exit.", 
 			"このターミナルでスクロールするには、ctrl+bを押してから[を押します。マウスホイール、ページアップ/ダウン、または矢印キーを使用し、終了するにはqを押します。");
 		m.put("To scroll in this terminal, tap tmux [, use page up/down, or arrow keys, and tap tmux [ again to exit.", 
@@ -4567,7 +4544,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Toggle change history", "変更履歴を切り替える");
 		m.put("Toggle comments", "コメントを切り替える");
 		m.put("Toggle commits", "コミットを切り替える");
-		m.put("Toggle dark mode", "ダークモードを切り替える");
 		m.put("Toggle detail message", "詳細メッセージを切り替える");
 		m.put("Toggle fixed width font", "固定幅フォントを切り替える");
 		m.put("Toggle full screen", "全画面表示を切り替える");
@@ -4730,7 +4706,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unsupported ssh signature algorithm: ", "サポートされていないssh署名アルゴリズム:");
 		m.put("Unsupported ssh signature version: ", "サポートされていないssh署名バージョン:");
 		m.put("Unverified", "未確認");
-		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未確認のメールアドレスは上記の機能には<b>適用されません</b>");
 		m.put("Unviewed code comment activity", "未閲覧のコードコメントアクティビティ");
 		m.put("Unvote", "投票を取り消す");
 		m.put("Unwatched. Click to watch", "ウォッチ解除。クリックしてウォッチ");
@@ -4888,8 +4863,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"プロジェクトを承認すると、すべての子プロジェクトが割り当てられた役割で承認されます");
 		m.put("When authorize a user, the user will also be authorized with the role for all child projects", 
 			"ユーザーを承認すると、そのユーザーはすべての子プロジェクトに対して役割で承認されます");
-		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
-			"ユーザーがGitコミットの著者/コミッターであるかを判断する際、ここにリストされたすべてのメールが確認されます");
 		m.put("When evaluating this template, below variables will be available:", "このテンプレートを評価する際、以下の変数が利用可能です:");
 		m.put("When forking from the UI, the default target project will be created as\n&lt;default fork root&gt;/&lt;account name&gt;/&lt;project name&gt; if specified\n(users forking need permission to create child projects under the fork\nroot), or &lt;account name&gt;/&lt;project name&gt; otherwise (need permission\nto create root projects)", 
 			"UIからフォークする場合、デフォルトターゲットプロジェクトは\n&lt;デフォルトフォークルート&gt;/&lt;アカウント名&gt;/&lt;プロジェクト名&gt;として作成されます（指定されている場合）\n（フォークするユーザーはフォークルート下で子プロジェクトを作成する権限が必要）、または&lt;アカウント名&gt;/&lt;プロジェクト名&gt;（ルートプロジェクトを作成する権限が必要）として作成されます");
@@ -5029,9 +5002,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Workspaces at this tag", "このタグでのワークスペース");
 		m.put("Workspaces created by this provisioner have same privilege as OneDev process.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple projects should be separated by space.<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process.\nPlease make sure that only trusted projects can use this provisioner", 
 			"このプロビジョナーによって作成されたワークスペースは、OneDevプロセスと同じ権限を持ちます。\n'**'、'*'、または'?'を<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>に使用してください。\n複数のプロジェクトはスペースで区切る必要があります。<br>\n<b class='text-danger'>警告</b>: このプロビジョナーによって作成されたワークスペースは、OneDevプロセスと同じ権限を持ちます。\nこのプロビジョナーを使用できるのは信頼できるプロジェクトのみであることを確認してください。");
-		m.put("Workspaces on source branch", "ソースブランチ上のワークスペース");
 		m.put("Workspaces on this branch", "このブランチのワークスペース");
-		m.put("Workspaces on this issue", "この課題上のワークスペース");
 		m.put("Write", "書き込み");
 		m.put("YAML", "YAML");
 		m.put("Yes", "はい");
@@ -5305,11 +5276,21 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{0}m", "{0}分");
 		m.put("{0}s", "{0}秒");
 		m.put("{0}w", "{0}週");
-		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
-		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
-		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("New", "新規");
-		m.put("Old", "旧");
+		m.put("Anywhere", "どこでも");
+		m.put("Compare and set", "比較して設定");
+		m.put("Exact", "正確");
+		m.put("Increment", "インクリメント");
+		m.put("Max", "最大");
+		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
+			"プルリクエストを表示するプロジェクトを任意で指定してください。空欄の場合、アクセス可能なすべてのプロジェクトのプルリクエストが表示されます");
+		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
+			"競合を解決するには、<a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">この指示</a>に従ってください");
+		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
+			"リビジョンのインデックス作成中...（インデックス作成後にシンボルナビゲーションとリビジョン内のコンテキストが利用可能になります）");
+		m.put("Specify timeout in seconds. It counts from the time when job starts running", "タイムアウトを秒単位で指定してください。ジョブが実行を開始した時点からカウントされます");
+		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
+		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
+		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
 	}
 		
 	@Override
