@@ -39,7 +39,7 @@ test('restores a private issue comment fragment after login', async ({ page, api
   expect(await page.evaluate(key => sessionStorage.getItem(key), storageKey)).toBe(target.hash);
 
   // Submit the intercepted login form without navigating away from it.
-  await page.getByPlaceholder('Login name or email address', { exact: true }).fill(admin.name);
+  await page.getByRole('textbox', { name: 'Login name or email address' }).fill(admin.name);
   await page.locator('form input[type="password"]').fill(admin.password);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page).toHaveURL(target.href);
@@ -89,7 +89,7 @@ for (const existingSession of [false, true]) {
 
         await page.goto(target);
         await expect(page).toHaveURL(/\/~login(?:[;?#]|$)/);
-        const userName = page.getByPlaceholder('Login name or email address', { exact: true });
+        const userName = page.getByRole('textbox', { name: 'Login name or email address' });
         const password = page.locator('form input[type="password"]');
         const signIn = page.getByRole('button', { name: 'Sign in', exact: true });
         await expect(signIn).toBeVisible();
@@ -158,7 +158,7 @@ test('replacing the login session closes old WebSockets and rejects the old cook
     expect(replacementCookie?.value).toBeTruthy();
     expect(replacementCookie.value).not.toBe(originalCookie.value);
 
-    await loginTab.getByPlaceholder('Login name or email address', { exact: true }).fill(admin.name);
+    await loginTab.getByRole('textbox', { name: 'Login name or email address' }).fill(admin.name);
     await loginTab.locator('form input[type="password"]').fill(admin.password);
     await loginTab.getByRole('button', { name: 'Sign in', exact: true }).click();
     await expect(loginTab.getByRole('button', { name: 'Save Settings', exact: true })).toBeVisible();
