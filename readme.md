@@ -125,6 +125,14 @@ CI/CD jobs.
 
 ![package registry](./doc/images/package-registry.png)
 
+## 📖 Wiki for versioned project documentation
+
+Keep Markdown documentation alongside your code. Edit pages in the browser or with Git,
+review changes in pull requests, and browse the wiki for any branch or release tag.
+[**Tutorial**](https://docs.onedev.io/tutorials/wiki/working-with-wiki)
+
+![project wiki](./doc/images/wiki.jpg)
+
 ## 🧩 Deep integration and information cross-reference
 
 Transit issue state via commit, CI/CD, or pull request.
