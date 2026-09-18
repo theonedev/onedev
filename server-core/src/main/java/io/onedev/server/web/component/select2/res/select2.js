@@ -3744,8 +3744,14 @@ S2.define('select2/data/ajax',[
   };
 
   AjaxAdapter.prototype.query = function (params, callback) {
-    var matches = [];
     var self = this;
+    var queryId = this._queryId = (this._queryId || 0) + 1;
+
+    // Reopening runs an immediate query, which must also cancel any delayed search.
+    if (this._queryTimeout) {
+      window.clearTimeout(this._queryTimeout);
+      this._queryTimeout = null;
+    }
 
     if (this._request != null) {
       // JSONP requests cannot always be aborted
@@ -3770,6 +3776,10 @@ S2.define('select2/data/ajax',[
 
     function request () {
       var $request = options.transport(options, function (data) {
+        if (queryId !== self._queryId) {
+          return;
+        }
+
         var results = self.processResults(data, params);
 
         if (results && results.results && Array.isArray(results.results)) {
@@ -3788,10 +3798,9 @@ S2.define('select2/data/ajax',[
 
         callback(results);
       }, function () {
-        // Attempt to detect if a request was aborted
-        // Only works if the transport exposes a status property
-        if ($request && 'status' in $request &&
-            ($request.status === 0 || $request.status === '0')) {
+        // Only ignore superseded requests. Status 0 can also mean a failed
+        // connection, which must replace the searching message with an error.
+        if (queryId !== self._queryId) {
           return;
         }
 
@@ -3800,14 +3809,12 @@ S2.define('select2/data/ajax',[
         });
       });
 
-      self._request = $request;
+      if (queryId === self._queryId) {
+        self._request = $request;
+      }
     }
 
     if (this.ajaxOptions.delay && params.term != null) {
-      if (this._queryTimeout) {
-        window.clearTimeout(this._queryTimeout);
-      }
-
       this._queryTimeout = window.setTimeout(request, this.ajaxOptions.delay);
     } else {
       request();

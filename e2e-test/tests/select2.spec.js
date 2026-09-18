@@ -169,6 +169,73 @@ test('dropdown search keeps focus inside a Bootstrap modal and is cleaned up on 
   });
 });
 
+test('reopening cancels a search still waiting for the debounce delay', async ({ page }) => {
+  await page.evaluate(() => {
+    window.queries = [];
+    onedev.server.select2.init($('#single'), {
+      ajax: {
+        delay: 100,
+        transport: (params, success) => {
+          window.queries.push(params.data.term || '');
+          const timer = setTimeout(() => success({
+            results: [{ id: '1', text: params.data.term || 'All choices' }],
+          }), 0);
+          return { abort: () => clearTimeout(timer) };
+        },
+      },
+    }, []);
+    $('#single').select2('open');
+    $('.select2-search__field').val('Old search').trigger('input');
+    $('#single').select2('close').select2('open');
+  });
+  // Allow an incorrectly retained debounce timer to fire before checking.
+  await page.waitForTimeout(250);
+  await expect(page.getByRole('option')).toHaveText('All choices');
+  expect(await page.evaluate(() => window.queries)).toEqual(['', '']);
+});
+
+test('reopening ignores late callbacks from an earlier request', async ({ page }) => {
+  await page.evaluate(() => {
+    window.requests = [];
+    onedev.server.select2.init($('#single'), {
+      ajax: {
+        transport: (params, success, failure) => {
+          window.requests.push({ success, failure });
+          // Some transports cannot stop a response already being delivered.
+          return { abort() {} };
+        },
+      },
+    }, []);
+  });
+  const selection = page.locator('#single + .select2 .select2-selection');
+  await selection.click();
+  await selection.click();
+  await selection.click();
+  await page.evaluate(() => {
+    window.requests[0].success({ results: [{ id: 'old', text: 'Old result' }] });
+    window.requests[0].failure();
+  });
+  await expect(page.locator('.loading-results')).toHaveCount(1);
+  await expect(page.getByText('Old result', { exact: true })).toHaveCount(0);
+  await page.evaluate(() => {
+    window.requests[1].success({ results: [{ id: 'new', text: 'New result' }] });
+  });
+  await expect(page.getByRole('option')).toHaveText('New result');
+  await expect(page.locator('.loading-results')).toHaveCount(0);
+});
+
+test('a failed connection clears the searching message', async ({ page }) => {
+  await page.route('**/select2-choices*', route => route.abort('failed'));
+  await page.evaluate(() => {
+    onedev.server.select2.init($('#single'), {
+      ajax: { url: '/select2-choices' },
+    }, []);
+  });
+  await page.locator('#single + .select2 .select2-selection').click();
+  await expect(page.locator('.select2-results__message')).toHaveText('The results could not be loaded.');
+  await expect(page.locator('.loading-results')).toHaveCount(0);
+});
+
 const label = 'First <b>name & value</b>';
 const escapedLabel = 'First &lt;b&gt;name &amp; value&lt;/b&gt;';
 const description = '<em>Description & details</em>';
