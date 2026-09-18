@@ -49,6 +49,7 @@
 	<logger name="org.eclipse.jgit.util.FS" level="ERROR"/>
 	<logger name="com.hazelcast" level="ERROR"/>
 	<logger name="org.eclipse.jetty.io.AbstractConnection" level="ERROR"/>
+	<logger name="io.onedev.server.persistence.HazelcastLocalCacheRegionFactory" level="WARN"/>
 	<logger name="io.onedev" level="INFO"/>	
 	
 	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />

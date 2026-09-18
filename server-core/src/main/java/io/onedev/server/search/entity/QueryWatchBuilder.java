@@ -2,6 +2,7 @@ package io.onedev.server.search.entity;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,23 +28,21 @@ public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 
 	public QueryWatchBuilder() {
 		for (QueryPersonalization<?> personalization: getQueryPersonalizations()) {
-			for (Map.Entry<String, Boolean> entry: personalization.getQueryWatchSupport().getQueryWatches().entrySet()) {
-				String globalName = NamedQuery.getCommonName(entry.getKey());
-				if (globalName != null) {
-					// Skip common query watch if a personal query with same name exists
-					if (NamedQuery.find(personalization.getQueries(), globalName) == null) {
-						if (matches(NamedQuery.find(getNamedQueries(), globalName), personalization.getUser())) {
-							watches.putIfAbsent(personalization.getUser(), entry.getValue());
-							break;
-						}
-					}
-				}
-				String personalName = NamedQuery.getPersonalName(entry.getKey());
-				if (personalName != null) {
-					if (matches(NamedQuery.find(personalization.getQueries(), personalName), personalization.getUser())) {
-						watches.putIfAbsent(personalization.getUser(), entry.getValue());
-						break;
-					}
+			// Match the displayed order: personal queries, then unshadowed common queries.
+			// The watch map's insertion order only records when watches were enabled.
+			Map<String, NamedQuery> orderedQueries = new LinkedHashMap<>();
+			for (var query: personalization.getQueries())
+				orderedQueries.put(NamedQuery.PERSONAL_NAME_PREFIX + query.getName(), query);
+			for (var query: getNamedQueries()) {
+				if (NamedQuery.find(personalization.getQueries(), query.getName()) == null)
+					orderedQueries.put(NamedQuery.COMMON_NAME_PREFIX + query.getName(), query);
+			}
+			var queryWatches = personalization.getQueryWatchSupport().getQueryWatches();
+			for (var entry: orderedQueries.entrySet()) {
+				var watching = queryWatches.get(entry.getKey());
+				if (watching != null && matches(entry.getValue(), personalization.getUser())) {
+					watches.putIfAbsent(personalization.getUser(), watching);
+					break;
 				}
 			}
 		}

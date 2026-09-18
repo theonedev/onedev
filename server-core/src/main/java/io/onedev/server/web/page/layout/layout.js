@@ -162,8 +162,8 @@ onedev.server.layout = {
 	},
 	onNewVersionStatusIconLoaded: function(newVersionStatusCallback) {
 		var $newVersionStatusIcon = $(".new-version-status>img");
-		var width = $newVersionStatusIcon[0].width;
-		var height = $newVersionStatusIcon[0].height;
+		var width = $newVersionStatusIcon[0].naturalWidth;
+		var height = $newVersionStatusIcon[0].naturalHeight;
 
 		var newVersionStatus;
 		if (width == 16 && height == 16)
@@ -175,9 +175,8 @@ onedev.server.layout = {
 		else
 			newVersionStatus = "none";
 
-		if (newVersionStatus == "none") {
-			$newVersionStatusIcon.parent().hide();
-		} else {
+		$newVersionStatusIcon.parent().toggleClass("d-md-inline", newVersionStatus != "none");
+		if (newVersionStatus != "none") {
 			$newVersionStatusIcon.css({
 				width: "16px",
 				height: "16px"

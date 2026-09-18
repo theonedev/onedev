@@ -14,7 +14,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
+import io.onedev.server.web.component.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -70,21 +70,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 	}
 	
 	private Component checkStates(String markupId) {
-		return new AjaxLazyLoadPanel<Component>(markupId) {
-
-			@Override
-			protected void initTimer() {
-                if (getPage().getBehaviors(AjaxLazyLoadTimer.class).isEmpty()) {
-                    getPage().add(new AjaxLazyLoadTimer() {
-                        @Override
-                        protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-                            super.updateAjaxAttributes(attributes);
-                            attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
-                        }
-                    });
-                }
-                super.initTimer();
-            }
+		return new ReconcileLazyLoadPanel(markupId) {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
@@ -169,21 +155,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 	}
 
 	private Component checkFields(String markupId) {
-		return new AjaxLazyLoadPanel<Component>(markupId) {
-
-			@Override
-			protected void initTimer() {
-                if (getPage().getBehaviors(AjaxLazyLoadTimer.class).isEmpty()) {
-                    getPage().add(new AjaxLazyLoadTimer() {
-                        @Override
-                        protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-                            super.updateAjaxAttributes(attributes);
-                            attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
-                        }
-                    });
-                }
-                super.initTimer();
-            }
+		return new ReconcileLazyLoadPanel(markupId) {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
@@ -266,21 +238,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 	}
 	
 	private Component checkFieldValues(String markupId) {
-		return new AjaxLazyLoadPanel<Component>(markupId) {
-
-			@Override
-			protected void initTimer() {
-                if (getPage().getBehaviors(AjaxLazyLoadTimer.class).isEmpty()) {
-                    getPage().add(new AjaxLazyLoadTimer() {
-                        @Override
-                        protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-                            super.updateAjaxAttributes(attributes);
-                            attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
-                        }
-                    });
-                }
-                super.initTimer();
-            }
+		return new ReconcileLazyLoadPanel(markupId) {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
@@ -432,6 +390,19 @@ public abstract class WorkflowReconcilePanel extends Panel {
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 	
+	private abstract static class ReconcileLazyLoadPanel extends AjaxLazyLoadPanel {
+
+		private ReconcileLazyLoadPanel(String id) {
+			super(id);
+		}
+
+		@Override
+		protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+			super.updateAjaxAttributes(attributes);
+			attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
+		}
+	}
+
 	static class UndefinedFieldValueContainer extends WebMarkupContainer {
 		
 		final String fieldName;

@@ -6,7 +6,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
-import io.onedev.server.web.behavior.InputChangeBehavior;
+import io.onedev.server.web.behavior.InputBehavior;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.job.RunJobLink;
 import org.apache.wicket.Component;
@@ -127,10 +127,10 @@ public abstract class JobRunSelector extends Panel {
 
 		searchField = new TextField<>("search", Model.of(""));
 		add(searchField);
-		searchField.add(new InputChangeBehavior() {
+		searchField.add(new InputBehavior() {
 
 			@Override
-			protected void onInputChange(AjaxRequestTarget target) {
+			protected void onInput(AjaxRequestTarget target) {
 				searchInput = searchField.getInput();
 
 				target.add(jobsContainer);

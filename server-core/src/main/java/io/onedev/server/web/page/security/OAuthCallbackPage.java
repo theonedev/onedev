@@ -50,13 +50,10 @@ public class OAuthCallbackPage extends SimplePage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		if (code != null) {
-			String script = String.format("window.open('', '%s').callback();", 
-					JavaScriptEscape.escapeJavaScript(state));
-			response.render(OnDomReadyHeaderItem.forScript(script));
-		} else {
-			response.render(OnDomReadyHeaderItem.forScript("window.close();"));
-		}
+		String script = String.format("var channel = new BroadcastChannel('onedev-refresh-token-%s');"
+				+ "channel.postMessage(%s);channel.close();window.close();",
+				JavaScriptEscape.escapeJavaScript(state), code != null);
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	
 }

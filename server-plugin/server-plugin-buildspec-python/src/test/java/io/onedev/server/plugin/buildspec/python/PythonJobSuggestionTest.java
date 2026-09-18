@@ -12,10 +12,47 @@ import org.junit.jupiter.api.Test;
 
 import org.jspecify.annotations.Nullable;
 import java.io.IOException;
+import java.nio.file.Files;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PythonJobSuggestionTest {
+
+	@Test
+	public void testPoetryProjectVersionAndFailedTestCoverage() throws Exception {
+		Project project = new Project() {
+			@Override
+			public Blob getBlob(BlobIdent blobIdent, boolean mustExist) {
+				if (blobIdent.path.equals("poetry.lock"))
+					return new Blob(blobIdent, ObjectId.zeroId(), "pytest".getBytes());
+				if (blobIdent.path.equals("pyproject.toml"))
+					return new Blob(blobIdent, ObjectId.zeroId(), "[project]\nversion = '2.5.0'\n".getBytes());
+				return null;
+			}
+		};
+		var job = new PythonJobSuggestion().suggestJobs(project, ObjectId.zeroId()).iterator().next();
+		assertTrue(job.getSteps().stream().filter(CommandStep.class::isInstance)
+				.map(CommandStep.class::cast).anyMatch(step -> step.getInterpreter().getCommands()
+						.contains("yq '.project.version'")));
+		var commands = getBuildAndTestStep(job).getInterpreter().getCommands();
+		var reportCommands = commands.substring(commands.indexOf("test_status=0"));
+		for (int testStatus : new int[] {0, 7}) {
+			var directory = Files.createTempDirectory("python-report-test");
+			try {
+				var script = "set -e\npoetry() { shift; \"$@\"; }\n"
+						+ "pytest() { return " + testStatus + "; }\n"
+						+ "coverage() { test \"$1\" = xml; printf coverage > coverage.xml; }\n"
+						+ reportCommands;
+				var process = new ProcessBuilder("sh", "-c", script).directory(directory.toFile()).start();
+				assertEquals(testStatus, process.waitFor());
+				assertEquals("coverage", Files.readString(directory.resolve("coverage.xml")));
+			} finally {
+				Files.deleteIfExists(directory.resolve("coverage.xml"));
+				Files.delete(directory);
+			}
+		}
+	}
 
 	@Test
 	public void testPoetryLock() {

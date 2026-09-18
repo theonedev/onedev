@@ -292,7 +292,7 @@ public class ProjectWikiPage extends ProjectPage {
 		navigation.setOutputMarkupId(true);
 		view.add(navigation);
 		String sidebar = read("_Sidebar");
-		navigation.add(viewer("sidebar", sidebar).setVisible(sidebar != null).setOutputMarkupPlaceholderTag(true));
+		navigation.add(sidebarViewer(sidebar));
 		navigation.add(new Label("currentOutline", new LoadableDetachableModel<String>() {
 			@Override
 			protected String load() {
@@ -673,8 +673,7 @@ public class ProjectWikiPage extends ProjectPage {
 		navigation.get("currentOutline").setVisible(sidebar == null);
 		navigation.addOrReplace(newSidebarEdit());
 		navigation.addOrReplace(newUseDefault(sidebar));
-		navigation.addOrReplace(viewer("sidebar", sidebar)
-				.setVisible(sidebar != null).setOutputMarkupPlaceholderTag(true));
+		navigation.addOrReplace(sidebarViewer(sidebar));
 		target.add(wiki.get("title"), wiki.get("subtitle"), actions, view.get("body"),
 				navigation.get("sidebar"), navigation.get("currentOutline"), navigation.get("sidebarEdit"), navigation.get("useDefault"));
 		target.appendJavaScript("onedev.server.wiki.onPageChanged('"
@@ -974,11 +973,22 @@ public class ProjectWikiPage extends ProjectPage {
 		return params;
 	}
 
+	private Component sidebarViewer(String markdown) {
+		return viewer("sidebar", markdown, "_Sidebar")
+				.setVisible(markdown != null).setOutputMarkupPlaceholderTag(true);
+	}
+
 	private Component viewer(String id, String markdown) {
+		return viewer(id, markdown, null);
+	}
+
+	private Component viewer(String id, String markdown, String sourcePage) {
 		return new MarkdownViewer(id, Model.of(markdown), null) {
 			@Override
 			protected String renderMarkdown(String markdown) {
-				return ProjectWikiPage.this.render(markdown);
+				return sourcePage != null
+						? ProjectWikiPage.this.render(markdown, WikiUtils.pagePath(folder, sourcePage))
+						: ProjectWikiPage.this.render(markdown);
 			}
 		};
 	}

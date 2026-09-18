@@ -29,7 +29,7 @@ import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.InputChangeBehavior;
+import io.onedev.server.web.behavior.InputBehavior;
 
 public abstract class BranchSelector extends Panel {
 	
@@ -121,10 +121,10 @@ public abstract class BranchSelector extends Panel {
 			
 		};
 		
-		branchField.add(new InputChangeBehavior() {
+		branchField.add(new InputBehavior() {
 			
 			@Override
-			protected void onInputChange(AjaxRequestTarget target) {
+			protected void onInput(AjaxRequestTarget target) {
 				branchInput = branchField.getInput();
 				filteredBranches.clear();
 				if (StringUtils.isNotBlank(branchInput)) {

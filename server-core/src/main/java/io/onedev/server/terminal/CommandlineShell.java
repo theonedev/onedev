@@ -48,6 +48,8 @@ public class CommandlineShell implements Shell {
 		this.onTerminate = onTerminate;
         ptyMode = new PtyMode();
         cmdline.ptyMode(ptyMode);
+        // The browser terminal supports xterm, regardless of how the server was started.
+        cmdline.envs().put("TERM", "xterm-256color");
 
         future = OneDev.getInstance(ExecutorService.class).submit(new Runnable() {
 

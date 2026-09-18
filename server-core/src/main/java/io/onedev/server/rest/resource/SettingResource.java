@@ -9,6 +9,7 @@ import java.util.Map;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -21,6 +22,7 @@ import jakarta.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AuditService;
@@ -53,11 +55,14 @@ public class SettingResource {
 	private final SettingService settingService;
 
 	private final AuditService auditService;
+
+	private final Validator validator;
 	
 	@Inject
-	public SettingResource(SettingService settingService, AuditService auditService) {
+	public SettingResource(SettingService settingService, AuditService auditService, Validator validator) {
 		this.settingService = settingService;
 		this.auditService = auditService;
+		this.validator = validator;
 	}
 
 	@Api(order=100)
@@ -276,9 +281,20 @@ public class SettingResource {
 	@Api(order=2000)
 	@Path("/issue")
 	@POST
-    public Response setIssueSetting(@NotNull @Valid GlobalIssueSetting issueSetting) {
-    	if (!SecurityUtils.isAdministrator()) 
+    public Response setIssueSetting(@NotNull GlobalIssueSetting issueSetting) {
+		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
+		// Validate manually after populating editColumns: this JSON-ignored UI field has a
+		// minimum-size constraint, so @Valid would reject valid boards before entering this method.
+		if (issueSetting.getBoardSpecs() != null) {
+			for (var boardSpec: issueSetting.getBoardSpecs())
+				boardSpec.populateEditColumns();
+		}
+		var violations = validator.validate(issueSetting);
+		if (!violations.isEmpty()) {
+			var violation = violations.iterator().next();
+			throw new ExplicitException(violation.getPropertyPath() + ": " + violation.getMessage());
+		}
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingService.getIssueSetting()).toXML();
     	issueSetting.setReconciled(false);
     	settingService.saveIssueSetting(issueSetting);

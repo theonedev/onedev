@@ -30,7 +30,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
+import io.onedev.server.web.component.AjaxLazyLoadPanel;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -984,21 +984,13 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		
 		container.add(new Label("help", _T(getPullRequest().getMergeStrategy().getDescription())));
 		
-		container.add(new AjaxLazyLoadPanel<Component>("status") {
+		container.add(new AjaxLazyLoadPanel("status") {
 			
 			@Override
-			protected void initTimer() {
-                if (getPage().getBehaviors(AjaxLazyLoadTimer.class).isEmpty()) {
-                    getPage().add(new AjaxLazyLoadTimer() {
-                        @Override
-                        protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-                            super.updateAjaxAttributes(attributes);
-                            attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
-                        }
-                    });
-                }
-                super.initTimer();
-            }
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
+			}
 
 			@Override
 			public Component getLazyLoadComponent(String componentId) {

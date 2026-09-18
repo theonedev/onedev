@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.SessionTrackingMode;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.tika.mime.MimeTypes;
@@ -98,6 +99,8 @@ public class DefaultJettyService implements JettyService, Serializable {
 		server.addBean(sessionDataStoreFactory);
 		
         servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        // The connector permits encoded slashes used by scoped package names and repository paths.
+        servletContextHandler.getServletHandler().setDecodeAmbiguousURIs(true);
         servletContextHandler.setMaxFormContentSize(MAX_CONTENT_SIZE);
 
         servletContextHandler.setClassLoader(OneDev.class.getClassLoader());
@@ -106,7 +109,8 @@ public class DefaultJettyService implements JettyService, Serializable {
         servletContextHandler.setErrorHandler(new ErrorPageErrorHandler());
         servletContextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
-        servletContextHandler.getSessionHandler().setSessionIdPathParameterName(null);
+        // Jetty restores a null session path parameter name at startup; explicitly use cookies only.
+        servletContextHandler.getSessionHandler().setSessionTrackingModes(EnumSet.of(SessionTrackingMode.COOKIE));
         servletContextHandler.getSessionHandler().setSameSite(SameSite.LAX);  
         servletContextHandler.getSessionHandler().setHttpOnly(true);
 		var sessionTimeout = DEFAULT_SESSION_TIMEOUT;

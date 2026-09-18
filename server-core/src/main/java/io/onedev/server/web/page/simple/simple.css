@@ -10,7 +10,7 @@
 	padding: 40px 20px;
 }
 .SimplePage .main {
-	width: 440px;
+	width: 560px;
 	min-width: 0;
 	margin: auto;
 	max-width: 100%;
@@ -47,7 +47,7 @@
 	font-weight: 500;
 	margin-bottom: 8px;
 }
-.SimplePage:not(.force-ordinary-style) .main .form-control {
+.SimplePage:not(.force-ordinary-style) .main .form-control:not(.select2-container) {
 	padding: 12px 14px;
 	height: auto;
 	background: var(--simple-input-background);
@@ -84,7 +84,7 @@
 	border-color: #323248;
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
-.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control {
+.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control:not(.select2-container) {
 	border-color: #474761;
 }
 .SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control:focus {
@@ -182,11 +182,23 @@
 	top: 11px;
 }
 .SimplePage:not(.force-ordinary-style) .main .select2-selection--single {
-	padding: 8px 14px;
-	height: auto;
+	padding: 0;
+	height: calc(1.5em + 26px);
 	background: white;
 	border: 1px solid #cdd5df;
 	border-radius: 8px;
+}
+.SimplePage:not(.force-ordinary-style) .main .select2-selection--single .select2-selection__rendered {
+	padding: 12px 32px 12px 14px;
+	line-height: 1.5;
+}
+.SimplePage:not(.force-ordinary-style) .main .select2-container--open.select2-container--below .select2-selection--single {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+.SimplePage:not(.force-ordinary-style) .main .select2-container--open.select2-container--above .select2-selection--single {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 }
 .SimplePage.dark-mode:not(.force-ordinary-style) .main .select2-selection--single,
 .SimplePage.dark-mode:not(.force-ordinary-style) .select2-dropdown,

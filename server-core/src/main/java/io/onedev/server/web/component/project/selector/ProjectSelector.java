@@ -7,7 +7,7 @@ import io.onedev.server.util.Similarities;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
-import io.onedev.server.web.behavior.InputChangeBehavior;
+import io.onedev.server.web.behavior.InputBehavior;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 import io.onedev.server.web.component.project.ProjectAvatar;
@@ -148,10 +148,10 @@ public abstract class ProjectSelector extends Panel {
 		
 		searchField = new TextField<>("search", Model.of(""));
 		add(searchField);
-		searchField.add(new InputChangeBehavior() {
+		searchField.add(new InputBehavior() {
 			
 			@Override
-			protected void onInputChange(AjaxRequestTarget target) {
+			protected void onInput(AjaxRequestTarget target) {
 				searchInput = searchField.getInput();
 				
 				target.add(projectsContainer);

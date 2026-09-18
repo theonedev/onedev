@@ -19,6 +19,7 @@ import jakarta.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.mime.MimeTypes;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
@@ -92,12 +93,14 @@ public class BuildLogResource extends AbstractResource {
 				} else {
 	    			Client client = ClientBuilder.newClient();
 	    			try {
-	    				CharSequence path = RequestCycle.get().urlFor(
+						var pathAndQuery = Url.parse(RequestCycle.get().urlFor(
 	    						new BuildLogResourceReference(), 
-	    						BuildLogResource.paramsOf(projectId, buildNumber));
-	    				String activeServerUrl = clusterService.getServerUrl(activeServer) + path;
+								BuildLogResource.paramsOf(projectId, buildNumber)));
+						String activeServerUrl = clusterService.getServerUrl(activeServer);
 	    				
-	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
+						WebTarget target = client.target(activeServerUrl).path(pathAndQuery.getPath());
+						for (var entry: pathAndQuery.getQueryParameters())
+							target = target.queryParam(entry.getName(), entry.getValue());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
 	    						KubernetesHelper.BEARER + " " + clusterService.getCredential());

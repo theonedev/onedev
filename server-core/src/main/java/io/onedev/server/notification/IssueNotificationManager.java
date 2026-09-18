@@ -162,7 +162,7 @@ public class IssueNotificationManager implements Serializable {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentBuildCriteria(true);
+				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
 				return IssueQuery.parse(null, queryString, option, true);
 			}
 

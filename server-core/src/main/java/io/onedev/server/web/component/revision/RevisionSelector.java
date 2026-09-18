@@ -10,7 +10,7 @@ import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.behavior.InputChangeBehavior;
+import io.onedev.server.web.behavior.InputBehavior;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.createtag.CreateTagPanel;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
@@ -192,10 +192,10 @@ public abstract class RevisionSelector extends Panel {
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
 		
-		revField.add(new InputChangeBehavior() {
+		revField.add(new InputBehavior() {
 			
 			@Override
-			protected void onInputChange(AjaxRequestTarget target) {
+			protected void onInput(AjaxRequestTarget target) {
 				revInput = revField.getInput();
 				newItemsView(target);
 			}

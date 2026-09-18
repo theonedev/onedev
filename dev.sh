@@ -125,6 +125,7 @@ compile_changed() {
 		done
 	else
 		find . -path '*/src/main/java/*.java' -type f \
+			! -path '*/target/*' \
 			! -path '*/archetype-resources/*' \
 			| while read -r source; do
 			module=${source%%/src/main/java/*}
@@ -175,7 +176,7 @@ copy_changed_resources() {
 	resources="$work_dir/resources"
 	: > "$resources"
 
-	find . -type f ! -path '*/bin/*' \
+	find . -type f ! -path '*/bin/*' ! -path '*/target/*' \
 		! -name '.DS_Store' ! -name '.*.sw?' ! -name '*~' \( \
 		\( -path '*/src/main/java/*' ! -name '*.java' \) -o \
 		-path '*/src/main/resources/*' \

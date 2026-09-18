@@ -88,9 +88,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 			command = prefix + "pytest --cov --junitxml=./pytest-result.xml\n";
 		else
 			command = prefix + "coverage run -m unittest\n";
-		return command + 
+		return "test_status=0\n" + command.stripTrailing() + " || test_status=$?\n" +
 				prefix + "coverage xml\n" +
-				"#" + prefix + "ruff check --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git";
+				"#" + prefix + "ruff check --no-fix --exit-zero --output-format=json --output-file=ruff-result.json --exclude=.git\n" +
+				"exit $test_status";
 	}
 	
 	private String getCoveragePackage(boolean withPytest) {
@@ -212,11 +213,13 @@ public class PythonJobSuggestion implements JobSuggestion {
 
 				var pyproject = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false);
 				var pyprojectToml = pyproject != null ? new Toml().read(pyproject.getText().getContent()) : null;
-				if (pyprojectToml != null && pyprojectToml.getString("tool.poetry.version") != null) {
+				var versionProperty = pyprojectToml != null && pyprojectToml.getString("project.version") != null
+						? "project.version" : "tool.poetry.version";
+				if (pyprojectToml != null && pyprojectToml.getString(versionProperty) != null) {
 					CommandStep detectBuildVersion = new CommandStep();
 					detectBuildVersion.setName("detect build version");
 					detectBuildVersion.setImage("1dev/yq:1.0.0");
-					detectBuildVersion.getInterpreter().setCommands("yq '.tool.poetry.version' pyproject.toml > buildVersion");
+					detectBuildVersion.getInterpreter().setCommands("yq '." + versionProperty + "' pyproject.toml > buildVersion");
 					job.getSteps().add(detectBuildVersion);
 
 					SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();

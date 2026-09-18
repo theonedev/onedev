@@ -42,10 +42,9 @@
 	min-width: 0;
 	gap: 0.5rem;
 }
-.chat>.body>.chat-selector>:first-child {
+.chat>.body>.chat-selector>.select2-container {
 	flex: 1;
 	min-width: 0;
-	overflow: hidden;
 }
 .chat>.body>.send textarea {
 	max-height: 160px;

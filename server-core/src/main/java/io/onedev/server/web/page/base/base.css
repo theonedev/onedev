@@ -947,6 +947,15 @@ span.keycap {
 	color: rgb(127, 196, 255) !important;
 }
 
+.setup-2fa .recovery-code {
+	font-size: 1.25rem;
+}
+@media (max-width: 575.98px) {
+	.setup-2fa .recovery-code {
+		font-size: 0.8rem;
+	}
+}
+
 .warning>.close {
 	font-size: 1.3rem;
 }

@@ -2,6 +2,7 @@ package io.onedev.server.product;
 
 import jakarta.inject.Inject;
 
+import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -28,6 +29,9 @@ public class ProductConfigurator implements ServerConfigurator {
 	@Override
 	public void configure(Server server) {
 		HttpConfiguration configuration = new HttpConfiguration();
+		// Scoped package names and repository paths contain encoded slashes.
+		configuration.setUriCompliance(UriCompliance.DEFAULT.with("ONEDEV",
+				UriCompliance.Violation.AMBIGUOUS_PATH_SEPARATOR));
 		configuration.setRelativeRedirectAllowed(true);
 		configuration.setRequestHeaderSize(REQUEST_HEADER_SIZE);
 		configuration.setSendServerVersion(false);
