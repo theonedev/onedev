@@ -597,12 +597,13 @@ body.markdown-editor-expanded {
 	color: var(--dark-mode-gray) !important;
 }
 
+.markdown-rendered .mermaid,
 .markdown-rendered .plantuml {
 	overflow-x: auto;
 	margin-bottom: 1.2rem;
 }
 .markdown-rendered .plantuml svg {
-	max-width: 100%;
+	max-width: none;
 	height: auto;
 }
 .markdown-rendered .plantuml-error {
