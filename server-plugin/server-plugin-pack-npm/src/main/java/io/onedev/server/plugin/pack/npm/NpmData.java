@@ -1,7 +1,12 @@
 package io.onedev.server.plugin.pack.npm;
 
 import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+
+import org.jspecify.annotations.Nullable;
 
 public class NpmData implements Serializable {
 	
@@ -12,6 +17,9 @@ public class NpmData implements Serializable {
 	private final byte[] metadata;
 	
 	private final Set<String> distTags;
+
+	// Null for packages serialized before tag update dates were recorded.
+	private Map<String, Date> distTagUpdateDates;
 	
 	private final String fileName;
 	
@@ -36,6 +44,24 @@ public class NpmData implements Serializable {
 
 	public Set<String> getDistTags() {
 		return distTags;
+	}
+
+	@Nullable
+	public Date getDistTagUpdateDate(String tag) {
+		return distTagUpdateDates != null ? distTagUpdateDates.get(tag) : null;
+	}
+
+	public void setDistTag(String tag, Date updateDate) {
+		distTags.add(tag);
+		if (distTagUpdateDates == null)
+			distTagUpdateDates = new HashMap<>();
+		distTagUpdateDates.put(tag, updateDate);
+	}
+
+	public void removeDistTag(String tag) {
+		distTags.remove(tag);
+		if (distTagUpdateDates != null)
+			distTagUpdateDates.remove(tag);
 	}
 
 	public String getFileName() {

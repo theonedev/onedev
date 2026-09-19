@@ -7,16 +7,23 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadPack;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Pack;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
@@ -31,6 +38,36 @@ public class NpmPackPanel extends GenericPanel<Pack> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		var tagsModel = new LoadableDetachableModel<List<String>>() {
+			@Override
+			protected List<String> load() {
+				var tags = new ArrayList<>(((NpmData) getPack().getData()).getDistTags());
+				Collections.sort(tags);
+				return tags;
+			}
+		};
+		var distTagsSection = new WebMarkupContainer("distTagsSection") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!((NpmData) getPack().getData()).getDistTags().isEmpty());
+			}
+		};
+		add(distTagsSection);
+		distTagsSection.add(new ListView<String>("distTags", tagsModel) {
+			@Override
+			protected void populateItem(ListItem<String> item) {
+				var tag = item.getModelObject();
+				item.add(new Label("tag", tag));
+				var updateDate = ((NpmData) getPack().getData()).getDistTagUpdateDate(tag);
+				if (updateDate != null) {
+					item.add(new Label("updated", DateUtils.formatAge(updateDate))
+							.add(AttributeModifier.replace("data-tippy-content", DateUtils.formatDateTime(updateDate))));
+				} else {
+					item.add(new Label("updated", _T("Unknown")));
+				}
+			}
+		});
 		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + NpmPackHandler.HANDLER_ID + "/";
 		if (getPack().getName().contains("/")) {
 			var scope = substringBefore(getPack().getName(), "/");

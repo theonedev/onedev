@@ -111,7 +111,7 @@ public class NpmPackHandler implements PackHandler {
 	private String getLockName(Long projectId, String name) {
 		return "update-pack:" + projectId + ":" + TYPE + ":" + name;
 	}
-	
+
 	private ObjectNode readJson(byte[] jsonBytes) {
 		try {
 			return (ObjectNode) objectMapper.readTree(jsonBytes);
@@ -201,8 +201,7 @@ public class NpmPackHandler implements PackHandler {
 										var project = projectService.load(projectId);
 										var pack = packService.findByNameAndVersion(project, TYPE, packageName, version);
 										if (pack != null) {
-											var packData = (NpmData) pack.getData();
-											packData.getDistTags().add(tag);
+											((NpmData) pack.getData()).setDistTag(tag, new Date());
 										} else {
 											throw new ClientException(SC_NOT_FOUND);
 										}
@@ -213,7 +212,7 @@ public class NpmPackHandler implements PackHandler {
 										var project = projectService.load(projectId);
 										for (var pack: packService.queryByName(project, TYPE, packageName, null)) {
 											var packData = (NpmData) pack.getData();
-											packData.getDistTags().remove(tag);
+											packData.removeDistTag(tag);
 										}
 									});
 									response.setStatus(SC_OK);
@@ -450,6 +449,8 @@ public class NpmPackHandler implements PackHandler {
 												var sha256Hash = packBlobService.load(packBlobId).getSha256Hash();
 												pack.setData(new NpmData(packageMetadataBytes, versionMetadataBytes, distTagsOfVersion, fileName, sha256Hash));
 												packService.createOrUpdate(pack, newArrayList(packBlobService.load(packBlobId)), true);
+												for (var tag : distTagsOfVersion)
+													((NpmData) pack.getData()).setDistTag(tag, pack.getPublishDate());
 												response.setStatus(SC_CREATED);
 											}
 										}

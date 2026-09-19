@@ -1,4 +1,22 @@
 <wicket:panel>
+	<div wicket:id="distTagsSection">
+		<div class="table table-responsive mb-5">
+			<table class="table table-bordered border-top">
+				<thead>
+					<tr>
+						<th><wicket:t>Tag</wicket:t></th>
+						<th><wicket:t>Last Updated</wicket:t></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr wicket:id="distTags">
+						<td class="text-break" wicket:id="tag"></td>
+						<td wicket:id="updated"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
 	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Run below commands to install this package</wicket:t></div>
 	<div class="code mb-5">
 		<div wicket:id="registryConfig" class="text-break font-size-sm mt-2"></div>
