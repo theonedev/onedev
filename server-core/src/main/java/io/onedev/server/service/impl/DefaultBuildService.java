@@ -42,6 +42,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -386,12 +387,12 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	@Override
 	public Map<Long, Long> queryUnfinished() {
 		Query<?> query = getSession().createQuery("select id, project.id from Build where "
-				+ "status=:waiting or status=:pending or status=:running", Object[].class);
+				+ "status=:waiting or status=:pending or status=:running order by submitDate", Object[].class);
 		query.setParameter("waiting", Build.Status.WAITING);
 		query.setParameter("pending", Build.Status.PENDING);
 		query.setParameter("running", Build.Status.RUNNING);
 		
-		Map<Long, Long> result = new HashMap<>();
+		Map<Long, Long> result = new LinkedHashMap<>();
 		for (Object[] fields: (List<Object[]>)query.list()) 
 			result.put((Long)fields[0], (Long)fields[1]);
 		return result;

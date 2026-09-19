@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,21 +38,16 @@ import io.onedev.server.service.support.AgentCallable;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.agent.AgentConnected;
 import io.onedev.server.event.agent.AgentDisconnected;
-import io.onedev.server.event.cluster.NodeConnected;
-import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
-import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
 import oshi.SystemInfo;
 
 @Singleton
-public class DefaultResourceService implements ResourceService, Serializable, SchedulableTask {
+public class DefaultResourceService implements ResourceService, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultResourceService.class);
 
@@ -62,23 +57,36 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 
 	private final TransactionService transactionService;
 
-	private final TaskScheduler taskScheduler;
-
 	private volatile Map<String, Integer> cpuCounts;
 
+	/*
+	 * Only the leader allocates resources. These counters intentionally are not replicated:
+	 * after failover, existing tasks may temporarily exceed the limit until they finish.
+	 * Each coordinating task releases its reservation on the same server that acquired it.
+	 */
 	private final Map<String, Integer> concurrencyUsages = new HashMap<>();
-	
-	private volatile Map<String, Integer> concurrencyUsagesCache;
-		
-	private volatile String taskId;
+
+	// Guarded by concurrencyUsages, in order of arrival at the leader.
+	private final List<AllocationRequest> allocationRequests = new ArrayList<>();
+
+	private static class AllocationRequest {
+
+		private final String resourceName;
+
+		private Collection<String> nodes = Set.of();
+
+		private AllocationRequest(String resourceName) {
+			this.resourceName = resourceName;
+		}
+
+	}
 	
 	@Inject
 	public DefaultResourceService(AgentService agentService, TransactionService transactionService,
-                                    ClusterService clusterService, TaskScheduler taskScheduler) {
+			ClusterService clusterService) {
 		this.agentService = agentService;
 		this.transactionService = transactionService;
 		this.clusterService = clusterService;
-		this.taskScheduler = taskScheduler;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -99,55 +107,12 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 			logger.debug("Error calling oshi", e);
 			cpuCounts.put(localServer, 4);
 		}
-		concurrencyUsagesCache = hazelcastInstance.getReplicatedMap("concurrencyUsagesCache");
-		removeNodeFromConcurrencyUsagesCache(localServer);		
 	}
 
 	@Listen
 	public void on(SystemStopped event) {
 		if (cpuCounts != null)
 			cpuCounts.remove(clusterService.getLocalServerAddress());
-	}
-
-	@Listen
-	public void on(SystemStarted event) {
-		taskId = taskScheduler.schedule(this);
-	}
-	
-	@Listen
-	public void on(SystemStopping event) {
-		if (taskId != null)
-			taskScheduler.unschedule(taskId);
-	}
-	
-	@Listen
-	public void on(NodeConnected event) {
-		if (clusterService.isLeaderServer() && event.isRecovered()) {
-			clusterService.submitToServer(event.getServer(), () -> {
-				try {
-					while (true) {
-						synchronized (concurrencyUsages) {
-							if (concurrencyUsagesCache != null) {
-								concurrencyUsagesCache.putAll(concurrencyUsages);
-								break;
-							}
-						}
-						Thread.sleep(100);
-					}
-				} catch (Throwable e) {
-					logger.error("Error syncing concurrency usages cache", e);
-				}
-				return null;
-			});
-		}
-	}
-
-	private void removeNodeFromConcurrencyUsagesCache(String node) {
-		var keysToRemove = concurrencyUsagesCache.keySet().stream()
-				.filter(it -> it.startsWith(node + ":"))
-				.collect(toList());
-		for (var key: keysToRemove)
-			concurrencyUsagesCache.remove(key);
 	}
 
 	@Transactional
@@ -157,13 +122,6 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 		var agentCpuCount = event.getAgent().getCpuCount();
 		transactionService.runAfterCommit(() -> {
 			cpuCounts.put(String.valueOf(agentId), agentCpuCount);
-			removeNodeFromConcurrencyUsagesCache(agentId.toString());
-			synchronized (concurrencyUsages) {
-				for (var entry : concurrencyUsages.entrySet()) {
-					if (entry.getKey().startsWith(agentId + ":"))
-						concurrencyUsagesCache.put(entry.getKey(), entry.getValue());
-				}
-			}
 		});
 	}
 
@@ -200,20 +158,62 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 		}
 	}
 
+	private String acquireNode(Supplier<Collection<String>> candidateNodes, String resourceName,
+			int totalConcurrency, int requiredConcurrency) throws InterruptedException {
+		var request = new AllocationRequest(resourceName);
+		synchronized (concurrencyUsages) {
+			allocationRequests.add(request);
+		}
+		try {
+			while (true) {
+				if (Thread.interrupted())
+					throw new InterruptedException();
+				if (!clusterService.isLeaderServer())
+					throw new ExplicitException("Cluster leader changed, please retry later");
+				// Agent queries may access the database, so resolve candidates outside the monitor.
+				var nodes = new HashSet<>(candidateNodes.get());
+				nodes.removeIf(node -> getEffectiveTotalConcurrency(node, totalConcurrency) < requiredConcurrency);
+				synchronized (concurrencyUsages) {
+					if (Thread.interrupted())
+						throw new InterruptedException();
+					request.nodes = nodes;
+					var availableNodes = new HashSet<>(nodes);
+					// Leave shared nodes to older requests, even if a smaller request could fit now.
+					// Unrelated nodes/resources and requests with no eligible nodes do not block us.
+					for (var earlier : allocationRequests) {
+						if (earlier == request)
+							break;
+						if (earlier.resourceName.equals(resourceName))
+							availableNodes.removeAll(earlier.nodes);
+					}
+					var node = allocateNode(availableNodes, resourceName, totalConcurrency, requiredConcurrency);
+					if (node != null) {
+						concurrencyUsages.merge(node + ":" + resourceName, requiredConcurrency, Integer::sum);
+						return node;
+					}
+					// Poll capacity, eligibility, and leadership once per second to avoid wake-up storms.
+					concurrencyUsages.wait(1000);
+				}
+			}
+		} finally {
+			synchronized (concurrencyUsages) {
+				allocationRequests.remove(request);
+			}
+		}
+	}
+
+	// Called with concurrencyUsages locked, so selection and reservation are atomic.
 	@Nullable
 	private String allocateNode(Collection<String> nodes, String resourceName,
-								int totalConcurrency, int requiredConcurrency) {
+			int totalConcurrency, int requiredConcurrency) {
 		String allocatedNode = null;
 		var maxScore = 0;
 		var nodeList = new ArrayList<>(nodes);
 		Collections.shuffle(nodeList);
-		for (var node: nodeList) {
+		for (var node : nodeList) {
 			var effectiveTotalConcurrency = getEffectiveTotalConcurrency(node, totalConcurrency);
-			var usedConcurrency = concurrencyUsagesCache.get(node + ":" + resourceName);
-			if (usedConcurrency == null)
-				usedConcurrency = 0;
+			var usedConcurrency = concurrencyUsages.getOrDefault(node + ":" + resourceName, 0);
 			var score = getAllocationScore(effectiveTotalConcurrency, usedConcurrency, requiredConcurrency);
-
 			if (score > maxScore) {
 				allocatedNode = node;
 				maxScore = score;
@@ -222,69 +222,43 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 		return allocatedNode;
 	}
 
-	private void acquireConcurrency(String concurrencyKey, int totalConcurrency, int acquireConcurrency) {
-		while (true) {
-			synchronized (concurrencyUsages) {	
-				var usedCocurrency = concurrencyUsages.get(concurrencyKey);				
-				if (usedCocurrency == null)
-					usedCocurrency = 0;
-				usedCocurrency += acquireConcurrency;
-				if (usedCocurrency <= totalConcurrency) {
-					concurrencyUsages.put(concurrencyKey, usedCocurrency);
-					concurrencyUsagesCache.put(concurrencyKey, usedCocurrency);
-					break;
-				}
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
+	private void releaseConcurrency(String concurrencyKey, int releaseConcurrency) {
+		synchronized (concurrencyUsages) {
+			var usedConcurrency = concurrencyUsages.get(concurrencyKey) - releaseConcurrency;
+			if (usedConcurrency != 0)
+				concurrencyUsages.put(concurrencyKey, usedConcurrency);
+			else
+				concurrencyUsages.remove(concurrencyKey);
 		}
 	}
 
-	private void releaseConcurrency(String concurrencyKey, int releaseConcurrency) {
-		synchronized (concurrencyUsages) {	
-			var usedResources = concurrencyUsages.get(concurrencyKey);
-			usedResources -= releaseConcurrency;
-			concurrencyUsages.put(concurrencyKey, usedResources);
-			concurrencyUsagesCache.put(concurrencyKey, usedResources);
+	private <T> T runTask(Supplier<Collection<String>> candidateNodes, String resourceName,
+			int totalConcurrency, int requiredConcurrency, Function<String, T> task) throws InterruptedException {
+		var node = acquireNode(candidateNodes, resourceName, totalConcurrency, requiredConcurrency);
+		try {
+			return task.apply(node);
+		} finally {
+			releaseConcurrency(node + ":" + resourceName, requiredConcurrency);
 		}
 	}
 
 	@Override
 	public <T> Future<T> submitServerTask(@Nullable String pinnedServerAddress, String resourceName,
-				int totalConcurrency, int requiredConcurrency, ClusterTask<T> runnable) {
-		while (true) {
-			var candidateServers = new ArrayList<>(clusterService.getOnlineServers());			
-			if (pinnedServerAddress != null) 
+			int totalConcurrency, int requiredConcurrency, ClusterTask<T> task) {
+		return clusterService.submitToServer(clusterService.getLeaderServerAddress(), () -> runTask(() -> {
+			var candidateServers = new ArrayList<>(clusterService.getOnlineServers());
+			candidateServers.retainAll(new HashSet<>(clusterService.getServerAddresses()));
+			if (pinnedServerAddress != null)
 				candidateServers.retainAll(List.of(pinnedServerAddress));
-			var allocatedServer = allocateNode(candidateServers, resourceName, totalConcurrency, requiredConcurrency);
-			if (allocatedServer != null) {
-				return clusterService.submitToServer(allocatedServer, () -> {
-					int effectiveTotalConcurrency = getEffectiveTotalConcurrency(allocatedServer, totalConcurrency);
-					var concurrencyKey = allocatedServer + ":" + resourceName;
-					acquireConcurrency(concurrencyKey, effectiveTotalConcurrency, requiredConcurrency);
-					try {
-						return runnable.call();
-					} finally {
-						releaseConcurrency(concurrencyKey, requiredConcurrency);
-					}
-				});
-			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		}
+			return candidateServers;
+		}, resourceName, totalConcurrency, requiredConcurrency,
+				server -> clusterService.runOnServer(server, task)));
 	}
 
 	@Override
-	public <T> Future<T> submitAgentTask(@Nullable Long pinnedAgentId, AgentQuery agentQuery, 
-				String resourceName, int totalConcurrency, int requiredConcurrency, 
-				AgentCallable<T> task) {
-		while (true) {
+	public <T> Future<T> submitAgentTask(@Nullable Long pinnedAgentId, AgentQuery agentQuery,
+			String resourceName, int totalConcurrency, int requiredConcurrency, AgentCallable<T> task) {
+		return clusterService.submitToServer(clusterService.getLeaderServerAddress(), () -> runTask(() -> {
 			Set<Long> agentIds;
 			if (pinnedAgentId != null) {
 				agentIds = new HashSet<>();
@@ -297,45 +271,17 @@ public class DefaultResourceService implements ResourceService, Serializable, Sc
 						.map(AbstractEntity::getId)
 						.collect(toSet());
 			}
-			var agentIdString = allocateNode(
-					agentIds.stream().map(Object::toString).collect(toList()),
-					resourceName, totalConcurrency, requiredConcurrency);
-			var agentId = agentIdString != null? Long.valueOf(agentIdString): null;
-			if (agentId != null) {
-				var server = agentService.getAgentServer(agentId);
-				if (server == null)
-					throw new ExplicitException("Cannot find server managing allocated agent, please retry later");
-
-				return clusterService.submitToServer(server, () -> {
-					var effectiveTotalConcurrency = getEffectiveTotalConcurrency(agentIdString, totalConcurrency);
-					var concurrencyKey = agentId + ":" + resourceName;
-					acquireConcurrency(concurrencyKey, effectiveTotalConcurrency, requiredConcurrency);
-					try {
-						updateLastUsedDate(agentId);
-						return task.call(agentId);
-					} finally {
-						releaseConcurrency(concurrencyKey, requiredConcurrency);
-					}
-				});
-			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		}
+			return agentIds.stream().map(Object::toString).collect(toList());
+		}, resourceName, totalConcurrency, requiredConcurrency, node -> {
+			var agentId = Long.valueOf(node);
+			var server = agentService.getAgentServer(agentId);
+			if (server == null)
+				throw new ExplicitException("Cannot find server managing allocated agent, please retry later");
+			return clusterService.runOnServer(server, () -> {
+				updateLastUsedDate(agentId);
+				return task.call(agentId);
+			});
+		}));
 	}
 
-	@Override
-	public void execute() {
-		synchronized (concurrencyUsages) {
-			concurrencyUsagesCache.putAll(concurrencyUsages);
-		}
-	}
-
-	@Override
-	public ScheduleBuilder<?> getScheduleBuilder() {
-		return SimpleScheduleBuilder.repeatHourlyForever();
-	}
-	
 }
