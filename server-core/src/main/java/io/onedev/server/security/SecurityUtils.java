@@ -19,6 +19,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.ImmutablePrincipalCollection;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ScopedValues;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.jspecify.annotations.Nullable;
@@ -104,6 +105,9 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
     public static Subject getSubject() {
         Subject subject = ThreadContext.getSubject();
         if (subject == null) {
+            // Shiro uses a scoped value instead of ThreadContext for web requests on Java 25+.
+            if (ScopedValues.INSTANCE.isSupported() && ScopedValues.INSTANCE.isBound())
+                return org.apache.shiro.SecurityUtils.getSubject();
             // Shiro 3 no longer installs a VM-global security manager for web applications.
             subject = asAnonymous();
             ThreadContext.bind(subject);
