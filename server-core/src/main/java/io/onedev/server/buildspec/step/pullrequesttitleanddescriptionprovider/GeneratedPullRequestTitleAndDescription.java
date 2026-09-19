@@ -17,17 +17,20 @@ public class GeneratedPullRequestTitleAndDescription implements PullRequestTitle
 
     @Override
     public Pair<String, String> getTitleAndDescription(PullRequest pullRequest) {        
-        var title = pullRequest.generateTitleFromCommits();
-        var description = pullRequest.generateDescriptionFromCommits();
-        if (title == null || description == null) {
+        String title = null;
+        String description = null;
+        var commits = pullRequest.getLatestUpdate().getCommits();
+        if (commits.size() == 1) {
+            var commit = commits.get(0);
+            title = pullRequest.generateTitleFromSingleCommit(commit);
+            description = pullRequest.generateDescriptionFromSingleCommit(commit);
+        } else {
             var liteModel = OneDev.getInstance(SettingService.class).getAiSetting().getLiteModel();
             if (liteModel != null) {
                 var titleAndDescription = OneDev.getInstance(PullRequestService.class)
-                        .suggestTitleAndDescription(pullRequest, liteModel, title == null, description == null);
-                if (title == null)
-                    title = titleAndDescription.getLeft();
-                if (description == null)
-                    description = titleAndDescription.getRight();
+                        .suggestTitleAndDescription(pullRequest, liteModel, true, true);
+                title = titleAndDescription.getLeft();
+                description = titleAndDescription.getRight();
             }
         }
         if (title == null) 

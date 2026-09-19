@@ -1478,29 +1478,17 @@ public class PullRequest extends ProjectBelonging
 		return title.trim();
 	}
 
-	@Nullable
-	public String generateTitleFromCommits() {
-		var commits = getLatestUpdate().getCommits();
-		if (commits.size() == 1) {
-			return getTitlePrefix(getSourceBranchSemantic()) + cleanTitle(commits.get(0).getShortMessage());
-		} else {
-			return null;
-		}
+	public String generateTitleFromSingleCommit(RevCommit commit) {
+		return cleanTitle(commit.getShortMessage());
 	}
 	
 	@Nullable
-	public String generateDescriptionFromCommits() {
-		var commits = getLatestUpdate().getCommits();
-		if (commits.size() == 1) {
-			var commit = commits.get(0);
-			var shortMessage = commit.getShortMessage();
-			var description = commit.getFullMessage().substring(shortMessage.length()).trim();
-			if (description.length() == 0)
-				description = null;
-			return description;
-		} else {
-			return null;
-		}
+	public String generateDescriptionFromSingleCommit(RevCommit commit) {
+		var shortMessage = commit.getShortMessage();
+		var description = commit.getFullMessage().substring(shortMessage.length()).trim();
+		if (description.length() == 0)
+			description = null;
+		return description;
 	}
 
 	private static PullRequestService getPullRequestService() {

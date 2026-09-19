@@ -298,11 +298,14 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				update.setHeadCommitHash(source.getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
-				var title = request.generateTitleFromCommits();
-				if (title == null && settingService.getAiSetting().getLiteModelSetting() == null)
-					title = request.generateTitleFromBranch();
-				request.setTitle(title);
-				request.setDescription(request.generateDescriptionFromCommits());
+				var commits = update.getCommits();
+				if (commits.size() == 1) {
+					var commit = commits.get(0);
+					request.setTitle(request.generateTitleFromSingleCommit(commit));
+					request.setDescription(request.generateDescriptionFromSingleCommit(commit));
+				} else if (settingService.getAiSetting().getLiteModelSetting() == null) {
+					request.setTitle(request.generateTitleFromBranch());
+				}
 
 				pullRequestService.checkReviews(request, false);
 
@@ -726,10 +729,12 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				super.renderHead(response);
 				
 				CharSequence callback;
-				if (settingService.getAiSetting().getLiteModelSetting() != null)
+				if (getPullRequest().getLatestUpdate().getCommits().size() != 1
+						&& settingService.getAiSetting().getLiteModelSetting() != null) {
 					callback = behavior.getCallbackFunction(explicit("suggestTitle"), explicit("suggestDescription"));
-				else
+				} else {
 					callback = "undefined";
+				}
 				var translations = new HashMap<String, String>();
 				translations.put("suggesting-title", _T("Suggesting title..."));
 				translations.put("suggesting-description", _T("Suggesting description..."));
