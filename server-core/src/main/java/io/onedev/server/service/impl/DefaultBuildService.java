@@ -555,8 +555,8 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 
 		Map<Integer, Pair<Integer, Integer>> stats = new HashMap<>();
 		for (var result: getSession().createQuery(criteriaQuery).getResultList()) {
-			var pendingDuration = ((Double)result[1])/60000;
-			var runningDuration = ((Double)result[2])/60000;
+			var pendingDuration = ((Double)result[1])/1000;
+			var runningDuration = ((Double)result[2])/1000;
 			stats.put((int)result[0], new ImmutablePair<>((int)pendingDuration, (int)runningDuration));
 		}
 		return stats;

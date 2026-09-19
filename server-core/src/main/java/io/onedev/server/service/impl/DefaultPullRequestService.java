@@ -1168,7 +1168,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 		Map<Integer, Integer> stats = new HashMap<>();
 		for (var result: getSession().createQuery(criteriaQuery).getResultList()) {
-			var duration = ((Double)result[1])/60000;
+			var duration = ((Double)result[1])/1000;
 			stats.put((int)result[0], (int)duration);
 		}
 		return stats;
