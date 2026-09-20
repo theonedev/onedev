@@ -743,6 +743,6 @@
 		<hk2.version>4.0.2</hk2.version>
 		<tika.version>3.2.2</tika.version>
 		<langchain4j.version>1.14.1</langchain4j.version>
-		<bouncycastle.version>1.84</bouncycastle.version>
+		<bouncycastle.version>1.85</bouncycastle.version>
 	</properties>
 </project>
