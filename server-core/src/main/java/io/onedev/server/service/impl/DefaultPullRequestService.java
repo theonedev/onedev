@@ -854,6 +854,8 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		if (request.isOpen()) {
 			BranchProtection branchProtection = request.getTargetProject()
 					.getBranchProtection(request.getTargetBranch(), request.getSubmitter());
+			if (sourceUpdated && isTargetBranchMergeOrRebase(request))
+				sourceUpdated = false;
 			Collection<String> changedFiles;
 			if (sourceUpdated) {
 				changedFiles = request.getLatestUpdate().getChangedFiles();
@@ -877,7 +879,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 			}
 
 			if (sourceUpdated) {
-				// For AI user, we will request reviews every time source is updated even if the 
+				// For AI user, we will request reviews whenever source changes require review even if the
 				// review is not enforced by branch protection rules
 				for (PullRequestReview review: request.getReviews()) {
 					if (review.getUser().getType() == User.Type.AI 
@@ -888,6 +890,48 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 				}
 			}
 		}
+	}
+
+	private boolean isTargetBranchMergeOrRebase(PullRequest request) {
+		if (request.getUpdates().size() < 2)
+			return false;
+		var update = request.getLatestUpdate();
+		var head = update.getHeadCommit();
+		var previousHead = ObjectId.fromString(update.getBaseCommitHash());
+		var targetHead = ObjectId.fromString(update.getTargetHeadCommitHash());
+		var project = request.getTargetProject();
+		if (head.getParentCount() == 1) {
+			// Use the incorporated target revision, which may predate the current target head.
+			var rebaseTarget = gitService.getMergeBase(project, head, project, targetHead);
+			if (rebaseTarget == null)
+				return false;
+			var previousBase = gitService.getMergeBase(project, previousHead, project, rebaseTarget);
+			// A rebase must incorporate new target history. Ordinary edits and squash merges do not.
+			if (previousBase == null || previousBase.equals(rebaseTarget))
+				return false;
+
+			var rebased = gitService.rebase(project, previousHead, rebaseTarget, head.getCommitterIdent());
+			return rebased != null && gitService.getCommit(project, rebased).getTree().equals(head.getTree());
+		}
+		if (head.getParentCount() != 2)
+			return false;
+
+		ObjectId mergedTarget;
+		// The UI merge and a normal git merge use opposite parent orders.
+		if (head.getParent(0).equals(previousHead))
+			mergedTarget = head.getParent(1);
+		else if (head.getParent(1).equals(previousHead))
+			mergedTarget = head.getParent(0);
+		else
+			return false;
+
+		if (!gitService.isMergedInto(project, null, mergedTarget, targetHead))
+			return false;
+
+		// Recreate the merge to reject extra edits and manually resolved conflicts.
+		var merged = gitService.merge(project, head.getParent(0), head.getParent(1), false,
+				head.getCommitterIdent(), head.getAuthorIdent(), "Check target branch merge", false);
+		return merged != null && gitService.getCommit(project, merged).getTree().equals(head.getTree());
 	}
 
 	private void checkReviews(ReviewRequirement reviewRequirement, PullRequest request,
