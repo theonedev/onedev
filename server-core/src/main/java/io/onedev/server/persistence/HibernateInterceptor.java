@@ -9,6 +9,8 @@ import jakarta.inject.Singleton;
 import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
 
+import io.onedev.server.model.AbstractEntity;
+
 @Singleton
 public class HibernateInterceptor implements Interceptor {
 
@@ -17,6 +19,15 @@ public class HibernateInterceptor implements Interceptor {
 	@Inject
 	public HibernateInterceptor(Set<PersistListener> listeners) {
 		this.listeners = listeners;
+	}
+
+	@Override
+	public Boolean isTransient(Object entity) {
+		// Avoid existence queries for detached associations with assigned IDs.
+		// Explicit assigned-ID creation uses merge or stateless insertion.
+		if (entity instanceof AbstractEntity abstractEntity)
+			return abstractEntity.getId() == null;
+		return null;
 	}
 	
 	@Override

@@ -131,6 +131,7 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.ProjectLastActivityDate;
+import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
@@ -361,6 +362,9 @@ public class DefaultProjectService extends BaseEntityService<Project>
 		project.setLastActivityDate(lastEventDate);
 		lastEventDateService.create(lastEventDate);
 		dao.persist(project);
+		var numberCounter = new ProjectNumberCounter();
+		numberCounter.setProject(project);
+		dao.persist(numberCounter);
 
 		UserAuthorization authorization = new UserAuthorization();
 		authorization.setProject(project);

@@ -2,6 +2,7 @@ package io.onedev.server.persistence;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -39,7 +40,8 @@ public class IdentifierMigrationTest {
                 .applySetting("hibernate.cache.use_second_level_cache", false)
                 .applySetting("jakarta.persistence.validation.mode", "none").build();
         try (var factory = new MetadataSources(registry).addAnnotatedClass(Item.class)
-                .buildMetadata().buildSessionFactory()) {
+                .buildMetadata().getSessionFactoryBuilder()
+                .applyInterceptor(new HibernateInterceptor(Set.of())).build()) {
             try (var session = factory.openSession()) {
                 var tx = session.beginTransaction();
                 var generated = new Item("Generated", null);

@@ -67,6 +67,7 @@ import io.onedev.k8shelper.DefaultCloneInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.data.DataService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.NodeStopping;
@@ -87,6 +88,7 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.Workspace;
@@ -170,6 +172,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Inject
 	private Set<WorkspaceProvisionerDiscoverer> workspaceProvisionerDiscoverers;
 
+	@Inject
+	private DataService dataService;
+
 	private SequenceGenerator numberGenerator;
 
 	private final Map<String, WorkspaceContext> workspaceContexts = new ConcurrentHashMap<>();
@@ -202,7 +207,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private synchronized SequenceGenerator getNumberGenerator() {
 		if (numberGenerator == null)
-			numberGenerator = new SequenceGenerator(Workspace.class, clusterService, dao);
+			numberGenerator = new SequenceGenerator(Workspace.class, ProjectNumberCounter.PROP_NEXT_WORKSPACE_NUMBER, clusterService, dao, dataService);
 		return numberGenerator;
 	}
 
@@ -260,8 +265,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
-	    	if (project.getForkRoot().equals(project))
-	    		getNumberGenerator().removeNextSequence(project);
+			if (project.getForkRoot().equals(project))
+				transactionService.runAfterCommit(() -> getNumberGenerator().removeNextSequence(project));
 		} else if (event.getEntity() instanceof Workspace) {
 			var workspace = (Workspace) event.getEntity();
 			var loggingSupport = workspace.getLoggingSupport();

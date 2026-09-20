@@ -30,6 +30,7 @@ import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.data.DefaultDataService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EntityIdCounter;
+import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.Setting;
 
 public class HibernateSchemaTest {
@@ -69,7 +70,7 @@ public class HibernateSchemaTest {
                             throw new UnsupportedOperationException(method.getName());
                         });
                 data.createTables(connection);
-                assertEquals(100, sql.stream().filter(command -> command.startsWith("create table ")).count(), dialect);
+                assertEquals(101, sql.stream().filter(command -> command.startsWith("create table ")).count(), dialect);
                 assertTrue(sql.stream().noneMatch(command -> command.contains(" foreign key ")));
                 if (dialect.equals("io.onedev.server.persistence.PostgreSQLDialect")) {
                     assertTrue(sql.stream().anyMatch(command -> command.contains(" bytea")));
@@ -78,19 +79,19 @@ public class HibernateSchemaTest {
                 var script = new ArrayList<>(sql);
                 sql.clear();
                 data.applyConstraints(connection);
-                assertEquals(179, sql.size(), dialect);
+                assertEquals(180, sql.size(), dialect);
                 assertTrue(sql.stream().allMatch(command -> command.contains(" foreign key ")));
                 script.addAll(sql);
                 sql.clear();
                 data.dropConstraints(connection);
-                assertEquals(179, sql.size(), dialect);
+                assertEquals(180, sql.size(), dialect);
                 var dropKeyword = dialect.contains("MySQL") || dialect.contains("MariaDB")
                         ? " drop foreign key " : " drop constraint ";
                 assertTrue(sql.stream().allMatch(command -> command.contains(dropKeyword)), dialect);
                 script.addAll(sql);
                 sql.clear();
                 data.cleanDatabase(connection);
-                assertEquals(100, sql.stream().filter(command -> command.startsWith("drop table ")).count(), dialect);
+                assertEquals(101, sql.stream().filter(command -> command.startsWith("drop table ")).count(), dialect);
                 script.addAll(sql);
                 for (var command : script) {
                     assertFalse(command.isBlank() || command.contains("\n") || command.contains("\r"), command);
@@ -187,13 +188,15 @@ public class HibernateSchemaTest {
                     }
                 }
                 var legacySnapshot = snapshot(connection);
-                // ID counters were added after the Hibernate 5 schema fixture.
+                // ID and project number counters were added after the Hibernate 5 schema fixture.
                 assertEquals(structure(snapshot.stream()
-                        .filter(line -> !line.contains("\tO_ENTITYIDCOUNTER")).collect(Collectors.toList())),
+                        .filter(line -> !line.contains("\tO_ENTITYIDCOUNTER"))
+                        .filter(line -> !line.contains("\tO_PROJECTNUMBERCOUNTER"))
+                        .collect(Collectors.toList())),
                         structure(legacySnapshot));
                 assertConstraintEnforcement(connection);
                 var legacySources = new MetadataSources(registry);
-                var legacyEntities = entities.stream().filter(entity -> entity != EntityIdCounter.class)
+                var legacyEntities = entities.stream().filter(entity -> entity != EntityIdCounter.class && entity != ProjectNumberCounter.class)
                         .collect(Collectors.toList());
                 legacyEntities.forEach(legacySources::addAnnotatedClass);
                 var legacyMetadata = legacySources.getMetadataBuilder().applyPhysicalNamingStrategy(naming).build();

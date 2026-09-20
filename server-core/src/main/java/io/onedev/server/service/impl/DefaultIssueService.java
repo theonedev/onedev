@@ -58,6 +58,7 @@ import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Spec
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entityreference.ReferenceMigrator;
+import io.onedev.server.data.DataService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -85,6 +86,7 @@ import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -181,13 +183,16 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	@Inject
 	private GitService gitService;
 	
+	@Inject
+	private DataService dataService;
+
 	private SequenceGenerator numberGenerator;
 	
 	private volatile IMap<String, Long> idCache;
 
 	private synchronized SequenceGenerator getNumberGenerator() {
 		if (numberGenerator == null) 
-			numberGenerator = new SequenceGenerator(Issue.class, clusterService, dao);
+			numberGenerator = new SequenceGenerator(Issue.class, ProjectNumberCounter.PROP_NEXT_ISSUE_NUMBER, clusterService, dao, dataService);
 		return numberGenerator;
 	}
 
@@ -987,8 +992,8 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			transactionService.runAfterCommit(() -> idCache.remove(cacheKey));			
 		} else if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
-	    	if (project.getForkRoot().equals(project))
-	    		getNumberGenerator().removeNextSequence(project);
+			if (project.getForkRoot().equals(project))
+				transactionService.runAfterCommit(() -> getNumberGenerator().removeNextSequence(project));
 			
 			Long projectId = project.getId();
 			transactionService.runAfterCommit(() -> idCache.removeAll(entry -> entry.getKey().startsWith(projectId + ":")));
@@ -1346,14 +1351,16 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		return issueIds;
 	}
 
+	@Transactional
 	@Override
 	public Long getNextNumber(Project numberScope) {
-		return getNumberGenerator().getNextSequence(numberScope);
+		return getNumberGenerator().getNextSequence(numberScope.getForkRoot());
 	}
 
+	@Transactional
 	@Override
 	public void resetNextNumber(Project numberScope) {
-		getNumberGenerator().removeNextSequence(numberScope);
+		getNumberGenerator().resetNextSequence(numberScope.getForkRoot());
 	}
 
 	@Sessional

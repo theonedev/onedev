@@ -95,6 +95,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.StorageService;
 import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.data.DataService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -110,6 +111,7 @@ import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.persistence.SequenceGenerator;
@@ -193,6 +195,9 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	@Inject
 	private Set<BuildStorageSyncer> storageSyncers;
 	
+	@Inject
+	private DataService dataService;
+
 	private SequenceGenerator numberGenerator;
 	
 	private volatile IMap<Long, BuildFacade> cache;
@@ -203,7 +208,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 
 	private synchronized SequenceGenerator getNumberGenerator() {
 		if (numberGenerator == null)
-			numberGenerator = new SequenceGenerator(Build.class, clusterService, dao);
+			numberGenerator = new SequenceGenerator(Build.class, ProjectNumberCounter.PROP_NEXT_BUILD_NUMBER, clusterService, dao, dataService);
 		return numberGenerator;
 	}
 
@@ -263,8 +268,8 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
-	    	if (project.getForkRoot().equals(project))
-	    		getNumberGenerator().removeNextSequence(project);
+			if (project.getForkRoot().equals(project))
+				transactionService.runAfterCommit(() -> getNumberGenerator().removeNextSequence(project));
 			
 			Long projectId = project.getId();
 			transactionService.runAfterCommit(() -> {

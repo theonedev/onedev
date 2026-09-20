@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -94,6 +95,8 @@ import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.EntityIdCounter;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.ModelVersion;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
@@ -464,17 +467,21 @@ public class DefaultDataService implements DataService, Serializable {
 	@Override
 	public void exportData(File exportDir, int batchSize) {
 		var entityTypes = getEntityTypes();
-		// Online backups must capture counters after all entity rows they protect.
+		// Export counter rows after all entities they protect. Preserve the dependency
+		// order of ordinary entities, including projects and their activity dates.
+		if (entityTypes.remove(ProjectNumberCounter.class))
+			entityTypes.add(ProjectNumberCounter.class);
 		if (entityTypes.remove(EntityIdCounter.class))
 			entityTypes.add(EntityIdCounter.class);
+		var exportedProjectIds = new HashSet<Long>();
 		for (Class<?> entityType: entityTypes) {
 			logger.info("Exporting table '" + entityType.getSimpleName() + "'...");
 			
 			logger.info("Querying table ids...");
 			
 			Session session = dao.getSession();
-			// Counter updates use JDBC and do not refresh entities cached in this session.
-			if (entityType == EntityIdCounter.class)
+			// Counter updates bypass entities cached in this session.
+			if (entityType == EntityIdCounter.class || entityType == ProjectNumberCounter.class)
 				session.clear();
 			CriteriaBuilder builder = session.getCriteriaBuilder();
 			CriteriaQuery<Number> query = builder.createQuery(Number.class);
@@ -482,23 +489,25 @@ public class DefaultDataService implements DataService, Serializable {
 			query.select(root.get("id")).orderBy(builder.asc(root.get("id")));
 			
 			List<Number> ids = session.createQuery(query).list();
+			if (entityType == Project.class)
+				ids.forEach(id -> exportedProjectIds.add(id.longValue()));
 			
 			int count = ids.size();
 			
 			for (int i=0; i<count/batchSize; i++) {
-				exportEntity(session, entityType, ids, i*batchSize, batchSize, batchSize, exportDir);
+				exportEntity(session, entityType, ids, i*batchSize, batchSize, batchSize, exportDir, exportedProjectIds);
 				// clear session to free memory
 				session.clear();
 			}
 			
 			if (count%batchSize != 0) {
-				exportEntity(session, entityType, ids, count/batchSize*batchSize, count%batchSize, batchSize, exportDir);
+				exportEntity(session, entityType, ids, count/batchSize*batchSize, count%batchSize, batchSize, exportDir, exportedProjectIds);
 			}
 			logger.info("");
 		}
 	}
 
-	private void exportEntity(Session session, Class<?> entityType, List<Number> ids, int start, int count, int batchSize, File exportDir) {
+	private void exportEntity(Session session, Class<?> entityType, List<Number> ids, int start, int count, int batchSize, File exportDir, Set<Long> exportedProjectIds) {
 		logger.info("Loading table rows ({}->{}) from database...", String.valueOf(start+1), (start + count));
 		
 		Query<?> query = session.createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId order by id", entityType);
@@ -508,8 +517,13 @@ public class DefaultDataService implements DataService, Serializable {
 		logger.info("Converting table rows to XML...");
 		VersionedXmlDoc dom = new VersionedXmlDoc();
 		Element rootElement = dom.addElement("list");
-		for (Object entity: query.list())
-			rootElement.appendContent(VersionedXmlDoc.fromBean(entity));
+		for (Object entity: query.list()) {
+			// Counters are exported later: exclude those for projects created after
+			// the project snapshot, otherwise their foreign keys cannot be restored.
+			if (!(entity instanceof ProjectNumberCounter)
+					|| exportedProjectIds.contains(((ProjectNumberCounter) entity).getProject().getId()))
+				rootElement.appendContent(VersionedXmlDoc.fromBean(entity));
+		}
 		String fileName;
 
 		if (start == 0)

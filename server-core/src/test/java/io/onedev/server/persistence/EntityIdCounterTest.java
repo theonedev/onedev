@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -175,7 +176,8 @@ public class EntityIdCounterTest {
             }
             insert.executeBatch();
         }
-        factory = metadata.buildSessionFactory();
+        factory = metadata.getSessionFactoryBuilder()
+                .applyInterceptor(new HibernateInterceptor(Set.of())).build();
 
         var config = new Config().setClusterName(UUID.randomUUID().toString());
         config.setProperty("hazelcast.logging.type", "none");
@@ -418,7 +420,8 @@ public class EntityIdCounterTest {
                     var tx = session.beginTransaction();
                     var entity = new ModelVersion();
                     entity.setId(1000L);
-                    session.persist(entity);
+                    // Stateful assigned-ID creation follows the reserved-entity service path.
+                    session.merge(entity);
                     session.flush();
                     assertExpectedFailure(tx::commit);
                 }

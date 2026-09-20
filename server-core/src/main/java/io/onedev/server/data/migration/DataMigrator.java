@@ -9423,13 +9423,58 @@ public class DataMigrator {
 	}
 
 	private void migrate245(File dataDir, Stack<Integer> versions) {
-		var entityTypes = ClassUtils.findImplementations(AbstractEntity.class, AbstractEntity.class);
-		entityTypes.removeIf(type -> !type.isAnnotationPresent(jakarta.persistence.Entity.class));
-		entityTypes.sort(comparing(Class::getName));
 		var files = dataDir.listFiles();
+		var projectFiles = new ArrayList<File>();
+		for (var file: files) {
+			if (file.getName().startsWith("Projects.xml"))
+				projectFiles.add(file);
+		}
+		var numberProperties = Map.of(
+				"Issues.xml", "nextIssueNumber",
+				"PullRequests.xml", "nextPullRequestNumber",
+				"Builds.xml", "nextBuildNumber",
+				"Workspaces.xml", "nextWorkspaceNumber");
+		var nextNumbers = new HashMap<String, Map<String, Long>>();
+		for (var entry: numberProperties.entrySet()) {
+			var numbers = new HashMap<String, Long>();
+			nextNumbers.put(entry.getValue(), numbers);
+			if (projectFiles.isEmpty())
+				continue;
+			for (var file: files) {
+				if (file.getName().equals(entry.getKey()) || file.getName().startsWith(entry.getKey() + ".")) {
+					var dom = VersionedXmlDoc.fromFile(file);
+					for (var entity: dom.getRootElement().elements()) {
+						var scope = entity.elementTextTrim("numberScope");
+						var nextNumber = Math.addExact(Long.parseLong(entity.elementTextTrim("number")), 1);
+						numbers.merge(scope, nextNumber, Math::max);
+					}
+				}
+			}
+		}
 		var counters = new VersionedXmlDoc();
 		var list = counters.addElement("list");
 		long counterId = 0;
+		for (var file: projectFiles) {
+			var dom = VersionedXmlDoc.fromFile(file);
+			for (var project: dom.getRootElement().elements()) {
+				var counter = list.addElement("io.onedev.server.model.ProjectNumberCounter");
+				counter.addAttribute("revision", "0.0");
+				counter.addElement("id").setText(String.valueOf(++counterId));
+				var id = project.elementTextTrim("id");
+				counter.addElement("project").setText(id);
+				for (var entry: nextNumbers.entrySet())
+					counter.addElement(entry.getKey()).setText(String.valueOf(entry.getValue().getOrDefault(id, 1L)));
+			}
+		}
+		counters.writeToFile(new File(dataDir, "ProjectNumberCounters.xml"), false);
+
+		var entityTypes = ClassUtils.findImplementations(AbstractEntity.class, AbstractEntity.class);
+		entityTypes.removeIf(type -> !type.isAnnotationPresent(jakarta.persistence.Entity.class));
+		entityTypes.sort(comparing(Class::getName));
+		files = dataDir.listFiles();
+		counters = new VersionedXmlDoc();
+		list = counters.addElement("list");
+		counterId = 0;
 		for (var entityType: entityTypes) {
 			long maxId = 0;
 			if (entityType == EntityIdCounter.class) {

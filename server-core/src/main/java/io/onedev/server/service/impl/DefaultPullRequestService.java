@@ -72,6 +72,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.data.DataService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -98,6 +99,7 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.PullRequestAssignment;
@@ -208,11 +210,14 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Inject
 	private ObjectMapper objectMapper;
 
+	@Inject
+	private DataService dataService;
+
 	private SequenceGenerator numberGenerator;
 
 	private synchronized SequenceGenerator getNumberGenerator() {
 		if (numberGenerator == null)
-			numberGenerator = new SequenceGenerator(PullRequest.class, clusterService, dao);
+			numberGenerator = new SequenceGenerator(PullRequest.class, ProjectNumberCounter.PROP_NEXT_PULL_REQUEST_NUMBER, clusterService, dao, dataService);
 		return numberGenerator;
 	}
 
@@ -680,8 +685,8 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
-	    	if (project.getForkRoot().equals(project))
-	    		getNumberGenerator().removeNextSequence(project);
+			if (project.getForkRoot().equals(project))
+				transactionService.runAfterCommit(() -> getNumberGenerator().removeNextSequence(project));
 		}
 	}
 
