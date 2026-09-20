@@ -25,8 +25,9 @@ public class IdentifierMigrationTest {
             protected void configure() {
                 bind(IdService.class).toInstance(new IdService() {
                     public void init() {}
-                    public long nextId(Class<?> type) { return allocated.incrementAndGet(); }
-                    public void useId(Class<?> type, long id) {}
+                    public long nextId(org.hibernate.SharedSessionContract session, Class<?> type) { return allocated.incrementAndGet(); }
+                    public void useId(org.hibernate.SharedSessionContract session, Class<?> type, long id) {}
+                    public void clearTransaction(org.hibernate.Transaction transaction) {}
                 });
             }
         });

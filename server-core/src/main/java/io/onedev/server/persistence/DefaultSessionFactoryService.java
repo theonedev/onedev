@@ -1,6 +1,7 @@
 package io.onedev.server.persistence;
 
 import static org.hibernate.cfg.AvailableSettings.DIALECT;
+import static org.hibernate.cfg.AvailableSettings.STATIC_METAMODEL_POPULATION;
 
 import java.util.Properties;
 import java.util.Set;
@@ -47,6 +48,8 @@ public class DefaultSessionFactoryService implements SessionFactoryService {
 		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
 		Properties hibernateSettings = new Properties();
 		hibernateSettings.putAll(hibernateConfig);
+		// We use the runtime JPA metamodel, but do not generate static metamodel classes.
+		hibernateSettings.putIfAbsent(STATIC_METAMODEL_POPULATION, "disabled");
 		// Keep the configured dialect for OneDev's upgrade/maintenance decisions,
 		// but let Hibernate detect standard dialects from JDBC metadata.
 		if (!"false".equalsIgnoreCase(hibernateSettings.getProperty("hibernate.boot.allow_jdbc_metadata_access"))

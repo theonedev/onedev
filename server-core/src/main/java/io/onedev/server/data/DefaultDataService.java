@@ -91,6 +91,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.EntityIdCounter;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.ModelVersion;
 import io.onedev.server.model.Role;
@@ -285,6 +286,24 @@ public class DefaultDataService implements DataService, Serializable {
 	        		stmt.execute(String.format("insert into %s values(1, '%s')", 
 	        				getTableName(ModelVersion.class), MigrationHelper.getVersion(DataMigrator.class)));
 	        	}
+				// Fresh installations do not run data migrations. Seed the same counters
+				// here while the new database contains only its ModelVersion row.
+				var entityTypes = getMetadata().getEntityBindings().stream()
+						.map(binding -> binding.getMappedClass())
+						.sorted(java.util.Comparator.comparing(Class::getName)).collect(Collectors.toList());
+				try (var stmt = conn.prepareStatement(String.format("insert into %s (%s, %s, %s) values (?, ?, ?)",
+						getTableName(EntityIdCounter.class), getColumnName(AbstractEntity.PROP_ID),
+						getColumnName(EntityIdCounter.PROP_ENTITY_NAME), getColumnName(EntityIdCounter.PROP_MAX_ID)))) {
+					long counterId = 0;
+					for (var entityType: entityTypes) {
+						stmt.setLong(1, ++counterId);
+						stmt.setString(2, entityType.getName());
+						stmt.setLong(3, entityType == EntityIdCounter.class ? entityTypes.size()
+								: entityType == ModelVersion.class ? 1 : 0);
+						stmt.addBatch();
+					}
+					stmt.executeBatch();
+				}
         	} catch (Exception e) {
         		throw new RuntimeException(e);
 			} finally {
@@ -444,12 +463,19 @@ public class DefaultDataService implements DataService, Serializable {
 	@Sessional
 	@Override
 	public void exportData(File exportDir, int batchSize) {
-		for (Class<?> entityType: getEntityTypes()) {
+		var entityTypes = getEntityTypes();
+		// Online backups must capture counters after all entity rows they protect.
+		if (entityTypes.remove(EntityIdCounter.class))
+			entityTypes.add(EntityIdCounter.class);
+		for (Class<?> entityType: entityTypes) {
 			logger.info("Exporting table '" + entityType.getSimpleName() + "'...");
 			
 			logger.info("Querying table ids...");
 			
 			Session session = dao.getSession();
+			// Counter updates use JDBC and do not refresh entities cached in this session.
+			if (entityType == EntityIdCounter.class)
+				session.clear();
 			CriteriaBuilder builder = session.getCriteriaBuilder();
 			CriteriaQuery<Number> query = builder.createQuery(Number.class);
 			Root<?> root = query.from(entityType);
@@ -696,6 +722,7 @@ public class DefaultDataService implements DataService, Serializable {
 				createRoot(bean);
 			} else {
 				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(PROP_TYPE, PROP_NOTIFY_OWN_EVENTS)) {
+					private static final long serialVersionUID = 1L;
 	
 					@Override
 					public void complete() {
@@ -747,6 +774,7 @@ public class DefaultDataService implements DataService, Serializable {
 
 			manualConfigs.add(new ManualConfig("Specify System Settings", null, 
 					systemSetting, excludedProps) {
+				private static final long serialVersionUID = 1L;
 	
 				@Override
 				public void complete() {
@@ -848,6 +876,7 @@ public class DefaultDataService implements DataService, Serializable {
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
 			manualConfigs.add(new ManualConfig("Specify Service Desk Setting", null, 
 					setting.getValue(), new HashSet<>(), true) {
+				private static final long serialVersionUID = 1L;
 	
 				@Override
 				public void complete() {
@@ -882,6 +911,7 @@ public class DefaultDataService implements DataService, Serializable {
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
 			Serializable backupSetting = setting.getValue();
 			manualConfigs.add(new ManualConfig("Specify Backup Setting", null, backupSetting) {
+				private static final long serialVersionUID = 1L;
 
 				@Override
 				public void complete() {

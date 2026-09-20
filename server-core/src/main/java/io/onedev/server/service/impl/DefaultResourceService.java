@@ -23,9 +23,6 @@ import org.jspecify.annotations.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.hazelcast.core.HazelcastInstance;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
@@ -44,12 +41,9 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import oshi.SystemInfo;
 
 @Singleton
 public class DefaultResourceService implements ResourceService, Serializable {
-
-	private static final Logger logger = LoggerFactory.getLogger(DefaultResourceService.class);
 
 	private final AgentService agentService;
 
@@ -99,14 +93,7 @@ public class DefaultResourceService implements ResourceService, Serializable {
 
 		cpuCounts = hazelcastInstance.getReplicatedMap("cpuCounts");
 		var localServer = clusterService.getLocalServerAddress();
-		try {
-			cpuCounts.put(
-					localServer,
-					new SystemInfo().getHardware().getProcessor().getLogicalProcessorCount());
-		} catch (Exception e) {
-			logger.debug("Error calling oshi", e);
-			cpuCounts.put(localServer, 4);
-		}
+		cpuCounts.put(localServer, Runtime.getRuntime().availableProcessors());
 	}
 
 	@Listen

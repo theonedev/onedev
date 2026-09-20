@@ -2,19 +2,12 @@ package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.server.annotation.Editable;
-import oshi.SystemInfo;
-import oshi.hardware.HardwareAbstractionLayer;
 
 @Editable
 public class PerformanceSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1;
-	
-	private static final Logger logger=  LoggerFactory.getLogger(PerformanceSetting.class);
 	
 	private int cpuIntensiveTaskConcurrency;
 	
@@ -25,15 +18,7 @@ public class PerformanceSetting implements Serializable {
 	private int maxCodeSearchEntries = 100;
 	
 	public PerformanceSetting() {
-		try {
-			HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
-			cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount() / 2;
-			if (cpuIntensiveTaskConcurrency == 0)
-				cpuIntensiveTaskConcurrency = 1;
-		} catch (Exception e) {
-			logger.debug("Error calling oshi", e);
-			cpuIntensiveTaskConcurrency = 2;
-		}
+		cpuIntensiveTaskConcurrency = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
 	}
 
 	@Editable(order=100, name="CPU Intensive Task Concurrency", description="" +

@@ -44,6 +44,9 @@ public class DefaultTransactionService implements TransactionService {
 	private SessionService sessionService;
 
 	@Inject
+	private IdService idService;
+
+	@Inject
 	private ExecutorService executorService;
 	
 	private final Map<Transaction, Collection<Runnable>> completionRunnables = new ConcurrentHashMap<>();
@@ -66,6 +69,8 @@ public class DefaultTransactionService implements TransactionService {
 					tx.rollback();
 					throw ExceptionUtils.unchecked(t);
 				} finally {
+					// Hibernate skips remaining synchronizations if an earlier callback throws.
+					idService.clearTransaction(tx);
 					Collection<Runnable> runnables = completionRunnables.remove(tx);
 					if (runnables != null) {
 						for (Runnable runnable: runnables) {

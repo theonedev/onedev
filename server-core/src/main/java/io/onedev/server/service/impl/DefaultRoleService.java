@@ -77,7 +77,7 @@ public class DefaultRoleService extends BaseEntityService<Role> implements RoleS
 	@Override
 	public void replicate(Role role) {
 		getSession().merge(role);
-		idService.useId(Role.class, role.getId());
+		idService.useId(getSession(), Role.class, role.getId());
 
 		var facade = role.getFacade();
 		transactionService.runAfterCommit(() -> cache.put(facade.getId(), facade));

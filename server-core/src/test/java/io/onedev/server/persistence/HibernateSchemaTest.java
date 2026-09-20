@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.data.DefaultDataService;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.EntityIdCounter;
 import io.onedev.server.model.Setting;
 
 public class HibernateSchemaTest {
@@ -68,7 +69,7 @@ public class HibernateSchemaTest {
                             throw new UnsupportedOperationException(method.getName());
                         });
                 data.createTables(connection);
-                assertEquals(99, sql.stream().filter(command -> command.startsWith("create table ")).count(), dialect);
+                assertEquals(100, sql.stream().filter(command -> command.startsWith("create table ")).count(), dialect);
                 assertTrue(sql.stream().noneMatch(command -> command.contains(" foreign key ")));
                 if (dialect.equals("io.onedev.server.persistence.PostgreSQLDialect")) {
                     assertTrue(sql.stream().anyMatch(command -> command.contains(" bytea")));
@@ -89,7 +90,7 @@ public class HibernateSchemaTest {
                 script.addAll(sql);
                 sql.clear();
                 data.cleanDatabase(connection);
-                assertEquals(99, sql.stream().filter(command -> command.startsWith("drop table ")).count(), dialect);
+                assertEquals(100, sql.stream().filter(command -> command.startsWith("drop table ")).count(), dialect);
                 script.addAll(sql);
                 for (var command : script) {
                     assertFalse(command.isBlank() || command.contains("\n") || command.contains("\r"), command);
@@ -186,12 +187,19 @@ public class HibernateSchemaTest {
                     }
                 }
                 var legacySnapshot = snapshot(connection);
-                assertEquals(structure(snapshot), structure(legacySnapshot));
+                // ID counters were added after the Hibernate 5 schema fixture.
+                assertEquals(structure(snapshot.stream()
+                        .filter(line -> !line.contains("\tO_ENTITYIDCOUNTER")).collect(Collectors.toList())),
+                        structure(legacySnapshot));
                 assertConstraintEnforcement(connection);
-                var legacyMetadata = sources.getMetadataBuilder().applyPhysicalNamingStrategy(naming).build();
+                var legacySources = new MetadataSources(registry);
+                var legacyEntities = entities.stream().filter(entity -> entity != EntityIdCounter.class)
+                        .collect(Collectors.toList());
+                legacyEntities.forEach(legacySources::addAnnotatedClass);
+                var legacyMetadata = legacySources.getMetadataBuilder().applyPhysicalNamingStrategy(naming).build();
                 inject(factories, "metadata", legacyMetadata);
                 try (var factory = legacyMetadata.buildSessionFactory(); var session = factory.openSession()) {
-                    for (var entity : entities)
+                    for (var entity : legacyEntities)
                         assertTrue(session.createQuery("from " + entity.getSimpleName(), entity).setMaxResults(1).list().isEmpty());
                     var key = Setting.Key.SYSTEM;
                     try (var insert = connection.prepareStatement("insert into o_Setting (o_id, o_key, o_value) values (?, ?, ?)")) {

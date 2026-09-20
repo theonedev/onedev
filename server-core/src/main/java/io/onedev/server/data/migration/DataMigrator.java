@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -53,9 +54,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.sun.management.OperatingSystemMXBean;
 import com.thoughtworks.xstream.core.JVM;
 
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ClassUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -67,6 +70,8 @@ import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.markdown.MentionParser;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.EntityIdCounter;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueStateHistory;
@@ -87,8 +92,6 @@ import io.onedev.server.util.Pair;
 import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.util.patternset.PatternSet;
-import oshi.SystemInfo;
-import oshi.hardware.HardwareAbstractionLayer;
 
 
 @Singleton
@@ -2771,14 +2774,13 @@ public class DataMigrator {
 					if (key.equals("SYSTEM")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
+							int cpu = Runtime.getRuntime().availableProcessors() * 1000;
+							valueElement.addElement("cpu").setText(String.valueOf(cpu));
 							try {
-								HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
-								int cpu = hardware.getProcessor().getLogicalProcessorCount() * 1000;
-								valueElement.addElement("cpu").setText(String.valueOf(cpu));
-								int memory = (int) (hardware.getMemory().getTotal() / 1024 / 1024);
+								var operatingSystem = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+								int memory = (int) (operatingSystem.getTotalMemorySize() / 1024 / 1024);
 								valueElement.addElement("memory").setText(String.valueOf(memory));
 							} catch (Exception e) {
-								valueElement.addElement("cpu").setText("4000");
 								valueElement.addElement("memory").setText("8000");
 							}
 						}
@@ -4576,13 +4578,7 @@ public class DataMigrator {
 					} else if (key.equals("PERFORMANCE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							int cpuIntensiveTaskConcurrency;
-							try {
-								HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
-								cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount();
-							} catch (Exception e) {
-								cpuIntensiveTaskConcurrency = 4;
-							}
+							int cpuIntensiveTaskConcurrency = Runtime.getRuntime().availableProcessors();
 							valueElement.addElement("cpuIntensiveTaskConcurrency")
 									.setText(String.valueOf(cpuIntensiveTaskConcurrency));
 						}
@@ -9424,6 +9420,37 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
+	}
+
+	private void migrate245(File dataDir, Stack<Integer> versions) {
+		var entityTypes = ClassUtils.findImplementations(AbstractEntity.class, AbstractEntity.class);
+		entityTypes.removeIf(type -> !type.isAnnotationPresent(jakarta.persistence.Entity.class));
+		entityTypes.sort(comparing(Class::getName));
+		var files = dataDir.listFiles();
+		var counters = new VersionedXmlDoc();
+		var list = counters.addElement("list");
+		long counterId = 0;
+		for (var entityType: entityTypes) {
+			long maxId = 0;
+			if (entityType == EntityIdCounter.class) {
+				maxId = entityTypes.size();
+			} else {
+				var fileName = entityType.getSimpleName() + "s.xml";
+				for (var file: files) {
+					if (file.getName().equals(fileName) || file.getName().startsWith(fileName + ".")) {
+						var dom = VersionedXmlDoc.fromFile(file);
+						for (var entity: dom.getRootElement().elements())
+							maxId = Math.max(maxId, Long.parseLong(entity.elementTextTrim("id")));
+					}
+				}
+			}
+			var counter = list.addElement("io.onedev.server.model.EntityIdCounter");
+			counter.addAttribute("revision", "0.0");
+			counter.addElement("id").setText(String.valueOf(++counterId));
+			counter.addElement("entityName").setText(entityType.getName());
+			counter.addElement("maxId").setText(String.valueOf(maxId));
+		}
+		counters.writeToFile(new File(dataDir, "EntityIdCounters.xml"), false);
 	}
 
 }

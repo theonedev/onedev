@@ -41,6 +41,8 @@
 				<configuration>
 					<!-- Give Hazelcast in the test JVM access to required Java internals. -->
 					<argLine>
+						<!-- Mockito's instrumentation appends to the bootstrap classpath. -->
+						-Xshare:off
 						--add-modules=java.se
 						--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED
 						--add-opens=java.base/java.lang=ALL-UNNAMED

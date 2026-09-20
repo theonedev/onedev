@@ -169,7 +169,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	@Override
 	public void replicate(User user) {
 		getSession().merge(user);
-		idService.useId(User.class, user.getId());
+		idService.useId(getSession(), User.class, user.getId());
 		var facade = user.getFacade();
 		if (facade.getId() > 0)
 			transactionService.runAfterCommit(() -> cache.put(facade.getId(), facade));
@@ -833,6 +833,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 		var remoteServer = clusterService.getLocalServerAddress();
 		clusterService.submitToAllServers(new ClusterTask<Void>() {
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public Void call() throws Exception {

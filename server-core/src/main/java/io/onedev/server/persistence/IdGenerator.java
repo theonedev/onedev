@@ -16,8 +16,12 @@ public class IdGenerator implements BeforeExecutionGenerator {
 	@Override
 	public Object generate(SharedSessionContractImplementor session, Object object,
 			Object currentValue, EventType eventType) {
-		return currentValue != null ? currentValue
-				: AppLoader.getInstance(IdService.class).nextId(object.getClass());
+		var idService = AppLoader.getInstance(IdService.class);
+		if (currentValue != null) {
+			idService.useId(session, object.getClass(), (Long) currentValue);
+			return currentValue;
+		}
+		return idService.nextId(session, object.getClass());
 	}
 
 	@Override
