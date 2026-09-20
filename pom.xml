@@ -9,7 +9,7 @@
 		<version>1.4.0</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>16.6.4</version>
+	<version>16.7.0</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -39,6 +39,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<!-- Give Hazelcast in the test JVM access to required Java internals. -->
 					<argLine>
 						<!-- Mockito's instrumentation appends to the bootstrap classpath. -->

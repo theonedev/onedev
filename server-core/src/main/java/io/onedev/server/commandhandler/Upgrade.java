@@ -1099,6 +1099,11 @@ public class Upgrade extends AbstractPlugin {
 						Matcher.quoteReplacement("<file>${logback.logFile}</file>\n\t\t<encoder class=\"ch.qos.logback.core.encoder.LayoutWrappingEncoder\">\n\t\t\t<charset>UTF-8</charset>"));
 			}
 			
+			if (!logbackConfig.contains("io.onedev.server.persistence.HazelcastLocalCacheRegionFactory")) {
+				logbackConfig = Strings.CS.replace(logbackConfig, "<logger name=\"com.hazelcast\" level=\"ERROR\"/>",
+						"<logger name=\"com.hazelcast\" level=\"ERROR\"/>\n\t<logger name=\"io.onedev.server.persistence.HazelcastLocalCacheRegionFactory\" level=\"WARN\"/>");
+			}
+
 			writeStringToFile(logbackConfigFile, logbackConfig, UTF_8);
 			
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
