@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.pullrequests.detail;
 
 import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
-import static io.onedev.server.model.PullRequestReview.Status.EXCLUDED;
+import static io.onedev.server.model.PullRequestReview.Status.PENDING;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -176,6 +173,8 @@ import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
 import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.VisitInfoService;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
 
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
 
@@ -2109,7 +2108,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getAuthUser());
-					return review != null && review.getStatus() != EXCLUDED;
+					return review != null && review.getStatus() == PENDING;
 				} else {
 					return false;
 				}
@@ -2152,7 +2151,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getAuthUser());
-					return review != null && review.getStatus() != EXCLUDED;
+					return review != null && review.getStatus() == PENDING;
 				} else {
 					return false;
 				}
