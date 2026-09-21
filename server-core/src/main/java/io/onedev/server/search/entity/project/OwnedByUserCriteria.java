@@ -36,7 +36,7 @@ public class OwnedByUserCriteria extends OwnedByCriteria {
 		Join<?, ?> userAuthorizationJoin = from.join(Project.PROP_USER_AUTHORIZATIONS, JoinType.LEFT);
 
 		userAuthorizationJoin.on(builder.and(
-				builder.equal(userAuthorizationJoin.get(UserAuthorization.PROP_ROLE), Role.OWNER_ID), 
+				builder.equal(userAuthorizationJoin.get(UserAuthorization.PROP_ROLE).get(Role.PROP_ID), Role.OWNER_ID),
 				builder.equal(userAuthorizationJoin.get(UserAuthorization.PROP_USER), user)));
 		
 		if (user.getGroups().isEmpty()) {
@@ -44,7 +44,7 @@ public class OwnedByUserCriteria extends OwnedByCriteria {
 		} else {
 			Join<?, ?> groupAuthorizationJoin = from.join(Project.PROP_GROUP_AUTHORIZATIONS, JoinType.LEFT);
 			groupAuthorizationJoin.on(builder.and(
-					builder.equal(groupAuthorizationJoin.get(GroupAuthorization.PROP_ROLE), Role.OWNER_ID), 
+					builder.equal(groupAuthorizationJoin.get(GroupAuthorization.PROP_ROLE).get(Role.PROP_ID), Role.OWNER_ID),
 					groupAuthorizationJoin.get(GroupAuthorization.PROP_GROUP).in(user.getGroups())));
 			return builder.or(userAuthorizationJoin.isNotNull(), groupAuthorizationJoin.isNotNull());
 		}

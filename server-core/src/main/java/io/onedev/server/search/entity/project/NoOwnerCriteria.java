@@ -25,9 +25,9 @@ public class NoOwnerCriteria extends Criteria<Project> {
 		Join<?, ?> groupAuthorizationJoin = from.join(Project.PROP_GROUP_AUTHORIZATIONS, JoinType.LEFT);
 
 		userAuthorizationJoin.on(builder.equal(
-				userAuthorizationJoin.get(UserAuthorization.PROP_ROLE), Role.OWNER_ID));
+				userAuthorizationJoin.get(UserAuthorization.PROP_ROLE).get(Role.PROP_ID), Role.OWNER_ID));
 		groupAuthorizationJoin.on(
-				builder.equal(groupAuthorizationJoin.get(GroupAuthorization.PROP_ROLE), Role.OWNER_ID));
+				builder.equal(groupAuthorizationJoin.get(GroupAuthorization.PROP_ROLE).get(Role.PROP_ID), Role.OWNER_ID));
 		return builder.and(userAuthorizationJoin.isNull(), groupAuthorizationJoin.isNull());
 	}
 
