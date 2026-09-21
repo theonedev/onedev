@@ -4,6 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,8 +38,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LinearRange;
@@ -168,7 +167,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(settingService.getAiSetting().getLiteModelSetting() == null && symbolHits.size() > 1);
+				setVisible(settingService.getAiSetting().getJevSetting() == null && symbolHits.size() > 1);
 			}
 
 		});
@@ -323,7 +322,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					target.add(content);
 
 					CharSequence callback;
-					if (settingService.getAiSetting().getLiteModelSetting() != null && symbolHits.size() > 1)
+					if (settingService.getAiSetting().getJevSetting() != null && symbolHits.size() > 1)
 						callback = getCallbackFunction(explicit("action"));
 					else 
 						callback = "undefined";
@@ -338,10 +337,14 @@ public abstract class SymbolTooltipPanel extends Panel {
 					}
 					target.appendJavaScript(script);
 				} else {
-					var liteModel = settingService.getAiSetting().getLiteModel();
+					var jevSetting = settingService.getAiSetting().getJevSetting();
 					int index;
 					try {
-						var jsonOfSymbolHits = objectMapper.writeValueAsString(symbolHits);
+						if (jevSetting == null)
+							throw new ExplicitException("Jev is not configured");
+						var criteria = new LinkedHashMap<String, String>();
+						for (int i = 0; i < symbolHits.size(); i++)
+							criteria.put(String.valueOf(i), objectMapper.writeValueAsString(symbolHits.get(i)));
 						
 						var symbolContext = getSymbolContext(symbolPosition, SYMBOL_BEGIN, SYMBOL_END, OMITTED_LINES, 
 								START_CONTEXT_SIZE, BEFORE_CONTEXT_SIZE, AFTER_CONTEXT_SIZE);
@@ -353,25 +356,13 @@ public abstract class SymbolTooltipPanel extends Panel {
 							"note", String.format("Symbol is between %s and %s in the context", SYMBOL_BEGIN, SYMBOL_END)
 						);
 						var jsonOfSymbolOccurrence = objectMapper.writeValueAsString(occurrenceMap);
-						var systemMessage = new SystemMessage("""
-								You are familiar with various programming languages. Given a json object of symbol 
-								occurrence information, and a json array of possible symbol definitions, please 
-								determine the most likely definition for occurred symbol and return its index in 
-								the array. Symbol definition may contain parent symbol, and this is where the 
-								symbol is defined inside (namespace, package etc). The @type property in symbol 
-								definition means category/kind of the symbol (type, method, variable etc).
-
-								IMPORTANT: only return index of the definition, no other text or comments.
-								""");
-
-						var userMessage = new UserMessage(String.format("""
-								Symbol occurrence information json: 
-								%s
-
-								Possible symbol definitions json:
-								%s
-								""", jsonOfSymbolOccurrence, jsonOfSymbolHits));
-						index = Integer.parseInt(liteModel.chat(systemMessage, userMessage).aiMessage().text());
+						index = Integer.parseInt(jevSetting.choose(jsonOfSymbolOccurrence, """
+								Determine the most likely definition for the symbol occurrence in the state.
+								Each choice describes a possible symbol definition as JSON. A parent symbol
+								indicates where the symbol is defined (namespace, package, etc.). The @type
+								property indicates the kind of symbol (type, method, variable, etc.).
+								Use the source context, imports, and enclosing scope to select the definition.
+								""", criteria));
 						if (index < 0 || index >= symbolHits.size())
 							Session.get().warn("Unable to find most likely definition");
 					} catch (Exception e) {

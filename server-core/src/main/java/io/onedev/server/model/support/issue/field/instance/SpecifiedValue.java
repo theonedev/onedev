@@ -31,7 +31,7 @@ public class SpecifiedValue implements ValueProvider {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof SpecifiedValue)) 
+		if (other == null || getClass() != other.getClass())
 			return false;
 		if (this == other)
 			return true;

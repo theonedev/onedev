@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.issue.fieldinstance;
 
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.model.support.issue.field.instance.IgnoreValue;
+import io.onedev.server.model.support.issue.field.instance.JevDecideValue;
 import io.onedev.server.model.support.issue.field.instance.ScriptingValue;
 import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
 import io.onedev.server.web.editable.PropertyContext;
@@ -39,7 +40,9 @@ class FieldListViewPanel extends Panel {
 			container.add(new Label("name", field.getName()));
 			
 			if (field.getValueProvider() instanceof SpecifiedValue) {
-				if (field.isSecret())
+				if (field.getValueProvider() instanceof JevDecideValue)
+					container.add(new Label("valueProvider", JevDecideValue.DISPLAY_NAME + " (default value below)"));
+				else if (field.isSecret())
 					container.add(new Label("valueProvider", SpecifiedValue.SECRET_DISPLAY_NAME));
 				else
 					container.add(new Label("valueProvider", SpecifiedValue.DISPLAY_NAME));

@@ -178,7 +178,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				} finally {
 					HierarchicalContext.pop();
 				}
-				PropertyEditor<Serializable> propertyEditor = property.renderForEdit("value", Model.of(propertyValue)); 
+				PropertyEditor<Serializable> propertyEditor = newPropertyEditor("value", property, Model.of(propertyValue));
 				add(propertyEditor);
 				
 				Label descriptionLabel = new Label("description", property.getDescriptor().getDescription());
@@ -244,6 +244,11 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			propertyContainer.add(AttributeAppender.append("class", "d-none"));
 
 		return propertyContainer;
+	}
+
+	protected PropertyEditor<Serializable> newPropertyEditor(String id, PropertyContext<Serializable> property,
+			IModel<Serializable> model) {
+		return property.renderForEdit(id, model);
 	}
 
 	public PropertyContext<Serializable> getPropertyContext(String propertyName) {

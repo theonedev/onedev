@@ -356,6 +356,7 @@ jobs:
 
         cd e2e-test
         npm install
+        npm run install:mail-server
         CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results
     runAs: 0:0
     useTTY: true

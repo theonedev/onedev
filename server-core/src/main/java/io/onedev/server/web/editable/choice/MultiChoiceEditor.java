@@ -10,6 +10,9 @@ import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -133,6 +136,14 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 		
         add(input);
     }
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(new ChoiceEditorResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript(String.format(
+				"onedev.server.choiceEditor.init('%s', '%s');", getMarkupId(), input.getMarkupId())));
+	}
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {

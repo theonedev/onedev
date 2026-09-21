@@ -132,7 +132,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			System.setProperty("hsqldb.reconfig_logging", "false");
 			System.setProperty("hsqldb.method_class_names", "java.lang.Math");
 
-			starting("Starting cluster (all servers must run the same OneDev version)");
+			starting("Starting cluster");
 			clusterService.start();
 			starting("Initializing database");
 			sessionFactoryService.start();

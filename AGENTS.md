@@ -18,3 +18,6 @@ repository root. The server can hot-load changed classes. Use `./dev.sh build`
 to compile them; the first run performs a full compile, while subsequent runs
 compile only the changes. Watch the server console for reload errors and
 restart the server if one occurs.
+
+If you start the development server for a task, stop it with `./dev.sh stop`
+when the task is finished.

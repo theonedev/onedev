@@ -11,6 +11,7 @@ import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.page.admin.aisetting.ChatPreserveDaysPage;
 import io.onedev.server.web.page.admin.aisetting.ChatPromptsPage;
 import io.onedev.server.web.page.admin.aisetting.LiteModelPage;
+import io.onedev.server.web.page.admin.aisetting.JevPage;
 import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
@@ -381,6 +382,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/alert", AlertSettingPage.class));
 		add(new BasePageMapper("~administration/settings/performance", PerformanceSettingPage.class));
 		add(new BasePageMapper("~administration/settings/lite-ai-model", LiteModelPage.class));
+		add(new BasePageMapper("~administration/settings/jev", JevPage.class));
 		add(new BasePageMapper("~administration/settings/chat-prompts", ChatPromptsPage.class));
 		add(new BasePageMapper("~administration/settings/chat-preserve-days", ChatPreserveDaysPage.class));
 		add(new BasePageMapper("~administration/settings/backup", DatabaseBackupPage.class));

@@ -12,6 +12,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.model.support.AiModelSetting;
+import io.onedev.server.model.support.JevSetting;
 
 @Editable
 public class AiSetting implements Serializable {
@@ -33,6 +34,8 @@ public class AiSetting implements Serializable {
 
         Create exactly one issue. If you find problems with the created issue, report them instead of creating additional issues.""";
 
+    public static final String PROP_JEV_SETTING = "jevSetting";
+
     public static final String PROP_LITE_MODEL_SETTING = "liteModelSetting";
 
     public static final String PROP_CODE_EXPLANATION_PROMPT = "codeExplanationPrompt";
@@ -46,6 +49,8 @@ public class AiSetting implements Serializable {
     public static final String PROP_CHAT_PRESERVE_DAYS = "chatPreserveDays";
     
     private AiModelSetting liteModelSetting;
+
+    private JevSetting jevSetting;
 
     private String codeExplanationPrompt = DEFAULT_CODE_EXPLANATION_PROMPT;
 
@@ -65,6 +70,16 @@ public class AiSetting implements Serializable {
 
     public void setLiteModelSetting(AiModelSetting liteModelSetting) {
         this.liteModelSetting = liteModelSetting;
+    }
+
+    @Editable(order=150)
+    @Nullable
+    public JevSetting getJevSetting() {
+        return jevSetting;
+    }
+
+    public void setJevSetting(JevSetting jevSetting) {
+        this.jevSetting = jevSetting;
     }
 
     @Nullable

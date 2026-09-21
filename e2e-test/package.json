@@ -11,9 +11,11 @@
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
-    "install:browsers": "playwright install chromium"
+    "install:browsers": "playwright install chromium",
+    "install:mail-server": "mvn -q org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy -Dartifact=com.icegreen:greenmail-standalone:2.1.14:jar -DoutputDirectory=target"
   },
   "devDependencies": {
-    "@playwright/test": "1.62.1"
+    "@playwright/test": "1.62.1",
+    "nodemailer": "10.0.10"
   }
 }

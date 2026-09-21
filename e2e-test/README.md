@@ -5,12 +5,14 @@ the OneDev web interface in Chromium.
 
 ## Setup
 
-Node.js 20 or newer is required.
+Node.js 20 or newer is required. The service desk tests also require Java and
+Maven to install and run the local GreenMail server.
 
 ```bash
 cd e2e-test
 npm install
 npm run install:browsers
+npm run install:mail-server
 ```
 
 ## Run the tests
@@ -121,3 +123,63 @@ or logging configuration. For an existing server, set `E2E_ADMIN_USER` and
 ```bash
 npm test -- tests/websocket-*.spec.js
 ```
+
+## Jev issue suggestions
+
+`tests/jev-issue-suggestions.spec.js` configures a fake API key and tests the real
+new-issue form against a local HTTP mock. It verifies the outgoing authorization,
+model, title, description and choice questions; saving suggested values;
+ignoring low-confidence/unknown choices; preserving a manual choice; and
+discarding a response after the title changes.
+
+Jev requests originate in the Java server, so browser request interception cannot
+mock them. The fixture starts a local HTTP server on an automatically assigned
+port, then saves its URL and a fake API key through the Jev settings page. It
+restores the original settings afterward. Jev's normal base URL defaults to
+`https://api.typesafe.ai/v1`; custom URLs can include a port, and `/systemone` is
+appended automatically.
+
+```bash
+npm test -- tests/jev-issue-suggestions.spec.js
+```
+
+These tests also work with an already-running local OneDev server:
+
+```bash
+E2E_SKIP_WEBSERVER=1 npm test -- tests/jev-issue-suggestions.spec.js
+```
+
+Use one worker and a dedicated test server with the default Type and Priority
+fields: the fixture temporarily removes their defaults and changes Jev settings,
+restoring both after each case. No special server startup options are needed.
+
+The mock listens on the test runner's loopback interface, so run the Java server
+on the same host. No real Jev key or external API calls are needed.
+
+## Jev service desk fields
+
+`tests/jev-service-desk.spec.js` sends a generated email over SMTP to a local
+[GreenMail](https://greenmail-mail-test.github.io/greenmail/) mailbox. OneDev's
+real SMTP/IMAP connector polls that mailbox and creates the issue through the
+service desk. The tests reuse the Jev mock in `tests/jev-fixtures.js`.
+
+Install the pinned standalone mail server once (requires Maven and Java), then
+run both Jev suites:
+
+```bash
+npm run install:mail-server
+npm test -- tests/jev-*.spec.js
+```
+
+The mail fixture starts and stops GreenMail automatically on local ports. It
+waits for OneDev to poll the empty inbox before sending, because OneDev skips
+pre-existing messages on its first connection. Outgoing notifications also stay
+inside GreenMail. Its protocol log is attached to each test result.
+
+The tests verify created issue fields and configured fallbacks for low-confidence
+or unknown answers and API failures.
+
+Use a dedicated server and one worker, as with the new-issue form tests. Test
+settings are restored, and test projects and users are removed. No external
+mailbox, SMTP credentials or real Jev key is
+required. Both Jev suites run as part of the normal test run.

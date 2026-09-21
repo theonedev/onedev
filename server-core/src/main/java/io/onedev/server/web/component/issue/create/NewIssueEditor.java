@@ -6,17 +6,21 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxCallListener;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
@@ -29,11 +33,15 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.convert.ConversionException;
+import org.apache.wicket.util.visit.IVisitor;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unbescape.javascript.JavaScriptEscape;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
 
 import io.onedev.server.OneDev;
@@ -45,15 +53,19 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.JevSetting.ChoiceQuestion;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.model.support.issue.field.FieldUtils;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entitytext.IssueTextService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueService;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -67,12 +79,21 @@ import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.WicketUtils;
+import jakarta.inject.Inject;
 
 public abstract class NewIssueEditor extends FormComponentPanel<Issue> implements InputContext {
 
+	private static final Logger logger = LoggerFactory.getLogger(NewIssueEditor.class);
+
 	private static final int MAX_SIMILAR_ISSUES = 5;
+
+	@Inject
+	private ObjectMapper objectMapper;
+
 	private String uuid = UUID.randomUUID().toString();
 	
 	private TextField<String> titleInput;
@@ -92,6 +113,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	private String editingTitle;
 	
 	private AbstractPostAjaxBehavior ajaxBehavior;
+
+	private AbstractPostAjaxBehavior autoFillBehavior;
 	
 	public NewIssueEditor(String id) {
 		super(id, Model.of((Issue)null));
@@ -100,6 +123,25 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		setOutputMarkupId(true);
+		add(autoFillBehavior = new AbstractPostAjaxBehavior() {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new AjaxCallListener()
+						.onBeforeSend(String.format("onedev.server.newIssue.beginSuggestions('%s', attrs, '%s');",
+								getMarkupId(), JavaScriptEscape.escapeJavaScript(_T("Suggesting..."))))
+						.onComplete("onedev.server.newIssue.endSuggestions(attrs);"));
+			}
+
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				suggestFieldValues(target);
+			}
+
+		});
 
 		Issue issue = newIssue();
 		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass(true);
@@ -235,8 +277,19 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		
 		Collection<String> properties = FieldUtils.getEditablePropertyNames(getProject(), 
 				fieldBeanClass, fieldNames);
-		add(fieldEditor = new BeanContext(fieldBean.getClass(), properties, false)
-				.renderForEdit("fields", Model.of(fieldBean)));
+		var fieldContext = new BeanContext(fieldBean.getClass(), properties, false);
+		add(fieldEditor = new BeanEditor("fields", fieldContext.getDescriptor(), Model.of(fieldBean)) {
+
+			@Override
+			protected PropertyEditor<Serializable> newPropertyEditor(String id, PropertyContext<Serializable> property,
+					IModel<Serializable> model) {
+				var editor = super.newPropertyEditor(id, property, model);
+				if (OneDev.getInstance(SettingService.class).getAiSetting().getJevSetting() != null && isAutoFillField(editor))
+					editor.add(AttributeAppender.append("class", "jev-suggest"));
+				return editor;
+			}
+
+		});
 		
 		var estimatedTimeEditBean = new EstimatedTimeEditBean();
 		add(estimatedTimeEditor = new BeanContext(EstimatedTimeEditBean.class)
@@ -347,12 +400,11 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		
-		if (event.getPayload() instanceof BeanUpdating) {
+		if (event.getPayload() instanceof BeanUpdating beanUpdating) {
 			try {
 				Issue issue = getEditingIssue();
 				String descriptionTemplate = getDescriptionTemplate(issue);
 				if (!Objects.equal(descriptionTemplate, lastDescriptionTemplate)) {
-					BeanUpdating beanUpdating = (BeanUpdating)event.getPayload();
 					CallbackParameter description = CallbackParameter.explicit("description");
 					CallbackParameter template = CallbackParameter.explicit("template");
 					String script = String.format("var callback=%s;callback($('.new-issue>.description textarea').val(), '%s');", 
@@ -362,14 +414,75 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 				}
 			} catch (ConversionException e) {
 			}
+			beanUpdating.getHandler().appendJavaScript(String.format(
+					"onedev.server.newIssue.fieldsUpdated('%s');", getMarkupId()));
 		}
 		
 	}
 	
+	private boolean isAutoFillField(PropertyEditor<?> editor) {
+		var field = getInputSpec(editor.getDescriptor().getDisplayName());
+		return field instanceof ChoiceField choice && editor.getDescriptor().isPropertyRequired()
+				&& (choice.isAllowMultiple() ? choice.getDefaultMultiValueProvider() == null
+						: choice.getDefaultValueProvider() == null);
+	}
+
+	private void suggestFieldValues(AjaxRequestTarget target) {
+		var jevSetting = OneDev.getInstance(SettingService.class).getAiSetting().getJevSetting();
+		if (jevSetting == null)
+			return;
+		var params = RequestCycle.get().getRequest().getPostParameters();
+		var title = params.getParameterValue("title").toString("");
+		var description = params.getParameterValue("description").toString("");
+		if (StringUtils.isBlank(title))
+			return;
+		Project.push(getProject());
+		try {
+			var requestedFields = objectMapper.readTree(params.getParameterValue("fields").toString("[]"));
+			var fieldIds = new ArrayList<String>();
+			requestedFields.forEach(it -> fieldIds.add(it.asText()));
+			var questions = new LinkedHashMap<String, ChoiceQuestion>();
+			fieldEditor.visitChildren(PropertyEditor.class, (IVisitor<PropertyEditor<?>, Void>) (editor, visit) -> {
+				visit.dontGoDeeper();
+				if (isAutoFillField(editor) && editor.isVisibleInHierarchy()) {
+					var value = editor.getConvertedInput();
+					if (fieldIds.contains(editor.getMarkupId())
+							&& (value == null || value instanceof Collection<?> values && values.isEmpty())) {
+						var field = (ChoiceField) getInputSpec(editor.getDescriptor().getDisplayName());
+						HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(editor)));
+						try {
+							var question = FieldUtils.getChoiceQuestion(field);
+							if (question != null)
+								questions.put(editor.getMarkupId(), question);
+						} finally {
+							HierarchicalContext.pop();
+						}
+					}
+				}
+			});
+			if (!questions.isEmpty()) {
+				var suggestions = FieldUtils.suggestFieldValues(jevSetting, getProject(), title, description, questions);
+				target.appendJavaScript(String.format("onedev.server.newIssue.applySuggestions('%s', %s, %s);",
+						getMarkupId(), params.getParameterValue("revision").toLong(), objectMapper.writeValueAsString(suggestions)));
+			}
+		} catch (Exception e) {
+			logger.warn("Unable to suggest issue field values with Jev", e);
+		} finally {
+			Project.pop();
+		}
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new NewIssueCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new NewIssueResourceReference()));
+		var callback = autoFillBehavior.getCallbackFunction(
+				CallbackParameter.explicit("title"),
+				CallbackParameter.explicit("description"),
+				CallbackParameter.explicit("fields"),
+				CallbackParameter.explicit("revision"));
+		response.render(OnDomReadyHeaderItem.forScript(String.format("onedev.server.newIssue.init('%s', %s);",
+				getMarkupId(), callback)));
 	}
 
 	@Override

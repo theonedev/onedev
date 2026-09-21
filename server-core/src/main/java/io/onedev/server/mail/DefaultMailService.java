@@ -787,8 +787,7 @@ public class DefaultMailService implements MailService, Serializable {
 		
 		IssueCreationSetting issueCreationSetting = settingService.getServiceDeskSetting().getIssueCreationSetting(project);
 		issue.setConfidential(issueCreationSetting.isConfidential());
-		for (Map.Entry<String, Object> entry: FieldUtils.getFieldValues(project, issueCreationSetting.getIssueFields()).entrySet())
-			issue.setFieldValue(entry.getKey(), entry.getValue());
+		FieldUtils.populateFields(issue, issueCreationSetting.getIssueFields());
 
 		var notifyEmailAddresses = receiverInternetAddresses.stream().map(InternetAddress::getAddress).collect(toSet());
 		notifyEmailAddresses.add(submitterInternetAddress.getAddress());

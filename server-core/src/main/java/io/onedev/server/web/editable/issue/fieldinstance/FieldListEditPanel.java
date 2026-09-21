@@ -31,14 +31,17 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.FieldNamesProvider;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.model.support.issue.field.instance.IgnoreValue;
+import io.onedev.server.model.support.issue.field.instance.JevDecideValue;
 import io.onedev.server.model.support.issue.field.instance.ScriptingValue;
 import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
 import io.onedev.server.model.support.issue.field.instance.ValueProvider;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.SecretField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -139,6 +142,10 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 						choices.add(IgnoreValue.DISPLAY_NAME);
 					} else {
 						choices.add(SpecifiedValue.DISPLAY_NAME);
+						if (getDescriptor().getBeanClass() == IssueCreationSetting.class
+								&& getFieldSpecs().get(property.getDisplayName()) instanceof ChoiceField
+								&& OneDev.getInstance(SettingService.class).getAiSetting().getJevSetting() != null)
+							choices.add(JevDecideValue.DISPLAY_NAME);
 						choices.add(ScriptingValue.DISPLAY_NAME);
 						choices.add(IgnoreValue.DISPLAY_NAME);
 					}
@@ -153,6 +160,8 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 							Class<?> valueProviderClass = (Class<?>) container.getDefaultModelObject();
 							if (valueProviderClass == SpecifiedValue.class)
 								return isSecret?SpecifiedValue.SECRET_DISPLAY_NAME:SpecifiedValue.DISPLAY_NAME;
+							else if (valueProviderClass == JevDecideValue.class)
+								return JevDecideValue.DISPLAY_NAME;
 							else if (valueProviderClass == ScriptingValue.class)
 								return isSecret?ScriptingValue.SECRET_DISPLAY_NAME:ScriptingValue.DISPLAY_NAME;
 							else
@@ -164,6 +173,8 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 							ValueProvider valueProvider;
 							if (object.equals(SpecifiedValue.DISPLAY_NAME) || object.equals(SpecifiedValue.SECRET_DISPLAY_NAME))  
 								valueProvider = new SpecifiedValue();
+							else if (object.equals(JevDecideValue.DISPLAY_NAME))
+								valueProvider = new JevDecideValue();
 							else if (object.equals(ScriptingValue.DISPLAY_NAME) || object.equals(ScriptingValue.SECRET_DISPLAY_NAME))
 								valueProvider = new ScriptingValue();
 							else
@@ -186,6 +197,13 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 						
 					});
 					container.add(valueProviderChoice);
+					container.add(new Label("defaultValue", "Default value (used when confidence is below 85% or Jev is unavailable)") {
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setVisible(container.getDefaultModelObject() == JevDecideValue.class);
+						}
+					});
 					
 					container.add(new Label("description", property.getDescription()).setEscapeModelStrings(false));
 					container.add(new FencedFeedbackPanel("feedback", container));
@@ -264,8 +282,8 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 			if (container.get("value") instanceof PropertyEditor) {
 				PropertyEditor<Serializable> propertyEditor = (PropertyEditor<Serializable>) container.get("value");
 				Class<?> valueProviderClass = (Class<?>) container.getDefaultModelObject();
-				if (valueProviderClass == SpecifiedValue.class) {
-					SpecifiedValue specifiedValue = new SpecifiedValue();
+				if (valueProviderClass == SpecifiedValue.class || valueProviderClass == JevDecideValue.class) {
+					SpecifiedValue specifiedValue = valueProviderClass == JevDecideValue.class ? new JevDecideValue() : new SpecifiedValue();
 					Object propertyValue = propertyEditor.getConvertedInput();
 					specifiedValue.setValue(fieldSpec.convertToStrings(propertyValue));
 					field.setValueProvider(specifiedValue);
