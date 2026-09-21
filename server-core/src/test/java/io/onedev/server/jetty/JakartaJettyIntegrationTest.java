@@ -153,11 +153,28 @@ public class JakartaJettyIntegrationTest {
         var server = new Server();
         var connector = new LocalConnector(server);
         server.addConnector(connector);
-        server.setHandler(new ProbeHandler(() -> false));
+        var ready = new java.util.concurrent.atomic.AtomicBoolean();
+        var stage = new java.util.concurrent.atomic.AtomicReference<>("Starting cluster");
+        server.setHandler(new ProbeHandler(ready::get, stage::get));
         try {
             server.start();
             assertTrue(connector.getResponse(request("GET", "/healthz")).contains("200 OK"));
-            assertTrue(connector.getResponse(request("GET", "/readyz")).contains("503 Service Unavailable"));
+            for (String message : new String[] {"Starting cluster", "Initializing database", "Starting services"}) {
+                stage.set(message);
+                var response = org.eclipse.jetty.http.HttpTester.parseResponse(
+                        connector.getResponse(request("GET", "/readyz")));
+                assertEquals(503, response.getStatus());
+                assertEquals(message + "\n", response.getContent());
+                assertEquals("no-store", response.get("Cache-Control"));
+            }
+            String notReadyHead = connector.getResponse(request("HEAD", "/readyz"));
+            assertTrue(notReadyHead.contains("503 Service Unavailable"));
+            assertEquals("", notReadyHead.substring(notReadyHead.indexOf("\r\n\r\n") + 4));
+            ready.set(true);
+            var response = org.eclipse.jetty.http.HttpTester.parseResponse(
+                    connector.getResponse(request("GET", "/readyz")));
+            assertEquals(200, response.getStatus());
+            assertEquals("ok\n", response.getContent());
             String head = connector.getResponse(request("HEAD", "/healthz"));
             assertFalse(head.substring(head.indexOf("\r\n\r\n") + 4).contains("ok"));
             String post = connector.getResponse(request("POST", "/healthz"));

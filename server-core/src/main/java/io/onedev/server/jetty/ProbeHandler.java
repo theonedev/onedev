@@ -3,6 +3,7 @@ package io.onedev.server.jetty;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -19,8 +20,15 @@ public class ProbeHandler extends Handler.Abstract {
 
 	private final BooleanSupplier readiness;
 
+	private final Supplier<String> notReadyReason;
+
 	public ProbeHandler(BooleanSupplier readiness) {
+		this(readiness, () -> "not ready");
+	}
+
+	public ProbeHandler(BooleanSupplier readiness, Supplier<String> notReadyReason) {
 		this.readiness = readiness;
+		this.notReadyReason = notReadyReason;
 	}
 
 	@Override
@@ -49,7 +57,7 @@ public class ProbeHandler extends Handler.Abstract {
 		response.getHeaders().put("Content-Type", "text/plain;charset=UTF-8");
 		response.getHeaders().put("Cache-Control", "no-store");
 		String body = status == HttpServletResponse.SC_OK ? "ok\n"
-				: status == HttpServletResponse.SC_SERVICE_UNAVAILABLE ? "not ready\n" : "";
+				: status == HttpServletResponse.SC_SERVICE_UNAVAILABLE ? notReadyReason.get() + "\n" : "";
 		response.write(true, request.getMethod().equals("HEAD") ? null
 				: ByteBuffer.wrap(body.getBytes(StandardCharsets.UTF_8)), callback);
 	}

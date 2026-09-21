@@ -1,0 +1,127 @@
+{{- $upgrade := .Values.onedev.upgrade | default dict -}}
+{{- if and .Release.IsUpgrade (dig "stopAllServers" true $upgrade) -}}
+{{- $strategy := .Values.onedev.updateStrategy | default dict -}}
+{{- $rollingUpdate := $strategy.rollingUpdate | default dict -}}
+{{- if ne (int (default 0 $rollingUpdate.partition)) 0 -}}
+{{- fail "onedev.updateStrategy.rollingUpdate.partition must be 0 when onedev.upgrade.stopAllServers is true; a nonzero partition can restart servers with the old image after stopping them" -}}
+{{- end -}}
+{{- $name := printf "%s-upgrade" (include "ods.fullname" . | trunc 55 | trimSuffix "-") -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-30"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-20"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+rules:
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    resourceNames: [{{ include "ods.fullname" . | quote }}]
+    verbs: ["get"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets/scale"]
+    resourceNames: [{{ include "ods.fullname" . | quote }}]
+    verbs: ["patch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-10"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: {{ add (int (default 240 $upgrade.stopTimeoutSeconds)) 30 }}
+  template:
+{{- if or $upgrade.podLabels $upgrade.podAnnotations }}
+    metadata:
+{{- with $upgrade.podLabels }}
+      labels: {{ toYaml . | nindent 8 }}
+{{- end }}
+{{- with $upgrade.podAnnotations }}
+      annotations: {{ toYaml . | nindent 8 }}
+{{- end }}
+{{- end }}
+    spec:
+      serviceAccountName: {{ $name }}
+      restartPolicy: Never
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+{{- if .Values.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.image.pullSecrets | nindent 8 }}
+{{- end }}
+{{- if .Values.nodeSelector }}
+      nodeSelector: {{ toYaml .Values.nodeSelector | nindent 8 }}
+{{- end }}
+{{- if .Values.tolerations }}
+      tolerations: {{ toYaml .Values.tolerations | nindent 8 }}
+{{- end }}
+      containers:
+        - name: stop-servers
+          image: {{ default "docker.io/library/python:3.13-alpine" $upgrade.image | quote }}
+          command: ["python3", "-c"]
+          args:
+            - |
+{{ .Files.Get "files/stop-servers.py" | indent 14 }}
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: STATEFULSET_NAME
+              value: {{ include "ods.fullname" . | quote }}
+            - name: TARGET_IMAGE
+              value: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+            - name: STOP_TIMEOUT
+              value: {{ default 240 $upgrade.stopTimeoutSeconds | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+{{- end }}

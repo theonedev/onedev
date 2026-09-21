@@ -115,8 +115,10 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	@Override
 	public void start() {
 		var maintenanceFile = getMaintenanceFile(Bootstrap.installDir);
-		try (var ignored = MaintenanceProbeServer.start(Bootstrap.installDir)) {
+		try (var ignored = MaintenanceProbeServer.start(Bootstrap.installDir,
+				() -> "not ready: " + initStage.getMessage())) {
 			while (maintenanceFile.exists()) {
+				initStage = new InitStage("Maintenance in progress");
 				logger.info("Maintenance in progress, waiting...");
 				try {
 					Thread.sleep(5000);
@@ -130,7 +132,9 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			System.setProperty("hsqldb.reconfig_logging", "false");
 			System.setProperty("hsqldb.method_class_names", "java.lang.Math");
 
+			starting("Starting cluster (all servers must run the same OneDev version)");
 			clusterService.start();
+			starting("Initializing database");
 			sessionFactoryService.start();
 			taskScheduler.start();
 
@@ -151,6 +155,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 
 			idService.init();
 
+			starting("Starting services");
 			sessionService.run(() -> listenerRegistry.post(new SystemStarting()));
 		}
 		jettyServiceProvider.get().start();
@@ -324,6 +329,11 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	 */
 	public @Nullable InitStage getInitStage() {
 		return initStage;
+	}
+
+	private void starting(String message) {
+		initStage = new InitStage(message);
+		logger.info(message);
 	}
 
 	public boolean isReady() {

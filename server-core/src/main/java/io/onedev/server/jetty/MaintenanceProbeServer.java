@@ -3,6 +3,7 @@ package io.onedev.server.jetty;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.function.Supplier;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
@@ -25,6 +26,10 @@ public class MaintenanceProbeServer implements AutoCloseable {
 	}
 
 	public static MaintenanceProbeServer start(File installDir) {
+		return start(installDir, () -> "not ready: maintenance in progress");
+	}
+
+	public static MaintenanceProbeServer start(File installDir, Supplier<String> notReadyReason) {
 		var server = new Server();
 		ServerConfig serverConfig = null;
 		try {
@@ -35,7 +40,7 @@ public class MaintenanceProbeServer implements AutoCloseable {
 			connector.setHost(serverConfig.getHttpHost());
 			connector.setPort(serverConfig.getHttpPort());
 			server.addConnector(connector);
-			server.setHandler(new ProbeHandler(() -> false) {
+			server.setHandler(new ProbeHandler(() -> false, notReadyReason) {
 				@Override
 				public boolean handle(Request request, Response response, Callback callback) {
 					// Agents may connect before the main server takes over this port.

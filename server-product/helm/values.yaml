@@ -17,6 +17,26 @@ onedev:
   # onedev.updateStrategy -- Valid options: `RollingUpdate`, `OnDelete`
   updateStrategy:
     type: RollingUpdate
+  upgrade:
+    # onedev.upgrade.stopAllServers -- Stop all OneDev servers in this release before Helm applies a
+    # new image, then restore the configured replica count. Required for shared database migrations
+    # and incompatible cluster versions. Image upgrades require downtime; unchanged images skip shutdown.
+    # Set false only if external deployment tooling coordinates shutdown. This does not disable upgrades.
+    stopAllServers: true
+    # onedev.upgrade.image -- Python 3 image used by the pre-upgrade hook. Override for a private mirror.
+    image: docker.io/library/python:3.13-alpine
+    # onedev.upgrade.stopTimeoutSeconds -- Maximum time to wait for old OneDev pods to terminate
+    # after requesting shutdown. The hook Job's overall deadline is this value plus 30 seconds,
+    # including scheduling and image pulling. Set helm --timeout separately to allow for the hook
+    # and application startup.
+    stopTimeoutSeconds: 240
+    # onedev.upgrade.podLabels -- Labels for the upgrade hook pod, independent of application pod labels.
+    # Use these to disable sidecar injection when needed so the hook Job can finish.
+    podLabels: {}
+      # sidecar.istio.io/inject: "false"
+    # onedev.upgrade.podAnnotations -- Annotations for the upgrade hook pod, independent of application
+    # pod annotations. Set annotation-based sidecar injection controls here when needed.
+    podAnnotations: {}
   trustCerts:
     # onedev.trustCerts.secretName -- Name of an existing secret containing trusted certificates. You may create the
     # secret with "kubectl create secret generic onedev-trustcerts -n onedev --from-file=/path/to/trust-certs",
@@ -326,10 +346,26 @@ dnsConfig: {}
 
 # livenessProbe -- Specify the livenessProbe
 # [configuration](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes).
-# OneDev provides `/healthz`; allow for a brief outage while it switches to maintenance mode.
-livenessProbe: {}
+# Allow startup time and brief outages when switching between application and maintenance servers.
+# Set to null to disable.
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 300
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 6
 
 # readinessProbe -- Specify the readinessProbe
 # [configuration](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes).
 # OneDev provides `/readyz` for readiness checks. It returns 503 during startup, shutdown, and maintenance.
-readinessProbe: {}
+# Set to null to disable.
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
