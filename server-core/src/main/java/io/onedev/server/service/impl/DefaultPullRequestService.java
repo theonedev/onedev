@@ -795,7 +795,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Sessional
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
-		if (build.getRequest() != null && build.getRequest().isOpen()) {
+		if (!event.isMinor() && build.getRequest() != null && build.getRequest().isOpen()) {
 			if (build.getCommitHash().equals(build.getRequest().getBuildCommitHash()))
 				listenerRegistry.post(new PullRequestBuildEvent(build));
 		}

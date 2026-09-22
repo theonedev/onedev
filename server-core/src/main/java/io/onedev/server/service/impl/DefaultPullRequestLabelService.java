@@ -2,23 +2,33 @@ package io.onedev.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.pullrequest.PullRequestLabelAdded;
+import io.onedev.server.event.project.pullrequest.PullRequestLabelRemoved;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.PullRequestLabelService;
 
 @Singleton
 public class DefaultPullRequestLabelService extends BaseEntityLabelService<PullRequestLabel>
 		implements PullRequestLabelService {
+
+	@Inject
+	private ListenerRegistry listenerRegistry;
 
 	@Override
 	protected PullRequestLabel newEntityLabel(AbstractEntity entity, LabelSpec spec) {
@@ -28,10 +38,21 @@ public class DefaultPullRequestLabelService extends BaseEntityLabelService<PullR
 		return label;
 	}
 
+	@Transactional
 	@Override
 	public void create(PullRequestLabel pullRequestLabel) {
 		Preconditions.checkState(pullRequestLabel.isNew());
 		dao.persist(pullRequestLabel);
+		listenerRegistry.post(new PullRequestLabelAdded(SecurityUtils.getUser(), new Date(),
+				pullRequestLabel.getRequest(), pullRequestLabel.getSpec().getName()));
+	}
+
+	@Transactional
+	@Override
+	public void delete(PullRequestLabel pullRequestLabel) {
+		super.delete(pullRequestLabel);
+		listenerRegistry.post(new PullRequestLabelRemoved(SecurityUtils.getUser(), new Date(),
+				pullRequestLabel.getRequest(), pullRequestLabel.getSpec().getName()));
 	}
 
 	@Sessional

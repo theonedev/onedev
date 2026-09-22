@@ -35,10 +35,12 @@ public abstract class BaseEntityLabelService<T extends EntityLabel> extends Base
 			if (labelSpec == null)
 				throw new EntityNotFoundException("Label spec not found: " + it);
 			var label = newEntityLabel((AbstractEntity) entity, labelSpec);
-			dao.persist(label);
+			create(label);
 			entity.getLabels().add(label);
 		});
 	}
+
+	public abstract void create(T label);
 
 	protected abstract T newEntityLabel(AbstractEntity entity, LabelSpec spec);
 	

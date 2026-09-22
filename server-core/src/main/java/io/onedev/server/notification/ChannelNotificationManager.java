@@ -91,7 +91,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(BuildEvent event) {
-		if (event.getUser() == null || event.getUser().getType() != User.Type.SERVICE) {
+		if (!event.isMinor() && (event.getUser() == null || event.getUser().getType() != User.Type.SERVICE)) {
 			Build build = event.getBuild();
 
 			var status = StringUtils.capitalize(build.getStatus().toString().toLowerCase());
