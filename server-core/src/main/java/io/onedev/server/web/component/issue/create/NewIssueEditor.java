@@ -461,7 +461,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 				}
 			});
 			if (!questions.isEmpty()) {
-				var suggestions = FieldUtils.suggestFieldValues(jevSetting, getProject(), title, description, questions);
+				var suggestions = FieldUtils.suggestFieldValues(jevSetting, title, description, questions);
 				target.appendJavaScript(String.format("onedev.server.newIssue.applySuggestions('%s', %s, %s);",
 						getMarkupId(), params.getParameterValue("revision").toLong(), objectMapper.writeValueAsString(suggestions)));
 			}

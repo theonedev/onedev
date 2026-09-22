@@ -220,11 +220,11 @@ public class FieldUtils {
 		return new ChoiceQuestion(instructions, criteria);
 	}
 
-	public static Map<String, String> suggestFieldValues(JevSetting jevSetting, Project project, String title,
+	public static Map<String, String> suggestFieldValues(JevSetting jevSetting, String title,
 			@Nullable String description, Map<String, ChoiceQuestion> questions) throws IOException {
 		var suggestions = new LinkedHashMap<String, String>();
 		if (!questions.isEmpty()) {
-			var state = Map.of("project", project.getPath(), "title", title,
+			var state = Map.of("title", title,
 					"description", description != null ? description : "");
 			var selections = jevSetting.choose(new ObjectMapper().writeValueAsString(state), questions,
 					SUGGESTION_MINIMUM_CONFIDENCE);
@@ -266,7 +266,7 @@ public class FieldUtils {
 						}
 					}
 				}
-				suggestFieldValues(jevSetting, issue.getProject(), issue.getTitle(), issue.getDescription(), questions)
+				suggestFieldValues(jevSetting, issue.getTitle(), issue.getDescription(), questions)
 						.forEach((id, value) -> {
 							var field = fields.get(id);
 							suggestions.put(field.getName(), field.convertToObject(List.of(value)));
