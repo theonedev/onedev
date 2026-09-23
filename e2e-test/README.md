@@ -25,6 +25,15 @@ By default Playwright starts `./dev.sh run` from the repository root and waits
 up to ten minutes for `http://127.0.0.1:6610`. If a server is already listening
 there, Playwright reuses it.
 
+Server stdout is hidden by default, including the stack traces deliberately
+triggered by Jev failure tests. Server stderr and test failures remain visible.
+Full application logs remain in `server-product/target/sandbox/logs/server.log`.
+To show server stdout when Playwright starts the server, run:
+
+```bash
+E2E_SERVER_STDOUT=1 npm test
+```
+
 Before running tests, each worker polls `~api/server/ready` without
 authentication until it returns `true`, allowing up to ten minutes for server
 initialization to finish.
