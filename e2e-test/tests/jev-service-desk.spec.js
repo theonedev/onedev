@@ -85,8 +85,8 @@ const test = base.extend({
 
 const scenarios = [
   {
-    name: 'confident decisions populate single and multiple choices before the assignee script',
-    answers: { Type: ['Bug', 0.99], Priority: ['Major', 0.95], 'E2E Labels': ['Bug', 0.9] },
+    name: 'decisions at the confidence threshold populate single and multiple choices before the assignee script',
+    answers: { Type: ['Bug', 0.85], Priority: ['Major', 0.85], 'E2E Labels': ['Bug', 0.85] },
     expected: { Type: 'Bug', Priority: 'Major', 'E2E Labels': ['Bug'] },
     assignee: 'bugAssignee',
   },
@@ -98,7 +98,7 @@ const scenarios = [
   },
   {
     name: 'uncertain and unknown decisions retain configured fallbacks',
-    answers: { Type: ['Bug', 0.84], Priority: ['unknown', 0.99], 'E2E Labels': ['Bug', 0.84] },
+    answers: { Type: ['Bug', 0.8499], Priority: ['unknown', 0.99], 'E2E Labels': ['Bug', 0.8499] },
     expected: { Type: 'Support Request', Priority: 'Normal', 'E2E Labels': ['Improvement', 'Task'] },
     assignee: 'supportAssignee',
   },
@@ -120,9 +120,7 @@ for (const scenario of scenarios) {
 
     const request = await jev.nextRequest();
     const state = JSON.parse(request.body.state);
-    expect(state.project).toBe(project.name);
-    expect(state.title).toBe(title);
-    expect(state.description).toContain(body);
+    expect(state).toEqual({ title, description: expect.stringContaining(body) });
     expect(Object.values(request.body.questions).map(question =>
       question.instructions.match(/issue field '([^']+)'/)[1]).sort())
       .toEqual(['E2E Labels', 'Priority', 'Type']);

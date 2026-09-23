@@ -77,6 +77,10 @@ export const test = base.extend({
           expect(request.headers.authorization).toBe(`Bearer ${fakeApiKey}`);
           expect(request.headers['content-type']).toBe('application/json');
           expect(request.body.model).toBe('jev-latest');
+          // Check retries and form edits too: no project path or server metadata.
+          expect(JSON.parse(request.body.state)).toEqual({
+            title: expect.any(String), description: expect.any(String),
+          });
           return request;
         },
         reply(request, selections = { Type: ['Bug', 0.99], Priority: ['Major', 0.99] }, status = 200) {
