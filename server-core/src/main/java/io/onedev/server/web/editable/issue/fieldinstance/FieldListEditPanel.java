@@ -197,7 +197,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 						
 					});
 					container.add(valueProviderChoice);
-					container.add(new Label("defaultValue", "Default value (used when confidence is below 85% or Jev is unavailable)") {
+					container.add(new Label("defaultValue", "Default value (used when confidence is below 75% or Jev is unavailable)") {
 						@Override
 						protected void onConfigure() {
 							super.onConfigure();

@@ -138,7 +138,7 @@ npm test -- tests/websocket-*.spec.js
 `tests/jev-issue-suggestions.spec.js` configures a fake API key and tests the real
 new-issue form against a local HTTP mock. It verifies the outgoing authorization,
 model, title, description and choice questions, with no project path or other
-metadata in the request state; saving suggestions at the 85% confidence threshold;
+metadata in the request state; saving suggestions at the 75% confidence threshold;
 ignoring lower-confidence/unknown choices; preserving a manual choice;
 discarding a response after the title changes; and recovering from an API failure
 on a later edit.
@@ -188,7 +188,7 @@ pre-existing messages on its first connection. Outgoing notifications also stay
 inside GreenMail. Its protocol log is attached to each test result.
 
 The tests verify that request state contains only the email title and description,
-without the project path. They check single and multiple choices at the 85%
+without the project path. They check single and multiple choices at the 75%
 confidence threshold, assignee scripts using the resolved values, and configured
 fallbacks for lower-confidence or unknown answers and API failures.
 

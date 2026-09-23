@@ -52,7 +52,7 @@ import io.onedev.server.web.util.ProjectAware;
 
 public class FieldUtils {
 
-	private static final double SUGGESTION_MINIMUM_CONFIDENCE = 0.85;
+	private static final double SUGGESTION_MINIMUM_CONFIDENCE = 0.75;
 	
 	private static final Logger logger = LoggerFactory.getLogger(FieldUtils.class);
 	

@@ -101,8 +101,8 @@ class ServiceDeskFieldSuggestionTest {
 		when(response.statusCode()).thenReturn(200);
 		when(response.body()).thenReturn("""
 			{"answers": {
-			  "field0": {"choice": "choice0", "confidence": 0.85},
-			  "field1": {"choice": "choice0", "confidence": 0.8499},
+			  "field0": {"choice": "choice0", "confidence": 0.75},
+			  "field1": {"choice": "choice0", "confidence": 0.7499},
 			  "field2": {"choice": "choice0", "confidence": 0.99}
 			}}
 			""");
@@ -117,7 +117,7 @@ class ServiceDeskFieldSuggestionTest {
 			utils.when(() -> FieldUtils.getFieldBeanClass(false)).thenReturn(Fields.class);
 			var names = List.of("Type", "Priority", "Labels");
 			assertEquals(Map.of("Type", "Bug", "Labels", List.of("Bug")), FieldUtils.suggestFieldValues(issue, names));
-			verify(jev).choose(contains("Cannot log in"), anyMap(), eq(0.85));
+			verify(jev).choose(contains("Cannot log in"), anyMap(), eq(0.75));
 			verify(client).send(any(HttpRequest.class), ArgumentMatchers.<HttpResponse.BodyHandler<String>>any());
 
 			when(response.body()).thenReturn("{\"answers\":{\"field0\":{\"choice\":\"unknown\",\"confidence\":1}}}");
@@ -178,7 +178,7 @@ class ServiceDeskFieldSuggestionTest {
 				for (var outcome: List.of("bug", "support", "uncertain", "unconfigured")) {
 					clearInvocations(provider);
 					ai.setJevSetting(outcome.equals("unconfigured") ? null : jev);
-					when(jev.choose(anyString(), anyMap(), eq(0.85))).thenReturn(switch (outcome) {
+					when(jev.choose(anyString(), anyMap(), eq(0.75))).thenReturn(switch (outcome) {
 						case "bug" -> Map.of("field0", "choice0");
 						case "support" -> Map.of("field0", "choice1");
 						default -> Map.of();

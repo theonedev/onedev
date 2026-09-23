@@ -25,7 +25,7 @@ test('Jev suggestions populate required fields and are saved with the new issue'
   expect(JSON.parse(request.body.state)).toEqual({ title, description });
   expect(Object.keys(request.body.questions)).toHaveLength(2);
   await expect(field(page, 'Type')).toContainText('Suggesting...');
-  jev.reply(request, { Type: ['Bug', 0.85], Priority: ['Major', 0.85] });
+  jev.reply(request, { Type: ['Bug', 0.75], Priority: ['Major', 0.75] });
   await expect(field(page, 'Type').locator('.select2-selection__rendered')).toHaveText('Bug');
   await expect(field(page, 'Priority').locator('.select2-selection__rendered')).toHaveText('Major');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
@@ -38,7 +38,7 @@ test('Jev suggestions populate required fields and are saved with the new issue'
 test('uncertain and unknown suggestions leave fields empty and manual choices still work', async ({ page, api, jev }) => {
   await openIssue(page, api);
   await page.getByPlaceholder('Input title here').fill('Something needs attention');
-  jev.reply(await jev.nextRequest(), { Type: ['Bug', 0.8499], Priority: ['unknown', 0.99] });
+  jev.reply(await jev.nextRequest(), { Type: ['Bug', 0.7499], Priority: ['unknown', 0.99] });
   await expect(field(page, 'Type').locator('.select2-selection__placeholder')).not.toContainText('Suggesting...');
   await expect(field(page, 'Type').locator('select')).toHaveValue('');
   await expect(field(page, 'Priority').locator('select')).toHaveValue('');

@@ -86,7 +86,7 @@ const test = base.extend({
 const scenarios = [
   {
     name: 'decisions at the confidence threshold populate single and multiple choices before the assignee script',
-    answers: { Type: ['Bug', 0.85], Priority: ['Major', 0.85], 'E2E Labels': ['Bug', 0.85] },
+    answers: { Type: ['Bug', 0.75], Priority: ['Major', 0.75], 'E2E Labels': ['Bug', 0.75] },
     expected: { Type: 'Bug', Priority: 'Major', 'E2E Labels': ['Bug'] },
     assignee: 'bugAssignee',
   },
@@ -98,7 +98,7 @@ const scenarios = [
   },
   {
     name: 'uncertain and unknown decisions retain configured fallbacks',
-    answers: { Type: ['Bug', 0.8499], Priority: ['unknown', 0.99], 'E2E Labels': ['Bug', 0.8499] },
+    answers: { Type: ['Bug', 0.7499], Priority: ['unknown', 0.99], 'E2E Labels': ['Bug', 0.7499] },
     expected: { Type: 'Support Request', Priority: 'Normal', 'E2E Labels': ['Improvement', 'Task'] },
     assignee: 'supportAssignee',
   },
