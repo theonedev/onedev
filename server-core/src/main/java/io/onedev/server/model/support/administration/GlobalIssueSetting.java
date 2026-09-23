@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
@@ -38,8 +35,6 @@ import io.onedev.server.model.support.issue.TimeTrackingSetting;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
-import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.model.support.issue.transitionspec.BranchCreatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
@@ -56,6 +51,8 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 @Editable
 public class GlobalIssueSetting implements Serializable {
@@ -126,14 +123,7 @@ public class GlobalIssueSetting implements Serializable {
 		
 		specifiedChoices.setChoices(choices);
 		type.setChoiceProvider(specifiedChoices);
-		
-		SpecifiedDefaultValue specifiedDefaultValue = new SpecifiedDefaultValue();
-		DefaultValue defaultValue = new DefaultValue();
-		defaultValue.setValue("New Feature");
-		specifiedDefaultValue.getDefaultValues().add(defaultValue);
-		
-		type.setDefaultValueProvider(specifiedDefaultValue);
-		
+				
 		fieldSpecs.add(type);
 		
 		ChoiceField priority = new ChoiceField();
@@ -164,13 +154,7 @@ public class GlobalIssueSetting implements Serializable {
 		
 		specifiedChoices.setChoices(choices);
 		priority.setChoiceProvider(specifiedChoices);
-		
-		specifiedDefaultValue = new SpecifiedDefaultValue();
-		defaultValue = new DefaultValue();
-		defaultValue.setValue("Normal");
-		specifiedDefaultValue.getDefaultValues().add(defaultValue);
-		priority.setDefaultValueProvider(specifiedDefaultValue);
-		
+				
 		fieldSpecs.add(priority);
 
 		UserChoiceField assignees = new UserChoiceField();

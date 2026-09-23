@@ -56,7 +56,9 @@ export class FixturesApi {
 
   async createIssue(project, { title = `Issue ${randomUUID()}`, description, confidential = false, fields = {}, creator } = {}) {
     const id = await this.json('post', '~api/issues', {
-      data: { projectId: project.id, title, description, confidential, fields },
+      // Built-in required fields have no defaults on a fresh server.
+      data: { projectId: project.id, title, description, confidential,
+        fields: { Type: 'New Feature', Priority: 'Normal', ...fields } },
       ...(creator ? { headers: credentials(creator) } : {}),
     });
     const issue = await this.json('get', `~api/issues/${id}`);
