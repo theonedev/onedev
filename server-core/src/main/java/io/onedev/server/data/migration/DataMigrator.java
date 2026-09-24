@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.sun.management.OperatingSystemMXBean;
 import com.thoughtworks.xstream.core.JVM;
 
@@ -9076,7 +9077,7 @@ public class DataMigrator {
 									var showCondition = new ShowCondition();
 									showCondition.setInputName("Type");
 									var valueIsOneOf = new ValueIsOneOf();
-									valueIsOneOf.setValues(List.of("Build Failed"));
+									valueIsOneOf.setValues(Lists.newArrayList("Build Failed"));
 									showCondition.setValueMatcher(valueIsOneOf);
 									build.setShowCondition(showCondition);
 									fieldSpecsElement.add(beanToElement(build));

@@ -34,7 +34,7 @@ const test = base.extend({
       { name: 'Assignees', valueProvider: { '@type': 'ScriptingValue', scriptName } },
       { name: 'Type', valueProvider: { '@type': 'JevDecideValue', value: ['Support Request'] } },
       { name: 'Priority', valueProvider: { '@type': 'JevDecideValue', value: ['Normal'] } },
-      { name: 'E2E Labels', valueProvider: { '@type': 'JevDecideValue', value: ['Improvement', 'Task'] } },
+      { name: 'E2E Labels', valueProvider: { '@type': 'JevDecideValue', value: ['Enhancement', 'Task'] } },
       { name: 'E2E Source', valueProvider: { '@type': 'SpecifiedValue', value: ['Email'] } },
     ];
     try {
@@ -99,13 +99,13 @@ const scenarios = [
   {
     name: 'uncertain and unknown decisions retain configured fallbacks',
     answers: { Type: ['Bug', 0.7499], Priority: ['unknown', 0.99], 'E2E Labels': ['Bug', 0.7499] },
-    expected: { Type: 'Support Request', Priority: 'Normal', 'E2E Labels': ['Improvement', 'Task'] },
+    expected: { Type: 'Support Request', Priority: 'Normal', 'E2E Labels': ['Enhancement', 'Task'] },
     assignee: 'supportAssignee',
   },
   {
     name: 'Jev API failure still creates the issue using fallbacks', status: 503,
     answers: { Type: ['Bug', 0.99], Priority: ['Major', 0.99], 'E2E Labels': ['Bug', 0.99] },
-    expected: { Type: 'Support Request', Priority: 'Normal', 'E2E Labels': ['Improvement', 'Task'] },
+    expected: { Type: 'Support Request', Priority: 'Normal', 'E2E Labels': ['Enhancement', 'Task'] },
     assignee: 'supportAssignee',
   },
 ];

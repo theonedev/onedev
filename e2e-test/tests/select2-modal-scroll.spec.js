@@ -15,8 +15,8 @@ async function checkScrolledModal(page, testInfo, dark) {
     await defaultValue.locator('.add-element').click();
   const selection = defaultValue.locator('.select2-selection--single').first();
   await selection.click();
-  await modal.getByRole('option', { name: 'New Feature', exact: true }).click();
-  await expect(selection).toHaveText('New Feature');
+  await modal.getByRole('option', { name: 'Enhancement', exact: true }).click();
+  await expect(selection).toHaveText('Enhancement');
   await selection.scrollIntoViewIfNeeded();
   await selection.evaluate(element => {
     element.closest('.modal').scrollTop += element.getBoundingClientRect().top - window.innerHeight * 0.4;

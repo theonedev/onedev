@@ -43,13 +43,13 @@ test('uncertain and unknown suggestions leave fields empty and manual choices st
   await expect(field(page, 'Type').locator('select')).toHaveValue('');
   await expect(field(page, 'Priority').locator('select')).toHaveValue('');
   await field(page, 'Type').locator('.select2-selection').click();
-  await page.getByRole('option', { name: 'Improvement', exact: true }).click();
+  await page.getByRole('option', { name: 'Enhancement', exact: true }).click();
   const request = await jev.nextRequest(1);
   expect(Object.keys(request.body.questions)).toHaveLength(1);
   expect(Object.values(request.body.questions)[0].instructions).toContain("'Priority'");
   jev.reply(request);
   await expect(field(page, 'Priority').locator('select')).toHaveValue('Major');
-  await expect(field(page, 'Type').locator('select')).toHaveValue('Improvement');
+  await expect(field(page, 'Type').locator('select')).toHaveValue('Enhancement');
 });
 
 test('a response for an older title is ignored and the updated title is suggested', async ({ page, api, jev }) => {
@@ -62,8 +62,8 @@ test('a response for an older title is ignored and the updated title is suggeste
   expect(JSON.parse(oldRequest.body.state)).toEqual({ title: 'An old bug report', description: '' });
   expect(JSON.parse(newRequest.body.state)).toEqual({ title: 'Add a new dashboard', description: '' });
   await expect(field(page, 'Type').locator('select')).toHaveValue('');
-  jev.reply(newRequest, { Type: ['New Feature', 0.99], Priority: ['Normal', 0.99] });
-  await expect(field(page, 'Type').locator('select')).toHaveValue('New Feature');
+  jev.reply(newRequest, { Type: ['Enhancement', 0.99], Priority: ['Normal', 0.99] });
+  await expect(field(page, 'Type').locator('select')).toHaveValue('Enhancement');
   await expect(field(page, 'Priority').locator('select')).toHaveValue('Normal');
 });
 

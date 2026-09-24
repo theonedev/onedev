@@ -23,9 +23,9 @@ test('admin can edit an issue field from the issue list', async ({ page, api }) 
   await expect(editor).toBeVisible();
   await expect(editor.locator('.select2-selection__rendered')).toHaveText('Bug');
   await editor.locator('.select2-selection').click();
-  await page.getByRole('option', { name: 'New Feature', exact: true }).click();
+  await page.getByRole('option', { name: 'Enhancement', exact: true }).click();
   await expect(editor).toBeHidden();
-  await expect(field).toHaveText('New Feature');
+  await expect(field).toHaveText('Enhancement');
   await page.reload();
-  await expect(field).toHaveText('New Feature');
+  await expect(field).toHaveText('Enhancement');
 });

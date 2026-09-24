@@ -91,15 +91,10 @@ public class GlobalIssueSetting implements Serializable {
 		SpecifiedChoices specifiedChoices = new SpecifiedChoices();
 
 		List<Choice> choices = new ArrayList<>(); 
-		Choice newFeature = new Choice();
-		newFeature.setValue("New Feature");
-		newFeature.setColor("#1bc5bd");
-		choices.add(newFeature);
-		
-		Choice improvement = new Choice();
-		improvement.setValue("Improvement");
-		improvement.setColor("#1bc5bd");
-		choices.add(improvement);
+		Choice enhancement = new Choice();
+		enhancement.setValue("Enhancement");
+		enhancement.setColor("#1bc5bd");
+		choices.add(enhancement);
 
 		Choice bug = new Choice();
 		bug.setValue("Bug");
@@ -128,6 +123,7 @@ public class GlobalIssueSetting implements Serializable {
 		
 		ChoiceField priority = new ChoiceField();
 		priority.setName("Priority");
+		priority.setDescription("This field should be set to 'Normal' for most cases");
 		specifiedChoices = new SpecifiedChoices();
 
 		choices = new ArrayList<>(); 
