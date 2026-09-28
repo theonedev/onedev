@@ -10,17 +10,17 @@ import java.util.concurrent.TimeoutException;
 
 import org.joda.time.DateTime;
 
-import io.onedev.server.buildspec.job.log.JobLogEntryEx;
+import io.onedev.server.logging.LogEntry;
 
 class TaskFuture implements Future<TaskResult> {
 
 	private final Future<TaskResult> wrapped;
 	
-	private final List<JobLogEntryEx> logEntries;
+	private final List<LogEntry> logEntries;
 	
 	private volatile Date lastActive = new Date();
 	
-	public TaskFuture(Future<TaskResult> wrapped, List<JobLogEntryEx> logEntries) {
+	public TaskFuture(Future<TaskResult> wrapped, List<LogEntry> logEntries) {
 		this.wrapped = wrapped;
 		this.logEntries = logEntries;
 	}
@@ -55,10 +55,10 @@ class TaskFuture implements Future<TaskResult> {
 		return get(timeout, unit);
 	}
 	
-	public List<JobLogEntryEx> getLogEntries() {
+	public List<LogEntry> getLogEntries() {
 		lastActive = new Date();
 		synchronized (logEntries) {
-			List<JobLogEntryEx> copy = new ArrayList<>(logEntries);
+			List<LogEntry> copy = new ArrayList<>(logEntries);
 			logEntries.clear();
 			return copy;
 		}

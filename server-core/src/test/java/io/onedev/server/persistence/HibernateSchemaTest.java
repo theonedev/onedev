@@ -187,6 +187,12 @@ public class HibernateSchemaTest {
                         }
                     }
                 }
+                // Build step tracking was added after this historical ORM fixture.
+                // Add those columns while preserving its original enum and BLOB mappings.
+                try (var statement = connection.createStatement()) {
+                    statement.execute("alter table o_Build add o_finalization boolean not null");
+                    statement.execute("alter table o_Build add o_stepExecutions blob(65535)");
+                }
                 var legacySnapshot = snapshot(connection);
                 // ID and project number counters were added after the Hibernate 5 schema fixture.
                 assertEquals(structure(snapshot.stream()

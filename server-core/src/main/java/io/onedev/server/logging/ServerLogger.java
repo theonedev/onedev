@@ -5,6 +5,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Forwards log messages synchronously to another server. Callers must not hold
+ * database connections: the receiving logger may need database access, which
+ * could otherwise cause a circular wait.
+ */
 public class ServerLogger extends TaskLogger {
 	
 	private final String server;

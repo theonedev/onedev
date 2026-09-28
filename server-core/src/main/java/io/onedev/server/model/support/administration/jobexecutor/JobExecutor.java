@@ -78,6 +78,10 @@ public abstract class JobExecutor implements Serializable {
 		return WicketUtils.isSubscriptionActive();
 	}
 
+	/**
+	 * Callers must not hold a database connection: execution may wait for tasks
+	 * that need database access, which could otherwise cause a circular wait.
+	 */
 	public abstract boolean execute(JobContext jobContext, TaskLogger jobLogger);
 
 	public abstract boolean isApplicable(JobMatchContext context);

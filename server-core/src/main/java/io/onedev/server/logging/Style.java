@@ -1,17 +1,17 @@
-package io.onedev.server.buildspec.job.log;
+package io.onedev.server.logging;
 
 import java.io.Serializable;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class Style implements Serializable {
+class Style implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String FOREGROUND_COLOR_DEFAULT = "fg-default";
+	static final String FOREGROUND_COLOR_DEFAULT = "fg-default";
 	
-	public static final String BACKGROUND_COLOR_DEFAULT = "bg-default";
+	static final String BACKGROUND_COLOR_DEFAULT = "bg-default";
 	
 	private final String color;
 	
@@ -19,25 +19,25 @@ public class Style implements Serializable {
 	
 	private final boolean bold;
 	
-	public Style(String color, String backgroundColor, boolean bold) {
+	Style(String color, String backgroundColor, boolean bold) {
 		this.color = color;
 		this.backgroundColor = backgroundColor;
 		this.bold = bold;
 	}
 	
-	public String getColor() {
+	String getColor() {
 		return color;
 	}
 
-	public String getBackgroundColor() {
+	String getBackgroundColor() {
 		return backgroundColor;
 	}
 
-	public boolean isBold() {
+	boolean isBold() {
 		return bold;
 	}
 
-	public boolean isDefault() {
+	boolean isDefault() {
 		return color.equals(FOREGROUND_COLOR_DEFAULT) && backgroundColor.equals(BACKGROUND_COLOR_DEFAULT) && !bold;
 	}
 	

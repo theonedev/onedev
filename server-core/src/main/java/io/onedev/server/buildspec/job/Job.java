@@ -107,7 +107,7 @@ public class Job implements NamedElement, Validatable {
 	
 	private String retryCondition = "never";
 	
-	private int maxRetries = 3;
+	private int maxAttempts = 3;
 	
 	private int retryDelay = 30;
 
@@ -283,15 +283,15 @@ public class Job implements NamedElement, Validatable {
 		this.retryCondition = retryCondition;
 	}
 
-	@Editable(order=9410, group="More Settings", description="Maximum of retries before giving up")
-	@Min(value=1, message="This value should not be less than 1")
+	@Editable(order=9410, group="More Settings", description="Maximum number of attempts including the initial run before giving up")
+	@Min(value=1, message="This value should not be less than 2")
 	@DependsOn(property="retryCondition", value = "never", inverse = true)
-	public int getMaxRetries() {
-		return maxRetries;
+	public int getMaxAttempts() {
+		return maxAttempts;
 	}
 
-	public void setMaxRetries(int maxRetries) {
-		this.maxRetries = maxRetries;
+	public void setMaxAttempts(int maxAttempts) {
+		this.maxAttempts = maxAttempts;
 	}
 
 	@Editable(order=9420, group="More Settings", description="Delay for the first retry in seconds. " +

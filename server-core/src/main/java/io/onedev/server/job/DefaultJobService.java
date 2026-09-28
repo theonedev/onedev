@@ -34,19 +34,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ValidationException;
-import jakarta.validation.Validator;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.Response;
-
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
@@ -61,6 +48,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.hazelcast.map.IMap;
 
+import io.onedev.agent.job.JobUtils;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -122,8 +110,8 @@ import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.match.JobMatchContext;
-import io.onedev.server.logging.LogService;
 import io.onedev.server.logging.ServerLogger;
+import io.onedev.server.logging.build.BuildLogService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
@@ -134,6 +122,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.build.StepExecution;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -161,6 +150,18 @@ import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 import nl.altindag.ssl.SSLFactory;
 
 @Singleton
@@ -211,7 +212,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	private SessionService sessionService;
 
 	@Inject
-	private LogService logService;
+	private BuildLogService buildLogService;
 
 	@Inject
 	private UserService userService;
@@ -557,11 +558,23 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		}
 	}
 
+	private void resetLog(Build build) {
+		buildLogService.clear(build.getLogContext());
+		resetStepExecutions(build);
+	}
+
+	private void resetStepExecutions(Build build) {
+		build.getStepExecutions().clear();
+		build.setFinalization(false);
+	}
+
 	private Future<Boolean> execute(Build build) {		
+		// Recovery after a server restart can reuse a build with already-flushed stage logs.
+		resetLog(build);
 		String jobToken = build.getToken();
 		JobVariableInterpolator interpolator = new JobVariableInterpolator(build, build.getParamCombination());
 
-		TaskLogger jobLogger = logService.newLogger(build.getLoggingSupport());
+		TaskLogger jobLogger = buildLogService.newLogger(build);
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
 		JobExecutor jobExecutor = interpolator.interpolateProperties(getJobExecutor(build, jobExecutorName, jobLogger));
 		String sequentialGroup = interpolator.interpolate(build.getJob().getSequentialGroup());
@@ -613,6 +626,9 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		return executorService.submit(() -> {
 			int retried = 0;
 			while (true) {
+				jobLogger.log(JobUtils.buildPhaseMessage(JobHelper.INITIALIZATION));
+				if (retried > 0)
+					jobLogger.notice(String.format("Retrying job (attempt %d of %d)...", retried + 1, job.getMaxAttempts()));
 				if (sequentialKey != null) {
 					jobLogger.log("Locking sequential group...");
 					while (true) {
@@ -625,7 +641,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				// Store original job actions as the copy in job context will be fetched from cluster and 
 				// some transient fields (such as step object in ServerSideFacade) will not be preserved 
 				jobActions.put(jobToken, actions);
-				logService.addLogger(jobToken, jobLogger);
+				buildLogService.addLogger(jobToken, jobLogger);
 				serverStepThreads.put(jobToken, new ArrayList<>());
 				Throwable throwable = null;
 				try {
@@ -671,7 +687,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						for (Thread thread : threads)
 							thread.interrupt();
 					}
-					logService.removeLogger(jobToken);
+					buildLogService.removeLogger(jobToken);
 					jobActions.remove(jobToken);
 					
 					if (sequentialKey != null)
@@ -693,7 +709,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	
 	private boolean checkRetry(Job job, JobContext jobContext, TaskLogger jobLogger,
 							   @Nullable Throwable throwable, int retried) {
-		if (retried < job.getMaxRetries() && sessionService.call(() -> {
+		if (retried + 1 < job.getMaxAttempts() && sessionService.call(() -> {
 			RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
 			AtomicReference<String> errorMessage = new AtomicReference<>(null);
 			if (throwable != null) {
@@ -719,6 +735,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			}
 			transactionService.run(() -> {
 				Build innerBuild = buildService.load(jobContext.getBuildId());
+				buildLogService.clear(innerBuild.getLogContext());
 				innerBuild.setRunningDate(null);
 				innerBuild.setPendingDate(new Date());
 				innerBuild.setRetryDate(new Date());
@@ -762,7 +779,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	private void markBuildError(Build build, String errorMessage) {
 		build.setStatus(Build.Status.FAILED);
-		logService.newLogger(build.getLoggingSupport()).error(errorMessage);
+		buildLogService.newLogger(build).error(errorMessage);
 		build.setFinishDate(new Date());
 		buildService.update(build);
 		listenerRegistry.post(new BuildFinished(build));
@@ -906,6 +923,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				build.setCanceller(null);
 				build.setAgent(null);
 				build.getCheckoutPaths().clear();
+				resetStepExecutions(build);
 
 				buildService.update(build);
 				buildSubmitted(build);
@@ -1058,7 +1076,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		var projectId = build.getProject().getId();
 		var buildId = build.getId();
 		var userId = User.idOf(SecurityUtils.getUser());
-		projectService.runOnActiveServer(projectId, () -> {
+		projectService.submitToActiveServer(projectId, () -> {
 			var future = jobFutures.get(buildId);
 			if (future != null) {
 				future.cancel(true);
@@ -1345,7 +1363,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 							future.cancel(true);
 						} else if (future.isDone()) {
 							it.remove();
-							var jobLogger = logService.newLogger(build.getLoggingSupport());
+							var jobLogger = buildLogService.newLogger(build);
 							try {
 								if (future.get())
 									build.setStatus(Status.SUCCESSFUL);
@@ -1385,6 +1403,14 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(BuildFinished event) {
 		Build build = event.getBuild();
+
+		var stepExecutionStatus = build.getStatus() == Build.Status.CANCELLED
+				? StepExecution.Status.CANCELLED
+				: build.isSuccessful() ? StepExecution.Status.SUCCESSFUL
+				: StepExecution.Status.FAILED;
+		build.getStepExecutions().values().forEach(stepExecution -> stepExecution.complete(stepExecutionStatus));
+		buildLogService.finish(build);
+
 		JobAuthorizationContext.push(build.getJobAuthorizationContext());
 		Build.push(build);
 		try {
@@ -1458,18 +1484,18 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		jobContexts.put(jobToken, jobContext);
 		jobRunnables.put(jobToken, runnable);
 		try {
-			TaskLogger jobLogger = logService.getLogger(jobToken);
-			if (jobLogger == null) {
+			TaskLogger jobLogger = buildLogService.getLogger(jobToken);
+			boolean forwarding = jobLogger == null;
+			if (forwarding) {
 				var activeServer = projectService.getActiveServer(jobContext.getProjectId(), true);
 				jobLogger = new ServerLogger(activeServer, jobContext.getJobToken());
-				logService.addLogger(jobToken, jobLogger);
-				try {
-					return runnable.run(jobLogger);
-				} finally {
-					logService.removeLogger(jobToken);
-				}
-			} else {
+				buildLogService.addLogger(jobToken, jobLogger);
+			}
+			try {
 				return runnable.run(jobLogger);
+			} finally {
+				if (forwarding)
+					buildLogService.removeLogger(jobToken);
 			}
 		} finally {
 			jobRunnables.remove(jobToken);

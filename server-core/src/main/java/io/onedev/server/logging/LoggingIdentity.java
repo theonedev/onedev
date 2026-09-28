@@ -7,8 +7,6 @@ public interface LoggingIdentity extends Serializable {
 
     File getFile();
 
-    String getCacheKey();
-
     String getLockName();
 
 }

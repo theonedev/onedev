@@ -116,6 +116,8 @@ import io.onedev.server.job.DefaultJobService;
 import io.onedev.server.job.JobService;
 import io.onedev.server.logging.DefaultLogService;
 import io.onedev.server.logging.LogService;
+import io.onedev.server.logging.build.BuildLogService;
+import io.onedev.server.logging.build.DefaultBuildLogService;
 import io.onedev.server.mail.DefaultMailService;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.DefaultMarkdownService;
@@ -513,6 +515,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(JobService.class).to(DefaultJobService.class);
 		bind(RunCacheService.class).to(DefaultRunCacheService.class);
 		bind(LogService.class).to(DefaultLogService.class);
+		bind(BuildLogService.class).to(DefaultBuildLogService.class);
 		bind(MailService.class).to(DefaultMailService.class);
 		bind(IssueService.class).to(DefaultIssueService.class);
 		bind(IssueFieldService.class).to(DefaultIssueFieldService.class);

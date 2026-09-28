@@ -778,6 +778,39 @@ onedev.server = {
 		doSetup($(document));
 	},
 	
+	setupStickyTabs: function() {
+		function setup($container) {
+			$container.find(".nav-tabs-sticky").addBack(".nav-tabs-sticky").each(function() {
+				var $tabs = $(this);
+				if ($tabs.data("stickyTabsObserver"))
+					return;
+				var $sentinel = $('<div class="sticky-tabs-sentinel" aria-hidden="true"></div>').insertBefore($tabs);
+				var observer = new IntersectionObserver(function(entries) {
+					var entry = entries[0];
+					var aboveScrollport = entry.rootBounds
+						&& entry.boundingClientRect.bottom <= entry.rootBounds.top;
+					$tabs.toggleClass("is-docked", !entry.isIntersecting && aboveScrollport);
+				}, {root: $tabs.closest(".autofit")[0] || null, threshold: 0});
+				observer.observe($sentinel[0]);
+				$tabs.data("stickyTabsObserver", observer).data("stickyTabsSentinel", $sentinel);
+			});
+		}
+		$(document).on("beforeElementReplace", function(event, componentId) {
+			$("#" + componentId).find(".nav-tabs-sticky").addBack(".nav-tabs-sticky").each(function() {
+				var $tabs = $(this);
+				var observer = $tabs.data("stickyTabsObserver");
+				if (observer) {
+					observer.disconnect();
+					$tabs.data("stickyTabsSentinel").remove();
+				}
+			});
+		});
+		$(document).on("afterElementReplace", function(event, componentId) {
+			setup($("#" + componentId));
+		});
+		setup($(document));
+	},
+
 	setupRadio: function() {
 		function doSetup($container) {
 			$container.find(".radio").addBack(".radio").each(function() {
@@ -813,7 +846,7 @@ onedev.server = {
 		function doSetup(container) {
 			setTimeout(function() {
 				if (container === document || document.body.contains(container)) {
-					tippy(container.querySelectorAll('[data-tippy-content]'), {
+					tippy($(container).find('[data-tippy-content]').addBack('[data-tippy-content]').toArray(), {
 						delay: [500, 0],
 						placement: 'auto'
 					});
@@ -1004,6 +1037,7 @@ onedev.server = {
 		onedev.server.setupCheckbox();
 		onedev.server.setupRadio();
 		onedev.server.setupSwitch();
+		onedev.server.setupStickyTabs();
 		onedev.server.setupTable();
 		onedev.server.setupTippy();
 		onedev.server.history.init(popStateCallback);

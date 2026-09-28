@@ -1,5 +1,19 @@
 onedev.server.jobLogEntry = {
-	
+
+	append($log, logEntries, withDate) {
+		for (const logEntry of logEntries) {
+			const replacing = logEntry.messages.length !== 0 && logEntry.messages[0].text.startsWith("\r");
+			if (replacing)
+				logEntry.messages[0].text = logEntry.messages[0].text.substring(1);
+			const $entry = this.render(logEntry, withDate);
+			const $lastEntry = replacing ? $log.children(".log-entry:last") : $();
+			if (replacing && $lastEntry.length !== 0)
+				$lastEntry.replaceWith($entry);
+			else
+				$log.append($entry);
+		}
+	},
+
 	render(logEntry, withDate) {
 		var $logEntry = $("<div class='log-entry'></div>");
 		if (withDate)

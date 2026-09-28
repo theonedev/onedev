@@ -1,0 +1,151 @@
+.build-steps { min-width: 0; }
+.build-steps-layout { min-width: 0; }
+.build-steps-main { min-width: 0; }
+.build-step-sticky-actions { display: none; }
+.sticky-tabs-row.is-docked .build-step-sticky-actions { display: inline-flex; }
+.build-duration-progress {
+    position: sticky;
+    top: var(--build-progress-sticky-top, 0px);
+    z-index: 3;
+    margin-bottom: .75rem;
+    border-radius: 2px;
+}
+.build-duration-progress.is-docked { border-radius: 0; }
+.step-update-rail {
+    flex: 0 0 14px;
+    /* Dock to the card edge, or to the side panel when it is pinned open. */
+    margin: 0 -2.25rem 0 1rem;
+}
+.step-update-control {
+    position: sticky;
+    top: var(--build-update-sticky-top, 0px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 72px;
+    padding: 7px 0;
+    border: 1px solid rgba(137, 80, 252, .3);
+    border-radius: 0;
+    color: var(--info);
+    background: var(--light-info);
+    box-shadow: 0 2px 8px rgba(137, 80, 252, .08);
+    cursor: pointer;
+    transition: background .2s, color .2s, box-shadow .2s;
+}
+.step-update-control:hover {
+    background: #e3d4ff;
+    box-shadow: 0 4px 16px rgba(137, 80, 252, .18);
+}
+.step-update-control:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+.step-update-activity {
+    position: relative;
+    overflow: hidden;
+    width: 10px;
+    height: 56px;
+}
+.step-update-activity>span {
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 6px;
+    height: 1px;
+    background: currentColor;
+    transform: translateY(calc(3px + var(--line-index, 0) * 7px));
+    animation: step-update-scroll 4s linear infinite;
+    animation-delay: calc(var(--line-index, 0) * -.5s);
+}
+.step-update-activity>span:nth-child(2) { --line-index: 1; }
+.step-update-activity>span:nth-child(3) { --line-index: 2; }
+.step-update-activity>span:nth-child(4) { --line-index: 3; }
+.step-update-activity>span:nth-child(5) { --line-index: 4; }
+.step-update-activity>span:nth-child(6) { --line-index: 5; }
+.step-update-activity>span:nth-child(7) { --line-index: 6; }
+.step-update-activity>span:nth-child(8) { --line-index: 7; }
+.step-update-activity>span:nth-child(3n+2) { width: 4px; }
+.step-update-activity>span:nth-child(3n) { width: 5px; }
+.step-update-control[aria-pressed="false"] {
+    color: #805514;
+    background: #fff8e9;
+    border-color: #ebd5ae;
+}
+.step-update-control[aria-pressed="false"]:hover { background: #fff0ce; }
+.step-update-control[aria-pressed="false"] .step-update-activity>span {
+    animation-play-state: paused;
+    opacity: .3;
+}
+.dark-mode .step-update-control {
+    color: rgb(176, 142, 255);
+    background: var(--dark-mode-light-info);
+    border-color: rgba(176, 142, 255, .35);
+}
+.dark-mode .step-update-control:hover { background: #3b3062; }
+.dark-mode .step-update-control[aria-pressed="false"] {
+    color: #e8bf7a;
+    background: #392f28;
+    border-color: #655038;
+}
+.dark-mode .step-update-control[aria-pressed="false"]:hover { background: #493b2c; }
+@keyframes step-update-scroll {
+    from { transform: translateY(60px); }
+    to { transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .step-update-activity>span { animation: none; }
+    .step-update-control { transition: none; }
+}
+@media (min-width: 1199px) {
+    html:not(.hide-side-info) .side-info-visible .step-update-rail { margin-right: -2rem; }
+}
+.build-step .step-header {
+    position: sticky;
+    top: var(--build-step-sticky-top, 0px);
+    z-index: 2;
+    gap: .25rem;
+    flex-wrap: wrap;
+    /* Join the sticky header's top corners to the section's side borders. */
+    margin-left: -4px;
+    margin-right: -1px;
+    /* Overlap the section's bottom border so rounded corners share one outline. */
+    margin-bottom: -1px;
+    border: 1px solid;
+    border-left-width: 4px;
+    border-color: inherit;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+}
+/* Draw the log divider inside the colored side borders, avoiding diagonal border joins. */
+.build-step .step-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--light-gray);
+    pointer-events: none;
+}
+.dark-mode .build-step .step-header::after { background: var(--dark-mode-light-dark); }
+.build-step.step-collapsed .step-header::after,
+.build-step.is-docked-bottom .step-header::after { display: none; }
+.build-step.step-collapsed .step-header,
+.build-step.is-docked-bottom .step-header {
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+}
+.build-step .step-toggle { overflow-wrap: anywhere; color: inherit; }
+.build-step .step-body { overflow-anchor: none; }
+.build-step .log { white-space: pre-wrap; overflow-wrap: anywhere; }
+.build-step {
+    border-top-width: 0 !important;
+    border-left-width: 4px !important;
+    border-radius: .42rem;
+}
+.build-step.is-docked {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}

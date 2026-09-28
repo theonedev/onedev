@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.log.JobLogEntryEx;
+import io.onedev.server.logging.LogEntry;
 import io.onedev.server.logging.LogService;
 import io.onedev.server.logging.LogSnippet;
 import io.onedev.server.logging.LoggingSupport;
@@ -50,7 +50,7 @@ public abstract class LogPanel extends Panel {
 		add(new ChangeObserver() {
 			
 			private void appendRecentLogEntries(IPartialPageRequestHandler handler) {
-				List<JobLogEntryEx> logEntries = logService.readLogEntries(getLoggingSupport(), nextOffset, 0);
+				List<LogEntry> logEntries = logService.readLogEntries(getLoggingSupport(), nextOffset, 0);
 
 				if (!logEntries.isEmpty()) {
 					nextOffset += logEntries.size();
@@ -108,8 +108,8 @@ public abstract class LogPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private String asJSON(List<JobLogEntryEx> entries) {
-		entries = entries.stream().map(JobLogEntryEx::transformEmojis).collect(toList());
+	private String asJSON(List<LogEntry> entries) {
+		entries = entries.stream().map(LogEntry::transformEmojis).collect(toList());
 		try {
 			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(entries);
 		} catch (JsonProcessingException e) {

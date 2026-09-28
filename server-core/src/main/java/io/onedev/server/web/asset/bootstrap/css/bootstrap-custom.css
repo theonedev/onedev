@@ -135,17 +135,23 @@ a.link-info:hover, a.link-info:focus {
 .dark-mode a.link-info:hover, .dark-mode a.link-info:focus {
 	color: rgb(176, 142, 255) !important;
 }
-.text-secondary, a.link-secondary {
+.text-secondary {
 	color: var(--gray-dark) !important;
 }
-a.link-secondary:hover, a.link-secondary:focus {
+a.link-secondary {
 	color: var(--gray) !important;
 }
-.dark-mode .text-secondary, .dark-mode .text-secondary:hover, .dark-mode a.link-secondary {
+a.link-secondary:hover, a.link-secondary:focus {
+	color: var(--gray-dark) !important;
+}
+.dark-mode .text-secondary, .dark-mode .text-secondary:hover {
 	color: var(--light-gray) !important;
 }
-.dark-mode a.link-secondary:hover, .dark-mode a.link-secondary:focus {
+.dark-mode a.link-secondary {
 	color: var(--dark-mode-gray) !important;
+}
+.dark-mode a.link-secondary:hover, .dark-mode a.link-secondary:focus {
+	color: var(--light-gray) !important;
 }
 
 .text-light, a.link-light {

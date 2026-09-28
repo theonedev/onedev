@@ -6,8 +6,8 @@ import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
 
-import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.logging.instruction.LogInstruction;
 
 public interface LoggingSupport extends Serializable {
 

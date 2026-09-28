@@ -342,6 +342,12 @@ public class WorkerResource {
 		return Response.ok().build();
 	}
 
+	@Path("job-running")
+	@GET
+	public boolean isJobRunning(@QueryParam("token") String token) {
+		return jobService.getJobContext(token, false) != null;
+	}
+
 	@Path("workspace-active")
 	@GET
 	public boolean isWorkspaceActive(@QueryParam("token") String token) {

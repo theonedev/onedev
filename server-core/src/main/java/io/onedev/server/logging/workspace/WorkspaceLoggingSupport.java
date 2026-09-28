@@ -1,4 +1,4 @@
-package io.onedev.server.logging;
+package io.onedev.server.logging.workspace;
 
 import java.util.Collection;
 import java.util.Date;
@@ -7,8 +7,10 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.logging.LoggingIdentity;
+import io.onedev.server.logging.LoggingSupport;
+import io.onedev.server.logging.instruction.LogInstruction;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.service.ProjectService;
 
@@ -33,7 +35,7 @@ public class WorkspaceLoggingSupport implements LoggingSupport {
 		return identity;
 	}
 
-	public Long getWorkspaceId() {
+	Long getWorkspaceId() {
 		return workspaceId;
 	}
 

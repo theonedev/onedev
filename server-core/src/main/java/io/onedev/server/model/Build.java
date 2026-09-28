@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import static io.onedev.k8shelper.JobHelper.FINALIZATION;
+import static io.onedev.k8shelper.JobHelper.INITIALIZATION;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Build.PROP_COMMIT_HASH;
 import static io.onedev.server.model.Build.PROP_FINISH_DATE;
@@ -68,6 +70,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.k8shelper.JobHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Markdown;
@@ -85,8 +88,8 @@ import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.JobAuthorizationContext;
-import io.onedev.server.logging.BuildLoggingSupport;
-import io.onedev.server.logging.LoggingSupport;
+import io.onedev.server.logging.build.BuildLogContext;
+import io.onedev.server.model.support.build.StepExecution;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.ProjectBelonging;
@@ -128,7 +131,7 @@ public class Build extends ProjectBelonging
 	
 	public static final String ARTIFACTS_DIR = "artifacts";
 
-	public static final String LOG_FILE = "build.log";
+	public static final String LOG_DIR = "log";
 
 	public static final int MAX_DESCRIPTION_LEN = 12000;
 	
@@ -243,31 +246,6 @@ public class Build extends ProjectBelonging
 	}
 	
 	private static ThreadLocal<Stack<Build>> stack = ThreadLocal.withInitial(Stack::new);
-
-	public static File getLogFile(Long projectId, Long buildNumber) {
-		File buildDir = OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber);
-		return new File(buildDir, LOG_FILE);
-	}
-	
-	public static String getProjectRelativeDirPath(Long buildNumber) {
-		return BUILDS_DIR + "/" + getRelativeDirPath(buildNumber);		
-	}
-	
-	public static String getRelativeDirPath(Long buildNumber) {
-		return String.format("s%03d", buildNumber%1000) + "/" + buildNumber;
-	}
-	
-	public File getLogFile() {
-		return getLogFile(getProject().getId(), getNumber());
-	}
-	
-	public static String getLogLockName(Long projectId, Long buildNumber) {
-		return "build-log: " + projectId + ":" + buildNumber;
-	}
-	
-	public String getLogLockName() {
-		return getLogLockName(getProject().getId(), getNumber());
-	}
 
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
@@ -407,6 +385,11 @@ public class Build extends ProjectBelonging
 	@Column(nullable=false)
 	private Status status; 
 	
+	@Lob
+	private LinkedHashMap<String, StepExecution> stepExecutions = new LinkedHashMap<>();
+
+	private boolean finalization;
+
 	private boolean paused;
 	
 	@Column(nullable=false)
@@ -833,6 +816,67 @@ public class Build extends ProjectBelonging
 		this.issue = issue;
 	}
 
+	public boolean isFinalization() {
+		return finalization;
+	}
+
+	public void setFinalization(boolean finalization) {
+		this.finalization = finalization;
+	}
+
+	public String getCurrentLogStage() {
+		if (finalization)
+			return FINALIZATION;
+		var stage = INITIALIZATION;
+		for (var step : getStepExecutions().keySet())
+			stage = step;
+		return stage;
+	}
+
+	public List<String> getLogStages() {
+		var stages = new ArrayList<String>();
+		stages.add(INITIALIZATION);
+		stages.addAll(getStepExecutions().keySet());
+		if (finalization)
+			stages.add(FINALIZATION);
+		return stages;
+	}
+
+	public Map<String, StepExecution> getStepExecutions() {
+		return stepExecutions;
+	}
+
+	/** Resolve a log stage's title, including step names from this build's recorded spec. */
+	public String getLogStageName(String stage) {
+		if (stage.equals(INITIALIZATION))
+			return "Initialization";
+		if (stage.equals(FINALIZATION))
+			return "Finalization";
+		if (!stage.startsWith("step-") || getJob() == null)
+			return stage;
+		var position = JobHelper.parseStepPosition(stage.substring(5));
+		var steps = getJob().getSteps();
+		var names = new ArrayList<String>();
+		for (int depth = 0; depth < position.size(); depth++) {
+			int index = position.get(depth);
+			if (steps.isEmpty() || index < 0 || (depth == 0 && index >= steps.size()))
+				return stage;
+			// Template parameter combinations repeat the template's action list.
+			var step = steps.get(index % steps.size());
+			int repeat = index / steps.size() + 1;
+			names.add(step.getName() + (repeat > 1 ? " (" + repeat + ")" : ""));
+			if (depth < position.size() - 1) {
+				if (!(step instanceof io.onedev.server.buildspec.step.UseTemplateStep templateStep))
+					return stage;
+				var template = getSpec().getStepTemplateMap().get(templateStep.getTemplateName());
+				if (template == null)
+					return stage;
+				steps = template.getSteps();
+			}
+		}
+		return String.join(" -> ", names);
+	}
+
 	public Map<String, List<String>> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
@@ -997,11 +1041,11 @@ public class Build extends ProjectBelonging
 		return streamPreviousCache.get(status);
 	}
 	
-	private GitService getGitService() {
+	private static GitService getGitService() {
 		return OneDev.getInstance(GitService.class);
 	}
 	
-	private BuildService getBuildService() {
+	private static BuildService getBuildService() {
 		return OneDev.getInstance(BuildService.class);
 	}
 	
@@ -1153,8 +1197,33 @@ public class Build extends ProjectBelonging
 		return caption;
 	}
 	
-	public LoggingSupport getLoggingSupport() {
-		return new BuildLoggingSupport(this);
+	public BuildLogContext getLogContext() {
+		return new BuildLogContext(this);
+	}
+
+	public static File getLogDir(Long projectId, Long buildNumber) {
+		File buildDir = getBuildService().getBuildDir(projectId, buildNumber);
+		return new File(buildDir, LOG_DIR);
+	}
+	
+	public static String getProjectRelativeDirPath(Long buildNumber) {
+		return BUILDS_DIR + "/" + getRelativeDirPath(buildNumber);		
+	}
+	
+	public static String getRelativeDirPath(Long buildNumber) {
+		return String.format("s%03d", buildNumber%1000) + "/" + buildNumber;
+	}
+	
+	public File getLogDir() {
+		return getLogDir(getProject().getId(), getNumber());
+	}
+	
+	public static String getLogLockName(Long projectId, Long buildNumber) {
+		return "build-log: " + projectId + ":" + buildNumber;
+	}
+	
+	public String getLogLockName() {
+		return getLogLockName(getProject().getId(), getNumber());
 	}
 
 }

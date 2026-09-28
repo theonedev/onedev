@@ -6,7 +6,7 @@ import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
 import static io.onedev.server.model.Build.ARTIFACTS_DIR;
-import static io.onedev.server.model.Build.LOG_FILE;
+import static io.onedev.server.model.Build.LOG_DIR;
 import static io.onedev.server.model.Build.PROP_FINISH_DATE;
 import static io.onedev.server.model.Build.PROP_FINISH_TIME_GROUPS;
 import static io.onedev.server.model.Build.PROP_PENDING_DURATION;
@@ -22,9 +22,9 @@ import static io.onedev.server.model.Project.SHARE_TEST_DIR;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
+import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static java.lang.Long.valueOf;
 import static java.util.Arrays.asList;
-import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -50,33 +50,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.StreamingOutput;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.glassfish.jersey.client.ClientProperties;
 import org.hibernate.Session;
-import io.onedev.server.persistence.dao.MatchMode;
-import io.onedev.server.persistence.dao.Order;
-import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.hibernate.query.sqm.tree.domain.SqmPath;
 import org.jspecify.annotations.Nullable;
@@ -99,11 +78,9 @@ import io.onedev.server.data.DataService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.logging.LogService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -120,6 +97,9 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.persistence.dao.MatchMode;
+import io.onedev.server.persistence.dao.Order;
+import io.onedev.server.persistence.dao.Restrictions;
 import io.onedev.server.replica.BuildStorageSyncer;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
@@ -147,6 +127,23 @@ import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.web.util.StatsGroup;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 @Singleton
 public class DefaultBuildService extends BaseEntityService<Build> implements BuildService, SchedulableTask, Serializable {
@@ -176,9 +173,6 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	
 	@Inject
 	private BuildLabelService labelService;
-
-	@Inject
-	private LogService logService;
 	
 	@Inject
 	private ClusterService clusterService;
@@ -303,11 +297,6 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 				}
 			});
 		}
-	}
-
-	@Listen
-	public void on(BuildFinished event) {
-		logService.flush(event.getBuild().getLoggingSupport());
 	}
 
 	@Sessional
@@ -1219,7 +1208,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 			projectService.syncDirectory(projectId, BUILDS_DIR + "/" + suffix, (buildNumberString) -> {
 				var buildNumber = valueOf(buildNumberString);
 				var buildPath = getProjectRelativeDirPath(buildNumber);
-				projectService.syncFile(projectId, buildPath + "/" + LOG_FILE, 
+				projectService.syncDirectory(projectId, buildPath + "/" + LOG_DIR,
 						getLogLockName(projectId, buildNumber), activeServer);
 				if (clusterService.runOnServer(activeServer, () -> getArtifactsDir(projectId, buildNumber).exists())) {
 					var artifactsDir = storageService.initArtifactsDir(projectId, buildNumber);

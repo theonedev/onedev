@@ -126,112 +126,118 @@ public class Translate extends CommandHandler {
 
 			Set<String> scannedTranslationKeys = new TreeSet<>();
 
-			Files.walk(projectDir.toPath())
-					.filter(it -> it.toString().endsWith(".class"))
-					.forEach(it -> {
-						var classPath = it;
-						String relative = null;
-						var parentPath = classPath.getParent();
-						while (!parentPath.equals(projectDir.toPath())) {
-							if (parentPath.getFileName().toString().equals("classes")) {
-								relative = parentPath.relativize(classPath).toString();
-								break;
+			try (var paths = Files.walk(projectDir.toPath())) {
+				paths
+						.filter(it -> it.toString().endsWith(".class"))
+						.forEach(it -> {
+							var classPath = it;
+							String relative = null;
+							var parentPath = classPath.getParent();
+							while (!parentPath.equals(projectDir.toPath())) {
+								if (parentPath.getFileName().toString().equals("classes")) {
+									relative = parentPath.relativize(classPath).toString();
+									break;
+								}
+								parentPath = parentPath.getParent();
 							}
-							parentPath = parentPath.getParent();
-						}
 
-						if (relative != null && relative.startsWith("io/onedev/server/")) {
-							var className = StringUtils.substringBeforeLast(relative, ".").replace("/", ".");
-							if (!className.endsWith("Panel") && !className.endsWith("Page")
-									&& !className.endsWith("Behavior")) {
-								try {
-									var clazz = Class.forName(className);
-									var editable = clazz.getAnnotation(Editable.class);
-									if (editable != null) {
-										scannedTranslationKeys.add(EditableUtils.getDisplayName(clazz));
-										var group = EditableUtils.getGroup(clazz);
-										if (group != null)
-											scannedTranslationKeys.add(group);
-										var description = editable.description();
-										if (description.length() != 0) {
-											scannedTranslationKeys.add(description);
-										}
-									}
-									for (var method : clazz.getDeclaredMethods()) {
-										editable = method.getAnnotation(Editable.class);
+							if (relative != null && relative.startsWith("io/onedev/server/")) {
+								var className = StringUtils.substringBeforeLast(relative, ".").replace("/", ".");
+								if (!className.endsWith("Panel") && !className.endsWith("Page")
+										&& !className.endsWith("Behavior")) {
+									try {
+										var clazz = Class.forName(className);
+										var editable = clazz.getAnnotation(Editable.class);
 										if (editable != null) {
-											scannedTranslationKeys.add(EditableUtils.getDisplayName(method));
-											var group = EditableUtils.getGroup(method);
+											scannedTranslationKeys.add(EditableUtils.getDisplayName(clazz));
+											var group = EditableUtils.getGroup(clazz);
 											if (group != null)
 												scannedTranslationKeys.add(group);
 											var description = editable.description();
 											if (description.length() != 0) {
 												scannedTranslationKeys.add(description);
 											}
-											var placeholder = editable.placeholder();
-											if (placeholder.length() != 0) {
-												scannedTranslationKeys.add(placeholder);
+										}
+										for (var method : clazz.getDeclaredMethods()) {
+											editable = method.getAnnotation(Editable.class);
+											if (editable != null) {
+												scannedTranslationKeys.add(EditableUtils.getDisplayName(method));
+												var group = EditableUtils.getGroup(method);
+												if (group != null)
+													scannedTranslationKeys.add(group);
+												var description = editable.description();
+												if (description.length() != 0) {
+													scannedTranslationKeys.add(description);
+												}
+												var placeholder = editable.placeholder();
+												if (placeholder.length() != 0) {
+													scannedTranslationKeys.add(placeholder);
+												}
+												var rootPlaceholder = editable.rootPlaceholder();
+												if (rootPlaceholder.length() != 0) {
+													scannedTranslationKeys.add(rootPlaceholder);
+												}
 											}
-											var rootPlaceholder = editable.rootPlaceholder();
-											if (rootPlaceholder.length() != 0) {
-												scannedTranslationKeys.add(rootPlaceholder);
+											var notEmpty = method.getAnnotation(NotEmpty.class);
+											if (notEmpty != null && notEmpty.message().length() != 0) {
+												scannedTranslationKeys.add(notEmpty.message());
+											}
+											var notNull = method.getAnnotation(NotNull.class);
+											if (notNull != null && notNull.message().length() != 0) {
+												scannedTranslationKeys.add(notNull.message());
+											}
+											var size = method.getAnnotation(Size.class);
+											if (size != null && size.message().length() != 0) {
+												scannedTranslationKeys.add(size.message());
+											}
+											var metricIndicator = method.getAnnotation(MetricIndicator.class);
+											if (metricIndicator != null) {
+												if (metricIndicator.name().length() != 0)
+													scannedTranslationKeys.add(metricIndicator.name());
+												if (metricIndicator.group().length() != 0)
+													scannedTranslationKeys.add(metricIndicator.group());
 											}
 										}
-										var notEmpty = method.getAnnotation(NotEmpty.class);
-										if (notEmpty != null && notEmpty.message().length() != 0) {
-											scannedTranslationKeys.add(notEmpty.message());
+										if (clazz.isEnum()) {
+											for (var constant : clazz.getEnumConstants()) {
+												scannedTranslationKeys.add(TextUtils.getDisplayValue((Enum<?>) constant));
+											}
 										}
-										var notNull = method.getAnnotation(NotNull.class);
-										if (notNull != null && notNull.message().length() != 0) {
-											scannedTranslationKeys.add(notNull.message());
-										}
-										var size = method.getAnnotation(Size.class);
-										if (size != null && size.message().length() != 0) {
-											scannedTranslationKeys.add(size.message());
-										}
-										var metricIndicator = method.getAnnotation(MetricIndicator.class);
-										if (metricIndicator != null) {
-											if (metricIndicator.name().length() != 0)
-												scannedTranslationKeys.add(metricIndicator.name());
-											if (metricIndicator.group().length() != 0)
-												scannedTranslationKeys.add(metricIndicator.group());
-										}
+									} catch (ClassNotFoundException e) {
+										throw new RuntimeException(e);
 									}
-									if (clazz.isEnum()) {
-										for (var constant : clazz.getEnumConstants()) {
-											scannedTranslationKeys.add(TextUtils.getDisplayValue((Enum<?>) constant));
-										}
-									}
-								} catch (ClassNotFoundException e) {
-									throw new RuntimeException(e);
 								}
 							}
-						}
-					});
+						});
+			}
 
-			Files.walk(projectDir.toPath())
-					.filter(it -> it.toString().contains("src/main/java/io/onedev/server"))
-					.filter(it -> it.toString().endsWith(".java"))
-					.forEach(it -> {
-						try {
-							scannedTranslationKeys.addAll(scanJavaMethods(Files.readString(it)));
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					});
+			try (var paths = Files.walk(projectDir.toPath())) {
+				paths
+						.filter(it -> it.toString().contains("src/main/java/io/onedev/server"))
+						.filter(it -> it.toString().endsWith(".java"))
+						.forEach(it -> {
+							try {
+								scannedTranslationKeys.addAll(scanJavaMethods(Files.readString(it)));
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						});
+			}
 
-			Files.walk(projectDir.toPath())
-					.filter(it -> it.toString().contains("src/main/java/io/onedev/server"))
-					.filter(it -> it.toString().endsWith(".html"))
-					.forEach(it -> {
-						try {
-							var content = Files.readString(it);
-							scannedTranslationKeys.addAll(scanHtmlTags(content));
-							scannedTranslationKeys.addAll(scanHtmlAttributes(content));
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					});
+			try (var paths = Files.walk(projectDir.toPath())) {
+				paths
+						.filter(it -> it.toString().contains("src/main/java/io/onedev/server"))
+						.filter(it -> it.toString().endsWith(".html"))
+						.forEach(it -> {
+							try {
+								var content = Files.readString(it);
+								scannedTranslationKeys.addAll(scanHtmlTags(content));
+								scannedTranslationKeys.addAll(scanHtmlAttributes(content));
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						});
+			}
 
 			var model = OpenAiChatModel.builder()
 					.apiKey(apiKey)

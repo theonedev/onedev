@@ -35,7 +35,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.entityreference.WorkspaceReference;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.logging.WorkspaceLoggingSupport;
+import io.onedev.server.logging.workspace.WorkspaceLoggingSupport;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.web.util.TextUtils;

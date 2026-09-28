@@ -1,12 +1,13 @@
-package io.onedev.server.logging;
+package io.onedev.server.logging.workspace;
 
 import java.io.File;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.logging.LoggingIdentity;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.workspace.WorkspaceService;
 
-public class WorkspaceLoggingIdentity implements LoggingIdentity {
+class WorkspaceLoggingIdentity implements LoggingIdentity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -14,16 +15,16 @@ public class WorkspaceLoggingIdentity implements LoggingIdentity {
 
 	private final Long workspaceNumber;
 
-	public WorkspaceLoggingIdentity(Long projectId, Long workspaceNumber) {
+	WorkspaceLoggingIdentity(Long projectId, Long workspaceNumber) {
 		this.projectId = projectId;
 		this.workspaceNumber = workspaceNumber;
 	}
 
-	public Long getProjectId() {
+	Long getProjectId() {
 		return projectId;
 	}
 
-	public Long getWorkspaceNumber() {
+	Long getWorkspaceNumber() {
 		return workspaceNumber;
 	}
 
@@ -35,11 +36,6 @@ public class WorkspaceLoggingIdentity implements LoggingIdentity {
 	@Override
 	public String getLockName() {
 		return Workspace.getLogLockName(projectId, workspaceNumber);
-	}
-
-	@Override
-	public String getCacheKey() {
-		return "workspace-log:" + projectId + ":" + workspaceNumber;
 	}
 
 }

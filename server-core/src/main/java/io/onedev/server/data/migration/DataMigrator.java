@@ -9499,4 +9499,17 @@ public class DataMigrator {
 		counters.writeToFile(new File(dataDir, "EntityIdCounters.xml"), false);
 	}
 
+	private void migrate246(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("finalization").setText("false");
+					element.addElement("stepExecutions");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

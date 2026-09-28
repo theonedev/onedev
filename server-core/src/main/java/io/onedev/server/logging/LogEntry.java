@@ -1,5 +1,8 @@
-package io.onedev.server.buildspec.job.log;
+package io.onedev.server.logging;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,45 +15,41 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
-import org.jspecify.annotations.Nullable;
-
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 
-import io.onedev.server.logging.StyleBuilder;
 import io.onedev.server.web.asset.emoji.Emojis;
 
-public class JobLogEntryEx implements Serializable {
+public class LogEntry implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");	
 	
 	private static final Pattern EOL_PATTERN = Pattern.compile("\r?\n");
 
-	private final Date date;
+	private Date date;
 	
-	private final List<Message> messages;
+	private List<Message> messages;
 	
-	public JobLogEntryEx(Date date, List<Message> messages) {
+	LogEntry(Date date, List<Message> messages) {
 		this.date = date;
 		this.messages = messages;
 	}
 	
-	public JobLogEntryEx(JobLogEntry entry) {
-		this(entry.getDate(), Lists.newArrayList(new Message(new StyleBuilder().build(), entry.getMessage())));
+	public LogEntry(Date date, String message) {
+		this(date, new ArrayList<>(List.of(new Message(new StyleBuilder().build(), message))));
 	}
 	
-	public JobLogEntryEx transformEmojis() {
+	public LogEntry transformEmojis() {
 		Emojis emojis = Emojis.getInstance();
 		List<Message> messages = new ArrayList<>();
 		for (Message message: getMessages())
 			messages.add(new Message(message.getStyle(), emojis.apply(message.getText())));
-		return new JobLogEntryEx(getDate(), messages);
+		return new LogEntry(getDate(), messages);
 	}
 	
 	// Handle ANSI escape codes according to https://en.wikipedia.org/wiki/ANSI_escape_code
-	public static JobLogEntryEx parse(String text, StyleBuilder styleBuilder) {
+	public static LogEntry parse(String text, StyleBuilder styleBuilder) {
 		text = text.replace("\r\n", "\n");
 		
 		AtomicInteger cursor = new AtomicInteger(0);
@@ -280,14 +279,14 @@ public class JobLogEntryEx implements Serializable {
         if (currentTextBuilder.length() != 0)
         	textAppender.apply(currentTextBuilder.toString());
         
-        return new JobLogEntryEx(new Date(), new ArrayList<>(messages));
+        return new LogEntry(new Date(), new ArrayList<>(messages));
 	}
 
 	public Date getDate() {
 		return date;
 	}
 
-	public List<Message> getMessages() {
+	List<Message> getMessages() {
 		return messages;
 	}
 
@@ -315,16 +314,27 @@ public class JobLogEntryEx implements Serializable {
 		return builder.toString();
 	}
 
-	@Nullable
-	public JobLogEntry getSpaceEfficientVersion() {
-		StringBuilder builder = new StringBuilder();
+	private void writeObject(ObjectOutputStream output) throws IOException {
+		StringBuilder plainMessage = new StringBuilder();
 		for (Message message: messages) {
-			if (message.getStyle().isDefault())
-				builder.append(message.getText());
-			else
-				return null;
+			if (!message.getStyle().isDefault()) {
+				plainMessage = null;
+				break;
+			}
+			plainMessage.append(message.getText());
 		}
-		return new JobLogEntry(date, builder.toString());
+		output.writeLong(date.getTime());
+		output.writeObject(plainMessage != null ? plainMessage.toString() : messages);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void readObject(ObjectInputStream input) throws IOException, ClassNotFoundException {
+		date = new Date(input.readLong());
+		Object content = input.readObject();
+		if (content instanceof String)
+			messages = new ArrayList<>(List.of(new Message(new StyleBuilder().build(), (String) content)));
+		else
+			messages = (List<Message>) content;
 	}
 	
 }

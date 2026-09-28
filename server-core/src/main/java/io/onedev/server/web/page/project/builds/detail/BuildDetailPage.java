@@ -91,7 +91,7 @@ import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
 import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
-import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildStepsPage;
 import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
@@ -200,7 +200,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectOverviewPage.class, ProjectOverviewPage.paramsOf(project.getId()));
 	}
 
-	private ChangeObserver newBuildObserver(Long buildId) {
+	protected ChangeObserver newBuildObserver(Long buildId) {
 		return new ChangeObserver() {
 			
 			@Override
@@ -217,6 +217,60 @@ public abstract class BuildDetailPage extends ProjectPage
 		};
 	}
 	
+	protected Component newCancelLink(String componentId) {
+		return new AjaxLink<Void>(componentId) {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to cancel this build?")));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				jobService.cancel(getBuild());
+				getSession().success(_T("Cancel request submitted"));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getBuild().isFinished() && SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()));
+			}
+
+		}.setOutputMarkupId(true);
+	}
+
+	protected Component newTerminalLink(String componentId) {
+		return new AjaxLink<Void>(componentId) {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				if (isSubscriptionActive()) {
+					target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');",
+							terminalService.getTerminalUrl(getBuild())));
+				} else {
+					new MessageModal(target) {
+
+						@Override
+						protected Component newMessageContent(String componentId) {
+							return new Label(componentId, _T("Interactive web shell access to running jobs is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days")).setEscapeModelStrings(false);
+						}
+					};
+				}
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				JobContext jobContext = jobService.getJobContext(getBuild().getId());
+				setVisible(jobContext!= null && !getBuild().isFinished() && SecurityUtils.canOpenTerminal(getBuild()));
+			}
+
+		}.setOutputMarkupId(true);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -298,55 +352,9 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				}.setOutputMarkupId(true));
 
-				add(new AjaxLink<Void>("cancel") {
+				add(newCancelLink("cancel"));
 
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to cancel this build?")));
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						jobService.cancel(getBuild());
-						getSession().success(_T("Cancel request submitted"));
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!getBuild().isFinished() && SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()));
-					}
-
-				}.setOutputMarkupId(true));
-
-				add(new AjaxLink<Void>("terminal") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						if (isSubscriptionActive()) {
-							target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');",
-									terminalService.getTerminalUrl(getBuild())));
-						} else {
-							new MessageModal(target) {
-
-								@Override
-								protected Component newMessageContent(String componentId) {
-									return new Label(componentId, _T("Interactive web shell access to running jobs is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days")).setEscapeModelStrings(false);
-								}
-							};
-						}
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-
-						JobContext jobContext = jobService.getJobContext(getBuild().getId());
-						setVisible(jobContext!= null && !getBuild().isFinished() && SecurityUtils.canOpenTerminal(getBuild()));
-					}
-
-				}.setOutputMarkupId(true));
+				add(newTerminalLink("terminal"));
 
 				add(new DropdownLink("promotions") {
 
@@ -543,14 +551,13 @@ public abstract class BuildDetailPage extends ProjectPage
 				}
 
 				if (SecurityUtils.canAccessLog(getBuild())) {
-					tabs.add(new BuildTab(Model.of(_T("Log")), BuildLogPage.class, BuildLogPage.paramsOf(getBuild())) {
+					tabs.add(new BuildTab(Model.of("Steps"), BuildStepsPage.class, BuildStepsPage.paramsOf(getBuild())) {
+						private static final long serialVersionUID = 1L;
 
 						@Override
 						protected Component renderOptions(String componentId) {
-							BuildLogPage page = (BuildLogPage) getPage();
-							return page.renderOptions(componentId);
+							return ((BuildStepsPage) getPage()).renderOptions(componentId);
 						}
-
 					});
 				}
 
@@ -697,6 +704,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	@Override
 	protected void onDetach() {
 		buildModel.detach();
+		promotionsModel.detach();
 		super.onDetach();
 	}
 

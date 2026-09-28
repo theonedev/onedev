@@ -1,11 +1,11 @@
-package io.onedev.server.buildspec.job.log;
+package io.onedev.server.logging;
 
 import java.io.Serializable;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class Message implements Serializable {
+class Message implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -13,16 +13,16 @@ public class Message implements Serializable {
 	
 	private final String text;
 	
-	public Message(Style style, String text) {
+	Message(Style style, String text) {
 		this.style = style;
 		this.text = text;
 	}
 
-	public Style getStyle() {
+	Style getStyle() {
 		return style;
 	}
 
-	public String getText() {
+	String getText() {
 		return text;
 	}
 

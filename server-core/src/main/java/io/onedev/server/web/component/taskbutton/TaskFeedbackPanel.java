@@ -24,7 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.log.JobLogEntryEx;
+import io.onedev.server.logging.LogEntry;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
 abstract class TaskFeedbackPanel extends Panel {
@@ -147,7 +147,7 @@ abstract class TaskFeedbackPanel extends Panel {
 
 	protected abstract void onClose(AjaxRequestTarget target);
 	
-	protected abstract List<JobLogEntryEx> getLogEntries();
+	protected abstract List<LogEntry> getLogEntries();
 	
 	@Nullable
 	protected abstract TaskResult getResult();

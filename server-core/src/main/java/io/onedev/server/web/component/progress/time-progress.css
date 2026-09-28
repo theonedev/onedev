@@ -1,0 +1,18 @@
+.time-progress {
+    height: 4px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 0;
+    background: var(--secondary);
+}
+.time-progress-rounded { border-radius: 2px; }
+.time-progress-fill {
+    height: 100%;
+    width: 0;
+    background: var(--time-progress-color, var(--primary));
+    transition: width 1s linear;
+}
+.dark-mode .time-progress { background: var(--dark-mode-lighter-dark); }
+@media (prefers-reduced-motion: reduce) {
+    .time-progress-fill { transition: none; }
+}

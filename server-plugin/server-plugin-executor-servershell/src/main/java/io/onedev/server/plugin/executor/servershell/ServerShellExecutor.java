@@ -9,6 +9,7 @@ import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.initRepository;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import static io.onedev.k8shelper.KubernetesHelper.setupGitCerts;
+import static io.onedev.k8shelper.JobHelper.buildStepSkipMessage;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
+import io.onedev.k8shelper.JobHelper;
 import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.CacheProvisioner;
 import io.onedev.k8shelper.CheckoutFacade;
@@ -138,12 +140,19 @@ public class ServerShellExecutor extends JobExecutor implements Testable<Testabl
 
 			@Override
 			public boolean run(TaskLogger jobLogger) {
+				return executeJob(jobLogger);
+			}
+
+			private boolean executeJob(TaskLogger jobLogger) {
 				notifyJobRunning(jobContext.getBuildId(), null);
 				
 				var buildDir = getBuildDir(Bootstrap.getTempDir(), jobContext.getProjectId(), 
 						jobContext.getBuildNumber(), jobContext.getSubmitSequence());
 				FileUtils.createDir(buildDir);
 				File workDir = new File(buildDir, "work");
+				var cacheProvisioners = new ArrayList<CacheProvisioner>();
+				boolean successful = false;
+				boolean initializationCompleted = false;
 				SecretMasker.push(jobContext.getSecretMasker());
 				try {
 					String localServer = getClusterService().getLocalServerAddress();
@@ -158,19 +167,18 @@ public class ServerShellExecutor extends JobExecutor implements Testable<Testabl
 					}
 					FileUtils.createDir(workDir);
 
-					var cacheProvisioners = new ArrayList<CacheProvisioner>();
-				
 					jobLogger.log("Copying job dependencies...");
 					getJobService().copyDependencies(jobContext, workDir);
 
 					getJobService().reportJobWorkDir(jobContext, workDir.getAbsolutePath());
 					CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 					var cacheConfigIndex = new AtomicInteger(1);
-					var successful = entryFacade.execute(new LeafHandler() {
+					initializationCompleted = true;
+					successful = entryFacade.execute(new LeafHandler() {
 
 						@Override
 						public boolean execute(LeafFacade facade, List<Integer> position) {
-							return JobUtils.runStep(entryFacade, position, jobLogger, () -> {
+							return JobUtils.runStep(position, jobLogger, () -> {
 								runningStep = facade;
 								try {
 									return doExecute(facade, position);
@@ -273,21 +281,25 @@ public class ServerShellExecutor extends JobExecutor implements Testable<Testabl
 
 						@Override
 						public void skip(LeafFacade facade, List<Integer> position) {
-							jobLogger.notice("Step \"" + entryFacade.getPathAsString(position) + "\" is skipped");
+							jobLogger.log(buildStepSkipMessage(position));
 						}
 
 					}, new ArrayList<>());
 
-					if (successful) {
-						for (var cacheProvisioner : cacheProvisioners) 
-							cacheProvisioner.upload(buildDir, jobLogger);
-					}
-					
 					return successful;
 				} finally {
-					SecretMasker.pop();
-					synchronized (buildDir) {
-						FileUtils.deleteDir(buildDir, 5);
+					try {
+						if (initializationCompleted)
+							jobLogger.log(JobUtils.buildPhaseMessage(JobHelper.FINALIZATION));
+						if (successful) {
+							for (var cacheProvisioner : cacheProvisioners)
+								cacheProvisioner.upload(buildDir, jobLogger);
+						}
+					} finally {
+						SecretMasker.pop();
+						synchronized (buildDir) {
+							FileUtils.deleteDir(buildDir, 5);
+						}
 					}
 				}
 			}

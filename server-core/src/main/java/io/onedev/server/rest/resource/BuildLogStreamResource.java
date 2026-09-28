@@ -1,31 +1,36 @@
 package io.onedev.server.rest.resource;
 
+import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.logging.BuildLoggingSupport;
+
+import io.onedev.server.logging.LogEntry;
 import io.onedev.server.logging.LogListener;
-import io.onedev.server.logging.LogService;
-import io.onedev.server.logging.LogSnippet;
 import io.onedev.server.logging.LoggingSupport;
+import io.onedev.server.logging.build.BuildLogService;
+import io.onedev.server.logging.build.BuildLoggingSupport;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-
+import io.onedev.server.service.BuildService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
 @Api(description="Build log stream resource is operated with build id, which is different from build number. "
 		+ "To get build id of a particular build number, use the <a href='/~help/api/io.onedev.server.rest.BuildResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -40,17 +45,17 @@ public class BuildLogStreamResource {
 	
 	private final BuildService buildService;
 	
-	private final LogService logService;
+	private final BuildLogService buildLogService;
 	
 	private final ObjectMapper objectMapper;
 	
 	private final SessionService sessionService;
 	
 	@Inject
-	public BuildLogStreamResource(BuildService buildService, LogService logService,
+	public BuildLogStreamResource(BuildService buildService, BuildLogService buildLogService,
                                   ObjectMapper objectMapper, SessionService sessionService) {
 		this.buildService = buildService;
-		this.logService = logService;
+		this.buildLogService = buildLogService;
 		this.objectMapper = objectMapper;
 		this.sessionService = sessionService;
 	}
@@ -64,7 +69,7 @@ public class BuildLogStreamResource {
 		if (!SecurityUtils.canAccessLog(build))
 			throw new UnauthorizedException();
 		
-		var loggingSupport = build.getLoggingSupport();
+		var logContext = build.getLogContext();
 		var buildStatus = build.getStatus();
 
 		return os -> {
@@ -72,8 +77,8 @@ public class BuildLogStreamResource {
 			var logListener = new LogListener() {
 
 				@Override
-				public void logged(LoggingSupport loggingSupport) {
-					if (loggingSupport instanceof BuildLoggingSupport buildLoggingSupport 
+				public void logged(LoggingSupport support) {
+					if (support instanceof BuildLoggingSupport buildLoggingSupport 
 							&& buildLoggingSupport.getBuildId().equals(buildId)) {
 						synchronized (os) {
 							os.notify();
@@ -82,13 +87,11 @@ public class BuildLogStreamResource {
 				}
 
 			};
-			logService.registerListener(logListener);
+			buildLogService.registerListener(logListener);
 			sessionService.closeSession();
 			try {
-				var nextOffset = 0;
-				LogSnippet snippet = logService.readLogSnippetReversely(loggingSupport, MAX_LOG_ENTRIES + 1);
-				nextOffset = snippet.offset + snippet.entries.size();
-				for (var entry : snippet.entries)
+				var snapshot = buildLogService.readSnapshot(logContext, null, MAX_LOG_ENTRIES + 1);
+				for (var entry : snapshot.entries)
 					writeEntry(os, entry);
 
 				while (true) {
@@ -98,10 +101,9 @@ public class BuildLogStreamResource {
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}
-						var entries = logService.readLogEntries(loggingSupport, nextOffset, 0);
-						if (!entries.isEmpty()) {
-							nextOffset += entries.size();
-							for (var entry : entries)
+						snapshot = buildLogService.readSnapshot(logContext, snapshot, MAX_LOG_ENTRIES + 1);
+						if (!snapshot.entries.isEmpty()) {
+							for (var entry : snapshot.entries)
 								writeEntry(os, entry);
 						} else {
 							var innerBuildStatus = sessionService.call(() -> buildService.load(buildId).getStatus());
@@ -117,7 +119,7 @@ public class BuildLogStreamResource {
 				}
 			} finally {
 				sessionService.openSession();
-				logService.deregisterListener(logListener);
+				buildLogService.deregisterListener(logListener);
 			}
 		};
 	}
@@ -140,7 +142,7 @@ public class BuildLogStreamResource {
 		}
 	}
 	
-	private void writeEntry(OutputStream os, JobLogEntryEx entry) {
+	private void writeEntry(OutputStream os, LogEntry entry) {
 		try {
 			var bytes = objectMapper.writeValueAsBytes(entry.transformEmojis());
 			writeInt(os, bytes.length);

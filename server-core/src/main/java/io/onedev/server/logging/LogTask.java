@@ -6,7 +6,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
 
-public class LogTask implements ClusterTask<Void> {
+class LogTask implements ClusterTask<Void> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -16,7 +16,7 @@ public class LogTask implements ClusterTask<Void> {
 	
 	private final String sessionId;
 	
-	public LogTask(String token, String message, @Nullable String sessionId) {
+	LogTask(String token, String message, @Nullable String sessionId) {
 		this.token = token;
 		this.message = message;
 		this.sessionId = sessionId;

@@ -1,4 +1,4 @@
-package io.onedev.server.buildspec.job.log.instruction;
+package io.onedev.server.logging.instruction;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser.InstructionContext;
+import io.onedev.server.logging.instruction.LogInstructionParser.InstructionContext;
 
 @ExtensionPoint
 public abstract class LogInstruction {

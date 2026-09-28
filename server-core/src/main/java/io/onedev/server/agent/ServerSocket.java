@@ -150,7 +150,7 @@ public class ServerSocket {
 							if (logger != null)
 								logger.log(logMessage, sessionId);
 						} catch (Exception e) {
-							logger.error("Error processing job log", e);
+							logger.error("Error processing log", e);
 						}
 						break;
 					case REPORT_JOB_WORKDIR:

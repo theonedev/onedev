@@ -114,8 +114,11 @@ public class LfsObject implements Serializable {
 
 				@Override
 				public void close() throws IOException {
-					super.close();
-					readLock.unlock();
+					try {
+						super.close();
+					} finally {
+						readLock.unlock();
+					}
 				}
 				
 			};
@@ -137,8 +140,11 @@ public class LfsObject implements Serializable {
 
 				@Override
 				public void close() throws IOException {
-					super.close();
-					writeLock.unlock();
+					try {
+						super.close();
+					} finally {
+						writeLock.unlock();
+					}
 				}
 				
 			};

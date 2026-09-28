@@ -1,0 +1,26 @@
+<wicket:extend>
+    <div class="build-steps-layout d-flex flex-grow-1">
+        <div class="build-steps-main d-flex flex-column flex-grow-1">
+            <div wicket:id="progress" class="build-duration-progress" t:aria-label="Estimated build progress"
+                 t:data-tippy-content="Estimated progress based on the running time of the last successful build in the same stream"></div>
+            <div wicket:id="steps" class="build-steps flex-grow-1"></div>
+        </div>
+        <div wicket:id="autoUpdateContainer" class="step-update-rail">
+            <button wicket:id="autoUpdate" type="button" class="step-update-control" t:aria-label="Auto-update and auto-scroll steps and logs" aria-pressed="true">
+                <span class="step-update-activity" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                </span>
+            </button>
+        </div>
+    </div>
+    <wicket:fragment wicket:id="optionsFrag">
+        <div class="d-flex align-items-center">
+            <span wicket:id="stickyActions" class="build-step-sticky-actions align-items-center">
+                <a wicket:id="cancel" class="btn btn-icon btn-light btn-hover-danger btn-xs mr-2" t:data-tippy-content="Cancel this build" t:aria-label="Cancel this build"><wicket:svg href="cancel" class="icon"/></a>
+                <a wicket:id="terminal" class="subscription-required btn btn-icon btn-light btn-hover-primary btn-xs mr-2" t:data-tippy-content="Open terminal of current running step" t:aria-label="Open terminal of current running step"><wicket:svg href="terminal" class="icon"/></a>
+            </span>
+            <a wicket:id="download" class="btn btn-light btn-hover-primary btn-icon btn-sm btn-xs" t:data-tippy-content="Download full log" t:aria-label="Download full log"><wicket:svg href="download" class="icon"/></a>
+        </div>
+    </wicket:fragment>
+</wicket:extend>
