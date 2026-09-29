@@ -551,7 +551,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				}
 
 				if (SecurityUtils.canAccessLog(getBuild())) {
-					tabs.add(new BuildTab(Model.of("Steps"), BuildStepsPage.class, BuildStepsPage.paramsOf(getBuild())) {
+					tabs.add(new BuildTab(Model.of(_T("Steps")), BuildStepsPage.class, BuildStepsPage.paramsOf(getBuild())) {
 						private static final long serialVersionUID = 1L;
 
 						@Override

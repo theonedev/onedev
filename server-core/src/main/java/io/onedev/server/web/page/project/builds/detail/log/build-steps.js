@@ -1,9 +1,10 @@
 onedev.server.buildSteps = {
-    init: function(id, callback, resume, maxEntries, latestEntriesNotice, noEntriesNotice) {
+    init: function(id, callback, resume, maxEntries, latestEntriesNotice, noEntriesNotice, pausedText, resumeText, noStepsNotice) {
         const self = this;
         if (self.timer) clearInterval(self.timer);
         self.stopPositioning();
         if (self.steps) self.steps.forEach(step => {
+            if (step.stepPositionTooltip) step.stepPositionTooltip.destroy();
             if (step.statusTooltip) step.statusTooltip.destroy();
             step.downloadTooltip.destroy();
         });
@@ -29,6 +30,9 @@ onedev.server.buildSteps = {
         self.maxEntries = maxEntries;
         self.latestEntriesNotice = latestEntriesNotice;
         self.noEntriesNotice = noEntriesNotice;
+        self.pausedText = pausedText;
+        self.resumeText = resumeText;
+        self.noStepsNotice = noStepsNotice;
         self.steps = new Map();
         self.sequence = undefined;
         self.busy = false;
@@ -116,9 +120,15 @@ onedev.server.buildSteps = {
         step.toggle = $('<button type="button" class="step-toggle btn btn-link text-left p-0 font-weight-bold d-inline-flex align-items-center"></button>').appendTo(header);
         step.arrow = $('<svg class="icon icon-sm mr-1"><use xlink:href="' + onedev.server.icons + '#arrow"/></svg>').appendTo(step.toggle);
         $('<span></span>').text(step.title).appendTo(step.toggle);
-        if (data.stepIndex != null)
-            step.stepPosition = $('<span class="step-position text-muted font-weight-normal text-nowrap ml-2"></span>')
-                .appendTo(step.toggle);
+        if (data.stepIndex != null) {
+            step.stepPosition = $('<span class="step-position text-muted font-weight-normal text-nowrap ml-2" tabindex="0"></span>')
+                .appendTo(header);
+            step.stepPositionTooltip = tippy(step.stepPosition[0], {
+                content: data.stepPositionText,
+                delay: [500, 0],
+                placement: 'auto'
+            });
+        }
         if (data.status) {
             step.statusLabel = $('<span class="step-status ml-2 d-inline-flex" role="img" tabindex="0"></span>').appendTo(header);
             step.statusIcon = $('<svg aria-hidden="true"><use/></svg>').appendTo(step.statusLabel);
@@ -140,8 +150,8 @@ onedev.server.buildSteps = {
         step.body = $('<div class="step-body"></div>').appendTo(section);
         step.log = $('<pre class="log text-break font-size-sm p-3 mb-0"></pre>').appendTo(step.body);
         step.notice = $('<div class="step-notice text-muted px-3 pt-3"></div>').text(self.noEntriesNotice).prependTo(step.body);
-        step.paused = $('<div class="text-warning p-3">Execution paused</div>').appendTo(step.body).hide();
-        if (self.resume) $('<button type="button" class="btn btn-link ml-2 p-0">Resume</button>').appendTo(step.paused).on('click', self.resume);
+        step.paused = $('<div class="text-warning p-3"></div>').text(self.pausedText).appendTo(step.body).hide();
+        if (self.resume) $('<button type="button" class="btn btn-link ml-2 p-0"></button>').text(self.resumeText).appendTo(step.paused).on('click', self.resume);
         self.setExpanded(step, step.expanded);
         step.toggle.on('click', function() {
             self.setExpanded(step, !step.expanded);
@@ -157,6 +167,7 @@ onedev.server.buildSteps = {
         if (!self.autoUpdate && !requested) return;
         if (self.sequence !== undefined && self.sequence !== sequence) {
             self.steps.forEach(step => {
+                if (step.stepPositionTooltip) step.stepPositionTooltip.destroy();
                 if (step.statusTooltip) step.statusTooltip.destroy();
                 step.downloadTooltip.destroy();
             });
@@ -168,6 +179,7 @@ onedev.server.buildSteps = {
             const names = new Set(data.map(item => item.name));
             self.steps.forEach((step, name) => {
                 if (!names.has(name)) {
+                    if (step.stepPositionTooltip) step.stepPositionTooltip.destroy();
                     if (step.statusTooltip) step.statusTooltip.destroy();
                     step.downloadTooltip.destroy();
                     step.section.remove();
@@ -187,7 +199,7 @@ onedev.server.buildSteps = {
             }
             self.updateStep(step, item, index, paused);
         });
-        if (!data.length) $(self.container).text('No step logs available');
+        if (!data.length) $(self.container).text(self.noStepsNotice);
         else $(self.container).contents().filter(function() { return this.nodeType === 3; }).remove();
         self.updateStickyTop();
         if (requested) {
@@ -243,10 +255,12 @@ onedev.server.buildSteps = {
             const newEntries = item.entries.slice(Math.max(0, step.next - item.offset));
             onedev.server.jobLogEntry.append(step.log, newEntries, true);
             const entries = step.log.children();
+            step.log.toggle(entries.length > 0);
             if (entries.length > self.maxEntries) entries.slice(0, entries.length - self.maxEntries).remove();
             step.next = Math.max(step.next, item.next);
             step.fetch = false;
             step.notice.text(item.next > self.maxEntries ? self.latestEntriesNotice : self.noEntriesNotice)
+                .toggleClass('pb-3', item.next === 0)
                 .toggle(item.next > self.maxEntries || item.next === 0);
             if (self.autoUpdate && step.active)
                 step.body[0].scrollIntoView({block: 'end'});

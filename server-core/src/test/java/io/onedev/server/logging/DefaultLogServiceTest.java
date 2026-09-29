@@ -163,7 +163,7 @@ class DefaultLogServiceTest {
 	}
 
 	@Test
-	void closingWhileAWriterWaitsDoesNotRecreateTheSnippet() throws Exception {
+	void closingWhileAWriterWaitsRejectsTheEntryWithoutPersistingAnEmptySnippet() throws Exception {
 		var service = new DefaultLogService();
 		inject(service, "webSocketService", mock(WebSocketService.class));
 		inject(service, "clusterService", mock(ClusterService.class));
@@ -194,12 +194,11 @@ class DefaultLogServiceTest {
 			}
 			writer.get(5, java.util.concurrent.TimeUnit.SECONDS);
 			assertTrue(service.readLogEntries(identity, 0, 0).isEmpty());
-			assertTrue(identity.getFile().length() > 0);
-			var length = identity.getFile().length();
+			assertEquals(0, identity.getFile().length());
 			service.flush(support);
-			assertEquals(length, identity.getFile().length());
-			verify(support).fileModified();
-			service.newLogger(support).log("late entry without acceptance predicate");
+			assertEquals(0, identity.getFile().length());
+			verify(support, never()).fileModified();
+			logger.log("another rejected entry");
 			assertTrue(service.readLogEntries(identity, 0, 0).isEmpty());
 			var snippets = DefaultLogService.class.getDeclaredField("recentSnippets");
 			snippets.setAccessible(true);

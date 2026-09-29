@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -56,18 +57,26 @@ public class BuildLogResource extends AbstractResource {
 		if (buildNumber == null)
 			throw new IllegalArgumentException("build number has to be specified");
 
-		if (!SecurityUtils.isSystem()) {
-			Project project = getProjectService().load(projectId);			
-			Build build = getBuildService().find(project, buildNumber);
+		Project project = getProjectService().load(projectId);
+		Build build = getBuildService().find(project, buildNumber);
 
-			if (build == null) {
-				String message = String.format("Unable to find build (project: %s, build number: %d)", 
-						project.getPath(), buildNumber);
-				throw new EntityNotFoundException(message);
+		if (build == null) {
+			String message = String.format("Unable to find build (project: %s, build number: %d)",
+					project.getPath(), buildNumber);
+			throw new EntityNotFoundException(message);
+		}
+
+		if (!SecurityUtils.isSystem() && !SecurityUtils.canAccessLog(build))
+			throw new UnauthorizedException();
+
+		if (stage != null) {
+			var stepExecutions = build.getStepExecutions();
+			var stepExecution = stepExecutions.get(stage);
+			if (stepExecution != null) {
+				int stepIndex = stepExecution.getStepCount() != 0 ? stepExecution.getStepIndex()
+						: new ArrayList<>(stepExecutions.keySet()).indexOf(stage) + 1;
+				fileName = "step-" + stepIndex + ".log";
 			}
-			
-			if (!SecurityUtils.canAccessLog(build))
-				throw new UnauthorizedException();
 		}
 		
 		ResourceResponse response = new ResourceResponse();

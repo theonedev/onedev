@@ -269,7 +269,7 @@ class BuildStepsPageTest {
 	}
 
 	@Test
-	void retryReloadsThePageInsteadOfReusingPreviousLogOffsets() throws Exception {
+	void retryReloadsThePageRegardlessOfAutoUpdateInsteadOfReusingPreviousLogOffsets() throws Exception {
 		var build = mock(Build.class);
 		when(build.getSubmitSequence()).thenReturn(1L);
 		when(build.getRetryDate()).thenReturn(new Date(1000));
@@ -286,7 +286,9 @@ class BuildStepsPageTest {
 		clearInvocations(handler);
 		set(page, "autoUpdate", false);
 		update.invoke(page, handler, false);
-		verifyNoInteractions(handler);
+		verify(handler).appendJavaScript("window.location.reload();");
+		verifyNoMoreInteractions(handler);
+		clearInvocations(handler);
 		update.invoke(page, handler, true);
 		verify(handler).appendJavaScript("window.location.reload();");
 	}

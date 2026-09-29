@@ -48,6 +48,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("6 Months", "6개월");
 		m.put("6-digits passcode", "6자리 인증 코드");
 		m.put("7 days", "7일");
+		m.put("<a href=\"/~administration/settings/jev\" target=\"_blank\">Set up Jev</a> to mark the most likely", 
+			"<a href=\"/~administration/settings/jev\" target=\"_blank\">Jev 설정</a>을 통해 가장 가능성이 높은 것을 표시합니다.");
 		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
 			"<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">AI 설정</a>을 통해 가장 가능성이 높은 것을 표시합니다");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for", 
@@ -56,6 +58,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">사용자</a>의 이메일을 확인합니다");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 스타일 마크다운</a>이 허용되며, <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml 및 katex 지원</a>이 포함됩니다.");
+		m.put("<a href=\"https://typesafe.ai/\" target=\"_blank\" rel=\"noopener noreferrer\">Jev</a> marks the most likely symbol definition in symbol navigation and suggests field values when creating an issue.", 
+			"<a href=\"https://typesafe.ai/\" target=\"_blank\" rel=\"noopener noreferrer\">Jev</a>은 심볼 탐색에서 가장 가능성이 높은 심볼 정의를 표시하고, 이슈 생성 시 필드 값을 제안합니다.");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
 			"<a href='/~administration/settings/lite-ai-model' target='_blank'>AI 설정</a>을 통해 자연어로 질의합니다");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
@@ -361,6 +365,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Any state", "모든 상태");
 		m.put("Any tag", "모든 태그");
 		m.put("Any user", "모든 사용자");
+		m.put("Anywhere", "어디서나");
 		m.put("Api Key", "API 키");
 		m.put("Api Token", "API 토큰");
 		m.put("Api Url", "API URL");
@@ -456,6 +461,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Auto update check is performed by requesting an image in your browser from onedev.io indicating new version availability, with color indicating severity of the update. It works the same way as how gravatar requests avatar images. If disabled, you are highly recommended to check update manually from time to time (can be done via help menu on left bottom of the screen) to see if there are any security/critical fixes", 
 			"자동 업데이트 확인은 브라우저에서 onedev.io의 이미지를 요청하여 새 버전 가용성을 나타내며, 색상은 업데이트의 심각도를 나타냅니다. 이는 gravatar가 아바타 이미지를 요청하는 방식과 동일하게 작동합니다. 비활성화된 경우, 보안/중요 수정 사항이 있는지 확인하기 위해 수동으로 업데이트를 주기적으로 확인하는 것이 강력히 권장됩니다(화면 왼쪽 하단의 도움말 메뉴를 통해 수행 가능).");
 		m.put("Auto-discovered executor", "자동 검색된 실행기");
+		m.put("Auto-update and auto-scroll steps and logs", "단계와 로그를 자동 업데이트 및 자동 스크롤");
+		m.put("Automatic updates and scrolling are paused. Click to resume.", "자동 업데이트 및 스크롤이 일시 중지되었습니다. 클릭하여 재개하세요.");
 		m.put("Available Agent Tokens", "사용 가능한 에이전트 토큰");
 		m.put("Available Choices", "사용 가능한 선택 항목");
 		m.put("Avatar", "아바타");
@@ -478,6 +485,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Base URL", "기본 URL");
 		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
 			"<b class='text-info'>OpenAI 호환</b> API 엔드포인트의 기본 URL.\n<b class='text-danger'>참고:</b> 여기에서 지정된 기본 URL이 HTTP/2 연결을 지원하는지 확인하세요. HTTP/1.1은\n지원되지 않으며 연결 시간 초과 오류가 발생합니다.");
+		m.put("Base URL of the Jev API, including any custom port. Defaults to https://api.typesafe.ai/v1. The /systemone endpoint is appended automatically", 
+			"Jev API의 기본 URL로, 사용자 지정 포트를 포함합니다. 기본값은 https://api.typesafe.ai/v1입니다. /systemone 엔드포인트가 자동으로 추가됩니다.");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64로 인코딩된 PEM 형식, -----BEGIN CERTIFICATE-----로 시작하고 -----END CERTIFICATE-----로 끝남");
 		m.put("Basic Info", "기본 정보");
@@ -757,6 +766,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Choose JIRA project to import issues from", "JIRA 프로젝트를 선택하여 이슈를 가져옵니다.");
 		m.put("Choose Revision", "리비전을 선택하세요.");
 		m.put("Choose YouTrack project to import issues from", "YouTrack 프로젝트를 선택하여 이슈를 가져옵니다.");
+		m.put("Choose a fast, cost-effective model for lightweight tasks such as interpreting natural language queries, generating branch names from issue titles, and suggesting titles and descriptions for pull requests that contain multiple commits.", 
+			"자연어 쿼리 해석, 이슈 제목에서 브랜치 이름 생성, 여러 커밋이 포함된 풀 리퀘스트의 제목 및 설명 제안과 같은 경량 작업을 위한 빠르고 비용 효율적인 모델을 선택하세요.");
 		m.put("Choose a project...", "프로젝트를 선택하세요...");
 		m.put("Choose a user...", "사용자를 선택하세요...");
 		m.put("Choose branch...", "브랜치를 선택하세요...");
@@ -894,6 +905,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Committed By", "커밋한 사람");
 		m.put("Committer", "커밋자");
 		m.put("Compare", "비교");
+		m.put("Compare and set", "비교 및 설정");
 		m.put("Compare with base revision", "기본 수정본과 비교");
 		m.put("Compare with this parent", "이 부모와 비교");
 		m.put("Concurrency", "동시성");
@@ -1035,6 +1047,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Current context is different from this action, click to show the comment context", "현재 컨텍스트가 이 작업과 다릅니다. 댓글 컨텍스트를 보려면 클릭하세요");
 		m.put("Current platform", "현재 플랫폼");
 		m.put("Current project", "현재 프로젝트");
+		m.put("Current step index / total number of steps", "현재 단계 인덱스 / 총 단계 수");
 		m.put("Custom Headers", "사용자 정의 헤더");
 		m.put("Customize", "사용자 정의");
 		m.put("DISCARDED", "폐기됨");
@@ -1453,6 +1466,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Estimated Time Edit Bean", "예상 시간 편집 빈");
 		m.put("Estimated Time Issue Field", "예상 시간 이슈 필드");
 		m.put("Estimated Time:", "예상 시간:");
+		m.put("Estimated build progress", "예상 빌드 진행률");
+		m.put("Estimated progress", "예상 진행률");
+		m.put("Estimated progress based on the running time of the last successful build in the same stream", 
+			"같은 스트림에서 마지막으로 성공한 빌드의 실행 시간을 기준으로 한 예상 진행률");
 		m.put("Estimated time", "예상 시간");
 		m.put("Estimated/Spent time. Click for details", "예상/소요 시간. 세부 사항을 보려면 클릭하세요");
 		m.put("Evaluate script to get choices", "선택지를 얻기 위해 스크립트를 평가합니다");
@@ -1464,6 +1481,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Ever Used Since", "이후로 사용됨");
 		m.put("Everything inside this project and all child projects will be deleted and cannot be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"이 프로젝트와 모든 하위 프로젝트 내의 모든 것이 삭제되며 복구할 수 없습니다. 삭제를 확인하려면 아래에 프로젝트 경로 <code>{0}</code>를 입력하세요");
+		m.put("Exact", "정확히");
 		m.put("Example", "예제");
 		m.put("Example Plugin Setting", "예제 플러그인 설정");
 		m.put("Example Property", "예제 속성");
@@ -1874,6 +1892,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Include When Issue is Opened", "문제가 열릴 때 포함");
 		m.put("Incompatibilities", "비호환성");
 		m.put("Inconsistent issuer in provider metadata and ID token", "제공자 메타데이터와 ID 토큰의 발급자가 일치하지 않음");
+		m.put("Increment", "증가");
 		m.put("Indicator", "지표");
 		m.put("Inferring the most likely...", "가장 가능성이 높은 것을 추론 중...");
 		m.put("Inherit from parent", "상위에서 상속");
@@ -2031,6 +2050,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("JaCoCo Coverage Report", "JaCoCo 커버리지 보고서");
 		m.put("Jest Coverage Report", "Jest 커버리지 보고서");
 		m.put("Jest Test Report", "Jest 테스트 보고서");
+		m.put("Jev", "Jev");
+		m.put("Jev Decide Value", "Jev 값 결정");
+		m.put("Jev Setting", "Jev 설정");
+		m.put("Jev settings have been saved", "Jev 설정이 저장되었습니다.");
 		m.put("Job", "작업");
 		m.put("Job \"{0}\" associated with the build not found.", "빌드와 연결된 작업 \"{0}\"을(를) 찾을 수 없습니다.");
 		m.put("Job Authorization", "작업 권한");
@@ -2232,17 +2255,18 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Markdown from file", "파일에서 가져온 마크다운");
 		m.put("Maven", "Maven");
 		m.put("Maven(s)", "Maven(s)");
+		m.put("Max", "최대값");
+		m.put("Max Attempts", "최대 시도 횟수");
 		m.put("Max Code Search Entries", "최대 코드 검색 항목");
 		m.put("Max Commit Message Line Length", "최대 커밋 메시지 라인 길이");
 		m.put("Max Git LFS File Size (MB)", "최대 Git LFS 파일 크기 (MB)");
 		m.put("Max Loop Count", "최대 반복 횟수");
-		m.put("Max Retries", "최대 재시도 횟수");
 		m.put("Max Upload File Size (MB)", "최대 업로드 파일 크기 (MB)");
 		m.put("Max Value", "최대 값");
+		m.put("Maximum number of attempts including the initial run before giving up", "포기하기 전 초기 실행을 포함한 최대 시도 횟수");
 		m.put("Maximum number of entries to return when search code in repository", "저장소에서 코드 검색 시 반환할 최대 항목 수");
 		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
 			"이 AI 사용자가 단일 작업에서 깨울 수 있는 최대 횟수입니다. 제한에 도달하면 AI 사용자는 실행되지 않으며 대신 시스템 댓글이 게시됩니다");
-		m.put("Maximum of retries before giving up", "포기하기 전에 최대 재시도 횟수");
 		m.put("May not be empty", "비어 있을 수 없습니다");
 		m.put("Medium", "중간");
 		m.put("Medium Severity", "중간 심각도");
@@ -2447,6 +2471,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No jobs defined", "정의된 작업 없음");
 		m.put("No jobs found", "작업이 없습니다");
 		m.put("No limit", "제한 없음");
+		m.put("No log entries", "로그 항목이 없습니다.");
 		m.put("No mail service", "메일 서비스 없음");
 		m.put("No one", "아무도 없음");
 		m.put("No packages to delete", "삭제할 패키지 없음");
@@ -2817,6 +2842,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 문제를 표시할 프로젝트를 지정하세요. 접근 가능한 모든 프로젝트의 문제를 표시하려면 비워 두세요.");
 		m.put("Optionally specify project to show packages of. Leave empty to show packages of all projects with permissions", 
 			"선택적으로 패키지를 표시할 프로젝트를 지정하세요. 권한이 있는 모든 프로젝트의 패키지를 표시하려면 비워 두세요.");
+		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
+			"풀 리퀘스트를 표시할 프로젝트를 선택적으로 지정하세요. 모든 접근 가능한 프로젝트의 풀 리퀘스트를 표시하려면 비워 두세요");
 		m.put("Optionally specify projects applicable for this provider. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
 			"이 공급자에 적용 가능한 프로젝트를 선택적으로 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매치</a>를 위해 '**', '*' 또는 '?'를 사용하세요. 여러 프로젝트는 공백으로 구분하세요");
 		m.put("Optionally specify projects applicable for this provisioner. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
@@ -3040,6 +3067,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Please confirm", "확인해주세요");
 		m.put("Please confirm the password.", "비밀번호를 확인해주세요.");
 		m.put("Please enter a commit message", "커밋 메시지를 입력하세요");
+		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
+			"충돌을 해결하려면 <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">이 지침</a>을 따르세요");
 		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">this instruction</a> to resolve the conflicts", 
 			"충돌을 해결하려면 <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">이 지침</a>을 따르세요");
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
@@ -3457,6 +3486,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Reviewers", "리뷰어");
 		m.put("Revision", "개정");
 		m.put("Revision indexing in progress...", "개정 색인 생성 중...");
+		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
+			"리비전 색인 작업 진행 중... (색인이 완료되면 심볼 탐색 및 리비전 내 컨텍스트가 사용 가능해집니다)");
 		m.put("Right", "오른쪽");
 		m.put("Role", "역할");
 		m.put("Role \"{0}\" deleted", "역할 \"{0}\" 삭제됨");
@@ -3708,6 +3739,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Show test cases of this test suite", "이 테스트 스위트의 테스트 케이스 보기");
 		m.put("Show total estimated/spent time", "총 예상/소요 시간 보기");
 		m.put("Showing first {0} files as there are too many", "파일이 너무 많아 처음 {0}개 파일만 표시합니다");
+		m.put("Showing the latest {0} entries. Download the log for all entries.", "최신 {0}개의 항목을 표시 중입니다. 모든 항목을 보려면 로그를 다운로드하세요.");
 		m.put("Sign In", "로그인");
 		m.put("Sign In To", "로그인하기");
 		m.put("Sign Out", "로그아웃");
@@ -3736,6 +3768,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Six months", "6개월");
 		m.put("Size", "크기");
 		m.put("Size invalid", "크기가 유효하지 않음");
+		m.put("Skipped", "건너뜀");
 		m.put("Slack Notifications", "Slack 알림");
 		m.put("Smtp Ssl Setting", "Smtp Ssl 설정");
 		m.put("Smtp With Ssl", "Smtp Ssl 사용");
@@ -4152,6 +4185,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"그룹 멤버십 정보를 검색하는 전략을 지정하십시오. LDAP 그룹에 적절한 권한을 부여하려면 동일한 이름의 OneDev 그룹을 정의해야 합니다. 그룹 멤버십을 OneDev 측에서 관리하려면 <tt>그룹 검색 안 함</tt> 전략을 사용하십시오.");
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
+		m.put("Specify timeout in seconds. It counts from the time when job starts running", "초 단위로 타임아웃을 지정하세요. 작업이 실행되기 시작한 시점부터 계산됩니다");
 		m.put("Specify title of the issue", "이슈 제목을 지정하십시오.");
 		m.put("Specify uid:gid to run container as", "컨테이너를 실행할 uid:gid 지정");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack API의 URL을 지정하십시오. 예를 들어 <tt>http://localhost:8080/api</tt>.");
@@ -4176,6 +4210,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"주당 근무일을 지정하십시오. 이는 근무 기간의 분석 및 표시에 영향을 미칩니다. 예를 들어 <tt>1w</tt>는 이 속성이 <tt>5</tt>로 설정된 경우 <tt>5d</tt>와 동일합니다.");
 		m.put("Specify working hours per day. This will affect parsing and displaying of working periods. For instance <tt>1d</tt> is the same as <tt>8h</tt> if this property is set to <tt>8</tt>", 
 			"일일 근무 시간을 지정하십시오. 이는 근무 기간의 분석 및 표시에 영향을 미칩니다. 예를 들어 <tt>1d</tt>는 이 속성이 <tt>8</tt>로 설정된 경우 <tt>8h</tt>와 동일합니다.");
+		m.put("Specify your Jev API key for authentication", "인증을 위해 Jev API 키를 지정하세요.");
 		m.put("Spent", "소요됨");
 		m.put("Spent Time", "소요 시간");
 		m.put("Spent Time Issue Field", "소요 시간 이슈 필드");
@@ -4223,6 +4258,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Step Templates", "단계 템플릿들");
 		m.put("Step {0} of {1}: ", "{0}단계 중 {1}단계:");
 		m.put("Steps", "단계들");
+		m.put("Steps and logs are updating and scrolling automatically. Click to pause.", "단계와 로그가 자동으로 업데이트 및 스크롤 중입니다. 클릭하여 일시 중지하세요.");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>", 
 			"단계는 동일한 노드에서 직렬로 실행되며 동일한 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a>을 공유합니다.");
 		m.put("Stop", "중지");
@@ -4263,6 +4299,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Suggested change", "제안된 변경 사항");
 		m.put("Suggesting description...", "설명 제안 중...");
 		m.put("Suggesting title...", "제목 제안 중...");
+		m.put("Suggesting...", "제안 중...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "제안이 코드 변경 또는 풀 리퀘스트 종료로 인해 오래됨");
 		m.put("Suggestions", "제안들");
 		m.put("Summarize comments with AI", "AI로 댓글 요약하기");
@@ -4685,6 +4722,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unified", "통합됨");
 		m.put("Unified view", "통합 보기");
 		m.put("Unit Test Statistics", "단위 테스트 통계");
+		m.put("Unknown", "알 수 없음");
 		m.put("Unlimited", "무제한");
 		m.put("Unlink this issue", "이 이슈의 연결 해제");
 		m.put("Unordered List", "정렬되지 않은 목록");
@@ -5276,21 +5314,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{0}m", "{0}분");
 		m.put("{0}s", "{0}초");
 		m.put("{0}w", "{0}주");
-		m.put("Anywhere", "어디서나");
-		m.put("Compare and set", "비교 및 설정");
-		m.put("Exact", "정확히");
-		m.put("Increment", "증가");
-		m.put("Max", "최대값");
-		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
-			"풀 리퀘스트를 표시할 프로젝트를 선택적으로 지정하세요. 모든 접근 가능한 프로젝트의 풀 리퀘스트를 표시하려면 비워 두세요");
-		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
-			"충돌을 해결하려면 <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">이 지침</a>을 따르세요");
-		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
-			"리비전 색인 작업 진행 중... (색인이 완료되면 심볼 탐색 및 리비전 내 컨텍스트가 사용 가능해집니다)");
-		m.put("Specify timeout in seconds. It counts from the time when job starts running", "초 단위로 타임아웃을 지정하세요. 작업이 실행되기 시작한 시점부터 계산됩니다");
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
+		m.put("Execution paused", "실행 일시 중지");
+		m.put("Finalization", "마무리");
+		m.put("Initialization", "초기화");
+		m.put("No step logs available", "단계 로그를 사용할 수 없음");
 	}
 		
 	@Override

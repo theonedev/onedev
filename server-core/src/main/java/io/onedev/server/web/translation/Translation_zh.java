@@ -74,6 +74,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("6 Months", "6 个月");
 		m.put("6-digits passcode", "6 位数代码");
 		m.put("7 days", "7 天");
+		m.put("<a href=\"/~administration/settings/jev\" target=\"_blank\">Set up Jev</a> to mark the most likely", 
+			"<a href=\"/~administration/settings/jev\" target=\"_blank\">设置 Jev</a> 以标记最可能的");
 		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
 			"<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">设置 AI</a> 来标记最可能的");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for", 
@@ -82,6 +84,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"验证邮箱的 <a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">用户</a>");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> 被接受，并支持 <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml 和 katex</a>。");
+		m.put("<a href=\"https://typesafe.ai/\" target=\"_blank\" rel=\"noopener noreferrer\">Jev</a> marks the most likely symbol definition in symbol navigation and suggests field values when creating an issue.", 
+			"<a href=\"https://typesafe.ai/\" target=\"_blank\" rel=\"noopener noreferrer\">Jev</a> 标记符号导航中最可能的符号定义，并在创建工单时建议字段值。");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
 			"<a href='/~administration/settings/lite-ai-model' target='_blank'>设置 AI</a> 以使用自然语言查询");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
@@ -387,6 +391,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Any state", "任何状态");
 		m.put("Any tag", "任何标签");
 		m.put("Any user", "任何用户");
+		m.put("Anywhere", "任意位置");
 		m.put("Api Key", "API密钥");
 		m.put("Api Token", "API令牌");
 		m.put("Api Url", "API地址");
@@ -482,6 +487,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Auto update check is performed by requesting an image in your browser from onedev.io indicating new version availability, with color indicating severity of the update. It works the same way as how gravatar requests avatar images. If disabled, you are highly recommended to check update manually from time to time (can be done via help menu on left bottom of the screen) to see if there are any security/critical fixes", 
 			"自动更新检查通过从 onedev.io 请求一个图像来完成，该图像会指示新版本的可用性，颜色表示更新的严重程度。其工作方式与 gravatar 请求头像图片相同。如果禁用，强烈建议你定期手动检查更新（可通过屏幕左下角的帮助菜单执行），以确保获得安全/关键修复");
 		m.put("Auto-discovered executor", "自动发现的执行器");
+		m.put("Auto-update and auto-scroll steps and logs", "自动更新和自动滚动步骤和日志");
+		m.put("Automatic updates and scrolling are paused. Click to resume.", "自动更新和滚动已暂停。点击以恢复。");
 		m.put("Available Agent Tokens", "可用的代理令牌");
 		m.put("Available Choices", "可选项");
 		m.put("Avatar", "头像");
@@ -504,6 +511,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Base URL", "基本 URL");
 		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
 			"<b class='text-info'>OpenAI compatible</b> API 端点的基本 URL。\n<b class='text-danger'>注意：</b>请确保此处指定的基本 URL 支持 HTTP/2 连接。HTTP/1.1 不\n支持，并会导致连接超时错误。");
+		m.put("Base URL of the Jev API, including any custom port. Defaults to https://api.typesafe.ai/v1. The /systemone endpoint is appended automatically", 
+			"Jev API 的基本 URL，包括任何自定义端口。默认为 https://api.typesafe.ai/v1。/systemone 端点会自动附加。");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64 编码的 PEM 格式，以 -----BEGIN CERTIFICATE----- 开头，以 -----END CERTIFICATE----- 结尾");
 		m.put("Basic Info", "基本信息");
@@ -783,6 +792,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Choose JIRA project to import issues from", "选择要导入工单的 JIRA 项目");
 		m.put("Choose Revision", "选择版本");
 		m.put("Choose YouTrack project to import issues from", "选择要导入工单的 YouTrack 项目");
+		m.put("Choose a fast, cost-effective model for lightweight tasks such as interpreting natural language queries, generating branch names from issue titles, and suggesting titles and descriptions for pull requests that contain multiple commits.", 
+			"为轻量级任务选择一个快速且具有成本效益的模型，例如解释自然语言查询、从工单标题生成分支名称，以及为包含多个提交的合并请求建议标题和描述。");
 		m.put("Choose a project...", "选择项目...");
 		m.put("Choose a user...", "选择用户...");
 		m.put("Choose branch...", "选择分支...");
@@ -920,6 +931,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Committed By", "提交者");
 		m.put("Committer", "提交者");
 		m.put("Compare", "比较");
+		m.put("Compare and set", "比较并设置");
 		m.put("Compare with base revision", "与基线版本比较");
 		m.put("Compare with this parent", "与此父节点比较");
 		m.put("Concurrency", "并发");
@@ -1061,6 +1073,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Current context is different from this action, click to show the comment context", "当前上下文与此操作不同，点击显示评论上下文");
 		m.put("Current platform", "当前平台");
 		m.put("Current project", "当前项目");
+		m.put("Current step index / total number of steps", "当前步骤索引 / 总步骤数");
 		m.put("Custom Headers", "自定义头");
 		m.put("Customize", "自定义");
 		m.put("DISCARDED", "已放弃");
@@ -1479,6 +1492,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Estimated Time Edit Bean", "预计时间编辑 Bean");
 		m.put("Estimated Time Issue Field", "预计时间工单字段");
 		m.put("Estimated Time:", "预计时间");
+		m.put("Estimated build progress", "估算构建进度");
+		m.put("Estimated progress", "估算进度");
+		m.put("Estimated progress based on the running time of the last successful build in the same stream", 
+			"基于同一流中上次成功构建的运行时间估算进度");
 		m.put("Estimated time", "预计时间");
 		m.put("Estimated/Spent time. Click for details", "预计/已用时间。点击查看详情");
 		m.put("Evaluate script to get choices", "运行脚本以获取选项");
@@ -1490,6 +1507,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Ever Used Since", "上次使用时间");
 		m.put("Everything inside this project and all child projects will be deleted and cannot be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"此项目及其所有子项目将被删除且无法恢复，请在下方输入项目路径 <code>{0}</code> 以确认删除。");
+		m.put("Exact", "精确");
 		m.put("Example", "示例");
 		m.put("Example Plugin Setting", "示例插件设置");
 		m.put("Example Property", "示例属性");
@@ -1900,6 +1918,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Include When Issue is Opened", "在工单打开时包含");
 		m.put("Incompatibilities", "不兼容性");
 		m.put("Inconsistent issuer in provider metadata and ID token", "提供者元数据中的发行者与 ID 令牌中的发行者不一致");
+		m.put("Increment", "递增");
 		m.put("Indicator", "指示器");
 		m.put("Inferring the most likely...", "推断最有可能的...");
 		m.put("Inherit from parent", "从父级继承");
@@ -2057,6 +2076,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("JaCoCo Coverage Report", "JaCoCo 覆盖率报告");
 		m.put("Jest Coverage Report", "Jest 覆盖率报告");
 		m.put("Jest Test Report", "Jest 测试报告");
+		m.put("Jev", "Jev");
+		m.put("Jev Decide Value", "Jev 决策值");
+		m.put("Jev Setting", "Jev 设置");
+		m.put("Jev settings have been saved", "Jev 设置已保存");
 		m.put("Job", "任务");
 		m.put("Job \"{0}\" associated with the build not found.", "与构建关联的任务 \"{0}\" 未找到。");
 		m.put("Job Authorization", "任务授权");
@@ -2258,17 +2281,18 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Markdown from file", "Markdown（基于文件）");
 		m.put("Maven", "Maven");
 		m.put("Maven(s)", "Maven");
+		m.put("Max", "最大值");
+		m.put("Max Attempts", "最大尝试次数");
 		m.put("Max Code Search Entries", "最大代码搜索条目");
 		m.put("Max Commit Message Line Length", "最大提交消息行长度");
 		m.put("Max Git LFS File Size (MB)", "最大 Git LFS 文件大小 (MB)");
 		m.put("Max Loop Count", "最大循环次数");
-		m.put("Max Retries", "最大重试次数");
 		m.put("Max Upload File Size (MB)", "最大上传文件大小 (MB)");
 		m.put("Max Value", "最大值");
+		m.put("Maximum number of attempts including the initial run before giving up", "在放弃之前，包括初始运行在内的最大尝试次数");
 		m.put("Maximum number of entries to return when search code in repository", "搜索代码库时返回的最大条目数");
 		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
 			"此 AI 用户在单个任务中可以被唤醒的最大次数。当达到限制时，AI 用户将不会运行，而是会发布一条系统评论");
-		m.put("Maximum of retries before giving up", "放弃前的最大重试次数");
 		m.put("May not be empty", "不能为空");
 		m.put("Medium", "中等");
 		m.put("Medium Severity", "中等");
@@ -2473,6 +2497,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No jobs defined", "未定义任务");
 		m.put("No jobs found", "未找到作业");
 		m.put("No limit", "无限制");
+		m.put("No log entries", "没有日志条目");
 		m.put("No mail service", "无邮件服务");
 		m.put("No one", "无任何人");
 		m.put("No packages to delete", "没有可删除的包");
@@ -2843,6 +2868,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定要显示工单的项目。留空则显示所有可访问项目的工单");
 		m.put("Optionally specify project to show packages of. Leave empty to show packages of all projects with permissions", 
 			"可选择指定要显示包的项目。留空则显示所有有权限的项目的包");
+		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
+			"可选指定项目以显示合并请求。留空以显示所有可访问项目的合并请求");
 		m.put("Optionally specify projects applicable for this provider. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
 			"可选地指定适用于此提供方的项目。使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。多个项目应以空格分隔");
 		m.put("Optionally specify projects applicable for this provisioner. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
@@ -3066,6 +3093,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Please confirm", "请确认");
 		m.put("Please confirm the password.", "请确认密码。");
 		m.put("Please enter a commit message", "请输入提交消息");
+		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
+			"请按照<a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">此说明</a>解决冲突");
 		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">this instruction</a> to resolve the conflicts", 
 			"请遵循 <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">此说明</a> 以解决冲突");
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
@@ -3483,6 +3512,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Reviewers", "审查者");
 		m.put("Revision", "修订");
 		m.put("Revision indexing in progress...", "正在索引当前版本...");
+		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
+			"修订索引进行中...（符号导航和修订中的上下文将在索引完成后可用）");
 		m.put("Right", "右");
 		m.put("Role", "角色");
 		m.put("Role \"{0}\" deleted", "角色 \"{0}\" 已删除");
@@ -3734,6 +3765,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Show test cases of this test suite", "显示此测试套件的测试用例");
 		m.put("Show total estimated/spent time", "显示总预计/已用时间");
 		m.put("Showing first {0} files as there are too many", "显示前 {0} 个文件，因为文件太多");
+		m.put("Showing the latest {0} entries. Download the log for all entries.", "显示最新的 {0} 条条目。下载日志以获取所有条目。");
 		m.put("Sign In", "登录");
 		m.put("Sign In To", "登录到");
 		m.put("Sign Out", "登出");
@@ -3762,6 +3794,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Six months", "六个月");
 		m.put("Size", "大小");
 		m.put("Size invalid", "大小无效");
+		m.put("Skipped", "已跳过");
 		m.put("Slack Notifications", "Slack 通知");
 		m.put("Smtp Ssl Setting", "SMTP SSL 设置");
 		m.put("Smtp With Ssl", "SMTP SSL");
@@ -4178,6 +4211,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"指定查询组成员信息的策略。要为 LDAP 组分配适当权限，应定义一个同名的 OneDev 组。如果您希望在 OneDev 端管理组成员关系，请使用策略 <tt>不查询组</tt>");
 		m.put("Specify timeout in seconds when communicating with mail server", "指定与邮件服务器通信时的超时时间（秒）");
+		m.put("Specify timeout in seconds. It counts from the time when job starts running", "指定超时时间（以秒为单位）。从任务开始运行时开始计时");
 		m.put("Specify title of the issue", "指定工单的标题");
 		m.put("Specify uid:gid to run container as", "指定 uid:gid 以容器身份运行");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "指定 YouTrack API 的 URL。例如 <tt>http://localhost:8080/api</tt>");
@@ -4202,6 +4236,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定每周的工作天数。这将影响工作周期的解析和显示。例如，如果此属性设置为 <tt>5</tt>，则 <tt>1w</tt> 等同于 <tt>5d</tt>");
 		m.put("Specify working hours per day. This will affect parsing and displaying of working periods. For instance <tt>1d</tt> is the same as <tt>8h</tt> if this property is set to <tt>8</tt>", 
 			"指定每天的工作小时数。这将影响工作周期的解析和显示。例如，如果此属性设置为 <tt>8</tt>，则 <tt>1d</tt> 等同于 <tt>8h</tt>");
+		m.put("Specify your Jev API key for authentication", "指定您的 Jev API 密钥以进行身份验证");
 		m.put("Spent", "已花费");
 		m.put("Spent Time", "已用时间");
 		m.put("Spent Time Issue Field", "工单耗时字段");
@@ -4249,6 +4284,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Step Templates", "步骤模板");
 		m.put("Step {0} of {1}: ", "步骤 {0}/{1}：");
 		m.put("Steps", "步骤");
+		m.put("Steps and logs are updating and scrolling automatically. Click to pause.", "步骤和日志正在自动更新和滚动。点击以暂停。");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>", 
 			"步骤将在同一节点上按顺序执行，共享同一 <a href='https://docs.onedev.io/concepts#job-workdir'>任务工作区</a>");
 		m.put("Stop", "停止");
@@ -4289,6 +4325,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Suggested change", "建议更改");
 		m.put("Suggesting description...", "建议描述...");
 		m.put("Suggesting title...", "建议标题...");
+		m.put("Suggesting...", "正在建议...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "建议由于代码更改或合并请求关闭而过时");
 		m.put("Suggestions", "建议");
 		m.put("Summarize comments with AI", "使用 AI 总结评论");
@@ -4711,6 +4748,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unified", "统一");
 		m.put("Unified view", "统一视图");
 		m.put("Unit Test Statistics", "单元测试统计");
+		m.put("Unknown", "未知");
 		m.put("Unlimited", "无限制");
 		m.put("Unlink this issue", "取消链接此工单");
 		m.put("Unordered List", "无序列表");
@@ -5302,21 +5340,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{0}m", "{0} 分钟");
 		m.put("{0}s", "{0} 秒");
 		m.put("{0}w", "{0}周");
-		m.put("Anywhere", "任意位置");
-		m.put("Compare and set", "比较并设置");
-		m.put("Exact", "精确");
-		m.put("Increment", "递增");
-		m.put("Max", "最大值");
-		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
-			"可选指定项目以显示合并请求。留空以显示所有可访问项目的合并请求");
-		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
-			"请按照<a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">此说明</a>解决冲突");
-		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
-			"修订索引进行中...（符号导航和修订中的上下文将在索引完成后可用）");
-		m.put("Specify timeout in seconds. It counts from the time when job starts running", "指定超时时间（以秒为单位）。从任务开始运行时开始计时");
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
+		m.put("Execution paused", "执行已暂停");
+		m.put("Finalization", "最终化");
+		m.put("Initialization", "初始化");
+		m.put("No step logs available", "没有步骤日志可用");
 	}
 		
 	@Override

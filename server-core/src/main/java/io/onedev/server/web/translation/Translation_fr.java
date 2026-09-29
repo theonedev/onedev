@@ -48,6 +48,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("6 Months", "6 Mois");
 		m.put("6-digits passcode", "Code d'accès à 6 chiffres");
 		m.put("7 days", "7 jours");
+		m.put("<a href=\"/~administration/settings/jev\" target=\"_blank\">Set up Jev</a> to mark the most likely", 
+			"<a href=\"/~administration/settings/jev\" target=\"_blank\">Configurer Jev</a> pour marquer les plus probables");
 		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
 			"<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Configurer l'IA</a> pour marquer le plus probable");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for", 
@@ -56,6 +58,8 @@ public class Translation_fr extends TranslationResourceBundle {
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">utilisateur</a> pour vérifier l'email");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">Markdown au format GitHub</a> est accepté, avec <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">le support de mermaid, plantuml et katex</a>.");
+		m.put("<a href=\"https://typesafe.ai/\" target=\"_blank\" rel=\"noopener noreferrer\">Jev</a> marks the most likely symbol definition in symbol navigation and suggests field values when creating an issue.", 
+			"<a href=\"https://typesafe.ai/\" target=\"_blank\" rel=\"noopener noreferrer\">Jev</a> marque la définition de symbole la plus probable dans la navigation des symboles et suggère des valeurs de champ lors de la création d'un problème.");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
 			"<a href='/~administration/settings/lite-ai-model' target='_blank'>Configurer l'IA</a> pour interroger en langage naturel");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
@@ -361,6 +365,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Any state", "N'importe quel état");
 		m.put("Any tag", "N'importe quelle étiquette");
 		m.put("Any user", "N'importe quel utilisateur");
+		m.put("Anywhere", "Partout");
 		m.put("Api Key", "Clé API");
 		m.put("Api Token", "Jeton API");
 		m.put("Api Url", "URL API");
@@ -456,6 +461,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Auto update check is performed by requesting an image in your browser from onedev.io indicating new version availability, with color indicating severity of the update. It works the same way as how gravatar requests avatar images. If disabled, you are highly recommended to check update manually from time to time (can be done via help menu on left bottom of the screen) to see if there are any security/critical fixes", 
 			"La vérification automatique des mises à jour est effectuée en demandant une image dans votre navigateur depuis onedev.io indiquant la disponibilité de la nouvelle version, avec une couleur indiquant la gravité de la mise à jour. Cela fonctionne de la même manière que les demandes d'images d'avatar de gravatar. Si désactivé, il est fortement recommandé de vérifier manuellement les mises à jour de temps en temps (cela peut être fait via le menu d'aide en bas à gauche de l'écran) pour voir s'il y a des correctifs de sécurité/critiques");
 		m.put("Auto-discovered executor", "Exécuteur découvert automatiquement");
+		m.put("Auto-update and auto-scroll steps and logs", "Mise à jour automatique et défilement automatique des étapes et des journaux");
+		m.put("Automatic updates and scrolling are paused. Click to resume.", "Les mises à jour et le défilement automatiques sont en pause. Cliquez pour reprendre.");
 		m.put("Available Agent Tokens", "Jetons d'agent disponibles");
 		m.put("Available Choices", "Choix disponibles");
 		m.put("Avatar", "Avatar");
@@ -478,6 +485,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Base URL", "URL de base");
 		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
 			"URL de base du point de terminaison de l'API <b class='text-info'>compatible OpenAI</b>.\n<b class='text-danger'>REMARQUE :</b> Assurez-vous que l'URL de base spécifiée ici prend en charge la connexion HTTP/2. HTTP/1.1 n'est pas\npris en charge et entraînera une erreur de délai d'attente de connexion.");
+		m.put("Base URL of the Jev API, including any custom port. Defaults to https://api.typesafe.ai/v1. The /systemone endpoint is appended automatically", 
+			"URL de base de l'API Jev, y compris tout port personnalisé. Par défaut, https://api.typesafe.ai/v1. Le point de terminaison /systemone est ajouté automatiquement");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Format PEM encodé en Base64, commençant par -----BEGIN CERTIFICATE----- et se terminant par -----END CERTIFICATE-----");
 		m.put("Basic Info", "Informations de base");
@@ -757,6 +766,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Choose JIRA project to import issues from", "Choisissez le projet JIRA pour importer des problèmes");
 		m.put("Choose Revision", "Choisir la révision");
 		m.put("Choose YouTrack project to import issues from", "Choisissez le projet YouTrack pour importer des problèmes");
+		m.put("Choose a fast, cost-effective model for lightweight tasks such as interpreting natural language queries, generating branch names from issue titles, and suggesting titles and descriptions for pull requests that contain multiple commits.", 
+			"Choisissez un modèle rapide et économique pour des tâches légères telles que l'interprétation de requêtes en langage naturel, la génération de noms de branches à partir de titres de problèmes et la suggestion de titres et descriptions pour des pull requests contenant plusieurs commits.");
 		m.put("Choose a project...", "Choisissez un projet...");
 		m.put("Choose a user...", "Choisissez un utilisateur...");
 		m.put("Choose branch...", "Choisissez une branche...");
@@ -894,6 +905,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Committed By", "Commit par");
 		m.put("Committer", "Commetteur");
 		m.put("Compare", "Comparer");
+		m.put("Compare and set", "Comparer et définir");
 		m.put("Compare with base revision", "Comparer avec la révision de base");
 		m.put("Compare with this parent", "Comparer avec ce parent");
 		m.put("Concurrency", "Concurrence");
@@ -1035,6 +1047,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Current context is different from this action, click to show the comment context", "Le contexte actuel est différent de cette action, cliquez pour afficher le contexte du commentaire");
 		m.put("Current platform", "Plateforme actuelle");
 		m.put("Current project", "Projet actuel");
+		m.put("Current step index / total number of steps", "Index de l'étape actuelle / nombre total d'étapes");
 		m.put("Custom Headers", "En-têtes personnalisés");
 		m.put("Customize", "Personnaliser");
 		m.put("DISCARDED", "REJETÉ");
@@ -1453,6 +1466,10 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Estimated Time Edit Bean", "Éditeur de temps estimé");
 		m.put("Estimated Time Issue Field", "Champ de problème de temps estimé");
 		m.put("Estimated Time:", "Temps estimé :");
+		m.put("Estimated build progress", "Progression estimée de la construction");
+		m.put("Estimated progress", "Progression estimée");
+		m.put("Estimated progress based on the running time of the last successful build in the same stream", 
+			"Progression estimée basée sur le temps d'exécution de la dernière construction réussie dans le même flux");
 		m.put("Estimated time", "Temps estimé");
 		m.put("Estimated/Spent time. Click for details", "Temps estimé/dépensé. Cliquez pour plus de détails");
 		m.put("Evaluate script to get choices", "Évaluer le script pour obtenir des choix");
@@ -1464,6 +1481,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Ever Used Since", "Jamais utilisé depuis");
 		m.put("Everything inside this project and all child projects will be deleted and cannot be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"Tout ce qui se trouve dans ce projet et tous les projets enfants seront supprimés et ne pourront pas être récupérés, veuillez taper le chemin du projet <code>{0}</code> ci-dessous pour confirmer la suppression.");
+		m.put("Exact", "Exact");
 		m.put("Example", "Exemple");
 		m.put("Example Plugin Setting", "Exemple de paramètre de plugin");
 		m.put("Example Property", "Exemple de propriété");
@@ -1874,6 +1892,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Include When Issue is Opened", "Inclure lorsque le problème est ouvert");
 		m.put("Incompatibilities", "Incompatibilités");
 		m.put("Inconsistent issuer in provider metadata and ID token", "Émetteur incohérent dans les métadonnées du fournisseur et le jeton ID");
+		m.put("Increment", "Incrémenter");
 		m.put("Indicator", "Indicateur");
 		m.put("Inferring the most likely...", "Inférence de la plus probable...");
 		m.put("Inherit from parent", "Hériter du parent");
@@ -2031,6 +2050,10 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("JaCoCo Coverage Report", "Rapport de couverture JaCoCo");
 		m.put("Jest Coverage Report", "Rapport de couverture Jest");
 		m.put("Jest Test Report", "Rapport de test Jest");
+		m.put("Jev", "Jev");
+		m.put("Jev Decide Value", "Jev Décider Valeur");
+		m.put("Jev Setting", "Paramètre Jev");
+		m.put("Jev settings have been saved", "Les paramètres de Jev ont été enregistrés");
 		m.put("Job", "Tâche");
 		m.put("Job \"{0}\" associated with the build not found.", "Tâche \"{0}\" associée à la construction introuvable.");
 		m.put("Job Authorization", "Autorisation de tâche");
@@ -2232,17 +2255,18 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Markdown from file", "Markdown à partir du fichier");
 		m.put("Maven", "Maven");
 		m.put("Maven(s)", "Maven(s)");
+		m.put("Max", "Max");
+		m.put("Max Attempts", "Tentatives maximales");
 		m.put("Max Code Search Entries", "Entrées Maximales de Recherche de Code");
 		m.put("Max Commit Message Line Length", "Longueur Maximale de Ligne de Message de Commit");
 		m.put("Max Git LFS File Size (MB)", "Taille Maximale de Fichier Git LFS (MB)");
 		m.put("Max Loop Count", "Nombre maximal de boucles");
-		m.put("Max Retries", "Nombre Maximal de Tentatives");
 		m.put("Max Upload File Size (MB)", "Taille Maximale de Fichier Téléchargé (MB)");
 		m.put("Max Value", "Valeur Maximale");
+		m.put("Maximum number of attempts including the initial run before giving up", "Nombre maximal de tentatives, y compris l'exécution initiale, avant d'abandonner");
 		m.put("Maximum number of entries to return when search code in repository", "Nombre maximal d'entrées à retourner lors de la recherche de code dans le dépôt");
 		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
 			"Nombre maximum de fois que cet utilisateur IA peut être réveillé dans une seule tâche. Lorsque la limite est atteinte, l'utilisateur IA ne s'exécutera pas et un commentaire système sera publié à la place");
-		m.put("Maximum of retries before giving up", "Nombre maximal de tentatives avant d'abandonner");
 		m.put("May not be empty", "Ne peut pas être vide");
 		m.put("Medium", "Moyen");
 		m.put("Medium Severity", "Gravité Moyenne");
@@ -2447,6 +2471,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("No jobs defined", "Aucune tâche définie");
 		m.put("No jobs found", "Aucun job trouvé");
 		m.put("No limit", "Aucune limite");
+		m.put("No log entries", "Aucune entrée de journal");
 		m.put("No mail service", "Aucun service de messagerie");
 		m.put("No one", "Personne");
 		m.put("No packages to delete", "Aucun paquet à supprimer");
@@ -2817,6 +2842,8 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Spécifiez éventuellement le projet pour afficher les problèmes. Laissez vide pour afficher les problèmes de tous les projets accessibles.");
 		m.put("Optionally specify project to show packages of. Leave empty to show packages of all projects with permissions", 
 			"Spécifiez éventuellement le projet pour afficher les packages. Laissez vide pour afficher les packages de tous les projets avec permissions.");
+		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
+			"Spécifiez éventuellement le projet pour afficher les pull requests. Laissez vide pour afficher les pull requests de tous les projets accessibles");
 		m.put("Optionally specify projects applicable for this provider. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
 			"Spécifier éventuellement les projets applicables pour ce fournisseur. Utilisez '**', '*' ou '?' pour <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>la correspondance de joker de chemin</a>. Plusieurs projets doivent être séparés par un espace");
 		m.put("Optionally specify projects applicable for this provisioner. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
@@ -3040,6 +3067,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Please confirm", "Veuillez confirmer");
 		m.put("Please confirm the password.", "Veuillez confirmer le mot de passe.");
 		m.put("Please enter a commit message", "Veuillez entrer un message de commit");
+		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
+			"Veuillez suivre <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">cette instruction</a> pour résoudre les conflits");
 		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">this instruction</a> to resolve the conflicts", 
 			"Veuillez suivre <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">ces instructions</a> pour résoudre les conflits");
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
@@ -3457,6 +3486,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Reviewers", "Examinateurs");
 		m.put("Revision", "Révision");
 		m.put("Revision indexing in progress...", "Indexation de la révision en cours...");
+		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
+			"Indexation des révisions en cours... (la navigation par symboles et le contexte dans les révisions seront disponibles après indexation)");
 		m.put("Right", "Droite");
 		m.put("Role", "Rôle");
 		m.put("Role \"{0}\" deleted", "Rôle \"{0}\" supprimé");
@@ -3708,6 +3739,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Show test cases of this test suite", "Afficher les cas de test de cette suite de tests");
 		m.put("Show total estimated/spent time", "Afficher le temps total estimé/passé");
 		m.put("Showing first {0} files as there are too many", "Affichage des premiers {0} fichiers car il y en a trop");
+		m.put("Showing the latest {0} entries. Download the log for all entries.", "Affichage des {0} dernières entrées. Téléchargez le journal pour toutes les entrées.");
 		m.put("Sign In", "Se connecter");
 		m.put("Sign In To", "Se connecter à");
 		m.put("Sign Out", "Se déconnecter");
@@ -3736,6 +3768,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Six months", "Six mois");
 		m.put("Size", "Taille");
 		m.put("Size invalid", "Taille invalide");
+		m.put("Skipped", "Ignoré");
 		m.put("Slack Notifications", "Notifications Slack");
 		m.put("Smtp Ssl Setting", "Paramètre Smtp Ssl");
 		m.put("Smtp With Ssl", "Smtp avec Ssl");
@@ -4152,6 +4185,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"Spécifiez la stratégie pour récupérer les informations d'appartenance au groupe. Pour attribuer des permissions appropriées à un groupe LDAP, un groupe OneDev portant le même nom doit être défini. Utilisez la stratégie <tt>Ne pas récupérer les groupes</tt> si vous souhaitez gérer les appartenances aux groupes du côté de OneDev");
 		m.put("Specify timeout in seconds when communicating with mail server", "Spécifiez le délai d'attente en secondes lors de la communication avec le serveur de messagerie");
+		m.put("Specify timeout in seconds. It counts from the time when job starts running", "Spécifiez le délai d'expiration en secondes. Il commence à compter à partir du moment où le job commence à s'exécuter");
 		m.put("Specify title of the issue", "Spécifiez le titre du problème");
 		m.put("Specify uid:gid to run container as", "Spécifiez uid:gid pour exécuter le conteneur en tant que");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "Spécifiez l'URL de l'API YouTrack. Par exemple <tt>http://localhost:8080/api</tt>");
@@ -4176,6 +4210,7 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Spécifiez les jours ouvrables par semaine. Cela affectera l'analyse et l'affichage des périodes de travail. Par exemple <tt>1w</tt> est équivalent à <tt>5d</tt> si cette propriété est définie sur <tt>5</tt>");
 		m.put("Specify working hours per day. This will affect parsing and displaying of working periods. For instance <tt>1d</tt> is the same as <tt>8h</tt> if this property is set to <tt>8</tt>", 
 			"Spécifiez les heures de travail par jour. Cela affectera l'analyse et l'affichage des périodes de travail. Par exemple <tt>1d</tt> est équivalent à <tt>8h</tt> si cette propriété est définie sur <tt>8</tt>");
+		m.put("Specify your Jev API key for authentication", "Spécifiez votre clé API Jev pour l'authentification");
 		m.put("Spent", "Temps passé");
 		m.put("Spent Time", "Temps passé");
 		m.put("Spent Time Issue Field", "Champ de problème du temps passé");
@@ -4223,6 +4258,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Step Templates", "Modèles d'étape");
 		m.put("Step {0} of {1}: ", "Étape {0} de {1} :");
 		m.put("Steps", "Étapes");
+		m.put("Steps and logs are updating and scrolling automatically. Click to pause.", "Les étapes et les journaux se mettent à jour et défilent automatiquement. Cliquez pour mettre en pause.");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>", 
 			"Les étapes seront exécutées séquentiellement sur le même nœud, partageant le même <a href='https://docs.onedev.io/concepts#job-workdir'>espace de travail du travail</a>");
 		m.put("Stop", "Arrêter");
@@ -4263,6 +4299,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Suggested change", "Modification suggérée");
 		m.put("Suggesting description...", "Suggestion de description...");
 		m.put("Suggesting title...", "Suggestion de titre...");
+		m.put("Suggesting...", "Suggestion en cours...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "La suggestion est obsolète en raison d'un changement de code ou de la fermeture de la demande de tirage");
 		m.put("Suggestions", "Suggestions");
 		m.put("Summarize comments with AI", "Résumer les commentaires avec l'IA");
@@ -4685,6 +4722,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Unified", "Unifié");
 		m.put("Unified view", "Vue unifiée");
 		m.put("Unit Test Statistics", "Statistiques des tests unitaires");
+		m.put("Unknown", "Inconnu");
 		m.put("Unlimited", "Illimité");
 		m.put("Unlink this issue", "Dissocier ce problème");
 		m.put("Unordered List", "Liste non ordonnée");
@@ -5276,21 +5314,13 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{0}m", "{0}m");
 		m.put("{0}s", "{0}s");
 		m.put("{0}w", "{0}sem");
-		m.put("Anywhere", "Partout");
-		m.put("Compare and set", "Comparer et définir");
-		m.put("Exact", "Exact");
-		m.put("Increment", "Incrémenter");
-		m.put("Max", "Max");
-		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
-			"Spécifiez éventuellement le projet pour afficher les pull requests. Laissez vide pour afficher les pull requests de tous les projets accessibles");
-		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
-			"Veuillez suivre <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">cette instruction</a> pour résoudre les conflits");
-		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
-			"Indexation des révisions en cours... (la navigation par symboles et le contexte dans les révisions seront disponibles après indexation)");
-		m.put("Specify timeout in seconds. It counts from the time when job starts running", "Spécifiez le délai d'expiration en secondes. Il commence à compter à partir du moment où le job commence à s'exécuter");
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
+		m.put("Execution paused", "Exécution en pause");
+		m.put("Finalization", "Finalisation");
+		m.put("Initialization", "Initialisation");
+		m.put("No step logs available", "Aucun journal d'étape disponible");
 	}
 		
 	@Override

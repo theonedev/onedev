@@ -48,6 +48,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("6 Months", "6ヶ月");
 		m.put("6-digits passcode", "6桁のパスコード");
 		m.put("7 days", "7日間");
+		m.put("<a href=\"/~administration/settings/jev\" target=\"_blank\">Set up Jev</a> to mark the most likely", 
+			"<a href=\"/~administration/settings/jev\" target=\"_blank\">Jev を設定</a>して最も可能性の高いものをマークします");
 		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
 			"<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">AIを設定</a>して最も可能性の高いものをマーク");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for", 
@@ -56,6 +58,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">ユーザー</a>のメールを確認するため");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid, plantuml and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub風マークダウン</a>が使用可能で、<a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid、plantuml、katexのサポート</a>があります。");
+		m.put("<a href=\"https://typesafe.ai/\" target=\"_blank\" rel=\"noopener noreferrer\">Jev</a> marks the most likely symbol definition in symbol navigation and suggests field values when creating an issue.", 
+			"<a href=\"https://typesafe.ai/\" target=\"_blank\" rel=\"noopener noreferrer\">Jev</a> はシンボルナビゲーションで最も可能性の高いシンボル定義をマークし、課題作成時にフィールド値を提案します。");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
 			"<a href='/~administration/settings/lite-ai-model' target='_blank'>AIを設定</a>して自然言語でクエリ");
 		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
@@ -361,6 +365,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Any state", "任意の状態");
 		m.put("Any tag", "任意のタグ");
 		m.put("Any user", "任意のユーザー");
+		m.put("Anywhere", "どこでも");
 		m.put("Api Key", "APIキー");
 		m.put("Api Token", "APIトークン");
 		m.put("Api Url", "API URL");
@@ -456,6 +461,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Auto update check is performed by requesting an image in your browser from onedev.io indicating new version availability, with color indicating severity of the update. It works the same way as how gravatar requests avatar images. If disabled, you are highly recommended to check update manually from time to time (can be done via help menu on left bottom of the screen) to see if there are any security/critical fixes", 
 			"自動更新チェックは、ブラウザでonedev.ioから画像をリクエストすることで新しいバージョンの利用可能性を確認し、更新の重要度を色で示します。これは、Gravatarがアバター画像をリクエストする方法と同じです。無効にした場合は、セキュリティ/重要な修正があるかどうかを確認するために、定期的に手動で更新を確認することを強くお勧めします（画面左下のヘルプメニューから実行可能）。");
 		m.put("Auto-discovered executor", "自動検出されたエグゼキューター");
+		m.put("Auto-update and auto-scroll steps and logs", "ステップとログの自動更新および自動スクロール");
+		m.put("Automatic updates and scrolling are paused. Click to resume.", "自動更新とスクロールが一時停止されています。クリックして再開してください。");
 		m.put("Available Agent Tokens", "利用可能なエージェントトークン");
 		m.put("Available Choices", "利用可能な選択肢");
 		m.put("Avatar", "アバター");
@@ -478,6 +485,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Base URL", "ベースURL");
 		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
 			"<b class='text-info'>OpenAI互換</b>APIエンドポイントのベースURL。\n<b class='text-danger'>注意:</b> ここで指定されたベースURLがHTTP/2接続をサポートしていることを確認してください。HTTP/1.1は\nサポートされておらず、接続タイムアウトエラーが発生します。");
+		m.put("Base URL of the Jev API, including any custom port. Defaults to https://api.typesafe.ai/v1. The /systemone endpoint is appended automatically", 
+			"Jev API のベース URL（カスタムポートを含む）。デフォルトは https://api.typesafe.ai/v1 です。/systemone エンドポイントが自動的に追加されます");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64でエンコードされたPEM形式、-----BEGIN CERTIFICATE-----で始まり、-----END CERTIFICATE-----で終わる");
 		m.put("Basic Info", "基本情報");
@@ -757,6 +766,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Choose JIRA project to import issues from", "JIRAプロジェクトを選択して課題をインポート");
 		m.put("Choose Revision", "リビジョンを選択");
 		m.put("Choose YouTrack project to import issues from", "YouTrackプロジェクトを選択して課題をインポート");
+		m.put("Choose a fast, cost-effective model for lightweight tasks such as interpreting natural language queries, generating branch names from issue titles, and suggesting titles and descriptions for pull requests that contain multiple commits.", 
+			"自然言語クエリの解釈、課題タイトルからのブランチ名生成、複数コミットを含むプルリクエストのタイトルと説明の提案など、軽量タスク向けの高速でコスト効率の高いモデルを選択してください。");
 		m.put("Choose a project...", "プロジェクトを選択...");
 		m.put("Choose a user...", "ユーザーを選択...");
 		m.put("Choose branch...", "ブランチを選択...");
@@ -894,6 +905,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Committed By", "コミットした人");
 		m.put("Committer", "コミッター");
 		m.put("Compare", "比較");
+		m.put("Compare and set", "比較して設定");
 		m.put("Compare with base revision", "ベースリビジョンと比較");
 		m.put("Compare with this parent", "この親と比較");
 		m.put("Concurrency", "並行性");
@@ -1035,6 +1047,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Current context is different from this action, click to show the comment context", "このアクションと現在のコンテキストが異なります。コメントのコンテキストを表示するにはクリックしてください");
 		m.put("Current platform", "現在のプラットフォーム");
 		m.put("Current project", "現在のプロジェクト");
+		m.put("Current step index / total number of steps", "現在のステップインデックス / 総ステップ数");
 		m.put("Custom Headers", "カスタムヘッダー");
 		m.put("Customize", "カスタマイズ");
 		m.put("DISCARDED", "破棄済み");
@@ -1453,6 +1466,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Estimated Time Edit Bean", "推定時間編集Bean");
 		m.put("Estimated Time Issue Field", "推定時間問題フィールド");
 		m.put("Estimated Time:", "推定時間:");
+		m.put("Estimated build progress", "ビルド進行状況の推定");
+		m.put("Estimated progress", "進行状況の推定");
+		m.put("Estimated progress based on the running time of the last successful build in the same stream", 
+			"同じストリーム内で最後に成功したビルドの実行時間に基づく進行状況の推定");
 		m.put("Estimated time", "推定時間");
 		m.put("Estimated/Spent time. Click for details", "推定/消費時間。詳細をクリックしてください");
 		m.put("Evaluate script to get choices", "選択肢を取得するためにスクリプトを評価する");
@@ -1464,6 +1481,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ever Used Since", "使用開始日");
 		m.put("Everything inside this project and all child projects will be deleted and cannot be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"このプロジェクト内のすべての内容とすべての子プロジェクトが削除され、復元できなくなります。削除を確認するには、以下にプロジェクトパス<code>{0}</code>を入力してください。");
+		m.put("Exact", "正確");
 		m.put("Example", "例");
 		m.put("Example Plugin Setting", "プラグイン設定の例");
 		m.put("Example Property", "プロパティの例");
@@ -1874,6 +1892,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Include When Issue is Opened", "課題が開かれたときに含む");
 		m.put("Incompatibilities", "非互換性");
 		m.put("Inconsistent issuer in provider metadata and ID token", "プロバイダーメタデータとIDトークンの発行者が一致しない");
+		m.put("Increment", "インクリメント");
 		m.put("Indicator", "インジケーター");
 		m.put("Inferring the most likely...", "最も可能性の高いものを推測しています...");
 		m.put("Inherit from parent", "親から継承");
@@ -2031,6 +2050,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("JaCoCo Coverage Report", "JaCoCoカバレッジレポート");
 		m.put("Jest Coverage Report", "Jestカバレッジレポート");
 		m.put("Jest Test Report", "Jestテストレポート");
+		m.put("Jev", "Jev");
+		m.put("Jev Decide Value", "Jev 値を決定");
+		m.put("Jev Setting", "Jev 設定");
+		m.put("Jev settings have been saved", "Jev 設定が保存されました");
 		m.put("Job", "ジョブ");
 		m.put("Job \"{0}\" associated with the build not found.", "ビルドに関連付けられたジョブ「{0}」が見つかりません");
 		m.put("Job Authorization", "ジョブ認証");
@@ -2232,17 +2255,18 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Markdown from file", "ファイルからのMarkdown");
 		m.put("Maven", "Maven");
 		m.put("Maven(s)", "Maven(s)");
+		m.put("Max", "最大");
+		m.put("Max Attempts", "最大試行回数");
 		m.put("Max Code Search Entries", "最大コード検索エントリ数");
 		m.put("Max Commit Message Line Length", "最大コミットメッセージ行長");
 		m.put("Max Git LFS File Size (MB)", "最大Git LFSファイルサイズ（MB）");
 		m.put("Max Loop Count", "最大ループ回数");
-		m.put("Max Retries", "最大リトライ回数");
 		m.put("Max Upload File Size (MB)", "最大アップロードファイルサイズ（MB）");
 		m.put("Max Value", "最大値");
+		m.put("Maximum number of attempts including the initial run before giving up", "初回実行を含む最大試行回数（諦める前に）");
 		m.put("Maximum number of entries to return when search code in repository", "リポジトリ内のコード検索時に返されるエントリの最大数");
 		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
 			"このAIユーザーが単一タスクで起動できる最大回数です。制限に達すると、AIユーザーは実行されず、代わりにシステムコメントが投稿されます");
-		m.put("Maximum of retries before giving up", "諦める前の最大リトライ回数");
 		m.put("May not be empty", "空であってはなりません");
 		m.put("Medium", "中程度");
 		m.put("Medium Severity", "中程度の重大度");
@@ -2447,6 +2471,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No jobs defined", "定義されたジョブなし");
 		m.put("No jobs found", "ジョブが見つかりません");
 		m.put("No limit", "制限なし");
+		m.put("No log entries", "ログエントリがありません");
 		m.put("No mail service", "メールサービスなし");
 		m.put("No one", "誰もいない");
 		m.put("No packages to delete", "削除するパッケージなし");
@@ -2817,6 +2842,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、課題を表示するプロジェクトを指定してください。アクセス可能なすべてのプロジェクトの課題を表示する場合は空のままにしてください。");
 		m.put("Optionally specify project to show packages of. Leave empty to show packages of all projects with permissions", 
 			"オプションで、パッケージを表示するプロジェクトを指定してください。権限を持つすべてのプロジェクトのパッケージを表示する場合は空のままにしてください。");
+		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
+			"プルリクエストを表示するプロジェクトを任意で指定してください。空欄の場合、アクセス可能なすべてのプロジェクトのプルリクエストが表示されます");
 		m.put("Optionally specify projects applicable for this provider. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
 			"このプロバイダーに適用されるプロジェクトをオプションで指定します。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には '**', '*', '?' を使用します。複数のプロジェクトはスペースで区切ります");
 		m.put("Optionally specify projects applicable for this provisioner. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
@@ -3040,6 +3067,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Please confirm", "確認してください");
 		m.put("Please confirm the password.", "パスワードを確認してください。");
 		m.put("Please enter a commit message", "コミットメッセージを入力してください");
+		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
+			"競合を解決するには、<a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">この指示</a>に従ってください");
 		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">this instruction</a> to resolve the conflicts", 
 			"競合を解決するには<a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">この指示</a>に従ってください");
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
@@ -3457,6 +3486,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Reviewers", "レビュアー");
 		m.put("Revision", "リビジョン");
 		m.put("Revision indexing in progress...", "リビジョンのインデックス作成中...");
+		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
+			"リビジョンのインデックス作成中...（インデックス作成後にシンボルナビゲーションとリビジョン内のコンテキストが利用可能になります）");
 		m.put("Right", "右");
 		m.put("Role", "役割");
 		m.put("Role \"{0}\" deleted", "役割\"{0}\"が削除されました");
@@ -3708,6 +3739,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Show test cases of this test suite", "このテストスイートのテストケースを表示");
 		m.put("Show total estimated/spent time", "推定/使用時間の合計を表示");
 		m.put("Showing first {0} files as there are too many", "ファイルが多すぎるため、最初の{0}ファイルを表示しています");
+		m.put("Showing the latest {0} entries. Download the log for all entries.", "最新の {0} 件のエントリを表示しています。すべてのエントリをダウンロードするにはログをダウンロードしてください。");
 		m.put("Sign In", "サインイン");
 		m.put("Sign In To", "サインイン先");
 		m.put("Sign Out", "サインアウト");
@@ -3736,6 +3768,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Six months", "6ヶ月");
 		m.put("Size", "サイズ");
 		m.put("Size invalid", "サイズが無効");
+		m.put("Skipped", "スキップ済み");
 		m.put("Slack Notifications", "Slack通知");
 		m.put("Smtp Ssl Setting", "Smtp SSL設定");
 		m.put("Smtp With Ssl", "Smtp SSL使用");
@@ -4152,6 +4185,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"グループメンバーシップ情報を取得する戦略を指定してください。LDAPグループに適切な権限を付与するには、同じ名前のOneDevグループを定義する必要があります。グループメンバーシップをOneDev側で管理したい場合は、<tt>グループを取得しない</tt>戦略を使用してください。");
 		m.put("Specify timeout in seconds when communicating with mail server", "メールサーバーと通信する際のタイムアウトを秒単位で指定してください。");
+		m.put("Specify timeout in seconds. It counts from the time when job starts running", "タイムアウトを秒単位で指定してください。ジョブが実行を開始した時点からカウントされます");
 		m.put("Specify title of the issue", "問題のタイトルを指定してください。");
 		m.put("Specify uid:gid to run container as", "コンテナを実行するためのuid:gidを指定してください");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack APIのURLを指定してください。例: <tt>http://localhost:8080/api</tt>");
@@ -4176,6 +4210,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"週あたりの勤務日数を指定してください。これにより、勤務期間の解析と表示に影響します。例: <tt>1w</tt>は、このプロパティが<tt>5</tt>に設定されている場合、<tt>5d</tt>と同じです。");
 		m.put("Specify working hours per day. This will affect parsing and displaying of working periods. For instance <tt>1d</tt> is the same as <tt>8h</tt> if this property is set to <tt>8</tt>", 
 			"1日あたりの勤務時間を指定してください。これにより、勤務期間の解析と表示に影響します。例: <tt>1d</tt>は、このプロパティが<tt>8</tt>に設定されている場合、<tt>8h</tt>と同じです。");
+		m.put("Specify your Jev API key for authentication", "認証のための Jev API キーを指定してください");
 		m.put("Spent", "消費済み");
 		m.put("Spent Time", "消費時間");
 		m.put("Spent Time Issue Field", "消費時間問題フィールド");
@@ -4223,6 +4258,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Step Templates", "ステップテンプレート");
 		m.put("Step {0} of {1}: ", "{0}のステップ{1}:");
 		m.put("Steps", "ステップ");
+		m.put("Steps and logs are updating and scrolling automatically. Click to pause.", "ステップとログが自動的に更新およびスクロールされています。クリックして一時停止してください。");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>", 
 			"ステップは同じノード上で直列に実行され、同じ<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>を共有します。");
 		m.put("Stop", "停止");
@@ -4263,6 +4299,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Suggested change", "提案された変更");
 		m.put("Suggesting description...", "説明を提案中...");
 		m.put("Suggesting title...", "タイトルを提案中...");
+		m.put("Suggesting...", "提案中...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "提案がコード変更またはプルリクエストのクローズにより古くなっています");
 		m.put("Suggestions", "提案");
 		m.put("Summarize comments with AI", "AIでコメントを要約する");
@@ -4685,6 +4722,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unified", "統一");
 		m.put("Unified view", "統一ビュー");
 		m.put("Unit Test Statistics", "単体テスト統計");
+		m.put("Unknown", "不明");
 		m.put("Unlimited", "無制限");
 		m.put("Unlink this issue", "この課題のリンクを解除");
 		m.put("Unordered List", "順序なしリスト");
@@ -5276,21 +5314,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{0}m", "{0}分");
 		m.put("{0}s", "{0}秒");
 		m.put("{0}w", "{0}週");
-		m.put("Anywhere", "どこでも");
-		m.put("Compare and set", "比較して設定");
-		m.put("Exact", "正確");
-		m.put("Increment", "インクリメント");
-		m.put("Max", "最大");
-		m.put("Optionally specify project to show pull requests of. Leave empty to show pull requests of all accessible projects", 
-			"プルリクエストを表示するプロジェクトを任意で指定してください。空欄の場合、アクセス可能なすべてのプロジェクトのプルリクエストが表示されます");
-		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">this instruction</a> to resolve the conflicts", 
-			"競合を解決するには、<a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"#\">この指示</a>に従ってください");
-		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
-			"リビジョンのインデックス作成中...（インデックス作成後にシンボルナビゲーションとリビジョン内のコンテキストが利用可能になります）");
-		m.put("Specify timeout in seconds. It counts from the time when job starts running", "タイムアウトを秒単位で指定してください。ジョブが実行を開始した時点からカウントされます");
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
+		m.put("Execution paused", "実行が一時停止しました");
+		m.put("Finalization", "最終処理");
+		m.put("Initialization", "初期化");
+		m.put("No step logs available", "ステップログは利用できません");
 	}
 		
 	@Override

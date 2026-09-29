@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.builds.detail.log;
 
+import static io.onedev.k8shelper.JobHelper.FINALIZATION;
+import static io.onedev.k8shelper.JobHelper.INITIALIZATION;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
@@ -241,7 +243,11 @@ public class BuildStepsPage extends BuildDetailPage {
 			var stepExecution = stepExecutions.get(name);
 			var stage = new LinkedHashMap<String, Object>();
 			stage.put("name", name);
-			stage.put("title", build.getLogStageName(name));
+			stage.put("title", switch (name) {
+				case INITIALIZATION -> _T("Initialization");
+				case FINALIZATION -> _T("Finalization");
+				default -> build.getLogStageName(name);
+			});
 			boolean active = stepExecution != null ? stepExecution.getStatus() == StepExecution.Status.RUNNING
 					: name.equals(currentLogStage) && !build.isFinished();
 			stage.put("active", active);
@@ -250,6 +256,7 @@ public class BuildStepsPage extends BuildDetailPage {
 				// Older builds only have the instances recorded in their step logs.
 				stage.put("stepIndex", stepExecution.getStepCount() != 0 ? stepExecution.getStepIndex() : stepIndex);
 				stage.put("stepCount", stepExecution.getStepCount() != 0 ? stepExecution.getStepCount() : stepExecutions.size());
+				stage.put("stepPositionText", _T("Current step index / total number of steps"));
 				stage.put("status", stepExecution.getStatus());
 				stage.put("statusText", stepExecution.isSkipped() ? _T("Skipped") : switch (stepExecution.getStatus()) {
 					case RUNNING -> _T("Running");
@@ -293,11 +300,13 @@ public class BuildStepsPage extends BuildDetailPage {
 		nextOffsets.clear();
 		response.render(JavaScriptHeaderItem.forReference(new BuildStepsResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript(String.format(
-				"onedev.server.buildSteps.init('%s', %s, %s, %s, '%s', '%s');", steps.getMarkupId(),
+				"onedev.server.buildSteps.init('%s', %s, %s, %s, '%s', '%s', '%s', '%s', '%s');", steps.getMarkupId(),
 				refresh.getCallbackFunction(CallbackParameter.explicit("offsets")),
 				SecurityUtils.canRunJob(getProject(), getBuild().getJobName()) ? resume.getCallbackFunction() : "null", MAX_ENTRIES,
 				escapeJavaScript(MessageFormat.format(_T("Showing the latest {0} entries. Download the log for all entries."),
-						String.valueOf(MAX_ENTRIES))), escapeJavaScript(_T("No log entries"))) + stepUpdateScript(false)));
+						String.valueOf(MAX_ENTRIES))), escapeJavaScript(_T("No log entries")),
+				escapeJavaScript(_T("Execution paused")), escapeJavaScript(_T("Resume")),
+				escapeJavaScript(_T("No step logs available"))) + stepUpdateScript(false)));
 	}
 
 	@Override

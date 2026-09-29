@@ -943,6 +943,20 @@ public class Upgrade extends AbstractPlugin {
 			}
 		}
 		
+		if (oldAppDataVersion <= 245) {
+			logger.info("Removing obsolete workspace logs...");
+			var projectsDir = new File(upgradeDir, "site/projects");
+			if (projectsDir.exists()) {
+				for (var projectDir : projectsDir.listFiles()) {
+					if (projectDir.isDirectory()) {
+						var workspaceLogsDir = new File(projectDir, "workspace-logs");
+						if (workspaceLogsDir.exists())
+							FileUtils.deleteDir(workspaceLogsDir);
+					}
+				}
+			}
+		}
+
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
 			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, UTF_8);

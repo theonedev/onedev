@@ -484,7 +484,7 @@ class DefaultBuildLogServiceTest {
 					.noneMatch(entry -> entry.getMessageText().contains("late old output")));
 			if (!operation.equals("retry")) {
 				assertTrue(logs.readLogEntries(oldIdentity, 0, 0).isEmpty());
-				assertTrue(oldIdentity.getFile().length() > 0);
+				assertFalse(oldIdentity.getFile().exists(), "Closing a stage without a snippet must not create a log file");
 			}
 		} finally {
 			writerReleased.countDown();
