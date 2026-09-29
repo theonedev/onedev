@@ -39,6 +39,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestChange;
@@ -197,6 +198,16 @@ public class PullRequestResource {
     	return pullRequest.getComments();
     }
 	
+	@Api(order=550, description="Get all code comments of the pull request")
+	@Path("/{requestId}/code-comments")
+	@GET
+	public Collection<CodeComment> getCodeComments(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestService.load(requestId);
+		if (!SecurityUtils.canReadCode(pullRequest.getProject()))
+			throw new UnauthorizedException();
+		return pullRequest.getCodeComments();
+	}
+
 	@Api(order=600)
 	@Path("/{requestId}/watches")
     @GET

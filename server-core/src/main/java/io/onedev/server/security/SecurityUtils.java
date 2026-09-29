@@ -643,7 +643,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 		if (canWriteCode(subject, comment.getProject()) 
 				|| comment.getUser().equals(user) 
-				|| canManageCodeComments(comment.getProject())) {
+				|| canManageCodeComments(subject, comment.getProject())) {
 			return true;
 		}
 		
