@@ -1,6 +1,8 @@
 package io.onedev.server.persistence;
 
 import static org.hibernate.cfg.AvailableSettings.DIALECT;
+import static org.hibernate.cfg.AvailableSettings.QUERY_PLAN_CACHE_ENABLED;
+import static org.hibernate.cfg.AvailableSettings.QUERY_PLAN_CACHE_MAX_SIZE;
 import static org.hibernate.cfg.AvailableSettings.STATIC_METAMODEL_POPULATION;
 
 import java.util.Properties;
@@ -48,6 +50,10 @@ public class DefaultSessionFactoryService implements SessionFactoryService {
 		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
 		Properties hibernateSettings = new Properties();
 		hibernateSettings.putAll(hibernateConfig);
+		// Cached Criteria plans can retain entities and their large object graphs.
+		// Override legacy cache sizes to avoid conflicting with the disabled cache.
+		hibernateSettings.put(QUERY_PLAN_CACHE_ENABLED, "false");
+		hibernateSettings.put(QUERY_PLAN_CACHE_MAX_SIZE, "0");
 		// We use the runtime JPA metamodel, but do not generate static metamodel classes.
 		hibernateSettings.putIfAbsent(STATIC_METAMODEL_POPULATION, "disabled");
 		// Keep the configured dialect for OneDev's upgrade/maintenance decisions,

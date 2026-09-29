@@ -1028,6 +1028,10 @@ public class Upgrade extends AbstractPlugin {
 					"jakarta.persistence.validation.mode");
 			hibernateProps = Strings.CS.replace(hibernateProps, "GitPlex", "OneDev");
 			hibernateProps = Strings.CS.replace(hibernateProps, "TurboDev", "OneDev");
+			// Query plan caching is disabled in code, so these settings are obsolete.
+			hibernateProps = hibernateProps.replaceAll(
+					"(?m)^[ \\t]*hibernate\\.query\\.(?:plan_cache_enabled|plan_cache_max_size|plan_parameter_metadata_max_size)"
+							+ "(?:[ \\t:=][^\\r\\n]*)?(?:\\r\\n|[\\r\\n]|$)", "");
 
 			if (!hibernateProps.contains("hsqldb.lob_file_scale")) {
 				hibernateProps = Strings.CS.replace(hibernateProps, "internaldb/onedev;", 

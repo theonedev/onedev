@@ -34,8 +34,7 @@ public class HibernateConfig extends Properties {
 			DIALECT, JAKARTA_JDBC_DRIVER, JAKARTA_JDBC_URL, JAKARTA_JDBC_USER, JAKARTA_JDBC_PASSWORD, "hibernate.hikari.leakDetectionThreshold",
 			"hibernate.hikari.maxLifetime", "hibernate.hikari.connectionTimeout",
 			"hibernate.hikari.maximumPoolSize", "hibernate.hikari.validationTimeout",
-			"hibernate.show_sql", "hibernate.query.plan_cache_max_size",
-			"hibernate.query.plan_parameter_metadata_max_size"
+			"hibernate.show_sql"
 	};
 	
 	public HibernateConfig(File installDir) {

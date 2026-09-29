@@ -28,7 +28,7 @@ public abstract class AbstractEnvironmentService {
 	
 	private static final long DEFAULT_LOG_FILE_SIZE = 8192;
 	
-	private static final int MEMORY_USAGE_PERCENT = 25;
+	private static final int MEMORY_USAGE_PERCENT = 20;
 	
 	private final Map<String, Environment> envs = new ConcurrentHashMap<>();
 	
