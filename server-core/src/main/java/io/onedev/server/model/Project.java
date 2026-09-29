@@ -464,6 +464,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private ArrayList<WebHook> webHooks = new ArrayList<>();
 	
     private transient Map<BlobIdent, Optional<Blob>> blobCache;
+
+    private transient Map<BlobIdent, Integer> modeCache;
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
     
@@ -1416,7 +1418,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	public int getMode(String revision, String path) {
-		return getGitService().getMode(this, getObjectId(revision, true), path);
+		if (modeCache == null)
+			modeCache = new HashMap<>();
+		ObjectId commitId = getObjectId(revision, true);
+		// Use the resolved commit so updating a revision's cached object id also refreshes its modes.
+		var blobIdent = new BlobIdent(commitId.name(), path);
+		return modeCache.computeIfAbsent(blobIdent, it -> getGitService().getMode(this, commitId, path));
 	}
 
 	public Collection<Iteration> getIterations() {

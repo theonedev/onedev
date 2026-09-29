@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -52,7 +54,6 @@ import org.jsoup.nodes.Element;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.commons.utils.PathUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.validation.validator.PathValidator;
 import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.BlobContent;
@@ -71,7 +72,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.ConventionalCommitChecker;
 import io.onedev.server.search.commit.PathCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.FileExtension;
@@ -102,6 +102,15 @@ import io.onedev.server.web.util.WikiLinkResolver;
 import io.onedev.server.web.util.WikiUtils;
 
 public class ProjectWikiPage extends ProjectPage {
+	@Inject
+	private GitService gitService;
+
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private MarkdownService markdownService;
+
 	private String revision;
 	private String page;
 	private @Nullable String folder;
@@ -146,18 +155,14 @@ public class ProjectWikiPage extends ProjectPage {
 		WikiUtils.pagePath(folder, returnPage);
 	}
 
-	private GitService git() {
-		return OneDev.getInstance(GitService.class);
-	}
-
 	private Project getWikiProject() {
-		return wikiProjectId != null ? OneDev.getInstance(ProjectService.class).load(wikiProjectId) : getProject();
+		return wikiProjectId != null ? projectService.load(wikiProjectId) : getProject();
 	}
 
 	private void resolveWikiProject() {
 		if (commitId == null || folder == null)
 			return;
-		var ident = git().getBlobIdent(getProject(), commitId, folder);
+		var ident = gitService.getBlobIdent(getProject(), commitId, folder);
 		if (ident == null || !ident.isGitLink())
 			return;
 		submodule = true;
@@ -167,15 +172,15 @@ public class ProjectWikiPage extends ProjectPage {
 			wikiWarning = _T("Wiki submodule URL is not configured.");
 			return;
 		}
-		String serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
+		String serverUrl = settingService.getSystemSetting().getServerUrl();
 		String projectPath = WikiUtils.submoduleProjectPath(serverUrl, getProject().getPath(), target.getUrl());
 		if (projectPath == null) {
 			wikiWarning = _T("Cannot display wiki pages hosted on other servers.");
 			return;
 		}
-		var project = OneDev.getInstance(ProjectService.class).findByPath(projectPath);
+		var project = projectService.findByPath(projectPath);
 		if (project == null && projectPath.endsWith(".git"))
-			project = OneDev.getInstance(ProjectService.class).findByPath(projectPath.substring(0, projectPath.length() - 4));
+			project = projectService.findByPath(projectPath.substring(0, projectPath.length() - 4));
 		if (project == null) {
 			wikiWarning = _T("Wiki project not found.");
 		} else if (!SecurityUtils.canReadCode(project)) {
@@ -687,7 +692,7 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private String outline(String markdown, String pageUrl) {
-		String html = markdown != null ? OneDev.getInstance(MarkdownService.class).render(markdown) : "";
+		String html = markdown != null ? markdownService.render(markdown) : "";
 		var result = new Element("div");
 		if (!html.isEmpty()) {
 			for (var heading : Jsoup.parseBodyFragment(html).select("h1, h2, h3, h4, h5, h6")) {
@@ -744,7 +749,7 @@ public class ProjectWikiPage extends ProjectPage {
 		}
 		ObjectId previousCommitId = commitId != null ? commitId : ObjectId.zeroId();
 		try {
-			return git().commit(getProject(), new BlobEdits(Set.of(), blobs), GitUtils.branch2ref(branchName),
+			return gitService.commit(getProject(), new BlobEdits(Set.of(), blobs), GitUtils.branch2ref(branchName),
 					previousCommitId, previousCommitId, user.asPerson(), message, protection.isCommitSignatureRequired());
 		} catch (ObsoleteCommitException e) {
 			throw new BlobEditException(_T("The branch changed. Reload before uploading files."));
@@ -850,10 +855,10 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private void collectPages(@Nullable String directory, List<String> pages) {
-		var ident = directory != null ? git().getBlobIdent(getWikiProject(), commitId, directory)
+		var ident = directory != null ? gitService.getBlobIdent(getWikiProject(), commitId, directory)
 				: new BlobIdent(commitId.name(), null, FileMode.TREE.getBits());
 		if (ident != null && ident.isTree()) {
-			for (var child : git().getChildren(getWikiProject(), commitId, directory, BlobIdentFilter.ALL, false)) {
+			for (var child : gitService.getChildren(getWikiProject(), commitId, directory, BlobIdentFilter.ALL, false)) {
 				if (child.isTree()) {
 					collectPages(child.path, pages);
 				} else if (child.isFile() && child.path.endsWith(".md")) {
@@ -876,8 +881,7 @@ public class ProjectWikiPage extends ProjectPage {
 	private String render(String markdown, String currentPath) {
 		if (markdown == null)
 			return "";
-		var service = OneDev.getInstance(MarkdownService.class);
-		String html = service.process(service.render(markdown), getWikiProject(), null, null, false);
+		String html = markdownService.process(markdownService.render(markdown), getWikiProject(), null, null, false);
 		return new WikiLinkResolver(getProject(), revision, folder, currentPath, returnPage,
 				getWikiProject(), submodule && commitId != null ? commitId.name() : revision, submodule).resolve(html);
 	}
@@ -931,7 +935,7 @@ public class ProjectWikiPage extends ProjectPage {
 			Map<String, BlobContent> blobs = delete ? Map.of() : Map.of(path,
 					new BlobContent(text != null ? text.getBytes(StandardCharsets.UTF_8) : new byte[0], FileMode.REGULAR_FILE.getBits()));
 			ObjectId previousCommitId = commitId != null ? commitId : ObjectId.zeroId();
-			ObjectId newCommitId = git().commit(getProject(), new BlobEdits(oldPaths, blobs), GitUtils.branch2ref(branchName), previousCommitId, previousCommitId,
+			ObjectId newCommitId = gitService.commit(getProject(), new BlobEdits(oldPaths, blobs), GitUtils.branch2ref(branchName), previousCommitId, previousCommitId,
 					SecurityUtils.getAuthUser().asPerson(), message, protection.isCommitSignatureRequired());
 			String selectedPage = destination != null ? destination : delete || name.equals("_Sidebar") ? "Home" : name;
 			if (delete) {
