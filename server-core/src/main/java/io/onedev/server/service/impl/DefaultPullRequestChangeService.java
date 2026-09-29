@@ -39,6 +39,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescript
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestWorkInProgressChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.PullRequestChangeService;
 
@@ -98,6 +99,22 @@ public class DefaultPullRequestChangeService extends BaseEntityService<PullReque
 		request.setAutoMerge(autoMerge);
 	}
 	
+	@Transactional
+	@Override
+	public void changeWorkInProgress(User user, PullRequest request, boolean workInProgress) {
+		if (request.isWorkInProgress() != workInProgress) {
+			request.setWorkInProgress(workInProgress);
+
+			PullRequestChange change = new PullRequestChange();
+			change.setDate(new Date());
+			change.setRequest(request);
+			change.setData(new PullRequestWorkInProgressChangeData(workInProgress));
+			change.setUser(user);
+			create(change, null);
+			dao.persist(request);
+		}
+	}
+
 	@Transactional
 	@Override
 	public void changeTitle(User user, PullRequest request, String title) {

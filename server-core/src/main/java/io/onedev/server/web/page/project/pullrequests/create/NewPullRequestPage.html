@@ -71,7 +71,12 @@
 						<label><wicket:t>Title</wicket:t> <span class="text-danger">*</span></label>
 						<input wicket:id="title" type="text" class="form-control">
 						<div wicket:id="titleFeedback"></div>
-						<div class="text-muted form-text"><wicket:t>Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress</wicket:t></div>
+					</div>
+					<div class="form-group">
+						<label><wicket:t>Work in Progress</wicket:t></label>
+						<div class="switch switch-sm switch-primary">
+							<label class="mb-0"><input wicket:id="workInProgress" type="checkbox"></label>
+						</div>
 					</div>
 					<div class="form-group pull-request-description">
 						<label><wicket:t>Description</wicket:t></label>

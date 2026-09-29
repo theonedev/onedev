@@ -157,6 +157,8 @@ public class PullRequest extends ProjectBelonging
 	public static final String NAME_TITLE = "Title";
 	
 	public static final String PROP_TITLE = "title";
+
+	public static final String PROP_WORK_IN_PROGRESS = "workInProgress";
 	
 	public static final String NAME_LABEL = "Label";
 	
@@ -299,6 +301,8 @@ public class PullRequest extends ProjectBelonging
 	@Api(order=100)
 	@Column(nullable=false, length=MAX_TITLE_LEN)
 	private String title;
+
+	private boolean workInProgress;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
 	@Api(description = "May be empty")
@@ -1416,8 +1420,11 @@ public class PullRequest extends ProjectBelonging
 	}
 	
 	public boolean isWorkInProgress() {
-		var lowerTitle = title.toLowerCase();
-		return lowerTitle.startsWith("wip") || lowerTitle.startsWith("[wip]");
+		return workInProgress;
+	}
+
+	public void setWorkInProgress(boolean workInProgress) {
+		this.workInProgress = workInProgress;
 	}
 
 	// Remove issue number suffix if there is any
@@ -1460,9 +1467,6 @@ public class PullRequest extends ProjectBelonging
 
 	public String getTitlePrefix(BranchSemantic sourceBranchSemantic) {
 		var prefixBuilder = new StringBuilder();
-		if (sourceBranchSemantic.isWorkInProgress()) {
-			prefixBuilder.append("[WIP] ");
-		}
 		if (sourceBranchSemantic.getWorkType() != null) {
 			prefixBuilder.append(sourceBranchSemantic.getWorkType()).append(": ");
 		}

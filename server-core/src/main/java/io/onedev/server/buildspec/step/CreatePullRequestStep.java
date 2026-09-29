@@ -163,8 +163,7 @@ public class CreatePullRequestStep extends ServerSideStep {
 						var titleAndDescription = titleAndDescritpionProvider.getTitleAndDescription(pullRequest);
 						
 						pullRequest.setTitle(titleAndDescription.getLeft());
-						if (isWorkInProgress() && !pullRequest.isWorkInProgress()) 
-							pullRequest.setTitle("[WIP] " + pullRequest.getTitle());
+						pullRequest.setWorkInProgress(isWorkInProgress());
 						
 						pullRequest.setDescription(titleAndDescription.getRight());
 						

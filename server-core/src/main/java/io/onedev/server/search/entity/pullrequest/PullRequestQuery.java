@@ -45,6 +45,7 @@ import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ToBeReviewedByMe;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.WatchedBy;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.WatchedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.WorkInProgress;
 import static io.onedev.server.util.QueryUtils.getIntValue;
 import static io.onedev.server.util.QueryUtils.getLabelSpec;
 import static io.onedev.server.util.QueryUtils.getNumber;
@@ -157,6 +158,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								return new MergedCriteria();
 							case Discarded:
 								return new DiscardedCriteria();
+							case WorkInProgress:
+								return new WorkInProgressCriteria();
 							case ReadyToMerge:
 								return new ReadyToMergeCriteria();
 							case NeedMyAction:

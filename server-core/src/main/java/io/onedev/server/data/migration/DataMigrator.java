@@ -9500,8 +9500,21 @@ public class DataMigrator {
 	}
 
 	private void migrate246(File dataDir, Stack<Integer> versions) {
+		var wipPrefix = Pattern.compile("(?i)^(?:\\[wip\\]|wip)\\s*:?\\s*");
 		for (File file : dataDir.listFiles()) {
-			if (file.getName().startsWith("Builds.xml")) {
+			if (file.getName().startsWith("PullRequests.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var titleElement = element.element("title");
+					var title = titleElement.getText();
+					var prefix = wipPrefix.matcher(title);
+					var workInProgress = prefix.find();
+					element.addElement("workInProgress").setText(String.valueOf(workInProgress));
+					if (workInProgress)
+						titleElement.setText(title.substring(prefix.end()).trim());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Builds.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("finalization").setText("false");

@@ -1,13 +1,17 @@
 package io.onedev.server.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.jupiter.api.Test;
+
+import io.onedev.server.util.BranchSemantic;
 
 class PullRequestTest {
 
@@ -51,6 +55,25 @@ class PullRequestTest {
 
         assertEquals(subject, request.generateTitleFromSingleCommit(commit));
         assertEquals(body, request.generateDescriptionFromSingleCommit(commit));
+    }
+
+    @Test
+    void workInProgressIsIndependentOfTitleAndBlocksMerging() {
+        request.setTitle("[WIP] A normal title now");
+        assertFalse(request.isWorkInProgress());
+        request.setWorkInProgress(true);
+        request.setTitle("Ready-looking title");
+        assertTrue(request.isWorkInProgress());
+        assertEquals("Pull request is work in progress", request.checkMergeCondition());
+        request.setWorkInProgress(false);
+        assertFalse(request.isWorkInProgress());
+        assertEquals("Ready-looking title", request.getTitle());
+    }
+
+    @Test
+    void generatedTitlePrefixContainsOnlyWorkType() {
+        assertEquals("fix: ", request.getTitlePrefix(new BranchSemantic(true, "fix", "bug")));
+        assertEquals("", request.getTitlePrefix(new BranchSemantic(true, null, "bug")));
     }
 
     private RevCommit commit(String message) {

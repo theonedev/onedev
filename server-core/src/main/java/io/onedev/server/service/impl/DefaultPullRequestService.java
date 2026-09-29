@@ -123,6 +123,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenDa
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchDeleteData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchRestoreData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestWorkInProgressChangeData;
 import io.onedev.server.persistence.SequenceGenerator;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -768,7 +769,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 			checkAutoMerge(event.getRequest());
 		} if (event instanceof PullRequestChanged) {
 			PullRequestChangeData data = ((PullRequestChanged) event).getChange().getData();
-			if (data instanceof PullRequestApproveData) {
+			if (data instanceof PullRequestApproveData || data instanceof PullRequestWorkInProgressChangeData) {
 				checkAutoMerge(event.getRequest());
 			} else if (data instanceof PullRequestMergeStrategyChangeData
 					|| data instanceof PullRequestTargetBranchChangeData) {
@@ -1386,28 +1387,17 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 		var sourceBranchSemantic = pullRequest.getSourceBranchSemantic();
 		String titleSuggestInstruction;
-		if (sourceBranchSemantic.isWorkInProgress()) {
-			if (sourceBranchSemantic.getWorkType() != null) {
-				titleSuggestInstruction = """
-					When suggesting pull request title, you should not add work in progress prefix
-					or conventional commit type prefix to the title even if commit messages 
-					indicate that.
-					""";
-			} else {
-				titleSuggestInstruction = """
-					When suggesting pull request title, you should not add work in progress prefix
-					to the title even if commit messages indicate that. 
-					""";
-			}
+		if (sourceBranchSemantic.getWorkType() != null) {
+			titleSuggestInstruction = """
+				When suggesting pull request title, you should not add work in progress prefix
+				or conventional commit type prefix to the title even if commit messages
+				indicate that.
+				""";
 		} else {
-			if (sourceBranchSemantic.getWorkType() != null) {
-				titleSuggestInstruction = """
-					When suggesting pull request title, you should not add conventional commit type prefix
-					to the title even if commit messages indicate that.
-					""";
-			} else {
-				titleSuggestInstruction = "";
-			}
+			titleSuggestInstruction = """
+				When suggesting pull request title, you should not add work in progress prefix
+				to the title even if commit messages indicate that.
+				""";
 		}
 
 		var commitMessages = pullRequest.getLatestUpdate().getCommits().stream()

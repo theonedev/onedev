@@ -279,6 +279,7 @@ public class PullRequestResource {
 		request.setTarget(target);
 		request.setSource(source);
 		request.setTitle(data.getTitle());
+		request.setWorkInProgress(data.isWorkInProgress());
 		request.setDescription(data.getDescription());
 		if (data.getMergeStrategy() != null)
 			request.setMergeStrategy(data.getMergeStrategy());
@@ -330,6 +331,18 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1350)
+	@Path("/{requestId}/work-in-progress")
+	@POST
+	public Response setWorkInProgress(@PathParam("requestId") Long requestId, boolean workInProgress) {
+		PullRequest request = pullRequestService.load(requestId);
+		var subject = SecurityUtils.getSubject();
+		if (!SecurityUtils.canModifyPullRequest(subject, request))
+			throw new UnauthorizedException();
+		pullRequestChangeService.changeWorkInProgress(SecurityUtils.getUser(subject), request, workInProgress);
+		return Response.ok().build();
+	}
+
 	@Api(order=1400)
 	@Path("/{requestId}/description")
     @POST
@@ -635,6 +648,8 @@ public class PullRequestResource {
 		private String sourceBranch;
 		
 		private String title;
+
+		private boolean workInProgress;
 		
 		private String description;
 		
@@ -687,6 +702,14 @@ public class PullRequestResource {
 
 		public void setTitle(String title) {
 			this.title = title;
+		}
+
+		public boolean isWorkInProgress() {
+			return workInProgress;
+		}
+
+		public void setWorkInProgress(boolean workInProgress) {
+			this.workInProgress = workInProgress;
 		}
 
 		public String getDescription() {

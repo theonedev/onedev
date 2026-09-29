@@ -33,6 +33,7 @@ import org.apache.wicket.util.string.Strings;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.select2.json.JsonBuilder;
 import io.onedev.server.web.editable.InplacePropertyEditPanel;
 
@@ -184,7 +185,8 @@ abstract class AbstractSelect2Choice<T, M> extends FormComponent<M> implements I
 		selection.endArray();
 		String script = JQuery.execute("onedev.server.select2.init($('#%s'), %s, %s);",
 				getJquerySafeMarkupId(), settings.toJson(), selection.toJson());
-		if (findParent(InplacePropertyEditPanel.class) != null) {
+		if (findParent(InplacePropertyEditPanel.class) != null || findParent(FloatingPanel.class) != null) {
+			// Initialize before floating panels measure and align their content.
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		} else {
 			// Wait for modal dialogs to be visible before sizing the search field.

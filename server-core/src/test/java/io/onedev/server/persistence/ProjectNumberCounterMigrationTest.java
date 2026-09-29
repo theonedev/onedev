@@ -68,6 +68,6 @@ public class ProjectNumberCounterMigrationTest {
 
     private void writeEntity(String file, long project, long scope, long number) throws Exception {
         Files.writeString(directory.resolve(file), "<list><entity><id>" + project + "</id><project>" + project
-                + "</project><numberScope>" + scope + "</numberScope><number>" + number + "</number></entity></list>");
+                + "</project><title>Example title</title><numberScope>" + scope + "</numberScope><number>" + number + "</number></entity></list>");
     }
 }

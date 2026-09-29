@@ -21,6 +21,8 @@ public interface PullRequestChangeService extends EntityService<PullRequestChang
 	
 	void changeTitle(User user, PullRequest request, String title);
 
+	void changeWorkInProgress(User user, PullRequest request, boolean workInProgress);
+
 	void changeDescription(User user, PullRequest request, @Nullable String description);
 	
 	void changeTargetBranch(User user, PullRequest request, String targetBranch);

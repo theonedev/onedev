@@ -32,6 +32,7 @@ public class ReadyToMergeCriteria extends Criteria<PullRequest> {
 		return new AndCriteria<>(
 				new OpenCriteria(),
 				new NotCriteria<>(new OrCriteria<>(
+						new WorkInProgressCriteria(),
 						new HasMergeConflictsCriteria(),
 						new HasPendingReviewsCriteria(),
 						new SomeoneRequestedForChangesCriteria(),

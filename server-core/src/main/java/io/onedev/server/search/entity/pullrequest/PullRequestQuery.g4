@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-	: operator=(Open|Merged|Discarded|NeedMyAction|AssignedToMe|SubmittedByMe|WatchedByMe|IgnoredByMe|CommentedByMe|ToBeReviewedByMe|ToBeChangedByMe|ToBeMergedByMe|RequestedForChangesByMe|ApprovedByMe|MentionedMe|ReadyToMerge|SomeoneRequestedForChanges|HasPendingReviews|HasUnsuccessfulBuilds|HasUnfinishedBuilds|HasMergeConflicts) #OperatorCriteria
+	: operator=(Open|Merged|Discarded|WorkInProgress|NeedMyAction|AssignedToMe|SubmittedByMe|WatchedByMe|IgnoredByMe|CommentedByMe|ToBeReviewedByMe|ToBeChangedByMe|ToBeMergedByMe|RequestedForChangesByMe|ApprovedByMe|MentionedMe|ReadyToMerge|SomeoneRequestedForChanges|HasPendingReviews|HasUnsuccessfulBuilds|HasUnfinishedBuilds|HasMergeConflicts) #OperatorCriteria
     | operator=(NeedActionOf|ToBeReviewedBy|ToBeChangedBy|ToBeMergedBy|AssignedTo|ApprovedBy|RequestedForChangesBy|SubmittedBy|WatchedBy|IgnoredBy|CommentedBy|Mentioned|IncludesCommit|IncludesIssue) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince|Contains) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | Reference #ReferenceCriteria
@@ -37,6 +37,10 @@ Merged
 
 Discarded
     : 'discarded'
+    ;
+
+WorkInProgress
+    : 'work' WS+ 'in' WS+ 'progress'
     ;
 
 NeedMyAction

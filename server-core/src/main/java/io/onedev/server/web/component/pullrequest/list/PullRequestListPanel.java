@@ -968,6 +968,7 @@ public abstract class PullRequestListPanel extends Panel {
 					
 				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 
+				fragment.add(new WebMarkupContainer("workInProgress").setVisible(request.isWorkInProgress()));
 				fragment.add(new EntityLabelsPanel<PullRequestLabel>("labels", rowModel));
 
 				RepeatingView reviewsView = new RepeatingView("reviews");

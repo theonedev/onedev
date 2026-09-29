@@ -3,9 +3,9 @@
 		<div wicket:id="requestHeader" class="card-header align-items-center justify-content-start flex-nowrap">
 			<div class="d-flex align-items-center flex-grow-1">
 				<wicket:enclosure child="title">
-				<div class="card-title mr-3"><span wicket:id="title"></span> <span wicket:id="number" class="text-muted ml-1"></span></div>
+				<div class="card-title mr-3"><span wicket:id="title"></span> <span wicket:id="number" class="text-muted ml-1"></span> <span wicket:id="workInProgress" t:data-tippy-content="Work in progress" class="badge badge-sm badge-info ml-2">WIP</span></div>
 				</wicket:enclosure>
-				<a wicket:id="edit" t:data-tippy-content="Edit title" class="btn btn-xs btn-icon btn-light btn-hover-primary edit mr-3"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+				<a wicket:id="edit" t:data-tippy-content="Edit title" class="edit mr-3"><wicket:svg href="edit" class="icon"></wicket:svg></a>
 				<form wicket:id="editForm" class="form flex-grow-1 d-flex align-items-center">
 					<div class="clearable-wrapper mr-3 flex-grow-1">
 						<input wicket:id="title" type="text" t:placeholder="Input title" class="form-control">
@@ -163,6 +163,14 @@
 				</tr>
 			</table>
 		</div>
+		<wicket:enclosure child="workInProgress">
+		<div class="work-in-progress d-flex align-items-center justify-content-between">
+			<div class="font-weight-bolder mr-3"><wicket:t>Work in Progress</wicket:t></div>
+			<div class="switch switch-sm switch-primary">
+				<label><input wicket:id="workInProgress" type="checkbox"></label>
+			</div>
+		</div>
+		</wicket:enclosure>
 		<wicket:enclosure child="reviews">
 		<div class="reviews">
 			<div class="head"><wicket:t>Reviewers</wicket:t></div>

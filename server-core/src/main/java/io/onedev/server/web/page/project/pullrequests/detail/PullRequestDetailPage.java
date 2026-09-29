@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
@@ -296,6 +297,22 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		}.setEscapeModelStrings(false));
 
+		requestHead.add(new WebMarkupContainer("workInProgress") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isWorkInProgress());
+			}
+
+		}.setOutputMarkupPlaceholderTag(true).add(new ChangeObserver() {
+
+			@Override
+			public Collection<String> findObservables() {
+				return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
+			}
+
+		}));
 		requestHead.add(new Label("number", "#" + getPullRequest().getNumber()));
 
 		requestHead.add(new AjaxLink<Void>("edit") {
@@ -1011,6 +1028,41 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 				};
 
+				var workInProgress = new AtomicBoolean();
+				var workInProgressInput = new CheckBox("workInProgress", new IModel<Boolean>() {
+
+					@Override
+					public Boolean getObject() {
+						return getPullRequest().isWorkInProgress();
+					}
+
+					@Override
+					public void setObject(Boolean object) {
+						workInProgress.set(object);
+					}
+
+				}) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()));
+					}
+
+				};
+				workInProgressInput.add(new AjaxFormComponentUpdatingBehavior("change") {
+
+					@Override
+					protected void onUpdate(AjaxRequestTarget target) {
+						var request = getPullRequest();
+						if (!SecurityUtils.canModifyPullRequest(request))
+							throw new UnauthorizedException();
+						pullRequestChangeService.changeWorkInProgress(SecurityUtils.getUser(), request, workInProgress.get());
+						notifyPullRequestChange(target);
+					}
+
+				});
+				fragment.add(workInProgressInput);
 				fragment.add(new UserIdentPanel("submitter", getPullRequest().getSubmitter(), Mode.NAME));
 				fragment.add(new BranchLink("targetBranch", getPullRequest().getTarget()));
 

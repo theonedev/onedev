@@ -38,6 +38,7 @@ import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
@@ -286,6 +287,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				request.setTarget(target);
 				request.setSource(source);
 				request.setSubmitter(currentUser);
+				request.setWorkInProgress(request.getSourceBranchSemantic().isWorkInProgress());
 				
 				request.setBaseCommitHash(baseCommitId.name());
 				if (request.getBaseCommitHash().equals(source.getObjectName())) 
@@ -828,6 +830,19 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		}));
 		
 		form.add(titleInput);
+		form.add(new CheckBox("workInProgress", new IModel<Boolean>() {
+
+			@Override
+			public Boolean getObject() {
+				return getPullRequest().isWorkInProgress();
+			}
+
+			@Override
+			public void setObject(Boolean object) {
+				getPullRequest().setWorkInProgress(object);
+			}
+
+		}));
 
 		CommentInput descriptionInput = new CommentInput("description", new IModel<String>() {
 

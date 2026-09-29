@@ -17,6 +17,7 @@ import java.util.function.Predicate;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -34,6 +35,7 @@ import io.onedev.server.search.entity.pullrequest.OpenCriteria;
 import io.onedev.server.search.entity.pullrequest.StatusCriteria;
 import io.onedev.server.search.entity.pullrequest.SubmittedByCriteria;
 import io.onedev.server.search.entity.pullrequest.SubmittedByUserCriteria;
+import io.onedev.server.search.entity.pullrequest.WorkInProgressCriteria;
 import io.onedev.server.service.LabelSpecService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
@@ -98,6 +100,35 @@ class PullRequestFilterPanel extends FilterEditPanel<PullRequest> {
 			
 		});
 		add(statusChoice);
+
+		var workInProgressCheck = new CheckBox("workInProgress", new IModel<Boolean>() {
+
+			@Override
+			public Boolean getObject() {
+				return !getMatchingCriterias(getModelObject().getCriteria(), WorkInProgressCriteria.class, null).isEmpty();
+			}
+
+			@Override
+			public void setObject(Boolean object) {
+				var criteria = object? new WorkInProgressCriteria() : null;
+				var query = getModelObject();
+				query.setCriteria(setMatchingCriteria(query.getCriteria(), WorkInProgressCriteria.class, criteria, null));
+				getModel().setObject(query);
+			}
+
+			@Override
+			public void detach() {
+			}
+
+		});
+		workInProgressCheck.add(new AjaxFormComponentUpdatingBehavior("change") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+			}
+
+		});
+		add(workInProgressCheck);
 
 		var submittedByChoice = new UserMultiChoice("submittedBy", new IModel<Collection<User>>() {
 
