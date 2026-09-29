@@ -17,7 +17,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.panel.Fragment;
 import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -53,11 +52,13 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
 import io.onedev.server.web.component.filteredit.FilterEditPanel;
 import io.onedev.server.web.component.groupchoice.GroupMultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
+import io.onedev.server.web.component.tristateswitch.TriStateSwitch;
 import io.onedev.server.web.component.user.choice.UserMultiChoice;
 
 abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
@@ -400,18 +401,37 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 			add(new WebMarkupContainer("iteration").setVisible(false));
 		}
 
-		var confidentialCheck = new CheckBox("confidential", new IModel<Boolean>() {
+		var confidentialSwitch = new TriStateSwitch("confidential", new IModel<Boolean>() {
 
 			@Override
 			public Boolean getObject() {
-				return !getMatchingCriterias(getModelObject().getCriteria(), ConfidentialCriteria.class, null).isEmpty();
+				var criteria = getModelObject().getCriteria();
+				if (!getMatchingCriterias(criteria, ConfidentialCriteria.class, null).isEmpty())
+					return true;
+				if (!getMatchingCriterias(criteria, NotCriteria.class,
+						it -> it.getCriteria() instanceof ConfidentialCriteria).isEmpty())
+					return false;
+				return null;
 			}
 
 			@Override
 			public void setObject(Boolean object) {
-				var criteria = object? new ConfidentialCriteria() : null;
 				var query = getModelObject();
-				query.setCriteria(setMatchingCriteria(query.getCriteria(), ConfidentialCriteria.class, criteria, null));
+				var criteria = query.getCriteria();
+				if (!getMatchingCriterias(criteria, ConfidentialCriteria.class, null).isEmpty())
+					criteria = setMatchingCriteria(criteria, ConfidentialCriteria.class, null, null);
+				if (!getMatchingCriterias(criteria, NotCriteria.class,
+						it -> it.getCriteria() instanceof ConfidentialCriteria).isEmpty()) {
+					criteria = setMatchingCriteria(criteria, NotCriteria.class, null,
+							it -> it.getCriteria() instanceof ConfidentialCriteria);
+				}
+				if (object != null) {
+					Criteria<Issue> confidential = new ConfidentialCriteria();
+					if (!object)
+						confidential = new NotCriteria<>(confidential);
+					criteria = setMatchingCriteria(criteria, ConfidentialCriteria.class, confidential, null);
+				}
+				query.setCriteria(criteria);
 				getModel().setObject(query);
 			}
 
@@ -421,14 +441,14 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 
 		});
 
-		confidentialCheck.add(new AjaxFormComponentUpdatingBehavior("change") {
+		confidentialSwitch.add(new AjaxFormComponentUpdatingBehavior("change") {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 			}
 			
 		});
-		add(confidentialCheck);
+		add(confidentialSwitch);
 
 		var activeSincePicker = new DatePicker("activeSince", new IModel<Date>() {
 

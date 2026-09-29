@@ -17,7 +17,6 @@ import java.util.function.Predicate;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -40,9 +39,11 @@ import io.onedev.server.service.LabelSpecService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
 import io.onedev.server.web.component.filteredit.FilterEditPanel;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.component.tristateswitch.TriStateSwitch;
 import io.onedev.server.web.component.user.choice.UserMultiChoice;
 
 class PullRequestFilterPanel extends FilterEditPanel<PullRequest> {
@@ -101,18 +102,37 @@ class PullRequestFilterPanel extends FilterEditPanel<PullRequest> {
 		});
 		add(statusChoice);
 
-		var workInProgressCheck = new CheckBox("workInProgress", new IModel<Boolean>() {
+		var workInProgressSwitch = new TriStateSwitch("workInProgress", new IModel<Boolean>() {
 
 			@Override
 			public Boolean getObject() {
-				return !getMatchingCriterias(getModelObject().getCriteria(), WorkInProgressCriteria.class, null).isEmpty();
+				var criteria = getModelObject().getCriteria();
+				if (!getMatchingCriterias(criteria, WorkInProgressCriteria.class, null).isEmpty())
+					return true;
+				if (!getMatchingCriterias(criteria, NotCriteria.class,
+						it -> it.getCriteria() instanceof WorkInProgressCriteria).isEmpty())
+					return false;
+				return null;
 			}
 
 			@Override
 			public void setObject(Boolean object) {
-				var criteria = object? new WorkInProgressCriteria() : null;
 				var query = getModelObject();
-				query.setCriteria(setMatchingCriteria(query.getCriteria(), WorkInProgressCriteria.class, criteria, null));
+				var criteria = query.getCriteria();
+				if (!getMatchingCriterias(criteria, WorkInProgressCriteria.class, null).isEmpty())
+					criteria = setMatchingCriteria(criteria, WorkInProgressCriteria.class, null, null);
+				if (!getMatchingCriterias(criteria, NotCriteria.class,
+						it -> it.getCriteria() instanceof WorkInProgressCriteria).isEmpty()) {
+					criteria = setMatchingCriteria(criteria, NotCriteria.class, null,
+							it -> it.getCriteria() instanceof WorkInProgressCriteria);
+				}
+				if (object != null) {
+					Criteria<PullRequest> workInProgress = new WorkInProgressCriteria();
+					if (!object)
+						workInProgress = new NotCriteria<>(workInProgress);
+					criteria = setMatchingCriteria(criteria, WorkInProgressCriteria.class, workInProgress, null);
+				}
+				query.setCriteria(criteria);
 				getModel().setObject(query);
 			}
 
@@ -121,14 +141,14 @@ class PullRequestFilterPanel extends FilterEditPanel<PullRequest> {
 			}
 
 		});
-		workInProgressCheck.add(new AjaxFormComponentUpdatingBehavior("change") {
+		workInProgressSwitch.add(new AjaxFormComponentUpdatingBehavior("change") {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 			}
 
 		});
-		add(workInProgressCheck);
+		add(workInProgressSwitch);
 
 		var submittedByChoice = new UserMultiChoice("submittedBy", new IModel<Collection<User>>() {
 

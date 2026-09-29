@@ -32,11 +32,11 @@ public abstract class FilterEditPanel<T extends AbstractEntity> extends GenericP
 	}
 
 	@SuppressWarnings("unchecked")
-	private <C extends Criteria<T>> boolean isCriteriaMatching(Criteria<T> criteria, Class<C> criteriaClass, @Nullable Predicate<C> predicate) {
+	private <C extends Criteria<?>> boolean isCriteriaMatching(Criteria<T> criteria, Class<C> criteriaClass, @Nullable Predicate<C> predicate) {
 		return criteriaClass.isInstance(criteria) && (predicate == null || predicate.test((C) criteria));
 	}
 
-	private <C extends Criteria<T>> boolean isMemberAllMatching(OrCriteria<T> rootCriteria, Class<C> criteriaClass, @Nullable Predicate<C> predicate) {
+	private <C extends Criteria<?>> boolean isMemberAllMatching(OrCriteria<T> rootCriteria, Class<C> criteriaClass, @Nullable Predicate<C> predicate) {
 		for (var childCriteria: rootCriteria.getCriterias()) {
 			if (childCriteria instanceof OrCriteria) {
 				if (!isMemberAllMatching((OrCriteria<T>) childCriteria, criteriaClass, predicate))
@@ -49,7 +49,7 @@ public abstract class FilterEditPanel<T extends AbstractEntity> extends GenericP
 	}
 
 	@SuppressWarnings("unchecked")
-	private <C extends Criteria<T>> List<C> getFlattenedMembers(OrCriteria<T> rootCriteria) {
+	private <C extends Criteria<?>> List<C> getFlattenedMembers(OrCriteria<T> rootCriteria) {
 		var flattenedCriterias = new ArrayList<C>();
 		for (var childCriteria: rootCriteria.getCriterias()) {
 			if (childCriteria instanceof OrCriteria) {
@@ -62,7 +62,7 @@ public abstract class FilterEditPanel<T extends AbstractEntity> extends GenericP
 	}
 
 	@Nullable
-	private <C extends Criteria<T>> Pair<AndCriteria<T>, Integer> getFirstMatchingMember(AndCriteria<T> rootCriteria, Class<C> criteriaClass, @Nullable Predicate<C> predicate) {		
+	private <C extends Criteria<?>> Pair<AndCriteria<T>, Integer> getFirstMatchingMember(AndCriteria<T> rootCriteria, Class<C> criteriaClass, @Nullable Predicate<C> predicate) {
 		for (int i=0; i<rootCriteria.getCriterias().size(); i++) {
 			var childCriteria = rootCriteria.getCriterias().get(i);
 			if (isCriteriaMatching(childCriteria, criteriaClass, predicate) 
@@ -78,7 +78,7 @@ public abstract class FilterEditPanel<T extends AbstractEntity> extends GenericP
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <C extends Criteria<T>> List<C> getMatchingCriterias(@Nullable Criteria<T> rootCriteria, Class<C> criteriaClass, @Nullable Predicate<C> predicate) {	
+	protected <C extends Criteria<?>> List<C> getMatchingCriterias(@Nullable Criteria<T> rootCriteria, Class<C> criteriaClass, @Nullable Predicate<C> predicate) {
 		if (rootCriteria == null) {
 			return new ArrayList<>();
 		} else if (isCriteriaMatching(rootCriteria, criteriaClass, predicate)) {	
@@ -102,7 +102,7 @@ public abstract class FilterEditPanel<T extends AbstractEntity> extends GenericP
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected <C extends Criteria<T>> Criteria<T> setMatchingCriteria(@Nullable Criteria<T> rootCriteria, 
+	protected <C extends Criteria<?>> Criteria<T> setMatchingCriteria(@Nullable Criteria<T> rootCriteria,
 				Class<C> criteriaClass, @Nullable Criteria<T> criteria, @Nullable Predicate<C> predicate) {
 		if (rootCriteria == null 
 				|| isCriteriaMatching(rootCriteria, criteriaClass, predicate) 

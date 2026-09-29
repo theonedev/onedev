@@ -16,11 +16,9 @@
     </wicket:enclosure>
     <div class="form-group">
         <label class="control-label"><wicket:t>Confidential</wicket:t></label>
-        <span class="switch switch-sm switch-primary">
-            <label>
-                <input wicket:id="confidential" type="checkbox">
-            </label>
-        </span>
+        <div>
+            <input wicket:id="confidential" t:aria-label="Confidential">
+        </div>
     </div>    
     <div class="form-group">
         <label class="control-label"><wicket:t>Active Since</wicket:t></label>

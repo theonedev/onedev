@@ -27,6 +27,10 @@ public class NotCriteria<T> extends Criteria<T> {
 		this.criteria = criteria;
 	}
 
+	public Criteria<T> getCriteria() {
+		return criteria;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<T, T> root, CriteriaBuilder builder) {
 		return builder.not(criteria.getPredicate(projectScope, query, root, builder));

@@ -1,3 +1,14 @@
 <wicket:extend>
-	<a wicket:id="test">test</a>
+	<div class="d-flex align-items-center p-4">
+		<div class="switch switch-sm switch-primary mr-4">
+			<label class="d-flex align-items-center">
+				<span class="mr-2">Normal switch</span>
+				<input wicket:id="normalSwitch" type="checkbox">
+			</label>
+		</div>
+		<label class="d-flex align-items-center mb-0">
+			<span class="mr-2">Three-state switch</span>
+			<input wicket:id="triStateSwitch">
+		</label>
+	</div>
 </wicket:extend>

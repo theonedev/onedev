@@ -1,0 +1,109 @@
+.tri-state-switch {
+	--tri-state-track: var(--light-gray, #ebedf3);
+	--tri-state-thumb: #fff;
+	position: relative;
+	display: inline-flex;
+	width: 96px;
+	height: 24px;
+	vertical-align: middle;
+	border-radius: 12px;
+	background: var(--tri-state-track);
+	transition: background-color 100ms ease-in;
+}
+.tri-state-switch[data-state="2"] {
+	background: var(--primary, #3699ff);
+}
+.tri-state-switch-input {
+	width: 96px;
+	height: 24px;
+	margin: 0;
+	cursor: pointer;
+}
+.tri-state-switch > .tri-state-switch-input {
+	appearance: none;
+	-webkit-appearance: none;
+	position: absolute;
+	inset: 0;
+	box-sizing: border-box;
+	padding: 2px;
+	border: 0;
+	border-radius: inherit;
+	background: transparent;
+	direction: ltr;
+}
+.tri-state-switch-input::-webkit-slider-runnable-track {
+	height: 20px;
+	background: transparent;
+}
+.tri-state-switch-input::-moz-range-track {
+	height: 20px;
+	background: transparent;
+}
+.tri-state-switch-input::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 30px;
+	height: 20px;
+	border: 0;
+	border-radius: 10px;
+	background: var(--tri-state-thumb);
+	box-shadow: 0 1px 3px #0002;
+}
+.tri-state-switch-input::-moz-range-thumb {
+	width: 30px;
+	height: 20px;
+	border: 0;
+	border-radius: 10px;
+	background: var(--tri-state-thumb);
+	box-shadow: 0 1px 3px #0002;
+}
+.tri-state-switch-labels {
+	position: absolute;
+	inset: 2px;
+	display: flex;
+	align-items: center;
+	pointer-events: none;
+	user-select: none;
+	font-size: 9px;
+	font-weight: 600;
+	color: var(--gray, #7e8299);
+}
+.tri-state-switch-labels > span {
+	flex: 1;
+	text-align: center;
+}
+.tri-state-switch[data-state="0"] .tri-state-switch-labels > :first-child,
+.tri-state-switch[data-state="1"] .tri-state-switch-labels > :nth-child(2) {
+	color: var(--dark, #181c32);
+}
+.tri-state-switch[data-state="2"] .tri-state-switch-labels {
+	color: #fff;
+}
+.tri-state-switch[data-state="2"] .tri-state-switch-labels > :last-child {
+	color: var(--primary, #3699ff);
+}
+.tri-state-switch-input:focus-visible {
+	outline: 2px solid var(--primary, #3699ff);
+	outline-offset: 3px;
+}
+.tri-state-switch.disabled {
+	opacity: .5;
+}
+.tri-state-switch-input:disabled {
+	cursor: not-allowed;
+}
+.dark-mode .tri-state-switch {
+	--tri-state-track: var(--dark-mode-light-dark, #323248);
+	--tri-state-thumb: #565674;
+}
+.dark-mode .tri-state-switch[data-state="2"] {
+	--tri-state-thumb: #fff;
+}
+.dark-mode .tri-state-switch[data-state="0"] .tri-state-switch-labels > :first-child,
+.dark-mode .tri-state-switch[data-state="1"] .tri-state-switch-labels > :nth-child(2) {
+	color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+	.tri-state-switch {
+		transition: none;
+	}
+}
