@@ -11,13 +11,13 @@ import java.util.regex.Pattern;
 
 import org.jspecify.annotations.Nullable;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.diff.DiffMatchPatch.Diff;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
+import jakarta.ws.rs.NotAcceptableException;
 
 public class DiffUtils {
 
@@ -57,8 +57,9 @@ public class DiffUtils {
 	}
 	
 	public static <T> List<DiffBlock<T>> diff(List<T> oldElements, List<T> newElements, Function<T, T> processor) {
-		Preconditions.checkArgument(oldElements.size() + newElements.size() <= MAX_DIFF_SIZE, 
-				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
+		if (oldElements.size() + newElements.size() > MAX_DIFF_SIZE) {
+			throw new NotAcceptableException("Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
+		}
 		
 		List<T> processedOldElements = new ArrayList<>();
 		for (T element: oldElements) 

@@ -14,8 +14,6 @@ import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParser;
@@ -39,7 +37,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 
 import io.onedev.commons.loader.ImplementationRegistry;
-import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
@@ -130,7 +127,6 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);	
-		mapper.addMixIn(PlanarRange.class, PlanarRangeMixin.class);
 		
 		SimpleModule emptyStringModule = new SimpleModule();
 		emptyStringModule.addDeserializer(String.class, new JsonDeserializer<String>() {
@@ -148,17 +144,6 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 			each.configure(mapper);
 		
 		return mapper;
-	}
-
-	private abstract static class PlanarRangeMixin {
-
-		@JsonCreator
-		public PlanarRangeMixin(
-				@JsonProperty(value="fromRow", required=true) int fromRow,
-				@JsonProperty(value="fromColumn", required=true) int fromColumn,
-				@JsonProperty(value="toRow", required=true) int toRow,
-				@JsonProperty(value="toColumn", required=true) int toColumn) {
-		}
 	}
 
 }

@@ -7,7 +7,7 @@ import static org.mockito.Mockito.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
-import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotAcceptableException;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -22,12 +22,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
-import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
@@ -36,16 +36,17 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.rest.resource.CodeCommentResource.CodeCommentCreateData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.rest.resource.support.MarkData;
+import io.onedev.server.rest.resource.support.CompareContextData;
+import io.onedev.server.rest.resource.support.PlanarRangeData;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
-import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
-import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperModule;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.validation.HibernateValidationTestSupport;
 
@@ -57,6 +58,7 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 	private CodeCommentStatusChangeService statusChanges;
 	private AuditService audit;
 	private ProjectService projects;
+	private PullRequestService pullRequests;
 	private CodeCommentResource resource;
 	private Project project;
 	private User user;
@@ -70,7 +72,8 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 		statusChanges = mock(CodeCommentStatusChangeService.class);
 		audit = mock(AuditService.class);
 		projects = mock(ProjectService.class);
-		resource = new CodeCommentResource(comments, audit, projects, statusChanges);
+		pullRequests = mock(PullRequestService.class);
+		resource = new CodeCommentResource(comments, audit, projects, statusChanges, mock(GitService.class), pullRequests);
 		project = mock(Project.class);
 		user = new User();
 		user.setId(2L);
@@ -86,6 +89,8 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 		security.when(SecurityUtils::getUser).thenReturn(user);
 		security.when(SecurityUtils::getAuthUser).thenReturn(user);
 		security.when(() -> SecurityUtils.canReadCode(project)).thenReturn(true);
+		security.when(() -> SecurityUtils.canReadCode(subject, project))
+				.thenAnswer(invocation -> SecurityUtils.canReadCode(project));
 		xml = mockStatic(VersionedXmlDoc.class);
 		var document = mock(VersionedXmlDoc.class);
 		when(document.toXML()).thenReturn("<comment/>");
@@ -129,11 +134,12 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 	}
 
 	@Test
-	void checksPermissionAndTargetCommitBeforeMappingComment() {
+	void checksPermissionAndTargetCommitBeforeMappingComment() throws Exception {
 		existingComment();
-		assertThrows(BadRequestException.class, () -> resource.getMark(4L, null));
-		assertThrows(BadRequestException.class, () -> resource.getMark(4L, "invalid"));
-		assertThrows(BadRequestException.class, () -> resource.getMark(4L, "abcdefabcdefabcdefabcdefabcdefabcdefabcd"));
+		var method = CodeCommentResource.class.getMethod("getMark", Long.class, String.class);
+		assertFalse(validator.forExecutables().validateParameters(resource, method, new Object[] {4L, null}).isEmpty());
+		assertThrows(NotAcceptableException.class, () -> resource.getMark(4L, "invalid"));
+		assertThrows(NotAcceptableException.class, () -> resource.getMark(4L, "abcdefabcdefabcdefabcdefabcdefabcdefabcd"));
 		security.when(() -> SecurityUtils.canReadCode(project)).thenReturn(false);
 		assertThrows(UnauthorizedException.class, () -> resource.getMark(4L, COMMIT));
 		verify(project, never()).readLines(any(), any(), anyBoolean());
@@ -159,33 +165,30 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 		var request = new PullRequest();
 		request.setId(3L);
 		request.setTargetProject(project);
-		var dao = mock(Dao.class);
-		when(dao.load(PullRequest.class, 3L)).thenReturn(request);
-		var mapper = new ObjectMapperProvider(Set.of(), Set.of(), mock(ImplementationRegistry.class),
-				Set.of(new HibernateObjectMapperConfigurator(new HibernateObjectMapperModule(dao)))).get();
-		try (var loader = mockStatic(AppLoader.class)) {
-			loader.when(() -> AppLoader.getInstance(Dao.class)).thenReturn(dao);
-			var data = mapper.readValue("{\"projectId\":1,\"content\":\"Review this\","
-					+ "\"mark\":{\"commitHash\":\"" + COMMIT + "\",\"path\":\"file.txt\","
-					+ "\"range\":{\"fromRow\":0,\"fromColumn\":0,\"toRow\":0,\"toColumn\":5}},"
-					+ "\"compareContext\":{\"oldCommitHash\":\"" + COMMIT + "\",\"newCommitHash\":\"" + COMMIT
-					+ "\",\"pullRequestId\":3}}", CodeCommentCreateData.class);
-			assertTrue(validator.validate(data).isEmpty());
-			var range = new PlanarRange(0, 0, 1, 4, 4);
-			assertEquals(range, mapper.readValue(mapper.writeValueAsString(range), PlanarRange.class));
-			doAnswer(invocation -> {
-				CodeComment comment = invocation.getArgument(0);
-				assertSame(project, comment.getProject());
-				assertSame(user, comment.getUser());
-				assertSame(request, comment.getCompareContext().getPullRequest());
-				assertEquals(new PlanarRange(0, 0, 0, 5), comment.getMark().getRange());
-				assertEquals("Review this", comment.getContent());
-				comment.setId(4L);
-				return null;
-			}).when(comments).create(any());
-			assertEquals(4L, resource.createComment(data));
-			verifyNoInteractions(audit);
-		}
+		when(pullRequests.load(3L)).thenReturn(request);
+		var mapper = new ObjectMapperProvider(Set.of(), Set.of(), mock(ImplementationRegistry.class), Set.of()).get();
+		var data = mapper.readValue("{\"projectId\":1,\"content\":\"Review this\","
+				+ "\"mark\":{\"commitHash\":\"" + COMMIT + "\",\"path\":\"file.txt\","
+				+ "\"range\":{\"fromRow\":0,\"fromColumn\":0,\"toRow\":0,\"toColumn\":5}},"
+				+ "\"compareContext\":{\"oldCommitHash\":\"" + COMMIT + "\",\"newCommitHash\":\"" + COMMIT
+				+ "\",\"pullRequestId\":3}}", CodeCommentCreateData.class);
+		assertTrue(validator.validate(data).isEmpty());
+		var range = new PlanarRange(0, 0, 1, 4, 4);
+		assertEquals(range, mapper.readValue(mapper.writeValueAsString(range), PlanarRangeData.class).toPlanarRange());
+		doAnswer(invocation -> {
+			CodeComment comment = invocation.getArgument(0);
+			assertSame(project, comment.getProject());
+			assertSame(user, comment.getUser());
+			assertSame(request, comment.getCompareContext().getPullRequest());
+			assertNull(comment.getCompareContext().getPathFilter());
+			assertEquals(WhitespaceOption.IGNORE_TRAILING, comment.getCompareContext().getWhitespaceOption());
+			assertEquals(new PlanarRange(0, 0, 0, 5), comment.getMark().getRange());
+			assertEquals("Review this", comment.getContent());
+			comment.setId(4L);
+			return null;
+		}).when(comments).create(any());
+		assertEquals(4L, resource.createComment(data));
+		verifyNoInteractions(audit);
 	}
 
 	@Test
@@ -205,17 +208,18 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 		var data = createData();
 		var request = new PullRequest();
 		request.setTargetProject(new Project());
-		data.getCompareContext().setPullRequest(request);
-		assertThrows(BadRequestException.class, () -> resource.createComment(data));
-		data.getCompareContext().setPullRequest(null);
+		when(pullRequests.load(3L)).thenReturn(request);
+		data.getCompareContext().setPullRequestId(3L);
+		assertThrows(NotAcceptableException.class, () -> resource.createComment(data));
+		data.getCompareContext().setPullRequestId(null);
 		data.getMark().setCommitHash("invalid");
-		assertThrows(BadRequestException.class, () -> resource.createComment(data));
+		assertThrows(NotAcceptableException.class, () -> resource.createComment(data));
 		data.getMark().setCommitHash(COMMIT);
-		data.getMark().setRange(new PlanarRange(0, 0, 2, 0));
-		assertThrows(BadRequestException.class, () -> resource.createComment(data));
-		data.getMark().setRange(new PlanarRange(0, 0, 0, 5));
+		data.getMark().setRange(rangeData(0, 0, 2, 0));
+		assertThrows(NotAcceptableException.class, () -> resource.createComment(data));
+		data.getMark().setRange(rangeData(0, 0, 0, 5));
 		when(project.getRevCommit(COMMIT, false)).thenReturn(null);
-		assertThrows(BadRequestException.class, () -> resource.createComment(data));
+		assertThrows(NotAcceptableException.class, () -> resource.createComment(data));
 		verifyNoInteractions(comments, audit);
 	}
 
@@ -327,6 +331,15 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 	@Test
 	void validatesRequiredFieldsAndContentLength() throws Exception {
 		assertPaths(validator.validate(new CodeCommentCreateData()), "projectId", "content", "mark", "compareContext");
+		var data = createData();
+		data.setMark(new MarkData());
+		data.setCompareContext(new CompareContextData());
+		assertPaths(validator.validate(data), "mark.commitHash", "mark.path", "mark.range",
+				"compareContext.oldCommitHash", "compareContext.newCommitHash");
+		data = createData();
+		data.getMark().setRange(new PlanarRangeData());
+		assertPaths(validator.validate(data), "mark.range.fromRow", "mark.range.fromColumn",
+				"mark.range.toRow", "mark.range.toColumn");
 		var method = CodeCommentResource.class.getMethod("updateComment", Long.class, String.class);
 		for (String content : new String[] {null, " ", "x".repeat(CodeComment.MAX_CONTENT_LEN + 1)}) {
 			assertFalse(validator.forExecutables().validateParameters(resource, method,
@@ -336,12 +349,25 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 				new Object[] {4L, "Updated"}).isEmpty());
 	}
 
+	private PlanarRangeData rangeData(int fromRow, int fromColumn, int toRow, int toColumn) {
+		var range = new PlanarRangeData();
+		range.setFromRow(fromRow);
+		range.setFromColumn(fromColumn);
+		range.setToRow(toRow);
+		range.setToColumn(toColumn);
+		return range;
+	}
+
 	private CodeCommentCreateData createData() {
 		var data = new CodeCommentCreateData();
 		data.setProjectId(1L);
 		data.setContent("Original");
-		data.setMark(new Mark(COMMIT, "file.txt", new PlanarRange(0, 0, 0, 5)));
-		var context = new CompareContext();
+		var mark = new MarkData();
+		mark.setCommitHash(COMMIT);
+		mark.setPath("file.txt");
+		mark.setRange(rangeData(0, 0, 0, 5));
+		data.setMark(mark);
+		var context = new CompareContextData();
 		context.setOldCommitHash(COMMIT);
 		context.setNewCommitHash(COMMIT);
 		data.setCompareContext(context);
@@ -355,8 +381,11 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 		comment.setProject(project);
 		comment.setUser(user);
 		comment.setContent(data.getContent());
-		comment.setMark(data.getMark());
-		comment.setCompareContext(data.getCompareContext());
+		comment.setMark(data.getMark().toMark());
+		var context = new CompareContext();
+		context.setOldCommitHash(COMMIT);
+		context.setNewCommitHash(COMMIT);
+		comment.setCompareContext(context);
 		when(comments.load(4L)).thenReturn(comment);
 		return comment;
 	}

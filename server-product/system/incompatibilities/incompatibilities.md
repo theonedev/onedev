@@ -1,3 +1,9 @@
+# 16.8.0
+
+### CI/CD
+
+The build log format has been upgraded. Logs of builds created before the upgrade will no longer be displayed.
+
 # 16.5.0
 
 ### GPG Signing
