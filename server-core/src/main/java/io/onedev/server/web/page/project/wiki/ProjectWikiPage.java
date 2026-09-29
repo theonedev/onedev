@@ -2,7 +2,10 @@ package io.onedev.server.web.page.project.wiki;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -46,6 +49,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.validation.ValidationError;
+import org.eclipse.jgit.ignore.IgnoreNode;
 import org.eclipse.jgit.lib.FileMode;
 import org.jspecify.annotations.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
@@ -306,11 +310,7 @@ public class ProjectWikiPage extends ProjectPage {
 		}).setEscapeModelStrings(false).setVisible(sidebar == null).setOutputMarkupPlaceholderTag(true));
 		navigation.add(newSidebarEdit());
 		navigation.add(newUseDefault(sidebar));
-		List<String> pages = new ArrayList<>();
-		if (commitId != null)
-			collectPages(folder, pages);
-		Collections.sort(pages);
-		navigation.add(new ListView<String>("pages", pages) {
+		navigation.add(new ListView<String>("pages", getPages()) {
 			@Override
 			protected void populateItem(ListItem<String> item) {
 				String name = item.getModelObject();
@@ -854,15 +854,37 @@ public class ProjectWikiPage extends ProjectPage {
 		return blob.getText().getContent();
 	}
 
-	private void collectPages(@Nullable String directory, List<String> pages) {
+	private List<String> getPages() {
+		List<String> pages = new ArrayList<>();
+		if (commitId != null) {
+			var ignore = new IgnoreNode();
+			String ignorePath = (folder != null ? folder + "/" : "") + ".wikiignore";
+			var blob = getWikiProject().getBlob(new BlobIdent(commitId.name(), ignorePath, FileMode.REGULAR_FILE.getBits()), false);
+			if (blob != null && blob.getIdent().isFile() && blob.getLfsPointer() == null) {
+				try (var input = new ByteArrayInputStream(blob.getBytes())) {
+					ignore.parse(input);
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			}
+			collectPages(folder, pages, ignore);
+		}
+		Collections.sort(pages);
+		return pages;
+	}
+
+	private void collectPages(@Nullable String directory, List<String> pages, IgnoreNode ignore) {
 		var ident = directory != null ? gitService.getBlobIdent(getWikiProject(), commitId, directory)
 				: new BlobIdent(commitId.name(), null, FileMode.TREE.getBits());
 		if (ident != null && ident.isTree()) {
 			for (var child : gitService.getChildren(getWikiProject(), commitId, directory, BlobIdentFilter.ALL, false)) {
+				String relativePath = child.path.substring(folder != null ? folder.length() + 1 : 0);
+				if (ignore.isIgnored(relativePath, child.isTree()) == IgnoreNode.MatchResult.IGNORED)
+					continue;
 				if (child.isTree()) {
-					collectPages(child.path, pages);
+					collectPages(child.path, pages, ignore);
 				} else if (child.isFile() && child.path.endsWith(".md")) {
-					String name = child.path.substring(folder != null ? folder.length() + 1 : 0, child.path.length() - 3);
+					String name = relativePath.substring(0, relativePath.length() - 3);
 					if (!name.equals("_Sidebar"))
 						pages.add(name);
 				}
@@ -943,10 +965,7 @@ public class ProjectWikiPage extends ProjectPage {
 				revision = branchName;
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class).orElse(null);
 				selectPage(target, selectedPage);
-				List<String> pages = new ArrayList<>();
-				collectPages(folder, pages);
-				Collections.sort(pages);
-				((ListView<String>) navigation.get("pages")).setList(pages);
+				((ListView<String>) navigation.get("pages")).setList(getPages());
 				target.add(get("wiki"));
 				String url = urlFor(ProjectWikiPage.class, paramsOf(getProject(), revision, page)).toString();
 				pushState(target, JavaScriptEscape.escapeJavaScript(url), page);

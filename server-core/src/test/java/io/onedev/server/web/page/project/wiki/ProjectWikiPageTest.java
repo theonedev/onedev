@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -18,6 +19,7 @@ import org.jsoup.Jsoup;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Project;
@@ -30,6 +32,53 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 
 public class ProjectWikiPageTest {
+
+	@Test
+	public void wikiIgnoreFiltersPagesRelativeToWikiRoot() throws Exception {
+		for (String folder : new String[] {null, "docs/wiki"}) {
+			var project = mock(Project.class);
+			var git = mock(GitService.class);
+			var commit = ObjectId.fromString("1111111111111111111111111111111111111111");
+			var page = mock(ProjectWikiPage.class, CALLS_REAL_METHODS);
+			doReturn(project).when(page).getProject();
+			set(page, "gitService", git);
+			set(page, "folder", folder);
+			set(page, "commitId", commit);
+			String prefix = folder != null ? folder + "/" : "";
+			when(git.getBlobIdent(eq(project), eq(commit), anyString())).thenAnswer(it ->
+					new BlobIdent(commit.name(), it.getArgument(2), FileMode.TREE.getBits()));
+			when(git.getChildren(project, commit, folder, BlobIdentFilter.ALL, false)).thenReturn(List.of(
+					wikiEntry(commit, prefix + "Home.md", false),
+					wikiEntry(commit, prefix + "AGENTS.md", false),
+					wikiEntry(commit, prefix + "Root-only.md", false),
+					wikiEntry(commit, prefix + "_Sidebar.md", false),
+					wikiEntry(commit, prefix + "guide", true),
+					wikiEntry(commit, prefix + "private", true)));
+			when(git.getChildren(project, commit, prefix + "guide", BlobIdentFilter.ALL, false)).thenReturn(List.of(
+					wikiEntry(commit, prefix + "guide/AGENTS.md", false),
+					wikiEntry(commit, prefix + "guide/Root-only.md", false),
+					wikiEntry(commit, prefix + "guide/Draft-one.md", false),
+					wikiEntry(commit, prefix + "guide/Draft-keep.md", false)));
+			when(git.getChildren(project, commit, prefix + "private", BlobIdentFilter.ALL, false)).thenReturn(List.of(
+					wikiEntry(commit, prefix + "private/keep.md", false)));
+			var ignoreIdent = wikiEntry(commit, prefix + ".wikiignore", false);
+			byte[] rules = ("# Agent instructions\n\nAGENTS.md\n/Root-only.md\n"
+					+ "**/Draft-*.md\n!guide/Draft-keep.md\nprivate/\n!private/keep.md\n")
+					.getBytes(StandardCharsets.UTF_8);
+			when(project.getBlob(ignoreIdent, false)).thenReturn(new Blob(ignoreIdent, commit, rules, rules.length));
+			assertEquals(List.of("Home", "guide/Draft-keep", "guide/Root-only"), invoke(page, "getPages"));
+			verify(git, never()).getChildren(project, commit, prefix + "private", BlobIdentFilter.ALL, false);
+
+			// A revision without .wikiignore keeps the existing page listing behavior.
+			when(project.getBlob(ignoreIdent, false)).thenReturn(null);
+			assertEquals(List.of("AGENTS", "Home", "Root-only", "guide/AGENTS", "guide/Draft-keep",
+					"guide/Draft-one", "guide/Root-only", "private/keep"), invoke(page, "getPages"));
+		}
+	}
+
+	private static BlobIdent wikiEntry(ObjectId commit, String path, boolean directory) {
+		return new BlobIdent(commit.name(), path, (directory ? FileMode.TREE : FileMode.REGULAR_FILE).getBits());
+	}
 
 	@Test
 	public void sidebarLinksStayAtWikiRootWhenViewingNestedPages() throws Exception {
@@ -59,6 +108,7 @@ public class ProjectWikiPageTest {
 				requestCycle.when(RequestCycle::get).thenReturn(cycle);
 				var page = mock(ProjectWikiPage.class, CALLS_REAL_METHODS);
 				doReturn(project).when(page).getProject();
+				set(page, "markdownService", markdown);
 				set(page, "revision", "main");
 				for (String folder : new String[] {"docs/wiki", null}) {
 					set(page, "folder", folder);
@@ -124,6 +174,9 @@ public class ProjectWikiPageTest {
 				security.when(() -> SecurityUtils.canReadCode(target)).thenReturn(scenario.equals("allowed"));
 				var page = mock(ProjectWikiPage.class, CALLS_REAL_METHODS);
 				doReturn(owner).when(page).getProject();
+				set(page, "gitService", git);
+				set(page, "settingService", settings);
+				set(page, "projectService", projects);
 				set(page, "folder", "wiki");
 				set(page, "commitId", ownerCommit);
 				invoke(page, "resolveWikiProject");
@@ -133,6 +186,9 @@ public class ProjectWikiPageTest {
 					assertNull(get(page, "wikiWarning"));
 					verify(target).getBlob(argThat(it -> targetCommit.name().equals(it.revision)
 							&& "Home.md".equals(it.path)), eq(false));
+					invoke(page, "getPages");
+					verify(target).getBlob(argThat(it -> targetCommit.name().equals(it.revision)
+							&& ".wikiignore".equals(it.path)), eq(false));
 				} else {
 					assertNotNull(get(page, "wikiWarning"));
 					verifyNoInteractions(target);
@@ -142,9 +198,7 @@ public class ProjectWikiPageTest {
 	}
 
 	private static void set(ProjectWikiPage page, String name, Object value) throws Exception {
-		var field = ProjectWikiPage.class.getDeclaredField(name);
-		field.setAccessible(true);
-		field.set(page, value);
+		org.apache.commons.lang3.reflect.FieldUtils.writeField(page, name, value, true);
 	}
 
 	private static Object get(ProjectWikiPage page, String name) throws Exception {
