@@ -2499,7 +2499,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 	@Override
 	protected String getPageTitle() {
-		return getPullRequest().getTitle() + " (" + getPullRequest().getReference().toString(getProject()) + ")";
+		return getPullRequest().getReference().toString(getProject()) + ": " + getPullRequest().getTitle();
 	}
 
 	@Override

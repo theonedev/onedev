@@ -421,6 +421,11 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 		return fragment;
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return getWorkspace().getReference().toString(getProject());
+	}
+
 	public static PageParameters paramsOf(Workspace workspace) {
 		return paramsOf(workspace.getProject(), workspace.getNumber());
 	}
@@ -430,7 +435,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 		params.add(PARAM_WOPKSPACE, workspaceNumber);
 		return params;
 	}
-
+	
 	private List<ShortcutConfig> getShortcutConfigs() {
 		var spec = getProject().getHierarchyWorkspaceSpecs().stream()
 			.filter(it -> it.getName().equals(getWorkspace().getSpecName()))
