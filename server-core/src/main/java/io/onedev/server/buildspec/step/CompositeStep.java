@@ -3,10 +3,12 @@ package io.onedev.server.buildspec.step;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CompositeFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class CompositeStep extends Step {
@@ -19,7 +21,15 @@ public abstract class CompositeStep extends Step {
 		return new CompositeFacade(getActions(build, jobExecutor, jobToken, paramCombination));
 	}
 	
-	protected abstract List<Action> getActions(Build build, JobExecutor jobExecutor, String jobToken,
-											   ParamCombination paramCombination);
+	/** Child step definitions, available without creating execution facades. */
+	public abstract List<Step> getSteps(BuildSpec buildSpec);
+
+	protected List<Action> getActions(Build build, JobExecutor jobExecutor, String jobToken,
+			ParamCombination paramCombination) {
+		List<Action> actions = new ArrayList<>();
+		for (var step : getSteps(build.getSpec()))
+			actions.add(step.getAction(build, jobExecutor, jobToken, paramCombination));
+		return actions;
+	}
 
 }

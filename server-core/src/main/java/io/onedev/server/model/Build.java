@@ -80,6 +80,8 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.step.CompositeStep;
+import io.onedev.server.buildspec.step.UseTemplateStep;
 import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.cluster.ClusterService;
@@ -857,21 +859,20 @@ public class Build extends ProjectBelonging
 		var position = JobHelper.parseStepPosition(stage.substring(5));
 		var steps = getJob().getSteps();
 		var names = new ArrayList<String>();
+		boolean repeated = false;
 		for (int depth = 0; depth < position.size(); depth++) {
 			int index = position.get(depth);
-			if (steps.isEmpty() || index < 0 || (depth == 0 && index >= steps.size()))
+			if (steps.isEmpty() || index < 0 || (!repeated && index >= steps.size()))
 				return stage;
 			// Template parameter combinations repeat the template's action list.
 			var step = steps.get(index % steps.size());
 			int repeat = index / steps.size() + 1;
 			names.add(step.getName() + (repeat > 1 ? " (" + repeat + ")" : ""));
 			if (depth < position.size() - 1) {
-				if (!(step instanceof io.onedev.server.buildspec.step.UseTemplateStep templateStep))
+				if (!(step instanceof CompositeStep compositeStep))
 					return stage;
-				var template = getSpec().getStepTemplateMap().get(templateStep.getTemplateName());
-				if (template == null)
-					return stage;
-				steps = template.getSteps();
+				steps = compositeStep.getSteps(getSpec());
+				repeated = step instanceof UseTemplateStep;
 			}
 		}
 		return String.join(" -> ", names);

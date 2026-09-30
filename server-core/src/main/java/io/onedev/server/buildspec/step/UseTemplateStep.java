@@ -108,6 +108,12 @@ public class UseTemplateStep extends CompositeStep {
 	}
 	
 	@Override
+	public List<Step> getSteps(BuildSpec buildSpec) {
+		var template = buildSpec.getStepTemplateMap().get(templateName);
+		return template != null ? template.getSteps() : List.of();
+	}
+
+	@Override
 	protected List<Action> getActions(Build build, JobExecutor jobExecutor, String jobToken, 
 								ParamCombination paramCombination) {
 		StepTemplate template = build.getSpec().getStepTemplateMap().get(templateName);
