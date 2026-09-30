@@ -48,7 +48,7 @@ export default defineConfig({
   webServer: process.env.E2E_SKIP_WEBSERVER
     ? undefined
     : {
-        command: './dev.sh run',
+        command: './dev.sh prod',
         cwd: serverDir,
         url: baseURL,
         reuseExistingServer: true,
