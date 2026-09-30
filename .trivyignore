@@ -6,8 +6,10 @@
 CVE-2026-54512
 CVE-2026-54513
 
+
 # Hazelcast 5.7.0 shades jackson-core 2.21.2 and 3.1.2; fixed in 2.21.4 and 3.1.4.
 # Reviewed JSON paths use synchronous createParser calls (including jackson-jr);
 # no callers of the affected non-blocking parsers were found in the packaged build.
 # Reassess these exceptions when changing Hazelcast or its JSON usage.
 GHSA-r7wm-3cxj-wff9
+CVE-2026-68497
