@@ -301,13 +301,13 @@ public class BuildStepsPage extends BuildDetailPage {
 		nextOffsets.clear();
 		response.render(JavaScriptHeaderItem.forReference(new BuildStepsResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript(String.format(
-				"onedev.server.buildSteps.init('%s', %s, %s, %s, '%s', '%s', '%s', '%s', '%s');", steps.getMarkupId(),
+				"onedev.server.buildSteps.init('%s', %s, %s, %s, '%s', '%s', '%s', '%s', '%s', '%s');", steps.getMarkupId(),
 				refresh.getCallbackFunction(CallbackParameter.explicit("offsets")),
 				SecurityUtils.canRunJob(getProject(), getBuild().getJobName()) ? resume.getCallbackFunction() : "null", MAX_ENTRIES,
 				escapeJavaScript(MessageFormat.format(_T("Showing the latest {0} entries. Download the log for all entries."),
 						String.valueOf(MAX_ENTRIES))), escapeJavaScript(_T("No log entries")),
 				escapeJavaScript(_T("Execution paused")), escapeJavaScript(_T("Resume")),
-				escapeJavaScript(_T("No step logs available"))) + stepUpdateScript(false)));
+				escapeJavaScript(_T("No step logs available")), escapeJavaScript(_T("Loading..."))) + stepUpdateScript(false)));
 	}
 
 	@Override

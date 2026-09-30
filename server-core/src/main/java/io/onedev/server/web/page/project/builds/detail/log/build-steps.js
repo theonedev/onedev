@@ -1,5 +1,5 @@
 onedev.server.buildSteps = {
-    init: function(id, callback, resume, maxEntries, latestEntriesNotice, noEntriesNotice, pausedText, resumeText, noStepsNotice) {
+    init: function(id, callback, resume, maxEntries, latestEntriesNotice, noEntriesNotice, pausedText, resumeText, noStepsNotice, loadingNotice) {
         const self = this;
         if (self.timer) clearInterval(self.timer);
         self.stopPositioning();
@@ -33,6 +33,7 @@ onedev.server.buildSteps = {
         self.pausedText = pausedText;
         self.resumeText = resumeText;
         self.noStepsNotice = noStepsNotice;
+        self.loadingNotice = loadingNotice;
         self.steps = new Map();
         self.sequence = undefined;
         self.busy = false;
@@ -98,7 +99,10 @@ onedev.server.buildSteps = {
         step.body.toggle(expanded);
         step.toggle.attr('aria-expanded', expanded);
         step.arrow.toggleClass('rotate-90', expanded);
-        if (!expanded) {
+        if (expanded) {
+            step.log.hide();
+            step.notice.text(this.loadingNotice).addClass('pb-3').show();
+        } else {
             step.fetch = false;
             step.log.empty();
             step.next = 0;
