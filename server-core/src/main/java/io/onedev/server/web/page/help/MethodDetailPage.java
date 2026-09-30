@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.help;
 
-import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
-import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.InputStream;
@@ -17,7 +15,6 @@ import java.util.regex.Matcher;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
@@ -98,14 +95,7 @@ public class MethodDetailPage extends ApiHelpPage {
 
 	@Nullable
 	private Parameter getRequestBodyParam() {
-		for (Parameter param: getResourceMethod().getParameters()) {
-			if (param.getAnnotation(PathParam.class) == null 
-					&& param.getAnnotation(QueryParam.class) == null 
-					&& param.getAnnotation(Context.class) == null) {
-				return param;
-			}
-		}
-		return null;
+		return ApiHelpUtils.getRequestBodyParam(getResourceMethod());
 	}
 	
 	@Override
@@ -430,11 +420,7 @@ public class MethodDetailPage extends ApiHelpPage {
 	}
 	
 	private ValueInfo.Origin getPostValueOrigin(Method method) {
-		var firstParam = getResourceMethod().getParameters()[0];
-		if (firstParam.getAnnotation(PathParam.class) != null && firstParam.getType() == Long.class)
-			return UPDATE_BODY;
-		else
-			return CREATE_BODY;
+		return ApiHelpUtils.getPostValueOrigin(method);
 	}
 	
 	private void appendParam(StringBuilder curlExample, String paramKey, String paramValue) {

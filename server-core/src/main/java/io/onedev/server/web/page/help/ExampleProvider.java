@@ -9,7 +9,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.ReflectionUtils;
 
-class ExampleProvider {
+public class ExampleProvider {
 	
 	private final Class<?> apiDeclaringClass;
 	

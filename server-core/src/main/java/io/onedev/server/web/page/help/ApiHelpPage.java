@@ -4,26 +4,27 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.lang.reflect.Method;
 
-import org.jspecify.annotations.Nullable;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
-import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.ApiHelpJson;
 import io.onedev.server.web.page.layout.LayoutPage;
 
 public abstract class ApiHelpPage extends LayoutPage {
 
 	public ApiHelpPage(PageParameters params) {
 		super(params);
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		add(new ExternalLink("jsonHelp", ApiHelpJson.PATH, ApiHelpJson.PATH));
 	}
 
 	@Override
@@ -37,59 +38,25 @@ public abstract class ApiHelpPage extends LayoutPage {
 	}
 	
 	protected String getResourceTitle(Class<?> resourceClass) {
-		var api = resourceClass.getAnnotation(Api.class);
-		if (api != null && api.name().length() != 0) {
-			return api.name();
-		} else {
-			return WordUtils.capitalize(
-					WordUtils.uncamel(
-							StringUtils.substringBeforeLast(
-									resourceClass.getSimpleName(), "Resource")));
-		}
+		return ApiHelpUtils.getResourceTitle(resourceClass);
 	}
-	
+
 	@Nullable
 	protected String getResourceDescription(Class<?> resourceClass) {
-		String description = "";
-		Api api = resourceClass.getAnnotation(Api.class);
-		if (api != null && api.description().length() != 0) 
-			description = api.description();
-		if (description.length() != 0)
-			return description;
-		else
-			return null;
+		return ApiHelpUtils.getResourceDescription(resourceClass);
 	}
-	
+
 	protected String getMethodTitle(Method resourceMethod) {
-		var api = resourceMethod.getAnnotation(Api.class);
-		if (api != null && api.name().length() != 0) {
-			return api.name();
-		} else {
-			return WordUtils.capitalize(WordUtils.uncamel(resourceMethod.getName()));
-		}
+		return ApiHelpUtils.getMethodTitle(resourceMethod);
 	}
 
 	@Nullable
 	protected String getMethodDescription(Method resourceMethod) {
-		String description = "";
-		Api api = resourceMethod.getAnnotation(Api.class);
-		if (api != null && api.description().length() != 0) 
-			description = api.description();
-		if (description.length() != 0)
-			return description;
-		else
-			return null;
+		return ApiHelpUtils.getMethodDescription(resourceMethod);
 	}
-	
+
 	protected String getHttpMethod(Method resourceMethod) {
-		if (resourceMethod.getAnnotation(GET.class) != null)
-			return "GET";
-		else if (resourceMethod.getAnnotation(POST.class) != null)
-			return "POST";
-		else if (resourceMethod.getAnnotation(PUT.class) != null)
-			return "PUT";
-		else
-			return "DELETE";
+		return ApiHelpUtils.getHttpMethod(resourceMethod);
 	}
 
 	@Override

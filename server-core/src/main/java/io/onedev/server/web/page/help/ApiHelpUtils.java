@@ -6,10 +6,12 @@ import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
 import static java.util.Comparator.comparing;
 
 import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +28,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 
+import org.glassfish.jersey.server.ResourceConfig;
+import org.jspecify.annotations.Nullable;
 import org.objenesis.ObjenesisStd;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -37,6 +49,8 @@ import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ImplementationRegistry;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.rest.annotation.Api;
@@ -49,6 +63,98 @@ import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 
 public class ApiHelpUtils {
+
+	public static String getResourceTitle(Class<?> resourceClass) {
+		var api = resourceClass.getAnnotation(Api.class);
+		if (api != null && api.name().length() != 0) {
+			return api.name();
+		} else {
+			return WordUtils.capitalize(
+					WordUtils.uncamel(
+							StringUtils.substringBeforeLast(
+									resourceClass.getSimpleName(), "Resource")));
+		}
+	}
+
+	@Nullable
+	public static String getResourceDescription(Class<?> resourceClass) {
+		return getDescription(resourceClass);
+	}
+
+	public static String getMethodTitle(Method resourceMethod) {
+		var api = resourceMethod.getAnnotation(Api.class);
+		if (api != null && api.name().length() != 0) {
+			return api.name();
+		} else {
+			return WordUtils.capitalize(WordUtils.uncamel(resourceMethod.getName()));
+		}
+	}
+
+	@Nullable
+	public static String getMethodDescription(Method resourceMethod) {
+		return getDescription(resourceMethod);
+	}
+
+	@Nullable
+	public static String getDescription(AnnotatedElement element) {
+		var api = element.getAnnotation(Api.class);
+		return api != null && !api.description().isEmpty() ? api.description() : null;
+	}
+
+	public static String getHttpMethod(Method resourceMethod) {
+		if (resourceMethod.getAnnotation(GET.class) != null)
+			return "GET";
+		else if (resourceMethod.getAnnotation(POST.class) != null)
+			return "POST";
+		else if (resourceMethod.getAnnotation(PUT.class) != null)
+			return "PUT";
+		else
+			return "DELETE";
+	}
+
+	public static List<Class<?>> getResourceClasses() {
+		List<Class<?>> resources = new ArrayList<>();
+		for (var clazz: OneDev.getInstance(ResourceConfig.class).getClasses()) {
+			var api = clazz.getAnnotation(Api.class);
+			if (clazz.isAnnotationPresent(Path.class) && (api == null || !api.internal()))
+				resources.add(clazz);
+		}
+		resources.sort(comparing(ApiHelpUtils::getResourceTitle));
+		return resources;
+	}
+
+	public static List<Method> getResourceMethods(Class<?> resourceClass) {
+		List<Method> methods = new ArrayList<>();
+		for (var method: resourceClass.getMethods()) {
+			if (method.isAnnotationPresent(GET.class) || method.isAnnotationPresent(POST.class)
+					|| method.isAnnotationPresent(PUT.class) || method.isAnnotationPresent(DELETE.class))
+				methods.add(method);
+		}
+		methods.sort(new ApiComparator());
+		return methods;
+	}
+
+	@Nullable
+	public static Parameter getRequestBodyParam(Method method) {
+		for (var param: method.getParameters()) {
+			if (!param.isAnnotationPresent(PathParam.class) && !param.isAnnotationPresent(QueryParam.class)
+					&& !param.isAnnotationPresent(Context.class))
+				return param;
+		}
+		return null;
+	}
+
+	public static ValueInfo.Origin getPostValueOrigin(Method method) {
+		var firstParam = method.getParameters()[0];
+		return firstParam.isAnnotationPresent(PathParam.class) && firstParam.getType() == Long.class
+				? UPDATE_BODY : CREATE_BODY;
+	}
+
+	public static String getResourcePath(Class<?> resourceClass, Method method) {
+		var path = resourceClass.getAnnotation(Path.class).value();
+		var methodPath = method.getAnnotation(Path.class);
+		return methodPath != null ? path + methodPath.value() : path;
+	}
 
 	public static Serializable getExampleValue(Type valueType, ValueInfo.Origin origin) {
 		return getExampleValue(valueType, Sets.newHashSet(), origin);

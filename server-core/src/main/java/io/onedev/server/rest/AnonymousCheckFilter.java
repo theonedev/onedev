@@ -12,11 +12,12 @@ import jakarta.ws.rs.ext.Provider;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 
-import io.onedev.server.service.SettingService;
-import io.onedev.server.rest.resource.TriggerJobResource;
-import io.onedev.server.rest.resource.ServerResource;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.resource.ApiHelpResource;
+import io.onedev.server.rest.resource.ServerResource;
+import io.onedev.server.rest.resource.TriggerJobResource;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.SettingService;
 
 @Provider
 public class AnonymousCheckFilter implements ContainerRequestFilter {
@@ -37,7 +38,9 @@ public class AnonymousCheckFilter implements ContainerRequestFilter {
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		Api api = resourceInfo.getResourceClass().getAnnotation(Api.class);
-		if ((api == null || !api.internal()) && SecurityUtils.isAnonymous() 
+		// JSON help is hidden from the resource list, but follows the help pages' access policy.
+		if ((api == null || !api.internal() || resourceInfo.getResourceClass() == ApiHelpResource.class)
+				&& SecurityUtils.isAnonymous()
 				&& resourceInfo.getResourceClass() != TriggerJobResource.class
 				&& resourceInfo.getResourceClass() != ServerResource.class) {
 			String method = request.getMethod();

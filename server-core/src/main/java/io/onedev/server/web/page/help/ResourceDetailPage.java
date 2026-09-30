@@ -1,13 +1,8 @@
 package io.onedev.server.web.page.help;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 
 import org.apache.wicket.Component;
@@ -19,7 +14,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 
@@ -52,19 +46,7 @@ public class ResourceDetailPage extends ApiHelpPage {
 
 			@Override
 			protected List<Method> load() {
-				List<Method> methods = new ArrayList<>();
-				
-				for (Method method: resourceClass.getMethods()) {
-					if (method.getAnnotation(GET.class) != null 
-							|| method.getAnnotation(POST.class) != null 
-							|| method.getAnnotation(DELETE.class) != null 
-							|| method.getAnnotation(PUT.class) != null) {
-						methods.add(method);
-					}
-				}
-				
-				Collections.sort(methods, new ApiComparator());
-				return methods;
+				return ApiHelpUtils.getResourceMethods(resourceClass);
 			}
 			
 		}) {
