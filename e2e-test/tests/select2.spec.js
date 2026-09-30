@@ -21,6 +21,9 @@ test.beforeEach(async ({ page }) => {
   await page.addStyleTag({ path: path.join(resources, 'select2.css') });
   await page.addStyleTag({ path: path.join(resources, 'select2-bootstrap.css') });
   await page.addScriptTag({ path: path.join(webRoot, 'asset/jqueryui/jquery-ui.min.js') });
+  // Production's login bundle already includes Select2. Reloading it retains
+  // the old plugin but replaces its AMD modules, splitting the data cache.
+  await page.evaluate(() => { delete $.fn.select2; });
   await page.addScriptTag({ path: path.join(resources, 'select2.js') });
   await page.addScriptTag({ path: path.join(resources, 'select2-integration.js') });
 });
