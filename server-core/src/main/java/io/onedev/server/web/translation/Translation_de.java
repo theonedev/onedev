@@ -1493,6 +1493,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Excludes", "Ausnahmen");
 		m.put("Execute Commands", "Befehle ausführen");
 		m.put("Execute Commands via SSH", "Befehle über SSH ausführen");
+		m.put("Execution paused", "Ausführung angehalten");
 		m.put("Exit Run As", "Run As beenden");
 		m.put("Exited run as", "Run as verlassen");
 		m.put("Expand all", "Alle erweitern");
@@ -1581,6 +1582,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Filter users", "Benutzer filtern");
 		m.put("Filter...", "Filter...");
 		m.put("Filters", "Filter");
+		m.put("Finalization", "Finalisierung");
 		m.put("Find branch", "Zweig finden");
 		m.put("Find or create branch", "Zweig finden oder erstellen");
 		m.put("Find or create tag", "Tag finden oder erstellen");
@@ -1897,6 +1899,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Inferring the most likely...", "Ermitteln der wahrscheinlichsten...");
 		m.put("Inherit from parent", "Vom Elternteil erben");
 		m.put("Inherited", "Geerbt");
+		m.put("Initialization", "Initialisierung");
 		m.put("Input Spec", "Eingabe-Spezifikation");
 		m.put("Input URL", "Eingabe-URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "Geben Sie die erlaubte CORS-Ursprung ein, drücken Sie ENTER, um hinzuzufügen");
@@ -2500,6 +2503,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No services defined", "Keine Dienste definiert");
 		m.put("No specs found", "Keine Spezifikationen gefunden");
 		m.put("No start/due date", "Kein Start-/Fälligkeitsdatum");
+		m.put("No step logs available", "Keine Schrittprotokolle verfügbar");
 		m.put("No step templates defined", "Keine Schrittvorlagen definiert");
 		m.put("No suggestions", "Keine Vorschläge");
 		m.put("No tags found", "Keine Tags gefunden");
@@ -4180,8 +4184,6 @@ public class Translation_de extends TranslationResourceBundle {
 			"Geben Sie den zu verwendenden Modellnamen an. <b class='text-danger'>HINWEIS: </b> Derzeit unterstützt OneDev nur\nModelle mit Chat-Vervollständigungs-API. OpenAI-Modelle mit der neuen Antwort-API werden noch nicht unterstützt");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"Geben Sie den privaten Schlüssel (im PEM-Format) an, der vom SSH-Server verwendet wird, um Verbindungen mit dem Client herzustellen");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
-			"Geben Sie den Repository-Ordner an, um Wiki-Seiten zu speichern. Lassen Sie das Feld leer, um vom übergeordneten Element zu erben.\nWenn Sie keine Wiki-Seiten im Projekt-Repository speichern möchten, kann der angegebene Ordner\nein Git-Submodul sein.");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"Geben Sie die Strategie an, um Informationen zur Gruppenmitgliedschaft abzurufen. Um einer LDAP-Gruppe entsprechende Berechtigungen zu erteilen, sollte eine OneDev-Gruppe mit demselben Namen definiert werden. Verwenden Sie die Strategie <tt>Gruppen nicht abrufen</tt>, wenn Sie die Gruppenmitgliedschaften auf der OneDev-Seite verwalten möchten");
 		m.put("Specify timeout in seconds when communicating with mail server", "Geben Sie das Timeout in Sekunden an, wenn mit dem Mailserver kommuniziert wird");
@@ -5317,10 +5319,13 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Execution paused", "Ausführung angehalten");
-		m.put("Finalization", "Finalisierung");
-		m.put("Initialization", "Initialisierung");
-		m.put("No step logs available", "Keine Schrittprotokolle verfügbar");
+		m.put("A JSON version of this API help is available for AI agents at", "Eine JSON-Version dieser API-Hilfe ist für KI-Agenten verfügbar unter");
+		m.put("OFF", "AUS");
+		m.put("ON", "AN");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"Geben Sie den Repository-Ordner an, um Wiki-Seiten zu speichern. Lassen Sie das Feld leer, um vom übergeordneten Element zu erben.\nWenn Sie keine Wiki-Seiten im Projekt-Repository speichern möchten, kann der angegebene Ordner\nein Git-Submodul sein. Um Dateien aus dem Wiki-Seiten-Panel auszuschließen, fügen Sie eine <code>.wikiignore</code>\nDatei im Stammordner des Wikis mit Git-Ignoriermustern relativ zu diesem Ordner hinzu.");
+		m.put("Work in Progress", "In Bearbeitung");
+		m.put("Work in progress", "In Bearbeitung");
 	}
 			
 	@Override

@@ -130,7 +130,7 @@ class BuildLogPersistenceTest {
 					assertNotSame(build, loaded);
 					assertEquals(Status.FAILED, loaded.getStepExecutions().get("step-0").getStatus());
 					assertTrue(loaded.getStepExecutions().get("step-1").isSkipped());
-					assertEquals(Status.SUCCESSFUL, loaded.getStepExecutions().get("step-2").getStatus());
+					assertEquals(Status.UNKNOWN, loaded.getStepExecutions().get("step-2").getStatus());
 					assertTrue(loaded.isFinalization());
 					// The caller already owns the sole connection. Reuse its session when logging.
 					router.reset(() -> {});

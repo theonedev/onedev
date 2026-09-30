@@ -542,7 +542,7 @@ class DefaultBuildLogServiceTest {
 		var logger = service.newLogger(build);
 		logger.log(JobHelper.buildStepStartMessage(List.of(0)));
 		logger.log(JobHelper.buildStepStartMessage(List.of(1)));
-		assertEquals(io.onedev.server.model.support.build.StepExecution.Status.FAILED,
+		assertEquals(io.onedev.server.model.support.build.StepExecution.Status.UNKNOWN,
 				build.getStepExecutions().get("step-0").getStatus());
 		logger.log(JobHelper.buildStepSkipMessage(List.of(1)));
 		logger.log(JobHelper.buildStepEndMessage(List.of(1), JobHelper.StepEventKind.FAILED));
@@ -554,13 +554,13 @@ class DefaultBuildLogServiceTest {
 		assertFalse(build.getStepExecutions().containsKey("step-3"));
 		assertTrue(build.isFinalization());
 		logger.log(JobHelper.buildStepEndMessage(List.of(2), JobHelper.StepEventKind.FAILED));
-		assertEquals(io.onedev.server.model.support.build.StepExecution.Status.SUCCESSFUL,
+		assertEquals(io.onedev.server.model.support.build.StepExecution.Status.UNKNOWN,
 				build.getStepExecutions().get("step-2").getStatus());
-		assertEquals(List.of("Running step \"step-0\"...", "Step \"step-0\" is failed"),
+		assertEquals(List.of("Running step \"step-0\"...", "Step \"step-0\" status is unknown"),
 				logs.readLogEntries(new BuildLoggingIdentity(1L, 2L, "step-0"), 0, 0).stream().map(it -> it.getMessageText()).toList());
 		assertEquals(List.of("Running step \"step-1\"...", "Step \"step-1\" is skipped"),
 				logs.readLogEntries(new BuildLoggingIdentity(1L, 2L, "step-1"), 0, 0).stream().map(it -> it.getMessageText()).toList());
-		assertEquals(List.of("Running step \"step-2\"...", "Step \"step-2\" is successful"),
+		assertEquals(List.of("Running step \"step-2\"...", "Step \"step-2\" status is unknown"),
 				logs.readLogEntries(new BuildLoggingIdentity(1L, 2L, "step-2"), 0, 0).stream().map(it -> it.getMessageText()).toList());
 		assertEquals(List.of("Cleaning up job..."),
 				logs.readLogEntries(new BuildLoggingIdentity(1L, 2L, FINALIZATION), 0, 0).stream().map(it -> it.getMessageText()).toList());

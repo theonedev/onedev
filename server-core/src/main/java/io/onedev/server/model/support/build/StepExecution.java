@@ -7,7 +7,7 @@ public class StepExecution implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public enum Status {
-		RUNNING, SUCCESSFUL, FAILED, CANCELLED
+		RUNNING, SUCCESSFUL, FAILED, CANCELLED, UNKNOWN
 	}
 
 	private Status status = Status.RUNNING;
@@ -43,7 +43,7 @@ public class StepExecution implements Serializable {
 		return duration + (status == Status.RUNNING ? Math.max(0, System.currentTimeMillis() - startedAt) : 0);
 	}
 
-	/** Record the step or build outcome, preserving an already completed execution. */
+	/** Record the step outcome or UNKNOWN when unavailable, preserving an already completed execution. */
 	public void complete(Status status) {
 		if (this.status == Status.RUNNING) {
 			duration = getDuration();

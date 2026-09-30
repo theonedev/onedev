@@ -1493,6 +1493,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Excludes", "제외");
 		m.put("Execute Commands", "명령 실행");
 		m.put("Execute Commands via SSH", "SSH를 통해 명령 실행");
+		m.put("Execution paused", "실행 일시 중지");
 		m.put("Exit Run As", "Run As 종료");
 		m.put("Exited run as", "실행 종료됨");
 		m.put("Expand all", "모두 확장");
@@ -1581,6 +1582,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Filter users", "사용자 필터링");
 		m.put("Filter...", "필터링...");
 		m.put("Filters", "필터들");
+		m.put("Finalization", "마무리");
 		m.put("Find branch", "브랜치 찾기");
 		m.put("Find or create branch", "브랜치 찾기 또는 생성");
 		m.put("Find or create tag", "태그 찾기 또는 생성");
@@ -1897,6 +1899,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Inferring the most likely...", "가장 가능성이 높은 것을 추론 중...");
 		m.put("Inherit from parent", "상위에서 상속");
 		m.put("Inherited", "상속됨");
+		m.put("Initialization", "초기화");
 		m.put("Input Spec", "입력 사양");
 		m.put("Input URL", "입력 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "허용된 CORS 원본 입력, ENTER를 눌러 추가");
@@ -2500,6 +2503,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No services defined", "정의된 서비스 없음");
 		m.put("No specs found", "찾은 사양 없음");
 		m.put("No start/due date", "시작/마감일 없음");
+		m.put("No step logs available", "단계 로그를 사용할 수 없음");
 		m.put("No step templates defined", "정의된 단계 템플릿 없음");
 		m.put("No suggestions", "제안 없음");
 		m.put("No tags found", "태그 없음");
@@ -4180,8 +4184,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"사용할 모델 이름을 지정하십시오. <b class='text-danger'>참고:</b> 현재 OneDev는\n채팅 완료 API가 있는 모델만 지원합니다. OpenAI의 새로운 응답 API가 있는 모델은 아직 지원되지 않습니다");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSH 서버가 클라이언트와 연결을 설정하는 데 사용하는 개인 키(PEM 형식)를 지정하십시오.");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
-			"위키 페이지를 저장할 저장소 폴더를 지정하세요. 상위에서 상속받으려면 비워 두세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다.");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"그룹 멤버십 정보를 검색하는 전략을 지정하십시오. LDAP 그룹에 적절한 권한을 부여하려면 동일한 이름의 OneDev 그룹을 정의해야 합니다. 그룹 멤버십을 OneDev 측에서 관리하려면 <tt>그룹 검색 안 함</tt> 전략을 사용하십시오.");
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
@@ -5317,10 +5319,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Execution paused", "실행 일시 중지");
-		m.put("Finalization", "마무리");
-		m.put("Initialization", "초기화");
-		m.put("No step logs available", "단계 로그를 사용할 수 없음");
+		m.put("A JSON version of this API help is available for AI agents at", "이 API 도움말의 JSON 버전은 AI 에이전트를 위해 제공됩니다.");
+		m.put("OFF", "꺼짐");
+		m.put("ON", "켜짐");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"위키 페이지를 저장할 저장소 폴더를 지정하세요. 상위에서 상속받으려면 비워 두세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다. 위키 페이지 패널에서 파일을 제외하려면, 위키 루트 폴더에 Git 무시 패턴을 포함한 <code>.wikiignore</code>\n파일을 추가하세요.");
+		m.put("Work in Progress", "작업 진행 중");
+		m.put("Work in progress", "작업 진행 중");
 	}
 		
 	@Override

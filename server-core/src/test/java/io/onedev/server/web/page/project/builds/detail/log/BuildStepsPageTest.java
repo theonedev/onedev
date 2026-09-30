@@ -210,7 +210,7 @@ class BuildStepsPageTest {
 		build.setStatus(Build.Status.RUNNING);
 		doReturn(null).when(build).getJob();
 		var stepExecution = new io.onedev.server.model.support.build.StepExecution();
-		stepExecution.complete(io.onedev.server.model.support.build.StepExecution.Status.FAILED);
+		stepExecution.complete(io.onedev.server.model.support.build.StepExecution.Status.UNKNOWN);
 		build.getStepExecutions().put("step-0", stepExecution);
 		build.setFinalization(true);
 		var page = mock(BuildStepsPage.class, CALLS_REAL_METHODS);
@@ -233,6 +233,8 @@ class BuildStepsPageTest {
 		assertEquals(false, data.get(0).get("active"));
 		assertEquals(true, data.get(2).get("active"));
 		assertEquals(stepExecution.getStatus(), data.get(1).get("status"));
+		assertEquals("Unknown", data.get(1).get("statusText"));
+		assertEquals(false, data.get(1).get("active"));
 		assertEquals(stepExecution.getDuration(), data.get(1).get("duration"));
 		assertEquals(1, data.get(1).get("stepIndex"));
 

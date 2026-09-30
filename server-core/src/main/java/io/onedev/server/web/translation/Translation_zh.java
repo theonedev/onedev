@@ -1519,6 +1519,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Excludes", "排除项");
 		m.put("Execute Commands", "执行命令");
 		m.put("Execute Commands via SSH", "通过 SSH 执行命令");
+		m.put("Execution paused", "执行已暂停");
 		m.put("Exit Run As", "退出以运行身份");
 		m.put("Exited run as", "退出以...身份运行");
 		m.put("Expand all", "展开所有");
@@ -1607,6 +1608,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Filter users", "筛选用户");
 		m.put("Filter...", "筛选...");
 		m.put("Filters", "过滤器");
+		m.put("Finalization", "最终化");
 		m.put("Find branch", "查找分支");
 		m.put("Find or create branch", "查找或创建分支");
 		m.put("Find or create tag", "查找或创建标签");
@@ -1923,6 +1925,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Inferring the most likely...", "推断最有可能的...");
 		m.put("Inherit from parent", "从父级继承");
 		m.put("Inherited", "继承");
+		m.put("Initialization", "初始化");
 		m.put("Input Spec", "输入规范");
 		m.put("Input URL", "输入 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "输入允许的 CORS 来源，按回车键添加");
@@ -2526,6 +2529,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No services defined", "未定义服务");
 		m.put("No specs found", "未找到规范");
 		m.put("No start/due date", "无开始/截止日期");
+		m.put("No step logs available", "没有步骤日志可用");
 		m.put("No step templates defined", "未定义步骤模板");
 		m.put("No suggestions", "没有建议");
 		m.put("No tags found", "未找到标签");
@@ -4206,8 +4210,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定要使用的模型名称。<b class='text-danger'>注意：</b>目前 OneDev 仅支持\n具有聊天完成 API 的模型。尚不支持具有新响应 API 的 OpenAI 模型。");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"指定用于与客户端建立连接的 SSH 服务器使用的私钥（在 PEM 格式中）");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
-			"指定用于存储 wiki 页面的仓库文件夹。留空以继承自父级。\n如果您不想将 wiki 页面存储在项目仓库中，指定的文件夹\n可以是一个 Git 子模块");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"指定查询组成员信息的策略。要为 LDAP 组分配适当权限，应定义一个同名的 OneDev 组。如果您希望在 OneDev 端管理组成员关系，请使用策略 <tt>不查询组</tt>");
 		m.put("Specify timeout in seconds when communicating with mail server", "指定与邮件服务器通信时的超时时间（秒）");
@@ -5343,10 +5345,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Execution paused", "执行已暂停");
-		m.put("Finalization", "最终化");
-		m.put("Initialization", "初始化");
-		m.put("No step logs available", "没有步骤日志可用");
+		m.put("A JSON version of this API help is available for AI agents at", "此 API 帮助的 JSON 版本可供 AI 代理使用");
+		m.put("OFF", "关闭");
+		m.put("ON", "开启");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"指定存储 wiki 页面的仓库文件夹。留空以继承自父级。\n如果您不想将 wiki 页面存储在项目仓库中，指定的文件夹\n可以是一个 Git 子模块。要从 wiki 页面面板中排除文件，请在 wiki 根文件夹中添加一个 <code>.wikiignore</code>\n文件，并使用相对于该文件夹的 Git 忽略模式");
+		m.put("Work in Progress", "进行中");
+		m.put("Work in progress", "进行中");
 	}
 		
 	@Override

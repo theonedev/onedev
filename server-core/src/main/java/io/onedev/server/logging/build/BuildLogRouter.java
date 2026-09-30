@@ -116,7 +116,8 @@ class BuildLogRouter extends TaskLogger {
 		var execution = build.getStepExecutions().get(stage);
 		if (execution != null && execution.getStatus() == Status.RUNNING) {
 			execution.complete(outcome);
-			var message = "Step \"" + title + "\" is " + outcome.name().toLowerCase(Locale.ROOT);
+			var message = outcome == Status.UNKNOWN ? "Step \"" + title + "\" status is unknown"
+					: "Step \"" + title + "\" is " + outcome.name().toLowerCase(Locale.ROOT);
 			currentLogger.log(switch (outcome) {
 				case FAILED -> wrapWithAnsiError(message);
 				case SUCCESSFUL -> wrapWithAnsiSuccess(message);
@@ -221,7 +222,7 @@ class BuildLogRouter extends TaskLogger {
 				&& (event.kind() == StepEventKind.START || execution.getStatus() != Status.RUNNING)))
 			return false;
 		if (!name.equals(stage)) {
-			complete(build, name.equals(FINALIZATION) ? Status.SUCCESSFUL : Status.FAILED);
+			complete(build, Status.UNKNOWN);
 			// Invalidate before flushing to reject writers already waiting for the log lock.
 			acceptingEntries.set(false);
 			buildLogService.flush(currentSupport);

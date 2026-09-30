@@ -1404,11 +1404,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	public void on(BuildFinished event) {
 		Build build = event.getBuild();
 
-		var stepExecutionStatus = build.getStatus() == Build.Status.CANCELLED
-				? StepExecution.Status.CANCELLED
-				: build.isSuccessful() ? StepExecution.Status.SUCCESSFUL
-				: StepExecution.Status.FAILED;
-		build.getStepExecutions().values().forEach(stepExecution -> stepExecution.complete(stepExecutionStatus));
+		build.getStepExecutions().values().forEach(stepExecution -> stepExecution.complete(StepExecution.Status.UNKNOWN));
 		buildLogService.finish(build);
 
 		JobAuthorizationContext.push(build.getJobAuthorizationContext());

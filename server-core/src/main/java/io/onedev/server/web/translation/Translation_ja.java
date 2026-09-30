@@ -1493,6 +1493,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Excludes", "除外");
 		m.put("Execute Commands", "コマンドを実行する");
 		m.put("Execute Commands via SSH", "SSH経由でコマンドを実行する");
+		m.put("Execution paused", "実行が一時停止しました");
 		m.put("Exit Run As", "実行ユーザーを終了");
 		m.put("Exited run as", "「として実行」を終了しました");
 		m.put("Expand all", "すべて展開する");
@@ -1581,6 +1582,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Filter users", "ユーザーをフィルター");
 		m.put("Filter...", "フィルター...");
 		m.put("Filters", "フィルター一覧");
+		m.put("Finalization", "最終処理");
 		m.put("Find branch", "ブランチを検索");
 		m.put("Find or create branch", "ブランチを検索または作成");
 		m.put("Find or create tag", "タグを検索または作成");
@@ -1897,6 +1899,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Inferring the most likely...", "最も可能性の高いものを推測しています...");
 		m.put("Inherit from parent", "親から継承");
 		m.put("Inherited", "継承済み");
+		m.put("Initialization", "初期化");
 		m.put("Input Spec", "入力仕様");
 		m.put("Input URL", "入力URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "許可されたCORSオリジンを入力し、ENTERを押して追加");
@@ -2500,6 +2503,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No services defined", "定義されたサービスなし");
 		m.put("No specs found", "仕様が見つかりません");
 		m.put("No start/due date", "開始/期限日なし");
+		m.put("No step logs available", "ステップログは利用できません");
 		m.put("No step templates defined", "定義されたステップテンプレートなし");
 		m.put("No suggestions", "提案はありません");
 		m.put("No tags found", "タグが見つかりません");
@@ -4180,8 +4184,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"使用するモデル名を指定します。<b class='text-danger'>注意:</b> 現在、OneDevは\nチャット完了APIを持つモデルのみをサポートしています。OpenAIの新しい応答APIを持つモデルはまだサポートされていません");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSHサーバーがクライアントとの接続を確立するために使用する秘密鍵（PEM形式）を指定してください。");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule", 
-			"Wikiページを保存するリポジトリフォルダを指定してください。親から継承する場合は空のままにします。\nプロジェクトリポジトリにWikiページを保存しない場合、指定されたフォルダ\nはGitサブモジュールである可能性があります。");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"グループメンバーシップ情報を取得する戦略を指定してください。LDAPグループに適切な権限を付与するには、同じ名前のOneDevグループを定義する必要があります。グループメンバーシップをOneDev側で管理したい場合は、<tt>グループを取得しない</tt>戦略を使用してください。");
 		m.put("Specify timeout in seconds when communicating with mail server", "メールサーバーと通信する際のタイムアウトを秒単位で指定してください。");
@@ -5317,10 +5319,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Execution paused", "実行が一時停止しました");
-		m.put("Finalization", "最終処理");
-		m.put("Initialization", "初期化");
-		m.put("No step logs available", "ステップログは利用できません");
+		m.put("A JSON version of this API help is available for AI agents at", "このAPIヘルプのJSONバージョンは、AIエージェント向けに利用可能です");
+		m.put("OFF", "オフ");
+		m.put("ON", "オン");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"Wikiページを保存するリポジトリフォルダーを指定してください。親から継承する場合は空のままにします。\nプロジェクトリポジトリにWikiページを保存したくない場合、指定されたフォルダー\nはGitサブモジュールにすることができます。Wikiページパネルからファイルを除外するには、<code>.wikiignore</code>\nファイルをWikiルートフォルダーに作成し、そのフォルダーに対するGit無視パターンを追加してください");
+		m.put("Work in Progress", "作業中");
+		m.put("Work in progress", "作業中");
 	}
 		
 	@Override

@@ -224,15 +224,15 @@ onedev.server.buildSteps = {
         if (position !== step.section[0]) self.container.insertBefore(step.section[0], position || null);
         if (item.status) {
             const displayStatus = item.skipped ? 'skipped' : item.status.toLowerCase();
-            const borderStyle = {running: 'warning', successful: 'success', failed: 'danger', cancelled: 'danger', skipped: 'secondary'}[displayStatus];
+            const borderStyle = {running: 'warning', successful: 'success', failed: 'danger', cancelled: 'danger', skipped: 'secondary', unknown: 'secondary'}[displayStatus];
             step.section.attr('data-status', displayStatus)
                 .removeClass('border-warning border-success border-danger border-secondary').addClass('border-' + borderStyle);
             step.duration = item.duration;
             step.updated = Date.now();
-            const statusIcon = {running: 'spin', successful: 'tick', failed: 'times', cancelled: 'cancel', skipped: 'minus'}[displayStatus];
+            const statusIcon = {running: 'spin', successful: 'tick', failed: 'times', cancelled: 'cancel', skipped: 'minus', unknown: 'question'}[displayStatus];
             step.statusLabel.attr('aria-label', item.statusText);
             step.statusTooltip.setContent(item.statusText);
-            step.statusIcon.attr('class', 'icon flex-shrink-0 ' + (item.skipped ? 'text-muted' : 'build-status-' + displayStatus)
+            step.statusIcon.attr('class', 'icon flex-shrink-0 ' + (item.skipped || displayStatus === 'unknown' ? 'text-muted' : 'build-status-' + displayStatus)
                 + (displayStatus === 'running' ? ' spin' : ''));
             step.statusIcon.find('use')[0].setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', onedev.server.icons + '#' + statusIcon);
         } else {

@@ -263,6 +263,7 @@ public class BuildStepsPage extends BuildDetailPage {
 					case SUCCESSFUL -> _T("Successful");
 					case FAILED -> _T("Failed");
 					case CANCELLED -> _T("Cancelled");
+					case UNKNOWN -> _T("Unknown");
 				});
 				stage.put("skipped", stepExecution.isSkipped());
 				stage.put("duration", stepExecution.getDuration());
