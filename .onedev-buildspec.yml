@@ -1,4 +1,4 @@
-version: 53
+version: 54
 imports:
 - projectPath: onedev/template
   revision: main
@@ -147,7 +147,7 @@ jobs:
     requireSuccessful: true
     artifacts: '**'
   retryCondition: never
-  maxRetries: 3
+  maxAttempts: 4
   retryDelay: 30
   includeUpstreamWhenRebuild: false
   includeDownstreamWhenRebuild: false
@@ -181,7 +181,7 @@ jobs:
     requireSuccessful: true
     artifacts: onedev-*.zip onedev-*.tar.gz
   retryCondition: never
-  maxRetries: 3
+  maxAttempts: 4
   retryDelay: 30
   includeUpstreamWhenRebuild: false
   includeDownstreamWhenRebuild: false
@@ -252,7 +252,7 @@ jobs:
       - value: linux/arm64
         color: '#0d87e9'
   retryCondition: never
-  maxRetries: 3
+  maxAttempts: 4
   retryDelay: 30
   includeUpstreamWhenRebuild: false
   includeDownstreamWhenRebuild: false
@@ -303,7 +303,7 @@ jobs:
     cronExpression: 0 0 1 * * ?
     projects: onedev/server
   retryCondition: never
-  maxRetries: 3
+  maxAttempts: 4
   retryDelay: 30
   includeUpstreamWhenRebuild: false
   includeDownstreamWhenRebuild: false
@@ -351,13 +351,7 @@ jobs:
     interpreter:
       type: PosixInterpreter
       shell: sh
-      commands: |
-        mvn -Dmaven.source.skip=true test
-
-        cd e2e-test
-        npm install
-        npm run install:mail-server
-        CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results
+      commands: "set -e \n\nmvn -Dmaven.source.skip=true test\n\ncd e2e-test\nnpm install\nnpm run install:mail-server\nCI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results\n"
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -380,7 +374,7 @@ jobs:
     userMatch: anyone
     projects: onedev/server
   retryCondition: never
-  maxRetries: 3
+  maxAttempts: 4
   retryDelay: 30
   includeUpstreamWhenRebuild: false
   includeDownstreamWhenRebuild: false
@@ -415,7 +409,7 @@ jobs:
     userMatch: anyone
     projects: onedev/server
   retryCondition: never
-  maxRetries: 3
+  maxAttempts: 4
   retryDelay: 30
   includeUpstreamWhenRebuild: false
   includeDownstreamWhenRebuild: false
