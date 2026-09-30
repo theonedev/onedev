@@ -131,6 +131,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ここには<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Javaパターン</a>が必要です");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"コミットメッセージのフッターを検証するための<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正規表現</a>");
+		m.put("A JSON version of this API help is available for AI agents at", "このAPIヘルプのJSONバージョンは、AIエージェント向けに利用可能です");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "\"{1}\" の下に \"{0}\" という名前の子プロジェクトがすでに存在します");
 		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
 			"サブディレクトリを作成しようとしている場所にファイルが存在します。新しいパスを選択して再試行してください。");
@@ -2568,7 +2569,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT ID", "OAuth2クライアント情報 | クライアントID");
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2クライアント情報 | クライアントシークレット");
 		m.put("OCI Layout Directory", "OCIレイアウトディレクトリ");
+		m.put("OFF", "オフ");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "OIDCエラー: IDトークンとユーザー情報のサブが一致しません");
+		m.put("ON", "オン");
 		m.put("OOPS! There Is An Error", "おっと！エラーがあります");
 		m.put("OPEN", "オープン");
 		m.put("OS", "OS");
@@ -4184,6 +4187,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"使用するモデル名を指定します。<b class='text-danger'>注意:</b> 現在、OneDevは\nチャット完了APIを持つモデルのみをサポートしています。OpenAIの新しい応答APIを持つモデルはまだサポートされていません");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSHサーバーがクライアントとの接続を確立するために使用する秘密鍵（PEM形式）を指定してください。");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"Wikiページを保存するリポジトリフォルダーを指定してください。親から継承する場合は空のままにします。\nプロジェクトリポジトリにWikiページを保存したくない場合、指定されたフォルダー\nはGitサブモジュールにすることができます。Wikiページパネルからファイルを除外するには、<code>.wikiignore</code>\nファイルをWikiルートフォルダーに作成し、そのフォルダーに対するGit無視パターンを追加してください");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"グループメンバーシップ情報を取得する戦略を指定してください。LDAPグループに適切な権限を付与するには、同じ名前のOneDevグループを定義する必要があります。グループメンバーシップをOneDev側で管理したい場合は、<tt>グループを取得しない</tt>戦略を使用してください。");
 		m.put("Specify timeout in seconds when communicating with mail server", "メールサーバーと通信する際のタイムアウトを秒単位で指定してください。");
@@ -5011,6 +5016,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"現在のユーザー数（{0}）で、サブスクリプションは<b>{1}</b>まで有効です");
 		m.put("Work In Progress", "作業中");
+		m.put("Work in Progress", "作業中");
+		m.put("Work in progress", "作業中");
 		m.put("Workflow reconciliation completed", "ワークフローの調整が完了しました");
 		m.put("Working Directory", "作業ディレクトリ");
 		m.put("Workspace", "ワークスペース");
@@ -5319,13 +5326,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("A JSON version of this API help is available for AI agents at", "このAPIヘルプのJSONバージョンは、AIエージェント向けに利用可能です");
-		m.put("OFF", "オフ");
-		m.put("ON", "オン");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"Wikiページを保存するリポジトリフォルダーを指定してください。親から継承する場合は空のままにします。\nプロジェクトリポジトリにWikiページを保存したくない場合、指定されたフォルダー\nはGitサブモジュールにすることができます。Wikiページパネルからファイルを除外するには、<code>.wikiignore</code>\nファイルをWikiルートフォルダーに作成し、そのフォルダーに対するGit無視パターンを追加してください");
-		m.put("Work in Progress", "作業中");
-		m.put("Work in progress", "作業中");
+		m.put("Elapsed time: {0}", "経過時間: {0}");
+		m.put("Estimated remaining time: {0}", "推定残り時間: {0}");
+		m.put("{0}h {1}m {2}s", "{0}時間 {1}分 {2}秒");
+		m.put("{0}m {1}s", "{0}分 {1}秒");
 	}
 		
 	@Override

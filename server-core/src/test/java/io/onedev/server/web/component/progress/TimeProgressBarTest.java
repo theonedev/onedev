@@ -16,12 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import io.onedev.server.web.translation.TranslationStringResourceLoader;
+
 class TimeProgressBarTest {
 	private WicketTester tester;
 
 	@BeforeEach
 	void setUp() {
 		tester = new WicketTester();
+		tester.getApplication().getResourceSettings().getStringResourceLoaders()
+				.add(0, new TranslationStringResourceLoader());
 	}
 
 	@AfterEach

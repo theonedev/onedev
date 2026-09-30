@@ -131,6 +131,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"Qui è previsto un <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>pattern Java</a>");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"Un <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>espressione regolare Java</a> per validare il footer del messaggio di commit");
+		m.put("A JSON version of this API help is available for AI agents at", "Una versione JSON di questo aiuto API è disponibile per gli agenti AI su");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "Un progetto figlio con nome \"{0}\" esiste già sotto \"{1}\"");
 		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
 			"Esiste un file dove stai cercando di creare una sottodirectory. Scegli un nuovo percorso e riprova.");
@@ -2568,7 +2569,9 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT ID", "Informazioni Client OAuth2 | CLIENT ID");
 		m.put("OAuth2 Client information | CLIENT SECRET", "Informazioni Client OAuth2 | CLIENT SECRET");
 		m.put("OCI Layout Directory", "Directory Layout OCI");
+		m.put("OFF", "SPENTO");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "Errore OIDC: Sub incoerente nel token ID e userinfo");
+		m.put("ON", "ACCESO");
 		m.put("OOPS! There Is An Error", "OOPS! C'è un errore");
 		m.put("OPEN", "APERTA");
 		m.put("OS", "Sistema Operativo");
@@ -4184,6 +4187,8 @@ public class Translation_it extends TranslationResourceBundle {
 			"Specifica il nome del modello da utilizzare. <b class='text-danger'>NOTA: </b> Al momento OneDev supporta solo\nmodelli con l'API di completamento delle chat. I modelli OpenAI con la nuova API di risposte non sono ancora supportati");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"Specifica la chiave privata (in formato PEM) utilizzata dal server SSH per stabilire connessioni con il client");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"Specifica la cartella del repository per memorizzare le pagine wiki. Lascia vuoto per ereditare dal genitore.\nSe non vuoi memorizzare le pagine wiki nel repository del progetto, la cartella specificata\npuò essere un sottogruppo Git. Per escludere file dal pannello delle pagine Wiki, aggiungi un file <code>.wikiignore</code>\nnella cartella radice del wiki con i modelli di esclusione Git relativi a quella cartella");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"Specifica la strategia per recuperare informazioni sull'appartenenza ai gruppi. Per assegnare permessi appropriati a un gruppo LDAP, deve essere definito un gruppo OneDev con lo stesso nome. Usa la strategia <tt>Non Recuperare Gruppi</tt> se desideri gestire le appartenenze ai gruppi sul lato OneDev");
 		m.put("Specify timeout in seconds when communicating with mail server", "Specifica il timeout in secondi durante la comunicazione con il server di posta");
@@ -5011,6 +5016,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"Con il numero attuale di utenti ({0}), l'abbonamento sarà attivo fino al <b>{1}</b>");
 		m.put("Work In Progress", "Lavoro in Corso");
+		m.put("Work in Progress", "Lavoro in corso");
+		m.put("Work in progress", "Lavoro in corso");
 		m.put("Workflow reconciliation completed", "Riconciliazione del flusso di lavoro completata");
 		m.put("Working Directory", "Directory di Lavoro");
 		m.put("Workspace", "Workspace");
@@ -5319,13 +5326,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("A JSON version of this API help is available for AI agents at", "Una versione JSON di questo aiuto API è disponibile per gli agenti AI su");
-		m.put("OFF", "SPENTO");
-		m.put("ON", "ACCESO");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"Specifica la cartella del repository per memorizzare le pagine wiki. Lascia vuoto per ereditare dal genitore.\nSe non vuoi memorizzare le pagine wiki nel repository del progetto, la cartella specificata\npuò essere un sottogruppo Git. Per escludere file dal pannello delle pagine Wiki, aggiungi un file <code>.wikiignore</code>\nnella cartella radice del wiki con i modelli di esclusione Git relativi a quella cartella");
-		m.put("Work in Progress", "Lavoro in corso");
-		m.put("Work in progress", "Lavoro in corso");
+		m.put("Elapsed time: {0}", "Tempo trascorso: {0}");
+		m.put("Estimated remaining time: {0}", "Tempo stimato rimanente: {0}");
+		m.put("{0}h {1}m {2}s", "{0}h {1}m {2}s");
+		m.put("{0}m {1}s", "{0}m {1}s");
 	}
 		
 	@Override

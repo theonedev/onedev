@@ -157,6 +157,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"这里需要一个 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 正则表达式</a>");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"用于验证提交信息页脚的<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正则表达式</a>");
+		m.put("A JSON version of this API help is available for AI agents at", "此 API 帮助的 JSON 版本可供 AI 代理使用");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "在 \"{1}\" 下已存在名为 \"{0}\" 的子项目");
 		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
 			"您尝试创建子目录的地方已存在一个文件。请选择一个新路径并重试。");
@@ -2594,7 +2595,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT ID", "OAuth2 客户端信息 | CLIENT ID");
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2 客户端信息 | CLIENT SECRET");
 		m.put("OCI Layout Directory", "OCI 布局目录");
+		m.put("OFF", "关闭");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "ID 令牌中的 sub 与用户信息中的 sub 不一致");
+		m.put("ON", "开启");
 		m.put("OOPS! There Is An Error", "哎呀！发生错误");
 		m.put("OPEN", "打开");
 		m.put("OS", "操作系统");
@@ -4210,6 +4213,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定要使用的模型名称。<b class='text-danger'>注意：</b>目前 OneDev 仅支持\n具有聊天完成 API 的模型。尚不支持具有新响应 API 的 OpenAI 模型。");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"指定用于与客户端建立连接的 SSH 服务器使用的私钥（在 PEM 格式中）");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"指定存储 wiki 页面的仓库文件夹。留空以继承自父级。\n如果您不想将 wiki 页面存储在项目仓库中，指定的文件夹\n可以是一个 Git 子模块。要从 wiki 页面面板中排除文件，请在 wiki 根文件夹中添加一个 <code>.wikiignore</code>\n文件，并使用相对于该文件夹的 Git 忽略模式");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"指定查询组成员信息的策略。要为 LDAP 组分配适当权限，应定义一个同名的 OneDev 组。如果您希望在 OneDev 端管理组成员关系，请使用策略 <tt>不查询组</tt>");
 		m.put("Specify timeout in seconds when communicating with mail server", "指定与邮件服务器通信时的超时时间（秒）");
@@ -5037,6 +5042,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"根据当前用户数（{0}），订阅将有效至<b>{1}</b>");
 		m.put("Work In Progress", "进行中");
+		m.put("Work in Progress", "进行中");
+		m.put("Work in progress", "进行中");
 		m.put("Workflow reconciliation completed", "工单工作流一致性检查完成");
 		m.put("Working Directory", "工作目录");
 		m.put("Workspace", "工作区");
@@ -5345,13 +5352,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("A JSON version of this API help is available for AI agents at", "此 API 帮助的 JSON 版本可供 AI 代理使用");
-		m.put("OFF", "关闭");
-		m.put("ON", "开启");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"指定存储 wiki 页面的仓库文件夹。留空以继承自父级。\n如果您不想将 wiki 页面存储在项目仓库中，指定的文件夹\n可以是一个 Git 子模块。要从 wiki 页面面板中排除文件，请在 wiki 根文件夹中添加一个 <code>.wikiignore</code>\n文件，并使用相对于该文件夹的 Git 忽略模式");
-		m.put("Work in Progress", "进行中");
-		m.put("Work in progress", "进行中");
+		m.put("Elapsed time: {0}", "耗时: {0}");
+		m.put("Estimated remaining time: {0}", "预计剩余时间: {0}");
+		m.put("{0}h {1}m {2}s", "{0}小时 {1}分钟 {2}秒");
+		m.put("{0}m {1}s", "{0}分钟 {1}秒");
 	}
 		
 	@Override

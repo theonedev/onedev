@@ -131,6 +131,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Ein <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java-Muster</a> wird hier erwartet");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"Ein <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java-Regulärer Ausdruck</a>, um die Commit-Nachrichten-Fußzeile zu validieren");
+		m.put("A JSON version of this API help is available for AI agents at", "Eine JSON-Version dieser API-Hilfe ist für KI-Agenten verfügbar unter");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "Ein untergeordnetes Projekt mit dem Namen \"{0}\" existiert bereits unter \"{1}\"");
 		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
 			"Eine Datei existiert dort, wo Sie versuchen, ein Unterverzeichnis zu erstellen. Wählen Sie einen neuen Pfad und versuchen Sie es erneut.");
@@ -2568,7 +2569,9 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT ID", "OAuth2-Client-Informationen | CLIENT-ID");
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2-Client-Informationen | CLIENT-SECRET");
 		m.put("OCI Layout Directory", "OCI-Layout-Verzeichnis");
+		m.put("OFF", "AUS");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "OIDC-Fehler: Inkonsistenter Sub in ID-Token und Benutzerinfo");
+		m.put("ON", "AN");
 		m.put("OOPS! There Is An Error", "OOPS! Es gibt einen Fehler");
 		m.put("OPEN", "OFFEN");
 		m.put("OS", "Betriebssystem");
@@ -4184,6 +4187,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Geben Sie den zu verwendenden Modellnamen an. <b class='text-danger'>HINWEIS: </b> Derzeit unterstützt OneDev nur\nModelle mit Chat-Vervollständigungs-API. OpenAI-Modelle mit der neuen Antwort-API werden noch nicht unterstützt");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"Geben Sie den privaten Schlüssel (im PEM-Format) an, der vom SSH-Server verwendet wird, um Verbindungen mit dem Client herzustellen");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"Geben Sie den Repository-Ordner an, um Wiki-Seiten zu speichern. Lassen Sie das Feld leer, um vom übergeordneten Element zu erben.\nWenn Sie keine Wiki-Seiten im Projekt-Repository speichern möchten, kann der angegebene Ordner\nein Git-Submodul sein. Um Dateien aus dem Wiki-Seiten-Panel auszuschließen, fügen Sie eine <code>.wikiignore</code>\nDatei im Stammordner des Wikis mit Git-Ignoriermustern relativ zu diesem Ordner hinzu.");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"Geben Sie die Strategie an, um Informationen zur Gruppenmitgliedschaft abzurufen. Um einer LDAP-Gruppe entsprechende Berechtigungen zu erteilen, sollte eine OneDev-Gruppe mit demselben Namen definiert werden. Verwenden Sie die Strategie <tt>Gruppen nicht abrufen</tt>, wenn Sie die Gruppenmitgliedschaften auf der OneDev-Seite verwalten möchten");
 		m.put("Specify timeout in seconds when communicating with mail server", "Geben Sie das Timeout in Sekunden an, wenn mit dem Mailserver kommuniziert wird");
@@ -5011,6 +5016,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"Mit der aktuellen Anzahl von Benutzern ({0}) bleibt das Abonnement bis <b>{1}</b> aktiv");
 		m.put("Work In Progress", "In Arbeit");
+		m.put("Work in Progress", "In Bearbeitung");
+		m.put("Work in progress", "In Bearbeitung");
 		m.put("Workflow reconciliation completed", "Workflow-Abgleich abgeschlossen");
 		m.put("Working Directory", "Arbeitsverzeichnis");
 		m.put("Workspace", "Arbeitsbereich");
@@ -5319,13 +5326,10 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("A JSON version of this API help is available for AI agents at", "Eine JSON-Version dieser API-Hilfe ist für KI-Agenten verfügbar unter");
-		m.put("OFF", "AUS");
-		m.put("ON", "AN");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"Geben Sie den Repository-Ordner an, um Wiki-Seiten zu speichern. Lassen Sie das Feld leer, um vom übergeordneten Element zu erben.\nWenn Sie keine Wiki-Seiten im Projekt-Repository speichern möchten, kann der angegebene Ordner\nein Git-Submodul sein. Um Dateien aus dem Wiki-Seiten-Panel auszuschließen, fügen Sie eine <code>.wikiignore</code>\nDatei im Stammordner des Wikis mit Git-Ignoriermustern relativ zu diesem Ordner hinzu.");
-		m.put("Work in Progress", "In Bearbeitung");
-		m.put("Work in progress", "In Bearbeitung");
+		m.put("Elapsed time: {0}", "Verstrichene Zeit: {0}");
+		m.put("Estimated remaining time: {0}", "Geschätzte verbleibende Zeit: {0}");
+		m.put("{0}h {1}m {2}s", "{0}h {1}m {2}s");
+		m.put("{0}m {1}s", "{0}m {1}s");
 	}
 			
 	@Override

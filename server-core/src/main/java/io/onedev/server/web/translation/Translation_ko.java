@@ -131,6 +131,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"여기에 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 패턴</a>이 필요합니다");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"커밋 메시지 푸터를 검증하기 위한 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 정규 표현식</a>");
+		m.put("A JSON version of this API help is available for AI agents at", "이 API 도움말의 JSON 버전은 AI 에이전트를 위해 제공됩니다.");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "\"{1}\" 아래에 이름이 \"{0}\"인 하위 프로젝트가 이미 존재합니다");
 		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
 			"하위 디렉토리를 생성하려는 위치에 파일이 존재합니다. 새로운 경로를 선택하고 다시 시도하세요.");
@@ -2568,7 +2569,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT ID", "OAuth2 클라이언트 정보 | CLIENT ID");
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2 클라이언트 정보 | CLIENT SECRET");
 		m.put("OCI Layout Directory", "OCI 레이아웃 디렉토리");
+		m.put("OFF", "꺼짐");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "OIDC 오류: ID 토큰과 사용자 정보의 하위가 일치하지 않음");
+		m.put("ON", "켜짐");
 		m.put("OOPS! There Is An Error", "이런! 오류가 발생했습니다");
 		m.put("OPEN", "열림");
 		m.put("OS", "운영 체제");
@@ -4184,6 +4187,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"사용할 모델 이름을 지정하십시오. <b class='text-danger'>참고:</b> 현재 OneDev는\n채팅 완료 API가 있는 모델만 지원합니다. OpenAI의 새로운 응답 API가 있는 모델은 아직 지원되지 않습니다");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSH 서버가 클라이언트와 연결을 설정하는 데 사용하는 개인 키(PEM 형식)를 지정하십시오.");
+		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"위키 페이지를 저장할 저장소 폴더를 지정하세요. 상위에서 상속받으려면 비워 두세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다. 위키 페이지 패널에서 파일을 제외하려면, 위키 루트 폴더에 Git 무시 패턴을 포함한 <code>.wikiignore</code>\n파일을 추가하세요.");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"그룹 멤버십 정보를 검색하는 전략을 지정하십시오. LDAP 그룹에 적절한 권한을 부여하려면 동일한 이름의 OneDev 그룹을 정의해야 합니다. 그룹 멤버십을 OneDev 측에서 관리하려면 <tt>그룹 검색 안 함</tt> 전략을 사용하십시오.");
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
@@ -5011,6 +5016,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"현재 사용자 수 ({0})로 구독은 <b>{1}</b>까지 활성화됩니다");
 		m.put("Work In Progress", "작업 진행 중");
+		m.put("Work in Progress", "작업 진행 중");
+		m.put("Work in progress", "작업 진행 중");
 		m.put("Workflow reconciliation completed", "워크플로우 조정 완료");
 		m.put("Working Directory", "작업 디렉토리");
 		m.put("Workspace", "워크스페이스");
@@ -5319,13 +5326,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("A JSON version of this API help is available for AI agents at", "이 API 도움말의 JSON 버전은 AI 에이전트를 위해 제공됩니다.");
-		m.put("OFF", "꺼짐");
-		m.put("ON", "켜짐");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"위키 페이지를 저장할 저장소 폴더를 지정하세요. 상위에서 상속받으려면 비워 두세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다. 위키 페이지 패널에서 파일을 제외하려면, 위키 루트 폴더에 Git 무시 패턴을 포함한 <code>.wikiignore</code>\n파일을 추가하세요.");
-		m.put("Work in Progress", "작업 진행 중");
-		m.put("Work in progress", "작업 진행 중");
+		m.put("Elapsed time: {0}", "경과 시간: {0}");
+		m.put("Estimated remaining time: {0}", "예상 남은 시간: {0}");
+		m.put("{0}h {1}m {2}s", "{0}시간 {1}분 {2}초");
+		m.put("{0}m {1}s", "{0}분 {1}초");
 	}
 		
 	@Override

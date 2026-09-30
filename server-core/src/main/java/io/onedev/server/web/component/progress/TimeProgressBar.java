@@ -51,6 +51,11 @@ public class TimeProgressBar extends Panel {
 			tag.put("aria-label", _T("Estimated progress"));
 		tag.put("data-estimated-duration", String.valueOf(estimatedDuration));
 		tag.put("data-elapsed", String.valueOf(elapsed));
+		tag.put("data-elapsed-template", _T("Elapsed time: {0}"));
+		tag.put("data-remaining-template", _T("Estimated remaining time: {0}"));
+		tag.put("data-hours-template", _T("{0}h {1}m {2}s"));
+		tag.put("data-minutes-template", _T("{0}m {1}s"));
+		tag.put("data-seconds-template", _T("{0}s"));
 		if (estimatedDuration <= 0)
 			tag.put("hidden", "hidden");
 	}
