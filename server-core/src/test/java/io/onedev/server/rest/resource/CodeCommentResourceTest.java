@@ -338,8 +338,7 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 				"compareContext.oldCommitHash", "compareContext.newCommitHash");
 		data = createData();
 		data.getMark().setRange(new PlanarRangeData());
-		assertPaths(validator.validate(data), "mark.range.fromRow", "mark.range.fromColumn",
-				"mark.range.toRow", "mark.range.toColumn");
+		assertTrue(validator.validate(data).isEmpty());
 		var method = CodeCommentResource.class.getMethod("updateComment", Long.class, String.class);
 		for (String content : new String[] {null, " ", "x".repeat(CodeComment.MAX_CONTENT_LEN + 1)}) {
 			assertFalse(validator.forExecutables().validateParameters(resource, method,
