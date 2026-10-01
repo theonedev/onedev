@@ -8,10 +8,11 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.component.modal.ModalPanel;
 
-public abstract class BuildOptionModalPanel extends ModalPanel implements InputContext {
+public abstract class BuildOptionModalPanel extends ModalPanel implements InputContext, JobAuthorizationContextAware {
 
 	private final List<String> refNames;
 	

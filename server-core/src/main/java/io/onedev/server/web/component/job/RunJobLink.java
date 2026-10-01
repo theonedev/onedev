@@ -142,6 +142,12 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 					new BuildOptionModalPanel(target, refNames, paramBean) {
 
 						@Override
+						public JobAuthorizationContext getJobAuthorizationContext() {
+							// The modal is attached to the page root, outside this link's hierarchy.
+							return RunJobLink.this.getJobAuthorizationContext();
+						}
+
+						@Override
 						protected void onSave(AjaxRequestTarget target, Collection<String> selectedRefNames,
 											  Serializable populatedParamBean) {
 							if (isBranchUpdated(selectedRefNames)) {
