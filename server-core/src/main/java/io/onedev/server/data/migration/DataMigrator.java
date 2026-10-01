@@ -9525,4 +9525,8 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate247(File dataDir, Stack<Integer> versions) {
+		// Recreate the schema to restore longblob columns on MySQL/MariaDB (OD-3157).
+	}
+
 }

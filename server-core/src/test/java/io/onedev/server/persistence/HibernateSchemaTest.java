@@ -75,6 +75,23 @@ public class HibernateSchemaTest {
                 assertTrue(sql.stream().anyMatch(command -> command.contains(" not null")), dialect);
                 assertTrue(sql.stream().anyMatch(command -> command.contains(" unique ")), dialect);
                 assertTrue(sql.stream().anyMatch(command -> command.startsWith("create index ")), dialect);
+                if (dialect.contains("MySQL") || dialect.contains("MariaDB")) {
+                    // Hibernate 5 used longblob for every binary LOB, regardless of
+                    // @Column.length. Shrinking these columns breaks backup imports.
+                    int blobCount = 0;
+                    for (var table : metadata.collectTableMappings()) {
+                        for (var column : table.getColumns()) {
+                            if (column.getSqlTypeCode(metadata) == java.sql.Types.BLOB) {
+                                assertEquals("longblob", column.getSqlType(metadata),
+                                        dialect + ": " + table.getName() + "." + column.getName());
+                                blobCount++;
+                            }
+                        }
+                    }
+                    assertTrue(blobCount > 0, dialect);
+                    assertTrue(sql.stream().anyMatch(command -> command.startsWith("create table o_Setting ")
+                            && command.contains("o_value longblob")), dialect);
+                }
                 if (dialect.equals("io.onedev.server.persistence.PostgreSQLDialect")) {
                     assertTrue(sql.stream().anyMatch(command -> command.contains(" bytea")));
                     assertTrue(sql.stream().noneMatch(command -> command.contains(" oid")));
