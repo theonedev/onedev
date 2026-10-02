@@ -364,7 +364,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 														Map<String, String> volumeMounts, List<Integer> position, boolean useTTY) {
 							containerName = network + "-step-" + stringifyStepPosition(position);
 							try {
-								docker.args("run", "--name=" + containerName, "--network=" + network);
+								docker.args("run", "--stop-timeout=30", "--name=" + containerName, "--network=" + network);
 								if (isAlwaysPullImage() && pulledImages.add(image))
 									docker.addArgs("--pull=always");
 
