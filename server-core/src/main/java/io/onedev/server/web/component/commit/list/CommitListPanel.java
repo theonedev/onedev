@@ -86,6 +86,7 @@ import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -218,7 +219,7 @@ public abstract class CommitListPanel extends Panel {
 						commitLabels = new ArrayList<>();
 						labels.put(commit.name(), commitLabels);
 					}
-					commitLabels.add(Repository.shortenRefName(ref.getName()));
+					commitLabels.add(ref.getName());
 				}
 			}
 			return labels;
@@ -711,7 +712,11 @@ public abstract class CommitListPanel extends Panel {
 				commitLabels = new ArrayList<>();
 			for (String label: commitLabels) {
 				WebMarkupContainer container = new WebMarkupContainer(labelsView.newChildId());
-				container.add(new Label("label", label));
+				boolean isTag = GitUtils.ref2tag(label) != null;
+				WebMarkupContainer badge = new WebMarkupContainer("badge");
+				badge.add(new SpriteImage("icon", isTag ? "tag" : "branch"));
+				badge.add(new Label("label", Repository.shortenRefName(label)));
+				container.add(badge);
 				labelsView.add(container);
 			}
 			item.add(labelsView);

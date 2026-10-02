@@ -24,6 +24,11 @@
 	font-size: 1.1rem;
 }
 
+.commit-list .labels .badge .icon {
+	width: 12px;
+	height: 12px;
+}
+
 .commit-list .commit-message .highlight {
 	background: yellow;
 }
