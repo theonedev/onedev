@@ -36,7 +36,7 @@ public class CodexInContainer extends WorkspaceSpecTemplate {
 
         var userData = new UserData();
         userData.setKey("codex");
-        userData.getEntries().add(UserDataEntry.of("/home/codex/.codex", "sessions archived_sessions packages plugins computer-use cache logs* *.log tmp .tmp"));
+        userData.getEntries().add(UserDataEntry.of("/home/codex/.codex", "sessions archived_sessions packages app-server-control app-server-daemon plugins computer-use cache logs* *.log tmp .tmp"));
         workspaceSpec.getUserDatas().add(userData);
 
         configureTaskAutomation(workspaceSpec, "codex exec --dangerously-bypass-approvals-and-sandbox \"$TASK_PROMPT\"");
