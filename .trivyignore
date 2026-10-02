@@ -13,3 +13,7 @@ CVE-2026-54513
 # Reassess these exceptions when changing Hazelcast or its JSON usage.
 GHSA-r7wm-3cxj-wff9
 CVE-2026-68497
+CVE-2026-89407
+CVE-2026-89425
+CVE-2026-91776
+CVE-2026-91777
