@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.k8shelper.CacheAvailability;
 import io.onedev.server.event.Listen;
@@ -93,10 +94,18 @@ public class DefaultRunCacheService implements RunCacheService, Serializable, Sc
 	}
 
 	private String getDirName(String key, @Nullable String checksum) {
-		if (checksum != null)
+		checkDirNamePart("key", key);
+		if (checksum != null) {
+			checkDirNamePart("checksum", checksum);
 			return encodePathSegment(key) + ":" + encodePathSegment(checksum);
-		else
+		} else {
 			return encodePathSegment(key);
+		}
+	}
+
+	private void checkDirNamePart(String name, String value) {
+		if (value.length() == 0 || value.equals(".") || value.contains(".."))
+			throw new ExplicitException("Invalid cache " + name + ": " + value);
 	}
 
 	private String getKeyFromDirName(String dirName) {
