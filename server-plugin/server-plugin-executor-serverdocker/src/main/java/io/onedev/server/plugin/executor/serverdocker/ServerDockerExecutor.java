@@ -33,6 +33,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.agent.AgentUtils;
+import io.onedev.agent.job.DockerRunOptions;
 import io.onedev.agent.job.JobUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.bootstrap.SecretMasker;
@@ -262,9 +263,12 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	}
 
 	@Editable(order=50050, group="More Settings", description="Optionally specify docker options to run container. " +
-			"Multiple options should be separated by space, and single option containing spaces should be quoted")
+			"Multiple options should be separated by space, and single option containing spaces should be quoted. " +
+			"File paths must be relative to the job working directory, without '..' or symbolic links. " +
+			"Volume and device mount options are not allowed")
 	@ReservedOptions({"-w", "(--workdir)=.*", "-d", "--detach", "-a", "--attach", "-t", "--tty", 
-			"-i", "--interactive", "--rm", "--restart", "(--name)=.*"})
+			"-i", "--interactive", "--rm", "--restart", "(--name)=.*", "(-[ditPq]*v).*",
+			"(--volume|--mount|--volumes-from|--volume-driver|--device|--gpus|--use-api-socket)(=.*)?"})
 	public String getRunOptions() {
 		return runOptions;
 	}
@@ -402,8 +406,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 									docker.addArgs("--cpus", getCpuLimit());
 								if (getMemoryLimit() != null)
 									docker.addArgs("--memory", getMemoryLimit());
-								if (getRunOptions() != null)
-									docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+								docker.addArgs(DockerRunOptions.parse(getRunOptions(), buildDir));
 
 								docker.addArgs("-v", getHostPath(buildDir.getAbsolutePath()) + ":" + containerBuildDirPath);
 
