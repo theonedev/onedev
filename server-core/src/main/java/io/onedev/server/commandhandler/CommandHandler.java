@@ -39,7 +39,7 @@ public abstract class CommandHandler extends AbstractPlugin {
 							waitForServerStop();
 							return callWithProbe(callable);
 						} finally {
-							FileUtils.deleteFile(maintenanceFile);
+							FileUtils.deletePath(maintenanceFile);
 						}
 					});
 				}
@@ -49,7 +49,7 @@ public abstract class CommandHandler extends AbstractPlugin {
 					waitForServerStop();
 					return callWithProbe(callable);
 				} finally {
-					FileUtils.deleteFile(maintenanceFile);
+					FileUtils.deletePath(maintenanceFile);
 				}
 			}
 		} catch (Exception e) {

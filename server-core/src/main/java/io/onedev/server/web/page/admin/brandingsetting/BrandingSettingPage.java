@@ -151,7 +151,7 @@ public class BrandingSettingPage extends AdministrationPage {
 				if (logoBytes != null)
 					FileUtils.writeByteArrayToFile(getCustomLogoFile(darkMode), logoBytes);
 				else 
-					FileUtils.deleteFile(getCustomLogoFile(darkMode));
+					FileUtils.deletePath(getCustomLogoFile(darkMode));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

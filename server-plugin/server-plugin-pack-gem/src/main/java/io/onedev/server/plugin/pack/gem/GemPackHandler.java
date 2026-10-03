@@ -241,7 +241,7 @@ public class GemPackHandler implements PackHandler {
 					response.setStatus(SC_OK);
 				}));
 			} finally {
-				FileUtils.deleteFile(tempFile);
+				FileUtils.deletePath(tempFile);
 			}
 		} else if (pathSegments.equals(newArrayList("api", "v1", "gems", "yank"))) {
 			if (!isDelete)

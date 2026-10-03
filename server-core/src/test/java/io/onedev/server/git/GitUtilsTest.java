@@ -53,7 +53,7 @@ public class GitUtilsTest extends AbstractGitTest {
 			assertTrue(response.contains("does not appear to be a git repository"));
 			assertTrue(response.endsWith("0000"));
 		} finally {
-			FileUtils.deleteDir(emptyDir);
+			FileUtils.deletePath(emptyDir);
 		}
 	}
 
@@ -450,7 +450,7 @@ public class GitUtilsTest extends AbstractGitTest {
 				}
 			}
 		} finally {
-			FileUtils.deleteDir(tempDir, 3);
+			FileUtils.deletePath(tempDir, 3);
 		}
 	}
 	
@@ -498,7 +498,7 @@ public class GitUtilsTest extends AbstractGitTest {
 				}
 			}
 		} finally {
-			FileUtils.deleteDir(tempDir, 3);
+			FileUtils.deletePath(tempDir, 3);
 		}	
 		
 	}	

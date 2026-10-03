@@ -57,7 +57,7 @@ public class PublishPlaywrightReportStep extends PublishUnitTestReportStep {
 	protected UnitTestReport process(Build build, File inputDir, TaskLogger logger) {
 		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 		File reportDir = new File(build.getDir(), UnitTestReport.CATEGORY + "/" + getReportName());
-		FileUtils.deleteDir(reportDir);
+		FileUtils.deletePath(reportDir);
 		FileUtils.createDir(reportDir);
 		try {
 			List<TestCase> testCases = new ArrayList<>();
@@ -72,11 +72,11 @@ public class PublishPlaywrightReportStep extends PublishUnitTestReportStep {
 			if (!testCases.isEmpty())
 				return new UnitTestReport(testCases, true);
 			else {
-				FileUtils.deleteDir(reportDir);
+				FileUtils.deletePath(reportDir);
 				return null;
 			}
 		} catch (Exception e) {
-			FileUtils.deleteDir(reportDir);
+			FileUtils.deletePath(reportDir);
 			throw ExceptionUtils.unchecked(e);
 		}
 	}

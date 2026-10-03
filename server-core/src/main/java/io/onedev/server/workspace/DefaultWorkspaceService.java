@@ -317,7 +317,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 							var logFile = getLogFile(projectId, workspaceNumber);
 							if (logFile.exists()) 
-								FileUtils.deleteFile(logFile);							
+								FileUtils.deletePath(logFile);
 						} catch (Throwable t) {
 							var message = "Error deleting workspace storage (project id: %d, workspace number: %d)"
 									.formatted(projectId, workspaceNumber);
@@ -466,7 +466,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		var workspaceNumber = workspace.getNumber();
 		
 		projectService.runOnActiveServer(projectId, (ClusterTask<Void>) () -> {
-			FileUtils.deleteFile(getLogFile(projectId, workspaceNumber));
+			FileUtils.deletePath(getLogFile(projectId, workspaceNumber));
 			return null;
 		});
 		

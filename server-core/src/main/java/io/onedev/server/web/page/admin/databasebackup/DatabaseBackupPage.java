@@ -81,7 +81,7 @@ public class DatabaseBackupPage extends AdministrationPage {
 							databaseManager.exportData(tempDir);
 							ZipUtils.zip(tempDir, attributes.getResponse().getOutputStream());
 						} finally {
-							FileUtils.deleteDir(tempDir);
+							FileUtils.deletePath(tempDir);
 						}
 					}				
 				});

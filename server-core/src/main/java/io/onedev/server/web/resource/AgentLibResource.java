@@ -54,7 +54,7 @@ public class AgentLibResource extends AbstractResource {
 							TarUtils.tar(tempDir, os, false);
 						}
 					} finally {
-						FileUtils.deleteDir(tempDir);
+						FileUtils.deletePath(tempDir);
 					}
 				}				
 				

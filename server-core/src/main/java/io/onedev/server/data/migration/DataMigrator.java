@@ -235,7 +235,7 @@ public class DataMigrator {
 					|| file.getName().startsWith("CodeCommentRelations.xml")
 					|| file.getName().startsWith("CodeCommentReplys.xml")
 					|| file.getName().startsWith("CodeCommentStatusChanges.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
@@ -330,7 +330,7 @@ public class DataMigrator {
 						|| file.getName().startsWith("PullRequest")
 						|| file.getName().startsWith("Review")
 						|| file.getName().startsWith("ReviewInvitation")) {
-					FileUtils.deleteFile(file);
+					FileUtils.deletePath(file);
 				} else if (file.getName().startsWith("Configs.xml")) {
 					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 					for (Element element : dom.getRootElement().elements()) {
@@ -344,7 +344,7 @@ public class DataMigrator {
 								for (File projectDir : projectsDir.listFiles()) {
 									File infoDir = new File(projectDir, "info");
 									if (infoDir.exists())
-										FileUtils.deleteDir(infoDir);
+										FileUtils.deletePath(infoDir);
 								}
 							}
 						} else if (element.elementText("key").equals("SECURITY")) {
@@ -364,7 +364,7 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeComments.xml") || file.getName().startsWith("CodeCommentReplys.xml")
 					|| file.getName().startsWith("CodeCommentStatusChanges.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
@@ -618,7 +618,7 @@ public class DataMigrator {
 					|| file.getName().startsWith("PullRequestTasks.xml")
 					|| file.getName().startsWith("ReviewInvitations.xml")
 					|| file.getName().startsWith("Reviews.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("UserAuthorizations.xml") || file.getName().startsWith("GroupAuthorizations.xml")) {
 				try {
 					String content = FileUtils.readFileToString(file, UTF_8);
@@ -720,7 +720,7 @@ public class DataMigrator {
 						}
 					}
 				}
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 				dom.writeToFile(new File(file.getParentFile(), file.getName().replace("Config", "Setting")), false);
 			} else if (file.getName().startsWith("PullRequestWatchs.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -814,7 +814,7 @@ public class DataMigrator {
 	private void migrate17(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Issue")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
@@ -1236,7 +1236,7 @@ public class DataMigrator {
 					|| file.getName().startsWith("Build2s.xml")
 					|| file.getName().startsWith("BuildDependences.xml")
 					|| file.getName().startsWith("BuildParams.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("IssueFieldEntitys.xml")) {
 				String content;
 				try {
@@ -1247,7 +1247,7 @@ public class DataMigrator {
 				content = content.replace("io.onedev.server.model.IssueFieldEntity",
 						"io.onedev.server.model.IssueField");
 
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 
 				File renamedFile = new File(dataDir, file.getName().replace(
 						"IssueFieldEntitys.xml", "IssueFields.xml"));
@@ -1290,7 +1290,7 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			}
 		}
 	}
@@ -1379,7 +1379,7 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("IssueChanges.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			}
 		}
 	}
@@ -2116,12 +2116,12 @@ public class DataMigrator {
 					element.addElement("submitReason").setText("Unknown");
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeCommentRelations.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("PullRequestBuilds.xml")) {
 				try {
 					String content = FileUtils.readFileToString(file, UTF_8.name());
 					content = Strings.CS.replace(content, "PullRequestBuild", "PullRequestVerification");
-					FileUtils.deleteFile(file);
+					FileUtils.deletePath(file);
 					String newFileName = Strings.CS.replace(file.getName(), "PullRequestBuild", "PullRequestVerification");
 					FileUtils.writeFile(new File(dataDir, newFileName), content, UTF_8);
 				} catch (IOException e) {
@@ -2873,7 +2873,7 @@ public class DataMigrator {
 					}
 					userQueryWatchesElement.detach();
 				}
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			} else if (file.getName().startsWith("PullRequestQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -2894,7 +2894,7 @@ public class DataMigrator {
 					}
 					userQueryWatchesElement.detach();
 				}
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			} else if (file.getName().startsWith("BuildQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -2912,7 +2912,7 @@ public class DataMigrator {
 					}
 					userQuerySubscriptionsElement.detach();
 				}
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			} else if (file.getName().startsWith("CodeCommentQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -2920,7 +2920,7 @@ public class DataMigrator {
 					element.setName("io.onedev.server.model.CodeCommentQueryPersonalization");
 					element.element("userQueries").setName("queries");
 				}
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			} else if (file.getName().startsWith("CommitQuerySettings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -2939,7 +2939,7 @@ public class DataMigrator {
 					}
 					userQuerySubscriptionsElement.detach();
 				}
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
 			}
 		}
@@ -3088,7 +3088,7 @@ public class DataMigrator {
 
 				String newFileName = file.getName().replace("Jest", "Unit");
 				dom.writeToFile(new File(dataDir, newFileName), false);
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("CloverMetric.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements())
@@ -3096,7 +3096,7 @@ public class DataMigrator {
 
 				String newFileName = file.getName().replace("Clover", "Coverage");
 				dom.writeToFile(new File(dataDir, newFileName), false);
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("CheckstyleMetric.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements())
@@ -3104,7 +3104,7 @@ public class DataMigrator {
 
 				String newFileName = file.getName().replace("Checkstyle", "Problem");
 				dom.writeToFile(new File(dataDir, newFileName), false);
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			}
 		}
 	}
@@ -4778,7 +4778,7 @@ public class DataMigrator {
 						element.setName("io.onedev.server.model.ProjectDynamics");
 					}
 				}
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 				String newFileName = file.getName().replace("Update", "Dynamics");
 				dom.writeToFile(new File(file.getParent(), newFileName), false);
 			} else if (file.getName().startsWith("Issues.xml")
@@ -5192,7 +5192,7 @@ public class DataMigrator {
 
 		for (var file : dataDir.listFiles()) {
 			if (file.getName().startsWith("ClusterCredentials.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
 				for (var element : dom.getRootElement().elements()) {
@@ -5211,7 +5211,7 @@ public class DataMigrator {
 					if (lastCommitDateElement != null)
 						lastCommitDateElement.setName("commit");
 				}
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 				dom.writeToFile(new File(dataDir, file.getName().replace("ProjectDynamicss", "ProjectLastEventDates")), false);
 			} else if (file.getName().startsWith("Agents.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
@@ -5254,7 +5254,7 @@ public class DataMigrator {
 	private void migrate118(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("ClusterServers.xml"))
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 		}
 	}
 
@@ -5264,7 +5264,7 @@ public class DataMigrator {
 	private void migrate120(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("ClusterServers.xml"))
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 		}
 	}
 
@@ -5365,7 +5365,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("IssueTouchs.xml")
 					|| file.getName().startsWith("PullRequestTouchs.xml")
 					|| file.getName().startsWith("CodeCommentTouchs.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			}
 		}
 
@@ -5503,7 +5503,7 @@ public class DataMigrator {
 	private void migrate131(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeCommentTouchs.xml") || file.getName().startsWith("PullRequestTouchs.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			} else if (file.getName().startsWith("Alerts.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements())
@@ -6915,7 +6915,7 @@ public class DataMigrator {
 					}
 				}
 			} else if (file.getName().startsWith("IssueStateHistorys.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			}
 		}
 
@@ -7537,7 +7537,7 @@ public class DataMigrator {
 			String packStorePath = null;
 			for (File file : dataDir.listFiles()) {
 				if (file.getName().startsWith("PackBlobAuthorizations.xml")) {
-					FileUtils.deleteFile(file);
+					FileUtils.deletePath(file);
 				} else if (file.getName().startsWith("PackBlobs.xml")) {
 					var dom = VersionedXmlDoc.fromFile(file);
 					for (Element element : dom.getRootElement().elements()) {
@@ -8453,7 +8453,7 @@ public class DataMigrator {
 	private void migrate218(File dataDir, Stack<Integer> versions) {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Chats.xml") || file.getName().startsWith("ChatMessages.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			}
 		}
 	}
@@ -8611,7 +8611,7 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("RunCaches.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			}
 		}
 	}
@@ -9147,7 +9147,7 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("GitLfsLocks.xml")) {
-				FileUtils.deleteFile(file);
+				FileUtils.deletePath(file);
 			}
 		}
 	}

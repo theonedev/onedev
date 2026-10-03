@@ -50,11 +50,11 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 								build.getProject().getId(), reportDir.getParentFile());
 						return aResult;
 					} else {
-						FileUtils.deleteDir(reportDir);
+						FileUtils.deletePath(reportDir);
 						return null;
 					}
 				} catch (Exception e) {
-					FileUtils.deleteDir(reportDir);
+					FileUtils.deletePath(reportDir);
 					throw ExceptionUtils.unchecked(e);
 				}
 			});

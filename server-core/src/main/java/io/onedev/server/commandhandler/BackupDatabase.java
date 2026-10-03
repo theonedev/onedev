@@ -80,7 +80,7 @@ public class BackupDatabase extends CommandHandler {
 				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);
 				} finally {
-					FileUtils.deleteDir(tempDir);
+					FileUtils.deletePath(tempDir);
 				}
 
 				logger.info("Database is successfully backed up to {}", backupFile.getAbsolutePath());

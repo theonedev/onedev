@@ -320,7 +320,7 @@ public class NugetPackHandler implements PackHandler {
 							logger.warn("Package version is not a SemVer v2 compatible version");
 							throw new ClientException(SC_BAD_REQUEST);
 						} finally {
-							FileUtils.deleteFile(tempFile);
+							FileUtils.deletePath(tempFile);
 						}
 					} else {
 						throw new ClientException(SC_BAD_REQUEST);

@@ -121,7 +121,7 @@ public class AgentResource extends AbstractResource {
 						}
 					}
 				} finally {
-					FileUtils.deleteDir(tempDir);
+					FileUtils.deletePath(tempDir);
 				}
 			}				
 			

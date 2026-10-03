@@ -153,7 +153,7 @@ public class WorkerResource {
 				os.write(bytes);
 			} finally {
 				sessionService.openSession();
-				FileUtils.deleteDir(filesDir);
+				FileUtils.deletePath(filesDir);
 			}
 		};
 	}
@@ -171,7 +171,7 @@ public class WorkerResource {
 				TarUtils.tar(tempDir, os, false);
 			} finally {
 				sessionService.openSession();
-				FileUtils.deleteDir(tempDir);
+				FileUtils.deletePath(tempDir);
 			}
 		};
 	}

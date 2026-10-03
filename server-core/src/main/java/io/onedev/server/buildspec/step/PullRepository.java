@@ -412,7 +412,7 @@ public class PullRepository extends SyncRepository {
 			} finally {
 				SecretMasker.pop();
 				if (certificateFile != null)
-					FileUtils.deleteFile(certificateFile);
+					FileUtils.deletePath(certificateFile);
 			}
 		}
 		

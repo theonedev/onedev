@@ -353,7 +353,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 
 		var containerReadyFile = new File(workspaceDir, CONTAINER_READY_FILE);
 		if (containerReadyFile.exists())
-			FileUtils.deleteFile(containerReadyFile);
+			FileUtils.deletePath(containerReadyFile);
 
 		var docker = newDocker();
 		var runAs = context.getSpec().getRunAs();

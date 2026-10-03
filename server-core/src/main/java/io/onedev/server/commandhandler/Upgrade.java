@@ -262,7 +262,7 @@ public class Upgrade extends AbstractPlugin {
 							File destDir = new File(upgradeDir, "site/lib");
 							FileUtils.createDir(destDir);
 							FileUtils.copyFileToDirectory(file, destDir);
-							FileUtils.deleteFile(file);
+							FileUtils.deletePath(file);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
@@ -358,7 +358,7 @@ public class Upgrade extends AbstractPlugin {
 									if (ret == 0) {
 										dbChanged = true;
 										if (isHSQL) {
-											FileUtils.deleteDir(new File(upgradeDir, "internaldb"), 3);
+											FileUtils.deletePath(new File(upgradeDir, "internaldb"), 3);
 										} else {
 											logger.info("Cleaning database with old program...");
 
@@ -458,7 +458,7 @@ public class Upgrade extends AbstractPlugin {
 										FileUtils.createDir(new File(upgradeDir, "site/assets/root"));
 
 									restoreExecutables(upgradeDir);
-									FileUtils.deleteDir(programBackup);
+									FileUtils.deletePath(programBackup);
 
 									logger.info("Old program files restored");
 									programRestored = true;
@@ -507,7 +507,7 @@ public class Upgrade extends AbstractPlugin {
 								throw new ExplicitException(errorMessage.toString());
 							} else {
 								logger.info("Successfully upgraded {}", upgradeDir.getAbsolutePath());
-								FileUtils.deleteDir(programBackup);
+								FileUtils.deletePath(programBackup);
 							}
 							return null;
 						}
@@ -527,7 +527,7 @@ public class Upgrade extends AbstractPlugin {
 							callable.call();
 						}
 					} finally {
-						FileUtils.deleteFile(maintenanceFile);
+						FileUtils.deletePath(maintenanceFile);
 					}
 					System.exit(0);
 				} catch (Exception e) {
@@ -582,22 +582,19 @@ public class Upgrade extends AbstractPlugin {
 				for (var destChildFile: destFile.listFiles()) {
 					var srcChildFile = new File(srcFile, destChildFile.getName());
 					if (!srcChildFile.exists()) {
-						if (destChildFile.isFile())
-							FileUtils.deleteFile(destChildFile);
-						else 
-							FileUtils.deleteDir(destChildFile);
+						FileUtils.deletePath(destChildFile);
 					}
 				}
 			} else {
 				if (destFile.isFile())
-					FileUtils.deleteFile(destFile);
+					FileUtils.deletePath(destFile);
 				FileUtils.createDir(destFile);
 			}
 			for (var srcChildFile: srcFile.listFiles())
 				restoreProgramFiles(srcChildFile, new File(destFile, srcChildFile.getName()));
 		} else try {
 			if (destFile.isDirectory())
-				FileUtils.deleteDir(destFile);
+				FileUtils.deletePath(destFile);
 			if (destFile.exists()) {
 				if (destFile.canWrite())
 					FileUtils.copyFile(srcFile, destFile);
@@ -671,23 +668,23 @@ public class Upgrade extends AbstractPlugin {
 		}
 
 		if (new File(upgradeDir, "bin/apply_db_constraints.bat").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "bin/apply_db_constraints.bat"));
+			FileUtils.deletePath(new File(upgradeDir, "bin/apply_db_constraints.bat"));
 		if (new File(upgradeDir, "bin/apply_db_constraints.sh").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "bin/apply_db_constraints.sh"));
+			FileUtils.deletePath(new File(upgradeDir, "bin/apply_db_constraints.sh"));
 		if (new File(upgradeDir, "bin/backup.bat").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "bin/backup.bat"));
+			FileUtils.deletePath(new File(upgradeDir, "bin/backup.bat"));
 		if (new File(upgradeDir, "bin/backup.sh").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "bin/backup.sh"));
+			FileUtils.deletePath(new File(upgradeDir, "bin/backup.sh"));
 		if (new File(upgradeDir, "bin/restore.bat").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "bin/restore.bat"));
+			FileUtils.deletePath(new File(upgradeDir, "bin/restore.bat"));
 		if (new File(upgradeDir, "bin/restore.sh").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "bin/restore.sh"));
+			FileUtils.deletePath(new File(upgradeDir, "bin/restore.sh"));
 		if (new File(upgradeDir, "bin/reset_admin_password.bat").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "bin/reset_admin_password.bat"));
+			FileUtils.deletePath(new File(upgradeDir, "bin/reset_admin_password.bat"));
 		if (new File(upgradeDir, "bin/reset_admin_password.sh").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "bin/reset_admin_password.sh"));
+			FileUtils.deletePath(new File(upgradeDir, "bin/reset_admin_password.sh"));
 		
-		FileUtils.deleteDir(new File(upgradeDir, "status"));
+		FileUtils.deletePath(new File(upgradeDir, "status"));
 		
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(new File(Bootstrap.installDir, "agent"), new File(upgradeDir, "agent"));
@@ -709,7 +706,7 @@ public class Upgrade extends AbstractPlugin {
 				FileUtils.copyFile(
 						new File(upgradeDir, "site/robots.txt"), 
 						new File(upgradeDir, "site/assets/robots.txt"));
-				FileUtils.deleteFile(new File(upgradeDir, "site/robots.txt"));
+				FileUtils.deletePath(new File(upgradeDir, "site/robots.txt"));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -719,7 +716,7 @@ public class Upgrade extends AbstractPlugin {
 				FileUtils.copyFile(
 						new File(upgradeDir, "site/logo.png"), 
 						new File(upgradeDir, "site/assets/logo.png"));
-				FileUtils.deleteFile(new File(upgradeDir, "site/logo.png"));
+				FileUtils.deletePath(new File(upgradeDir, "site/logo.png"));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -729,7 +726,7 @@ public class Upgrade extends AbstractPlugin {
 				FileUtils.copyDirectory(
 						new File(upgradeDir, "site/avatars"), 
 						new File(upgradeDir, "site/assets/avatars"));
-				FileUtils.deleteDir(new File(upgradeDir, "site/avatars"));
+				FileUtils.deletePath(new File(upgradeDir, "site/avatars"));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -766,7 +763,7 @@ public class Upgrade extends AbstractPlugin {
 					FileUtils.copyFile(
 							new File(upgradeDir, "site/assets/robots.txt"), 
 							new File(assetsRootDir, "robots.txt"));
-					FileUtils.deleteFile(new File(upgradeDir, "site/assets/robots.txt"));
+					FileUtils.deletePath(new File(upgradeDir, "site/assets/robots.txt"));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -780,7 +777,7 @@ public class Upgrade extends AbstractPlugin {
 				}
 			}
 			
-			FileUtils.deleteDir(assetsRootDir);
+			FileUtils.deletePath(assetsRootDir);
 			
 			File usersDir = new File(upgradeDir, "site/users");
 			if (usersDir.exists()) {
@@ -790,7 +787,7 @@ public class Upgrade extends AbstractPlugin {
 					if (oldVisitInfoDir.exists() && projectDir.exists()) {
 						File newVisitInfoDir = new File(projectDir, "info/visit");
 						FileUtils.createDir(newVisitInfoDir.getParentFile());
-						FileUtils.deleteDir(newVisitInfoDir);
+						FileUtils.deletePath(newVisitInfoDir);
 						try {
 							FileUtils.moveDirectory(oldVisitInfoDir, newVisitInfoDir);
 						} catch (IOException e) {
@@ -798,9 +795,9 @@ public class Upgrade extends AbstractPlugin {
 						}
 					}
 				}
-				FileUtils.deleteDir(usersDir);
+				FileUtils.deletePath(usersDir);
 			}
-			FileUtils.deleteDir(new File(upgradeDir, "site/info"));
+			FileUtils.deletePath(new File(upgradeDir, "site/info"));
 		}
 
 		var directoryVersion = ".onedev-directory-version";
@@ -834,7 +831,7 @@ public class Upgrade extends AbstractPlugin {
 								} catch (IOException e) {
 									throw new RuntimeException(e);
 								}
-								FileUtils.deleteDir(buildDir);
+								FileUtils.deletePath(buildDir);
 							}
 						}
 					}
@@ -937,7 +934,7 @@ public class Upgrade extends AbstractPlugin {
 					if (userDir.isDirectory()) {
 						var workspaceDataDir = new File(userDir, "workspace-data");
 						if (workspaceDataDir.exists())
-							FileUtils.deleteDir(workspaceDataDir);
+							FileUtils.deletePath(workspaceDataDir);
 					}
 				}
 			}
@@ -951,7 +948,7 @@ public class Upgrade extends AbstractPlugin {
 					if (projectDir.isDirectory()) {
 						var workspaceLogsDir = new File(projectDir, "workspace-logs");
 						if (workspaceLogsDir.exists())
-							FileUtils.deleteDir(workspaceLogsDir);
+							FileUtils.deletePath(workspaceLogsDir);
 					}
 				}
 			}
@@ -1089,7 +1086,7 @@ public class Upgrade extends AbstractPlugin {
 			
 			File sampleKeystoreFile = new File(upgradeDir, "conf/sample.keystore");
 			if (sampleKeystoreFile.exists())
-				FileUtils.deleteFile(sampleKeystoreFile);
+				FileUtils.deletePath(sampleKeystoreFile);
 			
 			var logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
 			var logbackConfig = FileUtils.readFileToString(logbackConfigFile, UTF_8);
@@ -1132,9 +1129,9 @@ public class Upgrade extends AbstractPlugin {
 
 			FileUtils.createDir(new File(Bootstrap.installDir, INCOMPATIBILITIES_FILE).getParentFile());
 			if (new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE).exists())
-				FileUtils.deleteFile(new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE));
+				FileUtils.deletePath(new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE));
 			if (new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE).exists())
-				FileUtils.deleteFile(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE));
+				FileUtils.deletePath(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION_FILE));
 			List<String> incompatibilities = FileUtils.readLines(
 					new File(Bootstrap.installDir, INCOMPATIBILITIES_FILE), UTF_8);
 			if (new File(upgradeDir, INCOMPATIBILITIES_FILE).exists()) {

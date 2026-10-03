@@ -149,7 +149,7 @@ public class WorkspaceDataPanel extends Panel {
 						clusterService.runOnAllServers(() -> {
 							write(lockName, () -> {
 								var dataDir = userService.getWorkspaceDataDir(userId, key, false);
-								FileUtils.deleteDir(dataDir);
+								FileUtils.deletePath(dataDir);
 							});
 							return null;
 						});

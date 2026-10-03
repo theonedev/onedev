@@ -189,10 +189,10 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 				writeToFile(avatarFile, avatarData);
 			} else {
 				if (avatarFile.exists())
-					FileUtils.deleteFile(avatarFile);
+					FileUtils.deletePath(avatarFile);
 				avatarFile = getUserUploadedFile(userId, "jpg");
 				if (avatarFile.exists())
-					FileUtils.deleteFile(avatarFile);
+					FileUtils.deletePath(avatarFile);
 			}
 			SiteSyncUtils.increaseVersion(OneDev.getAssetsDir());
 			return null;
@@ -217,10 +217,10 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 				writeToFile(avatarFile, avatarData);
 			} else {
 				if (avatarFile.exists())
-					FileUtils.deleteFile(avatarFile);
+					FileUtils.deletePath(avatarFile);
 				avatarFile = getProjectUploadedFile(projectId, "jpg");
 				if (avatarFile.exists())
-					FileUtils.deleteFile(avatarFile);
+					FileUtils.deletePath(avatarFile);
 			}
 			SiteSyncUtils.increaseVersion(OneDev.getAssetsDir());
 			return null;
@@ -269,7 +269,7 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 						}
 					});
 				} finally {
-					FileUtils.deleteFile(tempFile);
+					FileUtils.deletePath(tempFile);
 				}
 				SiteSyncUtils.increaseVersion(OneDev.getAssetsDir());
 			}

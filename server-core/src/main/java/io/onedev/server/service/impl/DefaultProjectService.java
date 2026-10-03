@@ -813,7 +813,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 		for (var projectDir: getProjectsDir().listFiles()) {
 			if (new File(projectDir, DELETE_MARK).exists()) {
 				logger.info("Deleting directory marked for deletion: " + projectDir);
-				FileUtils.deleteDir(projectDir);
+				FileUtils.deletePath(projectDir);
 				continue;
 			}
 			if (!NumberUtils.isDigits(projectDir.getName())) 
@@ -873,7 +873,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				return new File(remoteDir, SHARE_TEST_DIR + "/" + testFile.getName()).exists();
 			});
 		} finally {
-			FileUtils.deleteFile(testFile);
+			FileUtils.deletePath(testFile);
 		}
 	}
 
@@ -1381,7 +1381,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 									FileUtils.createDir(projectDir);
 									initGit(projectId, project.getGitPackConfig());
 								} else {
-									FileUtils.deleteFile(new File(projectDir, DELETE_MARK));
+									FileUtils.deletePath(new File(projectDir, DELETE_MARK));
 								}
 								newReplica.saveType(projectDir);
 								return readVersion(projectDir);

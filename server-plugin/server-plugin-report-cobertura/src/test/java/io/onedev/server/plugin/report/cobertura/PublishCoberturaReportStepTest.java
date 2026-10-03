@@ -122,7 +122,7 @@ public class PublishCoberturaReportStepTest {
 			}
 			assertEquals(CoverageStatus.NOT_COVERED, result.getStatuses().get("/example/src/requests/help.py").get(49));
 		} finally {
-			FileUtils.deleteDir(inputDir);
+			FileUtils.deletePath(inputDir);
 		}
     }
 

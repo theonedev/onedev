@@ -298,7 +298,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<Testabl
 					} finally {
 						SecretMasker.pop();
 						synchronized (buildDir) {
-							FileUtils.deleteDir(buildDir, 5);
+							FileUtils.deletePath(buildDir, 5);
 						}
 					}
 				}

@@ -344,7 +344,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 		var userId = user.getId();
 		clusterService.runOnAllServers(() -> {
-			FileUtils.deleteDir(getUserDir(userId));
+			FileUtils.deletePath(getUserDir(userId));
 			return null;
 		});
     }

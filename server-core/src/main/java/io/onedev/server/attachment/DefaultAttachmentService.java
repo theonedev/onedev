@@ -167,7 +167,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 					});
 					write(getAttachmentLockName(targetProjectId, attachmentGroup), () -> {
 						try {
-							FileUtils.deleteDir(targetGroupDir);
+							FileUtils.deletePath(targetGroupDir);
 							FileUtils.moveDirectory(tempGroupDir, targetGroupDir);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
@@ -175,7 +175,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 						return null;
 					});
 				} finally {
-					FileUtils.deleteDir(tempGroupDir);
+					FileUtils.deletePath(tempGroupDir);
 				}
 				projectService.directoryModified(targetProjectId, sourceGroupDir.getParentFile());
 				projectService.directoryModified(targetProjectId, targetGroupDir.getParentFile());
@@ -194,7 +194,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 
 					write(getAttachmentLockName(targetProjectId, attachmentGroup), () -> {
 						try {
-							FileUtils.deleteDir(targetGroupDir);
+							FileUtils.deletePath(targetGroupDir);
 							FileUtils.moveDirectory(tempGroupDir, targetGroupDir);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
@@ -202,7 +202,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 						return null;
 					});
 				} finally {
-					FileUtils.deleteDir(tempGroupDir);
+					FileUtils.deletePath(tempGroupDir);
 				}
 				projectService.directoryModified(targetProjectId, targetGroupDir.getParentFile());
 			}
@@ -216,7 +216,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 					for (var attachmentGroup: attachmentGroups) {
 						var sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, attachmentGroup);
 						write(getAttachmentLockName(sourceProjectId, attachmentGroup), () -> {
-							FileUtils.deleteDir(sourceGroupDir);
+							FileUtils.deletePath(sourceGroupDir);
 							return null;
 						});
 						projectService.directoryModified(sourceProjectId, sourceGroupDir.getParentFile());
@@ -257,14 +257,14 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 					});
 					write(getAttachmentLockName(targetProjectId, targetAttachmentGroup), () -> {
 						try {
-							FileUtils.deleteDir(targetGroupDir);
+							FileUtils.deletePath(targetGroupDir);
 							FileUtils.moveDirectory(tempGroupDir, targetGroupDir);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
 					});
 				} finally {
-					FileUtils.deleteDir(tempGroupDir);
+					FileUtils.deletePath(tempGroupDir);
 				}
 				projectService.directoryModified(targetProjectId, targetGroupDir.getParentFile());
 			}
@@ -280,14 +280,14 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 							sourceProjectId, sourceIssue.getAttachmentGroup());
 					write(getAttachmentLockName(targetProjectId, targetIssue.getAttachmentGroup()), () -> {
 						try {
-							FileUtils.deleteDir(targetGroupDir);
+							FileUtils.deletePath(targetGroupDir);
 							FileUtils.moveDirectory(tempGroupDir, targetGroupDir);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
 					});
 				} finally {
-					FileUtils.deleteDir(tempGroupDir);
+					FileUtils.deletePath(tempGroupDir);
 				}
 				projectService.directoryModified(targetProjectId, targetGroupDir.getParentFile());
 			}
@@ -369,7 +369,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 						if (tempAttachmentBase.exists()) {
 							for (File attachmentGroupDir: tempAttachmentBase.listFiles()) {
 								if (System.currentTimeMillis() - attachmentGroupDir.lastModified() > TEMP_PRESERVE_PERIOD) {
-									FileUtils.deleteDir(attachmentGroupDir);
+									FileUtils.deletePath(attachmentGroupDir);
 								}
 							}
 						}
@@ -517,7 +517,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 									File attachmentDir = getPermanentAttachmentGroupDir(
 											projectService.getAttachmentDir(storageSupport.getAttachmentProject().getId()),
 											attachmentGroup);
-									FileUtils.deleteDir(attachmentDir);
+									FileUtils.deletePath(attachmentDir);
 									projectService.directoryModified(projectId, attachmentDir.getParentFile());
 									return null;
 								});
@@ -612,7 +612,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 			}
 			if (ex != null) {
 				if (file.exists())
-					FileUtils.deleteFile(file);
+					FileUtils.deletePath(file);
 				throw ExceptionUtils.unchecked(ex);
 			} else {
 				if (!attachmentDir.getParentFile().getName().equals(TEMP))
@@ -644,7 +644,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 			var attachmentGroupDir = getAttachmentGroupDir(projectId, attachmentGroup);
 			File attachmentFile = new File(attachmentGroupDir, attachment);
 			if (attachmentFile.exists()) {
-				FileUtils.deleteFile(attachmentFile);
+				FileUtils.deletePath(attachmentFile);
 				projectService.directoryModified(projectId, attachmentGroupDir);
 			}
 			return null;

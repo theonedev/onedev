@@ -811,7 +811,7 @@ public class GitUtils {
 			throw new RuntimeException(e);
 		} finally {
 			SecretMasker.pop();
-			FileUtils.deleteDir(homeDir);
+			FileUtils.deletePath(homeDir);
 		}
 	}
 	

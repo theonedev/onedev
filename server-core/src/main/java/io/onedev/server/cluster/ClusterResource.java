@@ -333,7 +333,7 @@ public class ClusterResource {
 				commitInfoService.export(projectId, tempDir);
 				TarUtils.tar(tempDir, os, false);
 			} finally {
-				FileUtils.deleteDir(tempDir);
+				FileUtils.deletePath(tempDir);
 			}
 	   };
 		return ok(output).build();
@@ -352,7 +352,7 @@ public class ClusterResource {
 				visitInfoService.export(projectId, tempDir);
 				TarUtils.tar(tempDir, os, false);
 			} finally {
-				FileUtils.deleteDir(tempDir);
+				FileUtils.deletePath(tempDir);
 			}
 		};
 		return ok(output).build();

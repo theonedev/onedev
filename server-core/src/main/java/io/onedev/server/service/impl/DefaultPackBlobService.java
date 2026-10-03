@@ -224,7 +224,7 @@ public class DefaultPackBlobService extends BaseEntityService<PackBlob>
 					var blobFile = getPackBlobFile(projectId, sha256Hash);
 					boolean deleted = write(fileLockName, () -> {
 						if (blobFile.exists()) {
-							FileUtils.deleteFile(blobFile);
+							FileUtils.deletePath(blobFile);
 							return true;
 						} else {
 							return false;
@@ -334,7 +334,7 @@ public class DefaultPackBlobService extends BaseEntityService<PackBlob>
 		projectService.runOnActiveServer(projectId, () -> {
 			var uploadFile = getUploadFile(projectId, uuid);
 			if (uploadFile.exists())
-				FileUtils.deleteFile(uploadFile);
+				FileUtils.deletePath(uploadFile);
 			return null;
 		});
 	}
@@ -349,7 +349,7 @@ public class DefaultPackBlobService extends BaseEntityService<PackBlob>
 					if (digest.matches(is)) {
 						return new Pair<>(uploadFile.length(), sha256Hash);
 					} else {
-						FileUtils.deleteFile(uploadFile);
+						FileUtils.deletePath(uploadFile);
 						return null;
 					}
 				} else {
@@ -367,13 +367,13 @@ public class DefaultPackBlobService extends BaseEntityService<PackBlob>
 					FileUtils.createDir(blobFile.getParentFile());
 					write(getFileLockName(projectId, fileUploadResult.getRight()), () -> {
 						if (blobFile.exists())
-							FileUtils.deleteFile(blobFile);
+							FileUtils.deletePath(blobFile);
 						FileUtils.moveFile(uploadFile, blobFile);
 						return null;
 					});
 					projectService.directoryModified(projectId, blobFile.getParentFile());
 				} else {
-					FileUtils.deleteFile(uploadFile);
+					FileUtils.deletePath(uploadFile);
 				}
 				return null;
 			});
@@ -525,7 +525,7 @@ public class DefaultPackBlobService extends BaseEntityService<PackBlob>
 					if (project != null) {
 						for (var uploadFile: projectService.getSubDir(projectId, UPLOADS_DIR).listFiles()) {
 							if (now.getTime() - uploadFile.lastModified() > EXPIRE_MILLIS) 
-								FileUtils.deleteFile(uploadFile);
+								FileUtils.deletePath(uploadFile);
 						}
 					}
 				}
@@ -553,7 +553,7 @@ public class DefaultPackBlobService extends BaseEntityService<PackBlob>
 								var blobFile = getPackBlobFile(projectId, hash);
 								var deleted = write(getFileLockName(projectId, hash), () -> {
 									if (blobFile.exists()) {
-										FileUtils.deleteFile(blobFile);
+										FileUtils.deletePath(blobFile);
 										return true;
 									} else {
 										return false;

@@ -121,7 +121,7 @@ public class SignatureVerifierTest {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
-			FileUtils.deleteDir(tempDir, 3);
+			FileUtils.deletePath(tempDir, 3);
 		}		
     }
 	

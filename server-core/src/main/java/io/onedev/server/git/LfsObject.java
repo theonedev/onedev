@@ -164,7 +164,7 @@ public class LfsObject implements Serializable {
 				Lock writeLock = getLock().writeLock();
 				writeLock.lock();
 				try {
-					FileUtils.deleteFile(getFile());
+					FileUtils.deletePath(getFile());
 				} finally {
 					writeLock.unlock();
 				}

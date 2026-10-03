@@ -284,7 +284,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 					clusterService.submitToServer(projectServer, () -> {
 						try {
 							var buildDir = getBuildDir(projectId, buildNumber);
-							FileUtils.deleteDir(buildDir);
+							FileUtils.deletePath(buildDir);
 							projectService.directoryModified(projectId, buildDir.getParentFile());
 						} catch (Throwable e) {
 							var message = "Error deleting build storage directory (project id: %d, build number: %d)"
@@ -1185,9 +1185,9 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 				File artifactFile = new File(artifactsDir, artifactPath);
 				if (artifactFile.exists()) {
 					if (artifactFile.isFile())
-						FileUtils.deleteFile(artifactFile);
+						FileUtils.deletePath(artifactFile);
 					else 
-						FileUtils.deleteDir(artifactsDir);
+						FileUtils.deletePath(artifactsDir);
 				} else {
 					String errorMessage = String.format(
 							"Unable to find specified artifact (project: %s, build number: %d, artifact path: %s)",

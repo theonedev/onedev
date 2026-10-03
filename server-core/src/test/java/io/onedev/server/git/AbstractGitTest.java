@@ -81,7 +81,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 		int retried = 0;
 		while (dir.exists()) {
 			try {
-				FileUtils.deleteDir(dir);
+				FileUtils.deletePath(dir);
 				break;
 			} catch (Exception e) {
 				if (retried++ < retries) {
@@ -100,7 +100,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 	@Override
 	protected void teardown() {
 		git.getRepository().close();
-		FileUtils.deleteDir(gitDir, 3);
+		FileUtils.deletePath(gitDir, 3);
 	}
 
 	protected void createDir(String path) {
@@ -108,7 +108,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 	}
 	
 	protected void deleteDir(String path) {
-		FileUtils.deleteDir(new File(gitDir, path));
+		FileUtils.deletePath(new File(gitDir, path));
 	}
 	
 	protected void writeFile(String path, String content) {

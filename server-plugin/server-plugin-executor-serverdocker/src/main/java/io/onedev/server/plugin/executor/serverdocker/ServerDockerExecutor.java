@@ -604,7 +604,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 						} finally {
 							SecretMasker.pop();
 							synchronized (buildDir) {
-								FileUtils.deleteDir(buildDir, 5);
+								FileUtils.deletePath(buildDir, 5);
 							}
 						}
 					}

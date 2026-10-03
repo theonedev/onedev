@@ -37,7 +37,7 @@ public class IncompatibilitiesPage extends LayoutPage {
 							incompatibilitiesSinceUpgradedVersionFile, StandardCharsets.UTF_8);
 					FileUtils.copyFile(incompatibilitiesSinceUpgradedVersionFile, 
 							checkedIncompatibilitiesSinceUpgradedVersionFile);
-					FileUtils.deleteFile(incompatibilitiesSinceUpgradedVersionFile);
+					FileUtils.deletePath(incompatibilitiesSinceUpgradedVersionFile);
 					return incompatibilitiesSinceUpgradedVersion;
 				} else if (checkedIncompatibilitiesSinceUpgradedVersionFile.exists()) {
 					return FileUtils.readFileToString(

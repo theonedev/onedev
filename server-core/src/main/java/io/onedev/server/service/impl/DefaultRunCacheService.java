@@ -326,7 +326,7 @@ public class DefaultRunCacheService implements RunCacheService, Serializable, Sc
 	public void deleteCache(Long projectId, String key, @Nullable String checksum) {
 		var dirName = getDirName(key, checksum);
 		projectService.runOnActiveServer(projectId, () -> write(getLockName(projectId, dirName), () -> {
-			FileUtils.deleteDir(getCacheDir(projectId, dirName));
+			FileUtils.deletePath(getCacheDir(projectId, dirName));
 			return null;
 		}));
 	}
@@ -369,12 +369,12 @@ public class DefaultRunCacheService implements RunCacheService, Serializable, Sc
 							var dirName = child.getName();
 							write(getLockName(projectId, dirName), () -> {
 								if (!isCacheDirValid(child)) {
-									FileUtils.deleteDir(child);
+									FileUtils.deletePath(child);
 									return null;
 								}
 								var lastAccessTime = readLastAccessTime(child);
 								if (lastAccessTime < thresholdMillis)
-									FileUtils.deleteDir(child);
+									FileUtils.deletePath(child);
 								return null;
 							});
 						}

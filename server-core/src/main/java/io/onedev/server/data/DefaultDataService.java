@@ -603,7 +603,7 @@ public class DefaultDataService implements DataService, Serializable {
     		throw new RuntimeException(e);
     	} finally {
     		if (tempFile != null)
-    			FileUtils.deleteFile(tempFile);
+				FileUtils.deletePath(tempFile);
     	}
 	}
 	
@@ -988,7 +988,7 @@ public class DefaultDataService implements DataService, Serializable {
 							notifyBackupError(e);
 							throw ExceptionUtils.unchecked(e);
 						} finally {
-							FileUtils.deleteDir(tempDir);
+							FileUtils.deletePath(tempDir);
 						}
 					}		
 				}

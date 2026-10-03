@@ -126,10 +126,7 @@ public class SiteSyncUtils {
 					if (remoteChildren.remove(file.getName())) {
 						childSyncer.accept(file.getName());
 					} else if (deleteLocalIfRemoteIsMissing) {
-						if (file.isFile())
-							FileUtils.deleteFile(file);
-						else
-							FileUtils.deleteDir(file);
+						FileUtils.deletePath(file);
 					}
 				}
 			}
@@ -194,7 +191,7 @@ public class SiteSyncUtils {
 					try {
 						downloadDirectory(remoteServer, path, tempDir, readLock);
 						if (deleteLocalIfRemoteIsMissing) {
-							FileUtils.deleteDir(directory);
+							FileUtils.deletePath(directory);
 							FileUtils.moveDirectory(tempDir, directory);
 						} else {
 							FileUtils.copyDirectory(tempDir, directory);
@@ -203,7 +200,7 @@ public class SiteSyncUtils {
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					} finally {
-						FileUtils.deleteDir(tempDir);
+						FileUtils.deletePath(tempDir);
 					}
 				});
 			} else {
@@ -256,21 +253,21 @@ public class SiteSyncUtils {
 				var tempFile = FileUtils.createTempFile();
 				try {
 					if (downloadFile(fromServer, path, tempFile, readLock)) {
-						FileUtils.deleteFile(file);
+						FileUtils.deletePath(file);
 						FileUtils.moveFile(tempFile, file);
 					} else if (deleteLocalIfRemoteIsMissing && file.exists()) {
-						FileUtils.deleteFile(file);
+						FileUtils.deletePath(file);
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				} finally {
-					FileUtils.deleteFile(tempFile);
+					FileUtils.deletePath(tempFile);
 				}
 			});
 		} else if (!downloadFile(fromServer, path, file, readLock) 
 				&& deleteLocalIfRemoteIsMissing 
 				&& file.exists()) {
-			FileUtils.deleteFile(file);
+			FileUtils.deletePath(file);
 		}
 	}
 

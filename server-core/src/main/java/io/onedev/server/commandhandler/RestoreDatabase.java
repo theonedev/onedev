@@ -73,7 +73,7 @@ public class RestoreDatabase extends CommandHandler {
 						ZipUtils.unzip(backupFile, dataDir);
 						doRestore(dataDir);
 					} finally {
-						FileUtils.deleteDir(dataDir);
+						FileUtils.deletePath(dataDir);
 					}
 				} else {
 					doRestore(backupFile);

@@ -68,11 +68,11 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 								build.getProject().getId(), reportDir.getParentFile());
 						return aReport;
 					} else {
-						FileUtils.deleteDir(reportDir);
+						FileUtils.deletePath(reportDir);
 						return null;
 					}
 				} catch (Exception e) {
-					FileUtils.deleteDir(reportDir);
+					FileUtils.deletePath(reportDir);
 					throw ExceptionUtils.unchecked(e);
 				}
 			});

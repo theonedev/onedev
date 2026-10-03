@@ -409,7 +409,7 @@ public class DefaultLogService implements LogService, Serializable {
 	public void clear(LoggingSupport loggingSupport) {
 		var identity = loggingSupport.getIdentity();
 		write(identity.getLockName(), () -> {
-			FileUtils.deleteFile(identity.getFile());
+			FileUtils.deletePath(identity.getFile());
 			recentSnippets.remove(identity.getFile());
 			return null;
 		});
