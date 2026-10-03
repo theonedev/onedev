@@ -1,7 +1,10 @@
 package io.onedev.server.cache;
 
 import io.onedev.k8shelper.CacheConfigFacade;
+import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.UserService;
 import io.onedev.server.workspace.WorkspaceContext;
 
 public class ServerWorkspaceCacheProvisioner extends ServerCacheProvisioner {
@@ -21,8 +24,8 @@ public class ServerWorkspaceCacheProvisioner extends ServerCacheProvisioner {
 
 	@Override
 	protected boolean canUploadTo(Project uploadProject) {
-		var project = getProjectService().load(workspaceContext.getProjectId());
-		return project.isSelfOrAncestorOf(uploadProject);
+		var user = OneDev.getInstance(UserService.class).load(workspaceContext.getUserId());
+		return SecurityUtils.canUploadCache(user.asSubject(), uploadProject);
 	}
 			
 }

@@ -228,7 +228,8 @@ public class WorkerResource {
 	public Long checkUploadCache(WorkspaceContext context, @Nullable String projectPath) {
 		var project = projectService.load(context.getProjectId());
 		var uploadProject = getUploadProject(project, projectPath);
-		if (project.isSelfOrAncestorOf(uploadProject) || SecurityUtils.canUploadCache(uploadProject))
+		var user = userService.load(context.getUserId());
+		if (SecurityUtils.canUploadCache(user.asSubject(), uploadProject) || SecurityUtils.canUploadCache(uploadProject))
 			return uploadProject.getId();
 		else
 			throw new UnauthorizedException();

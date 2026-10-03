@@ -124,7 +124,7 @@ public class CacheConfig implements Serializable {
 
 	@Editable(order=500, description = """
 			Specify access token with upload cache permission for above project. 
-			Note that this property is not required if upload cache to current project""")
+			This property is not required if the workspace owner has upload cache permission for above project""")
 	@Password
 	public String getUploadAccessToken() {
 		return uploadAccessToken;
