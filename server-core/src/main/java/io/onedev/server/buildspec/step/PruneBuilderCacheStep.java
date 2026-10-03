@@ -13,7 +13,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
 
 @Editable(order=260, name="Prune Builder Cache", group = DOCKER_IMAGE, description="" +
-		"Prune image cache of docker buildx builder. This step calls docker builder prune command " +
+		"Prune image cache of docker buildx builder. This step calls docker buildx prune command " +
 		"to remove cache of buildx builder specified in server docker executor or remote docker executor")
 public class PruneBuilderCacheStep extends Step {
 
@@ -21,8 +21,8 @@ public class PruneBuilderCacheStep extends Step {
 	
 	private String options;
 
-	@Editable(order=100, description = "Optionally specify options for docker builder prune command")
-	@ReservedOptions({"-f", "--force", "--builder"})
+	@Editable(order=100, description = "Optionally specify options for docker buildx prune command")
+	@ReservedOptions({"-f", "--force", "(-f|--force)=.*", "--builder", "(--builder)=.*"})
 	public String getOptions() {
 		return options;
 	}
