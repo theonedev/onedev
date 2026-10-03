@@ -341,6 +341,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
 		checkStepPermissions(jobContext);
+		
 		ClusterTask<Boolean> runnable = () -> getJobService().runJob(jobContext, new JobRunnable() {
 
 			private static final long serialVersionUID = 1L;
