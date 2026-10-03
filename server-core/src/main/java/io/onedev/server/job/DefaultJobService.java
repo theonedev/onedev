@@ -69,6 +69,7 @@ import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Path;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecParseException;
 import io.onedev.server.buildspec.Service;
@@ -148,6 +149,7 @@ import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.concurrent.WorkExecutionService;
 import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.validation.validator.PathValidator;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
 import jakarta.inject.Inject;
@@ -1538,7 +1540,14 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 				File targetDir;
 				if (dependence.getDestinationPath() != null) {
-					targetDir = new File(tempDir, dependence.getDestinationPath());
+					// Validate the stored, interpolated value before creating or copying anything.
+					var destinationPath = dependence.getDestinationPath();
+					var error = PathValidator.checkPath(Path.Type.RELATIVE, destinationPath);
+					if (error != null)
+						throw new ExplicitException("Invalid dependency destination path '" + destinationPath + "': " + error);
+					targetDir = new File(tempDir, destinationPath);
+					if (FileUtils.hasSymbolLinks(tempDir, targetDir))
+						throw new ExplicitException("Dependency destination path must not contain symbolic links: " + destinationPath);
 					FileUtils.createDir(targetDir);
 				} else {
 					targetDir = tempDir;
