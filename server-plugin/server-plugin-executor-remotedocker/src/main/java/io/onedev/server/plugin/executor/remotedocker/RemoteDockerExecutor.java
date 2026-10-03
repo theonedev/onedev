@@ -88,7 +88,6 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger logger) {
-		checkStepPermissions(jobContext);
 		AgentCallable<Boolean> runnable = (agentId) -> {
 			return getJobService().runJob(jobContext, new JobRunnable() {
 				
@@ -110,7 +109,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					
 					var dockerSettings = new JobDockerSettings(isMountDockerSock(), getDockerSockPath(),
 							getCpuLimit(), getMemoryLimit(), getRunOptions(), registryLogins,
-							isAlwaysPullImage(), getDockerBuilder(), getNetworkOptions());
+							isAlwaysPullImage(), getDockerBuilder(), getNetworkOptions(),
+							isImageBuildEnabled(), isBuilderCachePruneEnabled());
 					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getSubmitSequence(), jobContext.getActions(),

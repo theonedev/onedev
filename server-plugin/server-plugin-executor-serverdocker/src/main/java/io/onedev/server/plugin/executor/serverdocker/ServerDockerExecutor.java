@@ -275,7 +275,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 	@Editable(order=50075, group="More Settings", description = "Optionally specify docker options to create network. " +
 			"Multiple options should be separated by space, and single option containing spaces should be quoted")
-	@ReservedOptions({"-d", "(--driver)=.*"})
+	@ReservedOptions({"(-d).*", "--driver", "(--driver)=.*"})
 	public String getNetworkOptions() {
 		return networkOptions;
 	}
@@ -326,22 +326,8 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		}
 	}
 	
-	protected void checkStepPermissions(JobContext jobContext) {
-		new CompositeFacade(jobContext.getActions()).traverse((facade, position) -> {
-			if (facade instanceof BuildImageFacade && !isImageBuildEnabled())
-				throw new ExplicitException("Image build is disabled in executor '" + getName()
-						+ "'. Enable Image Build in executor Security Settings to allow this step");
-			if (facade instanceof PruneBuilderCacheFacade && !isBuilderCachePruneEnabled())
-				throw new ExplicitException("Builder cache prune is disabled in executor '" + getName()
-						+ "'. Enable Builder Cache Prune in executor Security Settings to allow this step");
-			return null;
-		}, new ArrayList<>());
-	}
-
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
-		checkStepPermissions(jobContext);
-		
 		ClusterTask<Boolean> runnable = () -> getJobService().runJob(jobContext, new JobRunnable() {
 
 			private static final long serialVersionUID = 1L;
@@ -525,7 +511,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								var registryLogins = merge(buildImageFacade.getRegistryLogins(), getRegistryLogins(jobToken));
 								callWithRegistryLogins(docker, registryLogins, () -> {
 									JobUtils.buildImage(docker, getDockerBuilder(), buildImageFacade, buildDir,
-											isAlwaysPullImage(), jobLogger);
+											isAlwaysPullImage(), isImageBuildEnabled(), getName(), jobLogger);
 									return null;
 								});
 							} else if (facade instanceof PruneBuilderCacheFacade) {
@@ -533,7 +519,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								var docker = newDocker();
 								callWithRegistryLogins(docker, new ArrayList<>(), () -> {
 									JobUtils.pruneBuilderCache(docker, getDockerBuilder(), pruneBuilderCacheFacade,
-											buildDir, jobLogger);
+											buildDir, isBuilderCachePruneEnabled(), getName(), jobLogger);
 									return null;
 								});
 							} else if (facade instanceof RunContainerFacade) {
