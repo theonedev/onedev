@@ -14,12 +14,6 @@ import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import jakarta.validation.ConstraintValidatorContext;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
-import jakarta.validation.Validator;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.jspecify.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -38,7 +32,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
@@ -62,6 +55,11 @@ import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
 
 @Editable
 @ClassValidating

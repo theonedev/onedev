@@ -107,7 +107,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	
 	private String dockerSockPath;
 	
-	private String dockerBuilder = "onedev";
+	private String dockerBuilder;
 	
 	private String networkOptions;
 	
@@ -174,17 +174,23 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		this.dockerSockPath = dockerSockPath;
 	}
 
-	@Editable(order=515, group="More Settings", name="Buildx Builder", description = "Specify dockerx builder used to " +
-			"build docker image. OneDev will create the builder automatically if it does not exist. Check " +
+	@Editable(order=515, group="More Settings", name="Buildx Builder", placeholder="executor-<executor name>",
+			description = "Optionally specify the Buildx builder used to build docker images. " +
+			"Leave empty to use <code>executor-&lt;executor name&gt;</code>. OneDev will create the builder " +
+			"automatically if it does not exist. Jobs using the same builder can read or modify each other's " +
+			"build cache, so only share a builder among trusted jobs. Jobs using this executor still share its builder. Check " +
 			"<a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> " +
 			"on how to customize the builder for instance to allow publishing to insecure registries")
-	@NotEmpty
 	public String getDockerBuilder() {
 		return dockerBuilder;
 	}
 
 	public void setDockerBuilder(String dockerBuilder) {
 		this.dockerBuilder = dockerBuilder;
+	}
+
+	protected String getEffectiveDockerBuilder() {
+		return getDockerBuilder() != null ? getDockerBuilder() : "executor-" + getName();
 	}
 	
 	@Editable(order=600, group="Security Settings", description = "Whether or not to always pull image when " +
@@ -495,7 +501,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								var docker = newDocker();
 								var registryLogins = merge(buildImageFacade.getRegistryLogins(), getRegistryLogins(jobToken));
 								callWithRegistryLogins(docker, registryLogins, () -> {
-									JobUtils.buildImage(docker, getDockerBuilder(), getBuildOptions(), buildImageFacade, buildDir,
+									JobUtils.buildImage(docker, getEffectiveDockerBuilder(), getBuildOptions(), buildImageFacade, buildDir,
 											isAlwaysPullImage(), jobLogger);
 									return null;
 								});
@@ -511,7 +517,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								var pruneBuilderCacheFacade = (PruneBuilderCacheFacade) facade;
 								var docker = newDocker();
 								callWithRegistryLogins(docker, new ArrayList<>(), () -> {
-									JobUtils.pruneBuilderCache(docker, getDockerBuilder(), pruneBuilderCacheFacade,
+									JobUtils.pruneBuilderCache(docker, getEffectiveDockerBuilder(), pruneBuilderCacheFacade,
 											buildDir, jobLogger);
 									return null;
 								});

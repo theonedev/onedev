@@ -6,6 +6,10 @@ The `More Options` setting (`moreOptions` in build specs) of the build image ste
 
 Existing step options are removed when build specs are migrated and are not copied to executors automatically. Before upgrading, record any options you need to retain and ask an administrator to configure them on the appropriate Docker job executor after upgrading. Executor options apply to all build image steps using that executor.
 
+The `Buildx Builder` setting of all server and remote Docker job executors is cleared during upgrade, including custom builder names. When unset, it now defaults to `executor-<executor name>` instead of `onedev`. Image builds and cache pruning use this executor-specific builder, so existing builder caches and custom configuration are no longer used by default. Before upgrading, record any custom builder settings and reconfigure the new builders or explicitly restore a builder name afterward if needed.
+
+Jobs using the same Buildx builder can read or modify each other's build cache. Only share a builder among trusted jobs; jobs using the same executor still share its builder. Use separate executors and builders for mutually untrusted jobs.
+
 # 16.8.0
 
 ### CI/CD

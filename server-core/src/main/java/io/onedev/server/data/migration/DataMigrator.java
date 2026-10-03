@@ -9529,4 +9529,28 @@ public class DataMigrator {
 		// Recreate the schema to restore longblob columns on MySQL/MariaDB (OD-3157).
 	}
 
+	private void migrate248(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if ("JOB_EXECUTORS".equals(element.elementTextTrim("key"))) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement : valueElement.elements()) {
+								if (executorElement.getName().endsWith(".ServerDockerExecutor")
+										|| executorElement.getName().endsWith(".RemoteDockerExecutor")) {
+									var builderElement = executorElement.element("dockerBuilder");
+									if (builderElement != null)
+										builderElement.detach();
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }
