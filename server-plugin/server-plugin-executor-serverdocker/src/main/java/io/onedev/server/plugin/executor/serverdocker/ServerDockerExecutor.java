@@ -3,10 +3,8 @@ package io.onedev.server.plugin.executor.serverdocker;
 import static io.onedev.agent.AgentUtils.callWithRegistryLogins;
 import static io.onedev.agent.AgentUtils.changeOwner;
 import static io.onedev.agent.AgentUtils.getOsIds;
-import static io.onedev.agent.AgentUtils.newDockerKiller;
 import static io.onedev.agent.job.JobUtils.getBuildDir;
 import static io.onedev.k8shelper.JobHelper.BUILD_PATH;
-import static io.onedev.k8shelper.JobHelper.resolveBuildPath;
 import static io.onedev.k8shelper.JobHelper.resumeJob;
 import static io.onedev.k8shelper.JobHelper.stringifyStepPosition;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
@@ -28,12 +26,11 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.agent.AgentUtils;
-import io.onedev.agent.job.DockerRunOptions;
+import io.onedev.agent.DockerSettings;
 import io.onedev.agent.job.JobUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.bootstrap.SecretMasker;
@@ -386,7 +383,11 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 					getJobService().reportJobWorkDir(jobContext, containerWorkDirPath);
 					CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 					var cacheConfigIndex = new AtomicInteger(1);
-					var pulledImages = new HashSet<String>();
+					var dockerSettings = new DockerSettings(isMountDockerSock(), getDockerSockPath(), getCpuLimit(),
+							getMemoryLimit(), getRunOptions(), List.of(), isAlwaysPullImage());
+					var stepContainerContext = new JobUtils.StepContainerContext(dockerSettings, network, buildDir,
+							cacheProvisioners, new HashSet<>(), ServerDockerExecutor.this::getHostPath,
+							ServerDockerExecutor.this::newDocker, jobLogger);
 					initializationCompleted = true;
 					successful = entryFacade.execute(new LeafHandler() {
 
@@ -396,66 +397,8 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 														Map<String, String> volumeMounts, List<Integer> position, boolean useTTY) {
 							containerName = network + "-step-" + stringifyStepPosition(position);
 							try {
-								docker.args("run", "--stop-timeout=30", "--name=" + containerName, "--network=" + network);
-								if (isAlwaysPullImage() && pulledImages.add(image))
-									docker.addArgs("--pull=always");
-
-								docker.addArgs("--user", runAs);
-
-								if (getCpuLimit() != null)
-									docker.addArgs("--cpus", getCpuLimit());
-								if (getMemoryLimit() != null)
-									docker.addArgs("--memory", getMemoryLimit());
-								docker.addArgs(DockerRunOptions.parse(getRunOptions(), buildDir));
-
-								docker.addArgs("-v", getHostPath(buildDir.getAbsolutePath()) + ":" + containerBuildDirPath);
-
-								for (Map.Entry<String, String> entry : volumeMounts.entrySet()) {
-									if (entry.getKey().contains(".."))
-										throw new ExplicitException("Volume mount source path should not contain '..'");
-									String hostPath = getHostPath(resolveBuildPath(buildDir, "work/" + entry.getKey()).getAbsolutePath());
-									docker.addArgs("-v", hostPath + ":" + entry.getValue());
-								}
-
-								if (entrypoint != null)
-									docker.addArgs("-w", containerWorkDirPath);
-								else if (workingDir != null)
-									docker.addArgs("-w", workingDir);
-
-								for (var cacheProvisioner : cacheProvisioners) {
-									for (var path: cacheProvisioner.getConfig().getPaths()) {
-										if (FilenameUtils.getPrefixLength(path) > 0) {
-											var pathDir = cacheProvisioner.getPathDir(buildDir, path);
-											docker.addArgs("-v", getHostPath(pathDir.getAbsolutePath()) + ":" + path);
-										}
-									}
-								}
-	
-								if (isMountDockerSock()) {
-									if (getDockerSockPath() != null)
-										docker.addArgs("-v", getDockerSockPath() + ":/var/run/docker.sock");
-									else
-										docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
-								}
-
-								for (Map.Entry<String, String> entry : environments.entrySet())
-									docker.addArgs("-e", entry.getKey() + "=" + entry.getValue());
-
-								docker.addArgs("-e", "ONEDEV_WORKDIR=" + containerWorkDirPath);
-
-								if (useTTY)
-									docker.addArgs("-t");
-
-								if (entrypoint != null)
-									docker.addArgs("--entrypoint=" + entrypoint);
-
-								docker.addArgs("--", image);
-								docker.addArgs(arguments.toArray(new String[0]));
-								docker.processKiller(newDockerKiller(newDocker(), containerName, jobLogger));
-
-								var result = docker.execute(AgentUtils.newInfoLogger(jobLogger),
-										AgentUtils.newWarningLogger(jobLogger), null);
-								return result.getReturnCode();
+								return JobUtils.runStepContainer(stepContainerContext, docker, containerName, image, runAs,
+										entrypoint, arguments, environments, workingDir, volumeMounts, useTTY);
 							} finally {
 								containerName = null;
 							}
