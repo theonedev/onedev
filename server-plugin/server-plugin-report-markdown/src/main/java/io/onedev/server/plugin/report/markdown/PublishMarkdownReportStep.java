@@ -7,6 +7,7 @@ import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Path;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
@@ -35,6 +36,7 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	
 	@Editable(order=1100, description="Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance: <tt>manual/index.md</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
+	@Path(Path.Type.RELATIVE)
 	@NotEmpty
 	public String getStartPage() {
 		return startPage;
@@ -59,10 +61,10 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
+		File startPage = getReportFile(inputDir, getStartPage());
 		OneDev.getInstance(SessionService.class).run(() -> {
 			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			write(getReportLockName(build), () -> {
-				File startPage = new File(inputDir, getStartPage());
 				if (startPage.exists()) {
 					File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 

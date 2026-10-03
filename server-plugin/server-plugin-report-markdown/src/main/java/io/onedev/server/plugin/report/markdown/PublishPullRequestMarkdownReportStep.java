@@ -7,6 +7,7 @@ import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Path;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
@@ -35,6 +36,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 	
 	@Editable(order=1100, description="Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published")
 	@Interpolative(variableSuggester="suggestVariables")
+	@Path(Path.Type.RELATIVE)
 	@NotEmpty
 	public String getFile() {
 		return file;
@@ -56,11 +58,11 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	@Override
 	public ServerStepResult run(Long buildId, File workDir, TaskLogger logger) {
+		File file = getReportFile(workDir, getFile());
 		OneDev.getInstance(SessionService.class).run(() -> {
 			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			if (build.getRequest() != null) {
 				write(getReportLockName(build.getProject().getId(), build.getNumber()), () -> {
-					File file = new File(workDir, getFile());
 					if (file.exists()) {
 						File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 						String markdown = FileUtils.readFileToString(file, UTF_8);

@@ -418,7 +418,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								if (entrypoint != null)
 									docker.addArgs("--entrypoint=" + entrypoint);
 
-								docker.addArgs(image);
+								docker.addArgs("--", image);
 								docker.addArgs(arguments.toArray(new String[0]));
 								docker.processKiller(newDockerKiller(newDocker(), containerName, jobLogger));
 
