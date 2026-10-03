@@ -88,6 +88,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger logger) {
+		checkStepPermissions(jobContext);
 		AgentCallable<Boolean> runnable = (agentId) -> {
 			return getJobService().runJob(jobContext, new JobRunnable() {
 				

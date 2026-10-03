@@ -103,6 +103,10 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	private String dockerExecutable;
 	
 	private boolean mountDockerSock;
+
+	private boolean imageBuildEnabled;
+
+	private boolean builderCachePruneEnabled;
 	
 	private String dockerSockPath;
 	
@@ -216,6 +220,29 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		this.mountDockerSock = mountDockerSock;
 	}
 
+	@Editable(order=530, name="Enable Buildx Image Build", group="Security Settings", description="Enable this to allow to run the build image step which uses buildx. "
+			+ "The build image step using kaniko can still be used even this option is disabled<br>"
+			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can read arbitrary host files by running this step. Make sure this executor can only be used by "
+			+ "trusted jobs if this option is enabled")
+	public boolean isImageBuildEnabled() {
+		return imageBuildEnabled;
+	}
+
+	public void setImageBuildEnabled(boolean imageBuildEnabled) {
+		this.imageBuildEnabled = imageBuildEnabled;
+	}
+
+	@Editable(order=540, name="Enable Builder Cache Prune", group="Security Settings", description="Enable this to allow to run prune builder cache step<br>"
+			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can read arbitrary host files by running this step. Make sure this executor can only be used by "
+			+ "trusted jobs if this option is enabled")
+	public boolean isBuilderCachePruneEnabled() {
+		return builderCachePruneEnabled;
+	}
+
+	public void setBuilderCachePruneEnabled(boolean builderCachePruneEnabled) {
+		this.builderCachePruneEnabled = builderCachePruneEnabled;
+	}
+
 	@Editable(order=40, group="Resource Settings", placeholder = "No limit", description = "" +
 			"Optionally specify cpu limit of each job/service using this executor. This will be " +
 			"used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a> " +
@@ -305,8 +332,21 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		}
 	}
 	
+	protected void checkStepPermissions(JobContext jobContext) {
+		new CompositeFacade(jobContext.getActions()).traverse((facade, position) -> {
+			if (facade instanceof BuildImageFacade && !isImageBuildEnabled())
+				throw new ExplicitException("Image build is disabled in executor '" + getName()
+						+ "'. Enable Image Build in executor Security Settings to allow this step");
+			if (facade instanceof PruneBuilderCacheFacade && !isBuilderCachePruneEnabled())
+				throw new ExplicitException("Builder cache prune is disabled in executor '" + getName()
+						+ "'. Enable Builder Cache Prune in executor Security Settings to allow this step");
+			return null;
+		}, new ArrayList<>());
+	}
+
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
+		checkStepPermissions(jobContext);
 		ClusterTask<Boolean> runnable = () -> getJobService().runJob(jobContext, new JobRunnable() {
 
 			private static final long serialVersionUID = 1L;
