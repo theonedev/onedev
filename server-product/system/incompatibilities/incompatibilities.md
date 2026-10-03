@@ -2,9 +2,7 @@
 
 ### CI/CD
 
-The `Buildx Builder` setting of all server and remote Docker job executors is cleared during upgrade, including custom builder names. When unset, it now defaults to `executor-<executor name>` instead of `onedev`. Image builds and cache pruning use this executor-specific builder, so existing builder caches and custom configuration are no longer used by default. Before upgrading, record any custom builder settings and reconfigure the new builders or explicitly restore a builder name afterward if needed.
-
-Jobs using the same Buildx builder can read or modify each other's build cache. Only share a builder among trusted jobs; jobs using the same executor still share its builder. Use separate executors and builders for mutually untrusted jobs.
+The `Build Image` and `Prune Builder Cache` steps are now disabled by default because malicious jobs can read arbitrary host files by running these steps. After upgrading, jobs using either step will fail unless the corresponding option (`Enable Image Build` or `Enable Builder Cache Prune`) is enabled under **Security Settings** of the relevant server or remote Docker executor. When enabling either option, make sure the executor can only be used by trusted projects.
 
 # 16.8.0
 
