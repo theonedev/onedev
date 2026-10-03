@@ -1,3 +1,11 @@
+# 16.8.4
+
+### CI/CD
+
+The `More Options` setting (`moreOptions` in build specs) of the build image step has been moved to `Image Build Options` under the Docker job executor's `More Settings`. These options are now controlled by administrators, as they can allow access to files on the executor host.
+
+Existing step options are removed when build specs are migrated and are not copied to executors automatically. Before upgrading, record any options you need to retain and ask an administrator to configure them on the appropriate Docker job executor after upgrading. Executor options apply to all build image steps using that executor.
+
 # 16.8.0
 
 ### CI/CD

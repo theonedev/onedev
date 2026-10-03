@@ -38,6 +38,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
@@ -2840,6 +2841,23 @@ public class BuildSpec implements Serializable, Validatable {
 				}
 			}
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate55(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var node : stepsNode.getValue()) {
+				var step = (MappingNode) node;
+				if (!"BuildImageStep".equals(getStepType(step)))
+					continue;
+				for (var it = step.getValue().iterator(); it.hasNext();) {
+					var tuple = it.next();
+					if (((ScalarNode) tuple.getKeyNode()).getValue().equals("moreOptions")) {
+						it.remove();
+					}
+				}
+			}
+		});
 	}
 
 }

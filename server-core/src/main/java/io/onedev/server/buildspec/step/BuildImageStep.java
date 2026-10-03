@@ -18,7 +18,6 @@ import io.onedev.server.annotation.Path;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.NoSpace;
-import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
@@ -43,9 +42,7 @@ public class BuildImageStep extends Step {
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
 	private String platforms;
-	
-	private String moreOptions;
-	
+
 	@Editable(order=100, description="Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. "
 			+ "Leave empty to use job working directory itself")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -104,18 +101,6 @@ public class BuildImageStep extends Step {
 		this.platforms = platforms;
 	}
 	
-	@Editable(order=1400, group = "More Settings", description="Optionally specify additional options for " +
-			"buildx build command")
-	@Interpolative(variableSuggester="suggestVariables")
-	@ReservedOptions({"--builder", "(--builder)=.*", "--platform", "(--platform)=.*", "--push", "-f", "--file", "(-f|--file)=.*", "-t", "--tag", "(-t|--tag)=.*", "-o", "--output", "(-o|--output)=.*"})
-	public String getMoreOptions() {
-		return moreOptions;
-	}
-
-	public void setMoreOptions(String moreOptions) {
-		this.moreOptions = moreOptions;
-	}
-	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
@@ -124,7 +109,7 @@ public class BuildImageStep extends Step {
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
 		var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
 		return new BuildImageFacade(getBuildPath(), getDockerfile(), getOutput().getFacade(), 
-				registryLogins, getPlatforms(), getMoreOptions());
+				registryLogins, getPlatforms());
 	}
 	
 	@Override
