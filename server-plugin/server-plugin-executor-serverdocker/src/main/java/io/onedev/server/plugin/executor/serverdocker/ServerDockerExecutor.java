@@ -53,7 +53,6 @@ import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.PruneBuilderCacheFacade;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.k8shelper.RunContainerFacade;
-import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.k8shelper.SetupCacheFacade;
@@ -505,14 +504,6 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								callWithRegistryLogins(docker, registryLogins, () -> {
 									JobUtils.buildImage(docker, getEffectiveDockerBuilder(), getBuildOptions(), buildImageFacade, buildDir,
 											isAlwaysPullImage(), jobLogger);
-									return null;
-								});
-							} else if (facade instanceof RunImagetoolsFacade) {
-								var runImagetoolsFacade = (RunImagetoolsFacade) facade;
-								var docker = newDocker();
-								var registryLogins = merge(runImagetoolsFacade.getRegistryLogins(), getRegistryLogins(jobToken));
-								callWithRegistryLogins(docker, registryLogins, () -> {
-									JobUtils.runImagetools(docker, runImagetoolsFacade, buildDir, jobLogger);
 									return null;
 								});
 							} else if (facade instanceof PruneBuilderCacheFacade) {

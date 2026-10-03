@@ -45,7 +45,6 @@ import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.PruneBuilderCacheFacade;
 import io.onedev.k8shelper.RunContainerFacade;
-import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.k8shelper.SetupCacheFacade;
@@ -225,7 +224,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<Testabl
 									return false;
 								}
 							} else if (facade instanceof BuildImageFacade || facade instanceof RunContainerFacade
-									|| facade instanceof RunImagetoolsFacade || facade instanceof PruneBuilderCacheFacade) {
+									|| facade instanceof PruneBuilderCacheFacade) {
 								throw new ExplicitException("This step can only be executed by server docker executor or "
 										+ "remote docker executor");
 							} else if (facade instanceof CheckoutFacade) {
