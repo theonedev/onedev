@@ -98,8 +98,6 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	
 	private String runOptions;
 
-	private String buildOptions;
-	
 	private boolean alwaysPullImage = true;
 	
 	private String dockerExecutable;
@@ -252,17 +250,6 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 	public void setRunOptions(String runOptions) {
 		this.runOptions = runOptions;
-	}
-
-	@Editable(order=50060, name="Image Build Options", group="More Settings", description="Optionally specify additional "
-			+ "docker buildx build options for image build steps using this executor. "
-			+ "Separate options with spaces and quote values containing spaces")
-	public String getBuildOptions() {
-		return buildOptions;
-	}
-
-	public void setBuildOptions(String buildOptions) {
-		this.buildOptions = buildOptions;
 	}
 
 	@Editable(order=50075, group="More Settings", description = "Optionally specify docker options to create network. " +
@@ -502,7 +489,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								var docker = newDocker();
 								var registryLogins = merge(buildImageFacade.getRegistryLogins(), getRegistryLogins(jobToken));
 								callWithRegistryLogins(docker, registryLogins, () -> {
-									JobUtils.buildImage(docker, getEffectiveDockerBuilder(), getBuildOptions(), buildImageFacade, buildDir,
+									JobUtils.buildImage(docker, getEffectiveDockerBuilder(), buildImageFacade, buildDir,
 											isAlwaysPullImage(), jobLogger);
 									return null;
 								});

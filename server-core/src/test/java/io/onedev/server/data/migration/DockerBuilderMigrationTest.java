@@ -31,7 +31,7 @@ class DockerBuilderMigrationTest {
 				executor.addElement("name").setText("docker-" + builder);
 				if (!builder.isEmpty())
 					executor.addElement("dockerBuilder").setText(builder);
-				executor.addElement("buildOptions").setText("--no-cache");
+				executor.addElement("runOptions").setText("--read-only");
 			}
 			var otherSetting = list.addElement("io.onedev.server.model.Setting");
 			otherSetting.addElement("key").setText("OTHER");
@@ -55,7 +55,7 @@ class DockerBuilderMigrationTest {
 				assertEquals(List.of("docker-onedev", "docker-custom-builder", "docker-").get(i),
 						executor.elementText("name"));
 				assertNull(executor.element("dockerBuilder"));
-				assertEquals("--no-cache", executor.elementText("buildOptions"));
+				assertEquals("--read-only", executor.elementText("runOptions"));
 			}
 			assertEquals("preserved", settings.get(1).element("value").elementText("dockerBuilder"));
 			assertNull(settings.get(2).element("value"));

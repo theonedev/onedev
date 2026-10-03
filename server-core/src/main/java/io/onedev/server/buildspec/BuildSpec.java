@@ -2841,21 +2841,4 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private void migrate55(VersionedYamlDoc doc, Stack<Integer> versions) {
-		migrateSteps(doc, versions, stepsNode -> {
-			for (var node : stepsNode.getValue()) {
-				var step = (MappingNode) node;
-				if (!"BuildImageStep".equals(getStepType(step)))
-					continue;
-				for (var it = step.getValue().iterator(); it.hasNext();) {
-					var tuple = it.next();
-					if (((ScalarNode) tuple.getKeyNode()).getValue().equals("moreOptions")) {
-						it.remove();
-					}
-				}
-			}
-		});
-	}
-
 }

@@ -109,7 +109,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					
 					var dockerSettings = new JobDockerSettings(isMountDockerSock(), getDockerSockPath(),
 							getCpuLimit(), getMemoryLimit(), getRunOptions(), registryLogins,
-							isAlwaysPullImage(), getEffectiveDockerBuilder(), getNetworkOptions(), getBuildOptions());
+							isAlwaysPullImage(), getEffectiveDockerBuilder(), getNetworkOptions());
 					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getSubmitSequence(), jobContext.getActions(),
