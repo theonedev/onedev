@@ -6,6 +6,8 @@ import static io.onedev.agent.AgentUtils.getOsIds;
 import static io.onedev.agent.AgentUtils.newDockerKiller;
 import static io.onedev.agent.job.JobUtils.getBuildDir;
 import static io.onedev.k8shelper.JobHelper.BUILD_PATH;
+import static io.onedev.k8shelper.JobHelper.resolveBuildPath;
+import static io.onedev.k8shelper.JobHelper.resumeJob;
 import static io.onedev.k8shelper.JobHelper.stringifyStepPosition;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.initRepository;
@@ -401,7 +403,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								for (Map.Entry<String, String> entry : volumeMounts.entrySet()) {
 									if (entry.getKey().contains(".."))
 										throw new ExplicitException("Volume mount source path should not contain '..'");
-									String hostPath = getHostPath(new File(hostWorkDir, entry.getKey()).getAbsolutePath());
+									String hostPath = getHostPath(resolveBuildPath(buildDir, "work/" + entry.getKey()).getAbsolutePath());
 									docker.addArgs("-v", hostPath + ":" + entry.getValue());
 								}
 
@@ -635,7 +637,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 				var buildDir = getBuildDir(Bootstrap.getTempDir(), jobContext.getProjectId(), 
 						jobContext.getBuildNumber(), jobContext.getSubmitSequence());
 				if (buildDir.exists())
-					FileUtils.touchFile(new File(buildDir, "continue"));
+					resumeJob(buildDir);
 			}
 
 			@Override
