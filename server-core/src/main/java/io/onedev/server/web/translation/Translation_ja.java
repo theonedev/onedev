@@ -565,7 +565,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Build Description", "ビルド説明");
 		m.put("Build Failure Issue Prompt", "ビルド失敗問題プロンプト");
 		m.put("Build Filter", "ビルドフィルター");
-		m.put("Build Image", "ビルドイメージ");
 		m.put("Build Image (Kaniko)", "ビルドイメージ（Kaniko）");
 		m.put("Build Management", "ビルド管理");
 		m.put("Build Notification", "ビルド通知");
@@ -585,8 +584,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Build Volume Storage Size", "ビルドボリュームストレージサイズ");
 		m.put("Build administrative permission for all jobs inside a project, including batch operations over multiple builds", 
 			"プロジェクト内のすべてのジョブに対するビルド管理権限、複数のビルドに対する一括操作を含む");
-		m.put("Build docker image with docker buildx. This step can only be executed by server docker executor or remote docker executor, and it uses the buildx builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko step instead", 
-			"docker buildxを使用してDockerイメージをビルドします。このステップはサーバーDockerエグゼキューターまたはリモートDockerエグゼキューターによってのみ実行可能で、これらのエグゼキューターで指定されたbuildxビルダーを使用してジョブを実行します。Kubernetesエグゼキューターでイメージをビルドするには、kanikoステップを使用してください");
 		m.put("Build docker image with kaniko. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"kanikoを使用してDockerイメージをビルドします。このステップはサーバーDockerエグゼキューター、リモートDockerエグゼキューター、またはKubernetesエグゼキューターによって実行する必要があります");
 		m.put("Build duration statistics", "ビルド時間統計");
@@ -1352,6 +1349,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Editor", "エディター");
 		m.put("Either specify value or secret value of the environment variable", "環境変数の値または秘密の値を指定してください");
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "ターゲットブランチまたはソースブランチに新しいコミットが今追加されました。再確認してください。");
+		m.put("Elapsed time: {0}", "経過時間: {0}");
 		m.put("Email", "メール");
 		m.put("Email Address", "メールアドレス");
 		m.put("Email Address Privacy", "メールアドレスのプライバシー");
@@ -1398,10 +1396,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"この仕様がAIユーザーによってワークスペースを作成し、割り当てられたタスクを実行するために使用できる場合は有効にします");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"このオプションを有効にすると、準備が整ったときにプルリクエストを自動的にマージできます (すべてのレビューアが承認し、すべての必要なジョブが成功するなど)");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
-			"HTMLレポート公開ステップを実行できるようにするにはこれを有効化してください。XSS攻撃を防ぐため、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
-		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
-			"サイト公開ステップを実行できるようにするにはこれを有効にします。OneDevはプロジェクトサイトファイルをそのまま提供します。XSS攻撃を防ぐため、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
 		m.put("Enable this to process issue or pull request comments posted via email", "メール経由で投稿された問題やプルリクエストのコメントを処理するにはこれを有効にします");
 		m.put("Enable this to process issue or pull request comments posted via email. <b class='text-danger'>NOTE:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub addressing</a> needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts", 
 			"メール経由で投稿された問題やプルリクエストのコメントを処理するにはこれを有効にします。<b class='text-danger'>注意:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>サブアドレス</a>を上記のシステムメールアドレスに対して有効にする必要があります。OneDevはこれを使用して問題やプルリクエストのコンテキストを追跡します");
@@ -1471,6 +1465,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Estimated progress", "進行状況の推定");
 		m.put("Estimated progress based on the running time of the last successful build in the same stream", 
 			"同じストリーム内で最後に成功したビルドの実行時間に基づく進行状況の推定");
+		m.put("Estimated remaining time: {0}", "推定残り時間: {0}");
 		m.put("Estimated time", "推定時間");
 		m.put("Estimated/Spent time. Click for details", "推定/消費時間。詳細をクリックしてください");
 		m.put("Evaluate script to get choices", "選択肢を取得するためにスクリプトを評価する");
@@ -2825,7 +2820,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify name of the attribute inside the user LDAP entry whose values will be taken as user SSH keys. SSH keys will be managed by LDAP only if this field is set", 
 			"オプションで、ユーザーLDAPエントリ内の属性名を指定してください。その値がユーザーSSHキーとして使用されます。このフィールドが設定されている場合、SSHキーはLDAPによってのみ管理されます。");
 		m.put("Optionally specify node selector of the job pods", "オプションで、ジョブポッドのノードセレクターを指定してください。");
-		m.put("Optionally specify options for docker builder prune command", "オプションで、Dockerビルダープルーンコマンドのオプションを指定してください。");
 		m.put("Optionally specify options for scp command. Multiple options need to be separated with space", 
 			"オプションで、scpコマンドのオプションを指定してください。複数のオプションはスペースで区切る必要があります。");
 		m.put("Optionally specify options for ssh command. Multiple options need to be separated with space", 
@@ -3229,8 +3223,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Provisioner", "プロビジョナー");
 		m.put("Proxy", "プロキシ");
 		m.put("Prune Builder Cache", "ビルダーキャッシュの削除");
-		m.put("Prune image cache of docker buildx builder. This step calls docker builder prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
-			"Docker buildxビルダーのイメージキャッシュを削除します。このステップは、サーバーDockerエグゼキューターまたはリモートDockerエグゼキューターで指定されたbuildxビルダーのキャッシュを削除するためにdocker builder pruneコマンドを呼び出します");
 		m.put("Public Key", "公開鍵");
 		m.put("Public Roles", "公開の役割");
 		m.put("Publish", "公開");
@@ -3924,8 +3916,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"クラスターにアクセスするために kubectl が使用する設定ファイルの絶対パスを指定します。空欄の場合、kubectl はクラスターアクセス情報を自動的に決定します");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, OneDev will try to find the utility from system path", 
 			"kubectl ユーティリティの絶対パスを指定します。例: <i>/usr/bin/kubectl</i>。空欄の場合、OneDev はシステムパスからユーティリティを探します");
-		m.put("Specify access token with upload cache permission for above project.\nNote that this property is not required if upload cache to current project", 
-			"上記のプロジェクトに対するキャッシュアップロード権限を持つアクセストークンを指定します。\n現在のプロジェクトにキャッシュをアップロードする場合、このプロパティは必要ありません");
 		m.put("Specify account name to login to Gmail to send/receive email", "Gmail にログインしてメールを送受信するためのアカウント名を指定します");
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"役割を通じて付与されたユーザー以外でこの機密課題にアクセスできる追加ユーザーを指定します。課題に記載されたユーザーは自動的に承認されます");
@@ -4010,8 +4000,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するOCIレイアウトを保存するディレクトリを指定してください。");
 		m.put("Specify docker image of the service", "サービスのDockerイメージを指定してください。");
-		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
-			"Dockerイメージをビルドするために使用するdockerxビルダーを指定してください。OneDevはビルダーが存在しない場合、自動的に作成します。例えば、非セキュアなレジストリへの公開を許可するためにビルダーをカスタマイズする方法については<a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>このチュートリアル</a>を確認してください。");
 		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
 			"ユーザーが自身のメールアドレスを非公開にしたい場合、Git操作用のさまざまなnoreplyメールアドレスのドメインを指定してください\n");
 		m.put("Specify email addresses to send invitations, with one per line", "招待を送るメールアドレスを指定してください。1行につき1つのアドレスを記載してください。");
@@ -4968,8 +4956,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"課題が最初に開かれたときにこのフィールドを含めるかどうか。含めない場合は、課題が課題遷移ルールを介して他の状態に遷移したときに後でこのフィールドを含めることができます");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "推定時間/消費時間を時間/分単位でのみ入力および表示するかどうか");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
-			"ジョブコマンドでのDocker操作をサポートするために、Dockerソケットをジョブコンテナにマウントするかどうか<br><b class='text-danger'>警告</b>: 悪意のあるジョブがマウントされたDockerソケットを操作することでOneDev全体を制御する可能性があります。このオプションを有効にする場合、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
 		m.put("Whether or not to mount docker sock into workspace container to support docker operations in workspace<br><b class='text-danger'>WARNING</b>: Malicious workspaces can take control of whole OneDev by operating the mounted docker sock. Make sure this provisioner can only be used by trusted workspaces if this option is enabled", 
 			"ワークスペース内でのDocker操作をサポートするために、Dockerソックをワークスペースコンテナにマウントするかどうか<br><b class='text-danger'>警告</b>: 悪意のあるワークスペースは、マウントされたDockerソックを操作することでOneDev全体を制御することができます。このオプションが有効な場合、このプロビジョナーが信頼できるワークスペースでのみ使用できるようにしてください");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
@@ -5320,16 +5306,41 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{0} will be transcoded to UTF-8 upon commit", "{0}はコミット時にUTF-8にトランスコードされます");
 		m.put("{0}d", "{0}日");
 		m.put("{0}h", "{0}時間");
+		m.put("{0}h {1}m {2}s", "{0}時間 {1}分 {2}秒");
 		m.put("{0}m", "{0}分");
+		m.put("{0}m {1}s", "{0}分 {1}秒");
 		m.put("{0}s", "{0}秒");
 		m.put("{0}w", "{0}週");
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Elapsed time: {0}", "経過時間: {0}");
-		m.put("Estimated remaining time: {0}", "推定残り時間: {0}");
-		m.put("{0}h {1}m {2}s", "{0}時間 {1}分 {2}秒");
-		m.put("{0}m {1}s", "{0}分 {1}秒");
+		m.put("Build Image (Buildx)", "イメージをビルド (Buildx)");
+		m.put("Build docker image with buildx. This step can only be executed by server docker executor or remote docker executor, and it uses the buildx builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko step instead", 
+			"buildxを使用してDockerイメージをビルドします。このステップはサーバーDockerエグゼキューターまたはリモートDockerエグゼキューターでのみ実行可能で、これらのエグゼキューターで指定されたbuildxビルダーを使用してジョブを実行します。Kubernetesエグゼキューターでイメージをビルドするには、代わりにkanikoステップを使用してください");
+		m.put("Enable Builder Cache Prune", "ビルダーキャッシュのプルーンを有効化");
+		m.put("Enable Buildx Image Build", "Buildxイメージビルドを有効化");
+		m.put("Enable Buildx Image Tools", "Buildxイメージツールを有効化");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"HTMLレポート公開ステップを実行できるようにするにはこれを有効化してください。XSS攻撃を防ぐために、\nこのオプションを有効にしたエグゼキューターは信頼できるジョブでのみ使用されるようにしてください");
+		m.put("Enable this to allow to run prune builder cache step. To avoid shared builder cache being\ncleared by malicious jobs, make sure executor with this option enabled can only be used\nby trusted jobs", 
+			"ビルダーキャッシュのプルーンステップを実行できるようにするにはこれを有効化してください。共有ビルダーキャッシュが\n悪意のあるジョブによってクリアされるのを防ぐために、このオプションを有効にしたエグゼキューターは信頼できるジョブでのみ使用されるようにしてください\n");
+		m.put("Enable this to allow to run site publish step. OneDev will serve project\nsite files as is. To avoid XSS attack, make sure executor with this\noption enabled can only be used by trusted jobs", 
+			"サイト公開ステップを実行できるようにするにはこれを有効化してください。OneDevはプロジェクト\nサイトファイルをそのまま提供します。XSS攻撃を防ぐために、このオプションを有効にしたエグゼキューターは信頼できるジョブでのみ使用されるようにしてください\n");
+		m.put("Enable this to allow to run the buildx image tools step.\nTo avoid malicious jobs reading or writing arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"Buildxイメージツールステップを実行できるようにするにはこれを有効化してください。\nこのステップを実行することで悪意のあるジョブが任意のホストファイルを読み書きするのを防ぐために、\nこのオプションを有効にしたエグゼキューターは信頼できるジョブでのみ使用されるようにしてください");
+		m.put("Enable this to allow to run the image build step using buildx.\nThe image build step using kaniko can still be used even this option is disabled.\nTo avoid malicious jobs reading arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"Buildxを使用したイメージビルドステップを実行できるようにするにはこれを有効化してください。\nこのオプションが無効でもkanikoを使用したイメージビルドステップは引き続き使用可能です。\nこのステップを実行することで悪意のあるジョブが任意のホストファイルを読み取るのを防ぐために、\nこのオプションを有効にしたエグゼキューターは信頼できるジョブでのみ使用されるようにしてください");
+		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted. File paths must be relative to the job working directory, without '..' or symbolic links. Volume and device mount options are not allowed", 
+			"コンテナを実行するためのDockerオプションを任意で指定してください。複数のオプションはスペースで区切り、スペースを含む単一のオプションは引用符で囲む必要があります。ファイルパスはジョブ作業ディレクトリに対して相対的であり、「..」やシンボリックリンクを含めることはできません。ボリュームおよびデバイスマウントオプションは許可されていません");
+		m.put("Optionally specify options for docker buildx prune command", "Docker buildx pruneコマンドのオプションを任意で指定してください");
+		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
+			"Docker buildxビルダーのイメージキャッシュをプルーンします。このステップは、サーバーDockerエグゼキューターまたはリモートDockerエグゼキューターで指定されたbuildxビルダーのキャッシュを削除するためにdocker buildx pruneコマンドを呼び出します");
+		m.put("Specify Buildx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
+			"Dockerイメージをビルドするために使用されるBuildxビルダーを指定してください。OneDevはビルダーが存在しない場合、自動的に作成します。例えば、安全でないレジストリへの公開を許可するためにビルダーをカスタマイズする方法については、<a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>このチュートリアル</a>を確認してください");
+		m.put("Specify access token with upload cache permission for above project.\nThis property is not required if the workspace owner has upload cache permission for above project", 
+			"上記のプロジェクトに対するキャッシュアップロード権限を持つアクセストークンを指定してください。\nこのプロパティは、ワークスペース所有者が上記のプロジェクトに対するキャッシュアップロード権限を持っている場合は必要ありません");
+		m.put("Whether or not to mount docker sock into job container to\nsupport docker operations in job commands. To avoid malicious jobs taking control of whole OneDev\nby operating the mounted docker sock, make sure executor with this option enabled can only be used\nby trusted jobs", 
+			"ジョブコンテナにDockerソケットをマウントして\nジョブコマンドでDocker操作をサポートするかどうかを指定します。マウントされたDockerソケットを操作することで悪意のあるジョブがOneDev全体を制御するのを防ぐために、\nこのオプションを有効にしたエグゼキューターは信頼できるジョブでのみ使用されるようにしてください\n");
 	}
 		
 	@Override

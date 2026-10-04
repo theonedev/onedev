@@ -565,7 +565,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Build Description", "빌드 설명");
 		m.put("Build Failure Issue Prompt", "빌드 실패 문제 프롬프트");
 		m.put("Build Filter", "빌드 필터");
-		m.put("Build Image", "빌드 이미지");
 		m.put("Build Image (Kaniko)", "빌드 이미지 (Kaniko)");
 		m.put("Build Management", "빌드 관리");
 		m.put("Build Notification", "빌드 알림");
@@ -585,8 +584,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Build Volume Storage Size", "빌드 볼륨 저장소 크기");
 		m.put("Build administrative permission for all jobs inside a project, including batch operations over multiple builds", 
 			"프로젝트 내 모든 작업에 대한 빌드 관리 권한, 여러 빌드에 대한 일괄 작업 포함");
-		m.put("Build docker image with docker buildx. This step can only be executed by server docker executor or remote docker executor, and it uses the buildx builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko step instead", 
-			"docker buildx로 도커 이미지를 빌드합니다. 이 단계는 서버 도커 실행기 또는 원격 도커 실행기에 의해 실행될 수 있으며, 이 실행기에서 지정된 buildx 빌더를 사용하여 작업을 수행합니다. Kubernetes 실행기로 이미지를 빌드하려면 kaniko 단계를 사용하세요.");
 		m.put("Build docker image with kaniko. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"kaniko로 도커 이미지를 빌드합니다. 이 단계는 서버 도커 실행기, 원격 도커 실행기 또는 Kubernetes 실행기에 의해 실행되어야 합니다.");
 		m.put("Build duration statistics", "빌드 지속 시간 통계");
@@ -1352,6 +1349,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Editor", "편집기");
 		m.put("Either specify value or secret value of the environment variable", "환경 변수의 값 또는 비밀 값을 지정하십시오");
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "대상 브랜치 또는 소스 브랜치에 방금 새로운 커밋이 추가되었습니다. 다시 확인하세요.");
+		m.put("Elapsed time: {0}", "경과 시간: {0}");
 		m.put("Email", "이메일");
 		m.put("Email Address", "이메일 주소");
 		m.put("Email Address Privacy", "이메일 주소 개인정보 보호");
@@ -1398,10 +1396,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"AI 사용자가 지정된 작업을 실행하기 위해 워크스페이스를 생성할 수 있도록 이 스펙을 사용할 수 있는 경우 활성화하세요");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"준비되었을 때(모든 리뷰어 승인, 모든 필수 작업 통과 등) 풀 리퀘스트를 자동으로 병합하도록 이 옵션을 활성화합니다");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
-			"HTML 보고서 게시 단계를 실행할 수 있도록 활성화합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
-		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
-			"사이트 게시 단계를 실행할 수 있도록 허용하려면 이를 활성화합니다. OneDev는 프로젝트 사이트 파일을 그대로 제공합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("Enable this to process issue or pull request comments posted via email", "이메일을 통해 게시된 이슈 또는 풀 리퀘스트 댓글을 처리하려면 이를 활성화합니다");
 		m.put("Enable this to process issue or pull request comments posted via email. <b class='text-danger'>NOTE:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub addressing</a> needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts", 
 			"이메일을 통해 게시된 이슈 또는 풀 리퀘스트 댓글을 처리하려면 이를 활성화합니다. <b class='text-danger'>참고:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>서브 어드레싱</a>이 위 시스템 이메일 주소에 대해 활성화되어야 합니다. OneDev는 이를 사용하여 이슈 및 풀 리퀘스트 컨텍스트를 추적합니다");
@@ -1471,6 +1465,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Estimated progress", "예상 진행률");
 		m.put("Estimated progress based on the running time of the last successful build in the same stream", 
 			"같은 스트림에서 마지막으로 성공한 빌드의 실행 시간을 기준으로 한 예상 진행률");
+		m.put("Estimated remaining time: {0}", "예상 남은 시간: {0}");
 		m.put("Estimated time", "예상 시간");
 		m.put("Estimated/Spent time. Click for details", "예상/소요 시간. 세부 사항을 보려면 클릭하세요");
 		m.put("Evaluate script to get choices", "선택지를 얻기 위해 스크립트를 평가합니다");
@@ -2825,7 +2820,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify name of the attribute inside the user LDAP entry whose values will be taken as user SSH keys. SSH keys will be managed by LDAP only if this field is set", 
 			"선택적으로 사용자 LDAP 항목 내부의 속성 이름을 지정하세요. 해당 값은 사용자 SSH 키로 사용됩니다. 이 필드가 설정된 경우 SSH 키는 LDAP에서만 관리됩니다.");
 		m.put("Optionally specify node selector of the job pods", "선택적으로 작업 포드의 노드 선택기를 지정하세요.");
-		m.put("Optionally specify options for docker builder prune command", "선택적으로 Docker 빌더 정리 명령의 옵션을 지정하세요.");
 		m.put("Optionally specify options for scp command. Multiple options need to be separated with space", 
 			"선택적으로 scp 명령의 옵션을 지정하세요. 여러 옵션은 공백으로 구분해야 합니다.");
 		m.put("Optionally specify options for ssh command. Multiple options need to be separated with space", 
@@ -3229,8 +3223,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Provisioner", "프로비저너");
 		m.put("Proxy", "프록시");
 		m.put("Prune Builder Cache", "빌더 캐시 정리");
-		m.put("Prune image cache of docker buildx builder. This step calls docker builder prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
-			"도커 buildx 빌더의 이미지 캐시를 정리합니다. 이 단계는 서버 도커 실행자 또는 원격 도커 실행자에서 지정된 buildx 빌더의 캐시를 제거하기 위해 도커 빌더 정리 명령을 호출합니다");
 		m.put("Public Key", "공개 키");
 		m.put("Public Roles", "공개 역할");
 		m.put("Publish", "게시");
@@ -3924,8 +3916,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"클러스터에 접근하기 위해 kubectl이 사용하는 구성 파일의 절대 경로를 지정합니다. 비워두면 kubectl이 클러스터 접근 정보를 자동으로 결정합니다");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, OneDev will try to find the utility from system path", 
 			"kubectl 유틸리티의 절대 경로를 지정합니다. 예: <i>/usr/bin/kubectl</i>. 비워두면 OneDev가 시스템 경로에서 유틸리티를 찾으려고 시도합니다");
-		m.put("Specify access token with upload cache permission for above project.\nNote that this property is not required if upload cache to current project", 
-			"위의 프로젝트에 대한 업로드 캐시 권한이 있는 액세스 토큰을 지정하십시오.\n현재 프로젝트에 캐시를 업로드하는 경우 이 속성은 필요하지 않습니다");
 		m.put("Specify account name to login to Gmail to send/receive email", "이메일을 보내고/받기 위해 Gmail에 로그인할 계정 이름을 지정합니다");
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"역할을 통해 권한이 부여된 사용자 외에 이 기밀 이슈에 접근할 수 있는 추가 사용자를 지정합니다. 이슈에 언급된 사용자는 자동으로 권한이 부여됩니다");
@@ -4010,8 +4000,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 기준으로 OCI 레이아웃을 저장할 디렉터리를 지정하세요.");
 		m.put("Specify docker image of the service", "서비스의 도커 이미지를 지정하세요.");
-		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
-			"도커 이미지를 빌드하는 데 사용되는 dockerx 빌더를 지정하세요. OneDev는 빌더가 존재하지 않을 경우 자동으로 생성합니다. 예를 들어 비보안 레지스트리에 게시를 허용하도록 빌더를 사용자 정의하는 방법에 대한 <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>이 튜토리얼</a>을 확인하세요.");
 		m.put("Specify domain of various noreply email addresses for git operations if users want\nto keep their own email addresses private", 
 			"사용자가 자신의 이메일 주소를 비공개로 유지하려는 경우 Git 작업을 위한 다양한 noreply 이메일 주소의 도메인을 지정하십시오\n");
 		m.put("Specify email addresses to send invitations, with one per line", "초대장을 보낼 이메일 주소를 한 줄에 하나씩 지정하세요.");
@@ -4968,8 +4956,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"문제가 처음 열릴 때 이 필드를 포함할지 여부. 포함하지 않을 경우, 문제가 다른 상태로 전환될 때 문제 전환 규칙을 통해 나중에 이 필드를 포함할 수 있습니다");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "예상/소요 시간을 시간/분 단위로만 입력하고 표시할지 여부");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
-			"작업 명령에서 도커 작업을 지원하기 위해 도커 소켓을 작업 컨테이너에 마운트할지 여부<br><b class='text-danger'>경고</b>: 악의적인 작업은 마운트된 도커 소켓을 조작하여 전체 OneDev를 제어할 수 있습니다. 이 옵션이 활성화된 경우 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("Whether or not to mount docker sock into workspace container to support docker operations in workspace<br><b class='text-danger'>WARNING</b>: Malicious workspaces can take control of whole OneDev by operating the mounted docker sock. Make sure this provisioner can only be used by trusted workspaces if this option is enabled", 
 			"워크스페이스 컨테이너에 도커 소켓을 마운트하여 워크스페이스에서 도커 작업을 지원할지 여부<br><b class='text-danger'>경고</b>: 악의적인 워크스페이스가 마운트된 도커 소켓을 조작하여 전체 OneDev를 제어할 수 있습니다. 이 옵션이 활성화된 경우 이 프로비저너가 신뢰할 수 있는 워크스페이스에서만 사용되도록 하십시오");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
@@ -5320,16 +5306,41 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{0} will be transcoded to UTF-8 upon commit", "{0}은 커밋 시 UTF-8로 트랜스코딩됩니다.");
 		m.put("{0}d", "{0}일");
 		m.put("{0}h", "{0}시간");
+		m.put("{0}h {1}m {2}s", "{0}시간 {1}분 {2}초");
 		m.put("{0}m", "{0}분");
+		m.put("{0}m {1}s", "{0}분 {1}초");
 		m.put("{0}s", "{0}초");
 		m.put("{0}w", "{0}주");
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Elapsed time: {0}", "경과 시간: {0}");
-		m.put("Estimated remaining time: {0}", "예상 남은 시간: {0}");
-		m.put("{0}h {1}m {2}s", "{0}시간 {1}분 {2}초");
-		m.put("{0}m {1}s", "{0}분 {1}초");
+		m.put("Build Image (Buildx)", "이미지 빌드 (Buildx)");
+		m.put("Build docker image with buildx. This step can only be executed by server docker executor or remote docker executor, and it uses the buildx builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko step instead", 
+			"buildx를 사용하여 도커 이미지를 빌드합니다. 이 단계는 서버 도커 실행기 또는 원격 도커 실행기에서만 실행할 수 있으며, 해당 실행기에 지정된 buildx 빌더를 사용하여 작업을 수행합니다. Kubernetes 실행기로 이미지를 빌드하려면 대신 kaniko 단계를 사용하세요.");
+		m.put("Enable Builder Cache Prune", "빌더 캐시 정리 활성화");
+		m.put("Enable Buildx Image Build", "Buildx 이미지 빌드 활성화");
+		m.put("Enable Buildx Image Tools", "Buildx 이미지 도구 활성화");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"HTML 보고서 게시 단계를 실행할 수 있도록 활성화합니다. XSS 공격을 방지하려면,\n이 옵션이 활성화된 실행기가 신뢰할 수 있는 작업에서만 사용되도록 하세요.");
+		m.put("Enable this to allow to run prune builder cache step. To avoid shared builder cache being\ncleared by malicious jobs, make sure executor with this option enabled can only be used\nby trusted jobs", 
+			"빌더 캐시 정리 단계를 실행할 수 있도록 활성화합니다. 공유 빌더 캐시가\n악의적인 작업에 의해 삭제되지 않도록, 이 옵션이 활성화된 실행기가 신뢰할 수 있는 작업에서만 사용되도록 하세요.\n");
+		m.put("Enable this to allow to run site publish step. OneDev will serve project\nsite files as is. To avoid XSS attack, make sure executor with this\noption enabled can only be used by trusted jobs", 
+			"사이트 게시 단계를 실행할 수 있도록 활성화합니다. OneDev는 프로젝트\n사이트 파일을 그대로 제공합니다. XSS 공격을 방지하려면, 이 옵션이\n활성화된 실행기가 신뢰할 수 있는 작업에서만 사용되도록 하세요.");
+		m.put("Enable this to allow to run the buildx image tools step.\nTo avoid malicious jobs reading or writing arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"Buildx 이미지 도구 단계를 실행할 수 있도록 활성화합니다.\n이 단계를 실행하여 악의적인 작업이 임의의 호스트 파일을 읽거나 쓰는 것을 방지하려면,\n이 옵션이 활성화된 실행기가 신뢰할 수 있는 작업에서만 사용되도록 하세요.");
+		m.put("Enable this to allow to run the image build step using buildx.\nThe image build step using kaniko can still be used even this option is disabled.\nTo avoid malicious jobs reading arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"Buildx를 사용하여 이미지 빌드 단계를 실행할 수 있도록 활성화합니다.\n이 옵션이 비활성화되어도 kaniko를 사용한 이미지 빌드 단계는 여전히 사용할 수 있습니다.\n이 단계를 실행하여 악의적인 작업이 임의의 호스트 파일을 읽는 것을 방지하려면,\n이 옵션이 활성화된 실행기가 신뢰할 수 있는 작업에서만 사용되도록 하세요.");
+		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted. File paths must be relative to the job working directory, without '..' or symbolic links. Volume and device mount options are not allowed", 
+			"컨테이너를 실행하기 위한 도커 옵션을 선택적으로 지정하세요. 여러 옵션은 공백으로 구분해야 하며, 공백이 포함된 단일 옵션은 따옴표로 묶어야 합니다. 파일 경로는 작업 디렉토리를 기준으로 상대 경로여야 하며, '..' 또는 심볼릭 링크를 포함해서는 안 됩니다. 볼륨 및 장치 마운트 옵션은 허용되지 않습니다.");
+		m.put("Optionally specify options for docker buildx prune command", "docker buildx prune 명령어에 대한 옵션을 선택적으로 지정하세요.");
+		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
+			"docker buildx 빌더의 이미지 캐시를 정리합니다. 이 단계는 서버 도커 실행기 또는 원격 도커 실행기에 지정된 buildx 빌더의 캐시를 제거하기 위해 docker buildx prune 명령어를 호출합니다.");
+		m.put("Specify Buildx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
+			"도커 이미지를 빌드하는 데 사용되는 Buildx 빌더를 지정하세요. 빌더가 존재하지 않을 경우 OneDev가 자동으로 생성합니다. 신뢰할 수 없는 레지스트리에 게시를 허용하도록 빌더를 사용자 정의하는 방법에 대한 자세한 내용은 <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>이 튜토리얼</a>을 확인하세요.");
+		m.put("Specify access token with upload cache permission for above project.\nThis property is not required if the workspace owner has upload cache permission for above project", 
+			"위 프로젝트에 대한 캐시 업로드 권한이 있는 액세스 토큰을 지정하세요.\n위 프로젝트에 대해 작업 공간 소유자가 캐시 업로드 권한을 가지고 있는 경우 이 속성은 필요하지 않습니다.");
+		m.put("Whether or not to mount docker sock into job container to\nsupport docker operations in job commands. To avoid malicious jobs taking control of whole OneDev\nby operating the mounted docker sock, make sure executor with this option enabled can only be used\nby trusted jobs", 
+			"작업 명령에서 도커 작업을 지원하기 위해 도커 소켓을 작업 컨테이너에 마운트할지 여부를 선택하세요.\n마운트된 도커 소켓을 조작하여 악의적인 작업이 OneDev 전체를 제어하지 못하도록 하려면,\n이 옵션이 활성화된 실행기가 신뢰할 수 있는 작업에서만 사용되도록 하세요.");
 	}
 		
 	@Override
