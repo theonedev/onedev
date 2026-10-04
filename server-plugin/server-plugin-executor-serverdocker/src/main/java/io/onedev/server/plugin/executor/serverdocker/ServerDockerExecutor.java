@@ -51,6 +51,7 @@ import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.PruneBuilderCacheFacade;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.k8shelper.RunContainerFacade;
+import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.k8shelper.SetupCacheFacade;
@@ -105,6 +106,8 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	private boolean imageBuildEnabled;
 
 	private boolean builderCachePruneEnabled;
+
+	private boolean imagetoolsEnabled;
 	
 	private String dockerSockPath;
 	
@@ -225,7 +228,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	}
 
 	@Editable(order=540, name="Enable Builder Cache Prune", group="Security Settings", description="Enable this to allow to run prune builder cache step<br>"
-			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can read arbitrary host files by running this step. Make sure this executor can only be used by "
+			+ "<b class='text-danger'>WARNING</b>: Clearing shared builder cache can affect other jobs using same builder. Make sure this executor can only be used by "
 			+ "trusted jobs if this option is enabled")
 	public boolean isBuilderCachePruneEnabled() {
 		return builderCachePruneEnabled;
@@ -233,6 +236,17 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 	public void setBuilderCachePruneEnabled(boolean builderCachePruneEnabled) {
 		this.builderCachePruneEnabled = builderCachePruneEnabled;
+	}
+
+	@Editable(order=550, name="Enable Buildx Image Tools", group="Security Settings", description="Enable this to allow to run the buildx image tools step<br>"
+			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can read or write arbitrary host files by running this step. Make sure this executor can only be used by "
+			+ "trusted jobs if this option is enabled")
+	public boolean isImagetoolsEnabled() {
+		return imagetoolsEnabled;
+	}
+
+	public void setImagetoolsEnabled(boolean imagetoolsEnabled) {
+		this.imagetoolsEnabled = imagetoolsEnabled;
 	}
 
 	@Editable(order=40, group="Resource Settings", placeholder = "No limit", description = "" +
@@ -458,6 +472,15 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								callWithRegistryLogins(docker, registryLogins, () -> {
 									JobUtils.buildImage(docker, getDockerBuilder(), buildImageFacade, buildDir,
 											isAlwaysPullImage(), isImageBuildEnabled(), getName(), jobLogger);
+									return null;
+								});
+							} else if (facade instanceof RunImagetoolsFacade) {
+								var runImagetoolsFacade = (RunImagetoolsFacade) facade;
+								var docker = newDocker();
+								var registryLogins = merge(runImagetoolsFacade.getRegistryLogins(), getRegistryLogins(jobToken));
+								callWithRegistryLogins(docker, registryLogins, () -> {
+									JobUtils.runImagetools(docker, runImagetoolsFacade, buildDir,
+											isImagetoolsEnabled(), getName(), jobLogger);
 									return null;
 								});
 							} else if (facade instanceof PruneBuilderCacheFacade) {

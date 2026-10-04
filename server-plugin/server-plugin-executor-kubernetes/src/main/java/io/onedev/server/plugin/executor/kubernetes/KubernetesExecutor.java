@@ -74,6 +74,7 @@ import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.PruneBuilderCacheFacade;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.k8shelper.RunContainerFacade;
+import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.server.OneDev;
@@ -800,7 +801,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				} else if (facade instanceof BuildImageFacade) {
 					throw new ExplicitException("This step can only be executed by server docker executor or " +
 							"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");
-				} else if (facade instanceof RunContainerFacade
+				} else if (facade instanceof RunContainerFacade || facade instanceof RunImagetoolsFacade
 						|| facade instanceof PruneBuilderCacheFacade) {
 					throw new ExplicitException("This step can only be executed by server docker executor or " +
 							"remote docker executor");
