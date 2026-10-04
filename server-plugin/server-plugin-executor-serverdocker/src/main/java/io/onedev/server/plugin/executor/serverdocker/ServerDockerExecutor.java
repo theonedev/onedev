@@ -103,7 +103,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	
 	private boolean mountDockerSock;
 
-	private boolean imageBuildEnabled;
+	private boolean buildxImageBuildEnabled;
 
 	private boolean builderCachePruneEnabled;
 
@@ -220,12 +220,12 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 			The image build step using kaniko can still be used even this option is disabled.
 			To avoid malicious jobs reading arbitrary host files by running this step, 
 			make sure executor with this option enabled can only be used by trusted jobs""")
-	public boolean isImageBuildEnabled() {
-		return imageBuildEnabled;
+	public boolean isBuildxImageBuildEnabled() {
+		return buildxImageBuildEnabled;
 	}
 
-	public void setImageBuildEnabled(boolean imageBuildEnabled) {
-		this.imageBuildEnabled = imageBuildEnabled;
+	public void setBuildxImageBuildEnabled(boolean buildxImageBuildEnabled) {
+		this.buildxImageBuildEnabled = buildxImageBuildEnabled;
 	}
 
 	@Editable(order=550, name="Enable Buildx Image Tools", group="Security Settings", description="""
@@ -474,7 +474,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								var registryLogins = merge(buildImageFacade.getRegistryLogins(), getRegistryLogins(jobToken));
 								callWithRegistryLogins(docker, registryLogins, () -> {
 									JobUtils.buildImage(docker, getDockerBuilder(), buildImageFacade, buildDir,
-											isAlwaysPullImage(), isImageBuildEnabled(), getName(), jobLogger);
+											isAlwaysPullImage(), isBuildxImageBuildEnabled(), getName(), jobLogger);
 									return null;
 								});
 							} else if (facade instanceof RunImagetoolsFacade) {

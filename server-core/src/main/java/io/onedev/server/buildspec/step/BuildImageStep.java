@@ -26,7 +26,7 @@ import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
 
-@Editable(order=160, name="Build Image", group = DOCKER_IMAGE, description="Build docker image with buildx. " +
+@Editable(order=160, name="Build Image (Buildx)", group = DOCKER_IMAGE, description="Build docker image with buildx. " +
 		"This step can only be executed by server docker executor or remote docker executor, and it uses the buildx " +
 		"builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko " +
 		"step instead")

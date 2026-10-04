@@ -9540,7 +9540,7 @@ public class DataMigrator {
 							for (Element executorElement : valueElement.elements()) {
 								if (executorElement.getName().endsWith(".ServerDockerExecutor")
 										|| executorElement.getName().endsWith(".RemoteDockerExecutor")) {
-									executorElement.addElement("imageBuildEnabled").setText("false");
+									executorElement.addElement("buildxImageBuildEnabled").setText("false");
 									executorElement.addElement("builderCachePruneEnabled").setText("false");
 									executorElement.addElement("imagetoolsEnabled").setText("false");
 								}
