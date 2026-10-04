@@ -577,14 +577,6 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		JobVariableInterpolator interpolator = new JobVariableInterpolator(build, build.getParamCombination());
 
 		TaskLogger jobLogger = buildLogService.newLogger(build);
-		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
-		JobExecutor jobExecutor = interpolator.interpolateProperties(getJobExecutor(build, jobExecutorName, jobLogger));
-		String sequentialGroup = interpolator.interpolate(build.getJob().getSequentialGroup());
-		String sequentialKey;
-		if (sequentialGroup != null)
-			sequentialKey = jobExecutorName + ":" + sequentialGroup;
-		else
-			sequentialKey = null;
 		Long projectId = build.getProject().getId();
 		String projectPath = build.getProject().getPath();
 		String projectGitDir = projectService.getGitDir(build.getProject().getId()).getAbsolutePath();
@@ -600,10 +592,19 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		long timeout;
 
 		Job job;
+		JobExecutor jobExecutor;
+		String sequentialKey;
 		JobAuthorizationContext.push(build.getJobAuthorizationContext());
 		Build.push(build);
 		try {
 			job = build.getJob();
+			String jobExecutorName = interpolator.interpolate(job.getJobExecutor());
+			jobExecutor = interpolator.interpolateProperties(getJobExecutor(build, jobExecutorName, jobLogger));
+			String sequentialGroup = interpolator.interpolate(job.getSequentialGroup());
+			if (sequentialGroup != null)
+				sequentialKey = jobExecutorName + ":" + sequentialGroup;
+			else
+				sequentialKey = null;
 
 			for (Step step : job.getSteps()) {
 				step = interpolator.interpolateProperties(step);

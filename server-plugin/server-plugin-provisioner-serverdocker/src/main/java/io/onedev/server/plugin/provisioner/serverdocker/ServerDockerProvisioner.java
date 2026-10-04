@@ -459,7 +459,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 					@Override
 					@Nullable
 					public FileData readFileData(String path) {
-						return WorkspaceUtils.readFileData(workspaceDir, path);
+						return WorkspaceUtils.readFileData(newDocker(), containerName, containerWorkDirPath, path);
 					}
 
 					@Override

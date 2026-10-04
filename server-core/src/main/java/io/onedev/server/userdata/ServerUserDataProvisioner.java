@@ -55,10 +55,11 @@ public class ServerUserDataProvisioner extends UserDataProvisioner {
 			var pathIndex = entry.getValue();
 			if (initPaths.contains(path)) {
 				var targetPath = workspaceContainerPath + "/" + getSubPath(pathIndex);
+				var quotedPath = "'" + path.replace("'", "'\"'\"'") + "'";
 				initEntrypointArgs.append(" ; ");
 				initEntrypointArgs.append("if [ ! -e ").append(targetPath).append(" ]; then ");
-				initEntrypointArgs.append("if [ -e '").append(path).append("' ]; then ");
-				initEntrypointArgs.append("cp -a '").append(path).append("' ").append(targetPath);
+				initEntrypointArgs.append("if [ -e ").append(quotedPath).append(" ]; then ");
+				initEntrypointArgs.append("cp -a ").append(quotedPath).append(" ").append(targetPath);
 				initEntrypointArgs.append("; else mkdir -p ").append(targetPath).append("; fi; fi");
 			}
 		}

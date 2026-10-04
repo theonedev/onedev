@@ -722,8 +722,13 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		var spec = workspace.getSpec();
 		if (spec == null)
 			return null;
-		spec = new WorkspaceVariableInterpolator(workspace).interpolateProperties(spec);
-		return discoverProvisioner(workspace, spec);
+		Workspace.push(workspace);
+		try {
+			spec = new WorkspaceVariableInterpolator(workspace).interpolateProperties(spec);
+			return discoverProvisioner(workspace, spec);
+		} finally {
+			Workspace.pop();
+		}
 	}
 
 	@Nullable
