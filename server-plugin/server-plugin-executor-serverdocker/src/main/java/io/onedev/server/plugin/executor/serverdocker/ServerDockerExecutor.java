@@ -202,11 +202,11 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		this.alwaysPullImage = alwaysPullImage;
 	}
 	
-	@Editable(order=520, group="Security Settings", description="Whether or not to mount docker sock into job container to "
-			+ "support docker operations in job commands<br>"
-			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
-			+ "by operating the mounted docker sock. Make sure this executor can only be used by "
-			+ "trusted jobs if this option is enabled")
+	@Editable(order=520, group="Security Settings", description="""
+			Whether or not to mount docker sock into job container to 
+			support docker operations in job commands. To avoid malicious jobs taking control of whole OneDev 
+			by operating the mounted docker sock, make sure executor with this option enabled can only be used 
+			by trusted jobs""")
 	public boolean isMountDockerSock() {
 		return mountDockerSock;
 	}
@@ -215,10 +215,11 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		this.mountDockerSock = mountDockerSock;
 	}
 
-	@Editable(order=530, name="Enable Buildx Image Build", group="Security Settings", description="Enable this to allow to run the build image step which uses buildx. "
-			+ "The build image step using kaniko can still be used even this option is disabled<br>"
-			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can read arbitrary host files by running this step. Make sure this executor can only be used by "
-			+ "trusted jobs if this option is enabled")
+	@Editable(order=530, name="Enable Buildx Image Build", group="Security Settings", description="""
+			Enable this to allow to run the image build step using buildx. 
+			The image build step using kaniko can still be used even this option is disabled.
+			To avoid malicious jobs reading arbitrary host files by running this step, 
+			make sure executor with this option enabled can only be used by trusted jobs""")
 	public boolean isImageBuildEnabled() {
 		return imageBuildEnabled;
 	}
@@ -227,26 +228,28 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		this.imageBuildEnabled = imageBuildEnabled;
 	}
 
-	@Editable(order=540, name="Enable Builder Cache Prune", group="Security Settings", description="Enable this to allow to run prune builder cache step<br>"
-			+ "<b class='text-danger'>WARNING</b>: Clearing shared builder cache can affect other jobs using same builder. Make sure this executor can only be used by "
-			+ "trusted jobs if this option is enabled")
-	public boolean isBuilderCachePruneEnabled() {
-		return builderCachePruneEnabled;
-	}
-
-	public void setBuilderCachePruneEnabled(boolean builderCachePruneEnabled) {
-		this.builderCachePruneEnabled = builderCachePruneEnabled;
-	}
-
-	@Editable(order=550, name="Enable Buildx Image Tools", group="Security Settings", description="Enable this to allow to run the buildx image tools step<br>"
-			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can read or write arbitrary host files by running this step. Make sure this executor can only be used by "
-			+ "trusted jobs if this option is enabled")
+	@Editable(order=550, name="Enable Buildx Image Tools", group="Security Settings", description="""
+			Enable this to allow to run the buildx image tools step. 
+			To avoid malicious jobs reading or writing arbitrary host files by running this step, 
+			make sure executor with this option enabled can only be used by trusted jobs""")
 	public boolean isImagetoolsEnabled() {
 		return imagetoolsEnabled;
 	}
 
 	public void setImagetoolsEnabled(boolean imagetoolsEnabled) {
 		this.imagetoolsEnabled = imagetoolsEnabled;
+	}
+
+	@Editable(order=540, name="Enable Builder Cache Prune", group="Security Settings", description="""
+			Enable this to allow to run prune builder cache step. To avoid shared builder cache being 
+			cleared by malicious jobs, make sure executor with this option enabled can only be used 
+			by trusted jobs""")
+	public boolean isBuilderCachePruneEnabled() {
+		return builderCachePruneEnabled;
+	}
+
+	public void setBuilderCachePruneEnabled(boolean builderCachePruneEnabled) {
+		this.builderCachePruneEnabled = builderCachePruneEnabled;
 	}
 
 	@Editable(order=40, group="Resource Settings", placeholder = "No limit", description = "" +

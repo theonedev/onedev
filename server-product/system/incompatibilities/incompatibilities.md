@@ -2,7 +2,7 @@
 
 ### CI/CD
 
-The `Build Image`, `Prune Builder Cache`, and `Run Buildx Image Tools` steps are now disabled by default because malicious jobs can access arbitrary host files by running these steps. After upgrading, jobs using these steps will fail unless the corresponding option (`Enable Buildx Image Build`, `Enable Builder Cache Prune`, or `Enable Buildx Image Tools`, respectively) is enabled under **Security Settings** of the relevant server or remote Docker executor. When enabling any of these options, make sure the executor can only be used by trusted projects. The build image step using kaniko remains available without enabling these options.
+The `Build Image`, `Run Buildx Image Tools`, and `Prune Builder Cache` steps are now disabled by default because malicious jobs can access arbitrary host files by running these steps. After upgrading, jobs using these steps will fail unless the corresponding option (`Enable Buildx Image Build`, `Enable Builder Cache Prune`, or `Enable Buildx Image Tools`, respectively) is enabled under **Security Settings** of the relevant server or remote Docker executor. When enabling any of these options, make sure the executor can only be used by trusted projects. The build image step using kaniko remains available without enabling these options.
 
 # 16.8.0
 

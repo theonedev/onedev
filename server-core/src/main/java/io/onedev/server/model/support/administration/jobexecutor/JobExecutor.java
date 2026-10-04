@@ -53,8 +53,10 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=30, name="Enable Site Publish", group = "Security Settings", description="Enable this to allow to run site publish step. OneDev will serve project "
-			+ "site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs")
+	@Editable(order=30, name="Enable Site Publish", group = "Security Settings", description="""
+			Enable this to allow to run site publish step. OneDev will serve project 
+			site files as is. To avoid XSS attack, make sure executor with this 
+			option enabled can only be used by trusted jobs""")
 	public boolean isSitePublishEnabled() {
 		return sitePublishEnabled;
 	}
@@ -63,8 +65,9 @@ public abstract class JobExecutor implements Serializable {
 		this.sitePublishEnabled = sitePublishEnabled;
 	}
 
-	@Editable(order=40, name="Enable Html Report Publish", group = "Security Settings", description = "Enable this to allow to run html report publish step. To avoid XSS attack, " +
-			"make sure this executor can only be used by trusted jobs")
+	@Editable(order=40, name="Enable Html Report Publish", group = "Security Settings", description = """
+			Enable this to allow to run html report publish step. To avoid XSS attack, 
+			make sure executor with this option enabled can only be used by trusted jobs""")
 	public boolean isHtmlReportPublishEnabled() {
 		return htmlReportPublishEnabled;
 	}
