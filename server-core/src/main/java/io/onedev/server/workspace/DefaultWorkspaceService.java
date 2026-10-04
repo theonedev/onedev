@@ -31,20 +31,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.eclipse.jgit.lib.ObjectId;
-import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.jspecify.annotations.Nullable;
 import org.quartz.ScheduleBuilder;
@@ -62,6 +51,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.DefaultCloneInfo;
 import io.onedev.server.OneDev;
@@ -102,6 +92,7 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.persistence.dao.Restrictions;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
@@ -120,6 +111,15 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.interpolative.WorkspaceVariableInterpolator;
 import io.onedev.server.web.component.terminal.ShellExit;
 import io.onedev.server.web.editable.EditableUtils;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 @Singleton
 public class DefaultWorkspaceService extends BaseEntityService<Workspace> 
@@ -788,6 +788,11 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 			var interpolator = new WorkspaceVariableInterpolator(workspace);
 			spec = interpolator.interpolateProperties(spec);
+			for (int i = 0; i < spec.getUserDatas().size(); i++) {
+				var key = spec.getUserDatas().get(i).getKey();
+				if (StringUtils.isBlank(key))
+					throw new ExplicitException("User data #" + (i + 1) + ": data key must not be empty after interpolation");
+			}
 
 			String token = workspace.getToken();
 			var project = workspace.getProject();

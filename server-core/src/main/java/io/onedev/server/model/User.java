@@ -1347,6 +1347,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	public static String encodeWorkspaceDataKey(String dataKey) {
+		if (dataKey.equals(".") || dataKey.equals(".."))
+			throw new ExplicitException("Invalid workspace data key: " + dataKey);
 		try {
 			return URLEncoder.encode(dataKey, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
