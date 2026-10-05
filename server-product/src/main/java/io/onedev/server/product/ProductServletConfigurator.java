@@ -130,6 +130,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		boolean hasCustomDarkLogo = false;
 		boolean hasSiteMapTxt = false;
 		boolean hasSiteMapXml = false;
+		boolean hasPrefetch = false;
 		for (File file: assetsDir.listFiles()) {
 			if (file.isFile()) {
 				context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/" + file.getName());
@@ -141,6 +142,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 					hasSiteMapXml = true;
 				else if (file.getName().equals("sitemap.txt"))
 					hasSiteMapTxt = true;
+				else if (file.getName().equals("prefetch.json"))
+					hasPrefetch = true;
 			} else {
 				context.addServlet(new ServletHolder(new FileAssetServlet(file)), "/" + file.getName() + "/*");
 			}
@@ -153,6 +156,10 @@ public class ProductServletConfigurator implements ServletConfigurator {
 			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/sitemap.txt");
 		if (!hasSiteMapXml)
 			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/sitemap.xml");
+		// Keep background speculation-rule requests out of Wicket's login interception
+		// even when site/assets/prefetch.json is missing.
+		if (!hasPrefetch)
+			context.addServlet(new ServletHolder(new ClasspathAssetServlet(ProductServletConfigurator.class)), "/prefetch.json");
 		
 		var incompatibilitiesDir = new File(Bootstrap.installDir, "incompatibilities");
 		for (var file: incompatibilitiesDir.listFiles())
