@@ -49,17 +49,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.ws.rs.core.MediaType;
-
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
@@ -73,7 +62,6 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.hibernate.Session;
-import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.hibernate.query.sqm.tree.domain.SqmPath;
 import org.jspecify.annotations.Nullable;
@@ -135,6 +123,7 @@ import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.GitPackConfig;
@@ -144,6 +133,7 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.persistence.dao.Restrictions;
 import io.onedev.server.replica.ProjectReplica;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
@@ -184,6 +174,16 @@ import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.CommitInfoService;
 import io.onedev.server.xodus.VisitInfoService;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.ws.rs.core.MediaType;
 
 @Singleton
 public class DefaultProjectService extends BaseEntityService<Project>
@@ -473,6 +473,12 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				query.setParameter("fork", fork);
 				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
+
+				query = getSession().createMutationQuery(String.format("update Workspace set %s=:fork where %s=:descendant", 
+					Workspace.PROP_NUMBER_SCOPE, Workspace.PROP_PROJECT));
+				query.setParameter("fork", fork);
+				query.setParameter("descendant", forkChild);
+				query.executeUpdate();
 			}
 		}
 
@@ -485,12 +491,9 @@ public class DefaultProjectService extends BaseEntityService<Project>
 		for (PullRequest request: project.getOutgoingRequests()) {
 			if (!request.getTargetProject().equals(project) && request.isOpen())
 				pullRequestService.discard(user, request, "Source project is deleted.");
+			// Bulk updates leave managed requests referencing the project when Hibernate flushes.
+			request.setSourceProject(null);
 		}
-
-		query = getSession().createMutationQuery(String.format("update PullRequest set %s=null where %s=:sourceProject",
-				PullRequest.PROP_SOURCE_PROJECT, PullRequest.PROP_SOURCE_PROJECT));
-		query.setParameter("sourceProject", project);
-		query.executeUpdate();
 
 		for (var workspace: project.getWorkspaces())
 			workspaceService.delete(workspace);

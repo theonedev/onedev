@@ -719,39 +719,11 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 				query.setParameter("newState", entry.getValue().getNewState());
 				query.executeUpdate();
 			} else {
-				var query = getSession().createMutationQuery("delete from IssueField where issue in (select issue from Issue issue where issue.state=:state)");
-				query.setParameter("state", entry.getKey());
-				query.executeUpdate();
-				
-				query = getSession().createMutationQuery("delete from IssueComment where issue in (select issue from Issue issue where issue.state=:state)");
-				query.setParameter("state", entry.getKey());
-				query.executeUpdate();
-				
-				query = getSession().createMutationQuery("delete from IssueChange where issue in (select issue from Issue issue where issue.state=:state)");
-				query.setParameter("state", entry.getKey());
-				query.executeUpdate();
-				
-				query = getSession().createMutationQuery("delete from IssueVote where issue in (select issue from Issue issue where issue.state=:state)");
-				query.setParameter("state", entry.getKey());
-				query.executeUpdate();
-				
-				query = getSession().createMutationQuery("delete from IssueWatch where issue in (select issue from Issue issue where issue.state=:state)");
-				query.setParameter("state", entry.getKey());
-				query.executeUpdate();
+				// Normal deletion checks workspaces and cascades all issue dependents.
+				getSession().createQuery("from Issue where state=:state", Issue.class)
+						.setParameter("state", entry.getKey()).getResultList().forEach(this::delete);
 
-				query = getSession().createMutationQuery("delete from IssueAuthorization where issue in (select issue from Issue issue where issue.state=:state)");
-				query.setParameter("state", entry.getKey());
-				query.executeUpdate();
-
-				query = getSession().createMutationQuery("delete from IssueStateHistory where issue in (select issue from Issue issue where issue.state=:state)");
-				query.setParameter("state", entry.getKey());
-				query.executeUpdate();
-				
-				query = getSession().createMutationQuery("delete from Issue where state=:state");
-				query.setParameter("state", entry.getKey());
-				query.executeUpdate();
-
-				query = getSession().createMutationQuery("delete from IssueStateHistory where state=:state");
+				var query = getSession().createMutationQuery("delete from IssueStateHistory where state=:state");
 				query.setParameter("state", entry.getKey());
 				query.executeUpdate();
 			}
