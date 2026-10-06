@@ -217,6 +217,57 @@ public abstract class BuildDetailPage extends ProjectPage
 		};
 	}
 	
+	protected Component newRebuildLink(String componentId) {
+		return new AjaxLink<Void>(componentId) {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to rebuild?")));
+			}
+
+			private void resubmit(Serializable paramBean) {
+				var user = SecurityUtils.getUser();
+				jobService.resubmit(user, getBuild(), _T("Resubmitted manually"));
+				setResponsePage(BuildDefaultPage.class, BuildDefaultPage.paramsOf(getBuild()));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				resubmit(getBuild().getParamBean());
+				target.focusComponent(null);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getBuild().isFinished() && getBuild().getJob() != null
+						&& SecurityUtils.canRunJob(getProject(), getBuild().getJobName()));
+			}
+
+		}.setOutputMarkupId(true);
+	}
+
+	protected Component newCreateIssueLink(String componentId) {
+		return new AjaxLink<Void>(componentId) {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				var prompt = settingService.getAiSetting().getBuildFailureIssuePrompt();
+				getAssistant().show(target, prompt + " Display in " + getSession().getLocale().getDisplayLanguage());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getBuild().isFailed()
+						&& SecurityUtils.canWriteCode(getProject())
+						&& !getAssistant().getEntitledAis().isEmpty());
+			}
+
+		}.setOutputMarkupId(true);
+	}
+
 	protected Component newCancelLink(String componentId) {
 		return new AjaxLink<Void>(componentId) {
 
@@ -323,34 +374,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new AjaxLink<Void>("rebuild") {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to rebuild?")));
-					}
-
-					private void resubmit(Serializable paramBean) {
-						var user = SecurityUtils.getUser();
-						jobService.resubmit(user, getBuild(), _T("Resubmitted manually"));
-						setResponsePage(BuildDefaultPage.class, BuildDefaultPage.paramsOf(getBuild()));
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						resubmit(getBuild().getParamBean());
-						target.focusComponent(null);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getBuild().isFinished() && getBuild().getJob() != null
-								&& SecurityUtils.canRunJob(getProject(), getBuild().getJobName()));
-					}
-
-				}.setOutputMarkupId(true));
+				add(newRebuildLink("rebuild"));
 
 				add(newCancelLink("cancel"));
 
@@ -389,7 +413,7 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!promotionsModel.getObject().isEmpty());
+						setVisible(getBuild().isFinished() && !promotionsModel.getObject().isEmpty());
 					}
 
 				});
@@ -455,23 +479,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				});
 
-				add(new AjaxLink<Void>("createIssue") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						var prompt = settingService.getAiSetting().getBuildFailureIssuePrompt();
-						getAssistant().show(target, prompt + " Display in " + getSession().getLocale().getDisplayLanguage());
-					}
-		
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getBuild().isFailed() 
-								&& SecurityUtils.canWriteCode(getProject()) 
-								&& !getAssistant().getEntitledAis().isEmpty());
-					}
-		
-				});
+				add(newCreateIssueLink("createIssue"));
 						
 				add(newBuildObserver(getBuild().getId()));
 			}

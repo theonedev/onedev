@@ -17,8 +17,10 @@
     <wicket:fragment wicket:id="optionsFrag">
         <div class="d-flex align-items-center">
             <span wicket:id="stickyActions" class="build-step-sticky-actions align-items-center">
+                <a wicket:id="rebuild" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2" t:data-tippy-content="Re-run this build" t:aria-label="Re-run this build"><wicket:svg href="re-run" class="icon"/></a>
                 <a wicket:id="cancel" class="btn btn-icon btn-light btn-hover-danger btn-xs mr-2" t:data-tippy-content="Cancel this build" t:aria-label="Cancel this build"><wicket:svg href="cancel" class="icon"/></a>
                 <a wicket:id="terminal" class="subscription-required btn btn-icon btn-light btn-hover-primary btn-xs mr-2" t:data-tippy-content="Open terminal of current running step" t:aria-label="Open terminal of current running step"><wicket:svg href="terminal" class="icon"/></a>
+                <a wicket:id="createIssue" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2" t:data-tippy-content="Create an issue for this failure" t:aria-label="Create an issue for this failure"><wicket:svg href="issue" class="icon"/></a>
             </span>
             <a wicket:id="download" class="btn btn-light btn-hover-primary btn-icon btn-sm btn-xs" t:data-tippy-content="Download full log" t:aria-label="Download full log"><wicket:svg href="download" class="icon"/></a>
         </div>

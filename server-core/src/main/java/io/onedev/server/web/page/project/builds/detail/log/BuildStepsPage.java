@@ -318,7 +318,8 @@ public class BuildStepsPage extends BuildDetailPage {
 	public Component renderOptions(String componentId) {
 		var fragment = new Fragment(componentId, "optionsFrag", this);
 		var stickyActions = new WebMarkupContainer("stickyActions");
-		stickyActions.add(newCancelLink("cancel"), newTerminalLink("terminal"));
+		stickyActions.add(newRebuildLink("rebuild"), newCancelLink("cancel"),
+				newTerminalLink("terminal"), newCreateIssueLink("createIssue"));
 		stickyActions.add(newBuildObserver(getBuild().getId()));
 		fragment.add(stickyActions);
 		fragment.add(new ResourceLink<Void>("download", new BuildLogResourceReference(),
