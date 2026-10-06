@@ -565,6 +565,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Build Description", "Descripción de construcción");
 		m.put("Build Failure Issue Prompt", "Problema de Fallo de Construcción");
 		m.put("Build Filter", "Filtro de construcción");
+		m.put("Build Image (Buildx)", "Construir Imagen (Buildx)");
 		m.put("Build Image (Kaniko)", "Imagen de construcción (Kaniko)");
 		m.put("Build Management", "Gestión de construcción");
 		m.put("Build Notification", "Notificación de construcción");
@@ -584,6 +585,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Build Volume Storage Size", "Tamaño de almacenamiento de volumen de construcción");
 		m.put("Build administrative permission for all jobs inside a project, including batch operations over multiple builds", 
 			"Permiso administrativo de construcción para todos los trabajos dentro de un proyecto, incluidas las operaciones en lote sobre múltiples construcciones");
+		m.put("Build docker image with buildx. This step can only be executed by server docker executor or remote docker executor, and it uses the buildx builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko step instead", 
+			"Construir imagen de Docker con buildx. Este paso solo puede ser ejecutado por el ejecutor docker del servidor o el ejecutor docker remoto, y utiliza el constructor buildx especificado en estos ejecutores para realizar el trabajo. Para construir imágenes con el ejecutor de Kubernetes, utilice el paso kaniko en su lugar");
 		m.put("Build docker image with kaniko. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"Construir imagen de Docker con kaniko. Este paso necesita ser ejecutado por el ejecutor de Docker del servidor, el ejecutor de Docker remoto o el ejecutor de Kubernetes");
 		m.put("Build duration statistics", "Estadísticas de duración de construcción");
@@ -817,9 +820,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Clustered Servers", "Servidores Agrupados");
 		m.put("Cobertura Coverage Report", "Informe de Cobertura Cobertura");
 		m.put("Code", "Código");
-		m.put("Code Analysis", "Análisis de Código");
-		m.put("Code Analysis Setting", "Configuración de Análisis de Código");
-		m.put("Code Analysis Settings", "Configuraciones de Análisis de Código");
 		m.put("Code Changes", "Cambios de Código");
 		m.put("Code Comment", "Comentario de Código");
 		m.put("Code Comment Management", "Gestión de Comentarios de Código");
@@ -832,7 +832,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Code Privilege", "Privilegio de Código");
 		m.put("Code Problem Statistics", "Estadísticas de Problemas de Código");
 		m.put("Code Search", "Búsqueda de Código");
-		m.put("Code analysis settings updated", "Configuraciones de análisis de código actualizadas");
 		m.put("Code changes since...", "Cambios de código desde...");
 		m.put("Code clone or download", "Clonar o descargar código");
 		m.put("Code comment", "Comentario de código");
@@ -1384,6 +1383,9 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "Habilitar Todos los Usuarios Consultados");
 		m.put("Enable Anonymous Access", "Habilitar Acceso Anónimo");
 		m.put("Enable Auto Backup", "Habilitar Copia de Seguridad Automática");
+		m.put("Enable Builder Cache Prune", "Habilitar Limpieza de Caché del Constructor");
+		m.put("Enable Buildx Image Build", "Habilitar Construcción de Imágenes con Buildx");
+		m.put("Enable Buildx Image Tools", "Habilitar Herramientas de Imágenes con Buildx");
 		m.put("Enable CI/CD by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "Habilitar CI/CD mediante <a wicket:id=\"addFile\" class=\"link-primary\"></a>");
 		m.put("Enable Html Report Publish", "Habilitar la publicación del informe Html");
 		m.put("Enable Selected Users", "Habilitar Usuarios Seleccionados");
@@ -1396,6 +1398,16 @@ public class Translation_es extends TranslationResourceBundle {
 			"Habilita esto si la especificación puede ser utilizada por el usuario de IA para crear espacios de trabajo y ejecutar tareas asignadas");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"Habilitar esta opción para fusionar automáticamente la solicitud de extracción cuando esté lista (todos los revisores aprobaron, todos los trabajos requeridos pasaron, etc.)");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"Habilite esto para permitir ejecutar el paso de publicación de informes HTML. Para evitar ataques XSS,\nasegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado por trabajos confiables");
+		m.put("Enable this to allow to run prune builder cache step. To avoid shared builder cache being\ncleared by malicious jobs, make sure executor with this option enabled can only be used\nby trusted jobs", 
+			"Habilite esto para permitir ejecutar el paso de limpieza de caché del constructor. Para evitar que trabajos maliciosos borren la caché compartida del constructor, asegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado\npor trabajos confiables");
+		m.put("Enable this to allow to run site publish step. OneDev will serve project\nsite files as is. To avoid XSS attack, make sure executor with this\noption enabled can only be used by trusted jobs", 
+			"Habilite esto para permitir ejecutar el paso de publicación del sitio. OneDev servirá los archivos del sitio del proyecto tal como están. Para evitar ataques XSS, asegúrese de que el ejecutor con esta\nopción habilitada solo pueda ser utilizado por trabajos confiables");
+		m.put("Enable this to allow to run the buildx image tools step.\nTo avoid malicious jobs reading or writing arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"Habilite esto para permitir ejecutar el paso de herramientas de imágenes con buildx.\nPara evitar que trabajos maliciosos lean o escriban archivos arbitrarios del host al ejecutar este paso,\nasegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado por trabajos confiables");
+		m.put("Enable this to allow to run the image build step using buildx.\nThe image build step using kaniko can still be used even this option is disabled.\nTo avoid malicious jobs reading arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"Habilite esto para permitir ejecutar el paso de construcción de imágenes usando buildx.\nEl paso de construcción de imágenes usando kaniko aún puede ser utilizado incluso si esta opción está deshabilitada.\nPara evitar que trabajos maliciosos lean archivos arbitrarios del host al ejecutar este paso,\nasegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado por trabajos confiables");
 		m.put("Enable this to process issue or pull request comments posted via email", "Habilitar esto para procesar comentarios de problemas o solicitudes de extracción publicados por correo electrónico");
 		m.put("Enable this to process issue or pull request comments posted via email. <b class='text-danger'>NOTE:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub addressing</a> needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts", 
 			"Habilitar esto para procesar comentarios de problemas o solicitudes de extracción publicados por correo electrónico. <b class='text-danger'>NOTA:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>El subdireccionamiento</a> debe estar habilitado para la dirección de correo electrónico del sistema anterior, ya que OneDev lo utiliza para rastrear contextos de problemas y solicitudes de extracción");
@@ -1556,7 +1568,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("File name patterns such as *.java, *.c", "Patrones de nombre de archivo como *.java, *.c");
 		m.put("File not found", "Archivo no encontrado");
 		m.put("Files", "Archivos");
-		m.put("Files to Be Analyzed", "Archivos a Analizar");
 		m.put("Filter", "Filtro");
 		m.put("Filter Issues", "Filtrar Problemas");
 		m.put("Filter actions", "Filtrar acciones");
@@ -2586,8 +2597,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("OneDev Issue Field", "Campo de Problema de OneDev");
 		m.put("OneDev Issue Link", "Enlace de Problema de OneDev");
 		m.put("OneDev Issue State", "Estado de Problema de OneDev");
-		m.put("OneDev analyzes repository files for code search, line statistics, and code contribution statistics. This setting tells which files should be analyzed.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-analyzed when server is started", 
-			"OneDev analiza los archivos del repositorio para la búsqueda de código, estadísticas de líneas y estadísticas de contribución de código. Esta configuración indica qué archivos deben ser analizados.\n<b>NOTA: </b> Cambiar esta configuración solo afecta a los nuevos commits. Para aplicar el cambio a los commits históricos, detenga el servidor y elimine la carpeta\n<code>index</code> y <code>info/commit</code> bajo el <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>directorio de almacenamiento del proyecto</a>.\nEl repositorio será reanalizado cuando se inicie el servidor");
 		m.put("OneDev configures git hooks to communicate with itself via curl", "OneDev configura hooks de git para comunicarse consigo mismo vía curl");
 		m.put("OneDev needs to search and determine user DN, as well as searching user group information if group retrieval is enabled. Tick this option and specify 'manager' DN and password if these operations needs to be authenticated", 
 			"OneDev necesita buscar y determinar el DN del usuario, así como buscar información del grupo de usuarios si la recuperación de grupos está habilitada. Marque esta opción y especifique el DN del 'manager' y la contraseña si estas operaciones necesitan autenticación");
@@ -2772,6 +2781,8 @@ public class Translation_es extends TranslationResourceBundle {
 			"Opcionalmente especifique opciones de Docker para crear la red. Las múltiples opciones deben estar separadas por espacio, y una única opción que contenga espacios debe estar entre comillas.");
 		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted", 
 			"Opcionalmente especifique opciones de Docker para ejecutar el contenedor. Las múltiples opciones deben estar separadas por espacio, y una única opción que contenga espacios debe estar entre comillas.");
+		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted. File paths must be relative to the job working directory, without '..' or symbolic links. Volume and device mount options are not allowed", 
+			"Opcionalmente, especifique opciones de Docker para ejecutar el contenedor. Varias opciones deben estar separadas por espacios, y una sola opción que contenga espacios debe estar entre comillas. Las rutas de archivo deben ser relativas al directorio de trabajo del trabajo, sin '..' ni enlaces simbólicos. No se permiten opciones de montaje de volúmenes ni dispositivos");
 		m.put("Optionally specify docker sock to use. Defaults to <i>/var/run/docker.sock</i>", "Opcionalmente especifique el socket de docker a usar. Por defecto es <i>/var/run/docker.sock</i>");
 		m.put("Optionally specify environment variables", "Opcionalmente especifique variables de entorno");
 		m.put("Optionally specify environment variables for the container", "Opcionalmente especifique variables de entorno para el contenedor.");
@@ -2820,6 +2831,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Optionally specify name of the attribute inside the user LDAP entry whose values will be taken as user SSH keys. SSH keys will be managed by LDAP only if this field is set", 
 			"Opcionalmente especifique el nombre del atributo dentro de la entrada LDAP del usuario cuyos valores se tomarán como claves SSH del usuario. Las claves SSH serán gestionadas por LDAP solo si este campo está configurado.");
 		m.put("Optionally specify node selector of the job pods", "Opcionalmente especifique el selector de nodo de los pods del trabajo.");
+		m.put("Optionally specify options for docker buildx prune command", "Opcionalmente, especifique opciones para el comando docker buildx prune");
 		m.put("Optionally specify options for scp command. Multiple options need to be separated with space", 
 			"Opcionalmente especifique opciones para el comando scp. Las múltiples opciones deben estar separadas por espacio.");
 		m.put("Optionally specify options for ssh command. Multiple options need to be separated with space", 
@@ -3223,6 +3235,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Provisioner", "Provisionador");
 		m.put("Proxy", "Proxy");
 		m.put("Prune Builder Cache", "Limpiar caché del constructor");
+		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
+			"Limpiar la caché de imágenes del constructor docker buildx. Este paso ejecuta el comando docker buildx prune para eliminar la caché del constructor buildx especificado en el ejecutor docker del servidor o el ejecutor docker remoto");
 		m.put("Public Key", "Clave pública");
 		m.put("Public Roles", "Roles Públicos");
 		m.put("Publish", "Publicar");
@@ -3823,6 +3837,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
 			"Especifica el archivo de salida json de <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> relativo a <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. Este archivo puede generarse con la opción de salida json de clippy, por ejemplo <code>cargo clippy --message-format json>check-result.json</code>. Usa * o ? para coincidencia de patrones");
 		m.put("Specify Build Options", "Especifica las opciones de compilación");
+		m.put("Specify Buildx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
+			"Especifique el constructor Buildx utilizado para construir la imagen de Docker. OneDev creará el constructor automáticamente si no existe. Consulte <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>este tutorial</a> para aprender cómo personalizar el constructor, por ejemplo, para permitir la publicación en registros inseguros");
 		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
 			"Especifica el archivo xml de resultados de CPD relativo a <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, por ejemplo, <tt>target/cpd.xml</tt>. Usa * o ? para coincidencia de patrones");
 		m.put("Specify Commit Message", "Especifica el mensaje de commit");
@@ -3916,6 +3932,8 @@ public class Translation_es extends TranslationResourceBundle {
 			"Especifica la ruta absoluta al archivo de configuración utilizado por kubectl para acceder al clúster. Déjalo vacío para que kubectl determine automáticamente la información de acceso al clúster");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, OneDev will try to find the utility from system path", 
 			"Especifica la ruta absoluta a la utilidad kubectl, por ejemplo: <i>/usr/bin/kubectl</i>. Si se deja vacío, OneDev intentará encontrar la utilidad desde la ruta del sistema");
+		m.put("Specify access token with upload cache permission for above project.\nThis property is not required if the workspace owner has upload cache permission for above project", 
+			"Especifique el token de acceso con permiso para cargar la caché para el proyecto mencionado.\nEsta propiedad no es necesaria si el propietario del espacio de trabajo tiene permiso para cargar la caché para el proyecto mencionado");
 		m.put("Specify account name to login to Gmail to send/receive email", "Especifica el nombre de cuenta para iniciar sesión en Gmail para enviar/recibir correos");
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"Especifica usuarios adicionales que pueden acceder a este problema confidencial además de aquellos autorizados mediante roles. Los usuarios mencionados en el problema se autorizarán automáticamente");
@@ -4956,6 +4974,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"Si se debe incluir este campo cuando el problema se abre inicialmente o no. Si no, puedes incluir este campo más tarde cuando el problema se transite a otros estados mediante la regla de transición de problemas");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "Si se debe ingresar y mostrar el tiempo estimado/gastado solo en horas/minutos o no");
+		m.put("Whether or not to mount docker sock into job container to\nsupport docker operations in job commands. To avoid malicious jobs taking control of whole OneDev\nby operating the mounted docker sock, make sure executor with this option enabled can only be used\nby trusted jobs", 
+			"Indique si se debe montar el socket de Docker en el contenedor del trabajo para\nadmitir operaciones de Docker en los comandos del trabajo. Para evitar que trabajos maliciosos tomen control de todo OneDev\noperando el socket de Docker montado, asegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado\npor trabajos confiables");
 		m.put("Whether or not to mount docker sock into workspace container to support docker operations in workspace<br><b class='text-danger'>WARNING</b>: Malicious workspaces can take control of whole OneDev by operating the mounted docker sock. Make sure this provisioner can only be used by trusted workspaces if this option is enabled", 
 			"Si se debe montar el socket de docker en el contenedor del espacio de trabajo para soportar operaciones de docker en el espacio de trabajo o no<br><b class='text-danger'>ADVERTENCIA</b>: Los espacios de trabajo maliciosos pueden tomar control de todo OneDev operando el socket de docker montado. Asegúrese de que este aprovisionador solo pueda ser utilizado por espacios de trabajo de confianza si esta opción está habilitada");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
@@ -5314,33 +5334,16 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Build Image (Buildx)", "Construir Imagen (Buildx)");
-		m.put("Build docker image with buildx. This step can only be executed by server docker executor or remote docker executor, and it uses the buildx builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko step instead", 
-			"Construir imagen de Docker con buildx. Este paso solo puede ser ejecutado por el ejecutor docker del servidor o el ejecutor docker remoto, y utiliza el constructor buildx especificado en estos ejecutores para realizar el trabajo. Para construir imágenes con el ejecutor de Kubernetes, utilice el paso kaniko en su lugar");
-		m.put("Enable Builder Cache Prune", "Habilitar Limpieza de Caché del Constructor");
-		m.put("Enable Buildx Image Build", "Habilitar Construcción de Imágenes con Buildx");
-		m.put("Enable Buildx Image Tools", "Habilitar Herramientas de Imágenes con Buildx");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attack,\nmake sure executor with this option enabled can only be used by trusted jobs", 
-			"Habilite esto para permitir ejecutar el paso de publicación de informes HTML. Para evitar ataques XSS,\nasegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado por trabajos confiables");
-		m.put("Enable this to allow to run prune builder cache step. To avoid shared builder cache being\ncleared by malicious jobs, make sure executor with this option enabled can only be used\nby trusted jobs", 
-			"Habilite esto para permitir ejecutar el paso de limpieza de caché del constructor. Para evitar que trabajos maliciosos borren la caché compartida del constructor, asegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado\npor trabajos confiables");
-		m.put("Enable this to allow to run site publish step. OneDev will serve project\nsite files as is. To avoid XSS attack, make sure executor with this\noption enabled can only be used by trusted jobs", 
-			"Habilite esto para permitir ejecutar el paso de publicación del sitio. OneDev servirá los archivos del sitio del proyecto tal como están. Para evitar ataques XSS, asegúrese de que el ejecutor con esta\nopción habilitada solo pueda ser utilizado por trabajos confiables");
-		m.put("Enable this to allow to run the buildx image tools step.\nTo avoid malicious jobs reading or writing arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
-			"Habilite esto para permitir ejecutar el paso de herramientas de imágenes con buildx.\nPara evitar que trabajos maliciosos lean o escriban archivos arbitrarios del host al ejecutar este paso,\nasegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado por trabajos confiables");
-		m.put("Enable this to allow to run the image build step using buildx.\nThe image build step using kaniko can still be used even this option is disabled.\nTo avoid malicious jobs reading arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
-			"Habilite esto para permitir ejecutar el paso de construcción de imágenes usando buildx.\nEl paso de construcción de imágenes usando kaniko aún puede ser utilizado incluso si esta opción está deshabilitada.\nPara evitar que trabajos maliciosos lean archivos arbitrarios del host al ejecutar este paso,\nasegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado por trabajos confiables");
-		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted. File paths must be relative to the job working directory, without '..' or symbolic links. Volume and device mount options are not allowed", 
-			"Opcionalmente, especifique opciones de Docker para ejecutar el contenedor. Varias opciones deben estar separadas por espacios, y una sola opción que contenga espacios debe estar entre comillas. Las rutas de archivo deben ser relativas al directorio de trabajo del trabajo, sin '..' ni enlaces simbólicos. No se permiten opciones de montaje de volúmenes ni dispositivos");
-		m.put("Optionally specify options for docker buildx prune command", "Opcionalmente, especifique opciones para el comando docker buildx prune");
-		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
-			"Limpiar la caché de imágenes del constructor docker buildx. Este paso ejecuta el comando docker buildx prune para eliminar la caché del constructor buildx especificado en el ejecutor docker del servidor o el ejecutor docker remoto");
-		m.put("Specify Buildx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
-			"Especifique el constructor Buildx utilizado para construir la imagen de Docker. OneDev creará el constructor automáticamente si no existe. Consulte <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>este tutorial</a> para aprender cómo personalizar el constructor, por ejemplo, para permitir la publicación en registros inseguros");
-		m.put("Specify access token with upload cache permission for above project.\nThis property is not required if the workspace owner has upload cache permission for above project", 
-			"Especifique el token de acceso con permiso para cargar la caché para el proyecto mencionado.\nEsta propiedad no es necesaria si el propietario del espacio de trabajo tiene permiso para cargar la caché para el proyecto mencionado");
-		m.put("Whether or not to mount docker sock into job container to\nsupport docker operations in job commands. To avoid malicious jobs taking control of whole OneDev\nby operating the mounted docker sock, make sure executor with this option enabled can only be used\nby trusted jobs", 
-			"Indique si se debe montar el socket de Docker en el contenedor del trabajo para\nadmitir operaciones de Docker en los comandos del trabajo. Para evitar que trabajos maliciosos tomen control de todo OneDev\noperando el socket de Docker montado, asegúrese de que el ejecutor con esta opción habilitada solo pueda ser utilizado\npor trabajos confiables");
+		m.put("Code Indexing", "Indexación de Código");
+		m.put("Code Indexing Setting", "Configuración de Indexación de Código");
+		m.put("Code Indexing Settings", "Configuraciones de Indexación de Código");
+		m.put("Code indexing settings updated", "Configuraciones de indexación de código actualizadas");
+		m.put("Files to Be Indexed", "Archivos a Indexar");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs", 
+			"Si está habilitado, se requiere una sesión de inicio de sesión para activar automáticamente la indexación de código al navegar por los archivos del repositorio o al ver diferencias");
+		m.put("Require Login for Automatic Indexing", "Requerir Inicio de Sesión para la Indexación Automática");
+		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
+			"Especifique qué archivos del repositorio debe indexar OneDev. Durante la indexación, OneDev analiza estos archivos para la búsqueda de código, estadísticas de líneas y estadísticas de contribución de código.\n<b>NOTA: </b> Cambiar esta configuración solo afecta a los nuevos commits. Para aplicar el cambio a los commits históricos, detenga el servidor y elimine la carpeta\n<code>index</code> y <code>info/commit</code> en el <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>directorio de almacenamiento del proyecto</a>.\nEl repositorio será reindexado cuando se inicie el servidor");
 	}
 		
 	@Override

@@ -591,6 +591,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Build Description", "构建描述");
 		m.put("Build Failure Issue Prompt", "构建失败工单提示");
 		m.put("Build Filter", "构建筛选器");
+		m.put("Build Image (Buildx)", "构建镜像 (Buildx)");
 		m.put("Build Image (Kaniko)", "构建镜像（Kaniko）");
 		m.put("Build Management", "构建管理");
 		m.put("Build Notification", "构建通知");
@@ -610,6 +611,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Build Volume Storage Size", "构建卷存储大小");
 		m.put("Build administrative permission for all jobs inside a project, including batch operations over multiple builds", 
 			"项目中所有任务的构建管理权限，包括多个构建的批量操作");
+		m.put("Build docker image with buildx. This step can only be executed by server docker executor or remote docker executor, and it uses the buildx builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko step instead", 
+			"使用 buildx 构建 docker 镜像。此步骤只能由服务器 docker 执行器或远程 docker 执行器执行，并使用这些执行器中指定的 buildx 构建器来完成任务。要使用 Kubernetes 执行器构建镜像，请改用 kaniko 步骤");
 		m.put("Build docker image with kaniko. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"使用kaniko构建docker镜像。此步骤需由服务器docker执行器、远程docker执行器或Kubernetes执行器执行");
 		m.put("Build duration statistics", "构建时长统计");
@@ -843,9 +846,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Clustered Servers", "集群服务器");
 		m.put("Cobertura Coverage Report", "Cobertura 覆盖率报告");
 		m.put("Code", "代码");
-		m.put("Code Analysis", "代码分析");
-		m.put("Code Analysis Setting", "代码分析设置");
-		m.put("Code Analysis Settings", "代码分析设置");
 		m.put("Code Changes", "代码变更");
 		m.put("Code Comment", "代码评论");
 		m.put("Code Comment Management", "代码评论管理");
@@ -858,7 +858,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Code Privilege", "代码权限");
 		m.put("Code Problem Statistics", "代码问题统计");
 		m.put("Code Search", "代码搜索");
-		m.put("Code analysis settings updated", "代码分析设置已更新");
 		m.put("Code changes since...", "代码变更自...");
 		m.put("Code clone or download", "克隆或下载代码");
 		m.put("Code comment", "代码评论");
@@ -1410,6 +1409,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "启用所有查询的用户");
 		m.put("Enable Anonymous Access", "启用匿名访问");
 		m.put("Enable Auto Backup", "启用自动备份");
+		m.put("Enable Builder Cache Prune", "启用构建器缓存清理");
+		m.put("Enable Buildx Image Build", "启用 Buildx 镜像构建");
+		m.put("Enable Buildx Image Tools", "启用 Buildx 镜像工具");
 		m.put("Enable CI/CD by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "通过 <a wicket:id=\"addFile\" class=\"link-primary\"></a> 启用 CI/CD");
 		m.put("Enable Html Report Publish", "启用 Html 报告发布");
 		m.put("Enable Selected Users", "启用选定的用户");
@@ -1422,6 +1424,16 @@ public class Translation_zh extends TranslationResourceBundle {
 			"启用此选项，如果该规范可以被 AI 用户用来创建工作区以运行分配的任务");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"启用此选项以在准备好时自动合并合并请求（所有审查者批准，所有必需的任务通过等）");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"启用此选项以允许运行 html 报告发布步骤。为避免 XSS 攻击，\n请确保启用此选项的执行器只能被可信任务使用");
+		m.put("Enable this to allow to run prune builder cache step. To avoid shared builder cache being\ncleared by malicious jobs, make sure executor with this option enabled can only be used\nby trusted jobs", 
+			"启用此选项以允许运行清理构建器缓存步骤。为避免共享构建器缓存被\n恶意任务清理，请确保启用此选项的执行器只能被可信任务使用");
+		m.put("Enable this to allow to run site publish step. OneDev will serve project\nsite files as is. To avoid XSS attack, make sure executor with this\noption enabled can only be used by trusted jobs", 
+			"启用此选项以允许运行站点发布步骤。OneDev 将按原样提供项目\n站点文件。为避免 XSS 攻击，请确保启用此选项的执行器只能被可信任务使用");
+		m.put("Enable this to allow to run the buildx image tools step.\nTo avoid malicious jobs reading or writing arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"启用此选项以允许运行 buildx 镜像工具步骤。\n为避免恶意任务通过运行此步骤读取或写入任意主机文件，\n请确保启用此选项的执行器只能被可信任务使用");
+		m.put("Enable this to allow to run the image build step using buildx.\nThe image build step using kaniko can still be used even this option is disabled.\nTo avoid malicious jobs reading arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
+			"启用此选项以允许使用 buildx 运行镜像构建步骤。\n即使禁用此选项，仍然可以使用 kaniko 的镜像构建步骤。\n为避免恶意任务通过运行此步骤读取任意主机文件，\n请确保启用此选项的执行器只能被可信任务使用");
 		m.put("Enable this to process issue or pull request comments posted via email", "启用此选项以处理通过电子邮件发布的工单或合并请求评论");
 		m.put("Enable this to process issue or pull request comments posted via email. <b class='text-danger'>NOTE:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub addressing</a> needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts", 
 			"启用此选项以处理通过电子邮件发布的工单或合并请求评论。<b class='text-danger'>注意：</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> 需要为系统电子邮件地址启用，因为 OneDev 使用它来跟踪工单和合并请求上下文");
@@ -1582,7 +1594,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("File name patterns such as *.java, *.c", "文件名模式，如 *.java, *.c");
 		m.put("File not found", "文件未找到");
 		m.put("Files", "文件");
-		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
 		m.put("Filter Issues", "过滤工单");
 		m.put("Filter actions", "筛选操作");
@@ -2612,8 +2623,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("OneDev Issue Field", "OneDev 工单字段");
 		m.put("OneDev Issue Link", "OneDev 工单链接");
 		m.put("OneDev Issue State", "OneDev 工单状态");
-		m.put("OneDev analyzes repository files for code search, line statistics, and code contribution statistics. This setting tells which files should be analyzed.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-analyzed when server is started", 
-			"OneDev 分析代码库文件以进行代码搜索、行统计和代码贡献统计。此设置指示应分析哪些文件。\n<b>注意：</b>更改此设置仅影响新提交。要将更改应用于历史提交，请停止服务器并删除文件夹\n<code>index</code> 和 <code>info/commit</code>，位于 <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>项目存储目录</a>下。\n当服务器启动时，代码库将被重新分析。");
 		m.put("OneDev configures git hooks to communicate with itself via curl", "OneDev 配置 git 钩子以通过 curl 与自身通信");
 		m.put("OneDev needs to search and determine user DN, as well as searching user group information if group retrieval is enabled. Tick this option and specify 'manager' DN and password if these operations needs to be authenticated", 
 			"OneDev 需要搜索和确定用户 DN，以及在启用组获取时搜索用户组信息。如果这些操作需要认证，请勾选此选项并指定 'manager' DN 和密码");
@@ -2798,6 +2807,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定创建网络的 docker 选项。多个选项应以空格分隔，包含空格的单个选项应加引号");
 		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted", 
 			"可选择指定运行容器的 docker 选项。多个选项应以空格分隔，包含空格的单个选项应加引号");
+		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted. File paths must be relative to the job working directory, without '..' or symbolic links. Volume and device mount options are not allowed", 
+			"可选地指定运行容器的 docker 选项。多个选项应以空格分隔，包含空格的单个选项应加引号。文件路径必须相对于任务工作目录，且不能包含 '..' 或符号链接。不允许使用卷和设备挂载选项");
 		m.put("Optionally specify docker sock to use. Defaults to <i>/var/run/docker.sock</i>", "可选地指定要使用的 docker sock。默认为<i>/var/run/docker.sock</i>");
 		m.put("Optionally specify environment variables", "可选地指定环境变量");
 		m.put("Optionally specify environment variables for the container", "可选择为容器指定环境变量");
@@ -2846,6 +2857,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify name of the attribute inside the user LDAP entry whose values will be taken as user SSH keys. SSH keys will be managed by LDAP only if this field is set", 
 			"可选择指定用户 LDAP 条目中属性的名称，其值将被用作用户 SSH 密钥。只有设置了此字段，SSH 密钥才会由 LDAP 管理");
 		m.put("Optionally specify node selector of the job pods", "可选择指定任务 pod 的节点选择器");
+		m.put("Optionally specify options for docker buildx prune command", "可选地为 docker buildx prune 命令指定选项");
 		m.put("Optionally specify options for scp command. Multiple options need to be separated with space", 
 			"可选择为 scp 命令指定选项。多个选项需要用空格分隔");
 		m.put("Optionally specify options for ssh command. Multiple options need to be separated with space", 
@@ -3249,6 +3261,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Provisioner", "配置器");
 		m.put("Proxy", "代理");
 		m.put("Prune Builder Cache", "清理构建器缓存");
+		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
+			"清理 docker buildx 构建器的镜像缓存。此步骤调用 docker buildx prune 命令以移除服务器 docker 执行器或远程 docker 执行器中指定的 buildx 构建器的缓存");
 		m.put("Public Key", "公钥");
 		m.put("Public Roles", "公共角色");
 		m.put("Publish", "发布");
@@ -3849,6 +3863,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
 			"指定 <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json 输出文件相对 <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>。此文件可以通过 clippy json 输出选项生成，例如 <code>cargo clippy --message-format json>check-result.json</code>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Build Options", "指定构建选项");
+		m.put("Specify Buildx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
+			"指定用于构建 docker 镜像的 Buildx 构建器。如果构建器不存在，OneDev 将自动创建。查看 <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>此教程</a>，了解如何自定义构建器，例如允许发布到不安全的注册表");
 		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
 			"指定 CPD 结果 xml 文件相对 <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>，例如 <tt>target/cpd.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Commit Message", "指定提交消息");
@@ -3942,6 +3958,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定 kubectl 用于访问集群的配置文件的绝对路径。留空让 kubectl 自动确定集群访问信息");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, OneDev will try to find the utility from system path", 
 			"指定 kubectl 工具的绝对路径，例如：<i>/usr/bin/kubectl</i>。如果留空，OneDev 将尝试从系统路径中查找该工具");
+		m.put("Specify access token with upload cache permission for above project.\nThis property is not required if the workspace owner has upload cache permission for above project", 
+			"为上述项目指定具有上传缓存权限的访问令牌。\n如果工作区所有者对上述项目具有上传缓存权限，则此属性不是必需的");
 		m.put("Specify account name to login to Gmail to send/receive email", "指定用于登录 Gmail 发送/接收电子邮件的账户名");
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"指定额外用户可以访问此机密工单，除了通过角色授予的用户。提及在工单中的用户将自动被授权");
@@ -4982,6 +5000,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"在工单首次打开时是否包含此字段。如果不包含，您可以在工单通过工单转换规则转换到其他状态时再包含此字段");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "是否仅以小时/分钟输入和显示估计/耗费时间");
+		m.put("Whether or not to mount docker sock into job container to\nsupport docker operations in job commands. To avoid malicious jobs taking control of whole OneDev\nby operating the mounted docker sock, make sure executor with this option enabled can only be used\nby trusted jobs", 
+			"是否将 docker sock 挂载到任务容器中以\n支持任务命令中的 docker 操作。为避免恶意任务通过操作挂载的 docker sock 控制整个 OneDev，\n请确保启用此选项的执行器只能被可信任务使用");
 		m.put("Whether or not to mount docker sock into workspace container to support docker operations in workspace<br><b class='text-danger'>WARNING</b>: Malicious workspaces can take control of whole OneDev by operating the mounted docker sock. Make sure this provisioner can only be used by trusted workspaces if this option is enabled", 
 			"是否将 docker sock 挂载到工作区容器中以支持工作区中的 docker 操作<br><b class='text-danger'>警告</b>：恶意工作区可以通过操作挂载的 docker sock 来控制整个 OneDev。如果启用此选项，请确保此配置器只能被可信工作区使用");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
@@ -5340,33 +5360,16 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Build Image (Buildx)", "构建镜像 (Buildx)");
-		m.put("Build docker image with buildx. This step can only be executed by server docker executor or remote docker executor, and it uses the buildx builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko step instead", 
-			"使用 buildx 构建 docker 镜像。此步骤只能由服务器 docker 执行器或远程 docker 执行器执行，并使用这些执行器中指定的 buildx 构建器来完成任务。要使用 Kubernetes 执行器构建镜像，请改用 kaniko 步骤");
-		m.put("Enable Builder Cache Prune", "启用构建器缓存清理");
-		m.put("Enable Buildx Image Build", "启用 Buildx 镜像构建");
-		m.put("Enable Buildx Image Tools", "启用 Buildx 镜像工具");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attack,\nmake sure executor with this option enabled can only be used by trusted jobs", 
-			"启用此选项以允许运行 html 报告发布步骤。为避免 XSS 攻击，\n请确保启用此选项的执行器只能被可信任务使用");
-		m.put("Enable this to allow to run prune builder cache step. To avoid shared builder cache being\ncleared by malicious jobs, make sure executor with this option enabled can only be used\nby trusted jobs", 
-			"启用此选项以允许运行清理构建器缓存步骤。为避免共享构建器缓存被\n恶意任务清理，请确保启用此选项的执行器只能被可信任务使用");
-		m.put("Enable this to allow to run site publish step. OneDev will serve project\nsite files as is. To avoid XSS attack, make sure executor with this\noption enabled can only be used by trusted jobs", 
-			"启用此选项以允许运行站点发布步骤。OneDev 将按原样提供项目\n站点文件。为避免 XSS 攻击，请确保启用此选项的执行器只能被可信任务使用");
-		m.put("Enable this to allow to run the buildx image tools step.\nTo avoid malicious jobs reading or writing arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
-			"启用此选项以允许运行 buildx 镜像工具步骤。\n为避免恶意任务通过运行此步骤读取或写入任意主机文件，\n请确保启用此选项的执行器只能被可信任务使用");
-		m.put("Enable this to allow to run the image build step using buildx.\nThe image build step using kaniko can still be used even this option is disabled.\nTo avoid malicious jobs reading arbitrary host files by running this step,\nmake sure executor with this option enabled can only be used by trusted jobs", 
-			"启用此选项以允许使用 buildx 运行镜像构建步骤。\n即使禁用此选项，仍然可以使用 kaniko 的镜像构建步骤。\n为避免恶意任务通过运行此步骤读取任意主机文件，\n请确保启用此选项的执行器只能被可信任务使用");
-		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted. File paths must be relative to the job working directory, without '..' or symbolic links. Volume and device mount options are not allowed", 
-			"可选地指定运行容器的 docker 选项。多个选项应以空格分隔，包含空格的单个选项应加引号。文件路径必须相对于任务工作目录，且不能包含 '..' 或符号链接。不允许使用卷和设备挂载选项");
-		m.put("Optionally specify options for docker buildx prune command", "可选地为 docker buildx prune 命令指定选项");
-		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
-			"清理 docker buildx 构建器的镜像缓存。此步骤调用 docker buildx prune 命令以移除服务器 docker 执行器或远程 docker 执行器中指定的 buildx 构建器的缓存");
-		m.put("Specify Buildx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
-			"指定用于构建 docker 镜像的 Buildx 构建器。如果构建器不存在，OneDev 将自动创建。查看 <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>此教程</a>，了解如何自定义构建器，例如允许发布到不安全的注册表");
-		m.put("Specify access token with upload cache permission for above project.\nThis property is not required if the workspace owner has upload cache permission for above project", 
-			"为上述项目指定具有上传缓存权限的访问令牌。\n如果工作区所有者对上述项目具有上传缓存权限，则此属性不是必需的");
-		m.put("Whether or not to mount docker sock into job container to\nsupport docker operations in job commands. To avoid malicious jobs taking control of whole OneDev\nby operating the mounted docker sock, make sure executor with this option enabled can only be used\nby trusted jobs", 
-			"是否将 docker sock 挂载到任务容器中以\n支持任务命令中的 docker 操作。为避免恶意任务通过操作挂载的 docker sock 控制整个 OneDev，\n请确保启用此选项的执行器只能被可信任务使用");
+		m.put("Code Indexing", "代码索引");
+		m.put("Code Indexing Setting", "代码索引设置");
+		m.put("Code Indexing Settings", "代码索引设置");
+		m.put("Code indexing settings updated", "代码索引设置已更新");
+		m.put("Files to Be Indexed", "待索引的文件");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs", 
+			"如果启用，浏览仓库文件或查看差异时需要登录会话以自动触发代码索引");
+		m.put("Require Login for Automatic Indexing", "自动索引需要登录");
+		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
+			"指定 OneDev 应该索引哪些仓库文件。在索引期间，OneDev 会分析这些文件以进行代码搜索、行统计和代码贡献统计。\n<b>注意：</b>更改此设置仅影响新提交。要将更改应用于历史提交，请停止服务器并删除文件夹\n<code>index</code> 和 <code>info/commit</code>，它们位于<a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>项目存储目录</a>下。\n服务器启动时，仓库将被重新索引");
 	}
 		
 	@Override
