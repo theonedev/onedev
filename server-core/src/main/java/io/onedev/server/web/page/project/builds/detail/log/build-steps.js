@@ -273,7 +273,7 @@ onedev.server.buildSteps = {
     updateStickyTop: function() {
         const layout = this.layout;
         const tabs = $(layout).siblings('.sticky-tabs-row');
-        const tabsHeight = tabs.outerHeight() || 0;
+        const tabsHeight = tabs.css('position') === 'sticky' ? tabs.outerHeight() || 0 : 0;
         const progressHeight = this.progressElement.hidden ? 0 : this.progressElement.offsetHeight;
         layout.style.setProperty('--build-progress-sticky-top', tabsHeight + 'px');
         layout.style.setProperty('--build-step-sticky-top', (tabsHeight + progressHeight) + 'px');

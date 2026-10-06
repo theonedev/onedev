@@ -45,8 +45,8 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 import io.onedev.server.web.component.fileview.FileViewPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
 import io.onedev.agent.workspace.GitExecutionResult;
@@ -61,7 +61,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	/**
 	 * Matches viewports on which the diff pane is hidden by css and diffs are shown in a
-	 * dropdown instead. Keep in sync with workspace-changes.css.
+	 * modal instead. Keep in sync with workspace-changes.css.
 	 */
 	private static final String NARROW_MEDIA_QUERY = "(max-width: 991.98px)";
 
@@ -521,7 +521,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			item.add(new AttributeAppender("class", " active"));
 		}
 
-		DropdownLink fileLink = newFileLink(item, repository, entry);
+		ModalLink fileLink = newFileLink(item, repository, entry);
 		item.add(fileLink);
 
 		String fileName = entry.path;
@@ -571,7 +571,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			item.add(new AttributeAppender("class", " active"));
 		}
 
-		DropdownLink fileLink = newFileLink(item, repository, entry);
+		ModalLink fileLink = newFileLink(item, repository, entry);
 		item.add(fileLink);
 
 		Label statusLabel = new Label("status", String.valueOf(entry.displayStatus));
@@ -661,16 +661,15 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	/**
 	 * Clicking a file shows its diff in the side pane, except on narrow viewports where the
-	 * pane is hidden by css and the diff is shown in a dropdown instead. Only the browser
+	 * pane is hidden by css and the diff is shown in a modal instead. Only the browser
 	 * knows which of the two applies, hence the extra ajax parameter.
 	 */
-	private DropdownLink newFileLink(ListItem<FileEntry> item, RepositoryInfo repository, FileEntry entry) {
-		return new DropdownLink("fileLink") {
+	private ModalLink newFileLink(ListItem<FileEntry> item, RepositoryInfo repository, FileEntry entry) {
+		return new ModalLink("fileLink") {
 
 			@Override
-			protected void onInitialize(FloatingPanel dropdown) {
-				super.onInitialize(dropdown);
-				dropdown.add(AttributeAppender.append("class", "workspace-diff-dropdown"));
+			protected String getModalCssClass() {
+				return "modal-lg modal-dialog-scrollable workspace-diff-modal";
 			}
 
 			@Override
@@ -700,18 +699,26 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 			}
 
 			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				Fragment fragment = new Fragment(id, "diffDropdownFrag", WorkspaceChangesPage.this);
+			protected Component newContent(String id, ModalPanel modal) {
+				Fragment fragment = new Fragment(id, "diffModalFrag", WorkspaceChangesPage.this);
 				fragment.add(new Label("diffFileName", getDiffTitle(entry)));
 				fragment.add(new AjaxLink<Void>("close") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						dropdown.close();
+						modal.close();
 					}
 
 				});
 				fragment.add(newDiffPanel("diffPanel", repository, entry));
+				fragment.add(new AjaxLink<Void>("closeFooter") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+				});
 				return fragment;
 			}
 

@@ -359,7 +359,7 @@ onedev.server = {
 			$(".connection-error").hide();
 		});
 		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
-			if (!pageUnloading) {
+			if (!pageUnloading && !onedev.server.util.isDevice()) {
 				$("body>.error").hide();
 				$(".connection-error").show();
 			}
@@ -843,6 +843,13 @@ onedev.server = {
 	},
 
 	setupTippy: function() {
+		tippy.setDefaultProps({
+			touch: false,
+			onCreate: function(instance) {
+				if (instance.props.touch === true && instance.props.trigger === "mouseenter focus")
+					instance.setProps({trigger: "mouseenter focus click"});
+			}
+		});
 		function doSetup(container) {
 			setTimeout(function() {
 				if (container === document || document.body.contains(container)) {

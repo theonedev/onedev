@@ -126,9 +126,36 @@ onedev.server.terminal = {
 			}
 		};
 
+		var viewportWidth = window.innerWidth;
+		var expandedViewportHeight = window.innerHeight;
+		var isKeyboardOpen = function() {
+			if (!window.visualViewport)
+				return document.activeElement == xterm.textarea;
+			var viewport = window.visualViewport;
+			// Normalize zoom, including Safari's automatic zoom when focusing an input.
+			var viewportHeight = viewport.height * viewport.scale;
+			if (window.innerWidth != viewportWidth) {
+				viewportWidth = window.innerWidth;
+				expandedViewportHeight = window.innerHeight;
+			}
+			// Remember the expanded height as some browsers also shrink innerHeight
+			// when opening the keyboard. Focus alone may mean a hardware keyboard.
+			expandedViewportHeight = Math.max(expandedViewportHeight,
+					window.innerHeight, viewportHeight);
+			return document.activeElement == xterm.textarea
+					&& expandedViewportHeight - viewportHeight > 150;
+		};
+
 		var activateMobileKey = function($key) {
 			if ($key.data("terminal-action") == "keyboard") {
-				xterm.focus();
+				if (isKeyboardOpen()) {
+					xterm.blur();
+				} else {
+					// iOS can keep the textarea focused with the keyboard dismissed.
+					// Refocus synchronously within this tap to reopen it immediately.
+					xterm.blur();
+					xterm.focus();
+				}
 				return;
 			}
 			var modifier = $key.data("terminal-modifier");
@@ -139,6 +166,11 @@ onedev.server.terminal = {
 				sendMobileKey($key.data("terminal-key"));
 			}
 		};
+
+		$mobileKeys.on("mousedown", ".terminal-mobile-key", function(e) {
+			// Preserve focus until click so the keyboard button can toggle the current state.
+			e.preventDefault();
+		});
 
 		$mobileKeys.on("click", ".terminal-mobile-key", function(e) {
 			e.preventDefault();
@@ -190,20 +222,26 @@ onedev.server.terminal = {
 					}
 					if ($mobileKeys.css("display") != "none" && window.visualViewport) {
 						var viewport = window.visualViewport;
+						$container.toggleClass("terminal-keyboard-open", isKeyboardOpen());
 						var containerTop = $container[0].getBoundingClientRect().top;
 						var viewportBottom = viewport.offsetTop + viewport.height;
 						var availableHeight = viewportBottom - Math.max(containerTop, viewport.offsetTop);
-						if (availableHeight > 120)
-							$container.css("height", availableHeight + "px");
-						else
-							$container.css("height", "");
+						if (availableHeight > 120) {
+							// A flex-growing panel can exceed its height when the layout viewport
+							// stays tall behind the keyboard. Cap it before fitting terminal rows.
+							$container.css({height: availableHeight + "px", maxHeight: availableHeight + "px"});
+						} else {
+							$container.css({height: "", maxHeight: ""});
+						}
 					} else {
-						$container.css("height", "");
+						$container.removeClass("terminal-keyboard-open");
+						$container.css({height: "", maxHeight: ""});
 					}
 					fitAddon.fit();
 				});
 			};
 			$terminal.on("resized", fitTerminal);
+			$(xterm.textarea).on("focus blur", fitTerminal);
 
 			removeViewportListeners();
 			$(window).on("resize" + eventNamespace + " orientationchange" + eventNamespace, fitTerminal);

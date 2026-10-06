@@ -18,6 +18,10 @@ onedev.server.fileView = {
 		});
 
 		cm.setSize(null, "100%");
+		// A modal is still hidden while its content is initialized.
+		$container.closest(".modal").one("shown.bs.modal", function() {
+			cm.refresh();
+		});
 
 		var hasConflicts = /^<{7}\s/m.test(fileContent);
 		if (hasConflicts) {

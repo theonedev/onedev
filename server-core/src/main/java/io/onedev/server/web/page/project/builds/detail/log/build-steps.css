@@ -2,7 +2,9 @@
 .build-steps-layout { min-width: 0; }
 .build-steps-main { min-width: 0; }
 .build-step-sticky-actions { display: none; }
-.sticky-tabs-row.is-docked .build-step-sticky-actions { display: inline-flex; }
+@media(min-width: 992px) {
+    .sticky-tabs-row.is-docked .build-step-sticky-actions { display: inline-flex; }
+}
 .build-duration-progress {
     position: sticky;
     top: var(--build-progress-sticky-top, 0px);

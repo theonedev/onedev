@@ -12,7 +12,7 @@
 	flex: 0 0 auto;
 	align-items: center;
 	gap: 0.375rem;
-	padding: 0.375rem max(0.375rem, env(safe-area-inset-right)) max(0.375rem, env(safe-area-inset-bottom)) max(0.375rem, env(safe-area-inset-left));
+	padding: 0.25rem max(0.375rem, env(safe-area-inset-right)) max(0.25rem, env(safe-area-inset-bottom)) max(0.375rem, env(safe-area-inset-left));
 	background: #171717;
 	border-top: 1px solid #363636;
 	overflow: hidden;
@@ -38,7 +38,7 @@
 .terminal-mobile-key {
 	flex: 0 0 auto;
 	min-width: 44px;
-	height: 40px;
+	height: 34px;
 	padding: 0 0.625rem;
 	border: 1px solid #4a4a4a;
 	border-radius: 0.375rem;

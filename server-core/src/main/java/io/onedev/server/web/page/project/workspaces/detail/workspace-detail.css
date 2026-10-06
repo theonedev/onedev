@@ -50,3 +50,20 @@
 .workspace-detail>.body>.log>.log {
     padding: 1.6rem;
 }
+
+@media (max-width: 767.98px), (hover: none) and (pointer: coarse) {
+	.WorkspaceDetailPage:has(.terminal-keyboard-open) .topbar,
+	.workspace-detail:has(.terminal-keyboard-open)>.head,
+	.workspace-detail:has(.terminal-keyboard-open)>.body>.tabs {
+		display: none !important;
+	}
+
+	.WorkspaceDetailPage:has(.terminal-container)>body>.main {
+		/* Fit against the final position when the keyboard opens or closes. */
+		transition: none;
+	}
+
+	.WorkspaceDetailPage:has(.terminal-keyboard-open)>body>.main {
+		top: 0;
+	}
+}

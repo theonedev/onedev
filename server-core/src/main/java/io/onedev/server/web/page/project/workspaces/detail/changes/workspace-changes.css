@@ -11,7 +11,7 @@
 	}
 }
 /* Keep in sync with NARROW_MEDIA_QUERY in WorkspaceChangesPage.java: the diff pane is too
-   cramped to be useful here, so diffs are shown in a dropdown instead */
+   cramped to be useful here, so diffs are shown in a modal instead */
 @media (max-width: 991.98px) {
 	.workspace-changes>.changes-sidebar {
 		max-width: none !important;
@@ -199,28 +199,25 @@
 	background: var(--dark-mode-light-dark);
 	border-bottom-color: var(--dark-mode-lighter-dark) !important;
 }
-.floating>.content>.diff-dropdown {
+.modal-dialog.workspace-diff-modal {
+	--workspace-diff-modal-margin: 0.5rem;
 	width: 92vw;
 	max-width: 800px;
-	max-height: 70vh;
+	margin: var(--workspace-diff-modal-margin) auto;
+	height: calc(100vh - 2 * var(--workspace-diff-modal-margin));
+	/* Account for mobile browser controls while keeping both margins visible. */
+	height: calc(100dvh - 2 * var(--workspace-diff-modal-margin));
 }
-.floating.workspace-diff-dropdown {
-	overflow: hidden !important;
+@media (min-width: 576px) {
+	.modal-dialog.workspace-diff-modal {
+		--workspace-diff-modal-margin: 1.75rem;
+	}
 }
-.floating.workspace-diff-dropdown>.content,
-.floating.workspace-diff-dropdown>.content>.diff-dropdown {
+.workspace-diff-modal>.modal-content {
 	height: 100%;
-	min-height: 0;
+	max-height: 100%;
 }
-.floating>.content>.diff-dropdown>.diff-header {
-	background: var(--light);
-	border-bottom-color: var(--light-gray) !important;
-	border-radius: 0.42rem 0.42rem 0 0;
-}
-.dark-mode .floating>.content>.diff-dropdown>.diff-header {
-	background: var(--dark-mode-light-dark);
-	border-bottom-color: var(--dark-mode-lighter-dark) !important;
-}
-.floating>.content>.diff-dropdown>.diff-panel {
+.workspace-diff-modal>.modal-content>.modal-body,
+.workspace-diff-modal .diff-panel {
 	min-height: 0;
 }
