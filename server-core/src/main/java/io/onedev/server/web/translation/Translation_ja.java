@@ -828,6 +828,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Code Contributions", "コード貢献");
 		m.put("Code Coverage", "コードカバレッジ");
 		m.put("Code Explanation Prompt", "コード説明プロンプト");
+		m.put("Code Indexing", "コードインデックス");
+		m.put("Code Indexing Setting", "コードインデックス設定");
+		m.put("Code Indexing Settings", "コードインデックス設定");
 		m.put("Code Management", "コード管理");
 		m.put("Code Privilege", "コード権限");
 		m.put("Code Problem Statistics", "コード問題統計");
@@ -839,6 +842,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Code comment administrative permission inside a project, including batch operations over multiple code comments", 
 			"プロジェクト内のコードコメント管理権限、複数のコードコメントに対するバッチ操作を含む");
 		m.put("Code commit", "コードコミット");
+		m.put("Code indexing settings updated", "コードインデックス設定が更新されました");
 		m.put("Code is committed", "コードがコミットされました");
 		m.put("Code push", "コードプッシュ");
 		m.put("Code read permission is required to import build spec (import project: {0}, import revision: {1})", 
@@ -1568,6 +1572,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("File name patterns such as *.java, *.c", "ファイル名パターン（例: *.java, *.c）");
 		m.put("File not found", "ファイルが見つかりません");
 		m.put("Files", "ファイル一覧");
+		m.put("Files to Be Indexed", "インデックス対象のファイル");
 		m.put("Filter", "フィルター");
 		m.put("Filter Issues", "問題をフィルター");
 		m.put("Filter actions", "アクションをフィルター");
@@ -3451,6 +3456,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Requested for changes", "変更をリクエストしました");
 		m.put("Requested to sync estimated/spent time", "推定/使用時間の同期をリクエストしました");
 		m.put("Require Autentication", "認証が必要");
+		m.put("Require Login for Automatic Indexing", "自動インデックス作成にログインを要求");
 		m.put("Require Strict Pull Request Builds", "厳密なプルリクエストビルドが必要");
 		m.put("Require Successful", "成功が必要");
 		m.put("Required", "必須");
@@ -4217,6 +4223,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"閉じたGitLabの問題に使用する問題状態を指定してください。<br><b>注意:</b> 適切なオプションがない場合は、OneDevの問題状態をカスタマイズすることができます。");
 		m.put("Specify which issue state to use for closed Gitea issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"閉じたGiteaの問題に使用する問題状態を指定してください。<br><b>注意:</b> 適切なオプションがない場合は、OneDevの問題状態をカスタマイズすることができます。");
+		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
+			"OneDevがインデックスを作成するリポジトリファイルを指定してください。インデックス作成中、OneDevはこれらのファイルをコード検索、行統計、およびコード貢献統計のために分析します。\n<b>注意: </b>この設定を変更しても新しいコミットにのみ影響します。履歴コミットに変更を適用するには、サーバーを停止し、\n<code>index</code> フォルダーと <code>info/commit</code> フォルダーを<a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>プロジェクトのストレージディレクトリ</a>の下から削除してください。\nサーバーが起動されると、リポジトリは再インデックスされます");
 		m.put("Specify which states are considered as closed for various issues created by Renovate to orchestrate dependency update. Additionally, when Renovate closes the issue, OneDev will transit the issue to first state specified here", 
 			"依存関係の更新を調整するためにRenovateが作成したさまざまな問題で閉じたと見なされる状態を指定してください。さらに、Renovateが問題を閉じると、OneDevはここで指定された最初の状態に問題を移行します。");
 		m.put("Specify working days per week. This will affect parsing and displaying of working periods. For instance <tt>1w</tt> is the same as <tt>5d</tt> if this property is set to <tt>5</tt>", 
@@ -5334,16 +5342,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Code Indexing", "コードインデックス");
-		m.put("Code Indexing Setting", "コードインデックス設定");
-		m.put("Code Indexing Settings", "コードインデックス設定");
-		m.put("Code indexing settings updated", "コードインデックス設定が更新されました");
-		m.put("Files to Be Indexed", "インデックス対象のファイル");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs", 
-			"有効にすると、リポジトリファイルを閲覧したり差分を表示したりする際に、コードインデックスを自動的にトリガーするにはログインセッションが必要です");
-		m.put("Require Login for Automatic Indexing", "自動インデックス作成にログインを要求");
-		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
-			"OneDevがインデックスを作成するリポジトリファイルを指定してください。インデックス作成中、OneDevはこれらのファイルをコード検索、行統計、およびコード貢献統計のために分析します。\n<b>注意: </b>この設定を変更しても新しいコミットにのみ影響します。履歴コミットに変更を適用するには、サーバーを停止し、\n<code>index</code> フォルダーと <code>info/commit</code> フォルダーを<a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>プロジェクトのストレージディレクトリ</a>の下から削除してください。\nサーバーが起動されると、リポジトリは再インデックスされます");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"有効にすると、リポジトリファイルの閲覧や差分の表示時にコードインデックスの自動トリガーにログインセッションが必要になります。\nこれは、匿名のAIクローラーがすべての履歴コミットのインデックスをトリガーし、大量のインデックスキャッシュを生成するのを防ぐために、公開プロジェクトで役立ちます。");
 	}
 		
 	@Override

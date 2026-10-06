@@ -828,6 +828,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Code Contributions", "코드 기여");
 		m.put("Code Coverage", "코드 커버리지");
 		m.put("Code Explanation Prompt", "코드 설명 프롬프트");
+		m.put("Code Indexing", "코드 인덱싱");
+		m.put("Code Indexing Setting", "코드 인덱싱 설정");
+		m.put("Code Indexing Settings", "코드 인덱싱 설정들");
 		m.put("Code Management", "코드 관리");
 		m.put("Code Privilege", "코드 권한");
 		m.put("Code Problem Statistics", "코드 문제 통계");
@@ -839,6 +842,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Code comment administrative permission inside a project, including batch operations over multiple code comments", 
 			"프로젝트 내에서 코드 주석 관리 권한, 여러 코드 주석에 대한 일괄 작업 포함");
 		m.put("Code commit", "코드 커밋");
+		m.put("Code indexing settings updated", "코드 인덱싱 설정이 업데이트되었습니다");
 		m.put("Code is committed", "코드가 커밋되었습니다.");
 		m.put("Code push", "코드 푸시");
 		m.put("Code read permission is required to import build spec (import project: {0}, import revision: {1})", 
@@ -1568,6 +1572,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("File name patterns such as *.java, *.c", "파일 이름 패턴 예: *.java, *.c");
 		m.put("File not found", "파일을 찾을 수 없음");
 		m.put("Files", "파일들");
+		m.put("Files to Be Indexed", "인덱싱할 파일들");
 		m.put("Filter", "필터");
 		m.put("Filter Issues", "문제 필터링");
 		m.put("Filter actions", "작업 필터링");
@@ -3451,6 +3456,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Requested for changes", "변경 요청됨");
 		m.put("Requested to sync estimated/spent time", "예상/소요 시간을 동기화하도록 요청됨");
 		m.put("Require Autentication", "인증 필요");
+		m.put("Require Login for Automatic Indexing", "자동 인덱싱을 위한 로그인 필요");
 		m.put("Require Strict Pull Request Builds", "엄격한 풀 리퀘스트 빌드 필요");
 		m.put("Require Successful", "성공 필요");
 		m.put("Required", "필수");
@@ -4217,6 +4223,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"닫힌 GitLab 이슈에 사용할 이슈 상태를 지정하십시오.<br><b>참고:</b> 적절한 옵션이 없는 경우 OneDev 이슈 상태를 사용자 정의할 수 있습니다.");
 		m.put("Specify which issue state to use for closed Gitea issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"닫힌 Gitea 이슈에 사용할 이슈 상태를 지정하십시오.<br><b>참고:</b> 적절한 옵션이 없는 경우 OneDev 이슈 상태를 사용자 정의할 수 있습니다.");
+		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
+			"OneDev가 인덱싱할 저장소 파일을 지정하세요. 인덱싱 중에 OneDev는 코드 검색, 라인 통계, 코드 기여 통계를 위해 이러한 파일을 분석합니다.\n<b>참고: </b>이 설정을 변경하면 새로운 커밋에만 영향을 미칩니다. 히스토리 커밋에 변경 사항을 적용하려면 서버를 중지하고 \n<code>index</code> 및 <code>info/commit</code> 폴더를 삭제하세요. 해당 폴더는 <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>프로젝트 저장소 디렉토리</a> 아래에 있습니다.\n서버가 시작되면 저장소가 다시 인덱싱됩니다");
 		m.put("Specify which states are considered as closed for various issues created by Renovate to orchestrate dependency update. Additionally, when Renovate closes the issue, OneDev will transit the issue to first state specified here", 
 			"Renovate가 의존성 업데이트를 조정하기 위해 생성한 다양한 이슈에서 닫힌 것으로 간주되는 상태를 지정하십시오. 추가적으로, Renovate가 이슈를 닫을 때 OneDev는 이슈를 여기에서 지정된 첫 번째 상태로 전환합니다.");
 		m.put("Specify working days per week. This will affect parsing and displaying of working periods. For instance <tt>1w</tt> is the same as <tt>5d</tt> if this property is set to <tt>5</tt>", 
@@ -5334,16 +5342,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Code Indexing", "코드 인덱싱");
-		m.put("Code Indexing Setting", "코드 인덱싱 설정");
-		m.put("Code Indexing Settings", "코드 인덱싱 설정들");
-		m.put("Code indexing settings updated", "코드 인덱싱 설정이 업데이트되었습니다");
-		m.put("Files to Be Indexed", "인덱싱할 파일들");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs", 
-			"활성화된 경우, 저장소 파일을 탐색하거나 차이를 볼 때 코드 인덱싱을 자동으로 트리거하려면 로그인 세션이 필요합니다");
-		m.put("Require Login for Automatic Indexing", "자동 인덱싱을 위한 로그인 필요");
-		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
-			"OneDev가 인덱싱할 저장소 파일을 지정하세요. 인덱싱 중에 OneDev는 코드 검색, 라인 통계, 코드 기여 통계를 위해 이러한 파일을 분석합니다.\n<b>참고: </b>이 설정을 변경하면 새로운 커밋에만 영향을 미칩니다. 히스토리 커밋에 변경 사항을 적용하려면 서버를 중지하고 \n<code>index</code> 및 <code>info/commit</code> 폴더를 삭제하세요. 해당 폴더는 <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>프로젝트 저장소 디렉토리</a> 아래에 있습니다.\n서버가 시작되면 저장소가 다시 인덱싱됩니다");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"활성화된 경우, 저장소 파일을 탐색하거나 차이를 볼 때 코드 인덱싱을 자동으로 트리거하려면 로그인 세션이 필요합니다.\n이는 익명의 AI 크롤러가 모든 과거 커밋의 인덱싱을 트리거하고 거대한 인덱스 캐시를 생성하는 것을 방지하기 위해 공개 프로젝트에 유용합니다.");
 	}
 		
 	@Override

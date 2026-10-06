@@ -34,7 +34,8 @@ public class CodeIndexingSetting implements Serializable {
 	}
 
 	@Editable(order=200, name="Require Login for Automatic Indexing", placeholder="Inherit from parent", rootPlaceholder="No", description="""
-		If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs""")
+		If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.
+		This is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.""")
 	@Nullable
 	public Boolean getRequireLoginForAutoIndexing() {
 		return requireLoginForAutoIndexing;

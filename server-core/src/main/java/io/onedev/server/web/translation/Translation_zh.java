@@ -854,6 +854,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Code Contributions", "代码贡献");
 		m.put("Code Coverage", "代码覆盖率");
 		m.put("Code Explanation Prompt", "代码解释提示");
+		m.put("Code Indexing", "代码索引");
+		m.put("Code Indexing Setting", "代码索引设置");
+		m.put("Code Indexing Settings", "代码索引设置");
 		m.put("Code Management", "代码管理");
 		m.put("Code Privilege", "代码权限");
 		m.put("Code Problem Statistics", "代码问题统计");
@@ -865,6 +868,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Code comment administrative permission inside a project, including batch operations over multiple code comments", 
 			"项目内的代码评论管理权限，包括对多个代码评论的批量操作");
 		m.put("Code commit", "代码提交");
+		m.put("Code indexing settings updated", "代码索引设置已更新");
 		m.put("Code is committed", "代码已提交");
 		m.put("Code push", "代码推送");
 		m.put("Code read permission is required to import build spec (import project: {0}, import revision: {1})", 
@@ -1594,6 +1598,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("File name patterns such as *.java, *.c", "文件名模式，如 *.java, *.c");
 		m.put("File not found", "文件未找到");
 		m.put("Files", "文件");
+		m.put("Files to Be Indexed", "待索引的文件");
 		m.put("Filter", "过滤");
 		m.put("Filter Issues", "过滤工单");
 		m.put("Filter actions", "筛选操作");
@@ -3477,6 +3482,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Requested for changes", "请求更改");
 		m.put("Requested to sync estimated/spent time", "请求同步估计/已用时间");
 		m.put("Require Autentication", "要求认证");
+		m.put("Require Login for Automatic Indexing", "自动索引需要登录");
 		m.put("Require Strict Pull Request Builds", "要求严格合并请求构建");
 		m.put("Require Successful", "要求成功");
 		m.put("Required", "必需");
@@ -4243,6 +4249,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定用于已关闭 GitLab 工单的工单状态。<br><b>注意：</b> 如果此处没有合适的选项，您可以自定义 OneDev 工单状态");
 		m.put("Specify which issue state to use for closed Gitea issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"指定用于已关闭 Gitea 工单的工单状态。<br><b>注意：</b> 如果此处没有合适的选项，您可以自定义 OneDev 工单状态");
+		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
+			"指定 OneDev 应该索引哪些仓库文件。在索引期间，OneDev 会分析这些文件以进行代码搜索、行统计和代码贡献统计。\n<b>注意：</b>更改此设置仅影响新提交。要将更改应用于历史提交，请停止服务器并删除文件夹\n<code>index</code> 和 <code>info/commit</code>，它们位于<a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>项目存储目录</a>下。\n服务器启动时，仓库将被重新索引");
 		m.put("Specify which states are considered as closed for various issues created by Renovate to orchestrate dependency update. Additionally, when Renovate closes the issue, OneDev will transit the issue to first state specified here", 
 			"指定由 Renovate 创建的用于协调依赖更新的各种工单的关闭状态。此外，当 Renovate 关闭工单时，OneDev 会将工单转换为此处指定的第一个状态");
 		m.put("Specify working days per week. This will affect parsing and displaying of working periods. For instance <tt>1w</tt> is the same as <tt>5d</tt> if this property is set to <tt>5</tt>", 
@@ -5360,16 +5368,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Code Indexing", "代码索引");
-		m.put("Code Indexing Setting", "代码索引设置");
-		m.put("Code Indexing Settings", "代码索引设置");
-		m.put("Code indexing settings updated", "代码索引设置已更新");
-		m.put("Files to Be Indexed", "待索引的文件");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs", 
-			"如果启用，浏览仓库文件或查看差异时需要登录会话以自动触发代码索引");
-		m.put("Require Login for Automatic Indexing", "自动索引需要登录");
-		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
-			"指定 OneDev 应该索引哪些仓库文件。在索引期间，OneDev 会分析这些文件以进行代码搜索、行统计和代码贡献统计。\n<b>注意：</b>更改此设置仅影响新提交。要将更改应用于历史提交，请停止服务器并删除文件夹\n<code>index</code> 和 <code>info/commit</code>，它们位于<a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>项目存储目录</a>下。\n服务器启动时，仓库将被重新索引");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"如果启用，则需要登录会话来自动触发代码索引，当浏览存储库文件或查看差异时。\n这对于公共项目很有用，可以防止匿名 AI 爬虫触发每个历史提交的索引并生成巨大的索引缓存。");
 	}
 		
 	@Override

@@ -828,6 +828,9 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Code Contributions", "Code-Beiträge");
 		m.put("Code Coverage", "Code-Abdeckung");
 		m.put("Code Explanation Prompt", "Code-Erklärungsaufforderung");
+		m.put("Code Indexing", "Code-Indexierung");
+		m.put("Code Indexing Setting", "Einstellung der Code-Indexierung");
+		m.put("Code Indexing Settings", "Einstellungen der Code-Indexierung");
 		m.put("Code Management", "Code-Verwaltung");
 		m.put("Code Privilege", "Code-Berechtigung");
 		m.put("Code Problem Statistics", "Code-Problemstatistiken");
@@ -839,6 +842,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Code comment administrative permission inside a project, including batch operations over multiple code comments", 
 			"Administrative Berechtigung für Code-Kommentare innerhalb eines Projekts, einschließlich Batch-Operationen über mehrere Code-Kommentare");
 		m.put("Code commit", "Code-Commit");
+		m.put("Code indexing settings updated", "Einstellungen der Code-Indexierung aktualisiert");
 		m.put("Code is committed", "Code wurde committet");
 		m.put("Code push", "Code-Push");
 		m.put("Code read permission is required to import build spec (import project: {0}, import revision: {1})", 
@@ -1568,6 +1572,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("File name patterns such as *.java, *.c", "Dateinamenmuster wie *.java, *.c");
 		m.put("File not found", "Datei nicht gefunden");
 		m.put("Files", "Dateien");
+		m.put("Files to Be Indexed", "Dateien, die indexiert werden sollen");
 		m.put("Filter", "Filter");
 		m.put("Filter Issues", "Filterprobleme");
 		m.put("Filter actions", "Aktionen filtern");
@@ -3451,6 +3456,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Requested for changes", "Änderungen angefordert");
 		m.put("Requested to sync estimated/spent time", "Angefordert, geschätzte/aufgewendete Zeit zu synchronisieren");
 		m.put("Require Autentication", "Authentifizierung erforderlich");
+		m.put("Require Login for Automatic Indexing", "Login für automatische Indexierung erforderlich");
 		m.put("Require Strict Pull Request Builds", "Strikte Pull-Request-Builds erforderlich");
 		m.put("Require Successful", "Erfolgreich erforderlich");
 		m.put("Required", "Erforderlich");
@@ -4217,6 +4223,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Geben Sie den Problemstatus an, der für geschlossene GitLab-Probleme verwendet werden soll.<br><b>HINWEIS: </b> Sie können die OneDev-Problemstatus anpassen, falls hier keine geeignete Option vorhanden ist");
 		m.put("Specify which issue state to use for closed Gitea issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"Geben Sie den Problemstatus an, der für geschlossene Gitea-Probleme verwendet werden soll.<br><b>HINWEIS: </b> Sie können die OneDev-Problemstatus anpassen, falls hier keine geeignete Option vorhanden ist");
+		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
+			"Geben Sie an, welche Repository-Dateien OneDev indexieren soll. Während der Indexierung analysiert OneDev diese Dateien für die Codesuche, Zeilenstatistiken und Codebeitragsstatistiken.\n<b>HINWEIS: </b> Änderungen an dieser Einstellung wirken sich nur auf neue Commits aus. Um die Änderung auf historische Commits anzuwenden, stoppen Sie bitte den Server und löschen Sie den Ordner\n<code>index</code> und <code>info/commit</code> unter <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>Speicherverzeichnis des Projekts</a>.\nDas Repository wird neu indexiert, wenn der Server gestartet wird");
 		m.put("Specify which states are considered as closed for various issues created by Renovate to orchestrate dependency update. Additionally, when Renovate closes the issue, OneDev will transit the issue to first state specified here", 
 			"Geben Sie an, welche Status als geschlossen für verschiedene Probleme betrachtet werden, die von Renovate zur Orchestrierung von Abhängigkeitsaktualisierungen erstellt wurden. Zusätzlich wird OneDev das Problem in den ersten hier angegebenen Status versetzen, wenn Renovate das Problem schließt");
 		m.put("Specify working days per week. This will affect parsing and displaying of working periods. For instance <tt>1w</tt> is the same as <tt>5d</tt> if this property is set to <tt>5</tt>", 
@@ -5334,16 +5342,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Code Indexing", "Code-Indexierung");
-		m.put("Code Indexing Setting", "Einstellung der Code-Indexierung");
-		m.put("Code Indexing Settings", "Einstellungen der Code-Indexierung");
-		m.put("Code indexing settings updated", "Einstellungen der Code-Indexierung aktualisiert");
-		m.put("Files to Be Indexed", "Dateien, die indexiert werden sollen");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs", 
-			"Wenn aktiviert, ist eine Login-Sitzung erforderlich, um die Code-Indexierung automatisch auszulösen, wenn Repository-Dateien durchsucht oder Diffs angezeigt werden");
-		m.put("Require Login for Automatic Indexing", "Login für automatische Indexierung erforderlich");
-		m.put("Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-indexed when the server is started", 
-			"Geben Sie an, welche Repository-Dateien OneDev indexieren soll. Während der Indexierung analysiert OneDev diese Dateien für die Codesuche, Zeilenstatistiken und Codebeitragsstatistiken.\n<b>HINWEIS: </b> Änderungen an dieser Einstellung wirken sich nur auf neue Commits aus. Um die Änderung auf historische Commits anzuwenden, stoppen Sie bitte den Server und löschen Sie den Ordner\n<code>index</code> und <code>info/commit</code> unter <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>Speicherverzeichnis des Projekts</a>.\nDas Repository wird neu indexiert, wenn der Server gestartet wird");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"Wenn aktiviert, ist eine Login-Sitzung erforderlich, um das automatische Auslösen der Code-Indizierung beim Durchsuchen von Repository-Dateien oder Anzeigen von Diffs zu ermöglichen.\nDies ist nützlich für öffentliche Projekte, um zu verhindern, dass anonyme KI-Crawler die Indizierung jedes historischen Commits auslösen und einen riesigen Index-Cache erzeugen.");
 	}
 			
 	@Override
