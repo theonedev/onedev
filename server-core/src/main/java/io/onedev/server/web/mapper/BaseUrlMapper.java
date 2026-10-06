@@ -148,7 +148,7 @@ import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersP
 import io.onedev.server.web.page.project.setting.build.JobPropertiesPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.cache.CacheManagementPage;
-import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
+import io.onedev.server.web.page.project.setting.code.analysis.CodeIndexingSettingPage;
 import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
@@ -491,7 +491,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/avatar-edit", AvatarEditPage.class));
 		add(new ProjectPageMapper("${project}/~settings/branch-protection", BranchProtectionsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/tag-protection", TagProtectionsPage.class));
-		add(new ProjectPageMapper("${project}/~settings/code-analysis", CodeAnalysisSettingPage.class));
+		add(new ProjectPageMapper("${project}/~settings/code-analysis", CodeIndexingSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/git-pack-config", GitPackConfigPage.class));
 		add(new ProjectPageMapper("${project}/~settings/pull-request", PullRequestSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/job-secrets", JobSecretsPage.class));

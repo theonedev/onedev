@@ -420,6 +420,12 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
+				if (WicketUtils.isBot()
+						|| (getProject().findRequireLoginForAutoIndexing() && SecurityUtils.getAuthUser() == null)) {
+					setVisible(false);
+					return;
+				}
+
 				ObjectId oldCommit = getOldCommitId();
 				ObjectId newCommit = getNewCommitId();
 				boolean oldCommitIndexed = oldCommit.equals(ObjectId.zeroId()) 

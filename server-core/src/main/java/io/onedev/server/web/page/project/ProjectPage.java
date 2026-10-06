@@ -101,7 +101,7 @@ import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersP
 import io.onedev.server.web.page.project.setting.build.JobPropertiesPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.cache.CacheManagementPage;
-import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
+import io.onedev.server.web.page.project.setting.code.analysis.CodeIndexingSettingPage;
 import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
@@ -288,8 +288,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware, Ch
 					BranchProtectionsPage.class, BranchProtectionsPage.paramsOf(getProject())));
 			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Tag Protection"), 
 					TagProtectionsPage.class, TagProtectionsPage.paramsOf(getProject())));
-			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Code Analysis"), 
-					CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject())));
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Code Indexing"), 
+					CodeIndexingSettingPage.class, CodeIndexingSettingPage.paramsOf(getProject())));
 			if (getProject().isCodeManagement()) {
 				codeSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Git Pack Config"),
 						GitPackConfigPage.class, GitPackConfigPage.paramsOf(getProject())));

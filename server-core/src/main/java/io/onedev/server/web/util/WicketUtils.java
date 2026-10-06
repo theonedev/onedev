@@ -3,6 +3,7 @@ package io.onedev.server.web.util;
 import io.onedev.server.OneDev;
 import io.onedev.server.SubscriptionService;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.util.HttpUtils;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.WebSession;
@@ -133,6 +134,11 @@ public class WicketUtils {
 		return "web-request:" + sessionId;
 	}
 	
+	public static boolean isBot() {
+		var request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
+		return HttpUtils.isBot(request);
+	}
+
 	public static boolean isDevice() {
 		HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
 		String userAgent = request.getHeader("User-Agent").toLowerCase();

@@ -97,7 +97,7 @@ import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.git.signatureverification.SignatureVerificationService;
 import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.support.CodeAnalysisSetting;
+import io.onedev.server.model.support.CodeIndexingSetting;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
@@ -418,7 +418,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@Lob
 	@Column(length=65535)
-	private CodeAnalysisSetting codeAnalysisSetting = new CodeAnalysisSetting();
+	private CodeIndexingSetting codeIndexingSetting = new CodeIndexingSetting();
 
 	@Lob
 	@Column(length=65535)
@@ -1181,12 +1181,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return new SpecifiedPath();
 	}
 
-	public CodeAnalysisSetting getCodeAnalysisSetting() {
-		return codeAnalysisSetting;
+	public CodeIndexingSetting getCodeIndexingSetting() {
+		return codeIndexingSetting;
 	}
 
-	public void setCodeAnalysisSetting(CodeAnalysisSetting codeAnalysisSetting) {
-		this.codeAnalysisSetting = codeAnalysisSetting;
+	public void setCodeIndexingSetting(CodeIndexingSetting codeIndexingSetting) {
+		this.codeIndexingSetting = codeIndexingSetting;
 	}
 
 	public ProjectAiSetting getAiSetting() {
@@ -2112,12 +2112,23 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public String findCodeAnalysisFiles() {
 		Project current = this;
 		do {
-			if (current.getCodeAnalysisSetting().getAnalyzeFiles() != null)
-				return current.getCodeAnalysisSetting().getAnalyzeFiles();
+			if (current.getCodeIndexingSetting().getAnalyzeFiles() != null)
+				return current.getCodeIndexingSetting().getAnalyzeFiles();
 			current = current.getParent();
 		} while (current != null);
 		
 		return "**";
+	}
+
+	public boolean findRequireLoginForAutoIndexing() {
+		Project current = this;
+		do {
+			if (current.getCodeIndexingSetting().getRequireLoginForAutoIndexing() != null)
+				return current.getCodeIndexingSetting().getRequireLoginForAutoIndexing();
+			current = current.getParent();
+		} while (current != null);
+
+		return false;
 	}
 
 	@Nullable

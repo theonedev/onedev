@@ -9553,4 +9553,18 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate249(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var codeAnalysisSettingElement = element.element("codeAnalysisSetting");
+					if (codeAnalysisSettingElement != null)
+						codeAnalysisSettingElement.setName("codeIndexingSetting");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

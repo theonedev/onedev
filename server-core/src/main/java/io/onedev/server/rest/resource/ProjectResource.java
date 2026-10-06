@@ -50,7 +50,7 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.ProjectLabel;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.model.support.CodeAnalysisSetting;
+import io.onedev.server.model.support.CodeIndexingSetting;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.WebHook;
@@ -496,7 +496,7 @@ public class ProjectResource {
 		private GitPackConfig gitPackConfig;
 
 		@Api(order = 900)
-		private CodeAnalysisSetting codeAnalysisSetting;
+		private CodeIndexingSetting codeIndexingSetting;
 		
 		public Long getId() {
 			return id;
@@ -621,12 +621,12 @@ public class ProjectResource {
 		}
 
 		@NotNull
-		public CodeAnalysisSetting getCodeAnalysisSetting() {
-			return codeAnalysisSetting;
+		public CodeIndexingSetting getCodeIndexingSetting() {
+			return codeIndexingSetting;
 		}
 
-		public void setCodeAnalysisSetting(CodeAnalysisSetting codeAnalysisSetting) {
-			this.codeAnalysisSetting = codeAnalysisSetting;
+		public void setCodeIndexingSetting(CodeIndexingSetting codeIndexingSetting) {
+			this.codeIndexingSetting = codeIndexingSetting;
 		}
 
 		public void populate(Project project, ProjectService projectService) {
@@ -648,7 +648,7 @@ public class ProjectResource {
 			project.setTimeTracking(isTimeTracking());
 			project.setServiceDeskEmailAddress(getServiceDeskEmailAddress());
 			project.setGitPackConfig(getGitPackConfig());
-			project.setCodeAnalysisSetting(getCodeAnalysisSetting());
+			project.setCodeIndexingSetting(getCodeIndexingSetting());
 		}
 
 		public static ProjectData from(Project project) {
@@ -668,7 +668,7 @@ public class ProjectResource {
 			data.setTimeTracking(project.isTimeTracking());
 			data.setServiceDeskEmailAddress(project.getServiceDeskEmailAddress());
 			data.setGitPackConfig(project.getGitPackConfig());
-			data.setCodeAnalysisSetting(project.getCodeAnalysisSetting());
+			data.setCodeIndexingSetting(project.getCodeIndexingSetting());
 
 			return data;
 		}

@@ -152,7 +152,7 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setIssueManagement(editProject.isIssueManagement());						
 						newProject.setWikiManagement(editProject.isWikiManagement());
 						newProject.setTimeTracking(editProject.isTimeTracking());
-						newProject.setCodeAnalysisSetting(getProject().getCodeAnalysisSetting());
+						newProject.setCodeIndexingSetting(getProject().getCodeIndexingSetting());
 						newProject.setGitPackConfig(getProject().getGitPackConfig());
 						newProject.getBuildSetting().setBuildPreservations(getProject().getBuildSetting().getBuildPreservations());
 						newProject.getBuildSetting().setCachePreserveDays(getProject().getBuildSetting().getCachePreserveDays());

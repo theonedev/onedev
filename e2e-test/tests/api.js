@@ -27,7 +27,7 @@ export class FixturesApi {
 
   async createProject(name = `e2e-${randomUUID()}`) {
     const id = await this.json('post', '~api/projects', { data: {
-      name, codeManagement: true, wikiManagement: true, codeAnalysisSetting: {}, gitPackConfig: {},
+      name, codeManagement: true, wikiManagement: true, codeIndexingSetting: {}, gitPackConfig: {},
     } });
     this.projects.push(id);
     return { id, name };

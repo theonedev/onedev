@@ -18,6 +18,7 @@ package org.apache.wicket.protocol.http.servlet;
 
 import java.io.IOException;
 import java.time.Instant;
+import io.onedev.server.util.HttpUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -289,13 +290,7 @@ public class ServletWebResponse extends WebResponse
 			}
 			else
 			{
-				String userAgent = webRequest.getContainerRequest().getHeader("User-Agent");
-				if (userAgent != null)
-					userAgent = userAgent.toLowerCase();
-				else
-					userAgent = "";
-				if (userAgent.contains("bot") || userAgent.contains("crawler") 
-						|| userAgent.contains("spider") || userAgent.contains("crawling")) {
+				if (HttpUtils.isBot(webRequest.getContainerRequest())) {
 					httpServletResponse.sendRedirect(url);
 				} else {
 					httpServletResponse.resetBuffer();

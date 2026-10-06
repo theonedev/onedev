@@ -139,6 +139,7 @@ import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.EditParamsAware;
+import io.onedev.server.web.util.WicketUtils;
 
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
 		EditParamsAware, JobAuthorizationContextAware, ProjectScopedCommitAware {
@@ -282,7 +283,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			protected void onConfigure() {
 				super.onConfigure();
 
-				if (resolvedRevision != null) {
+				if (resolvedRevision != null && !WicketUtils.isBot()
+						&& (!getProject().findRequireLoginForAutoIndexing() || SecurityUtils.getAuthUser() != null)) {
 					RevCommit commit = getProject().getRevCommit(resolvedRevision, true);
 					if (!codeIndexService.isIndexed(getProject().getId(), commit)) {
 						codeIndexService.indexAsync(getProject().getId(), commit);
