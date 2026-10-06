@@ -480,12 +480,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
 			}
+			fork.setForkedFrom(null);
 		}
-
-		var query = getSession().createMutationQuery(String.format("update Project set %s=null where %s=:forkedFrom",
-				Project.PROP_FORKED_FROM, Project.PROP_FORKED_FROM));
-		query.setParameter("forkedFrom", project);
-		query.executeUpdate();
 
 		var user = userService.getSystem();
 		for (PullRequest request: project.getOutgoingRequests()) {
