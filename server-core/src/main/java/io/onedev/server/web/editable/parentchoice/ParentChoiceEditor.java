@@ -3,6 +3,7 @@ package io.onedev.server.web.editable.parentchoice;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -12,7 +13,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;

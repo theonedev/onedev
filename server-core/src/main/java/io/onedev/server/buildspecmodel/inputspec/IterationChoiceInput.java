@@ -1,12 +1,12 @@
 package io.onedev.server.buildspecmodel.inputspec;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.validation.ValidationException;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 

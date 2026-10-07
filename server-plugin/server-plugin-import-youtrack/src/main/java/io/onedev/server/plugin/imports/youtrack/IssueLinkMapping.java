@@ -2,12 +2,12 @@ package io.onedev.server.plugin.imports.youtrack;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.model.LinkSpec;

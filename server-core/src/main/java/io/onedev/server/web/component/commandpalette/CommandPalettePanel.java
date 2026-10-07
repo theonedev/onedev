@@ -2,8 +2,6 @@ package io.onedev.server.web.component.commandpalette;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import edu.emory.mathcs.backport.java.util.Arrays;
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.match.PathMatcher;
@@ -50,7 +48,6 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.lang.reflect.Field;
 import java.util.*;
 
-@SuppressWarnings("unchecked")
 public abstract class CommandPalettePanel extends Panel {
 
 	private static final int PAGE_SIZE = 100;

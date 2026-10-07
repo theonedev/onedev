@@ -1,6 +1,7 @@
 package io.onedev.server.buildspecmodel.inputspec.choiceinput;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +10,6 @@ import jakarta.validation.Validator;
 
 import org.jspecify.annotations.Nullable;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;

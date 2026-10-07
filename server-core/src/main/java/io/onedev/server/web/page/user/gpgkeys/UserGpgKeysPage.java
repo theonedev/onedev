@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.user.gpgkeys;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -8,7 +9,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.GpgKey;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.modal.ModalLink;

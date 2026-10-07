@@ -4,8 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringTokenizer;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class DiscordAuthorizationCodeResponse {
 	private static final String CHARSET = "utf-8";
@@ -39,7 +40,7 @@ public class DiscordAuthorizationCodeResponse {
 	}
 	
 	public boolean hasState(String state) {
-		return StringUtils.equals(this.state, state);
+		return Objects.equals(this.state, state);
 	}
 	
 	private static Map<String,String> parseParameters(final String query) {

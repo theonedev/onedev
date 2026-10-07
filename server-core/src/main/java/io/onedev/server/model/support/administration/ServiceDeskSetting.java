@@ -3,6 +3,7 @@ package io.onedev.server.model.support.administration;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,6 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;

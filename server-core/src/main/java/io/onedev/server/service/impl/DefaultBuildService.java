@@ -1,6 +1,5 @@
 package io.onedev.server.service.impl;
 
-import static edu.emory.mathcs.backport.java.util.Collections.sort;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
@@ -25,6 +24,7 @@ import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static java.lang.Long.valueOf;
 import static java.util.Arrays.asList;
+import static java.util.Collections.sort;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

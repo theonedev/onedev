@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.sso.discord.oauth2;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,7 +37,7 @@ public class AccessTokenResponse extends Response {
 	}
 	
 	public boolean hasValidAccessToken() {
-		return StringUtils.isNotEmpty(accessToken) && StringUtils.equals(tokenType, VALID_TOKEN_TYPE);
+		return StringUtils.isNotEmpty(accessToken) && VALID_TOKEN_TYPE.equals(tokenType);
 	}
 	
 	public String getAccessToken() {

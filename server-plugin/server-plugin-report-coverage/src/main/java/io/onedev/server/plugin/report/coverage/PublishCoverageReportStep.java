@@ -17,7 +17,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.CoverageMetric;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.Dao;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 
 import org.jspecify.annotations.Nullable;
 import java.io.*;

@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -40,7 +41,6 @@ import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;

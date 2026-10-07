@@ -7,6 +7,7 @@ import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,6 @@ import org.apache.shiro.subject.Subject;
 import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import io.onedev.server.service.IssueFieldService;
 import io.onedev.server.service.IssueService;
 import io.onedev.server.service.IssueWorkService;
@@ -51,7 +51,6 @@ public class DefaultIssueWorkService extends BaseEntityService<IssueWork> implem
 		dao.persist(work);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
 	public List<IssueWork> query(Subject subject, ProjectScope projectScope, EntityQuery<Issue> issueQuery, Date fromDate, Date toDate) {

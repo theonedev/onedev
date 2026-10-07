@@ -3,6 +3,7 @@ package io.onedev.server.web.behavior;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +14,6 @@ import org.jspecify.annotations.Nullable;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;

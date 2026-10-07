@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -70,7 +71,6 @@ import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
@@ -948,7 +948,7 @@ public abstract class IssueListPanel extends Panel {
 										@Override
 										protected IssueQuery getIssueQuery() {
 											if (queryModel.getObject() != null)
-												return (IssueQuery) queryModel.getObject();
+												return queryModel.getObject();
 											else
 												return null;
 										}

@@ -3,6 +3,7 @@ package io.onedev.server.util.criteria;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,6 @@ import org.apache.lucene.search.Query;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.RangeBuilder;

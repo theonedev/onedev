@@ -22,7 +22,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.Strings;
 import org.eclipse.jetty.websocket.api.Session;
 import io.onedev.server.persistence.dao.Restrictions;

@@ -5,6 +5,7 @@ import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -13,7 +14,6 @@ import jakarta.ws.rs.core.MultivaluedMap;
 
 import org.jspecify.annotations.Nullable;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.handler.ExceptionHandler;
 

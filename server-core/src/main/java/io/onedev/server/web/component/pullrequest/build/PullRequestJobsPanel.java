@@ -11,6 +11,7 @@ import static java.util.Comparator.comparing;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +32,6 @@ import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Sets;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.PullRequest;

@@ -1,9 +1,9 @@
 package io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;

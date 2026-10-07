@@ -55,6 +55,25 @@ E2E_SKIP_WEBSERVER=1 E2E_BASE_URL=https://onedev.example.com npm test
 For local debugging, `npm run test:headed` opens the browser and
 `npm run test:ui` starts Playwright's interactive test runner.
 
+## SSH cloning
+
+`tests/ssh-clone.spec.js` requires Git, OpenSSH (`ssh` and `ssh-keygen`),
+and a reachable SSH service at the server's advertised SSH clone URL (port 6611
+by default). Its SSH fixture waits up to 60 seconds for a TCP connection to the
+host and port in that URL, after HTTP readiness. This also supports custom SSH
+ports without making other tests depend on SSH.
+
+It tests Ed25519 and 3072-bit RSA keys, with separate RSA cases
+forcing SHA-256 and SHA-512 signatures. Each case generates a temporary key,
+checks that cloning fails before registration, registers the key for a test user
+with the Code Reader role, then clones and verifies the checked-out content and
+commit. SSH is isolated from local keys, agents and configuration. Temporary keys, checkouts,
+users and projects are cleaned up.
+
+```bash
+npm test -- tests/ssh-clone.spec.js
+```
+
 ## Application-relative redirects
 
 `tests/redirect-request-handler.spec.js` exercises `RedirectRequestHandler` via

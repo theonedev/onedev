@@ -3,6 +3,7 @@ package io.onedev.server.web.page.admin.buildsetting.agent;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,7 +24,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.AgentTokenService;
 import io.onedev.server.service.AuditService;

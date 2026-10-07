@@ -15,6 +15,7 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -47,7 +48,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
