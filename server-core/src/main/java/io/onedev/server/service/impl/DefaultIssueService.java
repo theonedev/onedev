@@ -2,6 +2,7 @@ package io.onedev.server.service.impl;
 
 import static io.onedev.server.model.Issue.PROP_OWN_ESTIMATED_TIME;
 import static io.onedev.server.model.Issue.PROP_OWN_SPENT_TIME;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -719,9 +720,11 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 				query.setParameter("newState", entry.getValue().getNewState());
 				query.executeUpdate();
 			} else {
-				// Normal deletion checks workspaces and cascades all issue dependents.
+				// Bulk deletion checks workspaces and cascades all issue dependents.
 				getSession().createQuery("from Issue where state=:state", Issue.class)
-						.setParameter("state", entry.getKey()).getResultList().forEach(this::delete);
+						.setParameter("state", entry.getKey()).getResultList().stream()
+						.collect(groupingBy(Issue::getProject))
+						.forEach((project, issues) -> delete(issues, project));
 
 				var query = getSession().createMutationQuery("delete from IssueStateHistory where state=:state");
 				query.setParameter("state", entry.getKey());
