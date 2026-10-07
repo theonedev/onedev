@@ -179,6 +179,7 @@ import io.onedev.server.security.DefaultAuthorizingService;
 import io.onedev.server.security.DefaultFilterChainResolver;
 import io.onedev.server.security.DefaultPasswordService;
 import io.onedev.server.security.DefaultRememberMeManager;
+import io.onedev.server.security.DefaultShiroFilter;
 import io.onedev.server.security.DefaultShiroFilterConfiguration;
 import io.onedev.server.security.DefaultWebSecurityManager;
 import io.onedev.server.security.FilterChainConfigurator;
@@ -674,7 +675,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BasicAuthenticationFilter.class);
 		bind(BearerAuthenticationFilter.class);
 		bind(PasswordService.class).to(DefaultPasswordService.class);
-		bind(ShiroFilter.class);
+		bind(ShiroFilter.class).to(DefaultShiroFilter.class);
 		install(new ShiroAopModule());
         contribute(FilterChainConfigurator.class, filterChainManager -> {
 			filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic, authcBearer");
