@@ -2841,4 +2841,18 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	private void migrate55(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNodeItem : stepsNode.getValue()) {
+				var stepNode = (MappingNode) stepNodeItem;
+				if ("RenovateStep".equals(getStepType(stepNode))) {
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "createDependencyDashboardIssue"),
+							new ScalarNode(Tag.BOOL, "true")));
+				}
+			}
+		});
+	}
+
 }
