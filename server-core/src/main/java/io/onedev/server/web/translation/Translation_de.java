@@ -1812,6 +1812,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("IP Address", "IP-Adresse");
 		m.put("Id", "ID");
 		m.put("Identify Field", "Feld identifizieren");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"Wenn aktiviert, ist eine Login-Sitzung erforderlich, um das automatische Auslösen der Code-Indizierung beim Durchsuchen von Repository-Dateien oder Anzeigen von Diffs zu ermöglichen.\nDies ist nützlich für öffentliche Projekte, um zu verhindern, dass anonyme KI-Crawler die Indizierung jedes historischen Commits auslösen und einen riesigen Index-Cache erzeugen.");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"Wenn aktiviert, wird das geplante Backup auf dem Hauptserver ausgeführt, der <span wicket:id=\"leadServer\"></span> derzeit ist");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -5342,8 +5344,10 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
-			"Wenn aktiviert, ist eine Login-Sitzung erforderlich, um das automatische Auslösen der Code-Indizierung beim Durchsuchen von Repository-Dateien oder Anzeigen von Diffs zu ermöglichen.\nDies ist nützlich für öffentliche Projekte, um zu verhindern, dass anonyme KI-Crawler die Indizierung jedes historischen Commits auslösen und einen riesigen Index-Cache erzeugen.");
+		m.put("Create Dependency Dashboard Issue", "Abhängigkeits-Dashboard-Issue erstellen");
+		m.put("Pending review", "Ausstehende Überprüfung");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"Ob ein Abhängigkeits-Dashboard-Issue erstellt werden soll oder nicht. Wenn deaktiviert, wird Renovate keine Issues erstellen oder aktualisieren, und bestehende Issues können manuell geschlossen werden. Optionen wie Rate-Limits können weiterhin über die Renovate-Konfiguration gesteuert werden");
 	}
 			
 	@Override

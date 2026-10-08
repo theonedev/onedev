@@ -1812,6 +1812,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("IP Address", "Dirección IP");
 		m.put("Id", "ID");
 		m.put("Identify Field", "Campo de identificación");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"Si está habilitado, se requiere una sesión de inicio de sesión para activar automáticamente la indexación de código al navegar por los archivos del repositorio o al ver diferencias.\nEsto es útil para proyectos públicos para evitar que rastreadores anónimos de IA activen la indexación de cada compromiso histórico y generen una enorme caché de índice.");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"Si está habilitado, la copia de seguridad programada se ejecutará en el servidor principal que es <span wicket:id=\"leadServer\"></span> actualmente");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -5342,8 +5344,10 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
-			"Si está habilitado, se requiere una sesión de inicio de sesión para activar automáticamente la indexación de código al navegar por los archivos del repositorio o al ver diferencias.\nEsto es útil para proyectos públicos para evitar que rastreadores anónimos de IA activen la indexación de cada compromiso histórico y generen una enorme caché de índice.");
+		m.put("Create Dependency Dashboard Issue", "Crear problema del panel de dependencias");
+		m.put("Pending review", "Revisión pendiente");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"Si se debe o no crear un problema del panel de dependencias. Si está deshabilitado, Renovate no creará ni actualizará problemas, y los problemas existentes se pueden cerrar manualmente. Opciones como los límites de velocidad aún se pueden controlar a través de la configuración de Renovate");
 	}
 		
 	@Override

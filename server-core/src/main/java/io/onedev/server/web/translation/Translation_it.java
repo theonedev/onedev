@@ -1812,6 +1812,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("IP Address", "Indirizzo IP");
 		m.put("Id", "ID");
 		m.put("Identify Field", "Campo di identificazione");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"Se abilitato, è necessaria una sessione di login per attivare automaticamente l'indicizzazione del codice durante la navigazione nei file del repository o la visualizzazione dei diff.\nQuesto è utile per i progetti pubblici per impedire che crawler AI anonimi attivino l'indicizzazione di ogni commit storico e generino una cache di indice enorme.");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"Se abilitato, il backup programmato verrà eseguito sul server principale che è attualmente <span wicket:id=\"leadServer\"></span>");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -5342,8 +5344,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
-			"Se abilitato, è necessaria una sessione di login per attivare automaticamente l'indicizzazione del codice durante la navigazione nei file del repository o la visualizzazione dei diff.\nQuesto è utile per i progetti pubblici per impedire che crawler AI anonimi attivino l'indicizzazione di ogni commit storico e generino una cache di indice enorme.");
+		m.put("Create Dependency Dashboard Issue", "Crea Problema del Cruscotto delle Dipendenze");
+		m.put("Pending review", "In attesa di revisione");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"Se creare o meno un problema del cruscotto delle dipendenze. Se disabilitato, Renovate non creerà né aggiornerà problemi, e i problemi esistenti possono essere chiusi manualmente. Opzioni come i limiti di velocità possono comunque essere controllate tramite la configurazione di Renovate");
 	}
 		
 	@Override

@@ -10,16 +10,16 @@
 	top: 12px;
 }
 .reviewer-avatar .review-status.icon {
-	width: 10px;
-	height: 10px;
+	width: 13px;
+	height: 13px;
 }
 
 .review-status-approved.icon {
 	fill: var(--success);
 }
 .review-status-request-for-changes.icon {
-	fill: var(--warning);
+	fill: var(--danger);
 }
 .review-status-pending.icon {
-	fill: var(--warning);
+	fill: var(--info);
 }

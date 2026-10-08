@@ -1812,6 +1812,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("IP Address", "Endereço IP");
 		m.put("Id", "ID");
 		m.put("Identify Field", "Campo de Identificação");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"Se ativado, uma sessão de login é necessária para acionar automaticamente a indexação de código ao navegar pelos arquivos do repositório ou visualizar diferenças.\nIsso é útil para projetos públicos para evitar que rastreadores de IA anônimos acionem a indexação de cada commit histórico e gerem um enorme cache de índice.");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"Se habilitado, o backup agendado será executado no servidor principal que é <span wicket:id=\"leadServer\"></span> atualmente");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -5342,8 +5344,10 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
-			"Se ativado, uma sessão de login é necessária para acionar automaticamente a indexação de código ao navegar pelos arquivos do repositório ou visualizar diferenças.\nIsso é útil para projetos públicos para evitar que rastreadores de IA anônimos acionem a indexação de cada commit histórico e gerem um enorme cache de índice.");
+		m.put("Create Dependency Dashboard Issue", "Criar Problema no Painel de Dependências");
+		m.put("Pending review", "Aguardando revisão");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"Se deve ou não criar um problema no painel de dependências. Se desativado, o Renovate não criará ou atualizará problemas, e problemas existentes podem ser fechados manualmente. Opções como limites de taxa ainda podem ser controladas por meio da configuração do Renovate");
 	}
 		
 	@Override

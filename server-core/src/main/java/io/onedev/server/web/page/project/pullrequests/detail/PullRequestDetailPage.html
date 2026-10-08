@@ -34,7 +34,7 @@
 					</div>        			
 					<div wicket:id="requestSummary" class="summary font-size-h6 pt-4 mt-4 mx-n4 px-4">
 						<wicket:enclosure>
-						<div class="text-warning">
+						<div class="text-info">
 							<wicket:svg href="exclamation-circle" class="icon"></wicket:svg>  <span wicket:id="checkError"></span>
 						</div>
 						</wicket:enclosure>
@@ -56,51 +56,51 @@
 						<div wicket:id="rebased" class="rebased text-success">
 							<wicket:svg href="tick-circle" class="icon"></wicket:svg> <wicket:t>Commits were rebased onto target branch</wicket:t>
 						</div>
-						<div wicket:id="sourceBranchOutdated" class="source-branch-outdated text-primary">
-							<wicket:svg href="info-circle" class="icon"></wicket:svg> <wicket:t>Source branch is outdated</wicket:t> <a wicket:id="detail" class="link-primary" t:data-tippy-content="Show changes"><wicket:svg href="diff" class="icon"/></a>
+						<div wicket:id="sourceBranchOutdated" class="source-branch-outdated text-info">
+							<wicket:svg href="info-circle" class="icon"></wicket:svg> <wicket:t>Source branch is outdated</wicket:t> <a wicket:id="detail" class="link-info" t:data-tippy-content="Show changes"><wicket:svg href="diff" class="icon"/></a>
 						</div>
-						<div wicket:id="calculatingMergePreview" class="calculating-merge-preview text-warning d-flex align-items-center">
+						<div wicket:id="calculatingMergePreview" class="calculating-merge-preview text-info d-flex align-items-center">
 							<wicket:svg href="loading" class="icon spin mr-2"></wicket:svg> <wicket:t>Calculating merge preview...</wicket:t>
 						</div>
 						<div wicket:id="calculatedMergePreview" class="calculated-merge-preview text-success">
 							<wicket:svg href="tick-circle" class="icon"></wicket:svg> <wicket:t>Able to merge without conflicts</wicket:t>
 						</div>
-						<div wicket:id="hasMergeConflict" class="has-merge-conflict text-warning">
+						<div wicket:id="hasMergeConflict" class="has-merge-conflict text-info">
 							<wicket:svg href="exclamation-circle" class="icon"></wicket:svg> <wicket:t>There are merge conflicts.</wicket:t>
 							<wicket:enclosure child="resolveInstructions">
 								<wicket:t>Please follow <a wicket:id="resolveInstructions" class="link-primary" href="#">this instruction</a> to resolve the conflicts</wicket:t>
 							</wicket:enclosure>
 						</div>
-						<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-warning">
+						<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-info">
 							<wicket:svg href="times-circle" class="icon"></wicket:svg> <wicket:t>Pull request cannot be merged now as valid signature is required for head commit</wicket:t>
 						</div>
-						<div wicket:id="workInProgress" class="work-in-progress text-warning">
+						<div wicket:id="workInProgress" class="work-in-progress text-info">
 							<wicket:svg href="clock" class="icon"></wicket:svg> <wicket:t>Pull request is still a work in progress</wicket:t>
 						</div>
-						<div wicket:id="requestedForChanges" class="requested-for-changes text-warning">
+						<div wicket:id="requestedForChanges" class="requested-for-changes text-danger">
 							<wicket:svg href="diff" class="icon"></wicket:svg> <wicket:t>Pull request cannot be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a></wicket:t>
 						</div>
-						<div wicket:id="waitingForReviews" class="waiting-for-reviews text-warning">
+						<div wicket:id="waitingForReviews" class="waiting-for-reviews text-info">
 							<wicket:svg href="clock" class="icon"></wicket:svg> <wicket:t>Pull request cannot be merged now as it is <a class="more-info d-inline link-primary">pending review</a></wicket:t>
 						</div>
-						<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds text-warning">
+						<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds text-danger">
 							<wicket:svg href="times-circle" class="icon"></wicket:svg> <wicket:t>Pull request cannot be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not successful</wicket:t>
 						</div>
-						<div wicket:id="unfinishedBuilds" class="unfinished-builds text-warning">
+						<div wicket:id="unfinishedBuilds" class="unfinished-builds text-info">
 							<wicket:svg href="clock" class="icon"></wicket:svg> <wicket:t>Pull request cannot be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not finished yet</wicket:t>
 						</div>
 						<wicket:enclosure child="commitMessageCheckError">
-						<div class="invalid-commit-messages text-warning">
+						<div class="invalid-commit-messages text-info">
 							<wicket:svg href="times-circle" class="icon"></wicket:svg> <span wicket:id="commitMessageCheckError"></span>
 						</div>
 						</wicket:enclosure>
 						<wicket:enclosure child="fileTypesCheckError">
-						<div class="file-types-check-error text-warning">
+						<div class="file-types-check-error text-info">
 							<wicket:svg href="times-circle" class="icon"></wicket:svg> <span wicket:id="fileTypesCheckError"></span>
 						</div>
 						</wicket:enclosure>
 						<wicket:enclosure child="requiredJobs">
-						<div class="required-jobs text-warning">
+						<div class="required-jobs text-info">
 							<wicket:svg href="warning" class="icon"></wicket:svg>
 							<span wicket:id="requiredJobsMessage"></span>
 							<span wicket:id="requiredJobs" class="d-inline-block mr-2">
@@ -120,9 +120,9 @@
 				</div>
 				<div wicket:id="requestOperations" class="operations">
 					<a wicket:id="merge" class="btn btn-sm btn-light-success btn-hover-success"><wicket:t>Merge</wicket:t></a>
-					<a wicket:id="discard" class="btn btn-sm btn-light-info btn-hover-info"><wicket:t>Discard</wicket:t></a>
+					<a wicket:id="discard" class="btn btn-sm btn-light-primary btn-hover-primary"><wicket:t>Discard</wicket:t></a>
 					<a wicket:id="approve" class="btn btn-sm btn-light-success btn-hover-success"><wicket:t>Approve</wicket:t></a>
-					<a wicket:id="requestForChanges" class="btn btn-sm btn-light-warning btn-hover-warning"><wicket:t>Request For Changes</wicket:t></a>
+					<a wicket:id="requestForChanges" class="btn btn-sm btn-light-danger btn-hover-danger"><wicket:t>Request For Changes</wicket:t></a>
 					<a wicket:id="reopen" class="btn btn-sm btn-light-primary btn-hover-primary"><wicket:t>Reopen</wicket:t></a>
 					<a wicket:id="updateSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary"><wicket:t>Update Source Branch</wicket:t> <wicket:svg href="arrow" class="icon rotate-90"/></a>
 					<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-light-primary btn-hover-primary"><wicket:t>Delete Source Branch</wicket:t></a>

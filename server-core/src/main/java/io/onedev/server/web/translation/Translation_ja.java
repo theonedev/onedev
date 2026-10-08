@@ -1812,6 +1812,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("IP Address", "IPアドレス");
 		m.put("Id", "ID");
 		m.put("Identify Field", "フィールドを識別");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"有効にすると、リポジトリファイルの閲覧や差分の表示時にコードインデックスの自動トリガーにログインセッションが必要になります。\nこれは、匿名のAIクローラーがすべての履歴コミットのインデックスをトリガーし、大量のインデックスキャッシュを生成するのを防ぐために、公開プロジェクトで役立ちます。");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"有効化されている場合、スケジュールされたバックアップは現在<span wicket:id=\"leadServer\"></span>のリードサーバーで実行されます");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -5342,8 +5344,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
-			"有効にすると、リポジトリファイルの閲覧や差分の表示時にコードインデックスの自動トリガーにログインセッションが必要になります。\nこれは、匿名のAIクローラーがすべての履歴コミットのインデックスをトリガーし、大量のインデックスキャッシュを生成するのを防ぐために、公開プロジェクトで役立ちます。");
+		m.put("Create Dependency Dashboard Issue", "依存関係ダッシュボードの課題を作成する");
+		m.put("Pending review", "レビュー待ち");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"依存関係ダッシュボードの課題を作成するかどうか。無効にすると、Renovate は課題を作成または更新せず、既存の課題は手動で閉じることができます。レート制限などのオプションは、Renovate の設定を通じて引き続き制御できます");
 	}
 		
 	@Override

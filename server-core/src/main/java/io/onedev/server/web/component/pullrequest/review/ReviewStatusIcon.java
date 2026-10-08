@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.pullrequest.review;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.MarkupStream;
@@ -46,17 +48,17 @@ public abstract class ReviewStatusIcon extends WebComponent {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(AttributeAppender.append("title", new LoadableDetachableModel<String>() {
+		add(AttributeAppender.append("data-tippy-content", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
 				switch (getStatus()) {
 				case PENDING:
-					return "Pending review";
+					return _T("Pending review");
 				case APPROVED:
-					return "Approved";
+					return _T("Approved");
 				case REQUESTED_FOR_CHANGES:
-					return "Requested for changes";
+					return _T("Requested for changes");
 				default:
 					throw new IllegalStateException("Unexpected review status: " + getStatus());
 				}

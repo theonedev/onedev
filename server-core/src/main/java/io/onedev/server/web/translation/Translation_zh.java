@@ -1838,6 +1838,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("IP Address", "IP 地址");
 		m.put("Id", "ID");
 		m.put("Identify Field", "区分字段");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"如果启用，则需要登录会话来自动触发代码索引，当浏览存储库文件或查看差异时。\n这对于公共项目很有用，可以防止匿名 AI 爬虫触发每个历史提交的索引并生成巨大的索引缓存。");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"如果启用，计划备份将在当前为 <span wicket:id=\"leadServer\"></span> 的主服务器上运行");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -5368,8 +5370,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
-			"如果启用，则需要登录会话来自动触发代码索引，当浏览存储库文件或查看差异时。\n这对于公共项目很有用，可以防止匿名 AI 爬虫触发每个历史提交的索引并生成巨大的索引缓存。");
+		m.put("Create Dependency Dashboard Issue", "创建依赖仪表板工单");
+		m.put("Pending review", "待处理审核");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"是否创建依赖仪表板工单。如果禁用，Renovate 将不会创建或更新工单，现有工单可以手动关闭。选项如速率限制仍然可以通过 Renovate 配置进行控制");
 	}
 		
 	@Override

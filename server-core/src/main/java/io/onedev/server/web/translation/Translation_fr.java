@@ -1812,6 +1812,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("IP Address", "Adresse IP");
 		m.put("Id", "Id");
 		m.put("Identify Field", "Champ d'identification");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"Si activé, une session de connexion est requise pour déclencher automatiquement l'indexation du code lors de la navigation dans les fichiers du dépôt ou de la visualisation des différences.\nCela est utile pour les projets publics afin d'empêcher les robots IA anonymes de déclencher l'indexation de chaque commit historique et de générer un énorme cache d'index.");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"Si activé, la sauvegarde planifiée s'exécutera sur le serveur principal qui est <span wicket:id=\"leadServer\"></span> actuellement");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -5342,8 +5344,10 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
-			"Si activé, une session de connexion est requise pour déclencher automatiquement l'indexation du code lors de la navigation dans les fichiers du dépôt ou de la visualisation des différences.\nCela est utile pour les projets publics afin d'empêcher les robots IA anonymes de déclencher l'indexation de chaque commit historique et de générer un énorme cache d'index.");
+		m.put("Create Dependency Dashboard Issue", "Créer un problème de tableau de bord des dépendances");
+		m.put("Pending review", "En attente de révision");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"Créer ou non un problème de tableau de bord des dépendances. Si désactivé, Renovate ne créera ni ne mettra à jour les problèmes, et les problèmes existants peuvent être fermés manuellement. Des options telles que les limites de taux peuvent toujours être contrôlées via la configuration de Renovate");
 	}
 		
 	@Override

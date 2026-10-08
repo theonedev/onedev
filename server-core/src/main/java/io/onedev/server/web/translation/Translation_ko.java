@@ -1812,6 +1812,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("IP Address", "IP 주소");
 		m.put("Id", "ID");
 		m.put("Identify Field", "식별 필드");
+		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
+			"활성화된 경우, 저장소 파일을 탐색하거나 차이를 볼 때 코드 인덱싱을 자동으로 트리거하려면 로그인 세션이 필요합니다.\n이는 익명의 AI 크롤러가 모든 과거 커밋의 인덱싱을 트리거하고 거대한 인덱스 캐시를 생성하는 것을 방지하기 위해 공개 프로젝트에 유용합니다.");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"활성화되면 예약된 백업이 현재 <span wicket:id=\"leadServer\"></span> 리드 서버에서 실행됩니다");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -5342,8 +5344,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
-			"활성화된 경우, 저장소 파일을 탐색하거나 차이를 볼 때 코드 인덱싱을 자동으로 트리거하려면 로그인 세션이 필요합니다.\n이는 익명의 AI 크롤러가 모든 과거 커밋의 인덱싱을 트리거하고 거대한 인덱스 캐시를 생성하는 것을 방지하기 위해 공개 프로젝트에 유용합니다.");
+		m.put("Create Dependency Dashboard Issue", "종속성 대시보드 이슈 생성");
+		m.put("Pending review", "검토 대기 중");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"종속성 대시보드 이슈를 생성할지 여부입니다. 비활성화된 경우, Renovate는 이슈를 생성하거나 업데이트하지 않으며, 기존 이슈는 수동으로 닫을 수 있습니다. 속도 제한과 같은 옵션은 여전히 Renovate 구성으로 제어할 수 있습니다.");
 	}
 		
 	@Override
