@@ -121,12 +121,12 @@
                     {
                       "name": "screenshot",
                       "contentType": "image/png",
-                      "path": "/onedev-build/work/confidential-issue-Issue-R-14762-d-view-a-confidential-issue-chromium/test-failed-1.png"
+                      "path": "/onedev-build/work/attachments/test-failed-1.png"
                     },
                     {
                       "name": "error-context",
                       "contentType": "text/markdown",
-                      "path": "/onedev-build/work/confidential-issue-Issue-R-14762-d-view-a-confidential-issue-chromium/error-context.md"
+                      "path": "/onedev-build/work/attachments/error-context.md"
                     }
                   ]
                 }

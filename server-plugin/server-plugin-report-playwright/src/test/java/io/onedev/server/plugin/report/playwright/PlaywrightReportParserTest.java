@@ -32,7 +32,7 @@ import io.onedev.server.util.patternset.PatternSet;
 public class PlaywrightReportParserTest {
 
 	private static final String ARTIFACT_DIR =
-			"confidential-issue-Issue-R-14762-d-view-a-confidential-issue-chromium";
+			"attachments";
 
 	@TempDir
 	public File temp;
