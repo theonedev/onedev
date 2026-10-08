@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
@@ -56,7 +57,7 @@ class RunJobLinkTest {
 		script = new GroovyScript();
 		script.setName("restricted-poc");
 		script.setCanBeUsedByBuildJobs(false);
-		script.setContent(List.of("new File('" + marker + "').text = 'executed'",
+		script.setContent(List.of("new File('" + StringUtils.escape(marker.toString(), "'") + "').text = 'executed'",
 				"return ['RESTRICTED-SCRIPT-OUTPUT-9031']"));
 		choices = new ScriptingChoices();
 		choices.setScriptName(script.getName());
