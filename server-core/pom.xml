@@ -15,6 +15,30 @@
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-antlr-tokens</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<!-- Keep ANTLR's Java output a source root when imported into IntelliJ. -->
+							<outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/generated-sources/antlr4</directory>
+									<includes>
+										<include>*.tokens</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>

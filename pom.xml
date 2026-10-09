@@ -100,12 +100,6 @@
 				<directory>src/main/resources</directory>
 			</resource>
 			<resource>
-				<directory>target/generated-sources/antlr4</directory>
-				<includes>
-					<include>*.tokens</include>
-				</includes>
-			</resource>
-			<resource>
 				<directory>target/generated-resources</directory>
 			</resource>
 		</resources>
