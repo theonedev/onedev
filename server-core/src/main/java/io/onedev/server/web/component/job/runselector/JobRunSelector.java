@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.job.runselector;
 
 import io.onedev.server.git.service.RefFacade;
+import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
@@ -38,15 +39,20 @@ public abstract class JobRunSelector extends Panel {
 		@Override
 		protected List<String> load() {
 			List<String> jobNames = new ArrayList<>();
-			var buildSpec = getProject().getBuildSpec(getCommitId());
-			if (buildSpec != null) {
-				for (var job: buildSpec.getJobs()) {
-					var jobName = job.getName();
-					if (SecurityUtils.canRunJob(getProject(), jobName) 
-							&& (searchInput == null || jobName.toLowerCase().contains(searchInput.toLowerCase()))) {
-						jobNames.add(jobName);
+			var commitId = getCommitId();
+			JobAuthorizationContext.push(new JobAuthorizationContext(getProject(), commitId, null));
+			try {
+				var buildSpec = getProject().getBuildSpec(commitId);
+				if (buildSpec != null) {
+					for (var jobName: buildSpec.getJobMap().keySet()) {
+						if (SecurityUtils.canRunJob(getProject(), jobName)
+								&& (searchInput == null || jobName.toLowerCase().contains(searchInput.toLowerCase()))) {
+							jobNames.add(jobName);
+						}
 					}
 				}
+			} finally {
+				JobAuthorizationContext.pop();
 			}
 			return jobNames;
 		}
