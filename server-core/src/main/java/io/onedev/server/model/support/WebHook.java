@@ -10,8 +10,9 @@ import io.onedev.server.event.project.workspace.WorkspaceEvent;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.annotation.Editable;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,8 +102,8 @@ public class WebHook implements Serializable {
 	}
 
 	@Editable(order=200)
-	@Size(min=1, message="At least one event type needs to be selected")
-	public List<EventType> getEventTypes() {
+	@NotEmpty(message="At least one event type needs to be selected")
+	public List<@NotNull EventType> getEventTypes() {
 		return eventTypes;
 	}
 
@@ -123,7 +124,8 @@ public class WebHook implements Serializable {
 
 	@Editable(order=400, name="Custom Headers", description="Optionally specify additional HTTP headers to include in "
 			+ "the webhook POST request, for example an Authorization header required by the receiving endpoint")
-	public List<WebHookHeader> getHeaders() {
+	@NotNull
+	public List<@NotNull @Valid WebHookHeader> getHeaders() {
 		return headers;
 	}
 

@@ -110,7 +110,7 @@ public class ProjectIssueSetting implements Serializable {
 		this.transitionSpecs = transitionSpecs;
 	}
 
-	@Editable(name="Branch Prefix", placeholder="Inherit from parent", rootPlaceholder="No prefix", description="""
+	@Editable(name="Branch Prefix", placeholder="Inherit from parent", topPlaceholder="No prefix", description="""
 			Optionally specify a prefix to be prepended (as a path segment) when generate issue branch. 
 			For instance with prefix <code>feature</code>, generated issue branch will be 
 			<code>feature/issue-100-some-title</code>""")

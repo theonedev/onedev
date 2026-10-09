@@ -74,6 +74,8 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 
 			@Override
 			public double getSimilarScore(Project object) {
+				if (Project.DEFAULT_ID.equals(object.getId()))
+					return Similarities.getSimilarScore(object.getPath(), term);
 				return cache.getSimilarScore(object, term);
 			}
 			

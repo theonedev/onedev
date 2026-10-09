@@ -980,6 +980,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "Bean de Crear Rama con Revisión");
 		m.put("Create Child Project", "Crear Proyecto Hijo");
 		m.put("Create Child Projects", "Crear Proyectos Hijos");
+		m.put("Create Dependency Dashboard Issue", "Crear problema del panel de dependencias");
 		m.put("Create Issue", "Crear problema");
 		m.put("Create Iteration", "Crear iteración");
 		m.put("Create Merge Commit", "Crear commit de fusión");
@@ -3044,6 +3045,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Paused selected agents", "Se han pausado los agentes seleccionados");
 		m.put("Pem Private Key", "Clave Privada Pem");
 		m.put("Pending", "Pendiente");
+		m.put("Pending review", "Revisión pendiente");
 		m.put("Performance", "Rendimiento");
 		m.put("Performance Setting", "Configuración de rendimiento");
 		m.put("Performance Settings", "Configuraciones de rendimiento");
@@ -4201,8 +4203,6 @@ public class Translation_es extends TranslationResourceBundle {
 			"Especifique el nombre del modelo a usar. <b class='text-danger'>NOTA: </b> Actualmente OneDev solo soporta\nmodelos con API de completaciones de chat. Los modelos de OpenAI con la nueva API de respuestas no están soportados aún");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"Especifique la clave privada (en formato PEM) utilizada por el servidor SSH para establecer conexiones con el cliente");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"Especifique la carpeta del repositorio para almacenar las páginas del wiki. Déjelo vacío para heredar del padre.\nSi no desea almacenar las páginas del wiki en el repositorio del proyecto, la carpeta especificada\npuede ser un submódulo de Git. Para excluir archivos del panel de páginas del wiki, agregue un archivo <code>.wikiignore</code>\nen la carpeta raíz del wiki con patrones de exclusión de Git relativos a esa carpeta");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"Especifique la estrategia para recuperar información de membresía de grupo. Para otorgar permisos apropiados a un grupo LDAP, se debe definir un grupo de OneDev con el mismo nombre. Use la estrategia <tt>No Recuperar Grupos</tt> si desea gestionar las membresías de grupo en el lado de OneDev");
 		m.put("Specify timeout in seconds when communicating with mail server", "Especifique el tiempo de espera en segundos al comunicarse con el servidor de correo");
@@ -4963,6 +4963,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
 			"Si se debe o no siempre extraer la imagen al ejecutar el contenedor. Habilitarlo evita que las imágenes sean reemplazadas por cargas de trabajo maliciosas que se ejecutan en el mismo nodo.");
 		m.put("Whether or not to be able to access time tracking info of issues", "Si se puede acceder o no a la información de seguimiento de tiempo de los problemas");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"Si se debe o no crear un problema del panel de dependencias. Si está deshabilitado, Renovate no creará ni actualizará problemas, y los problemas existentes se pueden cerrar manualmente. Opciones como los límites de velocidad aún se pueden controlar a través de la configuración de Renovate");
 		m.put("Whether or not to create the workspace inside container", "Si crear o no el espacio de trabajo dentro del contenedor");
 		m.put("Whether or not to delete workspace if task command completes successfully. Uncheck this if\nyou want to check how the prompt is processed by coding agent after task command completes\nsuccessfully. Note that workspace will not be deleted automatically if task command fails.", 
 			"Si eliminar o no el espacio de trabajo si el comando de tarea se completa con éxito. Desmarca esto si\nquieres verificar cómo el agente de codificación procesa el prompt después de que el comando de tarea se complete\ncon éxito. Ten en cuenta que el espacio de trabajo no se eliminará automáticamente si el comando de tarea falla.");
@@ -5344,10 +5346,17 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Create Dependency Dashboard Issue", "Crear problema del panel de dependencias");
-		m.put("Pending review", "Revisión pendiente");
-		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
-			"Si se debe o no crear un problema del panel de dependencias. Si está deshabilitado, Renovate no creará ni actualizará problemas, y los problemas existentes se pueden cerrar manualmente. Opciones como los límites de velocidad aún se pueden controlar a través de la configuración de Renovate");
+		m.put("All root projects can inherit shared settings from Administration / Project Defaults. Requires an active subscription.", 
+			"Todos los proyectos raíz pueden heredar configuraciones compartidas desde Administración / Valores Predeterminados del Proyecto. Requiere una suscripción activa.");
+		m.put("Leave empty to inherit from the parent project.", "Dejar vacío para heredar del proyecto padre.");
+		m.put("Leave empty to use the <a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>default setting</a>.", 
+			"Dejar vacío para usar la <a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>configuración predeterminada</a>.");
+		m.put("Project Defaults", "Valores Predeterminados del Proyecto");
+		m.put("Select <code>~default</code> to apply the selected roles to all projects, including projects created later", 
+			"Seleccione <code>~default</code> para aplicar los roles seleccionados a todos los proyectos, incluidos los proyectos creados posteriormente");
+		m.put("Specify the repository folder to store wiki pages.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"Especifique la carpeta del repositorio para almacenar las páginas wiki.\nSi no desea almacenar las páginas wiki en el repositorio del proyecto, la carpeta especificada\npuede ser un submódulo de Git. Para excluir archivos del panel de Páginas Wiki, agregue un archivo <code>.wikiignore</code>\nen la carpeta raíz del wiki con patrones de exclusión de Git relativos a esa carpeta");
+		m.put("Use default setting", "Usar configuración predeterminada");
 	}
 		
 	@Override

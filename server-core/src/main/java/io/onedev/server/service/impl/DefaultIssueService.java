@@ -131,6 +131,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class DefaultIssueService extends BaseEntityService<Issue> implements IssueService, Serializable {
@@ -563,6 +564,13 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		
 	}
 	
+	private List<Project> getProjectsForWorkflowReconciliation() {
+		var projects = new ArrayList<>(projectService.query());
+		if (WicketUtils.isSubscriptionActive())
+			projects.add(projectService.load(Project.DEFAULT_ID));
+		return projects;
+	}
+
 	@Sessional
 	@Override
 	public Collection<String> getUndefinedStates() {
@@ -580,7 +588,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 				undefinedStates.add(state);
 		}
 		
-		for (Project project: projectService.query()) {
+		for (Project project: getProjectsForWorkflowReconciliation()) {
 			undefinedStates.addAll(project.getIssueSetting().getUndefinedStates());
 			undefinedStates.addAll(project.getBuildSetting().getUndefinedStates());
 		}
@@ -623,7 +631,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 				undefinedFields.add(fieldName);
 		}
 
-		for (Project project: projectService.query()) { 
+		for (Project project: getProjectsForWorkflowReconciliation()) {
 			undefinedFields.addAll(project.getIssueSetting().getUndefinedFields());
 			undefinedFields.addAll(project.getBuildSetting().getUndefinedFields());
 		}
@@ -672,7 +680,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			}
 		}
 
-		for (Project project: projectService.query()) {
+		for (Project project: getProjectsForWorkflowReconciliation()) {
 			undefinedFieldValues.addAll(project.getIssueSetting().getUndefinedFieldValues());
 			undefinedFieldValues.addAll(project.getBuildSetting().getUndefinedFieldValues());
 		}
@@ -732,7 +740,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			}
 		}
 		
-		for (Project project: projectService.query()) { 
+		for (Project project: getProjectsForWorkflowReconciliation()) {
 			project.getIssueSetting().fixUndefinedStates(resolutions);
 			project.getBuildSetting().fixUndefinedStates(resolutions);
 		}
@@ -783,7 +791,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			query.executeUpdate();
 		}
 		
-		for (Project project: projectService.query()) { 
+		for (Project project: getProjectsForWorkflowReconciliation()) {
 			project.getIssueSetting().fixUndefinedFields(resolutions);
 			project.getBuildSetting().fixUndefinedFields(resolutions);
 		}
@@ -840,7 +848,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 			}
 		}
 		
-		for (Project project: projectService.query()) {
+		for (Project project: getProjectsForWorkflowReconciliation()) {
 			project.getIssueSetting().fixUndefinedFieldValues(resolutions);
 			project.getBuildSetting().fixUndefinedFieldValues(resolutions);
 		}

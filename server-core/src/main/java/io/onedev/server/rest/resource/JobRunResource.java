@@ -9,6 +9,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.rest.RestProjectUtils;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.JobRun;
 import io.onedev.server.rest.resource.support.JobRunOnCommit;
@@ -70,7 +71,7 @@ public class JobRunResource {
 		if (jobRun instanceof JobRunOnCommit) {
 			JobRunOnCommit jobRunOnCommit = (JobRunOnCommit) jobRun;
 			
-	    	project = projectService.load(jobRunOnCommit.getProjectId());
+			project = RestProjectUtils.loadProject(projectService, jobRunOnCommit.getProjectId());
 			if (!SecurityUtils.canRunJob(subject, project, jobRun.getJobName()))		
 				throw new UnauthorizedException();
 

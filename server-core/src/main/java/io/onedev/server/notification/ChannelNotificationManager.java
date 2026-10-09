@@ -153,7 +153,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			T setting = project.getContributedSetting(settingClass);
 			for (var notification : setting.getNotifications())
 				notifications.putIfAbsent(notification.getWebhookUrl(), notification);
-			project = project.getParent();
+			project = project.getSettingsParent();
 		} while (project != null);
 
 		return notifications.values();

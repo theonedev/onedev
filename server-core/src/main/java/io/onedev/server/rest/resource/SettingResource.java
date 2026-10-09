@@ -1,6 +1,7 @@
 package io.onedev.server.rest.resource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +26,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.SettingService;
+import io.onedev.server.model.BaseAuthorization;
+import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalWorkspaceSetting;
@@ -42,8 +45,14 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailservice.MailConnector;
+import io.onedev.server.persistence.TransactionService;
+import io.onedev.server.rest.RestProjectUtils;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.resource.support.ProjectDefaults;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
 @Path("/settings")
@@ -57,6 +66,12 @@ public class SettingResource {
 	private final AuditService auditService;
 
 	private final Validator validator;
+
+	@Inject
+	private ProjectService projectService;
+
+	@Inject
+	private TransactionService transactionService;
 	
 	@Inject
 	public SettingResource(SettingService settingService, AuditService auditService, Validator validator) {
@@ -444,4 +459,57 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	private Project getDefaultsProject() {
+		RestProjectUtils.checkProjectDefaultsPermission();
+		return projectService.load(Project.DEFAULT_ID);
+	}
+
+	@Api(order=2900, description="Get shared project defaults. Requires an active subscription")
+	@Path("/project-defaults")
+	@GET
+	public ProjectDefaults getProjectDefaults() {
+		return ProjectDefaults.from(getDefaultsProject());
+	}
+
+	@Api(order=3000, description="Replace shared project defaults. Requires an active subscription")
+	@Path("/project-defaults")
+	@POST
+	public Response setProjectDefaults(@NotNull ProjectDefaults defaults) {
+		var project = getDefaultsProject();
+		var violations = validator.validate(defaults);
+		if (!violations.isEmpty()) {
+			var violation = violations.iterator().next();
+			throw new ExplicitException(violation.getPropertyPath() + ": " + violation.getMessage());
+		}
+		transactionService.run(() -> {
+			var oldAuditContent = VersionedXmlDoc.fromBean(ProjectDefaults.from(project)).toXML();
+			defaults.populate(project);
+			projectService.update(project);
+			auditService.audit(project, "changed project defaults via RESTful API",
+					oldAuditContent, VersionedXmlDoc.fromBean(ProjectDefaults.from(project)).toXML());
+		});
+		return Response.ok().build();
+	}
+
+	@Api(order=3300, description="Get project default user authorizations. Use user-authorizations resource to add or remove entries")
+	@Path("/project-defaults/user-authorizations")
+	@GET
+	public Collection<UserAuthorization> getProjectDefaultUserAuthorizations() {
+		return getDefaultsProject().getUserAuthorizations();
+	}
+
+	@Api(order=3400, description="Get project default group authorizations. Use group-authorizations resource to add or remove entries")
+	@Path("/project-defaults/group-authorizations")
+	@GET
+	public Collection<GroupAuthorization> getProjectDefaultGroupAuthorizations() {
+		return getDefaultsProject().getGroupAuthorizations();
+	}
+
+	@Api(order=3500, description="Get project default base authorizations. Use base-authorizations resource to add or remove entries")
+	@Path("/project-defaults/base-authorizations")
+	@GET
+	public Collection<BaseAuthorization> getProjectDefaultBaseAuthorizations() {
+		return getDefaultsProject().getBaseAuthorizations();
+	}
+
 }

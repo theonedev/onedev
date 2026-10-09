@@ -9,6 +9,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
@@ -27,6 +29,8 @@ public class GitPackConfigPage extends ProjectSettingPage {
 
 	public GitPackConfigPage(PageParameters params) {
 		super(params);
+		if (isProjectDefaults())
+			throw new EntityNotFoundException("Project not found");
 	}
 
 	@Override
@@ -71,6 +75,11 @@ public class GitPackConfigPage extends ProjectSettingPage {
 		form.add(BeanContext.edit("editor", bean));
 		
 		add(form);
+	}
+
+	@Override
+	protected boolean hasProjectDefaults() {
+		return false;
 	}
 
 	@Override

@@ -105,9 +105,9 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	@SuppressWarnings("unused")
 	private static List<InputCompletion> getNameSuggestions(InputStatus status) {
 		Project project = Project.get();
-		if (project != null && project.getParent() != null) {
+		if (project != null && project.getSettingsParent() != null) {
 			List<String> candidates = new ArrayList<>();
-			for (var spec : project.getParent().getHierarchyWorkspaceSpecs())
+			for (var spec : project.getSettingsParent().getHierarchyWorkspaceSpecs())
 				candidates.add(spec.getName());
 			project.getWorkspaceSpecs().forEach(it -> candidates.remove(it.getName()));
 			return SuggestionUtils.suggestOverrides(candidates, status);
@@ -179,6 +179,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	@Editable(order = 300, description = """
 		Configure shell of the workspace. It will be used to launch workspace terminal, run workspace setup commands etc
 		""")
+	@Valid
 	@NotNull
 	public WorkspaceShell getShell() {
 		return shell;
@@ -204,7 +205,8 @@ public class WorkspaceSpec implements Serializable, Validatable {
 			Optionally specify container ports to expose. These ports will be mapped to random ports on host 
 			which will be displayed on the workspace page""")
 	@DependsOn(property = "runInContainer")
-	public List<Integer> getContainerPorts() {
+	@NotNull
+	public List<@NotNull Integer> getContainerPorts() {
 		return containerPorts;
 	}
 
@@ -213,7 +215,8 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	}
 
 	@Editable(order = 400, name = "Environment Variables", description = "Optionally specify environment variables")
-	public List<@Valid EnvVar> getEnvVars() {
+	@NotNull
+	public List<@NotNull @Valid EnvVar> getEnvVars() {
 		return envVars;
 	}
 
@@ -224,7 +227,8 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	@Editable(order = 600, name = "Shortcuts", description = """
 		Optionally specify list of shortcuts at top of workspace. When workspace is created, 
 		the first shortcut will be opened automatically""")
-	public List<@Valid ShortcutConfig> getShortcutConfigs() {
+	@NotNull
+	public List<@NotNull @Valid ShortcutConfig> getShortcutConfigs() {
 		return shortcutConfigs;
 	}
 
@@ -284,7 +288,8 @@ public class WorkspaceSpec implements Serializable, Validatable {
 			<code>@workspace_token@</code> for user name, and access token for password
 			""")
 	@DependsOn(property = "runInContainer")
-	public List<@Valid RegistryLogin> getRegistryLogins() {
+	@NotNull
+	public List<@NotNull @Valid RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
 

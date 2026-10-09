@@ -173,9 +173,9 @@ public class Translate extends CommandHandler {
 												if (placeholder.length() != 0) {
 													scannedTranslationKeys.add(placeholder);
 												}
-												var rootPlaceholder = editable.rootPlaceholder();
-												if (rootPlaceholder.length() != 0) {
-													scannedTranslationKeys.add(rootPlaceholder);
+												var topPlaceholder = editable.topPlaceholder();
+												if (topPlaceholder.length() != 0) {
+													scannedTranslationKeys.add(topPlaceholder);
 												}
 											}
 											var notEmpty = method.getAnnotation(NotEmpty.class);

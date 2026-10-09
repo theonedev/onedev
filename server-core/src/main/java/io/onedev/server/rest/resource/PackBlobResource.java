@@ -17,6 +17,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.service.PackBlobService;
 import io.onedev.server.model.PackBlob;
+import io.onedev.server.rest.RestProjectUtils;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
@@ -37,6 +38,7 @@ public class PackBlobResource {
 	@Api(order=100, description = "Find package blob by project id and hash")
 	@GET
 	public PackBlob findByHash(@QueryParam("projectId") Long projectId, @QueryParam("hash") String hash) {
+		RestProjectUtils.checkProjectId(projectId);
 		var packBlob = packBlobService.findBySha256Hash(projectId, hash);
 		if (packBlob != null) 
 			return packBlob;			

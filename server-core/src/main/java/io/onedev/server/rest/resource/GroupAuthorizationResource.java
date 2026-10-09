@@ -13,14 +13,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.GroupAuthorizationService;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.rest.RestProjectUtils;
 
 @Path("/group-authorizations")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -43,16 +41,14 @@ public class GroupAuthorizationResource {
 	@GET
 	public GroupAuthorization getAuthorization(@PathParam("authorizationId") Long authorizationId) {
 		var authorization = authorizationService.load(authorizationId);
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		return authorization;
 	}
 	
 	@Api(order=200, description="Create new group authorization")
 	@POST
 	public Long createAuthorization(@NotNull GroupAuthorization authorization) {
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		authorizationService.createOrUpdate(authorization);
 		var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 		auditService.audit(authorization.getProject(), "created group authorization via RESTful API", null, newAuditContent);
@@ -64,8 +60,7 @@ public class GroupAuthorizationResource {
 	@DELETE
 	public Response deleteAuthorization(@PathParam("authorizationId") Long authorizationId) {
 		var authorization = authorizationService.load(authorizationId);
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		authorizationService.delete(authorization);
 		var oldAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 		auditService.audit(authorization.getProject(), "deleted group authorization via RESTful API", oldAuditContent, null);

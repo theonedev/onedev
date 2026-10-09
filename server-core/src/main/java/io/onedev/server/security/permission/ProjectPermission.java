@@ -28,7 +28,7 @@ public class ProjectPermission implements BasePermission {
 	public boolean implies(Permission p) {
 		if (p instanceof ProjectPermission) {
 			ProjectPermission projectPermission = (ProjectPermission) p;
-			return project.isSelfOrAncestorOf(projectPermission.project) 
+			return project.isSelfOrSettingsAncestorOf(projectPermission.project)
 					&& privilege.implies(projectPermission.privilege);
 		} else {
 			return false;

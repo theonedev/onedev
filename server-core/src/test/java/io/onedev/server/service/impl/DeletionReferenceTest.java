@@ -35,6 +35,7 @@ import org.mockito.MockedStatic;
 
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
@@ -116,6 +117,7 @@ class DeletionReferenceTest {
 		application = mockStatic(OneDev.class);
 		application.when(() -> OneDev.getInstance(jakarta.validation.Validator.class)).thenReturn(validatorFactory.getValidator());
 		application.when(() -> OneDev.getInstance(SettingService.class)).thenReturn(settings);
+		application.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(mock(SubscriptionService.class));
 		var projects = mock(io.onedev.server.service.ProjectService.class);
 		when(projects.load(any())).thenAnswer(it -> session.find(Project.class, (Long) it.getArgument(0)));
 		application.when(() -> OneDev.getInstance(io.onedev.server.service.ProjectService.class)).thenReturn(projects);

@@ -1371,13 +1371,16 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 	 * constraints, including annotations of the same type with different attributes.
 	 */
 	private boolean isConstraintFromOverriddenMethod(ConstraintLocation location, Class<?> beanClass, Class<? extends Annotation> constraintAnnotationType) {
+		boolean containerElement = location instanceof TypeArgumentConstraintLocation;
+		if (containerElement)
+			location = ((TypeArgumentConstraintLocation) location).getOuterDelegate();
 		if (location instanceof GetterConstraintLocation) {
 			GetterConstraintLocation getterLocation = (GetterConstraintLocation) location;
 			String propertyName = getterLocation.getPropertyName();
 			Method getter = BeanUtils.findGetter(beanClass, propertyName);
 			if (getter != null) {
 				return getter.getDeclaringClass() != getterLocation.getDeclaringClass()
-						|| getter.getAnnotation(constraintAnnotationType) == null;
+						|| !containerElement && getter.getAnnotation(constraintAnnotationType) == null;
 			}
 		}
 		
@@ -1398,7 +1401,7 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 		}		
 		if (location instanceof AbstractPropertyConstraintLocation && valueContext.getCurrentBean() != null) {
 			// Check if this constraint comes from a superclass method that has been overridden
-			if (isConstraintFromOverriddenMethod(location, valueContext.getCurrentBean().getClass(), metaConstraint.getDescriptor().getAnnotationType())) {
+			if (isConstraintFromOverriddenMethod(metaConstraint.getLocation(), valueContext.getCurrentBean().getClass(), metaConstraint.getDescriptor().getAnnotationType())) {
 				return false; // Skip validation for constraints from overridden superclass methods
 			}
 			var bean = valueContext.getCurrentBean();			
@@ -1777,7 +1780,11 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 	}
 
 	private boolean isPropertyConstraint(MetaConstraint<?> metaConstraint) {
-		ConstraintLocationKind kind = metaConstraint.getLocation().getKind();
+		var location = metaConstraint.getLocation();
+		// Container elements must be validated in the same phase as their owning property.
+		if (location instanceof TypeArgumentConstraintLocation)
+			location = ((TypeArgumentConstraintLocation) location).getOuterDelegate();
+		ConstraintLocationKind kind = location.getKind();
 		return kind == ConstraintLocationKind.FIELD || kind == ConstraintLocationKind.GETTER;
 	}
 

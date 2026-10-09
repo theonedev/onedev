@@ -319,6 +319,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	@Override
 	public void update(Project project) {
 		Preconditions.checkState(!project.isNew());
+		checkProjectParent(project);
 		String oldPath = project.getPath();
 		String newPath = project.calcPath();
 		if (!newPath.equals(oldPath)) {
@@ -351,6 +352,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	@Override
 	public void create(User user, Project project) {
 		Preconditions.checkState(project.isNew());
+		checkProjectParent(project);
 		Project parent = project.getParent();
 		if (parent != null && parent.isNew()) {
 			create(user, parent);
@@ -400,7 +402,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof Project) {
 			ProjectFacade facade = ((Project) event.getEntity()).getFacade();
-			transactionService.runAfterCommit(() -> cache.put(facade.getId(), facade));
+			if (facade.getId() > 0)
+				transactionService.runAfterCommit(() -> cache.put(facade.getId(), facade));
 		}
 	}
 	
@@ -543,6 +546,13 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			return null;
 	}
 
+	private void checkProjectParent(Project project) {
+		for (var parent = project.getParent(); parent != null; parent = parent.getParent()) {
+			if (Project.DEFAULT_ID.equals(parent.getId()))
+				throw new ExplicitException("Project defaults cannot be used as a parent project");
+		}
+	}
+
 	@Sessional
 	@Override
 	public Project setup(Subject subject, String path) {
@@ -560,6 +570,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 					criteria.add(Restrictions.isNull(Project.PROP_PARENT));
 				criteria.add(Restrictions.eq(Project.PROP_NAME, name));
 				child = find(criteria);
+				if (child != null && Project.DEFAULT_ID.equals(child.getId()))
+					throw new ExplicitException("Project defaults cannot be used as an import target or parent project");
 				if (child == null) {
 					if (project == null && !SecurityUtils.canCreateRootProjects(subject))
 						throw new UnauthorizedException(_T("Not authorized to create root project"));
@@ -997,12 +1009,15 @@ public class DefaultProjectService extends BaseEntityService<Project>
 
 	@Override
 	public List<Project> query() {
-		return query(true);
+		EntityCriteria<Project> criteria = newCriteria();
+		criteria.add(Restrictions.gt(Project.PROP_ID, 0L));
+		criteria.setCacheable(true);
+		return query(criteria);
 	}
 
 	@Override
 	public int count() {
-		return count(true);
+		return cache.size();
 	}
 
 	private Order getOrder(EntitySort sort, CriteriaBuilder builder, From<Project, Project> root) {
@@ -1055,6 +1070,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	private Predicate[] getPredicates(Subject subject, @Nullable Criteria<Project> criteria, CriteriaQuery<?> query,
 									  From<Project, Project> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.gt(from.get(Project.PROP_ID), 0));
 		if (!SecurityUtils.isAdministrator(subject)) {
 			Collection<Project> projects = SecurityUtils.getAuthorizedProjects(subject, new AccessProject());
 			if (!projects.isEmpty()) {

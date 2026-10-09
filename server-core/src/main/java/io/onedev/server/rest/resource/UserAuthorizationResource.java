@@ -13,14 +13,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.UserAuthorizationService;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.rest.RestProjectUtils;
 
 @Path("/user-authorizations")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -43,16 +41,14 @@ public class UserAuthorizationResource {
 	@GET
 	public UserAuthorization getAuthorization(@PathParam("authorizationId") Long authorizationId) {
 		UserAuthorization authorization = authorizationService.load(authorizationId);
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		return authorization;
 	}
 	
 	@Api(order=200, description="Create user authorization")
 	@POST
 	public Long createAuthorization(@NotNull UserAuthorization authorization) {
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		authorizationService.createOrUpdate(authorization);
 		var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 		auditService.audit(null, "created user authorization via RESTful API", null, newAuditContent);
@@ -64,8 +60,7 @@ public class UserAuthorizationResource {
 	@DELETE
 	public Response deleteAuthorization(@PathParam("authorizationId") Long authorizationId) {
 		UserAuthorization authorization = authorizationService.load(authorizationId);
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		authorizationService.delete(authorization);
 		var oldAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 		auditService.audit(null, "deleted user authorization via RESTful API", oldAuditContent, null);

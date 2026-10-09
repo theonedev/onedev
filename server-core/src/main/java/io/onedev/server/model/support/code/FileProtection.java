@@ -46,8 +46,9 @@ public class FileProtection implements Serializable, Validatable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestPaths(String matchWith) {
-		if (Project.get() != null)
-			return SuggestionUtils.suggestBlobs(Project.get(), matchWith);
+		var project = Project.get();
+		if (project != null && !Project.DEFAULT_ID.equals(project.getId()))
+			return SuggestionUtils.suggestBlobs(project, matchWith);
 		else
 			return new ArrayList<>();
 	}

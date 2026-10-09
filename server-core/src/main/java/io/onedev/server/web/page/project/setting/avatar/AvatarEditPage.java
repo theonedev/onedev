@@ -86,6 +86,11 @@ public class AvatarEditPage extends ProjectSettingPage {
 	}
 
 	@Override
+	protected boolean hasProjectDefaults() {
+		return false;
+	}
+
+	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, _T("Edit Avatar")).add(AttributeAppender.replace("class", "text-truncate"));
 	}

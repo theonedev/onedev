@@ -89,11 +89,13 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 			
 			var accessToken = SecurityUtils.getAccessToken(principal);
 			if (accessToken != null) {
-				var owner = accessToken.getOwner();
-				for (var authorization: accessToken.getAuthorizations()) {
-					var project = authorization.getProject();
-					if (SecurityUtils.canManageProject(owner.asSubject(), project)) 
-						permissions.add(new ProjectPermission(project, authorization.getRole()));
+				try (var ignored = AuthorizationInfoCache.open()) {
+					var ownerSubject = accessToken.getOwner().asSubject();
+					for (var authorization: accessToken.getAuthorizations()) {
+						var project = authorization.getProject();
+						if (SecurityUtils.canManageProject(ownerSubject, project))
+							permissions.add(new ProjectPermission(project, authorization.getRole()));
+					}
 				}
 			}
 			
@@ -106,7 +108,7 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 						do {
 							if (project.isPermittedByLoginUser(privilege))
 								return true;
-							project = project.getParent();
+							project = project.getSettingsParent();
 						} while (project != null);
 					}
 					return false;
@@ -148,14 +150,20 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 	public AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		String principal = (String) principals.getPrimaryPrincipal();
 		RequestCycle requestCycle = RequestCycle.get();
+		Map<String, AuthorizationInfo> authorizationInfos;
 		if (requestCycle != null) {
-			Map<String, AuthorizationInfo> authorizationInfos = requestCycle.getMetaData(AUTHORIZATION_INFOS);
+			authorizationInfos = requestCycle.getMetaData(AUTHORIZATION_INFOS);
 			if (authorizationInfos == null) {
 				authorizationInfos = new HashMap<>();
 				requestCycle.setMetaData(AUTHORIZATION_INFOS, authorizationInfos);
 			}
+		} else {
+			authorizationInfos = AuthorizationInfoCache.get();
+		}
+		if (authorizationInfos != null) {
 			AuthorizationInfo authorizationInfo = authorizationInfos.get(principal);
 			if (authorizationInfo == null) {
+				// Token authorization may populate its owner's entry while this entry is built.
 				authorizationInfo = newAuthorizationInfo(principal);
 				authorizationInfos.put(principal, authorizationInfo);
 			}

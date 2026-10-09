@@ -18,6 +18,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -164,7 +165,7 @@ public class CacheManagementPage extends ProjectSettingPage {
 		SortableDataProvider<RunCacheInfo, Void> dataProvider = new SortableDataProvider<>() {
 
 			private List<RunCacheInfo> listCaches() {
-				return getCacheService().listCaches(getProject().getId());
+				return isProjectDefaults() ? List.of() : getCacheService().listCaches(getProject().getId());
 			}
 
 			@Override
@@ -203,8 +204,11 @@ public class CacheManagementPage extends ProjectSettingPage {
 
 		};
 
-		add(cachesTable = new DefaultDataTable<>("caches", columns, dataProvider,
+		var uploadedCaches = new WebMarkupContainer("uploadedCaches");
+		uploadedCaches.setVisible(!isProjectDefaults());
+		uploadedCaches.add(cachesTable = new DefaultDataTable<>("caches", columns, dataProvider,
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
+		add(uploadedCaches);
 	}
 
 	@Override

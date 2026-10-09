@@ -19,9 +19,9 @@ public @interface Editable {
 	
 	String placeholderProvider() default "";
 	
-	String rootPlaceholder() default "";
+	String topPlaceholder() default "";
 	
-	String rootPlaceholderProvider() default "";
+	String topPlaceholderProvider() default "";
 	
 	boolean displayPlaceholderAsValue() default false;
 

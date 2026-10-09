@@ -20,6 +20,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
@@ -59,12 +60,16 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		DefaultRolesBean defaultRolesBean = new DefaultRolesBean();
+		defaultRolesBean.setRoles(getProject().getBaseAuthorizations().stream().map(it->it.getRole()).collect(Collectors.toList()));
+		if (isProjectDefaults()) {
+			add(newDefaultsForm(defaultRolesBean));
+			return;
+		}
+
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_KEY, 
 				PROP_DESCRIPTION, PROP_CODE_MANAGEMENT, PROP_WIKI_MANAGEMENT, PROP_PACK_MANAGEMENT,
 				PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
-		
-		DefaultRolesBean defaultRolesBean = new DefaultRolesBean();
-		defaultRolesBean.setRoles(getProject().getBaseAuthorizations().stream().map(it->it.getRole()).collect(Collectors.toList()));
 		
 		LabelsBean labelsBean = LabelsBean.of(getProject());
 		
@@ -226,6 +231,29 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		});
 		
 		add(form);
+	}
+
+	private Form<?> newDefaultsForm(DefaultRolesBean defaultRolesBean) {
+		var oldAuditContent = VersionedXmlDoc.fromBean(defaultRolesBean).toXML();
+		var form = new Form<Void>("form") {
+
+			@Override
+			protected void onSubmit() {
+				OneDev.getInstance(TransactionService.class).run(() -> {
+					var project = getProject();
+					OneDev.getInstance(BaseAuthorizationService.class).syncRoles(project, defaultRolesBean.getRoles());
+					var newAuditContent = VersionedXmlDoc.fromBean(defaultRolesBean).toXML();
+					auditService.audit(project, "changed general settings", oldAuditContent, newAuditContent);
+				});
+				Session.get().success(_T("General settings updated"));
+				setResponsePage(GeneralProjectSettingPage.class, paramsOf(getProject()));
+			}
+		};
+		form.add(BeanContext.edit("defaultRoleEditor", defaultRolesBean));
+		// Only default roles are inherited; never bind project identity or lifecycle controls here.
+		for (var id : new String[] {"editor", "labelsEditor", "parentEditor", "delete"})
+			form.add(new WebMarkupContainer(id).setVisible(false));
+		return form;
 	}
 
 	@Override

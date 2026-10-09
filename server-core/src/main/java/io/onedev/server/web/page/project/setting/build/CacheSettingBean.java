@@ -13,7 +13,7 @@ public class CacheSettingBean implements Serializable {
 	
 	private Integer preserveDays;
 
-	@Editable(placeholder = "Inherit from parent", rootPlaceholder = ProjectBuildSetting.DEFAULT_CACHE_PRESERVE_DAYS + " days", 
+	@Editable(placeholder = "Inherit from parent", topPlaceholder = ProjectBuildSetting.DEFAULT_CACHE_PRESERVE_DAYS + " days", 
 			description = "Cache will be deleted to save space if not accessed for this number of days")
 	@OmitName
 	@Min(1)

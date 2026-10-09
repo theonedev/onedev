@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
@@ -46,7 +47,8 @@ public class TaskAutomation implements Serializable {
 			Optionally specify applicable AI users to use this workspace spec for task automation. Leave empty to allow all AI users. 
 			When a AI user creates workspace to do its job, the first applicable spec will be used.""")
 	@UserChoice("getAiUsers")
-	public List<String> getApplicableAis() {
+	@NotNull
+	public List<@NotNull String> getApplicableAis() {
 		return applicableAis;
 	}
 

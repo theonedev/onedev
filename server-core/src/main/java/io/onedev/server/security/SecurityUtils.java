@@ -3,9 +3,11 @@ package io.onedev.server.security;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.WikiUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -419,41 +421,45 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean isAssignedRole(Subject subject, Project project, Role role) {
-		String principal = (String) subject.getPrincipal();
-		var user = getAuthUser(principal);
-		if (user != null) {
-			for (UserAuthorization authorization: user.getProjectAuthorizations()) {
-				Project authorizedProject = authorization.getProject();
-				if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project))
-					return true;
-			}
-
-			for (Group group: user.getGroups()) {
-				for (GroupAuthorization authorization: group.getAuthorizations()) {
+		try (var ignored = AuthorizationInfoCache.open()) {
+			String principal = (String) subject.getPrincipal();
+			var user = getAuthUser(principal);
+			if (user != null) {
+				for (UserAuthorization authorization: user.getProjectAuthorizations()) {
 					Project authorizedProject = authorization.getProject();
-					if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project))
+					if (authorization.getRole().equals(role) && authorizedProject.isSelfOrSettingsAncestorOf(project))
 						return true;
 				}
-			}
 
-			return isAssignedDefaultRole(project, role);
-		}
+				for (Group group: user.getGroups()) {
+					for (GroupAuthorization authorization: group.getAuthorizations()) {
+						Project authorizedProject = authorization.getProject();
+						if (authorization.getRole().equals(role) && authorizedProject.isSelfOrSettingsAncestorOf(project))
+							return true;
+					}
+				}
+
+				return isAssignedDefaultRole(project, role);
+			}
 		
-		var accessToken = getAccessToken(principal);
-		if (accessToken != null) {
-			for (var authorization: accessToken.getAuthorizations()) {
-				Project authorizedProject = authorization.getProject();
-				if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project))
-					return true;
-			}			
-			return isAssignedDefaultRole(project, role);
+			var accessToken = getAccessToken(principal);
+			if (accessToken != null) {
+				var ownerSubject = accessToken.getOwner().asSubject();
+				for (var authorization: accessToken.getAuthorizations()) {
+					Project authorizedProject = authorization.getProject();
+					if (authorization.getRole().equals(role) && authorizedProject.isSelfOrSettingsAncestorOf(project)
+							&& canManageProject(ownerSubject, authorizedProject))
+						return true;
+				}
+				return isAssignedDefaultRole(project, role);
+			}
+			return OneDev.getInstance(SettingService.class).getSecuritySetting().isEnableAnonymousAccess()
+					&& isAssignedDefaultRole(project, role);
 		}
-		return OneDev.getInstance(SettingService.class).getSecuritySetting().isEnableAnonymousAccess()
-				&& isAssignedDefaultRole(project, role);
 	}
 	
 	private static boolean isAssignedDefaultRole(Project project, Role role) {
-		return role.getBaseAuthorizations().stream().anyMatch(it->it.getProject().isSelfOrAncestorOf(project));
+		return role.getBaseAuthorizations().stream().anyMatch(it->it.getProject().isSelfOrSettingsAncestorOf(project));
 	}
 	
 	public static boolean canAccessProject(Project project) {
@@ -780,12 +786,23 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return null;
 	}
 
+	private static Collection<Long> getAuthorizedProjectIds(ProjectCache cache, Project project) {
+		if (Project.DEFAULT_ID.equals(project.getId())) {
+			if (WicketUtils.isSubscriptionActive())
+				return cache.keySet();
+			else
+				return Collections.emptySet();
+		} else {
+			return cache.getSubtreeIds(project.getId());
+		}
+	}
+
 	private static void addIdsPermittedByDefaultRole(ProjectCache cache, Collection<Long> projectIds,
 											  Permission permission) {
 		var baseAuthorizationService = OneDev.getInstance(BaseAuthorizationService.class);
 		for (var authorization: baseAuthorizationService.query()) {
 			if (authorization.getRole().implies(permission))
-				projectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
+				projectIds.addAll(getAuthorizedProjectIds(cache, authorization.getProject()));
 		}
 	}
 
@@ -806,45 +823,49 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static Collection<Project> getAuthorizedProjects(Subject subject, @Nullable ProjectCache cache, BasePermission permission) {
-		var projectService = OneDev.getInstance(ProjectService.class);
-		String principal = (String) subject.getPrincipal();
-		var user = getAuthUser(principal);
-		var accessToken = getAccessToken(principal);
-		if (permission.isApplicable(UserFacade.of(getUser(user, accessToken)))) {
-			if (cache == null)
-				cache = projectService.cloneCache();
-			Collection<Long> authorizedProjectIds = new HashSet<>();
-			if (user != null) {
-				if (user.isRoot() || user.isSystem()) {
-					return cache.getProjects();
-				} else {
-					for (Group group : user.getGroups()) {
-						if (group.isAdministrator())
-							return cache.getProjects();
-						for (GroupAuthorization authorization : group.getAuthorizations()) {
+		try (var ignored = AuthorizationInfoCache.open()) {
+			var projectService = OneDev.getInstance(ProjectService.class);
+			String principal = (String) subject.getPrincipal();
+			var user = getAuthUser(principal);
+			var accessToken = getAccessToken(principal);
+			if (permission.isApplicable(UserFacade.of(getUser(user, accessToken)))) {
+				if (cache == null)
+					cache = projectService.cloneCache();
+				Collection<Long> authorizedProjectIds = new HashSet<>();
+				if (user != null) {
+					if (user.isRoot() || user.isSystem()) {
+						return cache.getProjects();
+					} else {
+						for (Group group : user.getGroups()) {
+							if (group.isAdministrator())
+								return cache.getProjects();
+							for (GroupAuthorization authorization : group.getAuthorizations()) {
+								if (authorization.getRole().implies(permission))
+									authorizedProjectIds.addAll(getAuthorizedProjectIds(cache, authorization.getProject()));
+							}
+						}
+
+						for (UserAuthorization authorization : user.getProjectAuthorizations()) {
 							if (authorization.getRole().implies(permission))
-								authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
+								authorizedProjectIds.addAll(getAuthorizedProjectIds(cache, authorization.getProject()));
 						}
 					}
-
-					for (UserAuthorization authorization : user.getProjectAuthorizations()) {
-						if (authorization.getRole().implies(permission))
-							authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
+				}
+				if (accessToken != null) {
+					var ownerSubject = accessToken.getOwner().asSubject();
+					for (var authorization : accessToken.getAuthorizations()) {
+						if (authorization.getRole().implies(permission)
+								&& canManageProject(ownerSubject, authorization.getProject()))
+							authorizedProjectIds.addAll(getAuthorizedProjectIds(cache, authorization.getProject()));
 					}
 				}
-			}
-			if (accessToken != null) {
-				for (var authorization : accessToken.getAuthorizations()) {
-					if (authorization.getRole().implies(permission))
-						authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
-				}
-			}
-			if (!isAnonymous(principal) || getSettingService().getSecuritySetting().isEnableAnonymousAccess())
-				addIdsPermittedByDefaultRole(cache, authorizedProjectIds, permission);
+				if (!isAnonymous(principal) || getSettingService().getSecuritySetting().isEnableAnonymousAccess())
+					addIdsPermittedByDefaultRole(cache, authorizedProjectIds, permission);
 			
-			return authorizedProjectIds.stream().map(projectService::load).collect(toSet());
-		} else {
-			return new HashSet<>();
+				return authorizedProjectIds.stream().map(projectService::load).collect(toSet());
+			} else {
+				return new HashSet<>();
+			}
 		}
 	}
 	
@@ -876,7 +897,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 					authorizedUsers.addAll(authorization.getGroup().getMembers());
 				}
 			}
-			current = current.getParent();
+			current = current.getSettingsParent();
 		} while (current != null);
 
 		if (permission instanceof ConfidentialIssuePermission) {
@@ -901,47 +922,53 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static Map<String, Collection<String>> getAccessibleReportNames(Project project, Class<?> metricClass,
 																		   Map<String, Collection<String>> availableReportNames) {
-		Map<String, Collection<String>> accessibleReportNames = new HashMap<>();
-		var subject = getSubject();
-		if (subject.isPermitted(new SystemAdministration())) {
-			for (Map.Entry<String, Collection<String>> entry: availableReportNames.entrySet())
-				accessibleReportNames.put(entry.getKey(), new HashSet<>(entry.getValue()));
-		} else {
-			String principal = (String) subject.getPrincipal();
-			var user = getAuthUser(principal);
-			if (user != null) {
-				for (UserAuthorization authorization: user.getProjectAuthorizations()) {
-					if (project.equals(authorization.getProject())) {
-						populateAccessibleReportNames(accessibleReportNames, availableReportNames,
-								project, authorization.getRole());
+		try (var ignored = AuthorizationInfoCache.open()) {
+			Map<String, Collection<String>> accessibleReportNames = new HashMap<>();
+			var subject = getSubject();
+			if (subject.isPermitted(new SystemAdministration())) {
+				for (Map.Entry<String, Collection<String>> entry: availableReportNames.entrySet())
+					accessibleReportNames.put(entry.getKey(), new HashSet<>(entry.getValue()));
+			} else {
+				String principal = (String) subject.getPrincipal();
+				var user = getAuthUser(principal);
+				if (user != null) {
+					for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+						if (authorization.getProject().isSelfOrSettingsAncestorOf(project)) {
+							populateAccessibleReportNames(accessibleReportNames, availableReportNames,
+									project, authorization.getRole());
+						}
+					}
+					for (Group group: user.getGroups()) {
+						for (GroupAuthorization authorization: group.getAuthorizations()) {
+							if (authorization.getProject().isSelfOrSettingsAncestorOf(project)) {
+								populateAccessibleReportNames(accessibleReportNames, availableReportNames,
+										project, authorization.getRole());
+							}
+						}
 					}
 				}
-				for (Group group: user.getGroups()) {
-					for (GroupAuthorization authorization: group.getAuthorizations()) {
-						if (project.equals(authorization.getProject())) {
+				var accessToken = getAccessToken(principal);
+				if (accessToken != null) {
+					var ownerSubject = accessToken.getOwner().asSubject();
+					for (var authorization: accessToken.getAuthorizations()) {
+						if (authorization.getProject().isSelfOrSettingsAncestorOf(project)
+								&& canManageProject(ownerSubject, authorization.getProject())) {
+							populateAccessibleReportNames(accessibleReportNames, availableReportNames,
+									project, authorization.getRole());
+						}
+					}
+				}
+				if (!isAnonymous(principal) || getSettingService().getSecuritySetting().isEnableAnonymousAccess()) {
+					for (var current = project; current != null; current = current.getSettingsParent()) {
+						for (var authorization: current.getBaseAuthorizations()) {
 							populateAccessibleReportNames(accessibleReportNames, availableReportNames,
 									project, authorization.getRole());
 						}
 					}
 				}
 			}
-			var accessToken = getAccessToken(principal);
-			if (accessToken != null) {
-				for (var authorization: accessToken.getAuthorizations()) {
-					if (project.equals(authorization.getProject())) {
-						populateAccessibleReportNames(accessibleReportNames, availableReportNames,
-								project, authorization.getRole());
-					}
-				}
-			}
-			if (!isAnonymous(principal) || getSettingService().getSecuritySetting().isEnableAnonymousAccess()) {
-				for (var authorization: project.getBaseAuthorizations()) {
-					populateAccessibleReportNames(accessibleReportNames, availableReportNames,
-							project, authorization.getRole());
-				}
-			}
+			return accessibleReportNames;
 		}
-		return accessibleReportNames;
 	}
 	
 }

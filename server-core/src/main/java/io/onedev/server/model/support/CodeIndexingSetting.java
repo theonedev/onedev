@@ -18,7 +18,7 @@ public class CodeIndexingSetting implements Serializable {
 	@Api(description = "Leave empty to inherit from parent project, or false if no parent")
 	private Boolean requireLoginForAutoIndexing;
 	
-	@Editable(order=100, name="Files to Be Indexed", placeholder="Inherit from parent", rootPlaceholder ="All files", description="""
+	@Editable(order=100, name="Files to Be Indexed", placeholder="Inherit from parent", topPlaceholder ="All files", description="""
 		Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.
 		<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder 
 		<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>. 
@@ -33,7 +33,7 @@ public class CodeIndexingSetting implements Serializable {
 		this.analysisFiles = analyzeFiles;
 	}
 
-	@Editable(order=200, name="Require Login for Automatic Indexing", placeholder="Inherit from parent", rootPlaceholder="No", description="""
+	@Editable(order=200, name="Require Login for Automatic Indexing", placeholder="Inherit from parent", topPlaceholder="No", description="""
 		If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.
 		This is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.""")
 	@Nullable

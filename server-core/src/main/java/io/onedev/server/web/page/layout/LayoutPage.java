@@ -67,6 +67,9 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.SubscriptionService;
+import io.onedev.server.model.Project;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.web.page.project.setting.ProjectSettingMenu;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.model.Alert;
 import io.onedev.server.model.User;
@@ -375,6 +378,12 @@ public abstract class LayoutPage extends BasePage {
 							ChatPreserveDaysPage.class, new PageParameters()));
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("AI Settings"), aiMenuItems));
+					if (isSubscriptionActive()) {
+						administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Project Defaults"),
+								ProjectSettingMenu.getMenuItems(OneDev.getInstance(ProjectService.class).load(Project.DEFAULT_ID))));
+					} else {
+						administrationMenuItems.add(new SidebarMenuItem.SubscriptionRequired(null, _T("Project Defaults")));
+					}
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Branding"),
 							BrandingSettingPage.class, new PageParameters()));

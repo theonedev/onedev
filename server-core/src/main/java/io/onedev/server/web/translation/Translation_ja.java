@@ -980,6 +980,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "リビジョン付きブランチBeanを作成");
 		m.put("Create Child Project", "子プロジェクトを作成");
 		m.put("Create Child Projects", "子プロジェクトを作成");
+		m.put("Create Dependency Dashboard Issue", "依存関係ダッシュボードの課題を作成する");
 		m.put("Create Issue", "課題を作成");
 		m.put("Create Iteration", "イテレーションを作成");
 		m.put("Create Merge Commit", "マージコミットを作成");
@@ -3044,6 +3045,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Paused selected agents", "選択されたエージェントを一時停止しました");
 		m.put("Pem Private Key", "Pem秘密鍵");
 		m.put("Pending", "保留中");
+		m.put("Pending review", "レビュー待ち");
 		m.put("Performance", "パフォーマンス");
 		m.put("Performance Setting", "パフォーマンス設定");
 		m.put("Performance Settings", "パフォーマンス設定");
@@ -4201,8 +4203,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"使用するモデル名を指定します。<b class='text-danger'>注意:</b> 現在、OneDevは\nチャット完了APIを持つモデルのみをサポートしています。OpenAIの新しい応答APIを持つモデルはまだサポートされていません");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSHサーバーがクライアントとの接続を確立するために使用する秘密鍵（PEM形式）を指定してください。");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"Wikiページを保存するリポジトリフォルダーを指定してください。親から継承する場合は空のままにします。\nプロジェクトリポジトリにWikiページを保存したくない場合、指定されたフォルダー\nはGitサブモジュールにすることができます。Wikiページパネルからファイルを除外するには、<code>.wikiignore</code>\nファイルをWikiルートフォルダーに作成し、そのフォルダーに対するGit無視パターンを追加してください");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"グループメンバーシップ情報を取得する戦略を指定してください。LDAPグループに適切な権限を付与するには、同じ名前のOneDevグループを定義する必要があります。グループメンバーシップをOneDev側で管理したい場合は、<tt>グループを取得しない</tt>戦略を使用してください。");
 		m.put("Specify timeout in seconds when communicating with mail server", "メールサーバーと通信する際のタイムアウトを秒単位で指定してください。");
@@ -4963,6 +4963,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
 			"コンテナを実行する際に常にイメージをプルするかどうかを指定します。有効にすると、同じノード上で実行される悪意のあるワークロードによってイメージが置き換えられるのを防ぎます。");
 		m.put("Whether or not to be able to access time tracking info of issues", "課題のタイムトラッキング情報にアクセスできるかどうか");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"依存関係ダッシュボードの課題を作成するかどうか。無効にすると、Renovate は課題を作成または更新せず、既存の課題は手動で閉じることができます。レート制限などのオプションは、Renovate の設定を通じて引き続き制御できます");
 		m.put("Whether or not to create the workspace inside container", "コンテナ内にワークスペースを作成するかどうか");
 		m.put("Whether or not to delete workspace if task command completes successfully. Uncheck this if\nyou want to check how the prompt is processed by coding agent after task command completes\nsuccessfully. Note that workspace will not be deleted automatically if task command fails.", 
 			"タスクコマンドが正常に完了した場合にワークスペースを削除するかどうか。\nタスクコマンドが正常に完了した後、コーディングエージェントがプロンプトをどのように処理するかを確認したい場合は、このチェックを外してください。\nタスクコマンドが失敗した場合、ワークスペースは自動的に削除されないことに注意してください。");
@@ -5344,10 +5346,17 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Create Dependency Dashboard Issue", "依存関係ダッシュボードの課題を作成する");
-		m.put("Pending review", "レビュー待ち");
-		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
-			"依存関係ダッシュボードの課題を作成するかどうか。無効にすると、Renovate は課題を作成または更新せず、既存の課題は手動で閉じることができます。レート制限などのオプションは、Renovate の設定を通じて引き続き制御できます");
+		m.put("All root projects can inherit shared settings from Administration / Project Defaults. Requires an active subscription.", 
+			"すべてのルートプロジェクトは、管理 / プロジェクトデフォルトから共有設定を継承できます。有効なサブスクリプションが必要です。");
+		m.put("Leave empty to inherit from the parent project.", "親プロジェクトから継承する場合は空のままにしてください。");
+		m.put("Leave empty to use the <a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>default setting</a>.", 
+			"<a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>デフォルト設定</a>を使用する場合は空のままにしてください。");
+		m.put("Project Defaults", "プロジェクトデフォルト");
+		m.put("Select <code>~default</code> to apply the selected roles to all projects, including projects created later", 
+			"選択したロールをすべてのプロジェクト（後で作成されるプロジェクトを含む）に適用するには、<code>~default</code>を選択してください。");
+		m.put("Specify the repository folder to store wiki pages.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"Wikiページを保存するリポジトリフォルダーを指定してください。\nプロジェクトリポジトリにWikiページを保存したくない場合、指定されたフォルダー\nはGitサブモジュールにすることができます。Wikiページパネルからファイルを除外するには、<code>.wikiignore</code>\nファイルをWikiルートフォルダーに追加し、そのフォルダーに対するGit無視パターンを記述してください。");
+		m.put("Use default setting", "デフォルト設定を使用");
 	}
 		
 	@Override

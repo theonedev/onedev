@@ -89,6 +89,7 @@ import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
+import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class DefaultUserService extends BaseEntityService<User> implements UserService, Serializable {
@@ -185,7 +186,10 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
     	dao.persist(user);
 
     	if (oldName != null && !oldName.equals(user.getName())) {
-    		for (Project project: projectService.query()) {
+			var projects = new ArrayList<>(projectService.query());
+			if (WicketUtils.isSubscriptionActive())
+				projects.add(projectService.load(Project.DEFAULT_ID));
+			for (Project project: projects) {
 				try {
 					for (BranchProtection protection : project.getBranchProtections())
 						protection.onRenameUser(oldName, user.getName());
@@ -351,7 +355,10 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 	private void checkUsage(User user) {
     	Usage usage = new Usage();
-		for (Project project: projectService.query()) {
+		var projects = new ArrayList<>(projectService.query());
+		if (WicketUtils.isSubscriptionActive())
+			projects.add(projectService.load(Project.DEFAULT_ID));
+		for (Project project: projects) {
 			try {
 				Usage usageInProject = new Usage();
 				for (BranchProtection protection : project.getBranchProtections())

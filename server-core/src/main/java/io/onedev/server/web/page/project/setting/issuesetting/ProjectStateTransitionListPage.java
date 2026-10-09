@@ -77,6 +77,11 @@ public class ProjectStateTransitionListPage extends ProjectIssueSettingPage {
 	}
 	
 	@Override
+	protected boolean hasProjectDefaults() {
+		return false;
+	}
+
+	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, _T("Issue State Transitions"));
 	}

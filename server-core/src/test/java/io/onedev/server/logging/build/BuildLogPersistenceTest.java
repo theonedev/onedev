@@ -23,6 +23,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.JobHelper;
 import io.onedev.k8shelper.JobHelper.StepEventKind;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.job.JobService;
@@ -113,6 +114,7 @@ class BuildLogPersistenceTest {
 				services.when(() -> OneDev.getInstance(BuildService.class)).thenReturn(builds);
 				services.when(() -> OneDev.getInstance(JobService.class)).thenReturn(mock(JobService.class));
 				services.when(() -> OneDev.getInstance(ListenerRegistry.class)).thenReturn(mock(ListenerRegistry.class));
+				services.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(mock(SubscriptionService.class));
 				var logs = mock(BuildLogService.class);
 				when(logs.newLogger(any(), any())).thenReturn(mock(TaskLogger.class));
 				var router = new BuildLogRouter(build, logs);

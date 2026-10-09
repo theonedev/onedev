@@ -170,6 +170,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final Long DEFAULT_ID = -1L;
+
+	public static final String DEFAULT_NAME = "~default";
+
 	public static final String BUILDS_DIR = "builds";
 
 	public static final String ATTACHMENT_DIR = "attachment";
@@ -563,8 +567,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public List<BranchProtection> getHierarchyBranchProtections() {
 		List<BranchProtection> branchProtections = new ArrayList<>(getBranchProtections());
-		if (getParent() != null)
-			branchProtections.addAll(getParent().getHierarchyBranchProtections());
+		if (getSettingsParent() != null)
+			branchProtections.addAll(getSettingsParent().getHierarchyBranchProtections());
 		return branchProtections;
 	}
 	
@@ -578,8 +582,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public List<TagProtection> getHierarchyTagProtections() {
 		List<TagProtection> tagProtections = new ArrayList<>(getTagProtections());
-		if (getParent() != null)
-			tagProtections.addAll(getParent().getHierarchyTagProtections());
+		if (getSettingsParent() != null)
+			tagProtections.addAll(getSettingsParent().getHierarchyTagProtections());
 		return tagProtections;
 	}
 	
@@ -720,6 +724,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     }
 	
 	public List<RefFacade> getCommitRefs(String prefix) {
+		if (DEFAULT_ID.equals(getId()))
+			return new ArrayList<>();
 		return getGitService().getCommitRefs(this, prefix);
     }
 
@@ -783,6 +789,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@Nullable
 	public String getDefaultBranch() {
+		if (DEFAULT_ID.equals(getId()))
+			return null;
 		if (defaultBranch == null) 
 			defaultBranch = Optional.fromNullable(getGitService().getDefaultBranch(this));
 		return defaultBranch.orNull();
@@ -1132,8 +1140,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			var specMap = new LinkedHashMap<String, WorkspaceSpec>();
 			for (var spec : getWorkspaceSpecs())
 				specMap.put(spec.getName(), spec);
-			if (getParent() != null) {
-				for (var spec : getParent().getHierarchyWorkspaceSpecs())
+			if (getSettingsParent() != null) {
+				for (var spec : getSettingsParent().getHierarchyWorkspaceSpecs())
 					specMap.putIfAbsent(spec.getName(), spec);
 			}
 			hierarchyWorkspaceSpecs = new ArrayList<>(specMap.values());
@@ -1155,6 +1163,24 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.serviceDeskEmailAddress = serviceDeskEmailAddress;
 	}
 	
+	/**
+	 * The next project to consult for inheritable settings, without changing the project tree.
+	 */
+	@Nullable
+	public Project getSettingsParent() {
+		if (getParent() != null)
+			return getParent();
+		else if (!DEFAULT_ID.equals(getId()) && WicketUtils.isSubscriptionActive())
+			return getProjectService().load(DEFAULT_ID);
+		else
+			return null;
+	}
+
+	public boolean isSelfOrSettingsAncestorOf(Project project) {
+		return DEFAULT_ID.equals(getId()) && WicketUtils.isSubscriptionActive()
+				|| isSelfOrAncestorOf(project);
+	}
+
 	public GitPackConfig getGitPackConfig() {
 		return gitPackConfig;
 	}
@@ -1174,7 +1200,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	public WikiFolder getWikiFolder() {
-		for (Project current = this; current != null; current = current.getParent()) {
+		for (Project current = this; current != null; current = current.getSettingsParent()) {
 			if (current.getWikiSetting().getFolder() != null)
 				return current.getWikiSetting().getFolder();
 		}
@@ -1231,16 +1257,16 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public List<JobSecret> getHierarchyJobSecrets() {
 		List<JobSecret> jobSecrets = new ArrayList<>(getBuildSetting().getJobSecrets());
-		if (getParent() != null) 
-			jobSecrets.addAll(getParent().getHierarchyJobSecrets());
+		if (getSettingsParent() != null)
+			jobSecrets.addAll(getSettingsParent().getHierarchyJobSecrets());
 		return jobSecrets;
 	}
 
 	public List<JobProperty> getHierarchyJobProperties() {
 		List<JobProperty> jobProperties = new ArrayList<>(getBuildSetting().getJobProperties());
-		if (getParent() != null) {
+		if (getSettingsParent() != null) {
 			Set<String> names = jobProperties.stream().map(it->it.getName()).collect(Collectors.toSet());
-			for (JobProperty jobProperty : getParent().getHierarchyJobProperties()) {
+			for (JobProperty jobProperty : getSettingsParent().getHierarchyJobProperties()) {
 				if (!names.contains(jobProperty.getName()))
 					jobProperties.add(jobProperty);
 			}
@@ -1250,15 +1276,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public List<DefaultFixedIssueFilter> getHierarchyDefaultFixedIssueFilters() {
 		List<DefaultFixedIssueFilter> defaultFixedIssueFilters = new ArrayList<>(getBuildSetting().getDefaultFixedIssueFilters());
-		if (getParent() != null)
-			defaultFixedIssueFilters.addAll(getParent().getHierarchyDefaultFixedIssueFilters());
+		if (getSettingsParent() != null)
+			defaultFixedIssueFilters.addAll(getSettingsParent().getHierarchyDefaultFixedIssueFilters());
 		return defaultFixedIssueFilters;
 	}
 	
 	public List<BuildPreservation> getHierarchyBuildPreservations() {
 		List<BuildPreservation> buildPreservations = new ArrayList<>(getBuildSetting().getBuildPreservations());
-		if (getParent() != null)
-			buildPreservations.addAll(getParent().getHierarchyBuildPreservations());
+		if (getSettingsParent() != null)
+			buildPreservations.addAll(getSettingsParent().getHierarchyBuildPreservations());
 		return buildPreservations;
 	}
 	
@@ -1276,8 +1302,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		var cachePreserveDays = getBuildSetting().getCachePreserveDays();
 		if (cachePreserveDays != null)
 			return cachePreserveDays;
-		else if (getParent() != null)
-			return getParent().getHierarchyCachePreserveDays();
+		else if (getSettingsParent() != null)
+			return getSettingsParent().getHierarchyCachePreserveDays();
 		else 
 			return ProjectBuildSetting.DEFAULT_CACHE_PRESERVE_DAYS; 
 	}
@@ -1456,8 +1482,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public List<WebHook> getHierarchyWebHooks() {
 		List<WebHook> webHooks = new ArrayList<>(getWebHooks());
-		if (getParent() != null)
-			webHooks.addAll(getParent().getHierarchyWebHooks());
+		if (getSettingsParent() != null)
+			webHooks.addAll(getSettingsParent().getHierarchyWebHooks());
 		return webHooks;
 	}
 	
@@ -2103,7 +2129,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			if (current.getAiSetting().getExcludedReviewFiles() != null)
 				return current.getAiSetting().getExcludedReviewFiles();
-			current = current.getParent();
+			current = current.getSettingsParent();
 		} while (current != null);
 		
 		return null;
@@ -2114,7 +2140,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			if (current.getCodeIndexingSetting().getAnalyzeFiles() != null)
 				return current.getCodeIndexingSetting().getAnalyzeFiles();
-			current = current.getParent();
+			current = current.getSettingsParent();
 		} while (current != null);
 		
 		return "**";
@@ -2125,7 +2151,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			if (current.getCodeIndexingSetting().getRequireLoginForAutoIndexing() != null)
 				return current.getCodeIndexingSetting().getRequireLoginForAutoIndexing();
-			current = current.getParent();
+			current = current.getSettingsParent();
 		} while (current != null);
 
 		return false;
@@ -2137,7 +2163,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			if (current.getIssueSetting().getBranchPrefix() != null)
 				return current.getIssueSetting().getBranchPrefix();
-			current = current.getParent();
+			current = current.getSettingsParent();
 		} while (current != null);
 
 		return null;
@@ -2148,7 +2174,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			if (current.getPullRequestSetting().getDefaultMergeStrategy() != null)
 				return current.getPullRequestSetting().getDefaultMergeStrategy();
-			current = current.getParent();
+			current = current.getSettingsParent();
 		} while (current != null);
 
 		return MergeStrategy.CREATE_MERGE_COMMIT;
@@ -2159,7 +2185,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		do {
 			if (current.getPullRequestSetting().getDeleteSourceBranchAfterMerge() != null)
 				return current.getPullRequestSetting().getDeleteSourceBranchAfterMerge();
-			current = current.getParent();
+			current = current.getSettingsParent();
 		} while (current != null);
 
 		return false;
@@ -2180,7 +2206,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 				}
 				return users;
 			}
-			current = current.getParent();
+			current = current.getSettingsParent();
 		} while (current != null);
 
 		return new ArrayList<>();

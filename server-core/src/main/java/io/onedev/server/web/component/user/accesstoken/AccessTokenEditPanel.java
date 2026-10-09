@@ -19,15 +19,16 @@ import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AccessTokenAuthorizationService;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.AuditService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.RoleService;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.AccessTokenAuthorization;
+import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.user.UserPage;
+import io.onedev.server.web.util.WicketUtils;
 
 abstract class AccessTokenEditPanel extends Panel {
 	
@@ -48,6 +49,8 @@ abstract class AccessTokenEditPanel extends Panel {
 
 		if (!token.isNew())
 			oldAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
+		if (!WicketUtils.isSubscriptionActive())
+			bean.getAuthorizations().removeIf(it -> Project.DEFAULT_NAME.equals(it.getProjectPath()));
 		
 		var editor = BeanContext.edit("editor", bean, Sets.newHashSet("value"), true);
 		form.add(editor);
@@ -72,10 +75,6 @@ abstract class AccessTokenEditPanel extends Panel {
 					editor.error(new Path(new PathNode.Named("name")), _T("Name already used by another access token of the owner"));
 					target.add(AccessTokenEditPanel.this);
 				} else {
-					token.setName(bean.getName());
-					token.setValue(bean.getValue());
-					token.setHasOwnerPermissions(bean.isHasOwnerPermissions());
-
 					var projectPaths = new HashSet<String>();
 					var authorizations = new ArrayList<AccessTokenAuthorization>();
 					for (var authorizationBean : bean.getAuthorizations()) {
@@ -84,7 +83,7 @@ abstract class AccessTokenEditPanel extends Panel {
 							target.add(AccessTokenEditPanel.this);
 							return;
 						} else {
-							var project = getProjectService().findByPath(authorizationBean.getProjectPath());
+							var project = authorizationBean.resolveProject(token.getOwner());
 							authorizationBean.getRoleNames().forEach(it -> {
 								var authorization = new AccessTokenAuthorization();
 								authorization.setProject(project);
@@ -94,6 +93,9 @@ abstract class AccessTokenEditPanel extends Panel {
 							});
 						}	
 					}
+					token.setName(bean.getName());
+					token.setValue(bean.getValue());
+					token.setHasOwnerPermissions(bean.isHasOwnerPermissions());
 					token.setExpireDate(bean.getExpireDate());
 
 					getTransactionService().run(() -> {
@@ -135,7 +137,7 @@ abstract class AccessTokenEditPanel extends Panel {
 	private AuditService getAuditService() {
 		return OneDev.getInstance(AuditService.class);
 	}
-	
+
 	private TransactionService getTransactionService() {
 		return OneDev.getInstance(TransactionService.class);
 	}
@@ -150,10 +152,6 @@ abstract class AccessTokenEditPanel extends Panel {
 	
 	private RoleService getRoleService() {
 		return OneDev.getInstance(RoleService.class);
-	}
-	
-	private ProjectService getProjectService() {
-		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	protected abstract AccessToken getToken();

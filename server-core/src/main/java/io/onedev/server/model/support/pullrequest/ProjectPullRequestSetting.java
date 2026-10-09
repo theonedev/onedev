@@ -52,7 +52,7 @@ public class ProjectPullRequestSetting implements Serializable {
 		}
 	}
 	
-	@Editable(order=200, placeholder = "Inherit from parent", rootPlaceholder = "Create merge commit", 
+	@Editable(order=200, placeholder = "Inherit from parent", topPlaceholder = "Create merge commit", 
 			description = "Specify default merge strategy of pull requests submitted to this project")
 	public MergeStrategy getDefaultMergeStrategy() {
 		return defaultMergeStrategy;
@@ -62,7 +62,7 @@ public class ProjectPullRequestSetting implements Serializable {
 		this.defaultMergeStrategy = defaultMergeStrategy;
 	}
 
-	@Editable(order=300, placeholder = "Inherit from parent", rootPlaceholder = "Not assigned", description = "" +
+	@Editable(order=300, placeholder = "Inherit from parent", topPlaceholder = "Not assigned", description = "" +
 			"Specify default assignees of pull requests submitted to this project. " +
 			"Only users with the write code permission to the project can be selected")
 	@UserChoice("getAssigneeChoices")
@@ -81,7 +81,7 @@ public class ProjectPullRequestSetting implements Serializable {
 		return choices;
 	}
 
-	@Editable(order=400, placeholder = "Inherit from parent", rootPlaceholder = "No", description = "" +
+	@Editable(order=400, placeholder = "Inherit from parent", topPlaceholder = "No", description = "" +
 			"If enabled, source branch will be deleted automatically after merge the pull request if " +
 			"user has permission to do that")
 	public Boolean getDeleteSourceBranchAfterMerge() {

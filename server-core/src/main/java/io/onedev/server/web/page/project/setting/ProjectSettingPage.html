@@ -2,4 +2,16 @@
 	<div class="project-setting p-2 p-sm-5">
 		<wicket:child></wicket:child>
 	</div>
+	<wicket:fragment wicket:id="defaultsTitleFrag">
+		<span wicket:id="defaults"></span>
+		<span class="dot"></span>
+		<span wicket:id="setting"></span>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="projectTitleWithDefaultsHintFrag">
+		<wicket:container wicket:id="title"></wicket:container>
+		<span wicket:id="defaultsHint" class="project-defaults-hint ml-2 text-muted d-inline-flex flex-shrink-0" tabindex="0"
+				t:aria-label="Project Defaults" t:data-tippy-content="All root projects can inherit shared settings from Administration / Project Defaults. Requires an active subscription.">
+			<wicket:svg href="info-circle" class="icon icon-sm"/>
+		</span>
+	</wicket:fragment>
 </wicket:extend>

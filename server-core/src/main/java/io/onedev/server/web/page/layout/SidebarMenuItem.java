@@ -4,6 +4,9 @@ import com.google.common.collect.Lists;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.mapper.ProjectMapperUtils;
+import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import java.util.Objects;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import org.jspecify.annotations.Nullable;
@@ -70,7 +73,14 @@ public abstract class SidebarMenuItem implements Serializable {
 		
 		@Override
 		public boolean isActive() {
-			org.apache.wicket.Page currentPage = WicketUtils.getPage();
+			var currentPage = WicketUtils.getPage();
+			if (currentPage instanceof ProjectSettingPage 
+					&& ProjectSettingPage.class.isAssignableFrom(pageClass)
+					&& !Objects.equals(
+							currentPage.getPageParameters().get(ProjectMapperUtils.PARAM_PROJECT).toOptionalString(),
+							pageParams.get(ProjectMapperUtils.PARAM_PROJECT).toOptionalString())) {
+				return false;
+			} 
 			if (pageClass.isAssignableFrom(currentPage.getClass())) { 
 				if (pageClass.isAssignableFrom(ContributedAdministrationSettingPage.class) 
 						|| pageClass.isAssignableFrom(ContributedProjectSettingPage.class)) { 

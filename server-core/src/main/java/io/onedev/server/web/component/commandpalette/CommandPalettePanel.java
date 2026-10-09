@@ -192,7 +192,7 @@ public abstract class CommandPalettePanel extends Panel {
 		super.onInitialize();
 
 		var matcher = new PathMatcher();
-		if (getPage() instanceof ProjectPage) {
+		if (getPage() instanceof ProjectPage && ((ProjectPage) getPage()).getProject().getId() > 0) {
 			for (String[] url: availableUrls) {
 				if (WicketUtils.isSubscriptionActive() 
 						|| !eeUrlPatterns.matches(matcher, Joiner.on("/").join(url))) {

@@ -86,6 +86,11 @@ public class ServiceDeskSettingPage extends ProjectSettingPage {
 	}
 
 	@Override
+	protected boolean hasProjectDefaults() {
+		return false;
+	}
+
+	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "<span class='text-truncate'>Service Desk Settings</span>").setEscapeModelStrings(false);
 	}

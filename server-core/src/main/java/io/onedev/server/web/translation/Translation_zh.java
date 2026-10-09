@@ -1006,6 +1006,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "带版本的创建分支 Bean");
 		m.put("Create Child Project", "创建子项目");
 		m.put("Create Child Projects", "创建子项目");
+		m.put("Create Dependency Dashboard Issue", "创建依赖仪表板工单");
 		m.put("Create Issue", "创建工单");
 		m.put("Create Iteration", "创建迭代");
 		m.put("Create Merge Commit", "创建合并提交");
@@ -3070,6 +3071,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Paused selected agents", "已暂停选定的代理");
 		m.put("Pem Private Key", "PEM 私钥");
 		m.put("Pending", "待处理");
+		m.put("Pending review", "待处理审核");
 		m.put("Performance", "性能");
 		m.put("Performance Setting", "性能设置");
 		m.put("Performance Settings", "性能设置");
@@ -4227,8 +4229,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定要使用的模型名称。<b class='text-danger'>注意：</b>目前 OneDev 仅支持\n具有聊天完成 API 的模型。尚不支持具有新响应 API 的 OpenAI 模型。");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"指定用于与客户端建立连接的 SSH 服务器使用的私钥（在 PEM 格式中）");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"指定存储 wiki 页面的仓库文件夹。留空以继承自父级。\n如果您不想将 wiki 页面存储在项目仓库中，指定的文件夹\n可以是一个 Git 子模块。要从 wiki 页面面板中排除文件，请在 wiki 根文件夹中添加一个 <code>.wikiignore</code>\n文件，并使用相对于该文件夹的 Git 忽略模式");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"指定查询组成员信息的策略。要为 LDAP 组分配适当权限，应定义一个同名的 OneDev 组。如果您希望在 OneDev 端管理组成员关系，请使用策略 <tt>不查询组</tt>");
 		m.put("Specify timeout in seconds when communicating with mail server", "指定与邮件服务器通信时的超时时间（秒）");
@@ -4989,6 +4989,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
 			"运行容器时是否总是拉取镜像。启用此选项可以避免镜像被运行在同一节点上的恶意工作负载替换。");
 		m.put("Whether or not to be able to access time tracking info of issues", "是否能够访问工单的时间跟踪信息");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"是否创建依赖仪表板工单。如果禁用，Renovate 将不会创建或更新工单，现有工单可以手动关闭。选项如速率限制仍然可以通过 Renovate 配置进行控制");
 		m.put("Whether or not to create the workspace inside container", "是否在容器内创建工作区");
 		m.put("Whether or not to delete workspace if task command completes successfully. Uncheck this if\nyou want to check how the prompt is processed by coding agent after task command completes\nsuccessfully. Note that workspace will not be deleted automatically if task command fails.", 
 			"是否在任务命令成功完成后删除工作区。如果您想检查任务命令成功完成后编码代理如何处理提示，请取消选中此选项。\n请注意，如果任务命令失败，工作区将不会自动删除。");
@@ -5370,10 +5372,17 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Create Dependency Dashboard Issue", "创建依赖仪表板工单");
-		m.put("Pending review", "待处理审核");
-		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
-			"是否创建依赖仪表板工单。如果禁用，Renovate 将不会创建或更新工单，现有工单可以手动关闭。选项如速率限制仍然可以通过 Renovate 配置进行控制");
+		m.put("All root projects can inherit shared settings from Administration / Project Defaults. Requires an active subscription.", 
+			"所有根项目可以从 Administration / Project Defaults 继承共享设置。需要一个有效订阅。");
+		m.put("Leave empty to inherit from the parent project.", "留空以继承父项目的设置。");
+		m.put("Leave empty to use the <a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>default setting</a>.", 
+			"留空以使用<a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>默认设置</a>。");
+		m.put("Project Defaults", "项目默认值");
+		m.put("Select <code>~default</code> to apply the selected roles to all projects, including projects created later", 
+			"选择 <code>~default</code> 以将选定的角色应用于所有项目，包括后续创建的项目");
+		m.put("Specify the repository folder to store wiki pages.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"指定存储 wiki 页面的存储库文件夹。\n如果您不想将 wiki 页面存储在项目存储库中，指定的文件夹\n可以是一个 Git 子模块。要从 wiki 页面面板中排除文件，请在 wiki 根文件夹中添加一个 <code>.wikiignore</code>\n文件，并使用相对于该文件夹的 Git 忽略模式");
+		m.put("Use default setting", "使用默认设置");
 	}
 		
 	@Override

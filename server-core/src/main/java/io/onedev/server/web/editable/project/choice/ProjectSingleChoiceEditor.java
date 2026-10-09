@@ -15,6 +15,8 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.ComponentHierarchical;
+import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.component.project.choice.ProjectSingleChoice;
@@ -31,8 +33,13 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 		protected List<Project> load() {
 			ProjectChoice projectChoice = descriptor.getPropertyGetter().getAnnotation(ProjectChoice.class);
 			if (projectChoice.value().length() != 0) {
-				return (List<Project>) ReflectionUtils.invokeStaticMethod(
-						descriptor.getPropertyGetter().getDeclaringClass(), projectChoice.value());
+				HierarchicalContext.push(new HierarchicalContext(new ComponentHierarchical(ProjectSingleChoiceEditor.this)));
+				try {
+					return (List<Project>) ReflectionUtils.invokeStaticMethod(
+							descriptor.getPropertyGetter().getDeclaringClass(), projectChoice.value());
+				} finally {
+					HierarchicalContext.pop();
+				}
 			} else {
 				ProjectCache cache = getProjectService().cloneCache();
 				List<Project> projects = new ArrayList<>(cache.getProjects());
@@ -59,9 +66,12 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 		super.onInitialize();
 
 		Project selection;
-		if (getModelObject() != null) 
+		if (getModelObject() != null) {
 			selection = getProjectService().findByPath(getModelObject());
-		else 
+			if (selection == null)
+				selection = choicesModel.getObject().stream()
+						.filter(it -> it.getPath().equals(getModelObject())).findFirst().orElse(null);
+		} else
 			selection = null;
 		
     	input = new ProjectSingleChoice("input", Model.of(selection), choicesModel) {

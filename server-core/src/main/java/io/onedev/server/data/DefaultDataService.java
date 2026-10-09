@@ -96,6 +96,7 @@ import io.onedev.server.model.EntityIdCounter;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.ModelVersion;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectLastActivityDate;
 import io.onedev.server.model.ProjectNumberCounter;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
@@ -710,6 +711,20 @@ public class DefaultDataService implements DataService, Serializable {
     		userService.replicate(unknown);
 		}		
 		
+		if (dao.get(Project.class, Project.DEFAULT_ID) == null) {
+			var lastActivityDate = new ProjectLastActivityDate();
+			dao.getSession().persist(lastActivityDate);
+			var defaultProject = new Project();
+			defaultProject.setId(Project.DEFAULT_ID);
+			defaultProject.setName("~default"); // Use an impossible name to avoid conflicts with actual projects
+			defaultProject.setPath("~default");
+			defaultProject.setLastActivityDate(lastActivityDate);
+			defaultProject = dao.getSession().merge(defaultProject);
+			var numberCounter = new ProjectNumberCounter();
+			numberCounter.setProject(defaultProject);
+			dao.getSession().persist(numberCounter);
+		}
+
 		// Initialize security setting first as initial password validation below relies on password policy
 		var setting = settingService.findSetting(Key.SECURITY);
 		if (setting == null) {

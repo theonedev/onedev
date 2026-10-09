@@ -6,11 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.Test;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.wiki.SpecifiedPath;
 import io.onedev.server.model.support.wiki.WikiSetting;
@@ -126,24 +129,27 @@ public class WikiUtilsTest {
 
 	@Test
 	public void inheritsNearestConfiguredFolder() {
-		Project parent = new Project();
-		Project child = new Project();
-		child.setParent(parent);
-		assertEquals("wiki", child.getWikiFolder().getPath());
-		parent.getWikiSetting().setFolder(specifiedPath("documentation"));
-		assertEquals("documentation", child.getWikiFolder().getPath());
-		child.getWikiSetting().setFolder(specifiedPath("docs/wiki"));
-		assertEquals("docs/wiki", child.getWikiFolder().getPath());
-		child.getWikiSetting().setFolder(null);
-		assertEquals("documentation", child.getWikiFolder().getPath());
-		child.getWikiSetting().setFolder(new RepositoryRoot());
-		org.junit.jupiter.api.Assertions.assertNull(child.getWikiFolder().getPath());
-		child.getWikiSetting().setFolder(null);
-		parent.getWikiSetting().setFolder(new RepositoryRoot());
-		org.junit.jupiter.api.Assertions.assertNull(child.getWikiFolder().getPath());
-		parent.getWikiSetting().setFolder(null);
-		assertTrue(parent.getWikiFolder() instanceof SpecifiedPath);
-		assertEquals("wiki", child.getWikiFolder().getPath());
+		try (var services = mockStatic(OneDev.class)) {
+			services.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(mock(SubscriptionService.class));
+			Project parent = new Project();
+			Project child = new Project();
+			child.setParent(parent);
+			assertEquals("wiki", child.getWikiFolder().getPath());
+			parent.getWikiSetting().setFolder(specifiedPath("documentation"));
+			assertEquals("documentation", child.getWikiFolder().getPath());
+			child.getWikiSetting().setFolder(specifiedPath("docs/wiki"));
+			assertEquals("docs/wiki", child.getWikiFolder().getPath());
+			child.getWikiSetting().setFolder(null);
+			assertEquals("documentation", child.getWikiFolder().getPath());
+			child.getWikiSetting().setFolder(new RepositoryRoot());
+			org.junit.jupiter.api.Assertions.assertNull(child.getWikiFolder().getPath());
+			child.getWikiSetting().setFolder(null);
+			parent.getWikiSetting().setFolder(new RepositoryRoot());
+			org.junit.jupiter.api.Assertions.assertNull(child.getWikiFolder().getPath());
+			parent.getWikiSetting().setFolder(null);
+			assertTrue(parent.getWikiFolder() instanceof SpecifiedPath);
+			assertEquals("wiki", child.getWikiFolder().getPath());
+		}
 	}
 
 	@Test

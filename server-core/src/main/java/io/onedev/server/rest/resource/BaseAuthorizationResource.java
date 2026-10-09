@@ -13,14 +13,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.BaseAuthorizationService;
 import io.onedev.server.model.BaseAuthorization;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.rest.RestProjectUtils;
 
 @Api(description = "This resource manages default roles of project")
 @Path("/base-authorizations")
@@ -44,16 +42,14 @@ public class BaseAuthorizationResource {
 	@GET
 	public BaseAuthorization getAuthorization(@PathParam("authorizationId") Long authorizationId) {
 		var authorization = authorizationService.load(authorizationId);
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		return authorization;
 	}
 	
 	@Api(order=200, description="Create base authorization")
 	@POST
 	public Long createAuthorization(@NotNull BaseAuthorization authorization) {
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		authorizationService.create(authorization);
 		var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 		auditService.audit(authorization.getProject(), "created base authorization via RESTful API", null, newAuditContent);
@@ -65,8 +61,7 @@ public class BaseAuthorizationResource {
 	@DELETE
 	public Response deleteAuthorization(@PathParam("authorizationId") Long authorizationId) {
 		var authorization = authorizationService.load(authorizationId);
-		if (!SecurityUtils.canManageProject(authorization.getProject()))
-			throw new UnauthorizedException();
+		RestProjectUtils.checkAuthorizationPermission(authorization.getProject());
 		authorizationService.delete(authorization);
 		var oldAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 		auditService.audit(authorization.getProject(), "deleted base authorization via RESTful API", oldAuditContent, null);

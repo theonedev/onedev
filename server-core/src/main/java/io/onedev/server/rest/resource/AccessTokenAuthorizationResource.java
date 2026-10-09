@@ -4,6 +4,19 @@ import static io.onedev.server.security.SecurityUtils.canManageProject;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
 import static io.onedev.server.security.SecurityUtils.isAdministrator;
 
+import java.util.function.Function;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.exception.NotAcceptableException;
+import io.onedev.server.model.AccessTokenAuthorization;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.rest.RestProjectUtils;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.service.AccessTokenAuthorizationService;
+import io.onedev.server.service.AuditService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.validation.constraints.NotNull;
@@ -17,14 +30,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-
-import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AccessTokenAuthorizationService;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.model.AccessTokenAuthorization;
-import io.onedev.server.rest.annotation.Api;
 
 @Api(description = "This resource manages project authorizations of access tokens. Note that " +
 		"project authorizations will not take effect if option <tt>hasOwnerPermissions</tt> is enabled " +
@@ -60,10 +65,7 @@ public class AccessTokenAuthorizationResource {
 	@POST
 	public Long createAuthorization(@NotNull AccessTokenAuthorization authorization) {
 		var owner = authorization.getToken().getOwner();
-		if (!isAdministrator() && !owner.equals(getAuthUser())) 
-			throw new UnauthorizedException();
-		if (!canManageProject(owner.asSubject(), authorization.getProject()))
-			throw new BadRequestException("Access token owner should have permission to manage authorized project");
+		checkAuthorization(owner, authorization.getProject(), BadRequestException::new);
 
 		accessTokenAuthorizationService.createOrUpdate(authorization);
 		if (!getAuthUser().equals(owner)) {
@@ -78,10 +80,7 @@ public class AccessTokenAuthorizationResource {
 	@POST
 	public Response updateAuthorization(@PathParam("authorizationId") Long authorizationId, @NotNull AccessTokenAuthorization authorization) {
 		var owner = authorization.getToken().getOwner();
-		if (!isAdministrator() && !owner.equals(getAuthUser())) 
-			throw new UnauthorizedException();
-		if (!canManageProject(owner.asSubject(), authorization.getProject()))
-			throw new BadRequestException("Access token owner should have permission to manage authorized project");
+		checkAuthorization(owner, authorization.getProject(), NotAcceptableException::new);
 
 		accessTokenAuthorizationService.createOrUpdate(authorization);
 		if (!getAuthUser().equals(owner)) {
@@ -90,6 +89,21 @@ public class AccessTokenAuthorizationResource {
 			auditService.audit(null, "changed access token authorization in account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		}
 		return Response.ok().build();
+	}
+
+	private void checkAuthorization(User owner, Project project, Function<String, RuntimeException> invalidOwner) {
+		if (!isAdministrator() && !owner.equals(getAuthUser()))
+			throw new UnauthorizedException();
+		var ownerSubject = owner.asSubject();
+		if (Project.DEFAULT_ID.equals(project.getId())) {
+			RestProjectUtils.checkProjectDefaultsPermission();
+			if (!isAdministrator(ownerSubject))
+				throw invalidOwner.apply("Access token owner should be an administrator to authorize project defaults");
+		} else {
+			RestProjectUtils.checkProjectId(project.getId());
+		}
+		if (!canManageProject(ownerSubject, project))
+			throw invalidOwner.apply("Access token owner should have permission to manage authorized project");
 	}
 	
 	@Api(order=300, description = "Delete access token authorization of specified id")

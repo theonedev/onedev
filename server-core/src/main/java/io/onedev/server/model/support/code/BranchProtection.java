@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
@@ -192,7 +193,8 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Editable(order=410, placeholder = "No disallowed file types", description = "Optionally specify disallowed file types by extensions (hit ENTER to add value), for instance <code>exe</code>, <code>bin</code>. Leave empty to allow all file types")
-	public List<String> getDisallowedFileTypes() {
+	@NotNull
+	public List<@NotNull String> getDisallowedFileTypes() {
 		return disallowedFileTypes;
 	}
 
@@ -203,7 +205,8 @@ public class BranchProtection implements Serializable {
 	@Editable(order=500, name="Required Builds", placeholder="No any", description="Optionally choose required builds. You may also " +
 			"input jobs not listed here, and press ENTER to add them")
 	@JobChoice(tagsMode=true)
-	public List<String> getJobNames() {
+	@NotNull
+	public List<@NotNull String> getJobNames() {
 		return jobNames;
 	}
 
@@ -212,7 +215,8 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Editable(order=700, description="Optionally specify path protection rules")
-	public List<@Valid FileProtection> getFileProtections() {
+	@NotNull
+	public List<@NotNull @Valid FileProtection> getFileProtections() {
 		return fileProtections;
 	}
 

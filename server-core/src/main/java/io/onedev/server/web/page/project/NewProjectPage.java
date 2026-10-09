@@ -12,6 +12,8 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.Collection;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -49,6 +51,8 @@ public class NewProjectPage extends LayoutPage {
 	public NewProjectPage(PageParameters params) {
 		super(params);
 		parentId = params.get(PARAM_PARENT).toOptionalLong();
+		if (parentId != null && parentId < 0)
+			throw new EntityNotFoundException("Project not found");
 	}
 
 	@Override

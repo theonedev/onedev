@@ -980,6 +980,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "수정본과 함께 브랜치 빈 생성");
 		m.put("Create Child Project", "하위 프로젝트 생성");
 		m.put("Create Child Projects", "하위 프로젝트들 생성");
+		m.put("Create Dependency Dashboard Issue", "종속성 대시보드 이슈 생성");
 		m.put("Create Issue", "이슈 생성");
 		m.put("Create Iteration", "반복 생성");
 		m.put("Create Merge Commit", "병합 커밋 생성");
@@ -3044,6 +3045,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Paused selected agents", "선택된 에이전트가 일시 중지되었습니다.");
 		m.put("Pem Private Key", "Pem 개인 키");
 		m.put("Pending", "대기 중");
+		m.put("Pending review", "검토 대기 중");
 		m.put("Performance", "성능");
 		m.put("Performance Setting", "성능 설정");
 		m.put("Performance Settings", "성능 설정들");
@@ -4201,8 +4203,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"사용할 모델 이름을 지정하십시오. <b class='text-danger'>참고:</b> 현재 OneDev는\n채팅 완료 API가 있는 모델만 지원합니다. OpenAI의 새로운 응답 API가 있는 모델은 아직 지원되지 않습니다");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSH 서버가 클라이언트와 연결을 설정하는 데 사용하는 개인 키(PEM 형식)를 지정하십시오.");
-		m.put("Specify the repository folder to store wiki pages. Leave empty to inherit from parent.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
-			"위키 페이지를 저장할 저장소 폴더를 지정하세요. 상위에서 상속받으려면 비워 두세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다. 위키 페이지 패널에서 파일을 제외하려면, 위키 루트 폴더에 Git 무시 패턴을 포함한 <code>.wikiignore</code>\n파일을 추가하세요.");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
 			"그룹 멤버십 정보를 검색하는 전략을 지정하십시오. LDAP 그룹에 적절한 권한을 부여하려면 동일한 이름의 OneDev 그룹을 정의해야 합니다. 그룹 멤버십을 OneDev 측에서 관리하려면 <tt>그룹 검색 안 함</tt> 전략을 사용하십시오.");
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
@@ -4963,6 +4963,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
 			"컨테이너를 실행할 때 항상 이미지를 가져올지 여부. 활성화하면 동일한 노드에서 실행 중인 악성 워크로드에 의해 이미지가 대체되는 것을 방지합니다.");
 		m.put("Whether or not to be able to access time tracking info of issues", "문제의 시간 추적 정보를 액세스할 수 있는지 여부");
+		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
+			"종속성 대시보드 이슈를 생성할지 여부입니다. 비활성화된 경우, Renovate는 이슈를 생성하거나 업데이트하지 않으며, 기존 이슈는 수동으로 닫을 수 있습니다. 속도 제한과 같은 옵션은 여전히 Renovate 구성으로 제어할 수 있습니다.");
 		m.put("Whether or not to create the workspace inside container", "컨테이너 내부에 워크스페이스를 생성할지 여부");
 		m.put("Whether or not to delete workspace if task command completes successfully. Uncheck this if\nyou want to check how the prompt is processed by coding agent after task command completes\nsuccessfully. Note that workspace will not be deleted automatically if task command fails.", 
 			"작업 명령이 성공적으로 완료되면 워크스페이스를 삭제할지 여부.\n작업 명령이 성공적으로 완료된 후 코딩 에이전트가 프롬프트를 처리하는 방식을 확인하려면 이 옵션을 선택 해제하세요.\n작업 명령이 실패한 경우 워크스페이스는 자동으로 삭제되지 않습니다.");
@@ -5344,10 +5346,17 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Create Dependency Dashboard Issue", "종속성 대시보드 이슈 생성");
-		m.put("Pending review", "검토 대기 중");
-		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
-			"종속성 대시보드 이슈를 생성할지 여부입니다. 비활성화된 경우, Renovate는 이슈를 생성하거나 업데이트하지 않으며, 기존 이슈는 수동으로 닫을 수 있습니다. 속도 제한과 같은 옵션은 여전히 Renovate 구성으로 제어할 수 있습니다.");
+		m.put("All root projects can inherit shared settings from Administration / Project Defaults. Requires an active subscription.", 
+			"모든 루트 프로젝트는 Administration / Project Defaults에서 공유 설정을 상속받을 수 있습니다. 활성 구독이 필요합니다.");
+		m.put("Leave empty to inherit from the parent project.", "상위 프로젝트에서 상속받으려면 비워 두세요.");
+		m.put("Leave empty to use the <a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>default setting</a>.", 
+			"<a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>기본 설정</a>을 사용하려면 비워 두세요.");
+		m.put("Project Defaults", "프로젝트 기본값");
+		m.put("Select <code>~default</code> to apply the selected roles to all projects, including projects created later", 
+			"선택한 역할을 모든 프로젝트(이후에 생성된 프로젝트 포함)에 적용하려면 <code>~default</code>를 선택하세요.");
+		m.put("Specify the repository folder to store wiki pages.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
+			"위키 페이지를 저장할 저장소 폴더를 지정하세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다. 위키 페이지 패널에서 파일을 제외하려면, 위키 루트 폴더에\n해당 폴더를 기준으로 Git 무시 패턴을 포함한 <code>.wikiignore</code> 파일을 추가하세요.");
+		m.put("Use default setting", "기본 설정 사용");
 	}
 		
 	@Override

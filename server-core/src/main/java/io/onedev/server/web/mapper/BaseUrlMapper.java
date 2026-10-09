@@ -327,6 +327,26 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addAdministrationPages() {
+		add(new ProjectDefaultsMapper("general", GeneralProjectSettingPage.class));
+		add(new ProjectDefaultsMapper("user-authorizations", io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage.class));
+		add(new ProjectDefaultsMapper("group-authorizations", io.onedev.server.web.page.project.setting.authorization.GroupAuthorizationsPage.class));
+		add(new ProjectDefaultsMapper("code/branch-protection", BranchProtectionsPage.class));
+		add(new ProjectDefaultsMapper("code/tag-protection", TagProtectionsPage.class));
+		add(new ProjectDefaultsMapper("code/indexing", CodeIndexingSettingPage.class));
+		add(new ProjectDefaultsMapper("pull-request", PullRequestSettingPage.class));
+		add(new ProjectDefaultsMapper("issue/branch-prefix", IssueBranchPrefixPage.class));
+		add(new ProjectDefaultsMapper("build/job-secrets", JobSecretsPage.class));
+		add(new ProjectDefaultsMapper("build/job-properties", JobPropertiesPage.class));
+		add(new ProjectDefaultsMapper("build/build-preserve-rules", BuildPreservationsPage.class));
+		add(new ProjectDefaultsMapper("build/default-fixed-issue-filters", DefaultFixedIssueFiltersPage.class));
+		add(new ProjectDefaultsMapper("cache-management", CacheManagementPage.class));
+		add(new ProjectDefaultsMapper("workspace-spec", WorkspaceSpecsPage.class));
+		add(new ProjectDefaultsMapper("wiki", WikiSettingPage.class));
+		add(new ProjectDefaultsMapper("web-hooks", WebHooksPage.class));
+		add(new ProjectDefaultsMapper("ai", ProjectAiSettingPage.class));
+		add(new ProjectDefaultsMapper("${" + ContributedProjectSettingPage.PARAM_SETTING + "}",
+				ContributedProjectSettingPage.class));
+
 		add(new BasePageMapper("~administration/settings/system", SystemSettingPage.class));
 		add(new BasePageMapper("~administration/settings/security", SecuritySettingPage.class));
 		add(new BasePageMapper("~administration/users", UserListPage.class));

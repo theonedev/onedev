@@ -30,6 +30,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Workspace.Status;
+import io.onedev.server.rest.RestProjectUtils;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -103,7 +104,7 @@ public class WorkspaceResource {
 		if (user == null)
 			throw new UnauthorizedException();
 
-		Project project = projectService.load(data.getProjectId());
+		Project project = RestProjectUtils.loadProject(projectService, data.getProjectId());
 		if (!SecurityUtils.canCreateWorkspaces(subject, project))
 			throw new UnauthorizedException();
 

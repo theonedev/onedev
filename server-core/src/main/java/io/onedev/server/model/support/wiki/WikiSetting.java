@@ -12,8 +12,8 @@ public class WikiSetting implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private WikiFolder folder;
 
-	@Editable(name="Wiki Folder", placeholder="Inherit from parent", rootPlaceholder="Use folder 'wiki'", description="""
-			Specify the repository folder to store wiki pages. Leave empty to inherit from parent.
+	@Editable(name="Wiki Folder", placeholder="Inherit from parent", topPlaceholder="Use folder 'wiki'", description="""
+			Specify the repository folder to store wiki pages.
 			If you do not want to store wiki pages in the project repository, the specified folder
 			can be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>
 			file in the wiki root folder with Git ignore patterns relative to that folder""")

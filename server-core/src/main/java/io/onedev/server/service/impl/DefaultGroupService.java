@@ -2,6 +2,7 @@ package io.onedev.server.service.impl;
 
 import static io.onedev.server.persistence.dao.Restrictions.eq;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
@@ -35,6 +36,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.util.facade.GroupCache;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.usage.Usage;
+import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class DefaultGroupService extends BaseEntityService<Group> implements GroupService {
@@ -77,7 +79,10 @@ public class DefaultGroupService extends BaseEntityService<Group> implements Gro
 	public void update(Group group, String oldName) {
 		Preconditions.checkState(!group.isNew());
 		if (oldName != null && !oldName.equals(group.getName())) {
-			for (Project project: projectService.query()) {
+			var projects = new ArrayList<>(projectService.query());
+			if (WicketUtils.isSubscriptionActive())
+				projects.add(projectService.load(Project.DEFAULT_ID));
+			for (Project project: projects) {
 				try {
 					for (BranchProtection protection : project.getBranchProtections())
 						protection.onRenameGroup(oldName, group.getName());
@@ -98,7 +103,10 @@ public class DefaultGroupService extends BaseEntityService<Group> implements Gro
 	@Override
 	public void delete(Group group) {
     	Usage usage = new Usage();
-		for (Project project: projectService.query()) {
+		var projects = new ArrayList<>(projectService.query());
+		if (WicketUtils.isSubscriptionActive())
+			projects.add(projectService.load(Project.DEFAULT_ID));
+		for (Project project: projects) {
 			try {
 				Usage usageInProject = new Usage();
 				for (BranchProtection protection : project.getBranchProtections())

@@ -45,6 +45,7 @@ import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
+import io.onedev.server.rest.RestProjectUtils;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -139,7 +140,7 @@ public class CodeCommentResource {
 			@QueryParam("query") @Api(description="Syntax of this query is the same as in the project's code comments page", example="unresolved") String query,
 			@QueryParam("offset") @Api(example="0") int offset,
 			@QueryParam("count") @Api(example="100") int count) {
-		var project = projectService.load(projectId);
+		var project = RestProjectUtils.loadProject(projectService, projectId);
 		if (!SecurityUtils.canReadCode(project))
 			throw new UnauthorizedException();
 		var subject = SecurityUtils.getSubject();
@@ -155,7 +156,7 @@ public class CodeCommentResource {
 		var user = SecurityUtils.getUser();
 		if (user == null)
 			throw new UnauthenticatedException();
-		var project = projectService.load(data.getProjectId());
+		var project = RestProjectUtils.loadProject(projectService, data.getProjectId());
 		if (!SecurityUtils.canReadCode(project))
 			throw new UnauthorizedException();
 

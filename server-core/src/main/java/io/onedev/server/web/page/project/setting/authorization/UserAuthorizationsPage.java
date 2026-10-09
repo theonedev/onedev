@@ -66,8 +66,8 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 
 				SecurityUtils.checkPermission(new ProjectPermission(getProject(), new ManageProject()));
 				
-				if (getProject().getParent() == null 
-						|| !SecurityUtils.canManageProject(getProject().getParent())) {
+				var settingsParent = getProject().getSettingsParent();
+				if (settingsParent == null || !SecurityUtils.canManageProject(settingsParent)) {
 					boolean canManageProject = false;
 					Project project = getProject();
 					User user = SecurityUtils.getAuthUser();
