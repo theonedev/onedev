@@ -25,6 +25,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.mail.MailService;
@@ -41,7 +42,6 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.WicketUtils;
 
 public class MailConnectorPage extends AdministrationPage {
 	
@@ -86,7 +86,7 @@ public class MailConnectorPage extends AdministrationPage {
 						(IVisitor<BeanEditor, BeanEditor>) (component, visit) -> visit.stop(component));
 				setEnabled(beanEditor == null 
 						|| beanEditor.getDescriptor().getBeanClass().getAnnotation(SubscriptionRequired.class) == null 
-						|| WicketUtils.isSubscriptionActive());
+						|| OneDev.getInstance(SubscriptionService.class).isSubscriptionActive());
 			}
 		};
 		saveButton.add(new DisableAwareBehavior());
@@ -117,7 +117,7 @@ public class MailConnectorPage extends AdministrationPage {
 				setVisible(beanEditor != null && beanEditor.isVisibleInHierarchy());
 				setEnabled(beanEditor == null
 						|| beanEditor.getDescriptor().getBeanClass().getAnnotation(SubscriptionRequired.class) == null
-						|| WicketUtils.isSubscriptionActive());
+						|| OneDev.getInstance(SubscriptionService.class).isSubscriptionActive());
 			}
 
 			@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.git.LastCommitsOfChildren;
 import io.onedev.server.model.support.wiki.WikiFolder;
 import io.onedev.server.model.support.wiki.WikiSetting;
@@ -149,7 +150,6 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.workspace.WorkspaceQueryPersonalizationService;
 import io.onedev.server.xodus.CommitInfoService;
 
@@ -1106,7 +1106,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@SuppressWarnings("unused")
 	private static String getTimeTrackingDescription() {
-		if (!WicketUtils.isSubscriptionActive()) {
+		if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 			return _T("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days");
 		} else {
 			return _T("Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets");
@@ -1170,14 +1170,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public Project getSettingsParent() {
 		if (getParent() != null)
 			return getParent();
-		else if (!DEFAULT_ID.equals(getId()) && WicketUtils.isSubscriptionActive())
+		else if (!DEFAULT_ID.equals(getId()) && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			return getProjectService().load(DEFAULT_ID);
 		else
 			return null;
 	}
 
 	public boolean isSelfOrSettingsAncestorOf(Project project) {
-		return DEFAULT_ID.equals(getId()) && WicketUtils.isSubscriptionActive()
+		return DEFAULT_ID.equals(getId()) && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
 				|| isSelfOrAncestorOf(project);
 	}
 

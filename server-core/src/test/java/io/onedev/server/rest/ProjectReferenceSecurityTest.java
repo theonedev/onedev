@@ -12,11 +12,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import io.onedev.commons.loader.AppLoader;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.*;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperModule;
-import io.onedev.server.web.util.WicketUtils;
 
 class ProjectReferenceSecurityTest {
 
@@ -32,9 +33,11 @@ class ProjectReferenceSecurityTest {
 				.visibility(PropertyAccessor.FIELD, Visibility.ANY)
 				.addModule(new HibernateObjectMapperModule(dao)).build();
 		try (var loader = mockStatic(AppLoader.class); var security = mockStatic(SecurityUtils.class);
-				var wicket = mockStatic(WicketUtils.class)) {
+				var oneDev = mockStatic(OneDev.class)) {
+			var subscription = mock(SubscriptionService.class);
+			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
 			loader.when(() -> AppLoader.getInstance(Dao.class)).thenReturn(dao);
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			for (var type: new Class<?>[] {UserAuthorization.class, GroupAuthorization.class,
 					BaseAuthorization.class, AccessTokenAuthorization.class}) {
 				var error = assertThrows(JsonMappingException.class, () -> mapper.readValue("{\"projectId\":-1}", type));

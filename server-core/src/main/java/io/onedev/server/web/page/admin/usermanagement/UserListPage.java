@@ -42,6 +42,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
@@ -69,7 +70,6 @@ import io.onedev.server.web.page.user.UserCssResourceReference;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.TextUtils;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 
@@ -154,7 +154,7 @@ public class UserListPage extends AdministrationPage {
 		else
 			getPageParameters().remove(PARAM_TYPE);
 		target.add(searchField);
-		if (WicketUtils.isSubscriptionActive())
+		if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			target.add(includeDisabledLink);
 		target.add(filterTypeLink);
 		selectionColumn.getSelections().clear();
@@ -225,7 +225,7 @@ public class UserListPage extends AdministrationPage {
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 				
-				if (WicketUtils.isSubscriptionActive()) {
+				if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -503,7 +503,7 @@ public class UserListPage extends AdministrationPage {
 
 				});
 				
-				if (WicketUtils.isSubscriptionActive()) {
+				if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -810,7 +810,7 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(WicketUtils.isSubscriptionActive());
+				setVisible(OneDev.getInstance(SubscriptionService.class).isSubscriptionActive());
 			}
 
 			@Override
@@ -888,7 +888,7 @@ public class UserListPage extends AdministrationPage {
 				link.add(new Label("name", user.getName()));
 				link.add(new WebMarkupContainer("service").setVisible(user.getType() == SERVICE));
 				link.add(new WebMarkupContainer("ai").setVisible(user.getType() == AI));
-				link.add(new WebMarkupContainer("disabled").setVisible(user.isDisabled() && WicketUtils.isSubscriptionActive()));
+				link.add(new WebMarkupContainer("disabled").setVisible(user.isDisabled() && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}

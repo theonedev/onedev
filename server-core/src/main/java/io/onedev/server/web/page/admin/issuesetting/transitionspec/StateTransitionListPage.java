@@ -11,13 +11,13 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.component.issue.transitionspec.StateTransitionListPanel;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-import io.onedev.server.web.util.WicketUtils;
 
 public class StateTransitionListPage extends IssueSettingPage {
 
@@ -70,8 +70,8 @@ public class StateTransitionListPage extends IssueSettingPage {
 			
 		});
 
-		add(new WebMarkupContainer("ceNote").setVisible(!WicketUtils.isSubscriptionActive()));
-		add(new WebMarkupContainer("eeNote").setVisible(WicketUtils.isSubscriptionActive()));
+		add(new WebMarkupContainer("ceNote").setVisible(!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()));
+		add(new WebMarkupContainer("eeNote").setVisible(OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()));
 	}
 	
 	@Override

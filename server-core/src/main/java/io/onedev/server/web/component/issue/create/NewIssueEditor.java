@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
@@ -82,7 +83,6 @@ import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.WicketUtils;
 import jakarta.inject.Inject;
 
 public abstract class NewIssueEditor extends FormComponentPanel<Issue> implements InputContext {
@@ -294,7 +294,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		var estimatedTimeEditBean = new EstimatedTimeEditBean();
 		add(estimatedTimeEditor = new BeanContext(EstimatedTimeEditBean.class)
 				.renderForEdit("estimatedTime", Model.of(estimatedTimeEditBean)));
-		estimatedTimeEditor.setVisible(WicketUtils.isSubscriptionActive() && getProject().isTimeTracking());
+		estimatedTimeEditor.setVisible(OneDev.getInstance(SubscriptionService.class).isSubscriptionActive() && getProject().isTimeTracking());
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
 

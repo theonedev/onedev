@@ -38,6 +38,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
@@ -78,7 +79,6 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ProjectAware;
-import io.onedev.server.web.util.WicketUtils;
 
 abstract class BoardColumnPanel extends AbstractColumnPanel {
 
@@ -285,7 +285,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 		}
 
 		if (getQuery() != null && getProject().isTimeTracking() 
-				&& WicketUtils.isSubscriptionActive() 
+				&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
 				&& SecurityUtils.canAccessTimeTracking(getProject())) {
 			head.add(new DropdownLink("showProgress") {
 				@Override

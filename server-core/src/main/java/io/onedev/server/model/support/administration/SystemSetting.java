@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
@@ -30,7 +31,6 @@ import io.onedev.server.git.location.SystemCurl;
 import io.onedev.server.git.location.SystemGit;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 @ClassValidating
@@ -185,7 +185,7 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	@SuppressWarnings("unused")
 	private static boolean isDisableDashboardEnabled() {
-		return WicketUtils.isSubscriptionActive();
+		return OneDev.getInstance(SubscriptionService.class).isSubscriptionActive();
 	}
 
 	@Editable(order=500, description="Whether or not to use user avatar from a public service")

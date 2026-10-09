@@ -59,6 +59,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -147,7 +148,6 @@ import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.xodus.VisitInfoService;
 
@@ -698,7 +698,7 @@ public abstract class IssueListPanel extends Panel {
 							var issues = new ArrayList<Issue>();
 							for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
 								var issue = it.next();
-								if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0 && WicketUtils.isSubscriptionActive()) {
+								if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0 && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 									withTimeTracking = true;
 								}
 								issues.add(issue);
@@ -780,7 +780,7 @@ public abstract class IssueListPanel extends Panel {
 							var issues = new ArrayList<Issue>();
 							for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
 								var issue = it.next();
-								if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0 && WicketUtils.isSubscriptionActive()) {
+								if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0 && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 									withTimeTracking = true;
 								}
 								issues.add(issue);
@@ -852,7 +852,7 @@ public abstract class IssueListPanel extends Panel {
 
 				if (getProject() != null && getProject().isTimeTracking() 
 						&& SecurityUtils.canManageIssues(getProject()) 
-						&& WicketUtils.isSubscriptionActive()) {
+						&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -1221,7 +1221,7 @@ public abstract class IssueListPanel extends Panel {
 
 				if (getProject() != null && getProject().isTimeTracking() 
 						&& SecurityUtils.canManageIssues(getProject())
-						&& WicketUtils.isSubscriptionActive()) {
+						&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -1804,7 +1804,7 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 		
-		if (getProject() != null && getProject().isTimeTracking() && WicketUtils.isSubscriptionActive()) {
+		if (getProject() != null && getProject().isTimeTracking() && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 			add(new DropdownLink("showProgress") {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {

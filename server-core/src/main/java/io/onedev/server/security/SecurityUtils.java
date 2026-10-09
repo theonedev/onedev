@@ -3,7 +3,7 @@ package io.onedev.server.security;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.web.util.WikiUtils;
 
 import java.util.Collection;
@@ -788,7 +788,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	private static Collection<Long> getAuthorizedProjectIds(ProjectCache cache, Project project) {
 		if (Project.DEFAULT_ID.equals(project.getId())) {
-			if (WicketUtils.isSubscriptionActive())
+			if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 				return cache.keySet();
 			else
 				return Collections.emptySet();

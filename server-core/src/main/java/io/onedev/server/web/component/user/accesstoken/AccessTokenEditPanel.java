@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AccessTokenAuthorizationService;
 import io.onedev.server.service.AccessTokenService;
@@ -28,7 +29,6 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.user.UserPage;
-import io.onedev.server.web.util.WicketUtils;
 
 abstract class AccessTokenEditPanel extends Panel {
 	
@@ -49,7 +49,7 @@ abstract class AccessTokenEditPanel extends Panel {
 
 		if (!token.isNew())
 			oldAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
-		if (!WicketUtils.isSubscriptionActive())
+		if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			bean.getAuthorizations().removeIf(it -> Project.DEFAULT_NAME.equals(it.getProjectPath()));
 		
 		var editor = BeanContext.edit("editor", bean, Sets.newHashSet("value"), true);

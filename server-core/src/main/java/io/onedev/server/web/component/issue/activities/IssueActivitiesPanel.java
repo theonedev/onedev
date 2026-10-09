@@ -28,6 +28,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -64,7 +66,6 @@ import io.onedev.server.web.component.issue.activities.activity.IssueWorkActivit
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.util.WicketUtils;
 
 public abstract class IssueActivitiesPanel extends Panel {
 
@@ -156,7 +157,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 		}
 		
 		if (showWorkLog && getIssue().getProject().isTimeTracking() 
-				&& WicketUtils.isSubscriptionActive() 
+				&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
 				&& canAccessTimeTracking(getIssue().getProject())) {
 			for (IssueWork work: getIssue().getWorks())
 				otherActivities.add(new IssueWorkActivity(work));
@@ -444,7 +445,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 				super.onConfigure();
 				var project = getIssue().getProject();
 				setVisible(project.isTimeTracking() 
-						&& WicketUtils.isSubscriptionActive() 
+						&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
 						&& canAccessTimeTracking(project));
 			}
 			

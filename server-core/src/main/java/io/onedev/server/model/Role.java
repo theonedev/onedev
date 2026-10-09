@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
@@ -68,7 +69,6 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.RoleFacade;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.web.util.WicketUtils;
 
 /**
  * @author robin
@@ -486,7 +486,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	
 	@SuppressWarnings("unused")
 	private static boolean isSubscriptionActive() {
-		return WicketUtils.isSubscriptionActive();
+		return OneDev.getInstance(SubscriptionService.class).isSubscriptionActive();
 	}
 
 	@Override

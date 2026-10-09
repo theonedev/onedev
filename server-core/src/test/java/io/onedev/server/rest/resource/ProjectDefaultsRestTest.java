@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.exception.NoSubscriptionException;
 import io.onedev.server.model.*;
@@ -33,7 +35,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.*;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
 import io.onedev.server.validation.HibernateValidationTestSupport;
-import io.onedev.server.web.util.WicketUtils;
 
 class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 
@@ -189,15 +190,17 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 		var projects = mock(ProjectService.class);
 		var resource = new SettingResource(mock(SettingService.class), mock(AuditService.class), validator);
 		inject(resource, "projectService", projects);
-		try (var security = mockStatic(SecurityUtils.class); var wicket = mockStatic(WicketUtils.class)) {
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+		try (var security = mockStatic(SecurityUtils.class); var oneDev = mockStatic(OneDev.class)) {
+			var subscription = mock(SubscriptionService.class);
+			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			assertThrows(UnauthorizedException.class, resource::getProjectDefaults);
 			assertThrows(UnauthorizedException.class, () -> resource.setProjectDefaults(new ProjectDefaults()));
 			assertThrows(UnauthorizedException.class, resource::getProjectDefaultUserAuthorizations);
 			assertThrows(UnauthorizedException.class, resource::getProjectDefaultGroupAuthorizations);
 			assertThrows(UnauthorizedException.class, resource::getProjectDefaultBaseAuthorizations);
 			security.when(SecurityUtils::isAdministrator).thenReturn(true);
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(false);
+			when(subscription.isSubscriptionActive()).thenReturn(false);
 			assertThrows(NoSubscriptionException.class, resource::getProjectDefaults);
 			assertThrows(NoSubscriptionException.class, () -> resource.setProjectDefaults(new ProjectDefaults()));
 			assertThrows(NoSubscriptionException.class, resource::getProjectDefaultBaseAuthorizations);
@@ -226,10 +229,12 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 		inject(resource, "transactionService", transactions);
 		var authorization = new BaseAuthorization(); authorization.setRole(role); authorization.setProject(project);
 		project.getBaseAuthorizations().add(authorization);
-		try (var security = mockStatic(SecurityUtils.class); var wicket = mockStatic(WicketUtils.class);
+		try (var security = mockStatic(SecurityUtils.class); var oneDev = mockStatic(OneDev.class);
 				var xml = mockStatic(VersionedXmlDoc.class)) {
+			var subscription = mock(SubscriptionService.class);
+			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
 			security.when(SecurityUtils::isAdministrator).thenReturn(true);
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			var document = mock(VersionedXmlDoc.class); when(document.toXML()).thenReturn("audit");
 			xml.when(() -> VersionedXmlDoc.fromBean(any())).thenReturn(document);
 			var defaults = resource.getProjectDefaults();
@@ -286,9 +291,11 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 		var userResource = new UserAuthorizationResource(users, audit);
 		var groupResource = new GroupAuthorizationResource(groups, audit);
 		var baseResource = new BaseAuthorizationResource(bases, audit);
-		try (var security = mockStatic(SecurityUtils.class); var wicket = mockStatic(WicketUtils.class)) {
+		try (var security = mockStatic(SecurityUtils.class); var oneDev = mockStatic(OneDev.class)) {
+			var subscription = mock(SubscriptionService.class);
+			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
 			security.when(() -> SecurityUtils.canManageProject(project)).thenReturn(true);
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			assertThrows(UnauthorizedException.class, () -> userResource.createAuthorization(userAuth));
 			assertThrows(UnauthorizedException.class, () -> groupResource.createAuthorization(groupAuth));
 			assertThrows(UnauthorizedException.class, () -> baseResource.createAuthorization(baseAuth));
@@ -316,9 +323,11 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 		inject(resource, "projectService", projects);
 		var transactions = mock(TransactionService.class);
 		inject(resource, "transactionService", transactions);
-		try (var security = mockStatic(SecurityUtils.class); var wicket = mockStatic(WicketUtils.class)) {
+		try (var security = mockStatic(SecurityUtils.class); var oneDev = mockStatic(OneDev.class)) {
+			var subscription = mock(SubscriptionService.class);
+			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
 			security.when(SecurityUtils::isAdministrator).thenReturn(true);
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			var defaults = new ProjectDefaults(); defaults.setCodeIndexingSetting(null);
 			assertThrows(ExplicitException.class, () -> resource.setProjectDefaults(defaults));
 			var nullElements = new ProjectDefaults();
@@ -350,9 +359,11 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 		var projects = mock(ProjectService.class); when(projects.load(Project.DEFAULT_ID)).thenReturn(project);
 		var resource = new SettingResource(mock(SettingService.class), mock(AuditService.class), validator);
 		inject(resource, "projectService", projects);
-		try (var security = mockStatic(SecurityUtils.class); var wicket = mockStatic(WicketUtils.class)) {
+		try (var security = mockStatic(SecurityUtils.class); var oneDev = mockStatic(OneDev.class)) {
+			var subscription = mock(SubscriptionService.class);
+			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
 			security.when(SecurityUtils::isAdministrator).thenReturn(true);
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			assertSame(project.getUserAuthorizations(), resource.getProjectDefaultUserAuthorizations());
 			assertSame(project.getGroupAuthorizations(), resource.getProjectDefaultGroupAuthorizations());
 			assertSame(project.getBaseAuthorizations(), resource.getProjectDefaultBaseAuthorizations());

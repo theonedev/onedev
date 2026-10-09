@@ -9,6 +9,8 @@ import org.jspecify.annotations.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.persistence.dao.MatchMode;
 import io.onedev.server.persistence.dao.Order;
 import io.onedev.server.persistence.dao.Restrictions;
@@ -36,7 +38,6 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.util.facade.GroupCache;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class DefaultGroupService extends BaseEntityService<Group> implements GroupService {
@@ -80,7 +81,7 @@ public class DefaultGroupService extends BaseEntityService<Group> implements Gro
 		Preconditions.checkState(!group.isNew());
 		if (oldName != null && !oldName.equals(group.getName())) {
 			var projects = new ArrayList<>(projectService.query());
-			if (WicketUtils.isSubscriptionActive())
+			if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 				projects.add(projectService.load(Project.DEFAULT_ID));
 			for (Project project: projects) {
 				try {
@@ -104,7 +105,7 @@ public class DefaultGroupService extends BaseEntityService<Group> implements Gro
 	public void delete(Group group) {
     	Usage usage = new Usage();
 		var projects = new ArrayList<>(projectService.query());
-		if (WicketUtils.isSubscriptionActive())
+		if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			projects.add(projectService.load(Project.DEFAULT_ID));
 		for (Project project: projects) {
 			try {

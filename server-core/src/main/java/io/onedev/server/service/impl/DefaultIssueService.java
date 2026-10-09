@@ -38,6 +38,8 @@ import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.persistence.dao.Order;
 import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
@@ -131,7 +133,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class DefaultIssueService extends BaseEntityService<Issue> implements IssueService, Serializable {
@@ -566,7 +567,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	
 	private List<Project> getProjectsForWorkflowReconciliation() {
 		var projects = new ArrayList<>(projectService.query());
-		if (WicketUtils.isSubscriptionActive())
+		if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			projects.add(projectService.load(Project.DEFAULT_ID));
 		return projects;
 	}

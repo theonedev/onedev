@@ -32,6 +32,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.persistence.dao.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -89,7 +91,6 @@ import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class DefaultUserService extends BaseEntityService<User> implements UserService, Serializable {
@@ -187,7 +188,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
     	if (oldName != null && !oldName.equals(user.getName())) {
 			var projects = new ArrayList<>(projectService.query());
-			if (WicketUtils.isSubscriptionActive())
+			if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 				projects.add(projectService.load(Project.DEFAULT_ID));
 			for (Project project: projects) {
 				try {
@@ -356,7 +357,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	private void checkUsage(User user) {
     	Usage usage = new Usage();
 		var projects = new ArrayList<>(projectService.query());
-		if (WicketUtils.isSubscriptionActive())
+		if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			projects.add(projectService.load(Project.DEFAULT_ID));
 		for (Project project: projects) {
 			try {

@@ -4,11 +4,12 @@ import jakarta.ws.rs.NotFoundException;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.exception.NoSubscriptionException;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.ProjectService;
-import io.onedev.server.web.util.WicketUtils;
 
 public class RestProjectUtils {
 
@@ -25,7 +26,7 @@ public class RestProjectUtils {
 	public static void checkProjectDefaultsPermission() {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		if (!WicketUtils.isSubscriptionActive())
+		if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			throw new NoSubscriptionException("Project defaults");
 	}
 

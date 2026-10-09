@@ -5,10 +5,11 @@ import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.ProjectAiSetting;
 import io.onedev.server.model.support.code.GitPackConfig;
-import io.onedev.server.web.util.WicketUtils;
 
 public class EditableUtilsTest {
 
@@ -23,7 +24,9 @@ public class EditableUtilsTest {
 		var defaults = new Project();
 		defaults.setId(Project.DEFAULT_ID);
 
-		try (var projects = mockStatic(Project.class); var wicket = mockStatic(WicketUtils.class)) {
+		try (var projects = mockStatic(Project.class); var oneDev = mockStatic(OneDev.class)) {
+			var subscription = mock(SubscriptionService.class);
+			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
 			var baseDescription = EditableUtils.getDescription(property);
 			assertFalse(baseDescription.contains("Leave empty"));
 
@@ -32,7 +35,7 @@ public class EditableUtilsTest {
 
 			projects.when(Project::get).thenReturn(root);
 			assertEquals(baseDescription, EditableUtils.getDescription(property));
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			assertTrue(EditableUtils.getDescription(property).contains(
 					"<a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>default setting</a>"));
 

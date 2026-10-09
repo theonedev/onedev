@@ -42,6 +42,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
@@ -90,7 +91,6 @@ import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.simple.SimplePage;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.websocket.AiToolExecution;
 import io.onedev.server.web.websocket.ObservablesChanged;
 import io.onedev.server.web.websocket.WebSocketService;
@@ -541,7 +541,7 @@ public abstract class BasePage extends WebPage {
 
 	protected Collection<String> getCssClasses() {
 		var cssClasses = new HashSet<String>();
-		if (WicketUtils.isSubscriptionActive())
+		if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			cssClasses.add("enterprise-edition");
 		else
 			cssClasses.add("community-edition");
@@ -553,7 +553,7 @@ public abstract class BasePage extends WebPage {
 	}
 
 	public boolean isSubscriptionActive() {
-		return WicketUtils.isSubscriptionActive();
+		return OneDev.getInstance(SubscriptionService.class).isSubscriptionActive();
 	}
 	
 	public void removeAutosaveKey(String autosaveKey) {

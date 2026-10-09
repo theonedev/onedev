@@ -75,6 +75,7 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
@@ -107,7 +108,6 @@ import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
-import io.onedev.server.web.util.WicketUtils;
 
 public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
@@ -180,7 +180,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								candidates.remove(NAME_STATE);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
 								candidates.put(field.getName(), null);
-							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
+							if (project != null && !project.isTimeTracking() || !OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 								candidates.remove(NAME_ESTIMATED_TIME);
 								candidates.remove(NAME_SPENT_TIME);
 								candidates.remove(NAME_PROGRESS);
@@ -193,7 +193,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								candidates.remove(NAME_BOARD_POSITION);
 							if (getProject() != null)
 								candidates.remove(Issue.NAME_PROJECT);
-							if (project != null && !project.isTimeTracking() || !WicketUtils.isSubscriptionActive()) {
+							if (project != null && !project.isTimeTracking() || !OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 								candidates.remove(NAME_ESTIMATED_TIME);
 								candidates.remove(NAME_SPENT_TIME);
 								candidates.remove(NAME_PROGRESS);

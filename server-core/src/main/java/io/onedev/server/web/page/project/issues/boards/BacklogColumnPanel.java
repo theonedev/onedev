@@ -28,6 +28,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -44,7 +46,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.util.WicketUtils;
 
 abstract class BacklogColumnPanel extends AbstractColumnPanel {
 
@@ -126,7 +127,7 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 		add(addToIterationLink = newAddToIterationLink("addToIteration"));
 
 		if (getQuery() != null && getProject().isTimeTracking() 
-				&& WicketUtils.isSubscriptionActive() 
+				&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
 				&& SecurityUtils.canAccessTimeTracking(getProject())) {
 			add(new DropdownLink("showProgress") {
 				@Override

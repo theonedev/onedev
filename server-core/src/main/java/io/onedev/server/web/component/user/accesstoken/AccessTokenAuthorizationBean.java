@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Size;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.annotation.RoleChoice;
@@ -23,7 +24,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.HierarchicalContext;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.UserAware;
 
 @Editable
@@ -49,7 +49,7 @@ public class AccessTokenAuthorizationBean implements Serializable {
 	@SuppressWarnings("unused")
 	private static String getProjectDescription() {
 		var user = HierarchicalContext.get().findData(UserAware.class).getUser();
-		if (SecurityUtils.isAdministrator(user.asSubject()) && WicketUtils.isSubscriptionActive())
+		if (SecurityUtils.isAdministrator(user.asSubject()) && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			return _T("Select <code>~default</code> to apply the selected roles to all projects, including projects created later");
 		else
 			return "";
@@ -60,7 +60,7 @@ public class AccessTokenAuthorizationBean implements Serializable {
 		var user = HierarchicalContext.get().findData(UserAware.class).getUser();
 		var projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(user.asSubject(), new ManageProject()));
 		projects.sort(comparing(Project::getPath));
-		if (SecurityUtils.isAdministrator(user.asSubject()) && WicketUtils.isSubscriptionActive())
+		if (SecurityUtils.isAdministrator(user.asSubject()) && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			projects.add(0, OneDev.getInstance(ProjectService.class).load(Project.DEFAULT_ID));
 		return projects;
 	}
@@ -71,7 +71,7 @@ public class AccessTokenAuthorizationBean implements Serializable {
 		if (Project.DEFAULT_NAME.equals(projectPath)) {
 			if (!SecurityUtils.isAdministrator(owner.asSubject()))
 				throw new UnauthorizedException();
-			if (!WicketUtils.isSubscriptionActive())
+			if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 				throw new NoSubscriptionException("Project defaults");
 			project = projectService.load(Project.DEFAULT_ID);
 		} else {

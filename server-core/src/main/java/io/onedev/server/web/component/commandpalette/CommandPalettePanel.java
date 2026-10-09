@@ -6,6 +6,7 @@ import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ReflectionUtils;
@@ -21,7 +22,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
-import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -63,6 +63,7 @@ public abstract class CommandPalettePanel extends Panel {
 
 	private static final PatternSet eeUrlPatterns = PatternSet.parse("" +
 			"~dashboards/** ~code-search/** ~administration/settings/storage-setting " +
+			"~administration/project-defaults/** " +
 			"~administration/cluster ~administration/audits ~administration/settings/time-tracking ${project}/~timesheets " +
 			"${project}/~stats/pull-request/duration ${project}/~stats/pull-request/frequency ${project}/~stats/build/duration " + 
 			"${project}/~stats/build/frequency ${project}/~stats/issue/state-frequency ${project}/~stats/issue/state-duration " + 
@@ -194,7 +195,7 @@ public abstract class CommandPalettePanel extends Panel {
 		var matcher = new PathMatcher();
 		if (getPage() instanceof ProjectPage && ((ProjectPage) getPage()).getProject().getId() > 0) {
 			for (String[] url: availableUrls) {
-				if (WicketUtils.isSubscriptionActive() 
+				if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
 						|| !eeUrlPatterns.matches(matcher, Joiner.on("/").join(url))) {
 					try {
 						if (url.length > 1 && url[0].equals("${project}")) {
@@ -208,7 +209,7 @@ public abstract class CommandPalettePanel extends Panel {
 			}
 		}
 		for (String[] url: availableUrls) {
-			if (WicketUtils.isSubscriptionActive()
+			if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
 					|| !eeUrlPatterns.matches(matcher, Joiner.on("/").join(url))) {
 				boolean applicable = false;
 				if (SecurityUtils.isAdministrator()) {

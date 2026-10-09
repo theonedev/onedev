@@ -16,9 +16,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.service.GroupAuthorizationService;
 import io.onedev.server.service.RoleService;
 import io.onedev.server.model.GroupAuthorization;
@@ -53,7 +53,7 @@ public class GroupAuthorizationsPage extends GroupPage {
 			authorizationsBean.getAuthorizations().add(authorizationBean);
 		}
 		oldAuditContent = VersionedXmlDoc.fromBean(authorizationsBean).toXML();
-		if (!WicketUtils.isSubscriptionActive())
+		if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			authorizationsBean.getAuthorizations().removeIf(it -> Project.DEFAULT_NAME.equals(it.getProjectPath()));
 
 		Form<?> form = new Form<Void>("form") {

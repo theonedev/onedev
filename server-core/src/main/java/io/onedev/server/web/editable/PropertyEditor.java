@@ -22,10 +22,11 @@ import org.apache.wicket.validation.INullAcceptingValidator;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.loader.AppLoader;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.util.ComponentHierarchical;
 import io.onedev.server.util.HierarchicalContext;
-import io.onedev.server.web.util.WicketUtils;
 
 public abstract class PropertyEditor<T> extends ValueEditor<T> {
 
@@ -74,7 +75,7 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 			
 		}));
 		
-		if (descriptor.isSubscriptionRequired() && !WicketUtils.isSubscriptionActive())
+		if (descriptor.isSubscriptionRequired() && !OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			add(AttributeAppender.append("class", "disabled"));
 		setOutputMarkupId(true);
 	}

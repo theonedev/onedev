@@ -17,6 +17,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Stopwatch;
 import io.onedev.server.security.SecurityUtils;
@@ -25,7 +26,6 @@ import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.CompletionRateBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.util.WicketUtils;
 
 public abstract class IssueProgressPanel extends Panel {
 
@@ -147,7 +147,7 @@ public abstract class IssueProgressPanel extends Panel {
 	protected void onConfigure() {
 		super.onConfigure();
 		setVisible(getIssue().getProject().isTimeTracking() 
-				&& WicketUtils.isSubscriptionActive() 
+				&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
 				&& SecurityUtils.canAccessTimeTracking(getIssue().getProject()));
 	}
 

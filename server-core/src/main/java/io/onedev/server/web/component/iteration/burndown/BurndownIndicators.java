@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.web.util.WicketUtils;
 
 public class BurndownIndicators {
 
@@ -28,7 +28,7 @@ public class BurndownIndicators {
 	
 	public static List<String> getChoices(Project project) {
 		var choices = new ArrayList<String>();
-		if (project.isTimeTracking() && WicketUtils.isSubscriptionActive()) {
+		if (project.isTimeTracking() && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 			choices.add(REMAINING_TIME);
 			choices.add(ESTIMATED_TIME);
 		}
@@ -42,7 +42,7 @@ public class BurndownIndicators {
 	}
 
 	public static String getDefault(Project project) {
-		if (project.isTimeTracking() && WicketUtils.isSubscriptionActive())
+		if (project.isTimeTracking() && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			return REMAINING_TIME;
 		else
 			return ISSUE_COUNT;

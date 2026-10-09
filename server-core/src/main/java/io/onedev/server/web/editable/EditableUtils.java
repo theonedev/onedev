@@ -10,6 +10,7 @@ import org.apache.wicket.Session;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.WorkingPeriod;
@@ -19,7 +20,6 @@ import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.interpolative.VariableInterpolator;
-import io.onedev.server.web.util.WicketUtils;
 
 public class EditableUtils {
 	
@@ -115,7 +115,7 @@ public class EditableUtils {
 			if (project != null && !Project.DEFAULT_ID.equals(project.getId())) {
 				if (project.getParent() != null) {
 					inheritanceDescription = _T("Leave empty to inherit from the parent project.");
-				} else if (WicketUtils.isSubscriptionActive()) {
+				} else if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 					inheritanceDescription = _T("Leave empty to use the <a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>default setting</a>.");
 				}
 			}
@@ -174,7 +174,7 @@ public class EditableUtils {
 		Project project = Project.get();
 		if (project != null && project.getParent() == null) {
 			if ((editable.topPlaceholder().length() != 0 || editable.topPlaceholderProvider().length() != 0)
-					&& !Project.DEFAULT_ID.equals(project.getId()) && WicketUtils.isSubscriptionActive()) {
+					&& !Project.DEFAULT_ID.equals(project.getId()) && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 				return _T("Use default setting");
 			}
 			String placeholder = editable.topPlaceholder();

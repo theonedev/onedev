@@ -24,6 +24,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -44,7 +46,6 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Named;
 import io.onedev.server.util.xstream.ObjectMap;
-import io.onedev.server.web.util.WicketUtils;
 
 public class BeanEditor extends ValueEditor<Serializable> {
 	
@@ -313,7 +314,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		add(AttributeAppender.append("class", "bean-editor editable"));
 		
 		if (descriptor.getBeanClass().getAnnotation(SubscriptionRequired.class) != null 
-				&& !WicketUtils.isSubscriptionActive()) {
+				&& !OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 			add(AttributeAppender.append("class", "disabled"));
 		}
 		setOutputMarkupId(true);

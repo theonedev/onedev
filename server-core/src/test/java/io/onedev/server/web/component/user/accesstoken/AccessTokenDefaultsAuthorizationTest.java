@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.exception.NoSubscriptionException;
 import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.AccessToken;
@@ -31,13 +32,12 @@ import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.util.UserAware;
-import io.onedev.server.web.util.WicketUtils;
 
 class AccessTokenDefaultsAuthorizationTest {
 
 	private MockedStatic<OneDev> oneDev;
 	private MockedStatic<SecurityUtils> security;
-	private MockedStatic<WicketUtils> wicket;
+	private SubscriptionService subscription;
 	private ProjectService projects;
 	private Project defaults;
 	private Project ordinary;
@@ -48,7 +48,8 @@ class AccessTokenDefaultsAuthorizationTest {
 	void setUp() {
 		oneDev = mockStatic(OneDev.class);
 		security = mockStatic(SecurityUtils.class);
-		wicket = mockStatic(WicketUtils.class);
+		subscription = mock(SubscriptionService.class);
+		oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
 		projects = mock(ProjectService.class);
 		oneDev.when(() -> OneDev.getInstance(ProjectService.class)).thenReturn(projects);
 		defaults = new Project();
@@ -70,7 +71,6 @@ class AccessTokenDefaultsAuthorizationTest {
 
 	@AfterEach
 	void tearDown() {
-		wicket.close();
 		security.close();
 		oneDev.close();
 	}
@@ -85,7 +85,7 @@ class AccessTokenDefaultsAuthorizationTest {
 				.thenReturn(List.of(ordinary));
 		HierarchicalContext.push(context);
 		try {
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			security.when(SecurityUtils::isAdministrator).thenReturn(true);
 			assertEquals(List.of(ordinary), choices());
 			assertEquals("", description());
@@ -96,10 +96,10 @@ class AccessTokenDefaultsAuthorizationTest {
 			security.when(SecurityUtils::isAdministrator).thenReturn(false);
 			assertEquals(List.of(defaults, ordinary), choices());
 			assertTrue(description().contains("~default"));
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(false);
+			when(subscription.isSubscriptionActive()).thenReturn(false);
 			assertEquals(List.of(ordinary), choices());
 			assertEquals("", description());
-			wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+			when(subscription.isSubscriptionActive()).thenReturn(true);
 			assertEquals(List.of(defaults, ordinary), choices());
 			assertTrue(description().contains("~default"));
 		} finally {
@@ -119,22 +119,22 @@ class AccessTokenDefaultsAuthorizationTest {
 	void resolvingDefaultChoiceUsesCurrentSubscriptionAndChecksOwnerPermission() {
 		var bean = new AccessTokenAuthorizationBean();
 		bean.setProjectPath(Project.DEFAULT_NAME);
-		wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+		when(subscription.isSubscriptionActive()).thenReturn(true);
 		security.when(SecurityUtils::isAdministrator).thenReturn(true);
 		assertThrows(UnauthorizedException.class, () -> bean.resolveProject(owner));
 		verify(projects, never()).load(Project.DEFAULT_ID);
 		security.when(() -> SecurityUtils.isAdministrator(ownerSubject)).thenReturn(true);
 		assertSame(defaults, bean.resolveProject(owner));
 		verify(projects, never()).findByPath(Project.DEFAULT_NAME);
-		wicket.when(WicketUtils::isSubscriptionActive).thenReturn(false);
+		when(subscription.isSubscriptionActive()).thenReturn(false);
 		assertThrows(NoSubscriptionException.class, () -> bean.resolveProject(owner));
-		wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+		when(subscription.isSubscriptionActive()).thenReturn(true);
 		assertSame(defaults, bean.resolveProject(owner));
 		security.when(() -> SecurityUtils.canManageProject(ownerSubject, defaults)).thenReturn(false);
 		assertThrows(UnauthorizedException.class, () -> bean.resolveProject(owner));
 
 		security.when(SecurityUtils::isAdministrator).thenReturn(false);
-		wicket.when(WicketUtils::isSubscriptionActive).thenReturn(false);
+		when(subscription.isSubscriptionActive()).thenReturn(false);
 		bean.setProjectPath("ordinary");
 		assertSame(ordinary, bean.resolveProject(owner));
 		security.when(() -> SecurityUtils.canManageProject(ownerSubject, ordinary)).thenReturn(false);
@@ -151,7 +151,7 @@ class AccessTokenDefaultsAuthorizationTest {
 		authorization.setId(5L);
 		authorization.setToken(token);
 		authorization.setProject(defaults);
-		wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+		when(subscription.isSubscriptionActive()).thenReturn(true);
 		assertThrows(UnauthorizedException.class, () -> resource.createAuthorization(authorization));
 		assertThrows(UnauthorizedException.class, () -> resource.updateAuthorization(5L, authorization));
 		verifyNoInteractions(service);
@@ -166,10 +166,10 @@ class AccessTokenDefaultsAuthorizationTest {
 		verify(service, times(2)).createOrUpdate(authorization);
 		clearInvocations(service);
 
-		wicket.when(WicketUtils::isSubscriptionActive).thenReturn(false);
+		when(subscription.isSubscriptionActive()).thenReturn(false);
 		assertThrows(NoSubscriptionException.class, () -> resource.createAuthorization(authorization));
 		assertThrows(NoSubscriptionException.class, () -> resource.updateAuthorization(5L, authorization));
-		wicket.when(WicketUtils::isSubscriptionActive).thenReturn(true);
+		when(subscription.isSubscriptionActive()).thenReturn(true);
 		security.when(() -> SecurityUtils.canManageProject(ownerSubject, defaults)).thenReturn(false);
 		assertThrows(BadRequestException.class, () -> resource.createAuthorization(authorization));
 		assertThrows(NotAcceptableException.class, () -> resource.updateAuthorization(5L, authorization));

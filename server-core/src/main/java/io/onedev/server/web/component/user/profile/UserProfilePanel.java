@@ -32,6 +32,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
 
@@ -92,7 +93,6 @@ import io.onedev.server.web.component.user.profile.activity.UserActivity;
 import io.onedev.server.web.page.user.password.UserPasswordPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.TextUtils;
-import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.xodus.CommitInfoService;
 
 public abstract class UserProfilePanel extends GenericPanel<User> {
@@ -317,7 +317,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.isAdministrator() && getUser().isDisabled() && WicketUtils.isSubscriptionActive());
+				setVisible(SecurityUtils.isAdministrator() && getUser().isDisabled() && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive());
 			}
 
 		}.add(new ConfirmClickModifier(_T("Do you really want to enable this account?"))));
@@ -338,7 +338,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 				setVisible(SecurityUtils.isAdministrator() 
                         && !getUser().equals(SecurityUtils.getAuthUser()) 
                         && !getUser().isDisabled() 
-                        && WicketUtils.isSubscriptionActive());
+                        && OneDev.getInstance(SubscriptionService.class).isSubscriptionActive());
 			}
 
 		}.add(new ConfirmClickModifier(_T("Disabling account will reset password, clear access tokens, "

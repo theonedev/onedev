@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.DnsName;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.job.JobContext;
@@ -16,7 +17,6 @@ import io.onedev.server.job.JobService;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.util.WicketUtils;
 
 @ExtensionPoint
 @Editable
@@ -78,7 +78,7 @@ public abstract class JobExecutor implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static boolean isSubscriptionActive() {
-		return WicketUtils.isSubscriptionActive();
+		return OneDev.getInstance(SubscriptionService.class).isSubscriptionActive();
 	}
 
 	/**
