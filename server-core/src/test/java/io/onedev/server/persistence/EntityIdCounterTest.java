@@ -479,6 +479,80 @@ public class EntityIdCounterTest {
     }
 
     @Test
+    public void startupCreatesCounterForEmptyNewModel() throws Exception {
+        checkMissingCounter(false);
+    }
+
+    @Test
+    public void startupCreatesCounterForPopulatedNewModel() throws Exception {
+        checkMissingCounter(true);
+    }
+
+    private void checkMissingCounter(boolean populated) throws Exception {
+        long savedCounterId = initialCounterRows + 50;
+        try (var stmt = connection.createStatement()) {
+            stmt.executeUpdate("delete from o_EntityIdCounter where o_entityName='" + ModelVersion.class.getName() + "'");
+            stmt.executeUpdate("update o_EntityIdCounter set o_maxId=" + savedCounterId
+                    + " where o_entityName='" + EntityIdCounter.class.getName() + "'");
+            if (!populated)
+                stmt.executeUpdate("delete from o_ModelVersion");
+        }
+        member.getMap("clusterAtomicLongs").clear();
+        var restarted = new DefaultIdService(data, cluster, factories);
+        restarted.init();
+        install(restarted);
+        long expectedMax = populated ? 7 : 0;
+        assertEquals(expectedMax, getPersistedMaxId(ModelVersion.class));
+        assertEquals(savedCounterId + 1, getPersistedMaxId(EntityIdCounter.class));
+        assertEquals(savedCounterId + 1, scalar("select o_id from o_EntityIdCounter where o_entityName='"
+                + ModelVersion.class.getName() + "'"));
+        assertEquals(initialCounterRows, scalar("select count(*) from o_EntityIdCounter"));
+
+        var joining = new DefaultIdService(data, cluster, factories);
+        joining.init();
+        try (var session = factory.openSession()) {
+            var tx = session.beginTransaction();
+            var entity = new ModelVersion();
+            session.persist(entity);
+            assertEquals(expectedMax + 1, entity.getId());
+            assertEquals(expectedMax + 2, joining.nextId(session, ModelVersion.class));
+            var counter = new EntityIdCounter();
+            counter.setEntityName("new-counter");
+            session.persist(counter);
+            assertEquals(savedCounterId + 2, counter.getId());
+            tx.commit();
+        }
+        assertEquals(expectedMax + 2, getPersistedMaxId(ModelVersion.class));
+        assertEquals(savedCounterId + 2, getPersistedMaxId(EntityIdCounter.class));
+        member.getMap("clusterAtomicLongs").clear();
+        new DefaultIdService(data, cluster, factories).init();
+        assertEquals(expectedMax + 2, getPersistedMaxId(ModelVersion.class));
+        assertEquals(initialCounterRows + 1, scalar("select count(*) from o_EntityIdCounter"));
+    }
+
+    @Test
+    public void startupRollsBackNewCountersIfTheirHighWaterMarkCannotBeSaved() throws Exception {
+        try (var stmt = connection.createStatement()) {
+            stmt.executeUpdate("delete from o_EntityIdCounter where o_entityName='" + ModelVersion.class.getName() + "'");
+            stmt.executeUpdate("alter table o_EntityIdCounter add constraint max_id_limit check (o_maxId <= "
+                    + initialCounterRows + ")");
+        }
+        member.getMap("clusterAtomicLongs").clear();
+        var restarted = new DefaultIdService(data, cluster, factories);
+        assertThrows(RuntimeException.class, restarted::init);
+        assertEquals(initialCounterRows, getPersistedMaxId(EntityIdCounter.class));
+        assertEquals(0, scalar("select count(*) from o_EntityIdCounter where o_entityName='"
+                + ModelVersion.class.getName() + "'"));
+        assertEquals(0, cluster.getAtomicLong(EntityIdCounter.class.getName()).get());
+        try (var stmt = connection.createStatement()) {
+            stmt.executeUpdate("alter table o_EntityIdCounter drop constraint max_id_limit");
+        }
+        restarted.init();
+        assertEquals(7, getPersistedMaxId(ModelVersion.class));
+        assertEquals(initialCounterRows + 1, getPersistedMaxId(EntityIdCounter.class));
+    }
+
+    @Test
     public void concurrentTransactionsAcquireCounterLocksInTheSameOrder() throws Exception {
         firstUpdated = new CountDownLatch(1);
         releaseFirst = new CountDownLatch(1);
