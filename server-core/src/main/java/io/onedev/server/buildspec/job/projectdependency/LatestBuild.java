@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
@@ -23,7 +25,7 @@ public class LatestBuild implements BuildProvider {
 	
 	private String jobName;
 	
-	private String refName;
+	private RefNameProvider refNameProvider;
 	
 	@Editable(order=100)
 	@ChoiceProvider(value = "getJobChoices", tagsMode = true)
@@ -36,14 +38,14 @@ public class LatestBuild implements BuildProvider {
 		this.jobName = jobName;
 	}
 
-	@Editable(name="Ref Name", order=200, placeholder="Any ref", description="Optionally specify ref of above job, "
-			+ "for instance <i>refs/heads/main</i>. Use * for wildcard match")
-	public String getRefName() {
-		return refName;
+	@Editable(name="Branch/Tag", order=200, placeholder="Any branch/tag", description="Optionally restrict above job to a branch or tag")
+	@Nullable
+	public RefNameProvider getRefNameProvider() {
+		return refNameProvider;
 	}
 
-	public void setRefName(String refName) {
-		this.refName = refName;
+	public void setRefNameProvider(@Nullable RefNameProvider refNameProvider) {
+		this.refNameProvider = refNameProvider;
 	}
 
 	@SuppressWarnings("unused")
@@ -59,13 +61,16 @@ public class LatestBuild implements BuildProvider {
 	
 	@Override
 	public Build getBuild(Project project) {
-		return OneDev.getInstance(BuildService.class).findLatest(project, jobName, refName);
+		return OneDev.getInstance(BuildService.class).findLatest(project, jobName,
+				refNameProvider != null ? refNameProvider.getRefName() : null);
 	}
 
 	@Override
 	public String getDescription() {
-		if (refName != null)
-			return "Latest of job '" + jobName + "' on ref '" + refName + "'";
+		if (refNameProvider instanceof BranchProvider branchProvider)
+			return "Latest of job '" + jobName + "' on branch '" + branchProvider.getBranchPattern() + "'";
+		else if (refNameProvider instanceof TagProvider tagProvider)
+			return "Latest of job '" + jobName + "' on tag '" + tagProvider.getTagPattern() + "'";
 		else
 			return "Latest of job '" + jobName + "'";
 	}

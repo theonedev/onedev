@@ -27,6 +27,10 @@ import io.onedev.commons.loader.AppLoaderMocker;
 import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.projectdependency.BranchProvider;
+import io.onedev.server.buildspec.job.projectdependency.LatestBuild;
+import io.onedev.server.buildspec.job.projectdependency.SpecifiedBuild;
+import io.onedev.server.buildspec.job.projectdependency.TagProvider;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.commandinterpreter.PosixInterpreter;
 
@@ -38,7 +42,8 @@ public class SnakeYamlCustomizationTest extends AppLoaderMocker {
             @Override
             public <T> Collection<Class<? extends T>> getImplementations(Class<T> type) {
                 var implementations = new ArrayList<Class<? extends T>>();
-                for (var candidate : List.of(Command.class, CommandStep.class, PosixInterpreter.class)) {
+                for (var candidate : List.of(Command.class, CommandStep.class, PosixInterpreter.class,
+                        LatestBuild.class, SpecifiedBuild.class, BranchProvider.class, TagProvider.class)) {
                     if (type.isAssignableFrom(candidate))
                         implementations.add(candidate.asSubclass(type));
                 }

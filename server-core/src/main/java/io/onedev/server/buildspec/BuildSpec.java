@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jgit.lib.Constants;
 import org.jspecify.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -2853,6 +2854,67 @@ public class BuildSpec implements Serializable, Validatable {
 				}
 			}
 		});
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate56(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (var specTuple : doc.getValue()) {
+			if (((ScalarNode) specTuple.getKeyNode()).getValue().equals("jobs")) {
+				for (var jobNode : ((SequenceNode) specTuple.getValueNode()).getValue()) {
+					for (var jobTuple : ((MappingNode) jobNode).getValue()) {
+						if (((ScalarNode) jobTuple.getKeyNode()).getValue().equals("projectDependencies")) {
+							for (var dependencyNode : ((SequenceNode) jobTuple.getValueNode()).getValue()) {
+								for (var dependencyTuple : ((MappingNode) dependencyNode).getValue()) {
+									if (((ScalarNode) dependencyTuple.getKeyNode()).getValue().equals("buildProvider")
+											&& dependencyTuple.getValueNode() instanceof MappingNode buildProviderNode) {
+										Node refNameProviderNode = null;
+										for (var it = buildProviderNode.getValue().iterator(); it.hasNext();) {
+											var tuple = it.next();
+											var propertyName = ((ScalarNode) tuple.getKeyNode()).getValue();
+											if (propertyName.equals("type")) {
+												var typeNode = (ScalarNode) tuple.getValueNode();
+												if (typeNode.getValue().equals("LastFinishedBuild"))
+													typeNode.setValue("LatestBuild");
+											} else if (propertyName.equals("refName")) {
+												it.remove();
+												var refNameNode = (ScalarNode) tuple.getValueNode();
+												if (refNameNode.getTag().equals(Tag.NULL))
+													continue;
+												var refName = refNameNode.getValue();
+												String providerType;
+												String patternProperty;
+												String pattern;
+												if (refName.startsWith(Constants.R_HEADS)) {
+													providerType = "BranchProvider";
+													patternProperty = "branchPattern";
+													pattern = refName.substring(Constants.R_HEADS.length());
+												} else if (refName.startsWith(Constants.R_TAGS)) {
+													providerType = "TagProvider";
+													patternProperty = "tagPattern";
+													pattern = refName.substring(Constants.R_TAGS.length());
+												} else {
+													continue;
+												}
+												if (!pattern.isEmpty()) {
+													List<NodeTuple> providerTuples = new ArrayList<>();
+													providerTuples.add(new NodeTuple(new ScalarNode(Tag.STR, "type"), new ScalarNode(Tag.STR, providerType)));
+													providerTuples.add(new NodeTuple(new ScalarNode(Tag.STR, patternProperty), new ScalarNode(Tag.STR, pattern)));
+													refNameProviderNode = new MappingNode(Tag.MAP, providerTuples, FlowStyle.BLOCK);
+												}
+											}
+										}
+										if (refNameProviderNode != null) {
+											buildProviderNode.getValue().add(new NodeTuple(
+													new ScalarNode(Tag.STR, "refNameProvider"), refNameProviderNode));
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 }
