@@ -1,72 +1,12 @@
 package io.onedev.server.job;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.onedev.commons.utils.ExceptionUtils.find;
-import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
-import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
-import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
-import static org.eclipse.jgit.lib.Constants.R_HEADS;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-
-import org.apache.shiro.subject.Subject;
-import org.eclipse.jgit.lib.ObjectId;
-import org.joda.time.DateTime;
-import org.jspecify.annotations.Nullable;
-import org.quartz.CronExpression;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.hazelcast.map.IMap;
-
 import io.onedev.agent.job.JobUtils;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TarUtils;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.Action;
-import io.onedev.k8shelper.CheckoutFacade;
-import io.onedev.k8shelper.CompositeFacade;
-import io.onedev.k8shelper.JobHelper;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.k8shelper.LeafFacade;
-import io.onedev.k8shelper.LeafVisitor;
-import io.onedev.k8shelper.ServerSideFacade;
-import io.onedev.k8shelper.ServerStepResult;
-import io.onedev.k8shelper.ServiceFacade;
+import io.onedev.commons.utils.*;
+import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Path;
@@ -96,12 +36,7 @@ import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.ScheduledTimeReaches;
-import io.onedev.server.event.project.build.BuildEvent;
-import io.onedev.server.event.project.build.BuildFinished;
-import io.onedev.server.event.project.build.BuildPending;
-import io.onedev.server.event.project.build.BuildRunning;
-import io.onedev.server.event.project.build.BuildSubmitted;
-import io.onedev.server.event.project.build.BuildUpdated;
+import io.onedev.server.event.project.build.*;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
@@ -113,14 +48,8 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.logging.ServerLogger;
 import io.onedev.server.logging.build.BuildLogService;
-import io.onedev.server.model.Build;
+import io.onedev.server.model.*;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.BuildDependence;
-import io.onedev.server.model.BuildParam;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.build.StepExecution;
@@ -133,14 +62,7 @@ import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.service.AgentService;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
+import io.onedev.server.service.*;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.terminal.Shell;
@@ -165,6 +87,28 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import nl.altindag.ssl.SSLFactory;
+import org.apache.shiro.subject.Subject;
+import org.eclipse.jgit.lib.ObjectId;
+import org.joda.time.DateTime;
+import org.jspecify.annotations.Nullable;
+import org.quartz.CronExpression;
+import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.onedev.commons.utils.ExceptionUtils.find;
+import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
+import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 @Singleton
 public class DefaultJobService implements JobService, Runnable, CodePullAuthorizationSource, Serializable {
@@ -267,7 +211,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	
 	private volatile String branchSchedulesTaskId;
 
-	public Object writeReplace() throws ObjectStreamException {
+	@Serial
+    public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(JobService.class);
 	}
 
@@ -290,7 +235,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						Map<String, List<String>> paramMap, String refName, 
 						PullRequest request, Issue issue, String reason) {
 		Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
-		transactionService.mustRunAfterTransaction(() -> lock.unlock());
+		transactionService.mustRunAfterTransaction(lock::unlock);
 
 		JobAuthorizationContext.push(new JobAuthorizationContext(project, commitId, request));
 		try {
@@ -424,8 +369,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 				Build dependencyBuild = dependency.getBuildProvider().getBuild(dependencyProject);
 				if (dependencyBuild == null) {
-					String errorMessage = String.format("Unable to find dependency build in project '"
-							+ dependencyProject.getPath() + "'");
+					String errorMessage = "Unable to find dependency build in project '%s'".formatted(dependencyProject.getPath());
 					throw new ExplicitException(errorMessage);
 				}
 
@@ -828,26 +772,21 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 								Long projectId = event.getProject().getId();
 
 								// run asynchrously as session may get closed due to exception
-								sessionService.runAsyncAfterCommit(new Runnable() {
-
-									@Override
-									public void run() {
-										SecurityUtils.bindAsSystem();
-										var user = SecurityUtils.getUser();
-										Project project = projectService.load(projectId);
-										try {
-											for (var paramMap: paramMaps) {
-												submit(user, project, commitId, job.getName(), paramMap, match.getRefName(), 
-														match.getRequest(), match.getIssue(), match.getReason());
-											}
-										} catch (Throwable e) {
-											String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)",
-													project.getPath(), commitId.name(), job.getName());
-											logException(message, e);
-										}
-									}
-
-								});
+								sessionService.runAsyncAfterCommit(() -> {
+                                    SecurityUtils.bindAsSystem();
+                                    var user = SecurityUtils.getUser();
+                                    Project project = projectService.load(projectId);
+                                    try {
+                                        for (var paramMap: paramMaps) {
+                                            submit(user, project, commitId, job.getName(), paramMap, match.getRefName(),
+                                                    match.getRequest(), match.getIssue(), match.getReason());
+                                        }
+                                    } catch (Throwable e) {
+                                        String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)",
+                                                project.getPath(), commitId.name(), job.getName());
+                                        logException(message, e);
+                                    }
+                                });
 							}
 						}
 					}
@@ -1080,16 +1019,23 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		var buildId = build.getId();
 		var userId = User.idOf(SecurityUtils.getUser());
 		projectService.submitToActiveServer(projectId, () -> {
-			var future = jobFutures.get(buildId);
-			if (future != null) {
-				future.cancel(true);
-				transactionService.run(() -> {
-					Build innerBuild = buildService.load(buildId);
-					innerBuild.setCanceller(userService.load(userId));
+			transactionService.run(() -> {
+				Build innerBuild = buildService.load(buildId);
+				if (!innerBuild.isFinished()) {
+					innerBuild.setCanceller(userId != null ? userService.load(userId) : null);
+					var future = jobFutures.get(buildId);
+					if (future != null) {
+						future.cancel(true);
+					} else {
+						innerBuild.setStatus(Status.CANCELLED);
+						innerBuild.setFinishDate(new Date());
+					}
 					buildService.update(innerBuild);
-				});
-				checkSignal.release();
-			}
+					if (future == null)
+						listenerRegistry.post(new BuildFinished(innerBuild));
+				}
+			});
+			checkSignal.release();
 			return null;
 		});
 	}
@@ -1146,22 +1092,20 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	
 	@Listen
 	public void on(SystemStarted event) {
-		workExecutionService.submit(CACHE_SCHEDULE_PRIORITY, () -> {
-			sessionService.run(() -> {
-				for (var projectId : projectService.getActiveIds()) {
-					var project = projectService.load(projectId);
-					var repository = projectService.getRepository(projectId);
-					try {
-						for (var ref : repository.getRefDatabase().getRefsByPrefix(R_HEADS)) {
-							var branch = GitUtils.ref2branch(ref.getName());
-							cacheBranchSchedules(project, branch, ref.getObjectId());
-						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}				
-			});
-		});
+		workExecutionService.submit(CACHE_SCHEDULE_PRIORITY, () -> sessionService.run(() -> {
+            for (var projectId : projectService.getActiveIds()) {
+                var project = projectService.load(projectId);
+                var repository = projectService.getRepository(projectId);
+                try {
+                    for (var ref : repository.getRefDatabase().getRefsByPrefix(R_HEADS)) {
+                        var branch = GitUtils.ref2branch(ref.getName());
+                        cacheBranchSchedules(project, branch, ref.getObjectId());
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }));
 		
 		maintenanceTaskId = taskScheduler.schedule(new SchedulableTask() {
 			
@@ -1267,6 +1211,19 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	@Listen
 	public void on(BuildEvent event) {
+		if (event instanceof BuildSubmitted) {
+			var build = event.getBuild();
+			if (build.getStatus() == Status.WAITING) {
+				for (var dependence : build.getDependencies()) {
+					var dependency = dependence.getDependency();
+					if (!dependency.isFinished()) {
+						buildLogService.newLogger(build).log(String.format(
+								"Waiting for dependency build %s (job: %s) to finish...",
+								dependency.getReference().toString(build.getProject()), dependency.getJobName()));
+					}
+				}
+			}
+		}
 		if (event instanceof BuildSubmitted || event instanceof BuildPending || event instanceof BuildFinished) {
 			clusterService.submitToServer(clusterService.getLeaderServerAddress(), () -> {
 				checkSignal.release();
@@ -1414,8 +1371,6 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		Build.push(build);
 		try {
 			JobVariableInterpolator interpolator = new JobVariableInterpolator(build, build.getParamCombination());
-			Map<String, String> placeholderValues = new HashMap<>();
-			placeholderValues.put(BUILD_VERSION, build.getVersion());
 			if (build.getJob() != null) {
 				for (PostBuildAction action : build.getJob().getPostBuildActions()) {
 					action = interpolator.interpolateProperties(action);
@@ -1517,9 +1472,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			build.setWorkDirPath(normalizeFilePath(workDirPath));
 			CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 			entryFacade.traverse((LeafVisitor<Void>) (executable, position) -> {
-				if (executable instanceof CheckoutFacade) {
-					CheckoutFacade checkoutFacade = (CheckoutFacade) executable;
-					var checkoutPath = workDirPath;
+				if (executable instanceof CheckoutFacade checkoutFacade) {
+                    var checkoutPath = workDirPath;
 					if (checkoutFacade.getCheckoutPath() != null)
 						checkoutPath += "/" + checkoutFacade.getCheckoutPath();
 					build.getCheckoutPaths().add(normalizeFilePath(checkoutPath));
@@ -1572,27 +1526,24 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					});
 				} else {
 					String serverUrl = clusterService.getServerUrl(dependencyActiveServer);
-					Client client = ClientBuilder.newClient();
-					try {
-						WebTarget target = client.target(serverUrl).path("~api/cluster/artifacts")
-								.queryParam("projectId", dependency.getProject().getId())
-								.queryParam("buildNumber", dependency.getNumber())
-								.queryParam("artifacts", dependence.getArtifacts());
-						Invocation.Builder builder = target.request();
-						builder.header(HttpHeaders.AUTHORIZATION, KubernetesHelper.BEARER + " "
-								+ clusterService.getCredential());
+                    try (Client client = ClientBuilder.newClient()) {
+                        WebTarget target = client.target(serverUrl).path("~api/cluster/artifacts")
+                                .queryParam("projectId", dependency.getProject().getId())
+                                .queryParam("buildNumber", dependency.getNumber())
+                                .queryParam("artifacts", dependence.getArtifacts());
+                        Invocation.Builder builder = target.request();
+                        builder.header(HttpHeaders.AUTHORIZATION, KubernetesHelper.BEARER + " "
+                                + clusterService.getCredential());
 
-						try (Response response = builder.get()) {
-							KubernetesHelper.checkStatus(response);
-							try (InputStream is = response.readEntity(InputStream.class)) {
-								TarUtils.untar(is, targetDir, false);
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						}
-					} finally {
-						client.close();
-					}
+                        try (Response response = builder.get()) {
+                            KubernetesHelper.checkStatus(response);
+                            try (InputStream is = response.readEntity(InputStream.class)) {
+                                TarUtils.untar(is, targetDir, false);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
 				}
 			}
 		}
@@ -1634,7 +1585,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	
 	private Collection<String> getActiveJobTokens() {
 		var activeJobTokens = new HashSet<String>();
-		for (var value: clusterService.runOnAllServers(() -> jobContexts.keySet()).values()) {
+		for (var value: clusterService.runOnAllServers(jobContexts::keySet).values()) {
 			activeJobTokens.addAll(value);
 		}
 		return activeJobTokens;

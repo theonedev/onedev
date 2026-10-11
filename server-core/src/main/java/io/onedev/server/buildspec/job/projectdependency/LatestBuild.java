@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job.projectdependency;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,17 +15,18 @@ import io.onedev.server.model.Project;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.util.EditContext;
 
-@Editable(order=100, name="Last Finished of Specified Job")
-public class LastFinishedBuild implements BuildProvider {
+@Editable(order=100, name="Latest Build of Specified Job")
+public class LatestBuild implements BuildProvider {
 
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 1L;
 	
 	private String jobName;
 	
 	private String refName;
 	
 	@Editable(order=100)
-	@ChoiceProvider("getJobChoices")
+	@ChoiceProvider(value = "getJobChoices", tagsMode = true)
 	@NotEmpty
 	public String getJobName() {
 		return jobName;
@@ -57,15 +59,15 @@ public class LastFinishedBuild implements BuildProvider {
 	
 	@Override
 	public Build getBuild(Project project) {
-		return OneDev.getInstance(BuildService.class).findLastFinished(project, jobName, refName);
+		return OneDev.getInstance(BuildService.class).findLatest(project, jobName, refName);
 	}
 
 	@Override
 	public String getDescription() {
 		if (refName != null)
-			return "Last finished of job '" + jobName + "' on ref '" + refName + "'";
+			return "Latest of job '" + jobName + "' on ref '" + refName + "'";
 		else
-			return "Last finished of job '" + jobName + "'";
+			return "Latest of job '" + jobName + "'";
 	}
 
 }

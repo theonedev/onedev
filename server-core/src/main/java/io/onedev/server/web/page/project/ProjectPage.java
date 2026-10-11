@@ -420,10 +420,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware, Ch
 			return;
 
 		String description = getProject().getDescription();
-		if(description == null || description.equals("")) {
+		if(StringUtils.isBlank(description))
 			description = getProject().getName();
-		}
-		
+
 		String urlOfProjectImage = getSettingService().getSystemSetting().getServerUrl() +
 				OneDev.getInstance(AvatarService.class).getProjectAvatarUrl(getProject().getId());
 		

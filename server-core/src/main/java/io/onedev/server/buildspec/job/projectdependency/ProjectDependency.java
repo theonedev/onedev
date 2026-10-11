@@ -8,6 +8,7 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Path;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -33,7 +34,7 @@ public class ProjectDependency implements Serializable {
 
 	private String projectPath;
 
-	private BuildProvider buildProvider = new LastFinishedBuild();
+	private BuildProvider buildProvider = new LatestBuild();
 	
 	private String artifacts = "**";
 	
@@ -104,9 +105,9 @@ public class ProjectDependency implements Serializable {
 		this.artifacts = artifacts;
 	}
 	
-	@Editable(order=500, placeholder="Job workdir", description=""
-			+ "Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> "
-			+ "to put retrieved artifacts. Leave empty to use job working directory itself")
+	@Editable(order=500, placeholder="Job workdir", description= """
+            Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> \
+            to put retrieved artifacts. Leave empty to use job working directory itself""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Path(Path.Type.RELATIVE)
 	public String getDestinationPath() {
@@ -138,7 +139,7 @@ public class ProjectDependency implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getAccessTokenSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
-				.stream().map(it->it.getName()).collect(Collectors.toList());
+				.stream().map(JobSecret::getName).collect(Collectors.toList());
 	}
 	
 }
