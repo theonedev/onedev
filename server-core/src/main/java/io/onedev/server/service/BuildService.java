@@ -37,7 +37,7 @@ public interface BuildService extends EntityService<Build> {
     Build find(String uuid);
 	
 	@Nullable
-	Build findLatest(Project project, String jobName, @Nullable String refName);
+	Build findLatest(Project project, String jobName, @Nullable String refNamePattern);
 
 	@Nullable
 	Build findStreamPrevious(Build build, Build.@Nullable Status status);

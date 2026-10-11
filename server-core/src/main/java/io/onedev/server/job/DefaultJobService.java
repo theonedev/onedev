@@ -389,6 +389,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				BuildDependence dependence = new BuildDependence();
 				dependence.setDependency(dependencyBuild);
 				dependence.setDependent(build);
+				dependence.setRequireSuccessful(dependency.isRequireSuccessful());
 				dependence.setArtifacts(dependency.getArtifacts());
 				dependence.setDestinationPath(dependency.getDestinationPath());
 				build.getDependencies().add(dependence);

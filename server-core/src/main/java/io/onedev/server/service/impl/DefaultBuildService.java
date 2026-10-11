@@ -214,13 +214,13 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	
 	@Sessional
 	@Override
-	public Build findLatest(Project project, String jobName, @Nullable String refName) {
+	public Build findLatest(Project project, String jobName, @Nullable String refNamePattern) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq(Build.PROP_PROJECT, project));
 		criteria.add(Restrictions.eq(Build.PROP_JOB_NAME, jobName));
-		if (refName != null) {
-			refName = refName.replace("*", "%");
-			criteria.add(Restrictions.ilike(Build.PROP_REF_NAME, refName));
+		if (refNamePattern != null) {
+			refNamePattern = refNamePattern.replace("*", "%");
+			criteria.add(Restrictions.ilike(Build.PROP_REF_NAME, refNamePattern));
 		}
 		criteria.addOrder(Order.desc(Build.PROP_NUMBER));
 		criteria.setCacheable(true);

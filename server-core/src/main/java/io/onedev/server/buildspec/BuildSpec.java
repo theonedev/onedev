@@ -2864,7 +2864,13 @@ public class BuildSpec implements Serializable, Validatable {
 					for (var jobTuple : ((MappingNode) jobNode).getValue()) {
 						if (((ScalarNode) jobTuple.getKeyNode()).getValue().equals("projectDependencies")) {
 							for (var dependencyNode : ((SequenceNode) jobTuple.getValueNode()).getValue()) {
-								for (var dependencyTuple : ((MappingNode) dependencyNode).getValue()) {
+								var dependency = (MappingNode) dependencyNode;
+								if (getScalarProperty(dependency, "requireSuccessful") == null) {
+									dependency.getValue().add(new NodeTuple(
+											new ScalarNode(Tag.STR, "requireSuccessful"),
+											new ScalarNode(Tag.BOOL, "true")));
+								}
+								for (var dependencyTuple : dependency.getValue()) {
 									if (((ScalarNode) dependencyTuple.getKeyNode()).getValue().equals("buildProvider")
 											&& dependencyTuple.getValueNode() instanceof MappingNode buildProviderNode) {
 										Node refNameProviderNode = null;

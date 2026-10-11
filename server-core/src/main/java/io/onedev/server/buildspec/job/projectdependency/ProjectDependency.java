@@ -35,6 +35,8 @@ public class ProjectDependency implements Serializable {
 	private String projectPath;
 
 	private BuildProvider buildProvider = new LatestBuild();
+
+	private boolean requireSuccessful = true;
 	
 	private String artifacts = "**";
 	
@@ -79,6 +81,15 @@ public class ProjectDependency implements Serializable {
 
 	public void setBuildProvider(BuildProvider buildProvider) {
 		this.buildProvider = buildProvider;
+	}
+
+	@Editable(order=350, description="Whether or not to require this dependency to be successful")
+	public boolean isRequireSuccessful() {
+		return requireSuccessful;
+	}
+
+	public void setRequireSuccessful(boolean requireSuccessful) {
+		this.requireSuccessful = requireSuccessful;
 	}
 
 	@Nullable
