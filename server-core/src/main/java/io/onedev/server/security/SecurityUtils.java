@@ -59,6 +59,7 @@ import io.onedev.server.security.permission.AccessBuildPipeline;
 import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.AccessConfidentialIssues;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.AccessSites;
 import io.onedev.server.security.permission.AccessTimeTracking;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
@@ -603,6 +604,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(project, new ReadPack()));
 	}
 		
+	public static boolean canAccessSite(Project project, String siteName) {
+		return siteName.equals(Project.PUBLIC_SITE)
+				|| getSubject().isPermitted(new ProjectPermission(project, new AccessSites(siteName)));
+	}
+
 	public static boolean canAccessReport(Build build, String reportName) {
 		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 
 				new JobPermission(build.getJobName(), new AccessBuildReports(reportName))));

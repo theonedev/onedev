@@ -198,7 +198,7 @@ public interface ProjectService extends EntityService<Project> {
 	 * @return
 	 * 			directory to store static content. The directory will exist after calling this method
 	 */
-	File getSiteDir(Long projectId);
+	File getSitesDir(Long projectId);
 
 	/**
 	 * Get directory to store additional info of specified project

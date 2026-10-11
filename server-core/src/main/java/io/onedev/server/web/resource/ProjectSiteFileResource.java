@@ -25,6 +25,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
@@ -35,24 +36,26 @@ import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.exception.ExceptionUtils;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
+import io.onedev.server.validation.validator.UrlSegmentValidator;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.util.WicketUtils;
 
 public class ProjectSiteFileResource extends AbstractResource {
+
+	private static final String PARAM_SITE = "site";
 
 	private static final long serialVersionUID = 1L;
 	
@@ -68,8 +71,14 @@ public class ProjectSiteFileResource extends AbstractResource {
 			throw new EntityNotFoundException();
 		
 		Long projectId = project.getId();
+		var siteName = params.get(PARAM_SITE).toString("");
+		if (!UrlSegmentValidator.PATTERN.matcher(siteName).matches())
+			throw new ExplicitException("Invalid site name");
+		if (!SecurityUtils.canAccessSite(project, siteName))
+			throw new UnauthorizedException();
 		
 		List<String> filePathSegments = new ArrayList<>();
+		filePathSegments.add(siteName);
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String segment = params.get(i).toString();
 			if (segment.contains(".."))
@@ -82,42 +91,23 @@ public class ProjectSiteFileResource extends AbstractResource {
 		String filePath = Joiner.on("/").join(filePathSegments);
 		if (filePathSegments.contains(FILE_VERSION))
 			return newNotFoundResponse(filePath);
-		if (filePath.length() != 0) {
-			ArtifactInfo artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
-			if (artifactInfo instanceof DirectoryInfo) {
-				if (attributes.getRequest().getUrl().getPath().endsWith("/")) {
-					DirectoryInfo directoryInfo = (DirectoryInfo) artifactInfo;
-					String indexFilePath = filePath + "/index.html";
-					artifactInfo = getProjectService().getSiteArtifactInfo(projectId, indexFilePath);
-					if (artifactInfo instanceof FileInfo)
-						fileInfo = (FileInfo) artifactInfo;
-					else
-						return newDirectoryResponse(filePath, directoryInfo);
-					filePath = indexFilePath;
-				} else {
-					throw new RedirectToUrlException(attributes.getRequest().getUrl().getPath() + "/");
-				}
-			} else if (artifactInfo instanceof FileInfo) {
-				fileInfo = (FileInfo) artifactInfo;
-			} else {
-				return newNotFoundResponse(filePath);
-			}
-		} else if (attributes.getRequest().getUrl().getPath().endsWith("/")) {
-			filePath = "index.html";
-			ArtifactInfo artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
+		ArtifactInfo artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
+		if (artifactInfo instanceof DirectoryInfo directoryInfo) {
+			if (!attributes.getRequest().getUrl().getPath().endsWith("/"))
+				throw new RedirectToUrlException(attributes.getRequest().getUrl().getPath() + "/");
+			String indexFilePath = filePath + "/index.html";
+			artifactInfo = getProjectService().getSiteArtifactInfo(projectId, indexFilePath);
 			if (artifactInfo instanceof FileInfo)
 				fileInfo = (FileInfo) artifactInfo;
-			else {
-				artifactInfo = getProjectService().getSiteArtifactInfo(projectId, "");
-				if (artifactInfo instanceof DirectoryInfo)
-					return newDirectoryResponse("", (DirectoryInfo) artifactInfo);
-				else
-					return newNotFoundResponse(filePath);
-			}
+			else
+				return newDirectoryResponse(filePath, directoryInfo);
+			filePath = indexFilePath;
+		} else if (artifactInfo instanceof FileInfo) {
+			fileInfo = (FileInfo) artifactInfo;
 		} else {
-			throw new RedirectToUrlException(attributes.getRequest().getUrl().getPath() + "/");
+			return newNotFoundResponse(filePath);
 		}
-		
+
 		ResourceResponse response = new ResourceResponse();
 		response.disableCaching();
 		response.setAcceptRange(ContentRangeType.BYTES);
@@ -147,8 +137,8 @@ public class ProjectSiteFileResource extends AbstractResource {
 				
 				String activeServer = getProjectService().getActiveServer(projectId, true);
 				if (activeServer.equals(getClusterService().getLocalServerAddress())) {
-					read(Project.getSiteLockName(projectId), () -> {
-						File file = new File(getProjectService().getSiteDir(projectId), finalFilePath);
+					read(Project.getSitesLockName(projectId), () -> {
+						File file = new File(getProjectService().getSitesDir(projectId), finalFilePath);
 						try (InputStream is = new FileInputStream(file)) {
 							copyRange(is, attributes.getResponse().getOutputStream(), range);
 						} catch (IOException e) {
@@ -161,7 +151,7 @@ public class ProjectSiteFileResource extends AbstractResource {
 					try {
 						String serverUrl = getClusterService().getServerUrl(activeServer);
 						WebTarget target = client.target(serverUrl);
-						target = target.path("~api/cluster/project-site")
+						target = target.path("~api/cluster/project-sites")
 								.queryParam("projectId", project.getId())
 								.queryParam("filePath", finalFilePath);
 						Invocation.Builder builder =  target.request();
@@ -205,7 +195,7 @@ public class ProjectSiteFileResource extends AbstractResource {
 						.append("</title></head><body><h1>Index of ")
 						.append(escapedDisplayPath)
 						.append("</h1><ul>");
-				if (!directoryPath.isEmpty())
+				if (directoryPath.contains("/"))
 					builder.append("<li><a href=\"../\">../</a></li>");
 				for (ArtifactInfo child : directoryInfo.getChildren() != null
 						? directoryInfo.getChildren() : Collections.<ArtifactInfo>emptyList()) {
@@ -253,20 +243,10 @@ public class ProjectSiteFileResource extends AbstractResource {
 		return OneDev.getInstance(ClusterService.class);
 	}
 	
-	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
+	public static PageParameters paramsOf(Project project, String siteName) {
 		PageParameters params = new PageParameters();
 		params.set(ProjectMapperUtils.PARAM_PROJECT, project.getPath());
-		
-		int index = 0;
-		for (String segment: Splitter.on("/").split(blobIdent.revision)) {
-			params.set(index, segment);
-			index++;
-		}
-		for (String segment: Splitter.on("/").split(blobIdent.path)) {
-			params.set(index, segment);
-			index++;
-		}
-
+		params.set(PARAM_SITE, siteName);
 		return params;
 	}
 

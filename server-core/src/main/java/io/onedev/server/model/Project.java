@@ -178,7 +178,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public static final String ATTACHMENT_DIR = "attachment";
 
-	public static final String SITE_DIR = "site";
+	public static final String SITES_DIR = "sites";
+
+	public static final String PUBLIC_SITE = "public";
 	
 	public static final String SHARE_TEST_DIR = ".onedev-share-test";
 	
@@ -2212,12 +2214,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return new ArrayList<>();
 	}
 	
-	public String getSiteLockName() {
-		return getSiteLockName(getId());
+	public String getSitesLockName() {
+		return getSitesLockName(getId());
 	}
 	
-	public static String getSiteLockName(Long projectId) {
-		return "project-site:" + projectId;
+	public static String getSitesLockName(Long projectId) {
+		return "project-sites:" + projectId;
 	}
 
 	public Collection<Build> getBuilds(ObjectId commitId) {

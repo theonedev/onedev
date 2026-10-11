@@ -2921,6 +2921,19 @@ public class BuildSpec implements Serializable, Validatable {
 				}
 			}
 		}
+
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNodeItem : stepsNode.getValue()) {
+				var stepNode = (MappingNode) stepNodeItem;
+				if ("PublishSiteStep".equals(getStepType(stepNode))) {
+					for (var tuple : stepNode.getValue()) {
+						var keyNode = (ScalarNode) tuple.getKeyNode();
+						if (keyNode.getValue().equals("artifacts"))
+							keyNode.setValue("siteFiles");
+					}
+				}
+			}
+		});
 	}
 
 }

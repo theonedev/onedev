@@ -5,6 +5,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -77,11 +79,14 @@ import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.BlobMarkdownViewer;
 import io.onedev.server.web.component.markdown.MarkdownOutlineDropdownLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.ProjectAvatar;
@@ -94,12 +99,12 @@ import io.onedev.server.web.component.project.stats.issue.IssueStatsPanel;
 import io.onedev.server.web.component.project.stats.pack.PackStatsPanel;
 import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStatsPanel;
 import io.onedev.server.web.component.project.stats.workspace.WorkspaceStatsPanel;
-import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
+import io.onedev.server.web.resource.ProjectSiteFileResource;
 import io.onedev.server.web.resource.SiteFileResourceReference;
 import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
@@ -533,20 +538,53 @@ public class ProjectOverviewPage extends ProjectPage {
 		return params;
 	}
 
+	private ExternalLink newSiteLink(String id, String siteName) {
+		var params = ProjectSiteFileResource.paramsOf(getProject(), siteName);
+		var link = new ExternalLink(id, urlFor(new SiteFileResourceReference(), params).toString());
+		link.add(AttributeAppender.append("target", "_blank"));
+		return link;
+	}
+
 	private WebMarkupContainer newSummary(String componentId) {
 		WebMarkupContainer container = new WebMarkupContainer(componentId);
 
 		container.add(new ProjectAvatar("avatar", getProject().getId()));
 		container.add(new Label("path", getProject().getPath()));
-		var siteRoot = getProjectService().getSiteArtifactInfo(getProject().getId(), "");
-		if (siteRoot instanceof DirectoryInfo directory
-				&& directory.getChildren() != null
-				&& !directory.getChildren().isEmpty()) {
-			var siteParams = new PageParameters();
-			siteParams.set(ProjectMapperUtils.PARAM_PROJECT, getProject().getPath());
-			container.add(new ExternalLink("site", urlFor(new SiteFileResourceReference(), siteParams).toString()));
+		var sitesRoot = getProjectService().getSiteArtifactInfo(getProject().getId(), "");
+		var siteNames = new ArrayList<String>();
+		if (sitesRoot instanceof DirectoryInfo directory && directory.getChildren() != null) {
+			for (var child : directory.getChildren()) {
+				if (child instanceof DirectoryInfo && SecurityUtils.canAccessSite(getProject(), child.getPath()))
+					siteNames.add(child.getPath());
+			}
+		}
+		if (siteNames.size() == 1) {
+			container.add(newSiteLink("sites", siteNames.get(0)));
+		} else if (siteNames.size() > 1) {
+			container.add(new MenuLink("sites") {
+				@Override
+				protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+					var items = new ArrayList<MenuItem>();
+					for (var siteName : siteNames) {
+						if (SecurityUtils.canAccessSite(getProject(), siteName)) {
+							items.add(new MenuItem() {
+								@Override
+								public String getLabel() {
+									return siteName;
+								}
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return newSiteLink(id, siteName);
+								}
+							});
+						}
+					}
+					return items;
+				}
+			});
 		} else {
-			container.add(new WebMarkupContainer("site").setVisible(false));
+			container.add(new WebMarkupContainer("sites").setVisible(false));
 		}
 
 		container.add(new EntityLabelsPanel<>("labels", projectModel));

@@ -37,11 +37,13 @@ import io.onedev.server.model.support.role.CodePrivilege;
 import io.onedev.server.model.support.role.IssueFieldSet;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.model.support.role.PackPrivilege;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildPipeline;
 import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.AccessConfidentialIssues;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.AccessSites;
 import io.onedev.server.security.permission.AccessTimeTracking;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.CreateChildren;
@@ -128,6 +130,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ArrayList<JobPrivilege> jobPrivileges = new ArrayList<>();
+
+	private String accessibleSites;
 
 	private boolean manageWorkspaces;
 
@@ -375,6 +379,19 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.jobPrivileges = (ArrayList<JobPrivilege>) jobPrivileges;
 	}
 
+	@Editable(order=750, name="Access Sites", placeholder="No accessible named sites", description="Optionally specify "
+			+ "space-separated site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
+			+ "The public site is always accessible")
+	@DependsOn(property="manageProject", value="false")
+	@Patterns
+	public String getAccessibleSites() {
+		return accessibleSites;
+	}
+
+	public void setAccessibleSites(String accessibleSites) {
+		this.accessibleSites = accessibleSites;
+	}
+
 	@Editable(order=800, name="Workspace Management", description="""
 			Workspace administrative permission inside a project, including batch operations 
 			over multiple workspaces including batch operations over multiple workspaces. 
@@ -465,6 +482,8 @@ public class Role extends AbstractEntity implements BasePermission {
 			permissions.add(new ManageWorkspaces());
 		if (createWorkspaces)
 			permissions.add(new CreateWorkspaces());
+		if (accessibleSites != null)
+			permissions.add(new AccessSites(accessibleSites));
 		if (uploadCache)
 			permissions.add(new UploadCache());
 		for (var jobPrivilege: jobPrivileges) {

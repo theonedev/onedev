@@ -245,15 +245,15 @@ public class ClusterResource {
 		return ok(out).build();
 	}
 
-	@Path("/project-site")
+	@Path("/project-sites")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
 	public Response downloadProjectSiteFile(@QueryParam("projectId") Long projectId, @QueryParam("filePath") String filePath) {
 		if (!SecurityUtils.isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = output -> read(Project.getSiteLockName(projectId), () -> {
-			File file = new File(projectService.getSiteDir(projectId), filePath);
+		StreamingOutput os = output -> read(Project.getSitesLockName(projectId), () -> {
+			File file = new File(projectService.getSitesDir(projectId), filePath);
 			try (output; InputStream is = new FileInputStream(file)) {
 				IOUtils.copy(is, output, BUFFER_SIZE);
 			}

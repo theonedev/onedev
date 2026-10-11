@@ -106,7 +106,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	public OneDev() {
 		try {
 			wrapperManagerClass = Class.forName("org.tanukisoftware.wrapper.WrapperManager");
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException ignored) {
 		}
 		thread = new Thread(this);
 		initStage = new InitStage("Server is Starting...");
@@ -394,7 +394,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		if (wrapperManagerClass != null) {
 			try {
 				Method method = wrapperManagerClass.getDeclaredMethod("restartAndReturn");
-				method.invoke(null, new Object[0]);
+				method.invoke(null);
 			} catch (Exception e) {
 				logger.error("Error restarting server", e);
 			}

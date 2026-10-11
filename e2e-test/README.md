@@ -74,15 +74,6 @@ users and projects are cleaned up.
 npm test -- tests/ssh-clone.spec.js
 ```
 
-## Application-relative redirects
-
-`tests/redirect-request-handler.spec.js` exercises `RedirectRequestHandler` via
-the project site's missing-trailing-slash redirect. It verifies that the project
-path is not duplicated when resolving the application-relative destination,
-for both normal browsers (JavaScript redirect) and crawlers (HTTP redirect).
-The fixture's empty site must display its directory listing at the canonical
-URL, rather than an unrelated project-not-found page.
-
 ## Login redirects and page-store warnings
 
 `tests/login-redirect.spec.js` checks protected system settings and private

@@ -13,6 +13,8 @@ import static org.hibernate.cfg.AvailableSettings.DIALECT;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,8 +47,10 @@ import io.onedev.server.data.migration.DataMigrator;
 import io.onedev.server.data.migration.MigrationHelper;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.jetty.MaintenanceProbeServer;
+import io.onedev.server.model.Project;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SiteSyncUtils;
 
 @Singleton
 public class Upgrade extends AbstractPlugin {
@@ -949,6 +953,30 @@ public class Upgrade extends AbstractPlugin {
 						var workspaceLogsDir = new File(projectDir, "workspace-logs");
 						if (workspaceLogsDir.exists())
 							FileUtils.deletePath(workspaceLogsDir);
+					}
+				}
+			}
+		}
+
+		if (oldAppDataVersion < 250) {
+			logger.info("Moving published sites into the public site directory...");
+			var projectsDir = new File(upgradeDir, "site/projects");
+			if (projectsDir.exists()) {
+				for (var projectDir : projectsDir.listFiles()) {
+					var legacyDir = new File(projectDir, "site");
+					var files = legacyDir.listFiles(file -> !SiteSyncUtils.isVersionFile(file));
+					if (files != null && files.length != 0) {
+						var sitesDir = new File(projectDir, Project.SITES_DIR);
+						FileUtils.createDir(sitesDir);
+						try {
+							var versionFile = new File(legacyDir, SiteSyncUtils.FILE_VERSION);
+							if (versionFile.exists())
+								Files.copy(versionFile.toPath(), new File(sitesDir, SiteSyncUtils.FILE_VERSION).toPath(),
+										StandardCopyOption.REPLACE_EXISTING);
+							FileUtils.moveDirectory(legacyDir, new File(sitesDir, Project.PUBLIC_SITE));
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
 					}
 				}
 			}

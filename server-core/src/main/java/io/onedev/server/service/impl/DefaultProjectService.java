@@ -9,9 +9,9 @@ import static io.onedev.server.git.GitUtils.isValid;
 import static io.onedev.server.git.GitUtils.setDefaultBranch;
 import static io.onedev.server.model.Project.ATTACHMENT_DIR;
 import static io.onedev.server.model.Project.SHARE_TEST_DIR;
-import static io.onedev.server.model.Project.SITE_DIR;
+import static io.onedev.server.model.Project.SITES_DIR;
 import static io.onedev.server.model.Project.SORT_FIELDS;
-import static io.onedev.server.model.Project.getSiteLockName;
+import static io.onedev.server.model.Project.getSitesLockName;
 import static io.onedev.server.replica.ProjectReplica.Type.BACKUP;
 import static io.onedev.server.replica.ProjectReplica.Type.PRIMARY;
 import static io.onedev.server.replica.ProjectReplica.Type.REDUNDANT;
@@ -49,6 +49,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
@@ -1326,8 +1327,17 @@ public class DefaultProjectService extends BaseEntityService<Project>
 
 			@Override
 			public ArtifactInfo call() {
-				return read(Project.getSiteLockName(projectId), () -> {
-					File siteArtifact = new File(getSiteDir(projectId), siteArtifactPath);
+				return read(Project.getSitesLockName(projectId), () -> {
+					var sitesDir = getSitesDir(projectId);
+					if (!siteArtifactPath.isEmpty()) {
+						// Match the stored name exactly, even on a case-insensitive filesystem,
+						// so a case alias cannot bypass case-sensitive site permissions.
+						var siteName = StringUtils.substringBefore(siteArtifactPath, "/");
+						var matches = sitesDir.list((dir, name) -> name.equals(siteName));
+						if (matches == null || matches.length == 0)
+							return null;
+					}
+					File siteArtifact = new File(sitesDir, siteArtifactPath);
 					if (siteArtifact.exists()) {
 						if (siteArtifact.isFile()) {
 							String mediaType = Files.probeContentType(siteArtifact.toPath());
@@ -1338,11 +1348,11 @@ public class DefaultProjectService extends BaseEntityService<Project>
 							List<ArtifactInfo> children = new ArrayList<>();
 							File[] childFiles = siteArtifact.listFiles();
 							if (childFiles != null) {
-								int baseLen = getSiteDir(projectId).getAbsolutePath().length() + 1;
 								for (File child : childFiles) {
 									if (!SiteSyncUtils.isVersionFile(child)
 											&& !child.getName().equals(".DS_Store")) {
-										String relativePath = child.getAbsolutePath().substring(baseLen);
+										String relativePath = siteArtifactPath.isEmpty() ? child.getName()
+												: siteArtifactPath + "/" + child.getName();
 										if (child.isFile()) {
 											children.add(new FileInfo(relativePath, child.lastModified(),
 													child.length(), null));
@@ -1665,7 +1675,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 							visitInfoService.syncVisitInfo(projectId, syncWithServer);
 							packBlobService.syncPacks(projectId, syncWithServer);
 							
-							syncDirectory(projectId, SITE_DIR, getSiteLockName(projectId), syncWithServer);
+							syncDirectory(projectId, SITES_DIR, getSitesLockName(projectId), syncWithServer);
 							
 							writeVersion(projectDir, remoteVersion);
 							logger.debug("Project synced (project: {}, server: {})", project.getPath(), syncWithServer);
@@ -1812,8 +1822,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	}
 
 	@Override
-	public File getSiteDir(Long projectId) {
-		return getSubDir(projectId, SITE_DIR);
+	public File getSitesDir(Long projectId) {
+		return getSubDir(projectId, SITES_DIR);
 	}
 
 	@Override

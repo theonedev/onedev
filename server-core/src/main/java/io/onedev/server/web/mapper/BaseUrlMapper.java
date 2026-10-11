@@ -274,7 +274,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BaseResourceMapper("~downloads/projects/${project}/archives", new ArchiveResourceReference()));
 		
 		add(new ProjectResourceMapper("${project}/~raw", new RawBlobResourceReference()));
-		add(new ProjectResourceMapper("${project}/~site", new SiteFileResourceReference()));
+		add(new ProjectResourceMapper("${project}/~sites/${site}", new SiteFileResourceReference()));
 		
 		// Change AttachmentResource.authorizeGroup accordingly if change attachment url here
 		add(new BaseResourceMapper("~downloads/projects/${project}/attachments/${attachment-group}/${attachment}", 

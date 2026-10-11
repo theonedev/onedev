@@ -9567,4 +9567,8 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate250(File dataDir, Stack<Integer> versions) {
+		// Recreate the schema to add the optional accessibleSites role property.
+	}
+
 }

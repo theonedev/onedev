@@ -83,15 +83,10 @@ caching. Exception logging is source-audited, not asserted by those tests.
 `RedirectRequestHandler` was introduced in `59b517746c` ("Fix the issue that page
 redirecting works abnormally"). Wicket 10.11.0 leaves destinations without a
 leading slash unchanged. For example, `ProjectSiteFileResource` redirects
-`project/~site` to the application-relative `project/~site/`. Passing that string
-directly to the browser resolves it as `project/project/~site/`; rendering it
-relative to the current request produces the intended `project/~site/` URL.
-`e2e-test/tests/redirect-request-handler.spec.js` verifies this using a newly
-created project's empty site, including both scripted browser redirects
-and crawler HTTP redirects. The destination's directory listing also confirms
-that the redirect reaches the correct resource. Replacing only the URL-rendering
-customization with Wicket 10.11.0's implementation makes both cases fail with a
-duplicated project path; restoring the customization makes both pass.
+`project/~sites/public` to the application-relative `project/~sites/public/`
+when the public site directory exists. Passing that string
+directly to the browser resolves it as `project/project/~sites/public/`; rendering it
+relative to the current request produces the intended `project/~sites/public/` URL.
 
 `InterceptRedirectCustomizationTest` generates callback metadata using Wicket 10's
 encoder and verifies removal, ordinary/duplicate parameters, page versions, and

@@ -67,7 +67,7 @@ public class ProjectResourceMapper extends BaseResourceMapper {
 				if (parameters == null) {
 					parameters = new PageParameters();
 				}
-				parameters.add(placeholder, normalizedUrl.getSegments().get(index), INamedParameters.Type.PATH);
+				parameters.set(placeholder, normalizedUrl.getSegments().get(index), INamedParameters.Type.PATH);
 			}
 		}
 		return new ResourceReferenceRequestHandler(getResourceReference(), parameters);
@@ -107,7 +107,7 @@ public class ProjectResourceMapper extends BaseResourceMapper {
 			String placeholder = getPlaceholder(mountSegments[index]);
 
 			if (placeholder != null) {
-				url.getSegments().set(index, parameters.get(placeholder).toString(""));
+				url.getSegments().set(index + start - 1, parameters.get(placeholder).toString(""));
 				parameters.remove(placeholder);
 			}
 		}
