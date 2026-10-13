@@ -184,7 +184,7 @@ prepare_distribution() (
 	done
 	for kind in server agent; do
 		if [ "$kind" = server ]; then
-			prefix= main_class=io.onedev.commons.bootstrap.Bootstrap app_name=onedev.server display_name=OneDev classpath=
+			prefix= main_class=io.onedev.commons.bootstrap.Bootstrap app_name=onedev.server display_name='OneDev Server' classpath=
 		else
 			prefix=agent/ main_class=io.onedev.agent.Agent app_name=onedev.agent display_name='OneDev Agent'
 			classpath='wrapper.java.classpath.2=../lib/agentVersion/*.jar'
