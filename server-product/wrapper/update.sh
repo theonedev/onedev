@@ -170,7 +170,6 @@ prepare_distribution() (
 	rm -rf "$distribution"
 	mkdir -p "$distribution/bin" "$distribution/conf" "$distribution/agent/bin" "$distribution/agent/conf"
 	cp -R "$release/boot" "$distribution/boot"
-	cp "$distribution/boot/wrapper-macosx-arm-64" "$distribution/boot/wrapper-macosx-universal-64"
 	cp -R "$distribution/boot" "$distribution/agent/boot"
 	for extension in sh bat; do
 		launcher="$release/bin/service.$extension"
@@ -446,7 +445,6 @@ test_wrapper() (
 	[ -x "$distribution/bin/backup-db.sh" ]
 	[ -x "$distribution/boot/wrapper-linux-x86-64" ]
 	[ ! -x "$distribution/boot/wrapper.jar" ]
-	cmp "$distribution/boot/wrapper-macosx-arm-64" "$distribution/boot/wrapper-macosx-universal-64"
 	grep -q io.onedev.commons.bootstrap.Bootstrap "$distribution/conf/wrapper.conf"
 	grep -q io.onedev.agent.Agent "$distribution/agent/conf/wrapper.conf"
 	grep -Fq '../lib/agentVersion/*.jar' "$distribution/agent/conf/wrapper.conf"

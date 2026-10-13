@@ -64,8 +64,8 @@ and its `.sha256` together, then run:
 ```
 
 The importer verifies the archive and file checksums, copies all upstream boot
-files, adapts generic launchers for server/agent and one-shot utilities, and creates
-the legacy macOS executable alias. It renders server and agent configurations from
+files and adapts generic launchers for server/agent and one-shot utilities.
+It renders server and agent configurations from
 `wrapper.conf` and regenerates `SHA256SUMS`. These integration rules live in the
 server project. The agent configuration retains the `agentVersion` placeholder,
 which is resolved when assembling a standalone agent or downloading one.
