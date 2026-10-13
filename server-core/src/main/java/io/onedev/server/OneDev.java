@@ -105,7 +105,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 
 	public OneDev() {
 		try {
-			wrapperManagerClass = Class.forName("org.tanukisoftware.wrapper.WrapperManager");
+			wrapperManagerClass = Class.forName("io.onedev.wrapper.WrapperManager");
 		} catch (ClassNotFoundException ignored) {
 		}
 		thread = new Thread(this);

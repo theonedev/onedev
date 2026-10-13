@@ -19,7 +19,7 @@ else
     CPUARCH="x86-64"
 fi
 
-/app/boot/wrapper-linux-$CPUARCH /app/conf/wrapper.conf -- upgrade /opt/onedev &
+/app/boot/wrapper-linux-$CPUARCH /app/conf/wrapper.conf wrapper.restart.disabled=TRUE -- upgrade /opt/onedev &
 child=$!
 wait "$child"
 

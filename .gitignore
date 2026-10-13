@@ -2,6 +2,9 @@ server-product/docker/build/
 server-product/docker/onedev-*/
 target/
 bin/
+# Prepared wrapper launchers are release inputs, not IDE output directories.
+!server-product/wrapper/distribution/**/bin/
+!server-product/wrapper/distribution/**/bin/**
 **/.classpath
 **/.gitignore
 **/.settings

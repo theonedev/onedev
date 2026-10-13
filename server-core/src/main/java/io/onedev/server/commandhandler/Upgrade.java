@@ -985,6 +985,9 @@ public class Upgrade extends AbstractPlugin {
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
 			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, UTF_8);
+			wrapperConf = wrapperConf.replaceAll(
+					"(?m)^(\\h*wrapper\\.java\\.mainclass\\h*=\\h*)[\\w.]+\\.WrapperSimpleApp\\h*$",
+					"$1io.onedev.wrapper.WrapperSimpleApp");
 			wrapperConf = Strings.CS.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = Strings.CS.replace(wrapperConf, "com.gitplex.launcher.bootstrap.Bootstrap", 
@@ -1149,8 +1152,6 @@ public class Upgrade extends AbstractPlugin {
 
 			writeStringToFile(logbackConfigFile, logbackConfig, UTF_8);
 			
-			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
-					new File(upgradeDir, "conf/wrapper-license.conf"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "readme.txt"), new File(upgradeDir, "readme.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "license.txt"), new File(upgradeDir, "license.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, RELEASE_PROPS_FILE), new File(upgradeDir, RELEASE_PROPS_FILE));
