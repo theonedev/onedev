@@ -1,6 +1,6 @@
 @echo off
 setlocal
-rem Java service launcher. Use an elevated prompt to install/remove services.
+rem Java service launcher. Service management prompts for administrator permission when needed.
 set "_ARCH=%PROCESSOR_ARCHITECTURE%"
 if defined PROCESSOR_ARCHITEW6432 set "_ARCH=%PROCESSOR_ARCHITEW6432%"
 if /i "%_ARCH%"=="AMD64" set "_BINARY=wrapper-windows-x86-64.exe"
