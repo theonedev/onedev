@@ -62,32 +62,6 @@ file_list() {
 	(cd "$1" && find . -type f | sed 's|^./||' | sort)
 }
 
-write_manifest() {
-	local directory=$1 name digest
-	while IFS= read -r name; do
-		[ "$name" = SHA256SUMS ] && continue
-		valid_path "$name" || fail "Invalid release path: $name"
-		digest=$(sha256 "$directory/$name")
-		printf '%s  %s\n' "$digest" "$name"
-	done < <(file_list "$directory")
-}
-
-verify_manifest() {
-	local directory=$1 line
-	local names=()
-	[ -f "$directory/SHA256SUMS" ] || fail "Missing SHA256SUMS in $directory"
-	while IFS= read -r line || [ -n "$line" ]; do
-		parse_checksum "$line"
-		[ -f "$directory/$checksum_name" ] || fail "Missing release file: $checksum_name"
-		[ "$(sha256 "$directory/$checksum_name")" = "$checksum_digest" ] \
-			|| fail "Release file checksum does not match: $checksum_name"
-		names+=("$checksum_name")
-	done < "$directory/SHA256SUMS"
-	cmp -s <(printf '%s\n' "${names[@]}" | sort) \
-		<(file_list "$directory" | sed '/^SHA256SUMS$/d') \
-		|| fail "Release manifest must cover every file exactly once"
-}
-
 # Verify and adapt a release before replacing the prepared distribution.
 import_release() (
 	import_usage() {
@@ -139,7 +113,6 @@ import_release() (
 	mkdir "$temporary/extracted"
 	tar -xzf "$archive" -C "$temporary/extracted"
 	release="$temporary/extracted/$root"
-	verify_manifest "$release"
 
 	prepare_distribution "$release" "$destination" "$sandbox"
 )
@@ -162,12 +135,10 @@ prepare_distribution() (
 	done
 	[ -f "$release/VERSION" ] || fail "Missing release VERSION"
 
-	# Prepare all adaptations and checksums before replacing any checked-in files.
+	# Prepare all adaptations before replacing any checked-in files, even at the same version.
 	prepared="$temporary/prepared"
 	mkdir "$prepared"
-	cp -R "$destination/." "$prepared/"
 	distribution="$prepared/distribution"
-	rm -rf "$distribution"
 	mkdir -p "$distribution/bin" "$distribution/conf" "$distribution/agent/bin" "$distribution/agent/conf"
 	cp -R "$release/boot" "$distribution/boot"
 	cp -R "$distribution/boot" "$distribution/agent/boot"
@@ -204,10 +175,11 @@ prepare_distribution() (
 		esac
 	done < <(file_list "$distribution")
 	cp "$release/VERSION" "$prepared/VERSION"
-	write_manifest "$prepared" > "$prepared/SHA256SUMS"
 	rm -rf "$destination/distribution"
 	mv "$distribution" "$destination/distribution"
-	cp "$prepared/VERSION" "$prepared/SHA256SUMS" "$destination/"
+	cp "$prepared/VERSION" "$destination/"
+	# Remove the obsolete per-file manifest left by earlier updater versions.
+	rm -f "$destination/SHA256SUMS"
 	echo "Imported Wrapper $(cat "$destination/VERSION") into $destination"
 	if [ -n "$sandbox" ]; then
 		refresh_sandbox "$destination/distribution" "$sandbox"
@@ -302,7 +274,7 @@ update_release() (
 	# Each publication replaces the site with one release and its checksum.
 	awk 'BEGIN {RS="<"}
 		tolower($0) ~ /^a[[:space:]]/ {
-			if (match($0, /[Hh][Rr][Ee][Ff][[:space:]]*=[[:space:]]*["\047]wrapper-[0-9][A-Za-z0-9.+-]*\.tar\.gz["\047]/)) {
+			if (match($0, /[Hh][Rr][Ee][Ff][[:space:]]*=[[:space:]]*["\047]wrapper-(latest|[0-9][A-Za-z0-9.+-]*)\.tar\.gz["\047]/)) {
 				name = substr($0, RSTART, RLENGTH)
 				sub(/^[^=]*=[[:space:]]*["\047]/, "", name)
 				sub(/["\047]$/, "", name)
@@ -382,8 +354,7 @@ check_package() (
 		fi
 		grep -qx sandbox/release.properties "$temporary/product-entries" || fail "Missing sandbox/release.properties"
 	done
-	verify_manifest "$inputs"
-	echo "Server archive, agent distribution, embedded product jar, permissions, and checksums verified"
+	echo "Server archive, agent distribution, embedded product jar, and permissions verified"
 )
 
 # Exercise the maintenance commands without native builds or network access.
@@ -405,7 +376,6 @@ test_wrapper() (
 	printf '1.0.0\n' > "$fixture/VERSION"
 
 	pack_release() {
-		write_manifest "$fixture" > "$fixture/SHA256SUMS"
 		tar -czf "$archive" -C "$temporary/release" wrapper-1.0.0
 		printf '%s  %s\n' "$(sha256 "$archive")" "$(basename "$archive")" > "$archive.sha256"
 	}
@@ -421,6 +391,7 @@ test_wrapper() (
 
 	# New boot artifacts must reach both distributions; retired files must disappear.
 	printf 'future format\000\377' > "$fixture/boot/new-runtime.dat"
+	printf 'obsolete manifest\n' > "$destination/SHA256SUMS"
 	pack_release
 	run_import
 	for prefix in '' agent/; do
@@ -435,7 +406,7 @@ test_wrapper() (
 	done
 	cmp "$WRAPPER_DIR/wrapper.conf" "$destination/wrapper.conf"
 
-	# Preserve binary bytes, CRLF launchers, substitutions, modes, and manifest coverage.
+	# Preserve binary bytes, CRLF launchers, substitutions, and modes.
 	distribution="$destination/distribution"
 	cmp "$fixture/bin/service.sh" "$distribution/bin/server.sh"
 	cmp "$fixture/bin/service.bat" "$distribution/agent/bin/agent.bat"
@@ -451,7 +422,7 @@ test_wrapper() (
 	if grep -Eq '@[A-Za-z0-9_.]+@' "$distribution/conf/wrapper.conf" "$distribution/agent/conf/wrapper.conf"; then
 		fail "Unresolved placeholder"
 	fi
-	verify_manifest "$destination"
+	[ ! -e "$destination/SHA256SUMS" ] || fail "Per-file manifest was generated"
 	cp -R "$destination" "$temporary/before"
 
 	# Bad downloads and invalid release contents must leave the previous import intact.
@@ -469,19 +440,12 @@ test_wrapper() (
 	pack_release
 	printf 'tampered\n' >> "$fixture/boot/wrapper.jar"
 	tar -czf "$archive" -C "$temporary/release" wrapper-1.0.0
-	printf '%s  %s\n' "$(sha256 "$archive")" "$(basename "$archive")" > "$archive.sha256"
 	expect_rejection
 	printf 'binary\000\377' > "$fixture/boot/wrapper.jar"
 	ln -s "$temporary/binary" "$fixture/boot/link"
 	pack_release
 	expect_rejection
 	rm "$fixture/boot/link"
-	pack_release
-	sed '/  VERSION$/d' "$fixture/SHA256SUMS" > "$temporary/incomplete-manifest"
-	cp "$temporary/incomplete-manifest" "$fixture/SHA256SUMS"
-	tar -czf "$archive" -C "$temporary/release" wrapper-1.0.0
-	printf '%s  %s\n' "$(sha256 "$archive")" "$(basename "$archive")" > "$archive.sha256"
-	expect_rejection
 	echo "Wrapper importer tests passed"
 
 	# Exercise the downloader offline, including multiple links on the same HTML line.
@@ -510,7 +474,19 @@ test_wrapper() (
 	printf '<a href="wrapper-1.0.0.tar.gz">release</a><a HREF=\047wrapper-1.0.0.tar.gz\047>duplicate</a>\n' \
 		> "$temporary/index.html"
 	PATH="$temporary/mock-bin:$PATH" TMPDIR="$temporary/downloads" "$temporary/wrapper/update.sh"
-	verify_manifest "$temporary/wrapper"
+	diff -r "$distribution" "$temporary/wrapper/distribution"
+	[ ! -e "$temporary/wrapper/SHA256SUMS" ] || fail "Per-file manifest was generated"
+	[ -z "$(ls -A "$temporary/downloads")" ] || fail "Downloads were not cleaned up"
+	# A remote update must reimport an unchanged version and regenerate configuration.
+	printf 'updated release jar\n' > "$fixture/boot/wrapper.jar"
+	printf '\nwrapper.logfile.maxfiles=7\n' >> "$temporary/wrapper/wrapper.conf"
+	pack_release
+	PATH="$temporary/mock-bin:$PATH" TMPDIR="$temporary/downloads" "$temporary/wrapper/update.sh"
+	for prefix in '' agent/; do
+		cmp "$fixture/boot/wrapper.jar" "$temporary/wrapper/distribution/${prefix}boot/wrapper.jar"
+		grep -qx 'wrapper.logfile.maxfiles=7' "$temporary/wrapper/distribution/${prefix}conf/wrapper.conf"
+	done
+	cmp "$fixture/VERSION" "$temporary/wrapper/VERSION"
 	[ -z "$(ls -A "$temporary/downloads")" ] || fail "Downloads were not cleaned up"
 	printf '<a href="wrapper-2.0.0.tar.gz">another release</a>\n' >> "$temporary/index.html"
 	if PATH="$temporary/mock-bin:$PATH" TMPDIR="$temporary/downloads" "$temporary/wrapper/update.sh" \
@@ -519,6 +495,30 @@ test_wrapper() (
 	fi
 	[ -z "$(ls -A "$temporary/downloads")" ] || fail "Failed download was not cleaned up"
 	echo "Wrapper updater tests passed"
+
+	# Local updates must also import changed build outputs at the same version.
+	checkout="$temporary/local checkout"
+	mkdir -p "$checkout/dist/boot" "$checkout/resources"
+	printf '[package]\nversion = "2.0.0"\n' > "$checkout/Cargo.toml"
+	cp "$fixture/bin/service.sh" "$checkout/resources/App.sh.in"
+	cp "$fixture/bin/service.bat" "$checkout/resources/AppCommand.bat.in"
+	printf 'local jar\n' > "$checkout/dist/boot/wrapper.jar"
+	printf 'local binary\n' > "$checkout/dist/boot/wrapper-linux-x86-64"
+	"$temporary/wrapper/update.sh" "$checkout"
+	printf 'updated local jar\n' > "$checkout/dist/boot/wrapper.jar"
+	printf 'updated local binary\n' > "$checkout/dist/boot/wrapper-linux-x86-64"
+	printf '\nwrapper.restart.delay=2\n' >> "$temporary/wrapper/wrapper.conf"
+	"$temporary/wrapper/update.sh" "$checkout"
+	for prefix in '' agent/; do
+		for name in wrapper.jar wrapper-linux-x86-64; do
+			cmp "$checkout/dist/boot/$name" "$temporary/wrapper/distribution/${prefix}boot/$name"
+		done
+		cmp "$fixture/boot/wrapper-linux-arm-64" "$temporary/wrapper/distribution/${prefix}boot/wrapper-linux-arm-64"
+		grep -qx 'wrapper.restart.delay=2' "$temporary/wrapper/distribution/${prefix}conf/wrapper.conf"
+	done
+	[ "$(cat "$temporary/wrapper/VERSION")" = 2.0.0-local ]
+	[ ! -e "$temporary/wrapper/SHA256SUMS" ] || fail "Per-file manifest was generated"
+	echo "Wrapper local update tests passed"
 
 	# Build a small Maven-shaped package and check that content/mode regressions fail.
 	mkdir -p "$temporary/package/onedev-test" "$temporary/product/sandbox"

@@ -111,32 +111,6 @@ function Get-FileList([string] $Directory) {
     return $names
 }
 
-function Write-Manifest([string] $Directory) {
-    $lines = foreach ($name in Get-FileList $Directory) {
-        if ($name -eq 'SHA256SUMS') { continue }
-        Assert-ReleasePath $name
-        (Get-Digest (Join-Path $Directory $name)) + '  ' + $name
-    }
-    Write-Text (Join-Path $Directory 'SHA256SUMS') (($lines -join "`n") + "`n")
-}
-
-function Test-Manifest([string] $Directory) {
-    $seen = @{}
-    foreach ($line in [IO.File]::ReadAllLines((Join-Path $Directory 'SHA256SUMS'))) {
-        $entry = Read-Checksum $line
-        if ($entry.Name -eq 'SHA256SUMS' -or $seen.ContainsKey($entry.Name)) { throw 'Duplicate or self-referencing manifest entry' }
-        $seen[$entry.Name] = $true
-        if ((Get-Digest (Join-Path $Directory $entry.Name)) -cne $entry.Digest) {
-            throw "Release file checksum does not match: $($entry.Name)"
-        }
-    }
-    $files = @(Get-FileList $Directory | Where-Object { $_ -ne 'SHA256SUMS' })
-    if ($files.Count -ne $seen.Count) { throw 'Release manifest must cover every file exactly once' }
-    foreach ($name in $files) {
-        if (-not $seen.ContainsKey($name)) { throw "Unlisted release file: $name" }
-    }
-}
-
 function Invoke-Tar([string[]] $Arguments) {
     & tar.exe @Arguments
     if ($LASTEXITCODE -ne 0) { throw "tar.exe failed with exit code $LASTEXITCODE" }
@@ -204,9 +178,8 @@ function Prepare-Distribution([string] $Release, [string] $Destination, [bool] $
     $temporary = New-TemporaryDirectory
     try {
         $prepared = Join-Path $temporary 'prepared'
-        Copy-Contents $Destination $prepared
+        New-Directory $prepared
         $distribution = Join-Path $prepared 'distribution'
-        Remove-Tree $distribution $prepared
         foreach ($name in @('bin', 'conf', 'agent/bin', 'agent/conf')) { New-Directory (Join-Path $distribution $name) }
         Copy-Contents (Join-Path $Release 'boot') (Join-Path $distribution 'boot')
         Copy-Contents (Join-Path $Release 'boot') (Join-Path $distribution 'agent/boot')
@@ -232,12 +205,14 @@ function Prepare-Distribution([string] $Release, [string] $Destination, [bool] $
             Write-Text (Join-Path $distribution "${prefix}conf/wrapper.conf") $text
         }
         Copy-Item -LiteralPath (Join-Path $Release 'VERSION') -Destination (Join-Path $prepared 'VERSION') -Force
-        Write-Manifest $prepared
-        # Finish validation before replacing the previous prepared distribution.
+        # Finish validation before replacing the prepared distribution, even at the same version.
         Remove-Tree (Join-Path $Destination 'distribution') $Destination
         Copy-Contents $distribution (Join-Path $Destination 'distribution')
-        foreach ($name in @('VERSION', 'SHA256SUMS')) {
-            Copy-Item -LiteralPath (Join-Path $prepared $name) -Destination (Join-Path $Destination $name) -Force
+        Copy-Item -LiteralPath (Join-Path $prepared 'VERSION') -Destination (Join-Path $Destination 'VERSION') -Force
+        # Remove the obsolete per-file manifest left by earlier updater versions.
+        $manifest = Join-Path $Destination 'SHA256SUMS'
+        if (Test-Path -LiteralPath $manifest) {
+            Remove-Item -LiteralPath $manifest -Force
         }
         Write-Host "Imported Wrapper $([IO.File]::ReadAllText((Join-Path $Destination 'VERSION')).Trim()) into $Destination"
         if ($Sandbox) { Update-Sandbox (Join-Path $Destination 'distribution') $sandboxPath }
@@ -277,7 +252,6 @@ function Import-Release([string] $Archive, [string] $Checksum, [string] $Destina
         Invoke-Tar @('-xzf', $Archive, '-C', $extracted)
         $release = Join-Path $extracted $root
         Assert-NoLinks $release
-        Test-Manifest $release
         Prepare-Distribution $release $Destination $Sandbox
     } finally { Remove-Tree $temporary ([IO.Path]::GetTempPath()) }
 }
@@ -310,7 +284,7 @@ function Update-Local([string] $Source, [string] $Destination, [bool] $Sandbox) 
 }
 
 function Get-ReleaseName([string] $Html) {
-    $names = @([regex]::Matches($Html, '(?i)<a\s+[^>]*?\bhref\s*=\s*["''](wrapper-[0-9][A-Za-z0-9.+-]*\.tar\.gz)["'']') |
+    $names = @([regex]::Matches($Html, '(?i)<a\s+[^>]*?\bhref\s*=\s*["''](wrapper-(?:latest|[0-9][A-Za-z0-9.+-]*)\.tar\.gz)["'']') |
         ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
     if ($names.Count -ne 1) { throw 'Expected exactly one Wrapper release on the public download site' }
     return $names[0]
@@ -395,24 +369,29 @@ function Test-Updater {
         Write-Text (Join-Path $fixture 'VERSION') "1.0.0`n"
         $archive = Join-Path $temporary 'wrapper-1.0.0.tar.gz'
         function Pack-Fixture {
-            Write-Manifest $fixture
             Invoke-Tar @('-czf', $archive, '-C', (Split-Path -Parent $fixture), 'wrapper-1.0.0')
             Write-Text "$archive.sha256" ((Get-Digest $archive) + "  wrapper-1.0.0.tar.gz`n")
         }
         function Assert-Equal($Actual, $Expected, [string] $Message) {
             if ($Actual -cne $Expected) { throw "Test failed: $Message" }
         }
+        function Get-PreparedSnapshot {
+            $files = foreach ($name in Get-FileList $destination) {
+                $name + ':' + (Get-Digest (Join-Path $destination $name))
+            }
+            return $files -join "`n"
+        }
         function Expect-Rejection([scriptblock] $Action) {
-            $before = Get-Digest (Join-Path $destination 'SHA256SUMS')
+            $before = Get-PreparedSnapshot
             $rejected = $false
             try { & $Action } catch { $rejected = $true }
             if (-not $rejected) { throw 'Test failed: invalid input accepted' }
-            Assert-Equal (Get-Digest (Join-Path $destination 'SHA256SUMS')) $before 'invalid input changed manifest'
-            Test-Manifest $destination
+            Assert-Equal (Get-PreparedSnapshot) $before 'invalid input changed prepared files'
         }
+        Write-Text (Join-Path $destination 'SHA256SUMS') 'obsolete manifest'
         Pack-Fixture
         Invoke-Updater @('import', $archive, '--destination', $destination)
-        Test-Manifest $destination
+        if (Test-Path -LiteralPath (Join-Path $destination 'SHA256SUMS')) { throw 'Test failed: per-file manifest was generated' }
         foreach ($prefix in @('', 'agent/')) {
             Assert-Equal (Get-Digest (Join-Path $destination "distribution/${prefix}boot/future-runtime.dat")) (Get-Digest (Join-Path $fixture 'boot/future-runtime.dat')) 'binary bytes'
         }
@@ -428,7 +407,6 @@ function Test-Updater {
         Pack-Fixture
         Write-Text (Join-Path $fixture 'boot/wrapper.jar') 'tampered'
         Invoke-Tar @('-czf', $archive, '-C', (Split-Path -Parent $fixture), 'wrapper-1.0.0')
-        Write-Text "$archive.sha256" ((Get-Digest $archive) + "  wrapper-1.0.0.tar.gz`n")
         Expect-Rejection { Import-Release $archive '' $destination $false }
         $launcher = [IO.File]::ReadAllText((Join-Path $fixture 'bin/service.sh'))
         Write-Text (Join-Path $fixture 'bin/service.sh') 'unrecognized'
@@ -444,7 +422,16 @@ function Test-Updater {
         New-Directory (Join-Path $sandbox 'conf')
         Write-Text (Join-Path $sandbox 'conf/wrapper.conf') 'preserve configuration'
         Import-Release $archive '' $destination $true
+        Write-Text (Join-Path $fixture 'boot/wrapper.jar') 'updated release jar'
+        $configuration = Join-Path $destination 'wrapper.conf'
+        Write-Text $configuration ([IO.File]::ReadAllText($configuration).Replace('wrapper.logfile.maxfiles=3', 'wrapper.logfile.maxfiles=7'))
+        Pack-Fixture
         Import-Release $archive '' $destination $true
+        Assert-Equal ([IO.File]::ReadAllText((Join-Path $destination 'VERSION'))) "1.0.0`n" 'same release version'
+        foreach ($prefix in @('', 'agent/')) {
+            Assert-Equal ([IO.File]::ReadAllText((Join-Path $destination "distribution/${prefix}boot/wrapper.jar"))) 'updated release jar' 'same version import'
+            if (-not ([IO.File]::ReadAllText((Join-Path $destination "distribution/${prefix}conf/wrapper.conf"))).Contains('wrapper.logfile.maxfiles=7')) { throw 'Test failed: configuration was not regenerated' }
+        }
         Assert-Equal ([IO.File]::ReadAllText((Join-Path $sandbox 'conf/wrapper.conf'))) 'preserve configuration' 'sandbox configuration'
         Assert-Equal (Get-Digest (Join-Path $sandbox 'agent/boot/wrapper.jar')) (Get-Digest (Join-Path $fixture 'boot/wrapper.jar')) 'sandbox binaries'
         $checkout = Join-Path $temporary 'local checkout'
@@ -456,10 +443,20 @@ function Test-Updater {
         Copy-Item -LiteralPath (Join-Path $fixture 'bin/service.sh') -Destination (Join-Path $checkout 'resources/App.sh.in')
         Copy-Item -LiteralPath (Join-Path $fixture 'bin/service.bat') -Destination (Join-Path $checkout 'resources/AppCommand.bat.in')
         Update-Local $checkout $destination $true
-        Test-Manifest $destination
+        if (Test-Path -LiteralPath (Join-Path $destination 'SHA256SUMS')) { throw 'Test failed: per-file manifest was generated' }
         Assert-Equal ([IO.File]::ReadAllText((Join-Path $destination 'VERSION'))) "2.0.0-local`n" 'local version'
         Assert-Equal ([IO.File]::ReadAllText((Join-Path $sandbox 'boot/wrapper.jar'))) 'local jar' 'local sandbox refresh'
         Assert-Equal (Get-Digest (Join-Path $destination 'distribution/boot/wrapper-linux-arm-64')) (Get-Digest (Join-Path $fixture 'boot/wrapper-linux-arm-64')) 'unbuilt platform retention'
+        Write-Text (Join-Path $checkout 'dist/boot/wrapper.jar') 'updated local jar'
+        Write-Text (Join-Path $checkout 'dist/boot/wrapper-windows-x86-64.exe') 'updated local binary'
+        Write-Text $configuration ([IO.File]::ReadAllText($configuration).Replace('wrapper.restart.delay=5', 'wrapper.restart.delay=2'))
+        Update-Local $checkout $destination $true
+        Assert-Equal ([IO.File]::ReadAllText((Join-Path $destination 'VERSION'))) "2.0.0-local`n" 'same local version'
+        foreach ($prefix in @('', 'agent/')) {
+            Assert-Equal ([IO.File]::ReadAllText((Join-Path $destination "distribution/${prefix}boot/wrapper.jar"))) 'updated local jar' 'same version local update'
+            Assert-Equal ([IO.File]::ReadAllText((Join-Path $sandbox "${prefix}boot/wrapper-windows-x86-64.exe"))) 'updated local binary' 'same version sandbox refresh'
+            if (-not ([IO.File]::ReadAllText((Join-Path $destination "distribution/${prefix}conf/wrapper.conf"))).Contains('wrapper.restart.delay=2')) { throw 'Test failed: local configuration was not regenerated' }
+        }
         Assert-Equal (Get-ReleaseName '<a href="wrapper-1.0.0.tar.gz">release</a><a HREF=''wrapper-1.0.0.tar.gz''>duplicate</a>') 'wrapper-1.0.0.tar.gz' 'release discovery'
         Expect-Rejection { Get-ReleaseName '<a href="wrapper-1.0.0.tar.gz">one</a><a href="wrapper-2.0.0.tar.gz">two</a>' }
         Expect-Rejection { Get-ReleaseName '<a href="../wrapper-1.0.0.tar.gz">invalid</a>' }

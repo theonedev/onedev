@@ -26,6 +26,9 @@ them using the same verification and adaptation described below. The site contai
 the latest successful publication. Downloads are removed after the update.
 Review and commit the updated files in this directory with the server changes.
 
+Every remote or local update imports the files and regenerates the prepared
+server and agent configurations, even when the version is unchanged.
+
 For local testing, build in the sibling wrapper checkout and import its
 output directly, without creating or downloading a release archive:
 
@@ -51,7 +54,7 @@ server-product\wrapper\update.bat import C:\downloads\wrapper-VERSION.tar.gz
 
 Pass `/path/to/wrapper` for a checkout elsewhere. This copies the
 available binaries and `wrapper.jar` from `dist/boot`, adapts the checkout's
-launcher templates, and refreshes both server and agent files and checksums.
+launcher templates, and refreshes both server and agent files.
 Platforms absent from the local build retain their bundled binaries, so a
 host-only `./build.sh` is sufficient. All binaries already in `dist/boot` are
 imported, including those from previous builds. `VERSION` is marked with a
@@ -86,11 +89,11 @@ and its `.sha256` together, then run:
 ./server-product/wrapper/update.sh import /path/to/wrapper-VERSION.tar.gz
 ```
 
-The importer verifies the archive and file checksums, copies all upstream boot
-files and adapts generic launchers for server/agent and one-shot utilities.
-It renders server and agent configurations from
-`wrapper.conf` and regenerates `SHA256SUMS`. These integration rules live in the
-server project. The agent configuration retains the `agentVersion` placeholder,
+The importer verifies the archive's `.sha256` checksum. It accepts both
+`wrapper-latest.tar.gz` and versioned archives, copies all upstream boot files,
+and adapts generic launchers for server/agent and one-shot utilities. It renders
+server and agent configurations from `wrapper.conf`. These integration rules
+live in the server project. The agent configuration retains the `agentVersion` placeholder,
 which is resolved when assembling a standalone agent or downloading one.
 
 `distribution/` contains the exact installation-relative files Maven will copy:
