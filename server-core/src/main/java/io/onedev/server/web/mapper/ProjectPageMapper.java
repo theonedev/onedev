@@ -64,6 +64,10 @@ public class ProjectPageMapper extends BasePageMapper {
 		Url normalizedUrl = ProjectMapperUtils.normalize(request.getUrl());
 
 		if (normalizedUrl != null && urlStartsWithMountedSegments(normalizedUrl)) {
+			// The project root should not act as a fallback for unknown project routes.
+			if (mountSegments.length == 1 && normalizedUrl.getSegments().size() > 1)
+				return null;
+
 			// try to extract page and component information from URL
 			PageComponentInfo info = getPageComponentInfo(normalizedUrl);
 			PageParameters pageParameters = extractPageParameters(request, normalizedUrl);
