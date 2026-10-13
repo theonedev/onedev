@@ -8,8 +8,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,11 +112,7 @@ public class ProjectSiteFileResource extends AbstractResource {
 		response.setContentType(fileInfo.getMediaType());
 		response.setContentLength(fileInfo.getLength());
 		
-		try {
-			response.setFileName(URLEncoder.encode(filePath, StandardCharsets.UTF_8.name()));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		response.setFileName(filePath.substring(filePath.lastIndexOf('/') + 1));
 
 		String finalFilePath = filePath;
 		response.setWriteCallback(new WriteCallback() {
