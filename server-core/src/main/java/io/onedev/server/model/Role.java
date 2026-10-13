@@ -379,8 +379,8 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.jobPrivileges = (ArrayList<JobPrivilege>) jobPrivileges;
 	}
 
-	@Editable(order=750, name="Access Sites", placeholder="No accessible named sites", description="Optionally specify "
-			+ "space-separated site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
+	@Editable(order=750, name="Accessible Sites", placeholder="No accessible named sites", description="Optionally specify "
+			+ "space-separated accessible site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
 			+ "The public site is always accessible")
 	@DependsOn(property="manageProject", value="false")
 	@Patterns
