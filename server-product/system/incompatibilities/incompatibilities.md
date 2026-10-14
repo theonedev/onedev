@@ -1,3 +1,9 @@
+# 16.8.9
+
+### Supported Platforms
+
+OneDev server and agent distributions now support only macOS on Apple Silicon (arm64), Windows on amd64/arm64, and Linux on amd64/arm64. Intel Macs and all other architectures are no longer supported.
+
 # 16.8.4
 
 ### CI/CD
