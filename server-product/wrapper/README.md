@@ -101,10 +101,13 @@ which is resolved when assembling a standalone agent or downloading one.
 - `boot/`, `bin/`, and `conf/` contain the server's wrapper files.
 - `agent/boot/`, `agent/bin/`, and `agent/conf/` contain the agent's wrapper files.
 
-The service names are `onedev.server` and `onedev.agent` on all platforms.
-Windows uses these SCM names, Linux uses `onedev.server.service` and
-`onedev.agent.service` (or the same names without `.service` for SysV), and
-macOS uses these names as launchd labels and plist filenames.
+The service names (`wrapper.name`) are `onedev.server` and `onedev.agent`.
+Windows uses these SCM names, and Linux uses `onedev.server.service` and
+`onedev.agent.service` (or the same names without `.service` for SysV).
+On macOS, `wrapper.launchd.label` selects `io.onedev.server` and `io.onedev.agent`
+as the launchd labels and plist filenames (with `.plist` appended). Stop/remove
+an existing service using its old configuration before changing its label, then
+install/start with the new configuration.
 
 Keep this prepared tree in version control. The Unix maintenance script uses Bash 3.2+
 and standard Unix tools (`sha256sum` on Linux or `shasum` on macOS). The Windows
@@ -148,15 +151,20 @@ The Java lifecycle API is `io.onedev.wrapper.WrapperManager`, with
 `restartAndReturn()` and `stopAndReturn(int)`. The launcher class is
 `io.onedev.wrapper.WrapperSimpleApp`. Update the wrapper and application jars
 together when migrating from an earlier Java API package.
-Stop and remove an existing service with its old launcher and configuration before
-replacing wrapper files or changing service names. Set `wrapper.name` to
-`onedev.server` or `onedev.agent`, and `wrapper.java.mainclass` to
-`io.onedev.wrapper.WrapperSimpleApp`, then install and start the service again.
 Server upgrades replace boot files and scripts while retaining `wrapper.conf`
-and updating its lifecycle bridge class.
+and updating its lifecycle bridge class. When upgrading from JSW (16.8.8 or
+earlier) on macOS, stop and remove the service using the old launcher before
+upgrading, then install and start it using the new launcher. The old JSW launchd
+label is not migrated automatically. Existing Linux and Windows service names
+are retained. Fresh installations use the new names and labels documented above.
+Intel Macs are not supported by the new wrapper.
+
 Existing agents update only application jars: migrating their wrapper requires
 stopping them and replacing `boot` and `bin` from a new agent distribution while
-retaining configuration. Newly downloaded agents use Wrapper.
+retaining configuration. Set `wrapper.java.mainclass=io.onedev.wrapper.WrapperSimpleApp`
+and, on macOS, remove the service with the old launcher before replacing these
+files, then install and start it with the new launcher. Newly downloaded agents
+use Wrapper.
 
 Review the standalone project's configuration compatibility list before migrating
 custom JSW features. Native SCM, launchd, and systemd acceptance testing is still
