@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -58,9 +59,11 @@ public class DefaultWorkExecutionService implements WorkExecutionService {
 	}
 	
 	private synchronized <T> Future<T> call(int priority, String groupId, Callable<T> callable) {
-		return executorService.submit(() -> {
+		var future = new FutureTask<T>(callable);
+		// Keep cleanup outside the cancellable task so it runs even if cancelled before execution.
+		executorService.execute(() -> {
 			try {
-				return callable.call();
+				future.run();
 			} finally {
 				synchronized (DefaultWorkExecutionService.this) {
 					var key = new Key(priority, groupId);
@@ -73,6 +76,7 @@ public class DefaultWorkExecutionService implements WorkExecutionService {
 				}
 			}
 		});
+		return future;
 	}
 	
 	@Override
