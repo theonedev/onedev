@@ -1,8 +1,8 @@
-# 16.8.9
+# 16.9.0
 
-### Supported Platforms
+### Service Wrapper
 
-OneDev server and agent distributions now support only macOS on Apple Silicon (arm64), Windows on amd64/arm64, and Linux on amd64/arm64. Intel Macs and all other architectures are no longer supported.
+JSW has been replaced with OneDev Wrapper. Server and agent now support only Linux/Windows on amd64/arm64 and macOS on Apple Silicon.
 
 # 16.8.4
 

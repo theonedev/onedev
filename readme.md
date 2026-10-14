@@ -16,6 +16,11 @@
 <p style="margin-bottom: 20px;">
 </div>
 
+## Supported platforms
+
+OneDev server and agent distributions support Linux and Windows on amd64/arm64, and macOS on Apple Silicon.
+Starting with OneDev 16.9.0, Java Service Wrapper (JSW) has been replaced with OneDev Wrapper. Intel Macs, FreeBSD, and other platforms are no longer supported.
+See the [installation guide](https://docs.onedev.io/installation-guide/run-on-bare-metal) for setup instructions.
 
 ## 🔎 Out-of-box code search and navigation
 
