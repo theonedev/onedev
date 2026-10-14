@@ -1,9 +1,3 @@
-# 16.8.9
-
-### macOS Services
-
-OneDev now uses its own service wrapper instead of Java Service Wrapper (JSW). When upgrading from 16.8.8 or earlier, existing macOS services must be reinstalled because the launchd labels have changed. **Before upgrading**, stop and remove the service using the old installation: `sudo bin/server.sh stop`, then `sudo bin/server.sh remove`. After upgrading, run `sudo bin/server.sh install`, then `sudo bin/server.sh start`. When migrating an agent to the new wrapper, follow the same sequence using `bin/agent.sh`.
-
 # 16.8.4
 
 ### CI/CD

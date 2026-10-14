@@ -152,19 +152,26 @@ The Java lifecycle API is `io.onedev.wrapper.WrapperManager`, with
 `io.onedev.wrapper.WrapperSimpleApp`. Update the wrapper and application jars
 together when migrating from an earlier Java API package.
 Server upgrades replace boot files and scripts while retaining `wrapper.conf`
-and updating its lifecycle bridge class. When upgrading from JSW (16.8.8 or
-earlier) on macOS, stop and remove the service using the old launcher before
-upgrading, then install and start it using the new launcher. The old JSW launchd
-label is not migrated automatically. Existing Linux and Windows service names
-are retained. Fresh installations use the new names and labels documented above.
-Intel Macs are not supported by the new wrapper.
+and updating its lifecycle bridge class. When migrating a JSW configuration
+(16.8.8 or earlier), the upgrader sets a missing `wrapper.launchd.label` to
+`org.tanukisoftware.wrapper.<existing wrapper.name>`. Explicit labels are preserved.
+This retains the standard old macOS registration and its `launchdinternal`
+launcher argument, so an Apple Silicon service can be stopped before the upgrade
+and started afterward without uninstalling/reinstalling it. Existing Linux and
+Windows service names are also retained. Fresh installations use the new names
+and labels documented above. Intel Macs are not supported by the new wrapper.
 
-Existing agents update only application jars: migrating their wrapper requires
-stopping them and replacing `boot` and `bin` from a new agent distribution while
-retaining configuration. Set `wrapper.java.mainclass=io.onedev.wrapper.WrapperSimpleApp`
-and, on macOS, remove the service with the old launcher before replacing these
-files, then install and start it with the new launcher. Newly downloaded agents
-use Wrapper.
+Existing agents update only application jars and continue using their installed
+wrapper. The agent supports both the new WrapperManager and JSW's WrapperManager
+for restart and stop requests, so automatic application updates do not require
+migrating the native wrapper or reinstalling the service.
+
+To migrate an existing agent's native wrapper, stop it and replace `boot` and
+`bin` from a new agent distribution while retaining configuration. Set
+`wrapper.java.mainclass=io.onedev.wrapper.WrapperSimpleApp` and, on macOS, set
+`wrapper.launchd.label` to the installed JSW label (normally
+`org.tanukisoftware.wrapper.onedevagent`). Keep the old `wrapper.name` and launcher
+path to retain the existing service registration. Newly downloaded agents use Wrapper.
 
 Review the standalone project's configuration compatibility list before migrating
 custom JSW features. Native SCM, launchd, and systemd acceptance testing is still

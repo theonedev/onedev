@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.inject.Singleton;
 
@@ -985,9 +986,7 @@ public class Upgrade extends AbstractPlugin {
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
 			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, UTF_8);
-			wrapperConf = wrapperConf.replaceAll(
-					"(?m)^(\\h*wrapper\\.java\\.mainclass\\h*=\\h*)[\\w.]+\\.WrapperSimpleApp\\h*$",
-					"$1io.onedev.wrapper.WrapperSimpleApp");
+			wrapperConf = migrateWrapperConf(wrapperConf);
 			wrapperConf = Strings.CS.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = Strings.CS.replace(wrapperConf, "com.gitplex.launcher.bootstrap.Bootstrap", 
@@ -1199,6 +1198,27 @@ public class Upgrade extends AbstractPlugin {
 		restoreExecutables(upgradeDir);
 	}
 	
+	static String migrateWrapperConf(String wrapperConf) {
+		var mainClassPattern = Pattern.compile(
+				"(?m)^(\\h*wrapper\\.java\\.mainclass\\h*=\\h*)([\\w.]+\\.WrapperSimpleApp)(\\h*(?:#.*)?)$");
+		var mainClassMatcher = mainClassPattern.matcher(wrapperConf);
+		String mainClass = null;
+		while (mainClassMatcher.find())
+			mainClass = mainClassMatcher.group(2);
+		if (mainClass != null && !mainClass.equals("io.onedev.wrapper.WrapperSimpleApp")
+				&& !Pattern.compile("(?m)^\\h*wrapper\\.launchd\\.label\\h*=").matcher(wrapperConf).find()) {
+			// JSW installations (16.8.8 and earlier) keep their existing launchd plist.
+			// Detect the old bridge before replacing it so subsequent upgrades are idempotent.
+			var nameMatcher = Pattern.compile("(?m)^\\h*wrapper\\.name\\h*=([^\\r\\n#]*)").matcher(wrapperConf);
+			String name = null;
+			while (nameMatcher.find())
+				name = nameMatcher.group(1).trim();
+			if (name != null && !name.isEmpty())
+				wrapperConf += lineSeparator() + "wrapper.launchd.label=org.tanukisoftware.wrapper." + name;
+		}
+		return mainClassPattern.matcher(wrapperConf).replaceAll("$1io.onedev.wrapper.WrapperSimpleApp$3");
+	}
+
 	protected void cleanAndCopy(File srcDir, File destDir) {
 		try {
 			FileUtils.cleanDir(destDir);
