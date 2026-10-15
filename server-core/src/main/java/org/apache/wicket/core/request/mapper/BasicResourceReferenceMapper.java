@@ -40,6 +40,8 @@ import org.apache.wicket.util.lang.Args;
 import org.apache.wicket.util.lang.Checks;
 import org.apache.wicket.util.string.Strings;
 
+import io.onedev.server.buildspec.param.ParamUtils;
+
 /**
  * Generic {@link ResourceReference} encoder that encodes and decodes non-mounted
  * {@link ResourceReference}s.
@@ -162,6 +164,10 @@ public class BasicResourceReferenceMapper extends AbstractResourceReferenceMappe
 
 	protected Class<?> resolveClass(String name)
 	{
+		// Resolving parameter bean classes deserializes data embedded in their names.
+		// Resource URLs are untrusted and must never trigger this deserialization.
+		if (name.startsWith(ParamUtils.PARAM_BEAN_CLASS_NAME_PREFIX))
+			return null;
 		return WicketObjects.resolveClass(name);
 	}
 

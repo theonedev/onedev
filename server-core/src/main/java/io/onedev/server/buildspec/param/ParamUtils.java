@@ -40,7 +40,7 @@ public class ParamUtils {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ParamInstances.class);
 	
-	private static final String PARAM_BEAN_CLASS_NAME_PREFIX = "BuildParamBean";
+	public static final String PARAM_BEAN_CLASS_NAME_PREFIX = "BuildParamBean";
 	
 	public static void validateParamValues(List<List<String>> values) {
 		if (values.isEmpty())
