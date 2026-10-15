@@ -42,6 +42,8 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
@@ -77,6 +79,8 @@ public class OpenIdConnector extends SsoConnector {
 	private static final String SESSION_ATTR_PROVIDER_METADATA = "endpoints";
 	
 	private static final String SESSION_ATTR_STATE = "state";
+
+	private static final String SESSION_ATTR_CODE_VERIFIER = "codeVerifier";
 
 	private static final String SESSION_ATTR_ID_TOKEN = "idToken";
 	
@@ -148,8 +152,14 @@ public class OpenIdConnector extends SsoConnector {
 				if (state == null || !state.equals(authenticationSuccessResponse.getState().getValue()))
 					throw new AuthenticationException(_T("Unsolicited OIDC authentication response"));
 				
+				String codeVerifier = (String) Session.get().getAttribute(SESSION_ATTR_CODE_VERIFIER);
+				Session.get().removeAttribute(SESSION_ATTR_CODE_VERIFIER);
+				if (codeVerifier == null)
+					throw new AuthenticationException(_T("Unsolicited OIDC authentication response"));
+				
 				AuthorizationGrant codeGrant = new AuthorizationCodeGrant(
-						authenticationSuccessResponse.getAuthorizationCode(), getCallbackUri(providerName));
+						authenticationSuccessResponse.getAuthorizationCode(), getCallbackUri(providerName),
+						new CodeVerifier(codeVerifier));
 
 				ClientID clientID = new ClientID(getClientId());
 				com.nimbusds.oauth2.sdk.auth.Secret clientSecret = new com.nimbusds.oauth2.sdk.auth.Secret(getClientSecret());
@@ -319,14 +329,19 @@ public class OpenIdConnector extends SsoConnector {
 			
 			State state = new State("OIDC-" + UUID.randomUUID());
 			Session.get().setAttribute(SESSION_ATTR_STATE, state.getValue());
+			CodeVerifier codeVerifier = new CodeVerifier();
+			Session.get().setAttribute(SESSION_ATTR_CODE_VERIFIER, codeVerifier.getValue());
 			Session.get().setAttribute(SESSION_ATTR_PROVIDER_METADATA, discoverProviderMetadata());
 			
 			String scopes = getRequestScopes();
 			
-			AuthenticationRequest request = new AuthenticationRequest(
-					new URI(getCachedProviderMetadata().getAuthorizationEndpoint()),
-				    new ResponseType("code"), Scope.parse(scopes), clientID, getCallbackUri(providerName),
-				    state, new Nonce());
+			AuthenticationRequest request = new AuthenticationRequest.Builder(
+					new ResponseType("code"), Scope.parse(scopes), clientID, getCallbackUri(providerName))
+					.endpointURI(new URI(getCachedProviderMetadata().getAuthorizationEndpoint()))
+					.state(state)
+					.nonce(new Nonce())
+					.codeChallenge(codeVerifier, CodeChallengeMethod.S256)
+					.build();
 			return request.toURI().toString();
 		} catch (URISyntaxException|SerializeException e) {
 			throw new RuntimeException(e);
