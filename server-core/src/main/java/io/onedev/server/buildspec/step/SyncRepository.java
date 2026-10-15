@@ -1,9 +1,6 @@
 package io.onedev.server.buildspec.step;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,6 +10,7 @@ import jakarta.validation.constraints.Pattern;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
+import com.google.common.net.PercentEscaper;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
@@ -30,6 +28,8 @@ import io.onedev.server.model.Project;
 public abstract class SyncRepository extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final PercentEscaper CREDENTIAL_ESCAPER = new PercentEscaper("-._~", false);
 
 	private String remoteUrl;
 	
@@ -121,14 +121,11 @@ public abstract class SyncRepository extends ServerSideStep {
 	}
 	
 	public String getRemoteUrlWithCredential(Build build) {
+		String encodedUserName = getUserName() != null ? CREDENTIAL_ESCAPER.escape(getUserName()) : null;
 		String encodedPassword = null;
 		if (getPasswordSecret() != null) {
-			try {
-				String password = build.getJobAuthorizationContext().getSecretValue(getPasswordSecret());
-				encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8.name());
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
-			}
+			String password = build.getJobAuthorizationContext().getSecretValue(getPasswordSecret());
+			encodedPassword = CREDENTIAL_ESCAPER.escape(password);
 		}
 
 		String protocol = StringUtils.substringBefore(getRemoteUrl(), "//");
@@ -140,10 +137,10 @@ public abstract class SyncRepository extends ServerSideStep {
 		
 		String remoteUrlWithCredentials = protocol + "//";
 		
-		if (getUserName() != null && encodedPassword != null)
-			remoteUrlWithCredentials += getUserName() + ":" + encodedPassword + "@" + hostAndPath;
-		else if (getUserName() != null)
-			remoteUrlWithCredentials += getUserName() + "@" + hostAndPath;
+		if (encodedUserName != null && encodedPassword != null)
+			remoteUrlWithCredentials += encodedUserName + ":" + encodedPassword + "@" + hostAndPath;
+		else if (encodedUserName != null)
+			remoteUrlWithCredentials += encodedUserName + "@" + hostAndPath;
 		else if (encodedPassword != null)
 			remoteUrlWithCredentials += encodedPassword + "@" + hostAndPath;
 		else
