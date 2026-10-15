@@ -806,6 +806,10 @@ public class GitUtils {
 				
 			}).checkReturnCode();
 			
+			// Restrict Git LFS to our trusted config. In bare repositories, GIT_CONFIG also
+			// prevents its "git config --blob HEAD:.lfsconfig" from reading repository content.
+			git.envs().put("GIT_CONFIG", new File(homeDir, ".gitconfig").getAbsolutePath());
+
 			return task.call(git);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

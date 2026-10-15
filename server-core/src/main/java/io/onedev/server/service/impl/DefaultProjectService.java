@@ -638,7 +638,15 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				if (withLfs)
 					// Use origin instead of real url as otherwise the command will 
 					// report EOF error when fetch from a local path
-					new LfsFetchAllCommand(toGitDir, "origin").run();
+					new LfsFetchAllCommand(toGitDir, "origin") {
+						@Override
+						protected Commandline newGit() {
+							var git = super.newGit();
+							// Ignore HEAD:.lfsconfig while retaining the local origin URL.
+							git.envs().put("GIT_CONFIG", new File(toGitDir, "config").getAbsolutePath());
+							return git;
+						}
+					}.run();
 			} else {
 				var remoteUrl = clusterService.getServerUrl(fromActiveServer) + "/" + fromPath;
 				callWithClusterCredential(git -> {

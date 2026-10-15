@@ -1,33 +1,40 @@
 package io.onedev.server.git;
 
+import static com.google.common.hash.Hashing.sha256;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static jakarta.servlet.http.HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.regex.Pattern;
 
 import org.apache.tika.mime.MediaType;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
+
+import com.google.common.hash.HashingInputStream;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.exception.HttpResponseAwareException;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ContentDetector;
+import io.onedev.server.util.IOUtils;
 
 public class LfsObject implements Serializable {
 	
@@ -128,29 +135,36 @@ public class LfsObject implements Serializable {
 		}
 	}
 	
-	public OutputStream getOutputStream() {
-		Lock writeLock = getLock().writeLock();
-		writeLock.lock();
-		try {
-			return new FilterOutputStream(new BufferedOutputStream(new FileOutputStream(getFile()), BUFFER_SIZE)) {
-				@Override
-				public void write(@NotNull byte[] b, int off, int len) throws IOException {
-					out.write(b, off, len);
-				}
+	public static void copyUpload(InputStream input, OutputStream output) throws IOException {
+		long maxSize = (long) OneDev.getInstance(SettingService.class)
+				.getPerformanceSetting().getMaxGitLFSFileSize() * 1024 * 1024;
+		// Read one extra byte to distinguish an exact-size upload from an oversized one.
+		if (maxSize < 0 || IOUtils.copyLarge(input, output, 0, maxSize + 1, new byte[BUFFER_SIZE]) > maxSize)
+			throw new HttpResponseAwareException(SC_REQUEST_ENTITY_TOO_LARGE,
+					"Exceeded max acceptable LFS file size " + maxSize);
+	}
 
-				@Override
-				public void close() throws IOException {
-					try {
-						super.close();
-					} finally {
-						writeLock.unlock();
-					}
-				}
-				
-			};
-		} catch (FileNotFoundException e) {
-			writeLock.unlock();
-			throw new RuntimeException(e);
+	public void upload(InputStream input) throws IOException {
+		File file = getFile();
+		// Keep the upload on the same filesystem so publishing it can be atomic.
+		var tempFile = Files.createTempFile(file.getParentFile().toPath(), "upload-", ".tmp");
+		try {
+			var is = new HashingInputStream(sha256(), input);
+			try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(tempFile), BUFFER_SIZE)) {
+				copyUpload(is, os);
+			}
+			if (!objectId.equals(is.hash().toString()))
+				throw new ExplicitException("Invalid uploaded content: hash not equals to object id");
+
+			Lock writeLock = getLock().writeLock();
+			writeLock.lock();
+			try {
+				Files.move(tempFile, file.toPath(), ATOMIC_MOVE, REPLACE_EXISTING);
+			} finally {
+				writeLock.unlock();
+			}
+		} finally {
+			Files.deleteIfExists(tempFile);
 		}
 	}
 	

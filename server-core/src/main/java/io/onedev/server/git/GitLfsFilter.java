@@ -1,6 +1,5 @@
 package io.onedev.server.git;
 
-import static com.google.common.hash.Hashing.sha256;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
@@ -12,6 +11,7 @@ import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static jakarta.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
 import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static jakarta.servlet.http.HttpServletResponse.SC_NOT_IMPLEMENTED;
+import static jakarta.servlet.http.HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 import jakarta.inject.Inject;
@@ -49,7 +48,6 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import io.onedev.server.persistence.dao.Restrictions;
 import org.jspecify.annotations.Nullable;
@@ -58,11 +56,11 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.hash.HashingInputStream;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.exception.HttpResponseAwareException;
 import io.onedev.server.model.GitLfsLock;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
@@ -254,50 +252,37 @@ public class GitLfsFilter implements Filter {
 
 				if (lfsObject != null) {
 					String activeServer = projectService.getActiveServer(lfsObject.getProjectId(), true);
-					var hash = new AtomicReference<String>(null);
-					try {
-						if (activeServer.equals(clusterService.getLocalServerAddress())) {
-							try (
-									HashingInputStream is = new HashingInputStream(
-											sha256(), httpRequest.getInputStream());
-									OutputStream os = lfsObject.getOutputStream()) {
-								IOUtils.copy(is, os, BUFFER_SIZE);
-								hash.set(Hex.encodeHexString(is.hash().asBytes()));
-							}
-						} else {
-							Client client = ClientBuilder.newClient();
-							client.property(REQUEST_ENTITY_PROCESSING, "CHUNKED");
-							try {
-								String serverUrl = clusterService.getServerUrl(activeServer);
-								WebTarget target = client.target(serverUrl)
-										.path("~api/cluster/lfs")
-										.queryParam("projectId", lfsObject.getProjectId())
-										.queryParam("objectId", lfsObject.getObjectId());
-								Invocation.Builder builder = target.request();
-								builder.header(AUTHORIZATION,
-										BEARER + " " + clusterService.getCredential());
-
-								StreamingOutput os = output -> {
-									try (HashingInputStream is = new HashingInputStream(
-											sha256(), httpRequest.getInputStream())) {
-										IOUtils.copy(is, output, BUFFER_SIZE);
-										hash.set(Hex.encodeHexString(is.hash().asBytes()));
-									} finally {
-										output.close();
-									}
-								};
-
-								try (Response lfsResponse = builder.post(Entity.entity(os, APPLICATION_OCTET_STREAM))) {
-									KubernetesHelper.checkStatus(lfsResponse);
-								}
-							} finally {
-								client.close();
-							}
+					if (activeServer.equals(clusterService.getLocalServerAddress())) {
+						try (InputStream is = httpRequest.getInputStream()) {
+							lfsObject.upload(is);
 						}
-					} finally {
-						if (!objectId.equals(hash.get())) {
-							lfsObject.delete();
-							throw new RuntimeException("Invalid uploaded content: hash not equals to object id");
+					} else {
+						Client client = ClientBuilder.newClient();
+						client.property(REQUEST_ENTITY_PROCESSING, "CHUNKED");
+						try {
+							String serverUrl = clusterService.getServerUrl(activeServer);
+							WebTarget target = client.target(serverUrl)
+									.path("~api/cluster/lfs")
+									.queryParam("projectId", lfsObject.getProjectId())
+									.queryParam("objectId", lfsObject.getObjectId());
+							Invocation.Builder builder = target.request();
+							builder.header(AUTHORIZATION,
+									BEARER + " " + clusterService.getCredential());
+
+							StreamingOutput os = output -> {
+								try (output; InputStream is = httpRequest.getInputStream()) {
+									LfsObject.copyUpload(is, output);
+								}
+							};
+
+							try (Response lfsResponse = builder.post(Entity.entity(os, APPLICATION_OCTET_STREAM))) {
+								if (lfsResponse.getStatus() == SC_REQUEST_ENTITY_TOO_LARGE)
+									throw new HttpResponseAwareException(SC_REQUEST_ENTITY_TOO_LARGE,
+											lfsResponse.readEntity(String.class));
+								KubernetesHelper.checkStatus(lfsResponse);
+							}
+						} finally {
+							client.close();
 						}
 					}
 				}

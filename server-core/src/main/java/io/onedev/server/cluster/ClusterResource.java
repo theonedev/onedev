@@ -381,8 +381,8 @@ public class ClusterResource {
 		if (!SecurityUtils.isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
-		try (input; OutputStream os = new LfsObject(projectId, objectId).getOutputStream()) {
-			IOUtils.copy(input, os, BUFFER_SIZE);
+		try (input) {
+			new LfsObject(projectId, objectId).upload(input);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
