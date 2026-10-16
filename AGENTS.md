@@ -13,6 +13,9 @@ files are generated automatically.
 Do not add tests for trivial or minor changes unless the user explicitly asks
 for them.
 
+Prefer field injection over constructor injection wherever possible for
+`@Singleton` services and Wicket components/pages.
+
 Users may continue privileged work in an existing session after their
 privileges are revoked. Revoked privileges must be denied in a new session.
 Do not report continued access within the existing session as a security bug
