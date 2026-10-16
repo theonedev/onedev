@@ -20,6 +20,7 @@ import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.wizard.WizardPanel;
@@ -131,7 +132,13 @@ public class ProjectImportPage extends LayoutPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getAuthUser() != null;
+		var parentProjectPath = importer.getParentProjectPath();
+		if (parentProjectPath != null) {
+			var parentProject = OneDev.getInstance(ProjectService.class).findByPath(parentProjectPath);
+			return parentProject != null && SecurityUtils.canCreateChildren(parentProject);
+		} else {
+			return SecurityUtils.canCreateRootProjects();
+		}
 	}
 	
 	@Override

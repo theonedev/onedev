@@ -1023,7 +1023,7 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		if (canCreateProjects) {
+		if (getParentProject() != null ? canCreateProjects : SecurityUtils.canCreateRootProjects()) {
 			add(new MenuLink("importProjects") {
 	
 				@Override

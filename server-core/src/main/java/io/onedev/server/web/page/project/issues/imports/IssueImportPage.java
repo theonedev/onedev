@@ -134,7 +134,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.getAuthUser() != null;
+		return SecurityUtils.canManageIssues(getProject());
 	}
 	
 	@Override
