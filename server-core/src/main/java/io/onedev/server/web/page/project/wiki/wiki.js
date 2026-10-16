@@ -1,5 +1,5 @@
 onedev.server.wiki = {
-	init: function(navigationId, navigate, initialState) {
+	init: function(navigationId, navigate) {
 		var $navigation = $("#" + navigationId);
 		var $view = $navigation.parent();
 		var width = parseInt(Cookies.get("wiki.navigation.width"));
@@ -52,8 +52,6 @@ onedev.server.wiki = {
 				if (state.scroll)
 					$(".wiki-content").scrollLeft(state.scroll.left).scrollTop(state.scroll.top);
 			});
-		if (!history.state || !history.state.data)
-			onedev.server.history.replaceState(window.location.href, initialState, document.title);
 		$(window).resize();
 	},
 	onPageChanged: function(page) {

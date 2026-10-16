@@ -18,9 +18,6 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.SerializationUtils;
-
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -77,7 +74,6 @@ import io.onedev.server.model.support.code.ConventionalCommitChecker;
 import io.onedev.server.search.commit.PathCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.RevisionAndPath;
@@ -287,9 +283,7 @@ public class ProjectWikiPage extends ProjectPage {
 							"onedev.server.wiki.init('" + navigation.getMarkupId() + "', "
 							+ navigateBehavior.getCallbackFunction(
 									CallbackParameter.explicit("page"),
-									CallbackParameter.explicit("hash")) + ", '"
-							+ Base64.encodeBase64String(CryptoUtils.encrypt(
-									SerializationUtils.serialize(page))) + "');"));
+									CallbackParameter.explicit("hash")) + ");"));
 			}
 		};
 		view.setVisible(!editing && !creating && !missingHome);

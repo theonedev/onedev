@@ -436,17 +436,19 @@ public abstract class BasePage extends WebPage {
 		super.onBeforeRender();
 	}
 
+	private String encodeHistoryState(Serializable data) {
+		return Base64.encodeBase64String(CryptoUtils.encrypt(SerializationUtils.serialize(data)));
+	}
+
 	public void pushState(IPartialPageRequestHandler handler, String url, Serializable data) {
-		String encodedData = new String(Base64.encodeBase64(CryptoUtils.encrypt(SerializationUtils.serialize(data))));
 		String script = String.format("onedev.server.history.pushState('%s', '%s', '%s');",
-				url, encodedData, JavaScriptEscape.escapeJavaScript(getPageTitle()));
+				url, encodeHistoryState(data), JavaScriptEscape.escapeJavaScript(getPageTitle()));
 		handler.prependJavaScript(script);
 	}
 
 	public void replaceState(IPartialPageRequestHandler handler, String url, Serializable data) {
-		String encodedData = new String(Base64.encodeBase64(CryptoUtils.encrypt(SerializationUtils.serialize(data))));
 		String script = String.format("onedev.server.history.replaceState('%s', '%s', '%s');",
-				url, encodedData, JavaScriptEscape.escapeJavaScript(getPageTitle()));
+				url, encodeHistoryState(data), JavaScriptEscape.escapeJavaScript(getPageTitle()));
 		handler.prependJavaScript(script);
 	}
 
