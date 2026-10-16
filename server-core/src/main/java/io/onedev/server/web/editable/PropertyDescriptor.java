@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -123,7 +124,7 @@ public class PropertyDescriptor implements Serializable {
 	public boolean isPropertyRequired() {
 		Size size;
 		return getPropertyGetter().getReturnType().isPrimitive()
-				|| findAnnotation(NotNull.class) != null 
+				|| (!List.class.isAssignableFrom(getPropertyClass()) && findAnnotation(NotNull.class) != null)
 				|| findAnnotation(NotEmpty.class) != null
 				|| (size = findAnnotation(Size.class)) != null && size.min()>=1;
 	}
