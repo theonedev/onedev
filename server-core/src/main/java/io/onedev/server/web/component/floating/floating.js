@@ -3,6 +3,11 @@ onedev.server.floating = {
 		var $floating = $("#" + floatingId);
 		$floating.data("closeCallback", closeCallback);
 		$floating.data("animation", animation);
+		// Floating panels live under body, outside the modal that opened them.
+		// Keep Bootstrap's modal focus handler from stealing focus from their inputs.
+		$floating.on("focusin", function(e) {
+			e.stopPropagation();
+		});
 		
 		$floating.data("mouseUpOrTouchStart", function(e) {
 			if ($(".flatpickr-calendar.open").length == 0 

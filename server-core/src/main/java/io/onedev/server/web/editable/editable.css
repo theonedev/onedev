@@ -184,8 +184,16 @@
 
 .inplace-property-edit {
 	width: 300px !important;
-	border-radius: 0 !important;
 	box-shadow: none !important;
+}
+/* Square the dropdown join only when the property reaches the panel edge. */
+.inplace-property-edit:has(>.content>form>.property:last-child .select2-container--open.select2-container--below) {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+.inplace-property-edit:has(>.content>form>.property:first-child .select2-container--open.select2-container--above) {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 }
 .select2-dropdown.string-list .select2-results__message,
 .select2-dropdown.string-list .loading-results {
