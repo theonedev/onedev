@@ -87,6 +87,8 @@ import io.onedev.server.commandhandler.EnableInternalLogin;
 import io.onedev.server.commandhandler.RestoreDatabase;
 import io.onedev.server.commandhandler.Translate;
 import io.onedev.server.commandhandler.Upgrade;
+import io.onedev.server.crypto.CryptoService;
+import io.onedev.server.crypto.DefaultCryptoService;
 import io.onedev.server.data.DataService;
 import io.onedev.server.data.DefaultDataService;
 import io.onedev.server.entityreference.DefaultReferenceChangeService;
@@ -502,6 +504,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(SshService.class).to(DefaultSshService.class);
 		bind(MarkdownService.class).to(DefaultMarkdownService.class);
 		bind(SettingService.class).to(DefaultSettingService.class);
+		bind(CryptoService.class).to(DefaultCryptoService.class);
 		bind(DataService.class).to(DefaultDataService.class);
 		bind(TaskScheduler.class).to(DefaultTaskScheduler.class);
 		bind(PullRequestCommentService.class).to(DefaultPullRequestCommentService.class);

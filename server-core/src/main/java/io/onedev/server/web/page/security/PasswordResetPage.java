@@ -11,12 +11,12 @@ import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.persistence.SessionService;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.simple.SimplePage;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -114,7 +114,7 @@ public class PasswordResetPage extends SimplePage {
 							emailAddressValue = emailAddress.getValue();
 						}
 
-						String passwordResetCode = CryptoUtils.generateSecret();
+						String passwordResetCode = RandomStringUtils.secure().nextAlphanumeric(40);
 						user.setPasswordResetCode(passwordResetCode);
 						getUserService().update(user, null);
 

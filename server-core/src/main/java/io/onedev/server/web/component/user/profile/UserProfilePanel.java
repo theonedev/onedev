@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
@@ -66,7 +67,6 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenDa
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateRange;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
@@ -269,7 +269,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 						if (settingService.getMailConnector() != null) {
                             var user = getUser();
 							if (user.getPrimaryEmailAddress() != null && user.getPrimaryEmailAddress().isVerified()) {
-								String passwordResetCode = CryptoUtils.generateSecret();
+								String passwordResetCode = RandomStringUtils.secure().nextAlphanumeric(40);
 								user.setPasswordResetCode(passwordResetCode);
 								getUserService().update(user, null);
 

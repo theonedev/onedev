@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.DisabledAccountException;
 
 import com.hazelcast.core.HazelcastInstance;
@@ -25,7 +26,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.AccessTokenCache;
 
 @Singleton
@@ -116,7 +116,7 @@ public class DefaultAccessTokenService extends BaseEntityService<AccessToken> im
 
 	@Override
 	public String createTemporal(Long userId, long secondsToExpire) {
-		var value = CryptoUtils.generateSecret();
+		var value = RandomStringUtils.secure().nextAlphanumeric(40);
 		temporalAccessTokens.put(value, userId, secondsToExpire, TimeUnit.SECONDS);
 		return value;
 	}

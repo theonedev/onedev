@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 import jakarta.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.sshd.common.config.keys.KeyUtils;
@@ -86,7 +87,6 @@ import io.onedev.server.model.support.issue.CommitMessageFixSetting;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.ssh.SshKeyUtils;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.GpgUtils;
 import io.onedev.server.util.Pair;
@@ -2138,7 +2138,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					element.addElement("accessToken").setText(CryptoUtils.generateSecret());
+					element.addElement("accessToken").setText(RandomStringUtils.secure().nextAlphanumeric(40));
 					element.addElement("ssoInfo").addElement("subject").setText(UUID.randomUUID().toString());
 				}
 				dom.writeToFile(file, false);
@@ -2684,7 +2684,7 @@ public class DataMigrator {
 					element.addElement("ssoInfo").addElement("subject").setText(UUID.randomUUID().toString());
 					element.addElement("email").setText("unknown email");
 					element.addElement("alternateEmails");
-					element.addElement("accessToken").setText(CryptoUtils.generateSecret());
+					element.addElement("accessToken").setText(RandomStringUtils.secure().nextAlphanumeric(40));
 					element.addElement("userProjectQueries");
 					element.addElement("userIssueQueries");
 					element.addElement("userIssueQueryWatches");
@@ -4820,7 +4820,7 @@ public class DataMigrator {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
-					element.element("accessToken").setText(CryptoUtils.generateSecret());
+					element.element("accessToken").setText(RandomStringUtils.secure().nextAlphanumeric(40));
 				}
 				dom.writeToFile(file, false);
 			}

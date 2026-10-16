@@ -1,5 +1,6 @@
 package io.onedev.server.model.support;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
@@ -7,7 +8,6 @@ import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.pack.PackEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.project.workspace.WorkspaceEvent;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.annotation.Editable;
 
 import jakarta.validation.Valid;
@@ -87,7 +87,7 @@ public class WebHook implements Serializable {
 	
 	private List<EventType> eventTypes = new ArrayList<>();
 	
-	private String secret = CryptoUtils.generateSecret();
+	private String secret = RandomStringUtils.secure().nextAlphanumeric(40);
 
 	private List<WebHookHeader> headers = new ArrayList<>();
 

@@ -69,6 +69,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.ChatToolsContribution;
+import io.onedev.server.crypto.CryptoService;
 import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.event.ListenerRegistry;
@@ -78,7 +79,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -121,6 +121,9 @@ public abstract class BasePage extends WebPage {
 
 	@Inject
 	private SettingService settingService;
+
+	@Inject
+	protected CryptoService cryptoService;
 
 	@Inject
 	protected ListenerRegistry listenerRegistry;
@@ -247,7 +250,7 @@ public abstract class BasePage extends WebPage {
 					throw new BadRequestException("Pop state data is missing");
 
 				byte[] bytes = Base64.decodeBase64(encodedData.getBytes());
-				Serializable data = (Serializable) SerializationUtils.deserialize(CryptoUtils.decrypt(bytes));
+				Serializable data = (Serializable) SerializationUtils.deserialize(cryptoService.decrypt(bytes));
 				onPopState(target, data);
 				resizeWindow(target);
 				target.appendJavaScript("onedev.server.viewState.getFromHistoryAndSetToView();");
@@ -437,7 +440,7 @@ public abstract class BasePage extends WebPage {
 	}
 
 	private String encodeHistoryState(Serializable data) {
-		return Base64.encodeBase64String(CryptoUtils.encrypt(SerializationUtils.serialize(data)));
+		return Base64.encodeBase64String(cryptoService.encrypt(SerializationUtils.serialize(data)));
 	}
 
 	public void pushState(IPartialPageRequestHandler handler, String url, Serializable data) {

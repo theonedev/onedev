@@ -2,6 +2,7 @@ package io.onedev.server.web.component.user.accesstoken;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -17,7 +18,6 @@ import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.model.AccessToken;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.user.UserPage;
@@ -54,7 +54,7 @@ abstract class AccessTokenPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				var oldAuditContent = VersionedXmlDoc.fromBean(token).toXML();
 				var token = getToken();
-				token.setValue(CryptoUtils.generateSecret());
+				token.setValue(RandomStringUtils.secure().nextAlphanumeric(40));
 				var newAuditContent = VersionedXmlDoc.fromBean(token).toXML();
 				OneDev.getInstance(AccessTokenService.class).createOrUpdate(token);
 				if (getPage() instanceof UserPage) {

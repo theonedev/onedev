@@ -37,6 +37,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -57,7 +58,6 @@ import io.onedev.server.service.PackBlobService;
 import io.onedev.server.service.PackService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.Digest;
 import io.onedev.server.util.HttpUtils;
 import io.onedev.server.util.Pair;
@@ -123,7 +123,7 @@ public class ContainerServlet extends HttpServlet {
 					var jsonObj = new HashMap<String, String>();
 					String accessTokenValue = SecurityUtils.createTemporalAccessTokenIfUserPrincipal(3600);
 					if (accessTokenValue == null)
-						accessTokenValue = CryptoUtils.generateSecret();
+						accessTokenValue = RandomStringUtils.secure().nextAlphanumeric(40);
 					var jobToken = HttpUtils.getAuthBasicUser(request);
 					if (jobToken == null)
 						jobToken = UUID.randomUUID().toString();

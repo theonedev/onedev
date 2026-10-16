@@ -6,8 +6,8 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.util.CryptoUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class HookUtils {
 
-	public static final String RECEIVE_HOOK_TOKEN = CryptoUtils.generateSecret();
+	public static final String RECEIVE_HOOK_TOKEN = RandomStringUtils.secure().nextAlphanumeric(40);
 
 	public static final String PARAM_REF_UPDATES = "REF_UPDATES"; 
 	

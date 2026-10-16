@@ -1,22 +1,26 @@
 package io.onedev.server.security;
 
-import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.crypto.CryptoService;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.web.mgt.CookieRememberMeManager;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
 public class DefaultRememberMeManager extends CookieRememberMeManager {
 
+	@Inject
+	private CryptoService cryptoService;
+
 	@Override
 	public byte[] getEncryptionCipherKey() {
-		return CryptoUtils.getCipherKey();
+		return cryptoService.getCipherKey();
 	}
 
 	@Override
 	public byte[] getDecryptionCipherKey() {
-		return CryptoUtils.getCipherKey();
+		return cryptoService.getCipherKey();
 	}
 
 	@Override

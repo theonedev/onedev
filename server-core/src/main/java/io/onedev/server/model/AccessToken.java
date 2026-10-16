@@ -3,8 +3,8 @@ package io.onedev.server.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.onedev.server.rest.annotation.Immutable;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.AccessTokenFacade;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -40,7 +40,7 @@ public class AccessToken extends AbstractEntity implements AuthenticationInfo {
 
 	@Column(nullable=false, unique=true)
 	@JsonProperty(access = READ_ONLY)
-	private String value = CryptoUtils.generateSecret();
+	private String value = RandomStringUtils.secure().nextAlphanumeric(40);
 	
 	private boolean hasOwnerPermissions;
 

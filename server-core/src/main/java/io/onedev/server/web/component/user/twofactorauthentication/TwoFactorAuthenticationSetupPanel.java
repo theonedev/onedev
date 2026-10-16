@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -30,7 +31,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TwoFactorAuthentication;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.page.security.LoginPage;
 
 public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<User> {
@@ -49,7 +49,7 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 		
 		List<String> scratchCodes = new ArrayList<>();
 		for (int i=0; i<16; i++) 
-			scratchCodes.add(CryptoUtils.generateSecret());
+			scratchCodes.add(RandomStringUtils.secure().nextAlphanumeric(40));
 		
 		TwoFactorAuthentication authentication = new TwoFactorAuthentication(secretKey, scratchCodes);
 

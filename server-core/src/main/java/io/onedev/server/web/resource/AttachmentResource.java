@@ -32,6 +32,7 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.crypto.CryptoService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -41,7 +42,6 @@ import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.service.IssueService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.PullRequestService;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.IOUtils;
 
 public class AttachmentResource extends AbstractResource {
@@ -73,7 +73,7 @@ public class AttachmentResource extends AbstractResource {
 			
 			String authorization = params.get(PARAM_AUTHORIZATION).toOptionalString();
 			if (authorization == null 
-					|| !new String(CryptoUtils.decrypt(Base64.decodeBase64(authorization)), UTF_8).equals(attachmentGroup)) {
+					|| !new String(OneDev.getInstance(CryptoService.class).decrypt(Base64.decodeBase64(authorization)), UTF_8).equals(attachmentGroup)) {
 				Issue issue;
 				Build build;
 				if (OneDev.getInstance(PullRequestService.class).find(attachmentGroup) != null
@@ -180,7 +180,7 @@ public class AttachmentResource extends AbstractResource {
 			URIBuilder builder = new URIBuilder(attachmentUrl);
 			if (builder.getPathSegments().size() >= 5) {
 				String group = builder.getPathSegments().get(4);
-				byte[] encrypted = CryptoUtils.encrypt(group.getBytes(UTF_8));
+				byte[] encrypted = OneDev.getInstance(CryptoService.class).encrypt(group.getBytes(UTF_8));
 				String base64 = Base64.encodeBase64URLSafeString(encrypted);
 				builder.addParameter(PARAM_AUTHORIZATION, base64);
 			}

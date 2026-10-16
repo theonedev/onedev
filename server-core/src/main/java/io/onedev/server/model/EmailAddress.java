@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -18,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.rest.annotation.Immutable;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.EmailAddressFacade;
 
 @Editable
@@ -37,7 +37,7 @@ public class EmailAddress extends AbstractEntity {
     private String value;
     
     @JsonIgnore
-    private String verificationCode = CryptoUtils.generateSecret();
+    private String verificationCode = RandomStringUtils.secure().nextAlphanumeric(40);
     
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean primary;
