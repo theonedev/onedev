@@ -52,7 +52,10 @@ public class LfsFetchCommand {
 
 				@Override
 				public void consume(String line) {
-					logger.error(line);
+					if (line.startsWith("Fetching reference "))
+						logger.debug(line);
+					else
+						logger.error(line);
 				}
 
 			}).checkReturnCode();
