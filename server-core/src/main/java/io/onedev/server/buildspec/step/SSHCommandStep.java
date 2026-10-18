@@ -58,7 +58,7 @@ public class SSHCommandStep extends CommandStep {
 		this.userName = userName;
 	}
 
-	@Editable(order=200, description="Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as private key of above user " +
+	@Editable(order=200, description="Specify a <a href='${docsite}/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as private key of above user " +
 			"for SSH authentication. <b class='text-info'>NOTE:</b> Private key with passphrase is not supported")
 	@ChoiceProvider("getPrivateKeySecretChoices")
 	@NotEmpty

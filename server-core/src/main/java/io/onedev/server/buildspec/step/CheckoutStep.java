@@ -34,7 +34,7 @@ public class CheckoutStep extends Step {
 	private String checkoutPath;
 	
 	@Editable(order=100, description="By default code is cloned via an auto-generated credential, " +
-			"which only has read permission over current project. In case the job needs to <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>push code to server</a>, " +
+			"which only has read permission over current project. In case the job needs to <a href='${docsite}/tutorials/cicd/commit-and-push' target='_blank'>push code to server</a>, " +
 			"you should supply custom credential with appropriate permissions here")
 	@Valid
 	@NotNull
@@ -56,7 +56,7 @@ public class CheckoutStep extends Step {
 	}
 
 	@Editable(order=180, name="Retrieve Submodules", description="Whether or not to retrieve submodules. Refer to " +
-			"<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on " +
+			"<a href='${docsite}/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on " +
 			"how to set up clone credential above to retrieve submodules")
 	public boolean isWithSubmodules() {
 		return withSubmodules;
@@ -77,7 +77,7 @@ public class CheckoutStep extends Step {
 	}
 
 	@Editable(order=300, placeholder="Job workdir", description="Optionally specify relative path under "
-			+ "<a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to clone code into. "
+			+ "<a href='${docsite}/concepts#job-workdir'>job working directory</a> to clone code into. "
 			+ "Leave empty to use job working directory itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Path(Path.Type.RELATIVE)

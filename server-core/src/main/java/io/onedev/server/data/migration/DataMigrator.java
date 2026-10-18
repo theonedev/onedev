@@ -65,6 +65,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.oem.OemService;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
@@ -6236,7 +6237,7 @@ public class DataMigrator {
 					} else if (key.equals("BRANDING")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null)
-							valueElement.addElement("url").setText("https://onedev.io");
+							valueElement.addElement("url").setText(OneDev.getInstance(OemService.class).getWebsite());
 					} else if (key.equals("SECURITY")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null)

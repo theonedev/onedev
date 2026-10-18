@@ -188,7 +188,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 	}
 
 	@Editable(order=10000, placeholder="Any project", description="Optionally specify projects applicable for this provisioner. " +
-			"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
+			"Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
 			"Multiple projects should be separated by space")
 	@Patterns(suggester="suggestProjects", path=true)
 	public String getApplicableProjects() {

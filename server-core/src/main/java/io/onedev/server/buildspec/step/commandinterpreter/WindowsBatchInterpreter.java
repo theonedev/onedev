@@ -14,7 +14,7 @@ public class WindowsBatchInterpreter extends Interpreter {
 	private static final long serialVersionUID = 1L;
 
 	@Editable(order=100, description="Specify batch commands to execute "
-			+ "under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>")
+			+ "under the <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@NotEmpty

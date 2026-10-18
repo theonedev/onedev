@@ -55,7 +55,7 @@ public class WorkspaceVariableInterpolator extends VariableInterpolator {
 	}
 
 	public static String getHelp() {
-		return _T("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/workspace-variables' target='_blank' tabindex='-1'>insert variable</a>. "
+		return _T("<b>Tips: </b> Type <tt>@</tt> to <a href='${docsite}/appendix/workspace-variables' target='_blank' tabindex='-1'>insert variable</a>. "
 			+ "Use <tt>@@</tt> for literal <tt>@</tt>");
 	}
 

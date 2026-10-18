@@ -46,7 +46,7 @@ public class BuildImageStep extends Step {
 
 	private String moreOptions;
 
-	@Editable(order=100, description="Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. "
+	@Editable(order=100, description="Optionally specify build path relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>. "
 			+ "Leave empty to use job working directory itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Path(Path.Type.RELATIVE)
@@ -58,7 +58,7 @@ public class BuildImageStep extends Step {
 		this.buildPath = buildPath;
 	}
 
-	@Editable(order=200, description="Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. "
+	@Editable(order=200, description="Optionally specify Dockerfile relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>. "
 			+ "Leave empty to use file <tt>Dockerfile</tt> under build path specified above")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Path(Path.Type.RELATIVE)
@@ -177,7 +177,7 @@ public class BuildImageStep extends Step {
 		
 		private String destPath;
 
-		@Editable(name="OCI Layout Directory", description = "Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout")
+		@Editable(name="OCI Layout Directory", description = "Specify relative path under <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout")
 		@Path(Path.Type.RELATIVE)
 		@NoSpace
 		@Interpolative(variableSuggester="suggestVariables")

@@ -305,7 +305,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 						@Override
 						protected Component newMessageContent(String componentId) {
-							return new Label(componentId, _T("Interactive web shell access to running jobs is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days")).setEscapeModelStrings(false);
+							return new Label(componentId, _T("Interactive web shell access to running jobs is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days")).setEscapeModelStrings(false);
 						}
 					};
 				}

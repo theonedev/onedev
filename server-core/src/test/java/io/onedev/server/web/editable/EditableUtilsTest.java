@@ -10,6 +10,7 @@ import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.ProjectAiSetting;
 import io.onedev.server.model.support.code.GitPackConfig;
+import io.onedev.server.oem.OemService;
 
 public class EditableUtilsTest {
 
@@ -25,6 +26,10 @@ public class EditableUtilsTest {
 		defaults.setId(Project.DEFAULT_ID);
 
 		try (var projects = mockStatic(Project.class); var oneDev = mockStatic(OneDev.class)) {
+			var oemService = mock(OemService.class);
+			when(oemService.getWebsite()).thenReturn(OemService.DEFAULT_WEBSITE);
+			when(oemService.getDocsite()).thenReturn(OemService.DEFAULT_DOCSITE);
+			oneDev.when(() -> OneDev.getInstance(OemService.class)).thenReturn(oemService);
 			var subscription = mock(SubscriptionService.class);
 			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
 			var baseDescription = EditableUtils.getDescription(property);

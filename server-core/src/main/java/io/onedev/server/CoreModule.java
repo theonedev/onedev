@@ -136,6 +136,8 @@ import io.onedev.server.notification.PackNotificationManager;
 import io.onedev.server.notification.PullRequestNotificationManager;
 import io.onedev.server.notification.WebHookManager;
 import io.onedev.server.notification.WorkspaceNotificationManager;
+import io.onedev.server.oem.DefaultOemService;
+import io.onedev.server.oem.OemService;
 import io.onedev.server.pack.PackFilter;
 import io.onedev.server.persistence.DefaultIdService;
 import io.onedev.server.persistence.DefaultSessionFactoryService;
@@ -598,6 +600,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentTouchService.class).to(DefaultCodeCommentTouchService.class);
 		bind(AlertService.class).to(DefaultAlertService.class);
 		bind(UpdateCheckService.class).to(DefaultUpdateCheckService.class);
+		bind(OemService.class).to(DefaultOemService.class);
 		bind(StopwatchService.class).to(DefaultStopwatchService.class);
 		bind(PackService.class).to(DefaultPackService.class);
 		bind(PackBlobService.class).to(DefaultPackBlobService.class);

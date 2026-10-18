@@ -35,7 +35,7 @@ public class DefaultValue implements Serializable {
 	}
 	
 	@Editable(order=200, placeholder="All projects", description="Specify applicable projects separated by space. "
-			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
+			+ "Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty for all projects")
 	@Patterns(suggester="suggestProjects", path=true)
 	public String getApplicableProjects() {

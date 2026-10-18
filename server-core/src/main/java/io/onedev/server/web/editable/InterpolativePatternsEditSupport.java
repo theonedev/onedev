@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable;
 
+import static io.onedev.server.web.translation.Translation._T;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -67,7 +68,7 @@ public class InterpolativePatternsEditSupport implements EditSupport {
 							protected List<String> getHints(TerminalExpect terminalExpect) {
 								return Lists.newArrayList(
 										"Pattern containing spaces or starting with dash needs to be quoted",
-										patterns.path()? "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude": "Use '*' or '?' for wildcard match. Prefix with '-' to exclude");
+										patterns.path()? _T("Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"): "Use '*' or '?' for wildcard match. Prefix with '-' to exclude");
 							}
 							
 						});

@@ -125,7 +125,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = JobMatch.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Build.NAME_PROJECT))
-						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
+						hints.add(_T("Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					else if (fieldName.equals(Build.NAME_JOB))
 						hints.add(_T("Use '*' or '?' for wildcard match"));
 				} else {
@@ -134,7 +134,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 					String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 					int operator = getLexerRule(ruleNames, operatorName);
 					if (operator == OnBranch)
-						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
+						hints.add(_T("Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 				}
 			}
 		} 

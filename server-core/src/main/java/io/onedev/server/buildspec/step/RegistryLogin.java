@@ -44,7 +44,7 @@ public class RegistryLogin implements Serializable {
 		this.userName = userName;
 	}
 	
-	@Editable(order=300, description = "Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as password or access token of the registry")
+	@Editable(order=300, description = "Specify a <a href='${docsite}/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as password or access token of the registry")
 	@ChoiceProvider("getPasswordSecretChoices")
 	@NotEmpty
 	public String getPasswordSecret() {

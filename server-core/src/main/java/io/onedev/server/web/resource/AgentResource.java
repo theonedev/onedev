@@ -24,6 +24,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.oem.OemService;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.AgentTokenService;
 import io.onedev.server.service.SettingService;
@@ -76,7 +77,8 @@ public class AgentResource extends AbstractResource {
 					
 					try (var os = new BufferedOutputStream(new FileOutputStream(new File(agentDir, "agent/conf/agent.properties")))) {
 						String comment = "For a list of supported agent properties, please visit:\n" 
-								+ "https://docs.onedev.io/administration-guide/agent-management#agent-propertiesenvironments";
+								+ OneDev.getInstance(OemService.class).getDocsite()
+								+ "/administration-guide/agent-management#agent-propertiesenvironments";
 						props.store(os, comment);
 					}
 					

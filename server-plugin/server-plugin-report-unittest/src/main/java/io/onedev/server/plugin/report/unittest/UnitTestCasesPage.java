@@ -186,7 +186,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 				protected List<String> getHints(TerminalExpect terminalExpect) {
 					return Lists.newArrayList(
 							_T("Path containing spaces or starting with dash needs to be quoted"),
-							_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
+							_T("Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
 					);
 				}
 
@@ -269,7 +269,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 				protected List<String> getHints(TerminalExpect terminalExpect) {
 					return Lists.newArrayList(
 							_T("Path containing spaces or starting with dash needs to be quoted"),
-							_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
+							_T("Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
 					);
 				}
 

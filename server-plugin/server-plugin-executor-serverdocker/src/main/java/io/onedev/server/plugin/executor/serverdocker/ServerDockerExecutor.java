@@ -180,7 +180,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 	@Editable(order=515, group="More Settings", name="Buildx Builder", description = "Specify Buildx builder used to " +
 			"build docker image. OneDev will create the builder automatically if it does not exist. Check " +
-			"<a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> " +
+			"<a href='${docsite}/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> " +
 			"on how to customize the builder for instance to allow publishing to insecure registries")
 	@NotEmpty
 	public String getDockerBuilder() {

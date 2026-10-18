@@ -18,7 +18,7 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
     @Editable(order=100, name="LDAP URL", description = "" +
 			"Specifies LDAP URL of the Active Directory server, for example: <i>ldap://ad-server</i>, or <i>ldaps://ad-server</i>. " +
 			"In case your ldap server is using a self-signed certificate for ldaps connection, you will need to " +
-			"<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates' target='_blank'>configure OneDev to trust the certificate</a>")
+			"<a href='${docsite}/administration-guide/trust-self-signed-certificates' target='_blank'>configure OneDev to trust the certificate</a>")
     @NotEmpty
 	@Override
 	public String getLdapUrl() {

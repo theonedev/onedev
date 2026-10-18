@@ -212,7 +212,7 @@ public class WorkspaceQueryBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = QueryUtils.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Workspace.NAME_PROJECT)) {
-						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
+						hints.add(_T("Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					} else if (fieldName.equals(Workspace.NAME_BRANCH)) {
 						hints.add(_T("Use '*' for wildcard match"));
 					} else if (fieldName.equals(Workspace.NAME_SPEC)) {

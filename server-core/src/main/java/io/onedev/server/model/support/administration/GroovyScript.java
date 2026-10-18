@@ -91,7 +91,7 @@ public class GroovyScript implements Serializable {
 	}
 	
 	@Editable(order=600, placeholder="Any project", description="Optionally specify projects applicable for this provider. " +
-			"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
+			"Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
 			"Multiple projects should be separated by space")
 	@Patterns(suggester="suggestProjects", path=true)
 	@DependsOn(property="canBeUsedByWorkspaceSpecs")		

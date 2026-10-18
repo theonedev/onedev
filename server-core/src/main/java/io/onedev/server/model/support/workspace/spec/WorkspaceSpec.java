@@ -258,7 +258,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	@Editable(order = 1200, name = "Retrieve Submodules", group = "More Settings", description = """
 			Whether or not to retrieve submodules. Refer to
-			<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on
+			<a href='${docsite}/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on
 			how to configure submodule authentication
 			""")
 	public boolean isRetrieveSubmodules() {

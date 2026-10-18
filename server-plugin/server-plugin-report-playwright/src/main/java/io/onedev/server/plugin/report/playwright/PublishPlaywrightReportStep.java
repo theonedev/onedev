@@ -30,7 +30,7 @@ public class PublishPlaywrightReportStep extends PublishUnitTestReportStep {
 	private static final long serialVersionUID = 1L;
 
 	@Editable(order=100, description="""
-			Specify files to publish relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>.
+			Specify files to publish relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>.
 			Published files should include the Playwright JSON report and all referenced artifacts, such as screenshots and traces.
 			For example, run <code>CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/report.json npx playwright test --reporter=json --output=test-results</code>
 			from the job working directory, and use <code>test-results/**</code> as the file pattern to publish the report and artifacts together.

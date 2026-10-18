@@ -69,7 +69,7 @@ import io.onedev.server.util.oauth.OAuthUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
-@Editable(name="OpenID", order=10000, description="Refer to this <a href='https://docs.onedev.io/tutorials/security/sso-with-okta' target='_blank'>tutorial</a> for an example setup")
+@Editable(name="OpenID", order=10000, description="Refer to this <a href='${docsite}/tutorials/security/sso-with-okta' target='_blank'>tutorial</a> for an example setup")
 public class OpenIdConnector extends SsoConnector {
 
 	private static final long serialVersionUID = 1L;

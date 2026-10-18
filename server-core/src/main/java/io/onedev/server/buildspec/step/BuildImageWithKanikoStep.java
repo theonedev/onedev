@@ -72,7 +72,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		return "0:0";
 	}
 
-	@Editable(order=100, description="Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. "
+	@Editable(order=100, description="Optionally specify build context path relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>. "
 			+ "Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context " +
 			"directory, unless you specify a different location with option <code>--dockerfile</code>")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -233,7 +233,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 		private String destPath;
 
-		@Editable(name="OCI Layout Directory", description = "Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout")
+		@Editable(name="OCI Layout Directory", description = "Specify relative path under <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout")
 		@Interpolative(variableSuggester="suggestVariables")
 		@Path(Path.Type.RELATIVE)
 		@NoSpace

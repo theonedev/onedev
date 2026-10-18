@@ -1109,9 +1109,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@SuppressWarnings("unused")
 	private static String getTimeTrackingDescription() {
 		if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
-			return _T("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days");
+			return _T("<b class='text-warning'>NOTE: </b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days");
 		} else {
-			return _T("Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets");
+			return _T("Enable <a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets");
 		}
 	}
 
@@ -1122,7 +1122,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	@SuppressWarnings("unused")
 	private static String getPackManagementDescription() {
-		return _T("Enable <a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project");
+		return _T("Enable <a href='${docsite}/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project");
 	}
 
 	public void setPackManagement(boolean packManagement) {

@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.lang.reflect.AnnotatedElement;
@@ -94,7 +95,7 @@ public class EditableUtils {
 		if (editable == null) {
 			return null;
 		} else if (element.getAnnotation(Interpolative.class) != null) {
-			return appendDescription(getDescription(element, editable), VariableInterpolator.getHelp());
+			return appendDescription(getDescription(element, editable), interpolate(VariableInterpolator.getHelp()));
 		} else if (element.getAnnotation(WorkingPeriod.class) != null) {
 			var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 			return appendDescription(getDescription(element, editable), timeTrackingSetting.getWorkingPeriodHelp());
@@ -116,13 +117,13 @@ public class EditableUtils {
 				if (project.getParent() != null) {
 					inheritanceDescription = _T("Leave empty to inherit from the parent project.");
 				} else if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
-					inheritanceDescription = _T("Leave empty to use the <a href='https://docs.onedev.io/administration-guide/project-defaults' target='_blank'>default setting</a>.");
+					inheritanceDescription = _T("Leave empty to use the <a href='${docsite}/administration-guide/project-defaults' target='_blank'>default setting</a>.");
 				}
 			}
 			if (inheritanceDescription != null)
 				description = appendDescription(description, inheritanceDescription);
 		}
-		return description;
+		return interpolate(description);
 	}
 
 	private static String appendDescription(String description, String help) {

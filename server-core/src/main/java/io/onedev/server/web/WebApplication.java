@@ -77,7 +77,7 @@ import io.onedev.server.web.resource.SpriteResourceReference;
 import io.onedev.server.web.resource.SpriteResourceStream;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.translation.TranslationResolver;
-import io.onedev.server.web.translation.TranslationStringResourceLoader;
+import io.onedev.server.oem.OemStringResourceLoader;
 import io.onedev.server.web.translation.TranslationTagHandler;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
 import io.onedev.server.web.websocket.WebSocketMessages;
@@ -132,7 +132,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 		getPageSettings().addComponentResolver(new TranslationResolver());
 		getPageSettings().addComponentResolver(new TranslationTagHandler());
 		
-		getResourceSettings().getStringResourceLoaders().add(0, new TranslationStringResourceLoader());
+		getResourceSettings().getStringResourceLoaders().add(0, new OemStringResourceLoader());
 		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {
 			getResourceSettings().getLocalizer().setEnableCache(false);
 		}

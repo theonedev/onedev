@@ -113,7 +113,7 @@ public class ServerShellProvisioner extends WorkspaceProvisioner implements Test
 
 	@Editable(order=10000, description="""
 			Workspaces created by this provisioner have same privilege as OneDev process. 			
-			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.
+			Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>.
 			Multiple projects should be separated by space.<br>
 			<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process. 
 			Please make sure that only trusted projects can use this provisioner""")

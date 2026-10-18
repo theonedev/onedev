@@ -23,7 +23,7 @@ public class CacheEntry implements Serializable {
 
 	@Editable(order=100, description = """
 			Specify cache path. Non-absolute path is considered to be relative to 
-			<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. 
+			<a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.
 			Note that shell related executors runs directly on host machine, and only accept relative paths""")
 	@Path
 	@Interpolative(variableSuggester="suggestVariables")
@@ -38,7 +38,7 @@ public class CacheEntry implements Serializable {
 
 	@Editable(order=200, placeholder = "None", description = """
 			Optionally specify files or directories relative to cache path to exclude. 
-			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
+			Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>.
 			Multiple excludes should be separated by space, and single exclude containing space should be quoted""")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getExcludes() {

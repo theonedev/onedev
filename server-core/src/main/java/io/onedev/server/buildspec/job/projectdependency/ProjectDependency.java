@@ -103,7 +103,7 @@ public class ProjectDependency implements Serializable {
 		return null;
 	}
 	
-	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. "
+	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='${docsite}/concepts#job-workdir'>job working directory</a>. "
 			+ "Only published artifacts (via artifact publish step) can be retrieved.")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
@@ -117,7 +117,7 @@ public class ProjectDependency implements Serializable {
 	}
 	
 	@Editable(order=500, placeholder="Job workdir", description= """
-            Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> \
+            Optionally specify a path relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a> \
             to put retrieved artifacts. Leave empty to use job working directory itself""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Path(Path.Type.RELATIVE)

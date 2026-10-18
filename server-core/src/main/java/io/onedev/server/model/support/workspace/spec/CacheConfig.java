@@ -62,9 +62,9 @@ public class CacheConfig implements Serializable {
 			has lock files (package-lock.json, pom.xml, etc.) that represent cache state. When 
 			checksum changes, cache can still be loaded as a partial match, but 
 			will be re-uploaded with the new checksum if upload strategy is set to <i>Upload If Not Exact Match</i>. 
-			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
+			Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>.
 			Multiple files should be separated by space, and single file containing space should be quoted. 
-			Non-absolute file is relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>.<br> 
+			Non-absolute file is relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.<br>
 			<b>NOTE: </b> An empty checksum is assumed if this property is empty.""")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getChecksumFiles() {

@@ -20,7 +20,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 
 @Editable(order=1100, group = UTILITIES, name="Copy Files with SCP", description = "" +
-		"This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>")
+		"This step can only be executed by a docker aware executor. It runs under <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>")
 public class SCPCommandStep extends CommandStep {
 
 	private static final long serialVersionUID = 1L;
@@ -33,7 +33,7 @@ public class SCPCommandStep extends CommandStep {
 	
 	private String options;
 
-	@Editable(order=200, description="Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as private key for SSH authentication. " +
+	@Editable(order=200, description="Specify a <a href='${docsite}/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as private key for SSH authentication. " +
 			"<b class='text-info'>NOTE:</b> Private key with passphrase is not supported")
 	@ChoiceProvider("getPrivateKeySecretChoices")
 	@NotEmpty

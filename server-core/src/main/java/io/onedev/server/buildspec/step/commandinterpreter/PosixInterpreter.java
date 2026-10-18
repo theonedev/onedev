@@ -27,7 +27,7 @@ public class PosixInterpreter extends Interpreter {
 	}
 
 	@Editable(order=110, description="Specify shell commands to execute "
-			+ "under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>")
+			+ "under the <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@NotEmpty

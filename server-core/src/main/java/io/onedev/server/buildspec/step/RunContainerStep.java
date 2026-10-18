@@ -26,7 +26,7 @@ import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
 
-@Editable(order=150, name="Run Docker Container", description="Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job workdir</a> "
+@Editable(order=150, name="Run Docker Container", description="Run specified docker container. <a href='${docsite}/concepts#job-workdir' target='_blank'>Job workdir</a> "
 		+ "is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. " +
 		"<b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote " +
 		"docker executor")

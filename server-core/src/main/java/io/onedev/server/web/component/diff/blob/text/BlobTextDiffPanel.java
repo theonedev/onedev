@@ -48,6 +48,7 @@ import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
+import io.onedev.server.oem.OemService;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.ai.tools.code.GetHighlightedText;
@@ -136,6 +137,9 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 
 	@Inject
 	private ObjectMapper objectMapper;
+
+	@Inject
+	private OemService oemService;
 
 	@Inject
 	private GitService gitService;
@@ -560,7 +564,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		translations.put("add-problem-comment", _T("Add comment"));
 
 		var jsonOfMarkRange = convertToJson(markRange);
-		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s);",
+		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s);",
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, 
 				change.getNewBlobIdent().revision,
@@ -570,7 +574,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 				jsonOfMarkRange, convertToJson(openCommentInfo), 
 				convertToJson(annotationInfoModel.getObject()), 
 				commentContainerId, convertToJson(translations),
-				getSymbolContextJson());
+				getSymbolContextJson(), convertToJson(oemService.getDocsite()));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 

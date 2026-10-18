@@ -27,7 +27,7 @@ public class PushImageStep extends CraneStep {
 	
 	private String moreOptions;
 	
-	@Editable(order=100, name="OCI Layout Directory", description = "Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to push from")
+	@Editable(order=100, name="OCI Layout Directory", description = "Specify OCI layout directory relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a> to push from")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Path(Path.Type.RELATIVE)
 	@NoSpace

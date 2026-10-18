@@ -21,7 +21,7 @@ public class CodeIndexingSetting implements Serializable {
 	@Editable(order=100, name="Files to Be Indexed", placeholder="Inherit from parent", topPlaceholder ="All files", description="""
 		Specify which repository files OneDev should index. During indexing, OneDev analyzes these files for code search, line statistics, and code contribution statistics.
 		<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder 
-		<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>. 
+		<code>index</code> and <code>info/commit</code> under <a href='${docsite}/concepts#project-storage' target='_blank'>project's storage directory</a>.
 		The repository will be re-indexed when the server is started""")
 	@Patterns(path=true)
 	@Nullable

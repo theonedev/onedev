@@ -37,7 +37,7 @@ public class UserDataEntry implements Serializable {
 
 	@Editable(order=200, placeholder = "None", description = """
 			Optionally specify directories or files relative to data path to exclude. 
-			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
+			Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>.
 			Multiple excludes should be separated by space, and single exclude containing space should be quoted""")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getExcludes() {

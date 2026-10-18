@@ -4,6 +4,7 @@ import static io.onedev.server.model.Alert.PROP_DATE;
 import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.model.User.Type.SERVICE;
+import static io.onedev.server.oem.OemService.DEFAULT_WEBSITE;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -19,6 +20,7 @@ import java.util.Locale;
 import java.util.Properties;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.Component;
@@ -65,6 +67,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.oem.OemService;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.Project;
@@ -185,6 +188,9 @@ import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.WicketUtils;
 
 public abstract class LayoutPage extends BasePage {
+
+	@Inject
+	private OemService oemService;
 	
 	private AbstractDefaultAjaxBehavior commandPaletteBehavior;
 
@@ -513,7 +519,7 @@ public abstract class LayoutPage extends BasePage {
 
 												@Override
 												protected Component newMessageContent(String componentId) {
-													return new Label(componentId, _T("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days")).setEscapeModelStrings(false);
+													return new Label(componentId, _T("This is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days")).setEscapeModelStrings(false);
 												}
 											};																
 										}
@@ -562,7 +568,7 @@ public abstract class LayoutPage extends BasePage {
 		});
 
 		var version = AppLoader.getProduct().getVersion();
-		sidebar.add(new ExternalLink("productVersion", "https://onedev.io", "OneDev " + version));
+		sidebar.add(new ExternalLink("productVersion", oemService.getWebsite(), "OneDev " + version));
 		
 		sidebar.add(new WebMarkupContainer("tryEE") {
 			@Override
@@ -581,14 +587,14 @@ public abstract class LayoutPage extends BasePage {
 			throw new RuntimeException(e);
 		}
 
-		var checkUpdateUrl = "https://onedev.io/check-update/" + commitHash + "-"
+		var checkUpdateUrl = oemService.getWebsite() + "/check-update/" + commitHash + "-"
 				+ (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()? "1": "0");
 		sidebar.add(new AjaxLink<Void>("checkUpdate") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getLoginUser() != null);
+				setVisible(DEFAULT_WEBSITE.equals(oemService.getWebsite()) && getLoginUser() != null);
 			}
 
 			@Override
@@ -937,7 +943,8 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getLoginUser() != null && !getSettingService().getSystemSetting().isDisableAutoUpdateCheck());
+				setVisible(DEFAULT_WEBSITE.equals(oemService.getWebsite()) && getLoginUser() != null
+						&& !getSettingService().getSystemSetting().isDisableAutoUpdateCheck());
 			}
 
 		});

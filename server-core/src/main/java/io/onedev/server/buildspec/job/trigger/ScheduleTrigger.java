@@ -41,7 +41,7 @@ public class ScheduleTrigger extends JobTrigger {
 
 	@Editable(name="Applicable Branches", order=200, placeholder="Default branch", description=""
 			+ "Optionally specify space-separated branches applicable for this trigger. "
-			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
+			+ "Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty for default branch")
 	@Patterns(suggester="suggestBranches", path=true)
 	public String getBranches() {

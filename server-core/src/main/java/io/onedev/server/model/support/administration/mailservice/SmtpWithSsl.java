@@ -16,7 +16,7 @@ public abstract class SmtpWithSsl implements SmtpSslSetting {
 
 	@Editable(order=1000, name="Bypass Certificate Check", description = "In case SMTP host certificate is self-signed or its CA root is not accepted, " +
 			"you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In " +
-			"an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the " +
+			"an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the " +
 			"certificate into OneDev</a> instead")
 	public boolean isTrustAll() {
 		return trustAll;

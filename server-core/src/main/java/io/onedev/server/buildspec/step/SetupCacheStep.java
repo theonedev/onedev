@@ -33,7 +33,7 @@ import io.onedev.server.util.patternset.PatternSet;
 
 @Editable(order=55, name="Set Up Cache", description = """
 		Set up job cache to speed up job execution. \
-		Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> \
+		Check <a href='${docsite}/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> \
 		on how to use job cache""")
 public class SetupCacheStep extends Step {
 
@@ -71,9 +71,9 @@ public class SetupCacheStep extends Step {
 			has lock files (package-lock.json, pom.xml, etc.) that represent cache state. When 
 			checksum changes, cache can still be loaded as a partial match, but 
 			will be re-uploaded with the new checksum if upload strategy is set to <i>Upload If Not Exact Match</i>. 
-			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
+			Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>.
 			Multiple files should be separated by space, and single file containing space should be quoted. 
-			Non-absolute file is relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>.<br> 
+			Non-absolute file is relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.<br>
 			<b>NOTE: </b> An empty checksum is assumed if this property is empty.""")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getChecksumFiles() {
@@ -137,7 +137,7 @@ public class SetupCacheStep extends Step {
 	}
 	
 	@Editable(order=500, description = """
-			Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> 
+			Specify a <a href='${docsite}/tutorials/cicd/job-secrets' target='_blank'>job secret</a>
 			whose value is an access token with upload cache permission for above project. 
 			Note that this property is not required if upload cache to current or child 
 			project and build commit is reachable from default branch""")

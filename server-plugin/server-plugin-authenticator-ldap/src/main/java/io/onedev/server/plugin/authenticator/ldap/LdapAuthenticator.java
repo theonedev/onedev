@@ -72,7 +72,7 @@ public class LdapAuthenticator extends Authenticator {
     @Editable(order=100, name="LDAP URL", description="" +
 			"Specifies LDAP URL, for example: <i>ldap://localhost</i>, or <i>ldaps://localhost</i>. In case" +
 			"your ldap server is using a self-signed certificate for ldaps connection, you will need " +
-			"to <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates' target='_blank'>configure OneDev to trust the certificate</a>")
+			"to <a href='${docsite}/administration-guide/trust-self-signed-certificates' target='_blank'>configure OneDev to trust the certificate</a>")
     @NotEmpty
 	public String getLdapUrl() {
 		return ldapUrl;
