@@ -5,7 +5,7 @@
         print """
             <b>${HtmlEscape.escapeHtml5(alert.subject)}</b>
             <br><br>
-            OneDev URL: <a href='${serverUrl}'>${serverUrl}</a>
+            ${productName} URL: <a href='${serverUrl}'>${serverUrl}</a>
         """
         if (alert.detail != null) {
             print """
@@ -17,7 +17,7 @@
         }
     } else {
         print "${alert.subject}\n\n"
-        print "OneDev URL: ${serverUrl}\n\n"
+        print "${productName} URL: ${serverUrl}\n\n"
 
         if (alert.detail != null) {
             print "Error Detail:\n"

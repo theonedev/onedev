@@ -10,6 +10,7 @@ import io.onedev.server.mail.MailService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
+import io.onedev.server.oem.OemUtils;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
@@ -130,7 +131,7 @@ public class PasswordResetPage extends SimplePage {
 
 						mailService.sendMail(Arrays.asList(emailAddressValue),
 								Lists.newArrayList(), Lists.newArrayList(),
-								"[Password Reset] You are Requesting to Reset Your OneDev Password",
+								OemUtils.interpolate("[Password Reset] You are Requesting to Reset Your ${productName} Password"),
 								htmlBody, textBody, null, null, null);
 
 						return sentMessage;

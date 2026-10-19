@@ -281,7 +281,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 			var template = Resources.toString(tplUrl, UTF_8);
 			fragment.add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings).trim())));
 			fragment.add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings).trim())).setVisible(requireSettings));
-			fragment.add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings).trim())).setVisible(requireSettings));
+			fragment.add(new CodeSnippetPanel("jobCommands", Model.of(MavenPackSupport.getJobCommands(bindings).trim())).setVisible(requireSettings));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -298,7 +298,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 			fragment.add(new CodeSnippetPanel("gradleGroovy", Model.of(evalTemplate(groovyTpl, bindings).trim())));
 			fragment.add(new CodeSnippetPanel("gradleKotlin", Model.of(evalTemplate(kotlinTpl, bindings).trim())));
 			fragment.add(new CodeSnippetPanel("gradleProperties", Model.of(evalTemplate(MavenPackSupport.getGradlePropertiesTemplate(), bindings).trim())).setVisible(requireGradleCredentials));
-			fragment.add(new CodeSnippetPanel("gradleJobCommands", Model.of(evalTemplate(MavenPackSupport.getGradleJobCommandsTemplate(), bindings).trim())).setVisible(requireGradleCredentials));
+			fragment.add(new CodeSnippetPanel("gradleJobCommands", Model.of(MavenPackSupport.getGradleJobCommands(bindings).trim())).setVisible(requireGradleCredentials));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

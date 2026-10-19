@@ -96,7 +96,7 @@ public class SmtpImapConnector implements MailConnector {
 
 	@Editable(order=450, name="Check Incoming Email", description="Enable this to process issue or pull request comments posted via email. "
 			+ "<b class='text-danger'>NOTE:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> "
-			+ "needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts")
+			+ "needs to be enabled for system email address above, as ${productName} uses it to track issue and pull request contexts")
 	public InboxPollSetting getInboxPollSetting() {
 		return inboxPollSetting;
 	}

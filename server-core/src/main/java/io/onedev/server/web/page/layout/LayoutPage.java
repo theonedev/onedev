@@ -568,7 +568,7 @@ public abstract class LayoutPage extends BasePage {
 		});
 
 		var version = AppLoader.getProduct().getVersion();
-		sidebar.add(new ExternalLink("productVersion", oemService.getWebsite(), "OneDev " + version));
+		sidebar.add(new ExternalLink("productVersion", oemService.getWebsite(), oemService.getProductName() + " " + version));
 		
 		sidebar.add(new WebMarkupContainer("tryEE") {
 			@Override

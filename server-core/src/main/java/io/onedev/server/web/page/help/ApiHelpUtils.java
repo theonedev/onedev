@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.help;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
 import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
@@ -98,7 +99,7 @@ public class ApiHelpUtils {
 	@Nullable
 	public static String getDescription(AnnotatedElement element) {
 		var api = element.getAnnotation(Api.class);
-		return api != null && !api.description().isEmpty() ? api.description() : null;
+		return api != null && !api.description().isEmpty() ? interpolate(api.description()) : null;
 	}
 
 	public static String getHttpMethod(Method resourceMethod) {

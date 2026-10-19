@@ -52,7 +52,7 @@ public class GmailConnector implements MailConnector {
 
 	private transient MailPosition mailPosition;
 
-	@Editable(order=100, description="Client ID of this OneDev instance registered in Google cloud")
+	@Editable(order=100, description="Client ID of this ${productName} instance registered in Google cloud")
 	@NotEmpty
 	public String getClientId() {
 		return clientId;
@@ -62,7 +62,7 @@ public class GmailConnector implements MailConnector {
 		this.clientId = clientId;
 	}
 
-	@Editable(order=200, description="Client secret of this OneDev instance registered in Google cloud")
+	@Editable(order=200, description="Client secret of this ${productName} instance registered in Google cloud")
 	@Password
 	@NotEmpty
 	public String getClientSecret() {

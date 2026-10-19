@@ -2,6 +2,11 @@ package io.onedev.server.validation.validator;
 
 import java.io.File;
 
+import org.apache.wicket.Application;
+
+import static io.onedev.server.oem.OemUtils.interpolate;
+import static io.onedev.server.web.translation.Translation._T;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -40,9 +45,12 @@ public class DataDirectoryValidator implements ConstraintValidator<DataDirectory
 					&& dir.getCanonicalFile().toPath().startsWith(Bootstrap.installDir.toPath())) {
 				constraintContext.disableDefaultConstraintViolation();
 				String message = annotation.message();
-				if (message.length() == 0)
-					message = "Specified directory should be either under site directory or outside of OneDev " +
-							"installation directory";
+				if (message.length() == 0) {
+					message = _T("Specified directory should be either under site directory or outside of ${productName} " +
+							"installation directory");
+					if (!Application.exists())
+						message = interpolate(message);
+				}
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 				return false;
 			}

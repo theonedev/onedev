@@ -112,7 +112,7 @@ public class WebHook implements Serializable {
 	}
 
 	@Editable(order=300, description="The secret which allows you to ensure that POST requests sent to the payload URL are "
-			+ "from OneDev. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request")
+			+ "from ${productName}. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request")
 	@NotEmpty
 	public String getSecret() {
 		return secret;

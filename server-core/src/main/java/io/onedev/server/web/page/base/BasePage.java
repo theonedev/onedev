@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.base;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
@@ -537,7 +538,7 @@ public abstract class BasePage extends WebPage {
 	}
 
 	protected String getPageTitle() {
-		return "OneDev - Git Server with CI/CD, Kanban, and Packages";
+		return interpolate("${productName} - Git Server with CI/CD, Kanban, and Packages");
 	}
 
 	protected int getPageRefreshInterval() {

@@ -36,7 +36,7 @@ public class NpmHelpPanel extends Panel {
 				return "" +
 						"# " + _T("Use @@ to reference scope in job commands to avoid being interpreted as variable") + "\n\n" +
 						"npm config set @@myscope:registry " + registryUrl + "\n\n" +
-						"# " + _T("Use job token to tell OneDev the build publishing the package") + "\n" +
+						"# " + _T("Use job token to tell ${productName} the build publishing the package") + "\n" +
 						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package write permission") + "\n\n" +
 						"npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"@job_token@:@secret:access-token@\"\n\n" +
 						"npm publish";

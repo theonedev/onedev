@@ -300,7 +300,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 
 	@Editable(name="Path to kubectl", order=27000, group="More Settings", placeholder="Use default", 
 			description="Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. "
-			+ "If left empty, OneDev will try to find the utility from system path")
+			+ "If left empty, ${productName} will try to find the utility from system path")
 	public String getKubectlPath() {
 		return kubectlPath;
 	}

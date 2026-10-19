@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.provisioner.servershell;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.agent.AgentUtils.testCommands;
 import static io.onedev.agent.workspace.WorkspaceUtils.setupShellProvisioned;
 import static io.onedev.agent.workspace.WorkspaceUtils.teardownShellProvisioned;
@@ -55,8 +56,8 @@ import io.onedev.server.workspace.WorkspaceContext;
 import io.onedev.server.workspace.WorkspaceRuntime;
 
 @Editable(order=ServerShellProvisioner.ORDER, name="Server Shell Provisioner", description="""
-		This provisioner creates workspaces with OneDev server's shell facility, and requires 
-		tmux to be installed on OneDev server""")
+		This provisioner creates workspaces with ${productName} server's shell facility, and requires
+		tmux to be installed on ${productName} server""")
 public class ServerShellProvisioner extends WorkspaceProvisioner implements Testable<Testable.None> {
 
 	private static final long serialVersionUID = 1L;
@@ -92,7 +93,7 @@ public class ServerShellProvisioner extends WorkspaceProvisioner implements Test
 
 	private void checkApplicable() {
 		if (OneDev.getK8sService() != null) {
-			throw new ExplicitException("OneDev running inside kubernetes cluster does not support workspaces yet");
+			throw new ExplicitException(interpolate("${productName} running inside kubernetes cluster does not support workspaces yet"));
 		}
 	}
 
@@ -112,10 +113,10 @@ public class ServerShellProvisioner extends WorkspaceProvisioner implements Test
 	}
 
 	@Editable(order=10000, description="""
-			Workspaces created by this provisioner have same privilege as OneDev process. 			
+			Workspaces created by this provisioner have same privilege as ${productName} process.
 			Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>.
 			Multiple projects should be separated by space.<br>
-			<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as OneDev process. 
+			<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have same privilege as ${productName} process.
 			Please make sure that only trusted projects can use this provisioner""")
 	@Patterns(suggester="suggestProjects", path=true)
 	@NotEmpty

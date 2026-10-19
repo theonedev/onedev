@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.list;
 
+import static io.onedev.server.oem.OemUtils.getProductName;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
@@ -677,7 +678,7 @@ public abstract class IssueListPanel extends Panel {
 						if (version.startsWith("v"))
 							version = version.substring(1);
 							
-						try (var workBook = new Workbook(os, "OneDev", version)) {
+						try (var workBook = new Workbook(os, getProductName(), version)) {
 							var worksheet = workBook.newWorksheet(_T("Issues"));
 							
 							var colIndex = 0;

@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.imports.jiracloud;
 
+import static io.onedev.server.oem.OemUtils.getProductName;
+
 import org.unbescape.html.HtmlEscape;
 
 import java.util.*;
@@ -30,19 +32,20 @@ public class ImportResult {
 	}
 	
 	public String toHtml(String leadingText) {
+		var productName = HtmlEscape.escapeHtml5(getProductName());
 		StringBuilder feedback = new StringBuilder(leadingText);
 		
 		feedback.append("<br><br><b>NOTE:</b><ul>");
 
 		feedback.append("<li> JIRA issue custom fields are not imported");
 		if (!unmappedIssueStatuses.isEmpty()) 
-			feedback.append(getEntryFeedback("JIRA issue statuses not mapped to OneDev custom field", unmappedIssueStatuses));
+			feedback.append(getEntryFeedback("JIRA issue statuses not mapped to " + productName + " custom field", unmappedIssueStatuses));
 		if (!unmappedIssueTypes.isEmpty()) 
-			feedback.append(getEntryFeedback("JIRA issue types not mapped to OneDev custom field", unmappedIssueTypes));
+			feedback.append(getEntryFeedback("JIRA issue types not mapped to " + productName + " custom field", unmappedIssueTypes));
 		if (!unmappedIssuePriorities.isEmpty()) 
-			feedback.append(getEntryFeedback("JIRA issue priorities not mapped to OneDev custom field", unmappedIssuePriorities));
+			feedback.append(getEntryFeedback("JIRA issue priorities not mapped to " + productName + " custom field", unmappedIssuePriorities));
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("JIRA accounts not available in OneDev (matching by full name)", nonExistentLogins));
+			feedback.append(getEntryFeedback("JIRA accounts not available in " + productName + " (matching by full name)", nonExistentLogins));
 		}
 		if (!tooLargeAttachments.isEmpty()) 
 			feedback.append(getEntryFeedback("Too large attachments", tooLargeAttachments));

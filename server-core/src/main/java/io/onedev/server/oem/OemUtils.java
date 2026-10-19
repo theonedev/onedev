@@ -1,27 +1,49 @@
 package io.onedev.server.oem;
 
 import io.onedev.server.OneDev;
+import org.apache.wicket.Application;
+import org.apache.wicket.Localizer;
+import org.unbescape.html.HtmlEscape;
 
-import static io.onedev.server.oem.OemService.DEFAULT_DOCSITE;
-import static io.onedev.server.oem.OemService.DEFAULT_WEBSITE;
+import java.util.regex.Pattern;
 
 public class OemUtils {
 
+	private static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{(productName|docsite|website)}");
+
+	public static String getProductName() {
+		return OneDev.getInstance(OemService.class).getProductName();
+	}
+
 	public static String interpolate(String text) {
-		if (text.contains("${docsite}") || text.contains("${website}")) {
+		return interpolate(text, false);
+	}
+
+	public static String interpolateHtml(String text) {
+		return interpolate(text, true);
+	}
+
+	public static String translateHtml(String text) {
+		if (Application.exists())
+			return Localizer.get().getString("th: " + text, null);
+		else
+			return interpolateHtml(text);
+	}
+
+	private static String interpolate(String text, boolean html) {
+		var matcher = PLACEHOLDER.matcher(text);
+		if (matcher.find()) {
 			var oemService = OneDev.getInstance(OemService.class);
-			return text.replace("${docsite}", oemService.getDocsite())
-					.replace("${website}", oemService.getWebsite());
+			return matcher.replaceAll(it -> {
+				var value = switch (it.group(1)) {
+					case "productName" -> oemService.getProductName();
+					case "docsite" -> oemService.getDocsite();
+					default -> oemService.getWebsite();
+				};
+				return java.util.regex.Matcher.quoteReplacement(html ? HtmlEscape.escapeHtml5(value) : value);
+			});
 		}
 		return text;
-	}
-
-	public static String useDefaultUrls(String text) {
-		return text.replace("${docsite}", DEFAULT_DOCSITE).replace("${website}", DEFAULT_WEBSITE);
-	}
-
-	public static String useUrlPlaceholders(String text) {
-		return text.replace(DEFAULT_DOCSITE, "${docsite}").replace(DEFAULT_WEBSITE, "${website}");
 	}
 
 }

@@ -32,7 +32,7 @@ public class GpgVerificationSuccessful implements VerificationSuccessful {
 		} else if (getGpgSetting().getTrustedSignatureVerificationKey(publicKey.getKeyID()) != null) {
 			message = _T("Signature verified successfully with trusted GPG key");
 		} else {
-			message = _T("Signature verified successfully with OneDev GPG key");
+			message = _T("Signature verified successfully with ${productName} GPG key");
 		}
 		
 		return new GpgVerificationDetailPanel(componentId, true, message, 

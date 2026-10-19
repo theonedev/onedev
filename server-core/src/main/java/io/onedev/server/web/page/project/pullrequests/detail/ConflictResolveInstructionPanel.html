@@ -20,7 +20,7 @@
 				</div>
 			</li>
 			<li>
-				<div class="mb-2">Resolve merge conflicts, test changes and push result commit to OneDev</div>
+				<div class="mb-2"><wicket:t>Resolve merge conflicts, test changes and push result commit to ${productName}</wicket:t></div>
 				<div class="code">  
 					git push origin <span wicket:id="srcBranchNameForPush"></span>
 				</div>
@@ -44,7 +44,7 @@
 				</div>
 			</li>
 			<li>
-				<div class="mb-2">Resolve rebase conflicts, test changes and force push result commit to OneDev</div>
+				<div class="mb-2"><wicket:t>Resolve rebase conflicts, test changes and force push result commit to ${productName}</wicket:t></div>
 				<div class="code">  
 					git push -f origin <span wicket:id="srcBranchNameForPush"></span>
 				</div>

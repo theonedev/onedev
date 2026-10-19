@@ -60,6 +60,38 @@ public class TranslateTest {
         }
 
         @Test
+        public void testOemKeysPreservePlaceholders() {
+                var content = "OemUtils.translateHtml(\"${productName}: ${website}, ${docsite}\") + "
+                                + "_T(\"${productName}: ${website}, ${docsite}\")";
+                var scanned = Translate.scanJavaMethods(content);
+                Assertions.assertEquals(2, scanned.size());
+                var englishTranslations = new TreeMap<String, String>();
+                for (var key : scanned) {
+                        englishTranslations.put(key, key);
+                }
+                Assertions.assertEquals(1, englishTranslations.size());
+
+                var existingTranslations = new TreeMap<String, String>();
+                existingTranslations.put("${productName}: https://onedev.io, https://docs.onedev.io", "existing translation");
+                var oldContent = "{\n\tm.clear();\n}";
+                var generated = Translate.generateFileContent(englishTranslations, existingTranslations,
+                                oldContent, keys -> {
+                                        Assertions.assertEquals(List.of("${productName}: ${website}, ${docsite}"), keys);
+                                        return List.of("${productName}：网站 ${website}，文档 ${docsite}");
+                                }, 100);
+                Assertions.assertFalse(generated.contains("existing translation"));
+                Assertions.assertTrue(generated.contains("${productName}: ${website}, ${docsite}"));
+                Assertions.assertTrue(generated.contains("${productName}：网站 ${website}，文档 ${docsite}"));
+                Assertions.assertFalse(generated.contains("https://onedev.io"));
+                Assertions.assertFalse(generated.contains("https://docs.onedev.io"));
+
+                existingTranslations.put("${productName}: ${website}, ${docsite}",
+                                "${productName}：网站 ${website}，文档 ${docsite}");
+                Assertions.assertEquals(generated, Translate.generateFileContent(englishTranslations, existingTranslations,
+                                oldContent, keys -> Assertions.fail("Placeholder translations must be reused"), 100));
+        }
+
+        @Test
         public void testScanHtmlTags() {
                 String content = "<wicket:t>message1</wicket:t>\n<wicket:t><b>message2</b></wicket:t>\n<wicket:t>message\n3</wicket:t>";
                 assertArrayEquals(new String[] { "message1", "<b>message2</b>", "message 3" },

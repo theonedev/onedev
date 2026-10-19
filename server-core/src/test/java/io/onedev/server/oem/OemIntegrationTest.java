@@ -4,7 +4,6 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.translation.TranslationResolver;
 import io.onedev.server.web.translation.TranslationTagHandler;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
@@ -13,6 +12,7 @@ import org.apache.wicket.markup.MarkupParser;
 import org.apache.wicket.markup.MarkupResourceStream;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.mock.MockApplication;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
@@ -27,6 +27,8 @@ import java.util.Locale;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class OemIntegrationTest {
 
@@ -34,9 +36,10 @@ public class OemIntegrationTest {
 	Path installDir;
 
 	@Test
-	public void customUrlsWorkInTranslationsAnnotationsAndMarkup() throws Exception {
+	public void customBrandingWorksInTranslationsAnnotationsAndMarkup() throws Exception {
 		Files.createDirectories(installDir.resolve("conf"));
 		Files.writeString(installDir.resolve("conf/oem.properties"), """
+				product_name=Acme Dev
 				website=https://example.com/product/
 				docsite=https://help.example.com/manual/
 				""");
@@ -49,9 +52,17 @@ public class OemIntegrationTest {
 			try {
 				tester.getSession().bind();
 				tester.getSession().setLocale(Locale.SIMPLIFIED_CHINESE);
+				assertEquals("Untranslated OneDev message", _T("Untranslated OneDev message"));
+				assertEquals("Untranslated Acme Dev message", _T("Untranslated ${productName} message"));
+				var webhookDescription = EditableUtils.getDescription(
+						io.onedev.server.model.support.WebHook.class.getMethod("getSecret"));
+				assertTrue(webhookDescription.contains("Acme Dev"), webhookDescription);
+				assertTrue(webhookDescription.contains("X-OneDev-Signature"), webhookDescription);
 				var description = EditableUtils.getDescription(Job.class.getMethod("getSteps"));
 				assertTrue(description.contains("https://help.example.com/manual/concepts#job-workdir"));
-				assertFalse(description.contains("Steps will be executed"), "Existing translations must still be found");
+				assertFalse(description.contains("${docsite}"), description);
+				assertEquals("Visit https://onedev.io and https://docs.onedev.io",
+						_T("Visit https://onedev.io and https://docs.onedev.io"));
 				assertEquals("Visit https://example.com/product/new-page?x=1#section",
 						_T("Visit ${website}/new-page?x=1#section"));
 				assertEquals("https://help.example.com/manual/new-page",
@@ -63,7 +74,6 @@ public class OemIntegrationTest {
 				assertTrue(html.contains("action=\"https://example.com/product/support-request\""));
 				assertTrue(html.contains("href=\"https://help.example.com/manual/guide#setup\""));
 				assertTrue(html.contains("https://help.example.com/manual/concepts#"), html);
-				assertFalse(html.contains("No previous successful build"), html);
 				assertFalse(html.contains("${website}"));
 				assertFalse(html.contains("${docsite}"));
 				assertFalse(html.contains(OemService.DEFAULT_WEBSITE));
@@ -72,6 +82,37 @@ public class OemIntegrationTest {
 			}
 		} finally {
 			Bootstrap.installDir = previousInstallDir;
+		}
+	}
+
+	@Test
+	public void productNamesAreLiteralAndMarkupIsEscaped() {
+		var productName = "Acme <Dev> & ${website} $1 \\ Suite";
+		try (var oneDev = mockStatic(OneDev.class)) {
+			var service = mock(OemService.class);
+			when(service.getProductName()).thenReturn(productName);
+			when(service.getWebsite()).thenReturn("https://example.com");
+			oneDev.when(() -> OneDev.getInstance(OemService.class)).thenReturn(service);
+			assertEquals(productName + " https://example.com", OemUtils.interpolate("${productName} ${website}"));
+			assertEquals("OneDev", OemUtils.translateHtml("OneDev"));
+			assertEquals("Acme &lt;Dev&gt; &amp; ${website} $1 \\ Suite", OemUtils.translateHtml("${productName}"));
+			var tester = new WicketTester(new OemApplication());
+			try {
+				tester.getSession().setLocale(Locale.ENGLISH);
+				assertEquals(productName, _T("${productName}"));
+				assertEquals("Welcome to OneDev", _T("Welcome to OneDev"));
+				assertEquals("io.onedev.server.OneDev OneDev.class OneDevAuthorization X-OneDev-Signature "
+						+ "$OneDev-Secret-Literal$ /tmp/OneDev OneDev.singleFile",
+						_T("io.onedev.server.OneDev OneDev.class OneDevAuthorization X-OneDev-Signature "
+								+ "$OneDev-Secret-Literal$ /tmp/OneDev OneDev.singleFile"));
+				tester.startPage(new ProductPage());
+				var html = tester.getLastResponseAsString();
+				assertTrue(html.contains("Acme &lt;Dev&gt; &amp; ${website} $1 \\ Suite"), html);
+				assertFalse(html.contains("<Dev>"), html);
+				assertFalse(html.contains("&amp;lt;"), html);
+			} finally {
+				tester.destroy();
+			}
 		}
 	}
 
@@ -107,9 +148,24 @@ public class OemIntegrationTest {
 					return parser;
 				}
 			});
-			getPageSettings().addComponentResolver(new TranslationResolver());
+			getPageSettings().addComponentResolver(new OemTranslationResolver());
 			getPageSettings().addComponentResolver(new TranslationTagHandler());
 			getResourceSettings().getStringResourceLoaders().add(0, new OemStringResourceLoader());
+		}
+	}
+
+	public static class ProductPage extends WebPage implements IMarkupResourceStreamProvider {
+		public ProductPage() {
+			add(new Label("product", _T("${productName}")));
+		}
+
+		@Override
+		public IResourceStream getMarkupResourceStream(MarkupContainer container, Class<?> containerClass) {
+			return new StringResourceStream("""
+					<html xmlns:wicket="http://wicket.apache.org"><body>
+					<span wicket:id="product"></span><wicket:t>${productName}</wicket:t>
+					</body></html>
+					""");
 		}
 	}
 

@@ -1,11 +1,15 @@
 package io.onedev.server.plugin.pack.maven;
 
 import static io.onedev.server.plugin.pack.maven.MavenPackHandler.NONE;
+import static io.onedev.server.util.GroovyUtils.evalTemplate;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -21,6 +25,9 @@ import io.onedev.server.pack.PackSupport;
 public class MavenPackSupport implements PackSupport {
 
 	public static final String TYPE = "Maven";
+
+	private static final Pattern PERMISSION_CHOICE = Pattern.compile(
+			"\\$\\{permission\\.equals\\(\"write\"\\)\\s*\\?\\s*\"([^\"]*)\"\\s*:\\s*\"([^\"]*)\"\\s*}");
 	
 	@Override
 	public int getOrder() {
@@ -67,19 +74,28 @@ public class MavenPackSupport implements PackSupport {
 		return new MavenHelpPanel(componentId, project.getPath());
 	}
 
-	public static String getJobCommandsTemplate() throws IOException {
+	public static String getJobCommands(Map<String, Object> bindings) throws IOException {
 		var tplUrl = Resources.getResource(MavenPackSupport.class, "job-commands.tpl");
-		var template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
-		template = template.replace(
+		var commands = evalTemplate(Resources.toString(tplUrl, StandardCharsets.UTF_8), bindings);
+		commands = commands.replace(
 			"maven:job-token-notice", 
-			_T("Use job token as user name so that OneDev can know which build is ${permission.equals(\"write\")? \"deploying\": \"using\"} packages"));
-		template = template.replace(
+			getJobTokenNotice(bindings));
+		commands = commands.replace(
 			"maven:access-token-notice", 
-			_T("Job secret 'access-token' should be defined in project build setting as an access token with package ${permission} permission"));
-		template = template.replace(
+			_T("Job secret 'access-token' should be defined in project build setting as an access token with package ${permission} permission")
+				.replace("${permission}", bindings.get("permission").toString()));
+		commands = commands.replace(
 			"maven:allow-http-notice", 
 			_T("Add below to allow accessing via http protocol in new Maven versions"));
-		return template;
+		return commands;
+	}
+
+	private static String getJobTokenNotice(Map<String, Object> bindings) {
+		// Insert translated branding only after rendering the template so that quotes,
+		// dollar signs and backslashes in the product name remain literal text.
+		var notice = _T("Use job token as user name so that ${productName} can know which build is ${permission.equals(\"write\")? \"deploying\": \"using\"} packages");
+		var choice = "write".equals(bindings.get("permission")) ? 1 : 2;
+		return PERMISSION_CHOICE.matcher(notice).replaceAll(match -> Matcher.quoteReplacement(match.group(choice)));
 	}
 
 	public static String getServersAndMirrorsTemplate() throws IOException {
@@ -114,15 +130,16 @@ public class MavenPackSupport implements PackSupport {
 			_T("Make sure the account has package ${permission} permission over the project"));
 	}
 
-	public static String getGradleJobCommandsTemplate() throws IOException {
+	public static String getGradleJobCommands(Map<String, Object> bindings) throws IOException {
 		var tplUrl = Resources.getResource(MavenPackSupport.class, "gradle-job-commands.tpl");
-		var template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
-		template = template.replace(
+		var commands = evalTemplate(Resources.toString(tplUrl, StandardCharsets.UTF_8), bindings);
+		commands = commands.replace(
 			"gradle:job-token-notice",
-			_T("Use job token as user name so that OneDev can know which build is ${permission.equals(\"write\")? \"deploying\": \"using\"} packages"));
-		template = template.replace(
+			getJobTokenNotice(bindings));
+		commands = commands.replace(
 			"gradle:access-token-notice",
-			_T("Job secret 'access-token' should be defined in project build setting as an access token with package ${permission} permission"));
-		return template;
+			_T("Job secret 'access-token' should be defined in project build setting as an access token with package ${permission} permission")
+				.replace("${permission}", bindings.get("permission").toString()));
+		return commands;
 	}
 }

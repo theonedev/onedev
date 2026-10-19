@@ -258,7 +258,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 			var passwordResetRequestSentMessage = _T("Password reset request has been sent");
 			var noVerifiedPrimaryEmailAddressMessage = _T("No verified primary email address");
 			var mailServiceNotConfiguredMessage = _T("Unable to notify user as mail service is not configured");
-			var mailSubject = _T("[Reset Password] Please Reset Your OneDev Password");
+			var mailSubject = _T("[Reset Password] Please Reset Your ${productName} Password");
 			form.add(new TaskButton("tellUserToResetPassword") {
 
 				@Override

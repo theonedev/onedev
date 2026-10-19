@@ -98,7 +98,7 @@ public class GolangJobSuggestion implements JobSuggestion {
 			buildAndTest.setImage("golang:@" + JobVariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_GO_VERSION + "@");
 			buildAndTest.getInterpreter().setCommands("" +
 					"set -e\n" +
-					"# Use double at to avoid being interpreted as OneDev variable substitution\n" +
+					"# Use double at to avoid being interpreted as a build variable substitution\n" +
 					"# Pin gocover-cobertura to a release installable by the Go toolchain in the image:\n" +
 					"# v1.3.0 for Go <=1.21, v1.4.0 for Go 1.22-1.24, v1.5.0 for Go >=1.25\n" +
 					"GOVERSION=$(go env GOVERSION 2>/dev/null || true)\n" +

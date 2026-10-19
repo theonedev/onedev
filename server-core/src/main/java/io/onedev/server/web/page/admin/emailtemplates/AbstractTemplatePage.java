@@ -124,6 +124,7 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 		
 		var currentVariableHelp = new LinkedHashMap<String, String>();
 		currentVariableHelp.put("htmlVersion", _T("true for html version, false for text version"));
+		currentVariableHelp.put("productName", _T("configured product name, HTML escaped for HTML version"));
 		currentVariableHelp.putAll(variableHelp);
 		
 		for (Map.Entry<String, String> entry: currentVariableHelp.entrySet())

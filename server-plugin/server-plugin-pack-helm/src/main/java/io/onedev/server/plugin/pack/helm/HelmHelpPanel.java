@@ -26,7 +26,7 @@ public class HelmHelpPanel extends Panel {
 		add(new CodeSnippetPanel("pushChart", Model.of("$ curl -u <onedev_account_name>:<onedev_password_or_access_token> -X POST --upload-file /path/to/chart.tgz " + registryUrl)));
 		
 		add(new CodeSnippetPanel("jobCommands", Model.of("" +
-				"# " + _T("Use job token to tell OneDev the build pushing the chart") + "\n" +
+				"# " + _T("Use job token to tell ${productName} the build pushing the chart") + "\n" +
 				"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package write permission") + "\n\n" +
 				"curl -u @job_token@:@secret:access-token@ -X POST --upload-file /path/to/chart.tgz " + registryUrl)));
 	}

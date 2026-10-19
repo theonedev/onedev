@@ -64,7 +64,7 @@ public class ImportServer implements Serializable, Validatable {
 	}
 
 	@Editable(order=200, placeholderProvider="getProjectPlaceholder", 
-			description="Specify project to import into at OneDev side")
+			description="Specify project to import into at ${productName} side")
 	public String getProject() {
 		return project;
 	}

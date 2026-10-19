@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.imports.gitea;
 
+import static io.onedev.server.oem.OemUtils.getProductName;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,6 +32,7 @@ public class ImportResult {
 	}
 	
 	public String toHtml(String leadingText) {
+		var productName = HtmlEscape.escapeHtml5(getProductName());
 		StringBuilder feedback = new StringBuilder(leadingText);
 		
 		boolean hasNotice = false;
@@ -45,9 +48,9 @@ public class ImportResult {
 		if (!nonExistentIterations.isEmpty()) 
 			feedback.append(getEntryFeedback("Non existent iterations", nonExistentIterations));
 		if (!unmappedIssueLabels.isEmpty()) 
-			feedback.append(getEntryFeedback("Gitea issue labels not mapped to OneDev custom field", unmappedIssueLabels));
+			feedback.append(getEntryFeedback("Gitea issue labels not mapped to " + productName + " custom field", unmappedIssueLabels));
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("Gitea logins not mapped to OneDev account due to missing/unmatched email address", 
+			feedback.append(getEntryFeedback("Gitea logins not mapped to " + productName + " account due to missing/unmatched email address",
 					nonExistentLogins));
 		}
 		

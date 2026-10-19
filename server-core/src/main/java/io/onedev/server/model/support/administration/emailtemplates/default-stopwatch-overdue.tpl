@@ -4,7 +4,7 @@
 		    Hello,
 			<p style='margin: 16px 0;'>
 			Your stopwatch on issue ${stopwatch.issue.FQN} runs overnight,
-			and was stopped by OneDev automatically. Elapsed time
+			and was stopped by ${productName} automatically. Elapsed time
 			until midnight was added to your work. Please correct the work time if necessary by visiting below link:
 			<br>
 			<br>
@@ -15,7 +15,7 @@
 		    Hello,
 
 			Your stopwatch on issue ${stopwatch.issue.FQN} runs overnight,
-			and was stopped by OneDev automatically. Elapsed time
+			and was stopped by ${productName} automatically. Elapsed time
 			until midnight was added to your work. Please correct the work time if necessary by visiting below link:
 
 			${stopwatch.issue.url}

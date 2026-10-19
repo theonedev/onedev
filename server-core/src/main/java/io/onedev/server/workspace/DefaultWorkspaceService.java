@@ -1,5 +1,6 @@
 package io.onedev.server.workspace;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -772,10 +773,10 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			}
 
 			if (spec.isRunInContainer()) {
-				throw new ExplicitException("""
+				throw new ExplicitException(interpolate("""
 					No applicable provisioner discovered for current workspace. \
-					Please check if docker is installed on OneDev server, or configure \
-					a kubernetes provisioner if you would like workspaces to run as pods""");
+					Please check if docker is installed on ${productName} server, or configure \
+					a kubernetes provisioner if you would like workspaces to run as pods"""));
 			} else {
 				throw new ExplicitException("""
 					No applicable provisioner discovered for current workspace. \

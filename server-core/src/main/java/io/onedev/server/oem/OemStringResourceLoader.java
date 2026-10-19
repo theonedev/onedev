@@ -8,8 +8,7 @@ import java.util.Locale;
 import java.util.function.Function;
 
 import static io.onedev.server.oem.OemUtils.interpolate;
-import static io.onedev.server.oem.OemUtils.useDefaultUrls;
-import static io.onedev.server.oem.OemUtils.useUrlPlaceholders;
+import static io.onedev.server.oem.OemUtils.interpolateHtml;
 
 public class OemStringResourceLoader extends TranslationStringResourceLoader {
 
@@ -25,16 +24,13 @@ public class OemStringResourceLoader extends TranslationStringResourceLoader {
 
 	@Nullable
 	private String loadStringResource(String key, Function<String, String> loader) {
+		var html = key.startsWith("th:");
+		if (html)
+			key = "t:" + key.substring(3);
 		var translated = loader.apply(key);
 		if (translated == null)
 			return null;
-		// Existing generated translations still use the default URLs in their keys and values.
-		if (key.equals("t: " + translated) || key.equals("t:" + translated)) {
-			var defaultKey = useDefaultUrls(key);
-			if (!defaultKey.equals(key))
-				translated = loader.apply(defaultKey);
-		}
-		return interpolate(useUrlPlaceholders(translated));
+		return html ? interpolateHtml(translated) : interpolate(translated);
 	}
 
 }

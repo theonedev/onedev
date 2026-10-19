@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.pullrequest;
 
-import static io.onedev.server.web.translation.Translation._T;
+import static io.onedev.server.oem.OemUtils.translateHtml;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -45,10 +45,10 @@ public class ProjectPullRequestSetting implements Serializable {
 	@SuppressWarnings("unused")
 	private static String getLfsDescription() {
 		if (!Bootstrap.isInDocker()) {
-			return _T("Whether or not to fetch LFS objects if pull request is opened from a different project. " +
-					"If this option is enabled, git lfs command needs to be installed on OneDev server");
+			return translateHtml("Whether or not to fetch LFS objects if pull request is opened from a different project. " +
+					"If this option is enabled, git lfs command needs to be installed on ${productName} server");
 		} else {
-			return _T("Whether or not to fetch LFS objects if pull request is opened from a different project.");
+			return translateHtml("Whether or not to fetch LFS objects if pull request is opened from a different project.");
 		}
 	}
 	

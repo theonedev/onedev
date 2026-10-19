@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.help;
 
+import static io.onedev.server.oem.OemUtils.interpolateHtml;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -282,7 +283,7 @@ public class ExampleValuePanel extends Panel {
 		}
 		if (description.length() != 0) {
 			hasHint = true;
-			fragment.add(new Label("description", description).setEscapeModelStrings(false));
+			fragment.add(new Label("description", interpolateHtml(description)).setEscapeModelStrings(false));
 		} else {
 			fragment.add(new WebMarkupContainer("description").setVisible(false));
 		}

@@ -27,6 +27,7 @@ public class EditableUtilsTest {
 
 		try (var projects = mockStatic(Project.class); var oneDev = mockStatic(OneDev.class)) {
 			var oemService = mock(OemService.class);
+			when(oemService.getProductName()).thenReturn("OneDev");
 			when(oemService.getWebsite()).thenReturn(OemService.DEFAULT_WEBSITE);
 			when(oemService.getDocsite()).thenReturn(OemService.DEFAULT_DOCSITE);
 			oneDev.when(() -> OneDev.getInstance(OemService.class)).thenReturn(oemService);

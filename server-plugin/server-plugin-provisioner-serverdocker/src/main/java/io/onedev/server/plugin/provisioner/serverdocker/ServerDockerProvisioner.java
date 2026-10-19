@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.provisioner.serverdocker;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.agent.AgentUtils.callWithRegistryLogins;
 import static io.onedev.agent.AgentUtils.changeOwner;
 import static io.onedev.agent.AgentUtils.getOsIds;
@@ -79,7 +80,7 @@ import io.onedev.server.workspace.WorkspaceContext;
 import io.onedev.server.workspace.WorkspaceRuntime;
 
 @Editable(order=ServerDockerProvisioner.ORDER, name="Server Docker Provisioner", description = """
-			This provisioner creates workspaces inside Docker containers on OneDev server""")
+			This provisioner creates workspaces inside Docker containers on ${productName} server""")
 public class ServerDockerProvisioner extends WorkspaceProvisioner implements DockerAware, Testable<ServerDockerProvisioner.TestData> {
 
 	private static final long serialVersionUID = 1L;
@@ -155,7 +156,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 
 	@Editable(order=30, group="Security Settings", description="Whether or not to mount docker sock into workspace container to "
 			+ "support docker operations in workspace<br>"
-			+ "<b class='text-danger'>WARNING</b>: Malicious workspaces can take control of whole OneDev "
+			+ "<b class='text-danger'>WARNING</b>: Malicious workspaces can take control of whole ${productName} "
 			+ "by operating the mounted docker sock. Make sure this provisioner can only be used by "
 			+ "trusted workspaces if this option is enabled")
 	public boolean isMountDockerSock() {
@@ -254,7 +255,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 
 	private void checkApplicable() {
 		if (OneDev.getK8sService() != null) {
-			throw new ExplicitException("OneDev running inside kubernetes cluster does not support workspaces yet");
+			throw new ExplicitException(interpolate("${productName} running inside kubernetes cluster does not support workspaces yet"));
 		}
 	}
 

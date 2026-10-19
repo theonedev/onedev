@@ -78,7 +78,7 @@ public class AiModelSetting implements Serializable {
     }
 
     @Editable(order=400, name="Name", description="""
-        Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports 
+        Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now ${productName} only supports
         models with chat completions API. OpenAI models with the new responses API is not supported yet""")
     @ChoiceProvider("getModels")
     @NotEmpty

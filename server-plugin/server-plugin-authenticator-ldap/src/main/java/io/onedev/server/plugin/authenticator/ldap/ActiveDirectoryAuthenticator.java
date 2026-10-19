@@ -18,7 +18,7 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
     @Editable(order=100, name="LDAP URL", description = "" +
 			"Specifies LDAP URL of the Active Directory server, for example: <i>ldap://ad-server</i>, or <i>ldaps://ad-server</i>. " +
 			"In case your ldap server is using a self-signed certificate for ldaps connection, you will need to " +
-			"<a href='${docsite}/administration-guide/trust-self-signed-certificates' target='_blank'>configure OneDev to trust the certificate</a>")
+			"<a href='${docsite}/administration-guide/trust-self-signed-certificates' target='_blank'>configure ${productName} to trust the certificate</a>")
     @NotEmpty
 	@Override
 	public String getLdapUrl() {
@@ -31,7 +31,7 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 	}
 
 	@Editable(order=300, description=""
-			+ "Specify manager DN to authenticate OneDev itself to Active Directory. The manager DN should be specified "
+			+ "Specify manager DN to authenticate ${productName} itself to Active Directory. The manager DN should be specified "
 			+ "in form of <i>&lt;account name&gt;@&lt;domain&gt;</i>, for instance: <i>manager@example.com</i>")
 	@NotEmpty
 	@DependsOn(property=PROP_AUTHENTICATION_REQUIRED)
@@ -71,8 +71,8 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 	@Editable(order=1000, placeholder="Do not retrieve groups", description=""
 			+ "Optionally specify group search base if you want to retrieve group membership information "
 			+ "of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate "
-			+ "permissions to a Active Directory group, a OneDev group with same name should be defined. "
-			+ "Leave empty to manage group memberships at OneDev side")
+			+ "permissions to a Active Directory group, a ${productName} group with same name should be defined. "
+			+ "Leave empty to manage group memberships at ${productName} side")
 	public String getGroupSearchBase() {
 		return groupSearchBase;
 	}

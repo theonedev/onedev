@@ -36,7 +36,7 @@ public class AlertTemplatePage extends AbstractTemplatePage {
 	protected Map<String, String> getVariableHelp() {
 		return CollectionUtils.newLinkedHashMap(
 				"alert", _T("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Alert.java'>alert</a> to display"),
-				"serverUrl", _T("root url of OneDev server"));
+				"serverUrl", _T("root url of ${productName} server"));
 	}
 
 	@Override

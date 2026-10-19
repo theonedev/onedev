@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.agent.AgentUtils.callWithRegistryLogins;
 import static io.onedev.agent.AgentUtils.changeOwner;
 import static io.onedev.agent.AgentUtils.getOsIds;
@@ -85,7 +86,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
 @Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
-		description="This executor runs build jobs as docker containers on OneDev server")
+		description="This executor runs build jobs as docker containers on ${productName} server")
 @ClassValidating
 public class ServerDockerExecutor extends JobExecutor implements DockerAware, Testable<TestData>, Validatable {
 
@@ -179,7 +180,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	}
 
 	@Editable(order=515, group="More Settings", name="Buildx Builder", description = "Specify Buildx builder used to " +
-			"build docker image. OneDev will create the builder automatically if it does not exist. Check " +
+			"build docker image. ${productName} will create the builder automatically if it does not exist. Check " +
 			"<a href='${docsite}/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> " +
 			"on how to customize the builder for instance to allow publishing to insecure registries")
 	@NotEmpty
@@ -204,7 +205,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	
 	@Editable(order=520, group="Security Settings", description="""
 			Whether or not to mount docker sock into job container to 
-			support docker operations in job commands. To avoid malicious jobs taking control of whole OneDev 
+			support docker operations in job commands. To avoid malicious jobs taking control of whole ${productName}
 			by operating the mounted docker sock, make sure executor with this option enabled can only be used 
 			by trusted jobs""")
 	public boolean isMountDockerSock() {
@@ -338,9 +339,9 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	
 	private void checkApplicable() {
 		if (OneDev.getK8sService() != null) {
-			throw new ExplicitException(""
-					+ "OneDev running inside kubernetes cluster does not support server docker executor. "
-					+ "Please use kubernetes executor instead");
+			throw new ExplicitException(interpolate(""
+					+ "${productName} running inside kubernetes cluster does not support server docker executor. "
+					+ "Please use kubernetes executor instead"));
 		}
 	}
 	

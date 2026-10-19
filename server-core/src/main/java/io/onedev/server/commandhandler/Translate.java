@@ -1,5 +1,6 @@
 package io.onedev.server.commandhandler;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static org.apache.commons.text.StringEscapeUtils.unescapeJava;
 
 import java.io.File;
@@ -59,7 +60,7 @@ public class Translate extends CommandHandler {
 	public static final String COMMAND = "translate";
 
 	private static final Pattern METHOD_PATTERN = Pattern
-			.compile("_T\\s*\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"(?:\\s*\\+\\s*\"((?:[^\"\\\\]|\\\\.)*)\")*\\s*\\)");
+			.compile("(?:_T|translateHtml)\\s*\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"(?:\\s*\\+\\s*\"((?:[^\"\\\\]|\\\\.)*)\")*\\s*\\)");
 
 	private static final Pattern TAG_PATTERN = Pattern.compile("<wicket:t>(.+?)</wicket:t>",
 			Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -93,8 +94,8 @@ public class Translate extends CommandHandler {
 		SecurityUtils.bindAsSystem();
 
 		if (Bootstrap.command.getArgs().length == 0) {
-			logger.error("Missing OneDev project directory. Usage: {} <path to onedev project directory>",
-					Bootstrap.command.getScript());
+			logger.error("Missing {} project directory. Usage: {} <path to {} project directory>",
+					interpolate("${productName}"), Bootstrap.command.getScript(), interpolate("${productName}"));
 			System.exit(1);
 		}
 
@@ -295,7 +296,6 @@ public class Translate extends CommandHandler {
 										untranslated.add("<a>" + i + "</a>" + input.get(i).replace("\n", "{{LINE_BREAK}}"));
 									}
 								}
-								logger.info("Translating {} lines...", untranslated.size());
 								var systemMsg = new SystemMessage(systemPrompt);
 								var userMsg = new UserMessage(userPromptPrefix + "\n\n\n\n" + Joiner.on("\n\n").join(untranslated));
 								var response = model.chat(systemMsg, userMsg).aiMessage().text();
@@ -311,6 +311,10 @@ public class Translate extends CommandHandler {
 												translated.put(index, input.get(index));	
 										}
 									}
+								}
+								if (translated.size() < input.size()) {
+									logger.info("Batch incomplete: translated {}/{} entries; retrying {} remaining entries...",
+											translated.size(), input.size(), input.size() - translated.size());
 								}
 							}
 							return translated.values().stream().collect(Collectors.toList());
@@ -352,6 +356,7 @@ public class Translate extends CommandHandler {
 
 		var count = new AtomicInteger(0);
 		Lists.partition(newEntries, batchSize).forEach(batch -> {
+			logger.info("Translating entries {}-{} of {}...", count.get() + 1, count.get() + batch.size(), newEntries.size());
 			var translated = translator.apply(batch.stream().map(it-> {
 				if (!it.getValue().equals(it.getKey())) {
 					return it.getValue() + " <<<translation context: " + StringUtils.substringBefore(it.getKey(), ":") + ">>>";
@@ -366,7 +371,7 @@ public class Translate extends CommandHandler {
 				var entry = batch.get(i);
 				appendTranslation(builder, entry.getKey(), translated.get(i));
 			}			
-			logger.info("Translated {}/{} entries", count.addAndGet(batch.size()), newEntries.size());
+			logger.info("File progress: translated {}/{} entries", count.addAndGet(batch.size()), newEntries.size());
 		});
 
 		matcher = INIT_END_PATTERN.matcher(oldFileContent.substring(mapClearEnd));

@@ -34,7 +34,7 @@ public class ImportProjects implements Serializable, Validatable {
 	
 	private boolean populateTagMappings = true;
 
-	@Editable(order=200, name="Parent OneDev Project", description = "Optionally specify a OneDev project " +
+	@Editable(order=200, name="Parent ${productName} Project", description = "Optionally specify a ${productName} project " +
 			"to be used as parent of imported projects. Leave empty to import as root projects")
 	@ChoiceProvider("getParentOneDevProjectChoices")
 	public String getParentOneDevProject() {

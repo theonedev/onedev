@@ -27,7 +27,7 @@ public class GetGroupsUsingAttribute implements GroupRetrieval {
 	
 	@Editable(order=200, description=""
 			+ "Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute "
-			+ "will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>")
+			+ "will be mapped to a ${productName} group. This attribute is normally set to <i>cn</i>")
 	@NotEmpty
 	public String getGroupNameAttribute() {
 		return groupNameAttribute;

@@ -31,7 +31,7 @@ public class IssueStatusMapping implements Serializable {
 		this.jiraIssueStatus = jiraIssueStatus;
 	}
 
-	@Editable(order=200, name="OneDev Issue State", description="OneDev Issue State")
+	@Editable(order=200, name="${productName} Issue State", description="${productName} Issue State")
 	@ChoiceProvider("getOneDevIssueStateChoices")
 	@NotEmpty
 	public String getOneDevIssueState() {

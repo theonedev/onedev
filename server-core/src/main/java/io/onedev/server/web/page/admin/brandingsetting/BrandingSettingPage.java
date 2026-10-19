@@ -19,6 +19,7 @@ import com.google.common.io.Resources;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.oem.OemUtils;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.service.SettingService;
@@ -82,7 +83,7 @@ public class BrandingSettingPage extends AdministrationPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				setting.setName(bean.getName());
+				setting.setName(bean.getName().equals(OemUtils.getProductName()) ? "OneDev" : bean.getName());
 				getSettingService().saveBrandingSetting(setting);
 				auditService.audit(null, "changed branding settings", null, null);
 				if (!bean.getLogoData().equals(getDefaultLogoData(false))) {
@@ -114,7 +115,7 @@ public class BrandingSettingPage extends AdministrationPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!setting.getName().equals("OneDev") 
+				setVisible(!setting.getName().equals(OemUtils.getProductName())
 						|| getCustomLogoFile(false).exists() 
 						|| getCustomLogoFile(true).exists());
 			}

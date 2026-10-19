@@ -55,6 +55,24 @@ E2E_SKIP_WEBSERVER=1 E2E_BASE_URL=https://onedev.example.com npm test
 For local debugging, `npm run test:headed` opens the browser and
 `npm run test:ui` starts Playwright's interactive test runner.
 
+## Product branding
+
+`tests/product-branding.spec.js` checks login branding, English and Chinese
+translations, webhook signature headers, REST help, email template editing,
+and a real invitation email captured by a loopback SMTP sink.
+It defaults to the product name `OneDev`. To test an OEM installation, configure
+`product_name=GitOn` in the server's `conf/oem.properties`, restart the server,
+and pass the same name to the tests:
+
+```bash
+E2E_SKIP_WEBSERVER=1 E2E_PRODUCT_NAME=GitOn npm test -- tests/product-branding.spec.js
+```
+
+The invitation test temporarily configures its local SMTP sink, then restores
+the previous mail connector and cancels its test invitation. Other tests do not
+save administration settings or template changes. Temporary projects are
+removed by the usual fixture cleanup.
+
 ## SSH cloning
 
 `tests/ssh-clone.spec.js` requires Git, OpenSSH (`ssh` and `ssh-keygen`),

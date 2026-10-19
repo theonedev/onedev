@@ -17,7 +17,7 @@ def stop_servers(api, namespace, name, image, timeout):
         if error.code == 404:
             raise RuntimeError(
                 f"Refusing to upgrade: StatefulSet {namespace}/{name} was not found; "
-                "cannot verify that existing OneDev servers are stopped. Keep the existing "
+                "cannot verify that existing servers are stopped. Keep the existing "
                 "StatefulSet name when upgrading (check global.nameOverride and "
                 "global.fullnameOverride).") from error
         raise
@@ -25,7 +25,7 @@ def stop_servers(api, namespace, name, image, timeout):
     if retention.get("whenScaled") == "Delete":
         raise RuntimeError(
             "Refusing to upgrade: persistentVolumeClaimRetentionPolicy.whenScaled is Delete; "
-            "scaling down could delete OneDev data. Set whenScaled to Retain on the existing "
+            "scaling down could delete server data. Set whenScaled to Retain on the existing "
             "StatefulSet before retrying.")
     strategy = statefulset["spec"].get("updateStrategy", {})
     if strategy.get("rollingUpdate", {}).get("partition", 0) != 0:
@@ -50,10 +50,10 @@ def stop_servers(api, namespace, name, image, timeout):
     existing = pods()
     if (server_image(statefulset["spec"]["template"]["spec"]) == image
             and all(server_image(pod["spec"]) == image for pod in existing)):
-        print("OneDev image is unchanged; no upgrade shutdown required", flush=True)
+        print("Server image is unchanged; no upgrade shutdown required", flush=True)
         return
 
-    print("Stopping all OneDev servers before upgrading the shared database", flush=True)
+    print("Stopping all servers before upgrading the shared database", flush=True)
     api("PATCH", base + "/scale", {"spec": {"replicas": 0}})
     deadline = time.monotonic() + timeout
     deleting = set()
@@ -64,7 +64,7 @@ def stop_servers(api, namespace, name, image, timeout):
             raise RuntimeError("StatefulSet was scaled up during upgrade; refusing to proceed")
         if (not existing and current.get("status", {}).get("observedGeneration", 0)
                 >= current["metadata"]["generation"]):
-            print("All OneDev pods have stopped; Helm can now apply the new image", flush=True)
+            print("All server pods have stopped; Helm can now apply the new image", flush=True)
             return
         # Older StatefulSet controllers can wait for an unready pod during scale-down.
         # Delete only this StatefulSet's pods, respecting their normal grace period.
@@ -80,7 +80,7 @@ def stop_servers(api, namespace, name, image, timeout):
                         raise
                 deleting.add(metadata["uid"])
         if time.monotonic() >= deadline:
-            raise TimeoutError("OneDev pods did not stop; upgrade aborted with replicas left at zero")
+            raise TimeoutError("Server pods did not stop; upgrade aborted with replicas left at zero")
         time.sleep(2)
 
 

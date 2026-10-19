@@ -56,7 +56,7 @@ public class TriggerJobResource {
 	
 	private static final String REF_DESCRIPTION = "Specify branch or tag to be triggered against. If none specified, default branch will be used";
 	
-	private static final String ACCESS_TOKEN_DESCRIPTION = "OneDev access token with permission to trigger the job";
+	private static final String ACCESS_TOKEN_DESCRIPTION = "${productName} access token with permission to trigger the job";
 	
 	private final JobService jobService;
 	

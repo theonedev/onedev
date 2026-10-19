@@ -33,7 +33,7 @@ public class IssueLinkMapping implements Serializable {
 		this.youTrackIssueLink = youTrackIssueLink;
 	}
 
-	@Editable(order=200, name="OneDev Issue Link")
+	@Editable(order=200, name="${productName} Issue Link")
 	@ChoiceProvider("getOneDevIssueLinkChoices")
 	@NotEmpty
 	public String getOneDevIssueLink() {

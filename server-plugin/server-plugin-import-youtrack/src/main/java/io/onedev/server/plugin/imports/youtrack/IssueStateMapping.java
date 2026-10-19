@@ -32,7 +32,7 @@ public class IssueStateMapping implements Serializable {
 		this.youTrackIssueState = youTrackIssueState;
 	}
 
-	@Editable(order=200, name="OneDev Issue State")
+	@Editable(order=200, name="${productName} Issue State")
 	@ChoiceProvider("getOneDevIssueStateChoices")
 	@NotEmpty
 	public String getOneDevIssueState() {

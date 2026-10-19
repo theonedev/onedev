@@ -2,7 +2,7 @@
 
 ### Service Wrapper
 
-JSW has been replaced with OneDev Wrapper. Server and agent now support only Linux/Windows on amd64/arm64 and macOS on Apple Silicon.
+JSW has been replaced with ${productName} Wrapper. Server and agent now support only Linux/Windows on amd64/arm64 and macOS on Apple Silicon.
 
 # 16.8.4
 
@@ -26,7 +26,7 @@ Default system GPG signing email changed from `system@onedev` to `onedev@noreply
 
 ### Helm Chart
 
-Git access via SSH is now disabled by default. Existing installations exposing SSH through a LoadBalancer, nginx ingress controller, or another TCP proxy should set `ssh.enabled=true` when upgrading; otherwise the SSH port is removed from OneDev's Kubernetes Service.
+Git access via SSH is now disabled by default. Existing installations exposing SSH through a LoadBalancer, nginx ingress controller, or another TCP proxy should set `ssh.enabled=true` when upgrading; otherwise the SSH port is removed from ${productName}'s Kubernetes Service.
 
 # 16.2.1
 
@@ -46,7 +46,7 @@ Existing Git LFS file locks will be removed during upgrade. Previously locks wer
 
 1. Issues defined in parent project are now longer able to link with commits/builds/PRs in child projects. This restriction is added to address the performance problem when a project has many child projects
 
-1. Users authorized to access a projectd will be able to access artifacts of all CI/CD jobs of the project. This is added to address performance issue when massive number of projects are created in OneDev
+1. Users authorized to access a projectd will be able to access artifacts of all CI/CD jobs of the project. This is added to address performance issue when massive number of projects are created in ${productName}
 
 # 16.0.0
 
@@ -74,7 +74,7 @@ Custom issue fields of type `Build`, `Issue`, and `Pull Request` now only allow 
 
 The Kubernetes job executor now requires build working directory to be backed by PVC. Using hostPath volumes is no longer supported, as it is not considered a recommended Kubernetes practice.
 
-If your previous configuration did not use a PVC for the build volume, OneDev will automatically provision a PVC using the cluster's default StorageClass. The initial storage size is set to 10 GiB. Adjust this value as needed to meet your workload requirements.
+If your previous configuration did not use a PVC for the build volume, ${productName} will automatically provision a PVC using the cluster's default StorageClass. The initial storage size is set to 10 GiB. Adjust this value as needed to meet your workload requirements.
 
 ### Workspace
 
@@ -156,7 +156,7 @@ Configure mail relay/forward at mail server side if you are using this feature p
 # 11.6.0
 
 SQL Server support is removed due to added complexity and inability to test with full version. 
-If you are using SQL Server, please [switch to use MySQL/PostgreSQL/MariaDB](https://docs.onedev.io/administration-guide/switch-database)
+If you are using SQL Server, please [switch to use MySQL/PostgreSQL/MariaDB](${docsite}/administration-guide/switch-database)
 
 # 11.5.0
 
@@ -185,7 +185,7 @@ they need to be updated to use iteration api instead
 
 1. The build image step now always uses buildx builder to build images to avoid polluting images used by other jobs. 
 The builder should be specified in more settings section of corresponding executors. If you are accessing insecure
-private docker registries, please follow [this tutorial](https://docs.onedev.io/tutorials/cicd/insecure-docker-registry) to configure the builder
+private docker registries, please follow [this tutorial](${docsite}/tutorials/cicd/insecure-docker-registry) to configure the builder
 
 2. Builder and platform option cannot be specified via _More Options_ property of build image step now. The builder option
 should be specified in executor (see above note), and platform option should be specified via property _Platform_
@@ -204,9 +204,9 @@ latest image or download latest agent package from server.
 
 ### CI/CD
 
-OneDev now stores job caches on server instead of local disk for better manageability and 
+${productName} now stores job caches on server instead of local disk for better manageability and
 sharing. As result of this, the cache settings defined at job level are removed. One should 
-use _Set Up Cache_ step now instead. Check out <a href='https://docs.onedev.io/tutorials/cicd/job-cache'>this tutorial</a> 
+use _Set Up Cache_ step now instead. Check out <a href='${docsite}/tutorials/cicd/job-cache'>this tutorial</a>
 to get familiar with the new cache mechanism
 
 ### RESTful API
@@ -227,7 +227,7 @@ need to specify additional email addresses to be monitored explicitly via option
 
 ### Agent
 
-OneDev now relies on buildx to build docker image. Make sure to update agent image by running 
+${productName} now relies on buildx to build docker image. Make sure to update agent image by running
 `docker pull 1dev/agent` if you are running agent inside container
 
 # 9.1.5
@@ -248,8 +248,8 @@ This feature will be replaced by on demand agent launch in future versions
  
 ### License Terms
 
-Since 9.0, OneDev introduces [enterprise edition](https://onedev.io/pricing) which requires a paid subscription to use, 
-and now it is distributed under [new license](https://onedev.io/license-agreement). In short, the _server-ee_ folder is 
+Since 9.0, ${productName} introduces [enterprise edition](${website}/pricing) which requires a paid subscription to use,
+and now it is distributed under [new license](${website}/license-agreement). In short, the _server-ee_ folder is
 licensed separately with a source available license, while other parts remain MIT licensed. 
 
 It is promised that all existing features prior to 9.0 will never be moved into enterprise edition, and new features 
@@ -257,7 +257,7 @@ will be added to MIT licensed part continuously.
 
 ### Helm Chart 
 
-1. OneDev only supports to run as statefulsets now. Refer to the [upgrade guide](https://docs.onedev.io/upgrade-guide/deploy-to-k8s) to migrate the persistent volume
+1. ${productName} only supports to run as statefulsets now. Refer to the [upgrade guide](${docsite}/upgrade-guide/deploy-to-k8s) to migrate the persistent volume
 2. Various database settings are changed to remove the _db_ prefix. For instance, _.Values.database.dbType_ was changed to _.Values.database.type_. Refer to [values.yaml](https://code.onedev.io/onedev/server/~files/main/server-product/helm/values.yaml) for details
 
 ### RESTful api 
@@ -268,13 +268,13 @@ The operation to [get issue fields](/~help/api/io.onedev.server.rest.IssueResour
 
 ### Database 
 
-Oracle support is removed as it is hard to test with latest version. If you happen to use this database, please back up data and restore to a supported database following [this guide](https://docs.onedev.io/administration-guide/backup-restore)
+Oracle support is removed as it is hard to test with latest version. If you happen to use this database, please back up data and restore to a supported database following [this guide](${docsite}/administration-guide/backup-restore)
 
 # 8.5.0
 
 ### Helm Chart
 
-Helm chart has been completely rewritten to be flexible, and it is not compatible with earlier versions. Follow [upgrade guide](https://docs.onedev.io/upgrade-guide/deploy-to-k8s) to upgrade your chart from version <= 8.4.2
+Helm chart has been completely rewritten to be flexible, and it is not compatible with earlier versions. Follow [upgrade guide](${docsite}/upgrade-guide/deploy-to-k8s) to upgrade your chart from version <= 8.4.2
 
 # 8.4.0
 
@@ -305,7 +305,7 @@ A particular agent token can only be used by one agent now. If you have multiple
 **[RESTful api]** 
 
 1. The endpoint path to list agents in agent token resource has been changed from `/agents` to `/agent`
-1. The endpoint to create agent token now do not require any request body. It will generate new token value at OneDev side
+1. The endpoint to create agent token now do not require any request body. It will generate new token value at ${productName} side
 
 # 8.0.7
 
@@ -325,7 +325,7 @@ All access tokens of users are re-generated with cryto strong random string. As 
 
 # 7.8.0
 
-To use consistent project url for web and git access, OneDev now uses project path instead of project id to access projects via web UI, for instance `https://code.onedev.io/projects/160` has been changed to `https://code.onedev.io/onedev/server`. To avoid conflicting with this url scheme, 
+To use consistent project url for web and git access, ${productName} now uses project path instead of project id to access projects via web UI, for instance `https://code.onedev.io/projects/160` has been changed to `https://code.onedev.io/onedev/server`. To avoid conflicting with this url scheme,
 some service urls have been changed and this causes some incompatibitlities:
 
 1. The RESTful api url now starts with `~api` instead of `api`, for instance url to access project information is now `/~api/projects/{projectId}` 
@@ -333,11 +333,11 @@ some service urls have been changed and this causes some incompatibitlities:
 3. If you are using OAuth based Office365 or Gmail mail service, make sure to change redirect url as `https://<onedev root url>/~oauth/callback` (use `~oauth` instead of `oauth`)
 4. Agents cannot upgrade itself for this version, as url connecting to server has been changed. You will need to re-download 
 agent package from server if running in bare-metal mode, or re-pull the agent image if running in docker mode
-5. If you are setting up reverse proxy using Apache or Nginx, make sure to change proxied path `/server` to `/~server`. Check [the docs](https://docs.onedev.io/administration-guide/reverse-proxy-setup) for details
+5. If you are setting up reverse proxy using Apache or Nginx, make sure to change proxied path `/server` to `/~server`. Check [the docs](${docsite}/administration-guide/reverse-proxy-setup) for details
 
 # 7.7.0
 
-OneDev server and agent now requires Java 11 or higher. Follow below steps to upgrade agent manually:
+${productName} server and agent now requires Java 11 or higher. Follow below steps to upgrade agent manually:
 
 1. If agent is running as bare metal mode with Java 8, re-download agent package from server and run it 
 with Java 11 or higher following the instructions
@@ -378,7 +378,7 @@ be executed by shell executor, edit them to disable this property, otherwise the
 
 # 5.4.0 
 
-1. In case install OneDev into a Kubernetes cluster, Kustomization based deployment is replaced by helm based deployment for flexibility reason
+1. In case install ${productName} into a Kubernetes cluster, Kustomization based deployment is replaced by helm based deployment for flexibility reason
 
 # 5.2.1
 
@@ -422,7 +422,7 @@ consideration. As a result of this, password authentication specified previously
 
 1. Submodule authentication
   
-  You will need to use custom http/ssh clone credential with permission to access submodule projects to retrieve source. Refer to [tutorial](https://docs.onedev.io/tutorials/cicd/clone-submodules-ssh/) for an example.
+  You will need to use custom http/ssh clone credential with permission to access submodule projects to retrieve source. Refer to [tutorial](${docsite}/tutorials/cicd/clone-submodules-ssh/) for an example.
   
 2. Project dependency authentication
 

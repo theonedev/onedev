@@ -201,7 +201,7 @@ function Prepare-Distribution([string] $Release, [string] $Destination, [bool] $
             $text = [IO.File]::ReadAllText($configuration).Replace('@bootstrap.class@', $mainClass).
                 Replace('@app.name@', "onedev.$kind").Replace('@app.long.name@', $displayName).
                 Replace('@app.description@', $displayName).Replace('@classpath2@', $classpath)
-            if ($text -match '@[A-Za-z0-9_.]+@') { throw 'Unresolved placeholder in OneDev wrapper configuration' }
+            if ($text -match '@[A-Za-z0-9_.]+@') { throw 'Unresolved placeholder in wrapper configuration' }
             Write-Text (Join-Path $distribution "${prefix}conf/wrapper.conf") $text
         }
         Copy-Item -LiteralPath (Join-Path $Release 'VERSION') -Destination (Join-Path $prepared 'VERSION') -Force

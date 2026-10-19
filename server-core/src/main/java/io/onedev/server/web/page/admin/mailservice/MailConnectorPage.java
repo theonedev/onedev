@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisitor;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Sets;
 
@@ -29,6 +30,7 @@ import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.mail.MailService;
+import io.onedev.server.oem.OemUtils;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.SettingService;
@@ -149,8 +151,8 @@ public class MailConnectorPage extends AdministrationPage {
 						String subAddressed = systemAddress.getSubaddress(MailService.TEST_SUB_ADDRESS);
 						logger.log(MessageFormat.format(sendingMailText, subAddressed));
 						mailConnector.sendMail(Sets.newHashSet(subAddressed), Sets.newHashSet(), 
-								Sets.newHashSet(), uuid, "[Test] Test Email From OneDev", 
-								"This is a test email from OneDev", null, 
+								Sets.newHashSet(), uuid, HtmlEscape.escapeHtml5(OemUtils.interpolate("[Test] Test Email From ${productName}")),
+								OemUtils.interpolate("This is a test email from ${productName}"), null,
 								null, null, true);
 
 						logger.log(waitingMailText);
@@ -173,7 +175,7 @@ public class MailConnectorPage extends AdministrationPage {
 						if (emailAddress != null) {
 							String body = "Great, your mail service configuration is working!";
 							mailConnector.sendMail(Sets.newHashSet(emailAddress.getValue()),
-									Sets.newHashSet(), Sets.newHashSet(), "[Test] Test Email From OneDev",
+									Sets.newHashSet(), Sets.newHashSet(), OemUtils.interpolate("[Test] Test Email From ${productName}"),
 									body, body, null, null, null, true);
 							return new TaskResult(true, new PlainMessage(MessageFormat.format(mailSentText, emailAddress.getValue())));
 						} else {

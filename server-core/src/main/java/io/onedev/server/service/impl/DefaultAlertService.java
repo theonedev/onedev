@@ -1,5 +1,6 @@
 package io.onedev.server.service.impl;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.server.model.Alert.PROP_SUBJECT;
 
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class DefaultAlertService extends BaseEntityService<Alert> implements Ale
 		if (clusterService.isLeaderServer() && event.isAbnormal()) {
 			var server = event.getServer() + " (" + clusterService.getServerName(event.getServer()) + ")";
 			alert("Server '" + server + "' cannot be reached", 
-					"Server '" + server + "' is part of OneDev cluster, but cannot be reached for some reason", 
+					"Server '" + server + interpolate("' is part of ${productName} cluster, but cannot be reached for some reason"),
 					false);
 		}
 	}

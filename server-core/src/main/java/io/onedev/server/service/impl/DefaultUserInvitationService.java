@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
+import io.onedev.server.oem.OemUtils;
 import io.onedev.server.persistence.dao.MatchMode;
 import io.onedev.server.persistence.dao.Order;
 import io.onedev.server.persistence.dao.Restrictions;
@@ -66,7 +67,7 @@ public class DefaultUserInvitationService extends BaseEntityService<UserInvitati
 		
 		mailService.sendMail(Arrays.asList(invitation.getEmailAddress()),
 				Lists.newArrayList(), Lists.newArrayList(), 
-				"[Invitation] You are Invited to Use OneDev", 
+				OemUtils.interpolate("[Invitation] You are Invited to Use ${productName}"),
 				htmlBody, textBody, null, null, null);
 	}
 	

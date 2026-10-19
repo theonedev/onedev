@@ -70,7 +70,7 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="" +
-		"This executor runs build jobs with OneDev server's shell facility")
+		"This executor runs build jobs with ${productName} server's shell facility")
 public class ServerShellExecutor extends JobExecutor implements Testable<Testable.None> {
 
 	private static final long serialVersionUID = 1L;
@@ -95,7 +95,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<Testabl
 
 	@Editable(order=10000, name="Applicable Jobs", description="""
 			Specify applicable jobs of this executor. 
-			<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as OneDev process. 
+			<b class='text-danger'>WARNING</b>: Jobs running with this executor has same privilege as ${productName} process.
 			Please make sure that only trusted jobs can use this executor""")
 	@io.onedev.server.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
 	@NotEmpty

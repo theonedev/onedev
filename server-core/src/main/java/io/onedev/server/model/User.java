@@ -46,6 +46,7 @@ import com.google.common.base.MoreObjects;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.oem.OemUtils;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
@@ -781,7 +782,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 	
 	public String getDisplayName() {
-		if (getFullName() != null)
+		if (isSystem())
+			return OemUtils.getProductName();
+		else if (getFullName() != null)
 			return getFullName();
 		else
 			return getName();

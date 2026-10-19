@@ -33,7 +33,7 @@ public class IssueLabelMapping implements Serializable {
 		this.gitLabIssueLabel = gitLabIssueLabel;
 	}
 
-	@Editable(order=200, name="OneDev Issue Field", description="Specify a custom field of Enum type")
+	@Editable(order=200, name="${productName} Issue Field", description="Specify a custom field of Enum type")
 	@ChoiceProvider("getOneDevIssueFieldChoices")
 	@NotEmpty
 	public String getOneDevIssueField() {

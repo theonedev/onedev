@@ -112,6 +112,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.issue.field.FieldUtils;
+import io.onedev.server.oem.OemUtils;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -466,7 +467,7 @@ public class DefaultMailService implements MailService, Serializable {
 					var project = findProject(systemAddress, parsedReceiverAddress);
 					if (project != null) {
 						if (isOriginatedFromOneDev(message)) {
-							logger.warn("Ignored opening issue from message as it is originated from OneDev");
+							logger.warn(OemUtils.interpolate("Ignored opening issue from message as it is originated from ${productName}"));
 						} else {
 							var serviceDeskSetting = settingService.getServiceDeskSetting();
 							if (serviceDeskSetting != null) {
@@ -916,7 +917,7 @@ public class DefaultMailService implements MailService, Serializable {
 								
 								var threadingReferences = getThreadingReferences(UUID.randomUUID().toString(), null);
 								sendMailAsync(newArrayList(from.getAddress()), new ArrayList<>(), 
-										new ArrayList<>(), "OneDev is unable to process your message", 
+										new ArrayList<>(), OemUtils.interpolate("${productName} is unable to process your message"),
 										htmlBody, textBody, null, null, threadingReferences);								
 							}
 						} catch (Exception e2) {

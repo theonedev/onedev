@@ -38,7 +38,7 @@ public class ImportOption implements Serializable {
 	}
 	
 	@Editable(order=350, description="Specify a multi-value user field to hold assignees information.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getAssigneesIssueFieldChoices")
 	@NotEmpty
 	public String getAssigneesIssueField() {
@@ -60,7 +60,7 @@ public class ImportOption implements Serializable {
 	}
 
 	@Editable(order=360, description="Optionally specify a date field to hold due date information.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getDueDateIssueFieldChoices")
 	public String getDueDateIssueField() {
 		return dueDateIssueField;
@@ -81,7 +81,7 @@ public class ImportOption implements Serializable {
 	}
 	
 	@Editable(order=370, description="Optionally specify a working period field to hold time spent infomration.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getIntegerIssueFieldChoices")
 	public String getTimeSpentIssueField() {
 		return timeSpentIssueField;
@@ -92,7 +92,7 @@ public class ImportOption implements Serializable {
 	}
 
 	@Editable(order=380, description="Optionally specify a working period field to hold time estimate infomration.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getIntegerIssueFieldChoices")
 	public String getTimeEstimateIssueField() {
 		return timeEstimateIssueField;
@@ -122,8 +122,8 @@ public class ImportOption implements Serializable {
 		return choices;
 	}
 	
-	@Editable(order=600, description="Specify how to map JIRA issue statuses to OneDev custom fields.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here")
+	@Editable(order=600, description="Specify how to map JIRA issue statuses to ${productName} custom fields.<br>"
+			+ "<b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here")
 	public List<IssueStatusMapping> getIssueStatusMappings() {
 		return issueStatusMappings;
 	}
@@ -132,8 +132,8 @@ public class ImportOption implements Serializable {
 		this.issueStatusMappings = issueStatusMappings;
 	}
 
-	@Editable(order=700, description="Specify how to map JIRA issue types to OneDev custom fields.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+	@Editable(order=700, description="Specify how to map JIRA issue types to ${productName} custom fields.<br>"
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	public List<IssueTypeMapping> getIssueTypeMappings() {
 		return issueTypeMappings;
 	}
@@ -142,8 +142,8 @@ public class ImportOption implements Serializable {
 		this.issueTypeMappings = issueTypeMappings;
 	}
 
-	@Editable(order=800, description="Specify how to map JIRA issue priorities to OneDev custom fields.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+	@Editable(order=800, description="Specify how to map JIRA issue priorities to ${productName} custom fields.<br>"
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	public List<IssuePriorityMapping> getIssuePriorityMappings() {
 		return issuePriorityMappings;
 	}

@@ -11,7 +11,7 @@ APP VERSION: {{ .Chart.AppVersion }}
 {{- $controller := include "ods.ingressController" . }}
 {{- $hosts := concat (list .Values.ingress.host) (.Values.ingress.additionalHosts | default (list)) }}
 
-You can access OneDev at:
+You can access the server at:
 
 {{- if .Values.ingress.tls.enabled }}
    https://{{ .Values.ingress.host }}
@@ -37,7 +37,7 @@ SSH root url as ssh://{{ .Values.ingress.host }} in menu Administration/System S
 
 {{- else }}
 
-Get the OneDev URL by running:
+Get the server URL by running:
 
 {{- if contains "ClusterIP"  .Values.service.type }}
 

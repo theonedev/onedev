@@ -33,7 +33,7 @@ public class IssueImportOption implements Serializable {
 	private List<IssueLabelMapping> issueLabelMappings = new ArrayList<>();
 	
 	@Editable(order=300, description="Specify which issue state to use for closed GitLab issues.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here")
 	@ChoiceProvider("getCloseStateChoices")
 	@NotEmpty
 	public String getClosedIssueState() {
@@ -57,7 +57,7 @@ public class IssueImportOption implements Serializable {
 	}
 	
 	@Editable(order=350, description="Specify a multi-value user field to hold assignees information.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getAssigneesIssueFieldChoices")
 	@NotEmpty
 	public String getAssigneesIssueField() {
@@ -79,7 +79,7 @@ public class IssueImportOption implements Serializable {
 	}
 
 	@Editable(order=360, description="Optionally specify a date field to hold due date information.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getDueDateIssueFieldChoices")
 	public String getDueDateIssueField() {
 		return dueDateIssueField;
@@ -100,7 +100,7 @@ public class IssueImportOption implements Serializable {
 	}
 	
 	@Editable(order=370, description="Optionally specify a working period field to hold estimated time infomration.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getIntegerIssueFieldChoices")
 	public String getEstimatedTimeIssueField() {
 		return estimatedTimeIssueField;
@@ -111,7 +111,7 @@ public class IssueImportOption implements Serializable {
 	}
 
 	@Editable(order=380, description="Optionally specify a working period field to hold spent time infomration.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getIntegerIssueFieldChoices")
 	public String getSpentTimeIssueField() {
 		return spentTimeIssueField;
@@ -131,9 +131,9 @@ public class IssueImportOption implements Serializable {
 		return choices;
 	}
 	
-	@Editable(order=400, description="Specify how to map GitLab issue labels to OneDev custom "
+	@Editable(order=400, description="Specify how to map GitLab issue labels to ${productName} custom "
 			+ "fields.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	public List<IssueLabelMapping> getIssueLabelMappings() {
 		return issueLabelMappings;
 	}

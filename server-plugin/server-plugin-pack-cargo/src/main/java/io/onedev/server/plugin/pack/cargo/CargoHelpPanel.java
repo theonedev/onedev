@@ -37,7 +37,7 @@ public class CargoHelpPanel extends Panel {
 			@Override
 			protected String load() {
 				return "" +
-						"# " + _T("Use job token to tell OneDev the build publishing the package") + "\n" +
+						"# " + _T("Use job token to tell ${productName} the build publishing the package") + "\n" +
 						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package write permission") + "\n\n" +
 						"mkdir -p $HOME/.cargo\n" +
 						"cat << EOF >> $HOME/.cargo/config.toml\n" +

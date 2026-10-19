@@ -1,5 +1,6 @@
 package io.onedev.server.commandhandler;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.server.persistence.PersistenceUtils.callWithLock;
 import static io.onedev.server.persistence.PersistenceUtils.newSiteLibClassLoader;
 import static io.onedev.server.persistence.PersistenceUtils.openConnection;
@@ -212,8 +213,8 @@ public class Upgrade extends AbstractPlugin {
 		SecurityUtils.bindAsSystem();
 		
 		if (Bootstrap.command.getArgs().length == 0) {
-			logger.error("Missing upgrade target parameter. Usage: {} <OneDev installation directory>", 
-					Bootstrap.command.getScript());
+			logger.error("Missing upgrade target parameter. Usage: {} <{} installation directory>",
+					Bootstrap.command.getScript(), interpolate("${productName}"));
 			System.exit(1);
 		}
 		
@@ -241,9 +242,9 @@ public class Upgrade extends AbstractPlugin {
 		}
 		if (!isEmpty) {
 			if (!new File(upgradeDir, "boot").exists()) {
-				logger.error("Invalid OneDev installation directory: {}, make sure you are specifying the top level "
-						+ "installation directory (it contains sub directories such as \"bin\", \"boot\", \"conf\", etc)", 
-						upgradeDir.getAbsolutePath());
+				logger.error("Invalid {} installation directory: {}, make sure you are specifying the top level "
+						+ "installation directory (it contains sub directories such as \"bin\", \"boot\", \"conf\", etc)",
+						interpolate("${productName}"), upgradeDir.getAbsolutePath());
 				System.exit(1);
 			}
 
@@ -311,7 +312,7 @@ public class Upgrade extends AbstractPlugin {
 							if (dbDataVersion != oldAppDataVersion && dbDataVersion != newAppDataVersion) 
 								throw new ExplicitException("Unable to upgrade specified installation as data version of application and database is not the same");
 							if (newAppDataVersion < oldAppDataVersion) 
-								throw new ExplicitException("OneDev program is too old, please use a newer version");
+								throw new ExplicitException(interpolate("${productName} program is too old, please use a newer version"));
 							
 							String timestamp = DateTimeFormat.forPattern(BACKUP_DATETIME_FORMAT).print(new DateTime());
 							File programBackup = new File(upgradeDir, "site/program-backup/" + timestamp);
@@ -501,9 +502,9 @@ public class Upgrade extends AbstractPlugin {
 								StringBuilder errorMessage = new StringBuilder(String.format("!! Failed to upgrade %s", upgradeDir.getAbsolutePath()));
 								if (dbChanged) {
 									if (inDocker)
-										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then exec into the container to run below command:");
+										errorMessage.append(interpolate("\n${productName} is unable to restore old database, please do it manually by first resetting it (delete and create), and then exec into the container to run below command:"));
 									else
-										errorMessage.append("\nOneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:");										
+										errorMessage.append(interpolate("\n${productName} is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:"));
 									if (SystemUtils.IS_OS_WINDOWS) 
 										errorMessage.append("\n" + upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
 									else 

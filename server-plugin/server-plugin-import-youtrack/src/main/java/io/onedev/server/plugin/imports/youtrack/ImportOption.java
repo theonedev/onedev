@@ -19,9 +19,9 @@ public class ImportOption implements Serializable {
 	
 	private List<IssueLinkMapping> issueLinkMappings = new ArrayList<>();
 	
-	@Editable(order=200, description="Specify how to map YouTrack issue state to OneDev issue state. "
-			+ "Unmapped states will use the initial state in OneDev.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here")
+	@Editable(order=200, description="Specify how to map YouTrack issue state to ${productName} issue state. "
+			+ "Unmapped states will use the initial state in ${productName}.<br>"
+			+ "<b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here")
 	public List<IssueStateMapping> getIssueStateMappings() {
 		return issueStateMappings;
 	}
@@ -30,13 +30,13 @@ public class ImportOption implements Serializable {
 		this.issueStateMappings = issueStateMappings;
 	}
 
-	@Editable(order=300, description="Specify how to map YouTrack issue fields to OneDev. Unmapped fields will "
+	@Editable(order=300, description="Specify how to map YouTrack issue fields to ${productName}. Unmapped fields will "
 			+ "be reflected in issue description.<br>"
 			+ "<b>Note: </b>"
 			+ "<ul>"
 			+ "<li>Enum field needs to be mapped in form of <tt>&lt;Field Name&gt;::&lt;Field Value&gt;</tt>, "
 			+ "for instance <tt>Priority::Critical</tt>"
-			+ "<li>You may customize OneDev issue fields in case there is no appropriate option here"
+			+ "<li>You may customize ${productName} issue fields in case there is no appropriate option here"
 			+ "</ul>")
 	public List<IssueFieldMapping> getIssueFieldMappings() {
 		return issueFieldMappings;
@@ -46,9 +46,9 @@ public class ImportOption implements Serializable {
 		this.issueFieldMappings = issueFieldMappings;
 	}
 
-	@Editable(order=300, description="Specify how to map YouTrack issue tags to OneDev issue custom "
+	@Editable(order=300, description="Specify how to map YouTrack issue tags to ${productName} issue custom "
 			+ "fields.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+			+ "<b>NOTE: </b> You may customize ${productName} issue fields in case there is no appropriate option here")
 	public List<IssueTagMapping> getIssueTagMappings() {
 		return issueTagMappings;
 	}
@@ -57,8 +57,8 @@ public class ImportOption implements Serializable {
 		this.issueTagMappings = issueTagMappings;
 	}
 
-	@Editable(order=400, description="Specify how to map YouTrack issue links to OneDev issue links.<br>"
-			+ "<b>NOTE: </b> You may customize OneDev issue links in case there is no appropriate option here")
+	@Editable(order=400, description="Specify how to map YouTrack issue links to ${productName} issue links.<br>"
+			+ "<b>NOTE: </b> You may customize ${productName} issue links in case there is no appropriate option here")
 	public List<IssueLinkMapping> getIssueLinkMappings() {
 		return issueLinkMappings;
 	}

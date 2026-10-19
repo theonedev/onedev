@@ -15,9 +15,9 @@ public abstract class ImapWithSsl implements ImapSslSetting {
 	private boolean trustAll;
 
 	@Editable(order=1000, name="Bypass Certificate Check", description = "In case IMAP host certificate is self-signed or its CA root is not accepted, " +
-			"you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In " +
+			"you may tell ${productName} to bypass certificate check. <b class='text-danger'>WARNING: </b> In " +
 			"an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the " +
-			"certificate into OneDev</a> instead")
+			"certificate into ${productName}</a> instead")
 	public boolean isTrustAll() {
 		return trustAll;
 	}

@@ -54,7 +54,7 @@ public abstract class JobExecutor implements Serializable {
 	}
 
 	@Editable(order=30, name="Enable Site Publish", group = "Security Settings", description="""
-			Enable this to allow to run site publish step. OneDev will serve project 
+			Enable this to allow to run site publish step. ${productName} will serve project
 			site files as is. To avoid XSS attack, make sure executor with this 
 			option enabled can only be used by trusted jobs""")
 	public boolean isSitePublishEnabled() {

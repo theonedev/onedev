@@ -1,6 +1,8 @@
 package io.onedev.server.web.editable;
 
 import static io.onedev.server.oem.OemUtils.interpolate;
+import static io.onedev.server.oem.OemUtils.interpolateHtml;
+import static io.onedev.server.oem.OemUtils.translateHtml;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.lang.reflect.AnnotatedElement;
@@ -115,15 +117,15 @@ public class EditableUtils {
 			String inheritanceDescription = null;
 			if (project != null && !Project.DEFAULT_ID.equals(project.getId())) {
 				if (project.getParent() != null) {
-					inheritanceDescription = _T("Leave empty to inherit from the parent project.");
+					inheritanceDescription = translateHtml("Leave empty to inherit from the parent project.");
 				} else if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
-					inheritanceDescription = _T("Leave empty to use the <a href='${docsite}/administration-guide/project-defaults' target='_blank'>default setting</a>.");
+					inheritanceDescription = translateHtml("Leave empty to use the <a href='${docsite}/administration-guide/project-defaults' target='_blank'>default setting</a>.");
 				}
 			}
 			if (inheritanceDescription != null)
 				description = appendDescription(description, inheritanceDescription);
 		}
-		return interpolate(description);
+		return description;
 	}
 
 	private static String appendDescription(String description, String help) {
@@ -145,9 +147,9 @@ public class EditableUtils {
 		String description = editable.description();
 		if (description.length() != 0) {
 			if (isTranslatable(element))
-				return _T(description);
+				return translateHtml(description);
 			else
-				return description;
+				return interpolateHtml(description);
 		} else if (editable.descriptionProvider().length() != 0) {
 			Class<?> clazz;
 			if (element instanceof Class) 
@@ -159,7 +161,8 @@ public class EditableUtils {
 			description = (String) ReflectionUtils.invokeStaticMethod(clazz, editable.descriptionProvider());
 			if (description == null)
 				description = "";
-			return description;
+			// Providers handle translation, but OEM placeholders still need resolving outside Wicket.
+			return interpolateHtml(description);
 		} else {
 			return "";
 		}

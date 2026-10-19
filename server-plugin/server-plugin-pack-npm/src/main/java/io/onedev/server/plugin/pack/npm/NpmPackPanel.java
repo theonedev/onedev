@@ -98,7 +98,7 @@ public class NpmPackPanel extends GenericPanel<Pack> {
 					registryConfig = "npm config set registry " + registryUrl + "\n\n";
 				}
 				return registryConfig +
-						"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
+						"# " + _T("Use job token to tell ${productName} the build using the package") + "\n" +
 						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package read permission") + "\n" +
 						"npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"@job_token@:@secret:access-token@\"\n\n" +
 						"npm install";

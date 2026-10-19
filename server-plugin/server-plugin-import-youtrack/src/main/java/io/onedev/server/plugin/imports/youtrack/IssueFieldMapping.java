@@ -33,7 +33,7 @@ public class IssueFieldMapping implements Serializable {
 		this.youTrackIssueField = youTrackIssueField;
 	}
 
-	@Editable(order=200, name="OneDev Issue Field")
+	@Editable(order=200, name="${productName} Issue Field")
 	@ChoiceProvider("getOneDevIssueFieldChoices")
 	@NotEmpty
 	public String getOneDevIssueField() {

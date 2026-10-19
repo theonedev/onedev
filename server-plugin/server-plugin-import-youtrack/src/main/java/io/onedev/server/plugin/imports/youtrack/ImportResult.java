@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.imports.youtrack;
 
+import static io.onedev.server.oem.OemUtils.getProductName;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ public class ImportResult {
 	}
 	
 	public String toHtml(String leadingText) {
+		var productName = HtmlEscape.escapeHtml5(getProductName());
 		StringBuilder feedback = new StringBuilder(HtmlEscape.escapeHtml5(leadingText));
 		
 		boolean hasNotes = 
@@ -60,7 +63,7 @@ public class ImportResult {
 			feedback.append("<br><br><b>NOTE:</b><ul>");
 		
 		if (!unmappedIssueStates.isEmpty()) { 
-			feedback.append(getEntryFeedback("Unmapped YouTrack issue states (using OneDev initial state)", 
+			feedback.append(getEntryFeedback("Unmapped YouTrack issue states (using " + productName + " initial state)",
 					unmappedIssueStates));
 		}
 		if (!unmappedIssueFields.isEmpty())  
@@ -68,7 +71,7 @@ public class ImportResult {
 		if (!unmappedIssueLinks.isEmpty())  
 			feedback.append(getEntryFeedback("Unmapped YouTrack issue links", unmappedIssueLinks));
 		if (!mismatchedIssueFields.isEmpty()) { 
-			feedback.append("<li> YouTrack issue fields mapped to wrong type of OneDev issue field: ");
+			feedback.append("<li> YouTrack issue fields mapped to wrong type of " + productName + " issue field: ");
 			feedback.append("<ul>");
 			
 			int displayedEntries = 0;
@@ -85,11 +88,11 @@ public class ImportResult {
 			feedback.append("</ul>");
 		}
 		if (!unmappedIssueTags.isEmpty()) { 
-			feedback.append(getEntryFeedback("YouTrack issue tags not mapped to OneDev custom field", 
+			feedback.append(getEntryFeedback("YouTrack issue tags not mapped to " + productName + " custom field",
 					unmappedIssueTags));
 		}
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("YouTrack logins not mapped to OneDev account due to missing/unmatched email address", 
+			feedback.append(getEntryFeedback("YouTrack logins not mapped to " + productName + " account due to missing/unmatched email address",
 					nonExistentLogins));
 		}
 		if (!tooLargeAttachments.isEmpty()) {

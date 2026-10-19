@@ -115,7 +115,7 @@ public class RustJobSuggestion implements JobSuggestion {
 					"lcov_cobertura lcov.info -o coverage.xml\n" +
 					"# cargo clippy --message-format=json > check-result.json\n" +
 					"\n" +
-					"# Make sure all files inside $CARGO_HOME is accessible by OneDev outside of container for cache upload\n" +
+					"# Make sure all files inside $CARGO_HOME are accessible outside the container for cache upload\n" +
 					"chmod -R o+r $CARGO_HOME");
 			job.getSteps().add(buildAndTest);
 			

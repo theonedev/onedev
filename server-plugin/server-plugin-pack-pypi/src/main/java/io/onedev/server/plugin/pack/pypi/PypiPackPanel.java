@@ -45,7 +45,7 @@ public class PypiPackPanel extends GenericPanel<Pack> {
 		}
 		var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
 				new ProjectPermission(getPack().getProject(), new ReadPack()));
-		var authPart = canAccessAnonymously ? "" : "<OneDev_account_name>:<OneDev_password>@";
+		var authPart = canAccessAnonymously ? "" : "<account_name>:<password>@";
 		var indexUrl = protocol + "://" + authPart + UrlUtils.getServer(serverUrl) 
 				+ "/" + getPack().getProject().getPath() + "/~" + PypiPackHandler.HANDLER_ID + "/simple/";
 		add(new WebMarkupContainer("readPermissionNote").setVisible(!canAccessAnonymously));
@@ -58,7 +58,7 @@ public class PypiPackPanel extends GenericPanel<Pack> {
 		indexUrl = protocol + "://@job_token@:@secret:access-token@@@" + UrlUtils.getServer(serverUrl)
 				+ "/" + getPack().getProject().getPath() + "/~" + PypiPackHandler.HANDLER_ID + "/simple/";
 		var jobCommands = "" +
-				"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
+				"# " + _T("Use job token to tell ${productName} the build using the package") + "\n" +
 				"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package read permission") + "\n\n" +
 				"python3 -m pip install --extra-index-url " + indexUrl;
 		if (protocol.equals("http"))		

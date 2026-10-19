@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.user.card;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.text.MessageFormat;
@@ -12,6 +13,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.oem.OemUtils;
 import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
@@ -43,7 +45,9 @@ public class PersonCardPanel extends Panel {
 		EmailAddressService emailAddressService = OneDev.getInstance(EmailAddressService.class);
 		String displayName;
 		EmailAddress emailAddress = emailAddressService.findByValue(personIdent.getEmailAddress());
-		if (emailAddress != null && emailAddress.isVerified())
+		if (personIdent.getName().equals(User.SYSTEM_NAME))
+			displayName = OemUtils.getProductName();
+		else if (emailAddress != null && emailAddress.isVerified())
 			displayName = emailAddress.getOwner().getDisplayName();
 		else
 			displayName = personIdent.getName();
@@ -51,11 +55,11 @@ public class PersonCardPanel extends Panel {
 		builder.append("<div>" + escapeHtml5(displayName) + " <i>(" + gitRole + ")</i></div>");
 		
 		if (personIdent.getName().equals(User.SYSTEM_NAME)) 
-			builder.append("<i>System Account</i>");
+			builder.append("<i>" + escapeHtml5(_T("System Account")) + "</i>");
 		else if (emailAddress != null && emailAddress.isVerified()) 
 			builder.append(MessageFormat.format("<a href=\"/~users/{0}\">@{1}</a>", String.valueOf(emailAddress.getOwner().getId()), escapeHtml5(emailAddress.getOwner().getName()))); 
 		else 
-			builder.append("<i>No OneDev Account</i>");
+			builder.append("<i>" + escapeHtml5(_T("No ${productName} Account")) + "</i>");
 		
 		container.add(new Label("info", builder.toString()).setEscapeModelStrings(false));
 	}

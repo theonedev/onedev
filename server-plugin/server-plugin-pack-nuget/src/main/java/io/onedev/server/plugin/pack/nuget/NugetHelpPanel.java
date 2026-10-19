@@ -32,7 +32,7 @@ public class NugetHelpPanel extends Panel {
 			@Override
 			protected String load() {
 				return "" +
-						"# " + _T("Use job token to tell OneDev the build pushing the package") + "\n" +
+						"# " + _T("Use job token to tell ${productName} the build pushing the package") + "\n" +
 						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package write permission") + "\n\n" +
 						"dotnet nuget add source --name onedev --username @job_token@ --password @secret:access-token@ --store-password-in-clear-text " + registryUrl;
 			}

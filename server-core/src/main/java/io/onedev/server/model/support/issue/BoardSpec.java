@@ -155,7 +155,7 @@ public class BoardSpec implements Serializable {
 		return displayColumns;
 	}
 
-	@Editable(order=450, description = "If specified, OneDev will only display iterations with this prefix")
+	@Editable(order=450, description = "If specified, ${productName} will only display iterations with this prefix")
 	public String getIterationPrefix() {
 		return iterationPrefix;
 	}

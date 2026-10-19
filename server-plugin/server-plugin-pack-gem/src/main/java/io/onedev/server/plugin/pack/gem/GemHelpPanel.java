@@ -35,7 +35,7 @@ public class GemHelpPanel extends Panel {
 		var jobCommands = "" +
 				"mkdir -p $HOME/.gem\n" +
 				"\n" +
-				"# " + _T("Use job token to tell OneDev the build publishing the package") + "\n" +
+				"# " + _T("Use job token to tell ${productName} the build publishing the package") + "\n" +
 				"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package write permission") + "\n\n" +
 				"cat << EOF > $HOME/.gem/credentials\n" +
 				"---\n" +

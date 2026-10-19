@@ -1,5 +1,6 @@
 package io.onedev.server.ai.tools;
 
+import static io.onedev.server.oem.OemUtils.getProductName;
 import java.util.ArrayList;
 
 import org.apache.shiro.subject.Subject;
@@ -39,7 +40,7 @@ public class GetBuildSpecEditInstructions implements TaskTool {
         variables.add("- @file:<workdir file path>@ (get content of specified workdir file generated in previous steps)");
         
         var instructions = """
-            OneDev CI/CD spec is a yaml file conforming to below schema:
+            %s CI/CD spec is a yaml file conforming to below schema:
 
             <!SCHEMA BEGIN!>
             %s
@@ -60,7 +61,7 @@ public class GetBuildSpecEditInstructions implements TaskTool {
                     4.2.4 The upload strategy property should be configured as UPLOAD_IF_NOT_HIT
             5. If user wants to pass files between different jobs, one job should publish files via the publish artifact step, and another jobs can then download them into job working directory via job dependency
             6. Call tools such as getRootFilesAndFolders, getFilesAndSubfolders and getTextContent to get project structure, and figure out what docker image and commands to use to build or test the project if requested by user"""
-            .formatted(BuildSpecSchema.get(), Joiner.on("\n").join(variables));
+            .formatted(getProductName(), BuildSpecSchema.get(), Joiner.on("\n").join(variables));
 
         if (withSaveInstruction)
             instructions += "\n7. After editing the CI/CD spec, call saveBuildSpec tool to save the result. If saving fails, fix errors according to error messages and schema above and save again";

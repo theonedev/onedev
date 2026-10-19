@@ -44,7 +44,7 @@ public class HelmPackPanel extends GenericPanel<Pack> {
 			@Override
 			protected String load() {
 				return "" +
-						"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
+						"# " + _T("Use job token to tell ${productName} the build using the package") + "\n" +
 						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package read permission") + "\n" +
 						"helm install " + getPack().getName() + " --username @job_token@ --password @secret:access-token@ " + registryUrl + "/" + getPack().getName() + "-" +getPack().getVersion() + ".tgz";
 			}

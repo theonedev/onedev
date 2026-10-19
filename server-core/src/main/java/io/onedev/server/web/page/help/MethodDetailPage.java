@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.help;
 
+import static io.onedev.server.oem.OemUtils.interpolate;
+import static io.onedev.server.oem.OemUtils.interpolateHtml;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.InputStream;
@@ -206,7 +208,7 @@ public class MethodDetailPage extends ApiHelpPage {
 				item.add(new Label("name", "{" + pathParam.value() + "}"));
 				Api api = param.getAnnotation(Api.class);
 				if (api != null && api.description().length() != 0)
-					item.add(new Label("description", api.description()));
+					item.add(new Label("description", interpolate(api.description())));
 				else
 					item.add(new Label("description", StringUtils.capitalize(WordUtils.uncamel(pathParam.value()))));
 				
@@ -256,7 +258,7 @@ public class MethodDetailPage extends ApiHelpPage {
 				item.add(new Label("name", queryParam.value()));
 				Api api = param.getAnnotation(Api.class);
 				if (api != null && api.description().length() != 0)
-					item.add(new Label("description", api.description()).setEscapeModelStrings(false));
+					item.add(new Label("description", interpolateHtml(api.description())).setEscapeModelStrings(false));
 				else
 					item.add(new Label("description", StringUtils.capitalize(WordUtils.uncamel(queryParam.value()).toLowerCase())));
 				item.add(new Label("required", TextUtils.getDisplayValue(ParamCheckFilter.isRequired(param))));

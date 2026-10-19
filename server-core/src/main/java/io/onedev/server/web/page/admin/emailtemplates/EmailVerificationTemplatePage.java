@@ -39,7 +39,7 @@ public class EmailVerificationTemplatePage extends AbstractTemplatePage {
 		return CollectionUtils.newLinkedHashMap(
 				"user", _T("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to verify email for"),
 				"emailAddress", _T("Email address to verify"), 
-				"serverUrl", _T("root url of OneDev server"),
+				"serverUrl", _T("root url of ${productName} server"),
 				"verificationUrl", _T("url following which to verify email address"));
 	}
 

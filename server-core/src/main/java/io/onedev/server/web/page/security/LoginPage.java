@@ -122,7 +122,7 @@ public class LoginPage extends SimplePage {
 					var user = (User) authenticationService.getAuthenticationInfo(token);
 					if (user.isEnforce2FA()) {
 						if (user.getTwoFactorAuthentication() != null) {
-							subTitle = _T("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of OneDev server and your device running TOTP authenticator is in sync");
+							subTitle = _T("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of ${productName} server and your device running TOTP authenticator is in sync");
 							newPasscodeVerifyFrag(user.getId());
 						} else {
 							subTitle = _T("Set up two-factor authentication");

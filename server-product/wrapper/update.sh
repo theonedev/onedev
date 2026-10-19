@@ -165,7 +165,7 @@ prepare_distribution() (
 			-e "s|@app\.long\.name@|$display_name|g" -e "s|@app\.description@|$display_name|g" \
 			-e "s|@classpath2@|$classpath|g" "$destination/wrapper.conf" > "$configuration"
 		if grep -Eq '@[A-Za-z0-9_.]+@' "$configuration"; then
-			fail "Unresolved placeholder in OneDev wrapper configuration"
+			fail "Unresolved placeholder in wrapper configuration"
 		fi
 	done
 	while IFS= read -r name; do
