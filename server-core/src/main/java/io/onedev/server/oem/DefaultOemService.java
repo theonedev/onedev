@@ -15,7 +15,7 @@ public class DefaultOemService implements OemService {
 	private final Properties properties;
 
 	public DefaultOemService() {
-		var file = new File(Bootstrap.getConfDir(), "oem.properties");
+		var file = new File(Bootstrap.installDir, "oem/oem.properties");
 		properties = file.exists() ? loadProperties(file) : new Properties();
 	}
 

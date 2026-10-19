@@ -226,7 +226,7 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					protected String load() {
-						return getSettingService().getBrandingSetting().getName();
+						return getSettingService().getBrandingSetting().getEffectiveName();
 					}
 
 				}));

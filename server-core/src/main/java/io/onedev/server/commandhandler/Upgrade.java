@@ -234,6 +234,7 @@ public class Upgrade extends AbstractPlugin {
 		for (File file: upgradeDir.listFiles()) {
 			if (!file.getName().equals("lost+found") 
 					&& !file.getName().equals("site") 
+					&& !file.getName().equals("oem")
 					&& !file.getName().equals("conf") // conf/trust-certs might be mounted
 					&& !file.getName().startsWith(".")) {
 				isEmpty = false;
@@ -325,6 +326,7 @@ public class Upgrade extends AbstractPlugin {
 										FileUtils.copyFileToDirectory(each, programBackup);
 									} else if (!each.getName().equals("temp")
 											&& !each.getName().equals("site")
+											&& !each.getName().equals("oem")
 											&& !each.getName().equals("internaldb")) {
 										FileUtils.copyDirectoryToDirectory(each, programBackup);
 									}
@@ -456,7 +458,7 @@ public class Upgrade extends AbstractPlugin {
 								logger.info("Restoring old program files...");
 								try {
 									for (File file : programBackup.listFiles()) {
-										if (!file.getName().equals("site")) 
+										if (!file.getName().equals("site") && !file.getName().equals("oem"))
 											restoreProgramFiles(file, new File(upgradeDir, file.getName()));
 									}
 
@@ -568,15 +570,21 @@ public class Upgrade extends AbstractPlugin {
 				System.exit(1);
 			}
 
+			var preserveOem = new File(upgradeDir, "oem").exists();
 			try {
-				FileUtils.copyDirectory(Bootstrap.installDir, upgradeDir);
+				var sourceOemDir = new File(Bootstrap.installDir, "oem");
+				FileUtils.copyDirectory(Bootstrap.installDir, upgradeDir,
+						file -> !preserveOem || !file.equals(sourceOemDir));
 				FileUtils.cleanDir(new File(upgradeDir, "logs"));
 				restoreExecutables(upgradeDir);
 				logger.info("Successfully populated {}", upgradeDir.getAbsolutePath());
 				System.exit(0);
 			} catch (Exception e) {
 				logger.error("!! Error populating " + upgradeDir.getAbsolutePath(), e);
-				FileUtils.cleanDir(upgradeDir);
+				for (var file : upgradeDir.listFiles()) {
+					if (!preserveOem || !file.getName().equals("oem"))
+						FileUtils.deletePath(file);
+				}
 				System.exit(1);
 			}
 		}

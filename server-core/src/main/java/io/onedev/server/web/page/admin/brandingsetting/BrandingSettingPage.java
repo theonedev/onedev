@@ -1,10 +1,9 @@
 package io.onedev.server.web.page.admin.brandingsetting;
 
 import static io.onedev.server.web.translation.Translation._T;
+import static io.onedev.server.web.util.BrandingUtils.getCustomLogoFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.wicket.Component;
@@ -17,16 +16,14 @@ import org.jspecify.annotations.Nullable;
 
 import com.google.common.io.Resources;
 
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.oem.OemUtils;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.util.BrandingUtils;
 
 public class BrandingSettingPage extends AdministrationPage {
 
@@ -36,29 +33,17 @@ public class BrandingSettingPage extends AdministrationPage {
 		super(params);
 	}
 	
-	private static File getCustomLogoFile(boolean darkMode) {
-		if (darkMode)
-			return new File(OneDev.getAssetsDir(), "logo-dark.png");
-		else
-			return new File(OneDev.getAssetsDir(), "logo.png");			
-	}
-	
 	private String getLogoData(boolean darkMode) {
-		var file = getCustomLogoFile(darkMode);
-		if (file.exists()) {
-			try {
-				return DATA_PREFIX + Base64.encodeBase64String(FileUtils.readFileToByteArray(file));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			return getDefaultLogoData(darkMode);
+		try {
+			return DATA_PREFIX + Base64.encodeBase64String(Resources.toByteArray(BrandingUtils.getLogoResource(darkMode)));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
 	private String getDefaultLogoData(boolean darkMode) {
 		try {
-			URL url = Resources.getResource(ImageScope.class, "logo.png");
+			var url = BrandingUtils.getDefaultLogoResource(darkMode);
 			return DATA_PREFIX + Base64.encodeBase64String(Resources.toByteArray(url));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -83,17 +68,13 @@ public class BrandingSettingPage extends AdministrationPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				setting.setName(bean.getName().equals(OemUtils.getProductName()) ? "OneDev" : bean.getName());
+				setting.setName(bean.getName());
 				getSettingService().saveBrandingSetting(setting);
 				auditService.audit(null, "changed branding settings", null, null);
-				if (!bean.getLogoData().equals(getDefaultLogoData(false))) {
-					var bytes = getLogoBytes(bean.getLogoData());
-					getClusterService().runOnAllServers(new UpdateLogoTask(bytes, false));
-				}
-				if (!bean.getDarkLogoData().equals(getDefaultLogoData(true))) {
-					var bytes = getLogoBytes(bean.getDarkLogoData());
-					getClusterService().runOnAllServers(new UpdateLogoTask(bytes, true));
-				}
+				var lightBytes = bean.getLogoData().equals(getDefaultLogoData(false)) ? null : getLogoBytes(bean.getLogoData());
+				getClusterService().runOnAllServers(new UpdateLogoTask(lightBytes, false));
+				var darkBytes = bean.getDarkLogoData().equals(getDefaultLogoData(true)) ? null : getLogoBytes(bean.getDarkLogoData());
+				getClusterService().runOnAllServers(new UpdateLogoTask(darkBytes, true));
 				Session.get().success(_T("Branding settings updated"));
 			}
 		};
@@ -103,7 +84,7 @@ public class BrandingSettingPage extends AdministrationPage {
 
 			@Override
 			public void onClick() {
-				setting.setName("OneDev");
+				setting.setName(null);
 				getSettingService().saveBrandingSetting(setting);
 				auditService.audit(null, "changed branding settings", null, null);
 				getClusterService().runOnAllServers(new UpdateLogoTask(null, false));
@@ -115,7 +96,7 @@ public class BrandingSettingPage extends AdministrationPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!setting.getName().equals(OemUtils.getProductName())
+				setVisible(setting.getName() != null
 						|| getCustomLogoFile(false).exists() 
 						|| getCustomLogoFile(true).exists());
 			}
@@ -149,10 +130,7 @@ public class BrandingSettingPage extends AdministrationPage {
 		@Override
 		public Void call() throws Exception {
 			try {
-				if (logoBytes != null)
-					FileUtils.writeByteArrayToFile(getCustomLogoFile(darkMode), logoBytes);
-				else 
-					FileUtils.deletePath(getCustomLogoFile(darkMode));
+				BrandingUtils.updateLogo(logoBytes, darkMode);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

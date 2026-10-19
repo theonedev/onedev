@@ -61,7 +61,7 @@ For local debugging, `npm run test:headed` opens the browser and
 translations, webhook signature headers, REST help, email template editing,
 and a real invitation email captured by a loopback SMTP sink.
 It defaults to the product name `OneDev`. To test an OEM installation, configure
-`product_name=GitOn` in the server's `conf/oem.properties`, restart the server,
+`product_name=GitOn` in the server's `oem/oem.properties`, restart the server,
 and pass the same name to the tests:
 
 ```bash

@@ -32,7 +32,7 @@ public abstract class AdministrationPage extends LayoutPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Administration - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
+		return "Administration - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getEffectiveName();
 	}
 	
 }

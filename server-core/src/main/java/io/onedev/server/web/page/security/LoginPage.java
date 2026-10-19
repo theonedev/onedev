@@ -342,7 +342,7 @@ public class LoginPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return _T("Sign In To") + " " + settingService.getBrandingSetting().getName();
+		return _T("Sign In To") + " " + settingService.getBrandingSetting().getEffectiveName();
 	}
 
 	@Override

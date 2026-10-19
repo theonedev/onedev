@@ -92,6 +92,7 @@ import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.simple.SimplePage;
+import io.onedev.server.web.util.BrandingUtils;
 import io.onedev.server.web.websocket.AiToolExecution;
 import io.onedev.server.web.websocket.ObservablesChanged;
 import io.onedev.server.web.websocket.WebSocketService;
@@ -326,10 +327,17 @@ public abstract class BasePage extends WebPage {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
+				tag.put("href", BrandingUtils.getLogoUrl(false));
+			}
 
-				File logoFile = new File(Bootstrap.getSiteDir(), "assets/logo.png");
-				if (logoFile.exists())
-					tag.put("href", "/logo.png?v=" + logoFile.lastModified());
+		});
+
+		add(new WebMarkupContainer("darkSiteIcon") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.put("href", BrandingUtils.getLogoUrl(true));
 			}
 
 		});

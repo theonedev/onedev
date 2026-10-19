@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -53,11 +54,14 @@ class ProductDisplayNameTest {
 					User.Type.ORDINARY, false, false, false);
 			assertEquals("OneDev Community", facade.getDisplayName());
 			var branding = new BrandingSetting();
-			assertEquals("OneDev", branding.getName());
+			assertNull(branding.getName());
+			assertEquals("Acme", branding.getEffectiveName());
 			branding.setName("OneDev Community");
 			assertEquals("OneDev Community", branding.getName());
+			assertEquals("OneDev Community", branding.getEffectiveName());
 			branding.setName("OneDev");
 			assertEquals("OneDev", branding.getName());
+			assertEquals("OneDev", branding.getEffectiveName());
 		}
 	}
 

@@ -23,6 +23,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.agent.ServerSocketServlet;
 import io.onedev.server.assets.ClasspathAssetServlet;
 import io.onedev.server.assets.FileAssetServlet;
+import io.onedev.server.assets.LogoAssetServlet;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitLfsFilter;
 import io.onedev.server.git.GoGetFilter;
@@ -126,19 +127,15 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		 */
 		File assetsDir = OneDev.getAssetsDir();
 		
-		boolean hasCustomLogo = false;
-		boolean hasCustomDarkLogo = false;
 		boolean hasSiteMapTxt = false;
 		boolean hasSiteMapXml = false;
 		boolean hasPrefetch = false;
 		for (File file: assetsDir.listFiles()) {
+			if (file.getName().equals("logo.png") || file.getName().equals("logo-dark.png"))
+				continue;
 			if (file.isFile()) {
 				context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/" + file.getName());
-				if (file.getName().equals("logo.png"))
-					hasCustomLogo = true;
-				else if (file.getName().equals("logo-dark.png"))
-					hasCustomDarkLogo = true;
-				else if (file.getName().equals("sitemap.xml"))
+				if (file.getName().equals("sitemap.xml"))
 					hasSiteMapXml = true;
 				else if (file.getName().equals("sitemap.txt"))
 					hasSiteMapTxt = true;
@@ -148,10 +145,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 				context.addServlet(new ServletHolder(new FileAssetServlet(file)), "/" + file.getName() + "/*");
 			}
 		}
-		if (!hasCustomLogo) 
-			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/logo.png");
-		if (!hasCustomDarkLogo)
-			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/logo-dark.png");
+		context.addServlet(new ServletHolder(new LogoAssetServlet()), "/logo.png");
+		context.addServlet(new ServletHolder(new LogoAssetServlet()), "/logo-dark.png");
 		if (!hasSiteMapTxt)
 			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/sitemap.txt");
 		if (!hasSiteMapXml)

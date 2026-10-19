@@ -251,7 +251,7 @@ public class BuildListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return _T("Builds") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
+		return _T("Builds") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getEffectiveName();
 	}
 	
 }

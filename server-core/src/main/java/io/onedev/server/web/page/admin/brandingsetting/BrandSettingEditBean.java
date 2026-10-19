@@ -2,10 +2,13 @@ package io.onedev.server.web.page.admin.brandingsetting;
 
 import java.io.Serializable;
 
+import org.jspecify.annotations.Nullable;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Image;
+import io.onedev.server.oem.OemUtils;
 
 @Editable
 public class BrandSettingEditBean implements Serializable {
@@ -16,14 +19,19 @@ public class BrandSettingEditBean implements Serializable {
 	
 	private String darkLogoData;
 
-	@Editable(order=100)
-	@NotEmpty
+	@Editable(order=100, placeholderProvider="getNamePlaceholder")
+	@Nullable
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
+	}
+
+	@SuppressWarnings("unused")
+	private static String getNamePlaceholder() {
+		return OemUtils.getProductName();
 	}
 		
 	@Editable(order=200, name="Logo for Light Mode", description = "Upload a 128x128 transparent png file to be used " +

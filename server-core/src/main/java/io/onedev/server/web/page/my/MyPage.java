@@ -25,7 +25,7 @@ public abstract class MyPage extends LayoutPage implements UserAware {
 
 	@Override
 	protected String getPageTitle() {
-		return "My - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
+		return "My - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getEffectiveName();
 	}
 	
 }

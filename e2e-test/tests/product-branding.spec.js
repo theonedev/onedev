@@ -4,7 +4,7 @@ import { admin, expect, test } from './fixtures.js';
 import { login } from './helpers.js';
 import { parseCapturedMail, startSmtpCapture } from './smtp-capture.js';
 
-// Set this to product_name in the test server's conf/oem.properties.
+// Set this to product_name in the test server's oem/oem.properties.
 const productName = process.env.E2E_PRODUCT_NAME ?? 'OneDev';
 
 test.describe('product branding', () => {

@@ -37,8 +37,8 @@ public class OemIntegrationTest {
 
 	@Test
 	public void customBrandingWorksInTranslationsAnnotationsAndMarkup() throws Exception {
-		Files.createDirectories(installDir.resolve("conf"));
-		Files.writeString(installDir.resolve("conf/oem.properties"), """
+		Files.createDirectories(installDir.resolve("oem"));
+		Files.writeString(installDir.resolve("oem/oem.properties"), """
 				product_name=Acme Dev
 				website=https://example.com/product/
 				docsite=https://help.example.com/manual/
@@ -125,8 +125,8 @@ public class OemIntegrationTest {
 			assertEquals("OneDev", service.getProductName());
 			assertEquals(OemService.DEFAULT_WEBSITE, service.getWebsite());
 			assertEquals(OemService.DEFAULT_DOCSITE, service.getDocsite());
-			Files.createDirectories(installDir.resolve("conf"));
-			Files.writeString(installDir.resolve("conf/oem.properties"), "website=https://example.com/\ndocsite= \n");
+			Files.createDirectories(installDir.resolve("oem"));
+			Files.writeString(installDir.resolve("oem/oem.properties"), "website=https://example.com/\ndocsite= \n");
 			service = new DefaultOemService();
 			assertEquals("OneDev", service.getProductName());
 			assertEquals("https://example.com", service.getWebsite());

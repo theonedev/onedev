@@ -250,7 +250,7 @@ public class PackListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return _T("Packages") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
+		return _T("Packages") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getEffectiveName();
 	}
 	
 }

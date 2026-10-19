@@ -191,7 +191,7 @@ public class DefaultMailService implements MailService, Serializable {
 	}
 	
 	private String getQuoteMark() {
-		return "[" + settingService.getBrandingSetting().getName() + "]";
+		return "[" + settingService.getBrandingSetting().getEffectiveName() + "]";
 	}
 
 	private synchronized ThreadPoolExecutor getSendExecutor(int concurrency) {

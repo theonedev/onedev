@@ -235,7 +235,7 @@ public class ProjectListPage extends LayoutPage {
 
 	@Override
 	protected String getPageTitle() {
-		return _T("Projects") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
+		return _T("Projects") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getEffectiveName();
 	}
 	
 	@Override

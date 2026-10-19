@@ -9575,4 +9575,23 @@ public class DataMigrator {
 	private void migrate251(File dataDir, Stack<Integer> versions) {
 	}
 
+	private void migrate252(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if ("BRANDING".equals(element.elementTextTrim("key"))) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							var nameElement = valueElement.element("name");
+							if (nameElement != null && "OneDev".equals(nameElement.getText()))
+								nameElement.detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

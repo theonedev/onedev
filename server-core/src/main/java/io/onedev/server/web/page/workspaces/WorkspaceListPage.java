@@ -253,7 +253,7 @@ public class WorkspaceListPage extends LayoutPage {
 
 	@Override
 	protected String getPageTitle() {
-		return _T("Workspaces") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
+		return _T("Workspaces") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getEffectiveName();
 	}
 
 }
