@@ -326,7 +326,6 @@ public class Upgrade extends AbstractPlugin {
 										FileUtils.copyFileToDirectory(each, programBackup);
 									} else if (!each.getName().equals("temp")
 											&& !each.getName().equals("site")
-											&& !each.getName().equals("oem")
 											&& !each.getName().equals("internaldb")) {
 										FileUtils.copyDirectoryToDirectory(each, programBackup);
 									}
@@ -457,8 +456,9 @@ public class Upgrade extends AbstractPlugin {
 								boolean programRestored = false;
 								logger.info("Restoring old program files...");
 								try {
+									FileUtils.deletePath(new File(upgradeDir, "oem"));
 									for (File file : programBackup.listFiles()) {
-										if (!file.getName().equals("site") && !file.getName().equals("oem"))
+										if (!file.getName().equals("site"))
 											restoreProgramFiles(file, new File(upgradeDir, file.getName()));
 									}
 
@@ -570,21 +570,17 @@ public class Upgrade extends AbstractPlugin {
 				System.exit(1);
 			}
 
-			var preserveOem = new File(upgradeDir, "oem").exists();
 			try {
-				var sourceOemDir = new File(Bootstrap.installDir, "oem");
-				FileUtils.copyDirectory(Bootstrap.installDir, upgradeDir,
-						file -> !preserveOem || !file.equals(sourceOemDir));
+				FileUtils.deletePath(new File(upgradeDir, "oem"));
+				FileUtils.copyDirectory(Bootstrap.installDir, upgradeDir);
 				FileUtils.cleanDir(new File(upgradeDir, "logs"));
 				restoreExecutables(upgradeDir);
 				logger.info("Successfully populated {}", upgradeDir.getAbsolutePath());
 				System.exit(0);
 			} catch (Exception e) {
 				logger.error("!! Error populating " + upgradeDir.getAbsolutePath(), e);
-				for (var file : upgradeDir.listFiles()) {
-					if (!preserveOem || !file.getName().equals("oem"))
-						FileUtils.deletePath(file);
-				}
+				for (var file : upgradeDir.listFiles())
+					FileUtils.deletePath(file);
 				System.exit(1);
 			}
 		}
@@ -623,6 +619,12 @@ public class Upgrade extends AbstractPlugin {
 	}
 	
 	protected void updateProgramFiles(File upgradeDir, int oldAppDataVersion) {
+		var sourceOemDir = new File(Bootstrap.installDir, "oem");
+		var targetOemDir = new File(upgradeDir, "oem");
+		FileUtils.deletePath(targetOemDir);
+		if (sourceOemDir.exists())
+			cleanAndCopy(sourceOemDir, targetOemDir);
+
 		cleanAndCopy(new File(Bootstrap.installDir, "3rdparty-licenses"), new File(upgradeDir, "3rdparty-licenses"));
 
 		File siteServerScriptFile = new File(upgradeDir, "bin/server.sh");
