@@ -53,11 +53,11 @@ class ProductDisplayNameTest {
 					User.Type.ORDINARY, false, false, false);
 			assertEquals("OneDev Community", facade.getDisplayName());
 			var branding = new BrandingSetting();
-			assertEquals("Acme", branding.getName());
+			assertEquals("OneDev", branding.getName());
 			branding.setName("OneDev Community");
 			assertEquals("OneDev Community", branding.getName());
 			branding.setName("OneDev");
-			assertEquals("Acme", branding.getName());
+			assertEquals("OneDev", branding.getName());
 		}
 	}
 
