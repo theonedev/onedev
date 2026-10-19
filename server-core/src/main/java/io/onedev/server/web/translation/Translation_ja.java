@@ -37,8 +37,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("(on behalf of <b>{0}</b>)", "(<b>{0}</b> の代理として)");
 		m.put("** Enterprise edition is disabled as the subscription was expired. Renew to enable **", 
 			"** サブスクリプションが期限切れのため、エンタープライズエディションは無効になっています。更新して有効にしてください **");
-		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact support@onedev.io if you need to extend your trial **", 
-			"** トライアルサブスクリプションが期限切れのため、エンタープライズ版は無効化されています。有効化するにはサブスクリプションを注文するか、トライアル延長が必要な場合は support@onedev.io にお問い合わせください **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 残りのユーザ月がないため、エンタープライズ版は無効化されています。有効化するには追加注文してください **");
 		m.put("1 Year", "1年");
@@ -5422,6 +5420,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
+		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact ${contactEmail} if you need to extend your trial **", 
+			"** エンタープライズエディションはトライアルサブスクリプションの期限が切れたため無効になっています。サブスクリプションを注文するか、トライアルを延長する必要がある場合は ${contactEmail} にお問い合わせください **");
 	}
 		
 	@Override

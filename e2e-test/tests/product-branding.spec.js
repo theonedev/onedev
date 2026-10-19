@@ -26,7 +26,7 @@ test.describe('product branding', () => {
       await context.addCookies([{ name: 'language', value: language, url: baseURL }]);
       await page.goto('~administration/settings/authenticator');
       const authenticatorDescription = language === 'zh'
-        ? `通过 ${productName} 的内置表单登录时，提交的用户凭据可以在此处定义的认证器以及内部数据库中进行检查`
+        ? `通过 ${productName} 的内置表单登录时，提交的用户凭据可以通过此处定义的验证器以及内部数据库进行检查`
         : `When login via ${productName}'s built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database`;
       await expect(page.getByText(authenticatorDescription, { exact: true })).toBeVisible();
       // Selecting an implementation reveals its editable descriptions through
@@ -35,7 +35,7 @@ test.describe('product branding', () => {
         label: language === 'zh' ? '通用 LDAP' : 'Generic LDAP',
       });
       const ldapDescription = language === 'zh'
-        ? `${productName} 需要搜索和确定用户 DN，以及在启用组获取时搜索用户组信息。如果这些操作需要认证，请勾选此选项并指定 'manager' DN 和密码`
+        ? `${productName} 需要搜索并确定用户 DN，同时在启用组检索时搜索用户组信息。勾选此选项并指定 'manager' DN 和密码，如果这些操作需要认证`
         : `${productName} needs to search and determine user DN, as well as searching user group information if group retrieval is enabled. Tick this option and specify 'manager' DN and password if these operations needs to be authenticated`;
       await expect(page.getByText(ldapDescription, { exact: true })).toBeVisible();
       if (language === 'zh') {
@@ -54,7 +54,7 @@ test.describe('product branding', () => {
       const editor = page.locator('form.webhook-edit');
       await expect(editor).toBeVisible();
       const description = language === 'zh'
-        ? `确保发送到有效负载 URL 的 POST 请求来自 ${productName} 的密钥。设置密钥后，您将在 Webhook POST 请求中收到 X-OneDev-Signature 头部`
+        ? `此密钥允许您确保发送到 payload URL 的 POST 请求来自 ${productName}。设置密钥后，您将在 webhook POST 请求中收到 X-OneDev-Signature 头`
         : `The secret which allows you to ensure that POST requests sent to the payload URL are from ${productName}. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request`;
       await expect(editor.getByText(description, { exact: true })).toBeVisible();
       // Opening the editor exercises Ajax rendering without saving a webhook.

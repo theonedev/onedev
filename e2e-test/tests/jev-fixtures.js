@@ -111,6 +111,14 @@ export const test = base.extend({
         if (originalIssue) {
           const response = await api.request.post('~api/settings/issue', { data: originalIssue });
           expect(response.ok(), await response.text()).toBeTruthy();
+          // The settings API always marks the workflow unreconciled, even when
+          // restoring the original settings. Restore its original status too.
+          if (originalIssue.reconciled) {
+            await page.goto('~administration/settings/issue-fields');
+            await page.getByRole('link', { name: 'reconciliation', exact: true }).click();
+            await expect(page.getByText('Workflow reconciliation completed', { exact: true })).toBeVisible();
+            expect((await api.json('get', '~api/settings/issue')).reconciled).toBe(true);
+          }
         }
       } finally {
         try {

@@ -63,8 +63,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("(on behalf of <b>{0}</b>)", "（代表 <b>{0}</b>）");
 		m.put("** Enterprise edition is disabled as the subscription was expired. Renew to enable **", 
 			"** 企业版已禁用，因为订阅已过期。续订以启用 **");
-		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact support@onedev.io if you need to extend your trial **", 
-			"** 企业版已禁用，因为试用订阅已过期，订购订阅以启用或联系 support@onedev.io 如果您需要延长试用期 **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 企业版已禁用，因为没有剩余的用户月数。订购更多以启用 **");
 		m.put("1 Year", "1 年");
@@ -5448,6 +5446,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
+		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact ${contactEmail} if you need to extend your trial **", 
+			"** 企业版已被禁用，因为试用订阅已过期，请订购订阅以启用，或联系 ${contactEmail} 以延长您的试用 **");
 	}
 		
 	@Override

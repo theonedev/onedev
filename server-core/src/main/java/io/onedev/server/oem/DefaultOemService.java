@@ -34,4 +34,9 @@ public class DefaultOemService implements OemService {
 		return stripEnd(properties.getProperty("docsite", DEFAULT_DOCSITE), "/");
 	}
 
+	@Override
+	public String getContactEmail() {
+		return properties.getProperty("contact_email", DEFAULT_CONTACT_EMAIL);
+	}
+
 }

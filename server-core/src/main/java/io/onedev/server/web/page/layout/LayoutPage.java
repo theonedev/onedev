@@ -613,17 +613,23 @@ public abstract class LayoutPage extends BasePage {
 			}
 		});
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
-		sidebar.add(new Label("bugReport", new LoadableDetachableModel<String>() {
+		var isDefaultWebsite = DEFAULT_WEBSITE.equals(oemService.getWebsite());
+		var supportUrl = isDefaultWebsite
+				? "https://code.onedev.io/onedev/server/~issues?query=%22State%22+is+%22Open%22"
+				: oemService.getWebsite() + "/support";
+		sidebar.add(new ExternalLink("bugReport", Model.of(supportUrl), new LoadableDetachableModel<String>() {
 			@Override
 			protected String load() {
-				if (isSubscriptionActive() && SecurityUtils.isAdministrator())
+				if (!isDefaultWebsite)
+					return _T("Support & Bug Report");
+				else if (isSubscriptionActive() && SecurityUtils.isAdministrator())
 					return _T("Bug Report");
 				else
 					return _T("Support & Bug Report");
 			}
 
 		}));
-		if (SecurityUtils.isAdministrator())
+		if (isDefaultWebsite && SecurityUtils.isAdministrator())
 			sidebar.add(getSubscriptionService().renderSupportRequestLink("supportRequest"));
 		else
 			sidebar.add(new WebMarkupContainer("supportRequest").setVisible(false));

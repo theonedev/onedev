@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class OemUtils {
 
-	private static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{(productName|docsite|website)}");
+	private static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{(productName|docsite|website|contactEmail)}");
 
 	public static String getProductName() {
 		return OneDev.getInstance(OemService.class).getProductName();
@@ -38,6 +38,7 @@ public class OemUtils {
 				var value = switch (it.group(1)) {
 					case "productName" -> oemService.getProductName();
 					case "docsite" -> oemService.getDocsite();
+					case "contactEmail" -> oemService.getContactEmail();
 					default -> oemService.getWebsite();
 				};
 				return java.util.regex.Matcher.quoteReplacement(html ? HtmlEscape.escapeHtml5(value) : value);

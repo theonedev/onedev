@@ -37,8 +37,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("(on behalf of <b>{0}</b>)", "(im Namen von <b>{0}</b>)");
 		m.put("** Enterprise edition is disabled as the subscription was expired. Renew to enable **", 
 			"** Enterprise-Edition ist deaktiviert, da das Abonnement abgelaufen ist. Erneuern, um zu aktivieren **");
-		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact support@onedev.io if you need to extend your trial **", 
-			"** Enterprise-Edition ist deaktiviert, da das Testabonnement abgelaufen ist. Bestellen Sie ein Abonnement, um es zu aktivieren, oder kontaktieren Sie support@onedev.io, wenn Sie Ihre Testphase verlängern möchten **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** Enterprise-Edition ist deaktiviert, da keine verbleibenden Benutzer-Monate vorhanden sind. Bestellen Sie mehr, um sie zu aktivieren **");
 		m.put("1 Year", "1 Jahr");
@@ -5422,6 +5420,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
+		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact ${contactEmail} if you need to extend your trial **", 
+			"** Die Enterprise-Edition ist deaktiviert, da das Testabonnement abgelaufen ist. Bestellen Sie ein Abonnement, um es zu aktivieren, oder kontaktieren Sie ${contactEmail}, wenn Sie Ihre Testphase verlängern möchten. **");
 	}
 			
 	@Override
