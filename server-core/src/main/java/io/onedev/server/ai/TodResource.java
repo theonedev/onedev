@@ -744,6 +744,38 @@ public class TodResource {
         return linkMap;
     }
 
+    @Path("/unlink-issues")
+    @POST
+    public Response unlinkIssues(
+                @QueryParam("currentProject") String currentProjectPath,
+                @QueryParam("sourceReference") @NotNull String sourceReference,
+                @QueryParam("linkName") @NotNull String linkName,
+                @QueryParam("targetReference") @NotNull String targetReference) {
+        if (SecurityUtils.getUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
+
+        var sourceIssue = getIssue(currentProject, sourceReference);
+        var targetIssue = getIssue(currentProject, targetReference);
+
+        var linkSpec = linkSpecService.find(linkName);
+        if (linkSpec == null)
+            throw new NotFoundException("Link spec not found: " + linkName);
+        if (!SecurityUtils.canEditIssueLink(sourceIssue.getProject(), linkSpec)
+                || !SecurityUtils.canEditIssueLink(targetIssue.getProject(), linkSpec)) {
+            throw new UnauthorizedException("No permission to remove specified link for specified issues");
+        }
+
+        var link = sourceIssue.findIssueLinks(linkSpec, !linkName.equals(linkSpec.getName())).stream()
+                .filter(it -> it.getLinked(sourceIssue).equals(targetIssue))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Specified issues are not linked via specified link spec"));
+        issueLinkService.delete(link);
+
+        return Response.ok().build();
+    }
+
     @Path("/log-work")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
