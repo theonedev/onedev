@@ -53,10 +53,12 @@ public class ChoiceInput {
 			if (!possibleValues.isEmpty()) {
 				List<String> copyOfStrings = new ArrayList<>(strings);
 				copyOfStrings.removeAll(possibleValues);
-				if (!copyOfStrings.isEmpty())
-					throw new ValidationException("Invalid choice values: " + copyOfStrings);
-				else
+				if (!copyOfStrings.isEmpty()) {
+					throw new ValidationException("Invalid choice values " + copyOfStrings + " for \""
+							+ inputSpec.getName() + "\"; valid values: " + String.join(", ", possibleValues));
+				} else {
 					return strings;
+				}
 			} else {
 				return strings;
 			}
@@ -66,10 +68,12 @@ public class ChoiceInput {
 			String value = strings.iterator().next();
 			List<String> possibleValues = inputSpec.getPossibleValues();
 			if (!possibleValues.isEmpty()) {
-				if (!possibleValues.contains(value))
-					throw new ValidationException("Invalid choice value");
-				else
+				if (!possibleValues.contains(value)) {
+					throw new ValidationException("Invalid choice value \"" + value + "\" for \""
+							+ inputSpec.getName() + "\"; valid values: " + String.join(", ", possibleValues));
+				} else {
 					return value;
+				}
 			} else {
 				return value;
 			}
