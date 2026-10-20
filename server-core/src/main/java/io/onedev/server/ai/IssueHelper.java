@@ -46,6 +46,7 @@ import io.onedev.server.service.IssueService;
 import io.onedev.server.service.IterationService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UrlService;
+import org.jspecify.annotations.Nullable;
 
 public class IssueHelper {
     
@@ -57,7 +58,7 @@ public class IssueHelper {
         return OneDev.getInstance(UrlService.class);
     }
 
-    public static Map<String, Object> getSummary(Project currentProject, Issue issue) {        
+    public static Map<String, Object> getSummary(@Nullable Project currentProject, Issue issue) {
         var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
         var summary = getObjectMapper().convertValue(issue, typeReference);
         summary.remove("id");
@@ -78,11 +79,7 @@ public class IssueHelper {
         summary.put("Project", issue.getProject().getPath());
         summary.remove("lastActivity");
         summary.put("lastActivityDate", issue.getLastActivity().getDate());
-        for (var it = summary.entrySet().iterator(); it.hasNext();) {
-            var entry = it.next();
-            if (entry.getKey().endsWith("Count"))
-                it.remove();
-        }
+        summary.entrySet().removeIf(entry -> entry.getKey().endsWith("Count"));
         return summary;
     }
 
@@ -99,7 +96,7 @@ public class IssueHelper {
         return comments;
     }
 
-    public static Map<String, Object> getDetail(Project currentProject, Issue issue) {
+    public static Map<String, Object> getDetail(@Nullable Project currentProject, Issue issue) {
         var data = getSummary(currentProject, issue);
 
         data.put("branch", issue.getBranch());
@@ -160,8 +157,7 @@ public class IssueHelper {
 
     public static Map<String, Object> getFieldProperties(FieldSpec field) {
         var description = field.getDescription() != null ? field.getDescription().replace('\n', ' ') : "";
-        if (field instanceof ChoiceField) {
-            var choiceField = (ChoiceField) field;
+        if (field instanceof ChoiceField choiceField) {
             if (field.isAllowMultiple())
                 description = appendDescription(description, "Expects one or more of: " + String.join(", ", choiceField.getPossibleValues()));
             else
@@ -225,9 +221,7 @@ public class IssueHelper {
     public static void setFieldValues(Map<String, Serializable> data, JsonNode fieldsNode) {
         if (fieldsNode == null || !fieldsNode.isObject())
             return;
-        var fields = fieldsNode.properties().iterator();
-        while (fields.hasNext()) {
-            var entry = fields.next();
+        for (Entry<String, JsonNode> entry : fieldsNode.properties()) {
             setFieldValue(data, entry.getKey(), entry.getValue());
         }
     }
