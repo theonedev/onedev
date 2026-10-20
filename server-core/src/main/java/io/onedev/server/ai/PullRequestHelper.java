@@ -47,6 +47,14 @@ public class PullRequestHelper {
         return OneDev.getInstance(UrlService.class);
     }
 
+    public static Map<String, Object> getIdentity(@Nullable Project currentProject, PullRequest pullRequest) {
+        return Map.of(
+            "id", pullRequest.getId(),
+            "number", pullRequest.getNumber(),
+            "reference", pullRequest.getReference().toString(currentProject),
+            "link", getUrlService().urlFor(pullRequest, true));
+    }
+
     public static Map<String, Object> getSummary(@Nullable Project currentProject,
             PullRequest pullRequest, boolean checkMergeConditionIfOpen) {        
         var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};

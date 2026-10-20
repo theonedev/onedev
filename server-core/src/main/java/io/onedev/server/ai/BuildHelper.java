@@ -23,6 +23,14 @@ public class BuildHelper {
         return OneDev.getInstance(UrlService.class);
     }
 
+    public static Map<String, Object> getIdentity(@Nullable Project currentProject, Build build) {
+        return Map.of(
+            "id", build.getId(),
+            "number", build.getNumber(),
+            "reference", build.getReference().toString(currentProject),
+            "link", getUrlService().urlFor(build, true));
+    }
+
     public static Map<String, Object> getSummary(@Nullable Project currentProject, Build build) {
         var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
         var summary = getObjectMapper().convertValue(build, typeReference);

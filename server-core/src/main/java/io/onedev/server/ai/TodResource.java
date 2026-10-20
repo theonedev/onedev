@@ -545,11 +545,7 @@ public class TodResource {
         comment.setDate(new Date());
         issueCommentService.create(comment);
 
-        var commentMap = new HashMap<String, Object>();
-        commentMap.put("content", comment.getContent());
-        commentMap.put("user", comment.getUser().getName());
-        commentMap.put("date", comment.getDate());
-        return commentMap;
+        return Map.of("id", comment.getId(), "link", urlService.urlFor(comment, true));
     }
 
     @Path("/create-issue")
@@ -578,7 +574,7 @@ public class TodResource {
             throw new NotAcceptableException(e.getMessage());
         }
 
-        return IssueHelper.getDetail(currentProject, issue);
+        return IssueHelper.getIdentity(currentProject, issue);
     }
 
     @Path("/edit-issue")
@@ -652,7 +648,7 @@ public class TodResource {
             issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(subject, issue.getProject(), data));
         }
 
-        return IssueHelper.getDetail(currentProject, issue);
+        return IssueHelper.getIdentity(currentProject, issue);
     }
 
     @Path("/change-issue-state")
@@ -685,7 +681,7 @@ public class TodResource {
         var fieldValues = FieldUtils.getFieldValues(subject, issue.getProject(), data);
         issueChangeService.changeState(user, issue, state, fieldValues, transition.getPromptFields(),
                 transition.getRemoveFields(), comment);
-        return IssueHelper.getDetail(currentProject, issue);
+        return IssueHelper.getIdentity(currentProject, issue);
     }
 
     @Path("/ensure-issue-branch") 
@@ -804,12 +800,7 @@ public class TodResource {
         work.setNote(trimToNull(comment));
         issueWorkService.createOrUpdate(work);
 
-        var workMap = new HashMap<String, Object>();
-        workMap.put("minutes", spentHours * 60);
-        workMap.put("note", comment);
-        workMap.put("user", work.getUser().getName());
-        workMap.put("date", work.getDate());
-        return workMap;
+        return Map.of("id", work.getId(), "link", urlService.urlFor(issue, true) + "#" + work.getAnchor());
     }
 
     @Path("/query-pull-requests")
@@ -1166,7 +1157,7 @@ public class TodResource {
 
         var request = pullRequestService.findOpen(target, source);
         if (request != null)
-            return PullRequestHelper.getDetail(currentProject, request);        
+            return PullRequestHelper.getIdentity(currentProject, request);
 
         request = new PullRequest();
         request.setTarget(target);
@@ -1234,7 +1225,7 @@ public class TodResource {
 
         pullRequestService.open(request);
 
-        return PullRequestHelper.getDetail(currentProject, request);        
+        return PullRequestHelper.getIdentity(currentProject, request);
     }
 
     @Api(description = "Get pull request title and description requirement")
@@ -1490,7 +1481,7 @@ public class TodResource {
             pullRequestChangeService.changeAutoMerge(user, request, autoMerge);
         }
                     
-        return PullRequestHelper.getDetail(currentProject, request);        
+        return PullRequestHelper.getIdentity(currentProject, request);
     }    
 
     @Path("/approve-pull-request")
@@ -1508,7 +1499,7 @@ public class TodResource {
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
         pullRequestReviewService.review(user, pullRequest, true, trimToNull(comment));
-        return PullRequestHelper.getDetail(currentProject, pullRequest);        
+        return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
 
     @Path("/request-changes-on-pull-request")
@@ -1526,7 +1517,7 @@ public class TodResource {
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
         pullRequestReviewService.review(user, pullRequest, false, trimToNull(comment));
-        return PullRequestHelper.getDetail(currentProject, pullRequest);        
+        return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
 
     @Path("/merge-pull-request")
@@ -1550,7 +1541,7 @@ public class TodResource {
 
         pullRequestService.merge(user, pullRequest, commitMessage);
 
-        return PullRequestHelper.getDetail(currentProject, pullRequest);        
+        return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
 
     @Path("/discard-pull-request")
@@ -1571,7 +1562,7 @@ public class TodResource {
             throw new UnauthorizedException();
 
         pullRequestService.discard(user, pullRequest, trimToNull(comment));
-        return PullRequestHelper.getDetail(currentProject, pullRequest);        
+        return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
 
     @Path("/reopen-pull-request")
@@ -1592,7 +1583,7 @@ public class TodResource {
             throw new UnauthorizedException();
 
         pullRequestService.reopen(user, pullRequest, trimToNull(comment));
-        return PullRequestHelper.getDetail(currentProject, pullRequest);        
+        return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
 
     @Path("/delete-pull-request-source-branch")
@@ -1615,7 +1606,7 @@ public class TodResource {
         }
 
         pullRequestService.deleteSourceBranch(user, pullRequest, trimToNull(comment));
-        return PullRequestHelper.getDetail(currentProject, pullRequest);        
+        return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
 
     @Path("/restore-pull-request-source-branch")
@@ -1638,7 +1629,7 @@ public class TodResource {
         }
 
         pullRequestService.restoreSourceBranch(user, pullRequest, trimToNull(comment));
-        return PullRequestHelper.getDetail(currentProject, pullRequest);        
+        return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
 
     @Path("/add-pull-request-comment")
@@ -1661,11 +1652,7 @@ public class TodResource {
         comment.setDate(new Date());
         pullRequestCommentService.create(comment);
 
-        var commentMap = new HashMap<String, Object>();
-        commentMap.put("content", comment.getContent());
-        commentMap.put("user", comment.getUser().getName());
-        commentMap.put("date", comment.getDate());
-        return commentMap;
+        return Map.of("id", comment.getId(), "link", urlService.urlFor(comment, true));
     }
 
     @Path("/add-pull-request-code-comment")
@@ -1686,7 +1673,7 @@ public class TodResource {
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
         var comment = PullRequestHelper.addCodeComment(pullRequest, user, filePath, fromLineNumber, toLineNumber, commentContent);
-        return CodeCommentHelper.getDetail(comment);
+        return CodeCommentHelper.getIdentity(comment);
     }
 
     @Path("/add-code-comment-reply")
@@ -1789,9 +1776,7 @@ public class TodResource {
         if (build.isFinished())
             jobService.resubmit(user, build, reason);
 
-        var summary = BuildHelper.getSummary(currentProject, build);
-        summary.put("id", build.getId());
-        return summary;
+        return BuildHelper.getIdentity(currentProject, build);
     }
 
     @Path("/get-clone-roots")

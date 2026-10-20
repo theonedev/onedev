@@ -58,6 +58,14 @@ public class IssueHelper {
         return OneDev.getInstance(UrlService.class);
     }
 
+    public static Map<String, Object> getIdentity(@Nullable Project currentProject, Issue issue) {
+        return Map.of(
+            "id", issue.getId(),
+            "number", issue.getNumber(),
+            "reference", issue.getReference().toString(currentProject),
+            "link", getUrlService().urlFor(issue, true));
+    }
+
     public static Map<String, Object> getSummary(@Nullable Project currentProject, Issue issue) {
         var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
         var summary = getObjectMapper().convertValue(issue, typeReference);
