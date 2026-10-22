@@ -337,6 +337,12 @@ usage() {
 	echo "  install  Install project artifacts with Maven"
 	echo "  clean    Clean build outputs with Maven"
 	echo
+	echo "Run/prod options:"
+	echo "  --agent-token <token> Add an agent token at startup if missing (repeatable)"
+	echo "                       Also accepts --agent-token=<token>"
+	echo
+	echo "Example: ./dev.sh run --agent-token token1 --agent-token token2"
+	echo
 	echo "Commands may be combined, for example: ./dev.sh clean package"
 }
 
@@ -413,6 +419,43 @@ if [ "$run_requested" != true ]; then
 fi
 
 set -- "${run_arguments[@]}"
+agent_token_values=()
+bootstrap_arguments=()
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+		--agent-token)
+			if [ "$#" -lt 2 ]; then
+				echo "Option --agent-token requires a value." >&2
+				exit 1
+			fi
+			value=$2
+			shift 2
+			;;
+		--agent-token=*)
+			value=${1#*=}
+			shift
+			;;
+		*)
+			bootstrap_arguments+=("$1")
+			shift
+			continue
+			;;
+	esac
+	if [ -z "$value" ] || [[ "$value" == --* ]]; then
+		echo "Option --agent-token requires a value." >&2
+		exit 1
+	fi
+	if [[ "$value" == *$'\n'* || "$value" == *$'\r'* ]]; then
+		echo "Option --agent-token requires a single-line value." >&2
+		exit 1
+	fi
+	agent_token_values+=("$value")
+done
+if [ "${#agent_token_values[@]}" -gt 0 ]; then
+	# Preserve spaces and punctuation by passing one token per line.
+	export agent_tokens="$(printf '%s\n' "${agent_token_values[@]}")"
+fi
+set -- "${bootstrap_arguments[@]}"
 if running_server; then
 	echo "Development server is already running (PID $server_pid). Use ./dev.sh stop first." >&2
 	exit 1
