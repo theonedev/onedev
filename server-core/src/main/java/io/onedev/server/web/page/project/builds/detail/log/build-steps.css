@@ -141,6 +141,11 @@
 }
 .build-step .step-toggle { overflow-wrap: anywhere; color: inherit; }
 .build-step .step-body { overflow-anchor: none; }
+.build-step .step-resume:hover,
+.build-step .step-resume:focus {
+    color: var(--primary);
+    text-decoration: none;
+}
 .build-step .log { white-space: pre-wrap; overflow-wrap: anywhere; }
 .build-step {
     border-top-width: 0 !important;

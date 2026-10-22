@@ -154,8 +154,9 @@ onedev.server.buildSteps = {
         step.body = $('<div class="step-body"></div>').appendTo(section);
         step.log = $('<pre class="log text-break font-size-sm p-3 mb-0"></pre>').appendTo(step.body);
         step.notice = $('<div class="step-notice text-muted px-3 pt-3"></div>').text(self.noEntriesNotice).prependTo(step.body);
-        step.paused = $('<div class="text-warning p-3"></div>').text(self.pausedText).appendTo(step.body).hide();
-        if (self.resume) $('<button type="button" class="btn btn-link ml-2 p-0"></button>').text(self.resumeText).appendTo(step.paused).on('click', self.resume);
+        step.paused = $('<div class="p-3"></div>').appendTo(step.body).hide();
+        $('<span class="text-warning"></span>').text(self.pausedText).appendTo(step.paused);
+        if (self.resume) $('<button type="button" class="step-resume btn btn-link align-baseline ml-2 p-0"></button>').text(self.resumeText).appendTo(step.paused).on('click', self.resume);
         self.setExpanded(step, step.expanded);
         step.toggle.on('click', function() {
             self.setExpanded(step, !step.expanded);
