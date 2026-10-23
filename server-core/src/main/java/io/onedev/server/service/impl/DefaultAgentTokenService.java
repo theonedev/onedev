@@ -7,6 +7,8 @@ import java.util.List;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.persistence.dao.Restrictions;
 
 import io.onedev.server.model.Agent;
@@ -22,6 +24,21 @@ public class DefaultAgentTokenService extends BaseEntityService<AgentToken> impl
 
 	@Inject
 	private AgentService agentService;
+
+	@Transactional
+	@Listen
+	public void on(SystemStarted event) {
+		var tokenValues = System.getenv("agent_tokens");
+		if (tokenValues != null) {
+			for (var value: tokenValues.split("\n")) {
+				if (!value.isEmpty() && find(value) == null) {
+					var token = new AgentToken();
+					token.setValue(value);
+					createOrUpdate(token);
+				}
+			}
+		}
+	}
 
 	@Transactional
 	@Override

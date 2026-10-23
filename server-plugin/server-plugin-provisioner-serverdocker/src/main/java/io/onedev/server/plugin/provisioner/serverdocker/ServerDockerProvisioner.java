@@ -80,7 +80,9 @@ import io.onedev.server.workspace.WorkspaceContext;
 import io.onedev.server.workspace.WorkspaceRuntime;
 
 @Editable(order=ServerDockerProvisioner.ORDER, name="Server Docker Provisioner", description = """
-			This provisioner creates workspaces inside Docker containers on ${productName} server""")
+			This provisioner creates workspaces inside Docker containers on ${productName} server.
+			<b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Provisioner
+			on a dedicated agent host, especially for untrusted workspaces.""")
 public class ServerDockerProvisioner extends WorkspaceProvisioner implements DockerAware, Testable<ServerDockerProvisioner.TestData> {
 
 	private static final long serialVersionUID = 1L;

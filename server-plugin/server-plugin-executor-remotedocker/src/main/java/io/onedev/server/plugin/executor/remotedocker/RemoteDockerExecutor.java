@@ -16,6 +16,7 @@ import io.onedev.agent.job.JobDockerSettings;
 import io.onedev.agent.job.JobResumeData;
 import io.onedev.agent.job.TestDockerJobData;
 import io.onedev.agent.shell.JobShellOpenData;
+import io.onedev.agent.shell.JobShellOpenData.Mode;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
@@ -136,7 +137,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				@Override
 				public Shell openShell(JobContext jobContext, JobTerminal terminal) {
 					if (agentSession != null) {
-						var shellOpenData = new JobShellOpenData(true, jobContext.getJobToken(), 
+						var shellOpenData = new JobShellOpenData(Mode.CONTAINER, jobContext.getJobToken(),
 								terminal.getSessionId(), jobContext.getProjectId(), jobContext.getBuildNumber(), 
 								jobContext.getSubmitSequence(), getDockerSockPath());
 						return new JobAgentShell(terminal, agentSession, shellOpenData);

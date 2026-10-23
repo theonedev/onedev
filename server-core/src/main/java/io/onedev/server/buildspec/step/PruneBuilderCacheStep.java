@@ -11,10 +11,11 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
+import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 
 @Editable(order=260, name="Prune Builder Cache", group = DOCKER_IMAGE, description="" +
 		"Prune image cache of docker buildx builder. This step calls docker buildx prune command " +
-		"to remove cache of buildx builder specified in server docker executor or remote docker executor")
+		"to remove cache of the builder used by the Docker or sandbox executor")
 public class PruneBuilderCacheStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -38,7 +39,8 @@ public class PruneBuilderCacheStep extends Step {
 	
 	@Override
 	public boolean isApplicable(Build build, JobExecutor executor) {
-		return executor instanceof DockerAware && !(executor instanceof KubernetesAware);
+		return executor instanceof SandboxAware
+				|| executor instanceof DockerAware && !(executor instanceof KubernetesAware);
 	}
 
 }

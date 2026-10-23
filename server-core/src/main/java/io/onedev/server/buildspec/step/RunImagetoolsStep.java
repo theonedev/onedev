@@ -20,10 +20,10 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
+import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 
 @Editable(order=230, name="Run Buildx Image Tools", group = DOCKER_IMAGE, description="Run docker buildx imagetools " +
-		"command with specified arguments. This step can only be executed by server docker executor " +
-		"or remote docker executor")
+		"command with specified arguments. This step can be executed by Docker or sandbox executors")
 public class RunImagetoolsStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -67,7 +67,8 @@ public class RunImagetoolsStep extends Step {
 
 	@Override
 	public boolean isApplicable(Build build, JobExecutor executor) {
-		return executor instanceof DockerAware && !(executor instanceof KubernetesAware);
+		return executor instanceof SandboxAware
+				|| executor instanceof DockerAware && !(executor instanceof KubernetesAware);
 	}
 
 }

@@ -27,6 +27,7 @@ import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 
 @Editable(order=100, name="Execute Commands")
 public class CommandStep extends Step {
@@ -149,6 +150,8 @@ public class CommandStep extends Step {
 
 	@Override
 	public boolean isApplicable(Build build, JobExecutor executor) {
+		if (executor instanceof SandboxAware)
+			return true;
 		if (isRunInContainer()) 
 			return executor instanceof DockerAware;
 		else 

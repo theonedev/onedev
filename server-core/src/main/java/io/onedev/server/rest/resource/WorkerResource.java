@@ -42,6 +42,8 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 import org.jspecify.annotations.Nullable;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TarUtils;
@@ -50,6 +52,7 @@ import io.onedev.k8shelper.CacheAvailability;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.KubernetesJobData;
 import io.onedev.k8shelper.KubernetesWorkspaceData;
+import io.onedev.server.agent.AgentHelper;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobService;
@@ -92,6 +95,16 @@ public class WorkerResource {
 	@Inject
 	private UserService userService;
 
+	@Inject
+	private ObjectMapper objectMapper;
+
+	@Path("job-workdir")
+	@PUT
+	public void reportJobWorkDir(@QueryParam("token") @NotEmpty String token,
+			@QueryParam("workDir") @NotEmpty String workDir) {
+		jobService.reportJobWorkDir(jobService.getJobContext(token, true), workDir);
+	}
+
 	@Path("job-data")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
@@ -110,7 +123,8 @@ public class WorkerResource {
 	@Path("run-server-step")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@POST
-	public StreamingOutput runServerStep(@QueryParam("token") @NotEmpty String token, InputStream is) {
+	public StreamingOutput runServerStep(@QueryParam("token") @NotEmpty String token,
+			@QueryParam("resultFormat") String resultFormat, InputStream is) {
 		JobContext jobContext = jobService.getJobContext(token, true);
 		return os -> {
 			File filesDir = FileUtils.createTempDir();
@@ -147,7 +161,11 @@ public class WorkerResource {
 					}
 
 				});
-				byte[] bytes = SerializationUtils.serialize(result);
+				// The sandbox runner uses the same streaming protocol without a Java runtime.
+				byte[] bytes = "json".equals(resultFormat)
+						? objectMapper.writeValueAsBytes(Map.of("successful", result.isSuccessful(),
+								"outputFiles", result.getOutputFiles()))
+						: SerializationUtils.serialize(result);
 				writeInt(os, 2);
 				writeInt(os, bytes.length);
 				os.write(bytes);
@@ -346,7 +364,7 @@ public class WorkerResource {
 	@Path("job-running")
 	@GET
 	public boolean isJobRunning(@QueryParam("token") @NotEmpty String token) {
-		return jobService.getJobContext(token, false) != null;
+		return jobService.getJobContext(token, false) != null || AgentHelper.isTestRunning(token);
 	}
 
 	@Path("workspace-active")

@@ -70,7 +70,9 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="" +
-		"This executor runs build jobs with ${productName} server's shell facility")
+		"This executor runs build jobs with ${productName} server's shell facility. "
+		+ "<b class='text-warning'>WARNING:</b> For better security, use a Remote Shell Executor "
+		+ "on a dedicated agent host, especially for untrusted jobs.")
 public class ServerShellExecutor extends JobExecutor implements Testable<Testable.None> {
 
 	private static final long serialVersionUID = 1L;

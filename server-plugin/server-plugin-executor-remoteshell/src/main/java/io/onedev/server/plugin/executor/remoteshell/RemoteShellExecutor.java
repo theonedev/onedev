@@ -14,6 +14,7 @@ import io.onedev.agent.job.JobResumeData;
 import io.onedev.agent.job.ShellJobData;
 import io.onedev.agent.job.TestShellJobData;
 import io.onedev.agent.shell.JobShellOpenData;
+import io.onedev.agent.shell.JobShellOpenData.Mode;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
@@ -118,7 +119,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 			@Override
 			public Shell openShell(JobContext jobContext, JobTerminal terminal) {
 				if (agentSession != null) {
-					var shellOpenData = new JobShellOpenData(false, jobContext.getJobToken(), 
+					var shellOpenData = new JobShellOpenData(Mode.HOST, jobContext.getJobToken(),
 							terminal.getSessionId(), jobContext.getProjectId(), 
 							jobContext.getBuildNumber(), jobContext.getSubmitSequence(), null);
 					return new JobAgentShell(terminal, agentSession, shellOpenData);

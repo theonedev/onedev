@@ -25,11 +25,11 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
+import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 
 @Editable(order=150, name="Run Docker Container", description="Run specified docker container. <a href='${docsite}/concepts#job-workdir' target='_blank'>Job workdir</a> "
 		+ "is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. " +
-		"<b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote " +
-		"docker executor")
+		"This step can be executed by Docker or sandbox executors")
 public class RunContainerStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -162,7 +162,8 @@ public class RunContainerStep extends Step {
 	
 	@Override
 	public boolean isApplicable(Build build, JobExecutor executor) {
-		return executor instanceof DockerAware && !(executor instanceof KubernetesAware);
+		return executor instanceof SandboxAware
+				|| executor instanceof DockerAware && !(executor instanceof KubernetesAware);
 	}
 
 }

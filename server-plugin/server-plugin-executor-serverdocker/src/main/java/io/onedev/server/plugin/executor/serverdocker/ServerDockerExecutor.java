@@ -86,7 +86,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
 @Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
-		description="This executor runs build jobs as docker containers on ${productName} server")
+		description="This executor runs build jobs as Docker containers on ${productName} server. "
+		+ "<b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Executor "
+		+ "on a dedicated agent host, especially for untrusted jobs.")
 @ClassValidating
 public class ServerDockerExecutor extends JobExecutor implements DockerAware, Testable<TestData>, Validatable {
 

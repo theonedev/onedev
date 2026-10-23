@@ -22,7 +22,7 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.PosixInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.support.administration.DockerAware;
+import io.onedev.server.model.support.administration.RegistryLoginAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 public abstract class CraneStep extends CommandStep {
@@ -92,8 +92,7 @@ public abstract class CraneStep extends CommandStep {
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination,
 			List<RegistryLoginFacade> registryLogins, Map<String, String> envMap) {
 		var commandsBuilder = new StringBuilder();
-		if (jobExecutor instanceof DockerAware) {
-			DockerAware registryLoginAware = (DockerAware) jobExecutor;
+		if (jobExecutor instanceof RegistryLoginAware registryLoginAware) {
 			commandsBuilder.append("mkdir /root/.docker\n");
 			commandsBuilder.append("cat <<EOF>> /root/.docker/config.json\n");
 			var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));

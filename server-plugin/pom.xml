@@ -43,6 +43,7 @@
 		<module>server-plugin-executor-remotedocker</module>
 		<module>server-plugin-executor-servershell</module>
 		<module>server-plugin-executor-remoteshell</module>
+		<module>server-plugin-executor-serversandbox</module>
 		<module>server-plugin-provisioner-servershell</module>
 		<module>server-plugin-provisioner-serverdocker</module>
 		<module>server-plugin-report-unittest</module>

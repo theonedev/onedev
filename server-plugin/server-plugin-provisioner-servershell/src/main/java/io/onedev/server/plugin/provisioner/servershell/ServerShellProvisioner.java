@@ -57,7 +57,9 @@ import io.onedev.server.workspace.WorkspaceRuntime;
 
 @Editable(order=ServerShellProvisioner.ORDER, name="Server Shell Provisioner", description="""
 		This provisioner creates workspaces with ${productName} server's shell facility, and requires
-		tmux to be installed on ${productName} server""")
+		tmux to be installed on ${productName} server.
+		<b class='text-warning'>WARNING:</b> For better security, use a Remote Shell Provisioner
+		on a dedicated agent host, especially for untrusted workspaces.""")
 public class ServerShellProvisioner extends WorkspaceProvisioner implements Testable<Testable.None> {
 
 	private static final long serialVersionUID = 1L;

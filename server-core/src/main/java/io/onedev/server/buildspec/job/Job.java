@@ -234,8 +234,7 @@ public class Job implements NamedElement, Validatable {
 
 	@Editable(order=9114, group="Dependencies & Services", placeholder="No required services", 
 			description="Optionally specify services required by this job. "
-			+ "<b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors "
-			+ "(server docker executor, remote docker executor, or kubernetes executor)")
+			+ "<b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors")
 	@ChoiceProvider("getServiceChoices")
 	public List<String> getRequiredServices() {
 		return requiredServices;

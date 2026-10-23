@@ -52,6 +52,7 @@ import io.onedev.server.model.*;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 import io.onedev.server.model.support.build.StepExecution;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
@@ -441,7 +442,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	}
 
 	private boolean isApplicable(Build build, JobExecutor executor) {
-		if (!build.getJob().getRequiredServices().isEmpty() && !(executor instanceof DockerAware))
+		if (!build.getJob().getRequiredServices().isEmpty()
+				&& !(executor instanceof DockerAware) && !(executor instanceof SandboxAware))
 			return false;
 			
 		for (var step: build.getJob().getSteps()) {

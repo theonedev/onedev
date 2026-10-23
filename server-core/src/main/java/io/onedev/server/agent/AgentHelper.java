@@ -3,6 +3,8 @@ package io.onedev.server.agent;
 import static io.onedev.agent.WebsocketUtils.call;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -23,10 +25,17 @@ import io.onedev.server.service.ResourceService;
 
 public class AgentHelper {
 
+	private static final Set<String> testTokens = ConcurrentHashMap.newKeySet();
+
+	public static boolean isTestRunning(String token) {
+		return getClusterService().runOnAllServers(() -> testTokens.contains(token)).containsValue(true);
+	}
+
 	public static void test(@Nullable String agentQuery, String resourceName, int concurrency,
 			TestData testData, TaskLogger logger) {
 		var token = testData.getToken();
 		getLogService().addLogger(token, logger);
+		testTokens.add(token);
 		try {
 			String testServer = getClusterService().getLocalServerAddress();
 			logger.log("Pending resource allocation...");
@@ -63,13 +72,16 @@ public class AgentHelper {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new RuntimeException(e);
 		} finally {
+			testTokens.remove(token);
 			getLogService().removeLogger(token);
 		}
 	}
 
 	private static Void testCallAgent(Session agentSession, Serializable testData, String testToken) {
 		try {
-			call(agentSession, testData);
+			// Pulling images and starting a sandbox can exceed the default RPC timeout.
+			// Agent housekeeping cancels executor tests when their token is no longer active.
+			call(agentSession, testData, 0);
 			return null;
 		} catch (InterruptedException | TimeoutException e) {
 			throw new RuntimeException(e);

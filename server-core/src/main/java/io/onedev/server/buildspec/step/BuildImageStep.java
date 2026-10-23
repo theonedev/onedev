@@ -25,10 +25,11 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
+import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 
 @Editable(order=160, name="Build Image (Buildx)", group = DOCKER_IMAGE, description="Build docker image with buildx. " +
-		"This step can only be executed by server docker executor or remote docker executor, and it uses the buildx " +
-		"builder specified in these executors to do the job. To build image with Kubernetes executor, please use kaniko " +
+		"This step can be executed by docker or sandbox executors. Docker executors use their configured buildx " +
+		"builder; sandbox executors use the default builder inside the sandbox. To build image with Kubernetes executor, please use kaniko " +
 		"step instead")
 public class BuildImageStep extends Step {
 
@@ -107,7 +108,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=1400, group = "More Settings", description="Optionally specify additional options for " +
 			"buildx build command")
 	@Interpolative(variableSuggester="suggestVariables")
-	@ReservedOptions({"--builder", "(--builder)=.*", "--platform", "(--platform)=.*", "--push", "-f", "--file", "(-f|--file)=.*", "-t", "--tag", "(-t|--tag)=.*", "-o", "--output", "(-o|--output)=.*"})
+	@ReservedOptions({"--", "(--builder|--platform|--push|--load|--file|--tag|--output)(=.*)?", "(-q*[fto]).*"})
 	public String getMoreOptions() {
 		return moreOptions;
 	}
@@ -129,7 +130,8 @@ public class BuildImageStep extends Step {
 	
 	@Override
 	public boolean isApplicable(Build build, JobExecutor executor) {
-		return executor instanceof DockerAware && !(executor instanceof KubernetesAware);
+		return executor instanceof SandboxAware
+				|| executor instanceof DockerAware && !(executor instanceof KubernetesAware);
 	}
 
 	@Editable
