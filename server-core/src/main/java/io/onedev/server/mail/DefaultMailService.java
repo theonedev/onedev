@@ -1180,7 +1180,11 @@ public class DefaultMailService implements MailService, Serializable {
 			throws IOException, MessagingException {
 		if (part.getDisposition() != null) {
 			String[] contentId = part.getHeader("Content-ID");
-			String fileName = MimeUtility.decodeText(part.getFileName());
+			String fileName = part.getFileName();
+			if (fileName != null)
+				fileName = MimeUtility.decodeText(fileName);
+			if (StringUtils.isBlank(fileName))
+				fileName = "attachment";
 			var attachmentService = OneDev.getInstance(AttachmentService.class);
 			String attachmentName = attachmentService.saveAttachment(project.getId(), attachmentGroup,
 					fileName, part.getInputStream());

@@ -2479,6 +2479,10 @@ public class BuildSpec implements Serializable, Validatable {
 
 	@SuppressWarnings("unused")
 	private void migrate47(VersionedYamlDoc doc, Stack<Integer> versions) {
+		// Legacy tags were still accepted after version 42. Normalize them before
+		// subsequent migrations look up implementations via the type property.
+		migrate42_processNode(doc);
+
 		for (NodeTuple specTuple: doc.getValue()) {
 			String specObjectKey = ((ScalarNode) specTuple.getKeyNode()).getValue();
 			if (specObjectKey.equals("services")) {
