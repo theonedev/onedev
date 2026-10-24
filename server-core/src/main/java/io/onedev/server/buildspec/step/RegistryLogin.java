@@ -8,6 +8,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @Editable
 public class RegistryLogin implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String registryUrl;

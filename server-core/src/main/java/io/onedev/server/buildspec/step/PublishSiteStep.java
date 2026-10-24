@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -36,6 +37,7 @@ import io.onedev.server.util.patternset.PatternSet;
 		+ "Leave the site name empty to publish a public site at <code>/path/to/project/~sites/public/</code>")
 public class PublishSiteStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String projectPath;

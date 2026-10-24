@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Date;
@@ -39,6 +40,7 @@ import io.onedev.server.validation.Validatable;
 @ClassValidating
 public class SshKey extends AbstractEntity implements Validatable {
     
+    @Serial
     private static final long serialVersionUID = 1L;
     
     @Column(nullable=false, length=5000)

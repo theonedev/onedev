@@ -1,9 +1,11 @@
 package io.onedev.server.service.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class PathInfo implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final String path;

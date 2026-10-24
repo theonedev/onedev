@@ -31,6 +31,7 @@ import static io.onedev.server.util.QueryUtils.getIntValue;
 import static io.onedev.server.util.QueryUtils.getUser;
 import static io.onedev.server.util.QueryUtils.getValue;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -70,6 +71,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public CodeCommentQuery(@Nullable Criteria<CodeComment> criteria, List<EntitySort> sorts) {

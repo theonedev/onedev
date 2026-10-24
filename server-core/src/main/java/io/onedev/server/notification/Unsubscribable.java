@@ -1,11 +1,13 @@
 package io.onedev.server.notification;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
 
 public class Unsubscribable implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String emailAddress;

@@ -2,6 +2,7 @@ package io.onedev.server.buildspec;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable
 public class Service implements NamedElement {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String name;

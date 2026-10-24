@@ -4,6 +4,7 @@ import static io.onedev.server.entityreference.ReferenceUtils.mayContainReferenc
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static org.unbescape.java.JavaEscape.unescapeJava;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -33,6 +34,7 @@ import io.onedev.server.validation.validator.ProjectPathValidator;
 @ClassValidating
 public class CommitMessageFixSetting implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String DEFAULT_FIX_SUGGESTION = """
@@ -178,6 +180,7 @@ public class CommitMessageFixSetting implements Serializable, Validatable {
 	@Editable
 	public static class FixPattern implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String prefix;

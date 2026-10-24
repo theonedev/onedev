@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.field.spec;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable
 public abstract class FieldSpec extends InputSpec {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String nameOfEmptyValue;

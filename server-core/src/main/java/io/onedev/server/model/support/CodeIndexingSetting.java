@@ -5,11 +5,13 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 
 @Editable
 public class CodeIndexingSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Api(description = "Files to analyze during code indexing. Leave empty to inherit from parent project, or all files if no parent")

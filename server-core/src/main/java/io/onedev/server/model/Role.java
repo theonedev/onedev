@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -82,6 +83,7 @@ import io.onedev.server.util.facade.UserFacade;
 @Editable
 public class Role extends AbstractEntity implements BasePermission {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_NAME = "name";

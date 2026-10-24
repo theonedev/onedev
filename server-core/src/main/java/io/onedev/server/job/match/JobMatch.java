@@ -4,6 +4,7 @@ import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
 import static io.onedev.server.job.match.JobMatchParser.IsNot;
 import static io.onedev.server.job.match.JobMatchParser.OnBranch;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class JobMatch extends Criteria<JobMatchContext> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Criteria<JobMatchContext> criteria;

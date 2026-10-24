@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.build;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable
 public class DefaultFixedIssueFilter implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String jobNames;

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.apache.commons.codec.binary.Hex;
@@ -74,6 +75,7 @@ public class AbstractComponentMapperTest {
 
 	private static class DeserializationProbe implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private static boolean deserialized;

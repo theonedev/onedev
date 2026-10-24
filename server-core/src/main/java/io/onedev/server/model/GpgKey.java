@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -25,6 +26,7 @@ import io.onedev.server.rest.annotation.Immutable;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class GpgKey extends BaseGpgKey {
     
+    @Serial
     private static final long serialVersionUID = 1L;
     
     public static final String PROP_KEY_ID = "keyId";

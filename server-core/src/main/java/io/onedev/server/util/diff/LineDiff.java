@@ -1,10 +1,12 @@
 package io.onedev.server.util.diff;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 public class LineDiff implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final int compareLine;

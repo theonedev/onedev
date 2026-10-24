@@ -2,6 +2,8 @@ package io.onedev.server.web.component.tristateswitch;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.Serial;
+
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -89,6 +91,7 @@ class TriStateSwitchTest {
 	}
 
 	private static class TestPage extends WebPage implements IMarkupResourceStreamProvider {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		TestPage(TriStateSwitch input) {

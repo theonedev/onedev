@@ -7,12 +7,14 @@ import io.onedev.server.annotation.ScriptChoice;
 import io.onedev.server.util.GroovyUtils;
 
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 @Editable(order=400, name="Evaluate script to get default value")
 public class ScriptingDefaultMultiValue implements DefaultMultiValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String scriptName;

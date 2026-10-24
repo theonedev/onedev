@@ -1,9 +1,11 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.io.Serial;
 import java.util.Map;
 
 public abstract class ParamSegment implements UrlSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String name;

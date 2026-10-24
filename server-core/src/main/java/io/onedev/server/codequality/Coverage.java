@@ -1,9 +1,11 @@
 package io.onedev.server.codequality;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Coverage implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private int totalBranches;

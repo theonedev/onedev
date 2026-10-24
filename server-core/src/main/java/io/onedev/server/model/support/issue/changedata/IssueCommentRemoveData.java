@@ -3,12 +3,14 @@ package io.onedev.server.model.support.issue.changedata;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class IssueCommentRemoveData extends IssueChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Override

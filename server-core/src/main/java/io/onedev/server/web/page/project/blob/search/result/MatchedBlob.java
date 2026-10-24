@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.blob.search.result;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import io.onedev.server.search.code.hit.QueryHit;
 
 public class MatchedBlob implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String blobPath;

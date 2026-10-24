@@ -20,12 +20,14 @@ import org.eclipse.jgit.lib.Repository;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Editable(name="Create Tag", order=300)
 public class CreateTagStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String tagName;

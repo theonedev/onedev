@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 @Editable
 public class ProjectIssueSetting implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private List<String> listFields;

@@ -16,6 +16,7 @@
  */
 package org.apache.wicket;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import org.apache.wicket.util.string.StringValue;
  */
 public class RestartResponseAtInterceptPageException extends ResetResponseException
 {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -137,6 +139,7 @@ public class RestartResponseAtInterceptPageException extends ResetResponseExcept
 	 */
 	static class InterceptData implements Serializable
 	{
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private Url originalUrl;
@@ -209,6 +212,7 @@ public class RestartResponseAtInterceptPageException extends ResetResponseExcept
 
 		private static final MetaDataKey<InterceptData> key = new MetaDataKey<>()
 		{
+			@Serial
 			private static final long serialVersionUID = 1L;
 		};
 	}

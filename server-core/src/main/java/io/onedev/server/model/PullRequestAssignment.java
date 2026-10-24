@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import io.onedev.server.rest.annotation.Immutable;
 
 import jakarta.persistence.Entity;
@@ -17,6 +19,7 @@ import jakarta.persistence.UniqueConstraint;
 )
 public class PullRequestAssignment extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_USER = "user";

@@ -1,5 +1,7 @@
 package io.onedev.server.event.project.codecomment;
 
+import java.io.Serial;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.service.UrlService;
@@ -9,6 +11,7 @@ import io.onedev.server.util.commenttext.MarkdownText;
 
 public class CodeCommentReplyCreated extends CodeCommentEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long replyId;

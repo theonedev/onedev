@@ -1,9 +1,12 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 public class PullRequestMergeData extends PullRequestChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String reason;

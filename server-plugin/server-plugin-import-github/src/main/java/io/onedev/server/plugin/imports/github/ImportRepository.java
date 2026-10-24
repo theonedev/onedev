@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.imports.github;
 
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -13,6 +14,7 @@ import io.onedev.server.web.editable.BeanEditor;
 @Editable
 public class ImportRepository extends ImportOrganization {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String repository;

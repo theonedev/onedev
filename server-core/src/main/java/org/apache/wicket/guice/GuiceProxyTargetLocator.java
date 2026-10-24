@@ -16,6 +16,7 @@
  */
 package org.apache.wicket.guice;
 
+import java.io.Serial;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -35,6 +36,7 @@ import io.onedev.commons.loader.AppLoader;
 
 class GuiceProxyTargetLocator implements IProxyTargetLocator
 {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Annotation bindingAnnotation;

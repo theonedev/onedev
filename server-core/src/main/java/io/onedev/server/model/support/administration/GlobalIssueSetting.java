@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,6 +58,7 @@ import jakarta.validation.constraints.NotNull;
 @Editable
 public class GlobalIssueSetting implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_EXTERNAL_ISSUE_PATTERN = "externalIssuePattern";

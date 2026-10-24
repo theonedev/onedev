@@ -1,5 +1,7 @@
 package io.onedev.server.logging;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.TaskLogger;
@@ -8,6 +10,7 @@ import io.onedev.server.cluster.ClusterTask;
 
 class LogTask implements ClusterTask<Void> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String token;

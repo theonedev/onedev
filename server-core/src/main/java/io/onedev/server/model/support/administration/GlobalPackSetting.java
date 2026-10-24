@@ -6,6 +6,7 @@ import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.pack.PackSupport;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,6 +15,7 @@ import java.util.List;
 @Editable
 public class GlobalPackSetting implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private List<NamedPackQuery> namedQueries = new ArrayList<>();

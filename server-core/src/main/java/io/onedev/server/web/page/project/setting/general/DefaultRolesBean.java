@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.setting.general;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import io.onedev.server.model.Role;
 @Editable
 public class DefaultRolesBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<String> roleNames = new ArrayList<>();

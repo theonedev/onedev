@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.agent;
 
+import java.io.Serial;
 import java.util.Collection;
 
 import org.jspecify.annotations.Nullable;
@@ -16,6 +17,7 @@ import io.onedev.server.util.ProjectScope;
 
 public class OnlineCriteria extends StatusCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

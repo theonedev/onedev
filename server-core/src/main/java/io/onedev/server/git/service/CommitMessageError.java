@@ -2,6 +2,7 @@ package io.onedev.server.git.service;
 
 import static io.onedev.server.git.GitUtils.abbreviateSHA;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -10,6 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 public class CommitMessageError implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final ObjectId commitId;

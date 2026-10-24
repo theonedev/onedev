@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -24,6 +25,7 @@ import jakarta.persistence.UniqueConstraint;
 	uniqueConstraints={@UniqueConstraint(columnNames={"project_id", PackBlob.PROP_SHA256_HASH})})
 public class PackBlob extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PACKS_DIR = "packages";

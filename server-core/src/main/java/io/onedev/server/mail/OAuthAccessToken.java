@@ -1,5 +1,7 @@
 package io.onedev.server.mail;
 
+import java.io.Serial;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.AlertService;
@@ -10,6 +12,7 @@ import org.unbescape.html.HtmlEscape;
 
 public class OAuthAccessToken implements MailCredential {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String tokenEndpoint;

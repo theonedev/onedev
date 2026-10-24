@@ -16,6 +16,7 @@
  */
 package org.apache.wicket.pageStore;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -36,6 +37,7 @@ public class RequestPageStore extends DelegatingPageStore
 
 	private static final MetaDataKey<RequestData> KEY = new MetaDataKey<>()
 	{
+		@Serial
 		private static final long serialVersionUID = 1L;
 	};
 

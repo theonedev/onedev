@@ -1,5 +1,6 @@
 package io.onedev.server.logging.build;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.OneDev;
@@ -12,6 +13,7 @@ import io.onedev.server.service.ProjectService;
 /** Context for whole-build log aggregation and lifecycle operations. */
 public class BuildLogContext implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final BuildLogStorage storage;

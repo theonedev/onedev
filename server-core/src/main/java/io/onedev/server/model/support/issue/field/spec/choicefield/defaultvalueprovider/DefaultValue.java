@@ -10,6 +10,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 @Editable(name="Value")
 public class DefaultValue implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String value;

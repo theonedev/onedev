@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -9,6 +11,7 @@ import jakarta.persistence.Table;
 @Table
 public class EntityIdCounter extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_ENTITY_NAME = "entityName";

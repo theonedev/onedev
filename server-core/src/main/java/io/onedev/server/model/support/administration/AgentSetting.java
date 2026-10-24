@@ -2,6 +2,7 @@ package io.onedev.server.model.support.administration;
 
 import static io.onedev.server.search.entity.agent.AgentQueryLexer.Is;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import io.onedev.server.search.entity.agent.OsCriteria;
 
 public class AgentSetting implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private List<NamedAgentQuery> namedQueries = new ArrayList<>();

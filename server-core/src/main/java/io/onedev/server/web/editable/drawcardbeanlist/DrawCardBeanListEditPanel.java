@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.drawcardbeanlist;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ import io.onedev.server.web.editable.PropertyUpdating;
  */
 public abstract class DrawCardBeanListEditPanel<T extends Serializable> extends PropertyEditor<List<Serializable>> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	protected final List<T> items;
@@ -80,6 +82,7 @@ public abstract class DrawCardBeanListEditPanel<T extends Serializable> extends 
 
 		IDataProvider<T> dataProvider = new ListDataProvider<T>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -97,6 +100,7 @@ public abstract class DrawCardBeanListEditPanel<T extends Serializable> extends 
 
 		dataTable.add(new SortBehavior() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -112,12 +116,14 @@ public abstract class DrawCardBeanListEditPanel<T extends Serializable> extends 
 	private IColumn<T, Void> newGripColumn() {
 		return new AbstractColumn<T, Void>(Model.of("")) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void populateItem(Item<ICellPopulator<T>> cellItem, String componentId, IModel<T> rowModel) {
 				cellItem.add(new SpriteImage(componentId, "grip") {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -141,6 +147,7 @@ public abstract class DrawCardBeanListEditPanel<T extends Serializable> extends 
 	private IColumn<T, Void> newActionColumn() {
 		return new AbstractColumn<T, Void>(Model.of("")) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -157,6 +164,7 @@ public abstract class DrawCardBeanListEditPanel<T extends Serializable> extends 
 				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -182,6 +190,7 @@ public abstract class DrawCardBeanListEditPanel<T extends Serializable> extends 
 	private DrawCardBeanItemEditPanel.EditCallback newCallback(ModalPanel modal) {
 		return new DrawCardBeanItemEditPanel.EditCallback() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

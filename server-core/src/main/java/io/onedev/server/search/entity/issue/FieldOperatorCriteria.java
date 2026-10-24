@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +31,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class FieldOperatorCriteria extends FieldCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final int operator;

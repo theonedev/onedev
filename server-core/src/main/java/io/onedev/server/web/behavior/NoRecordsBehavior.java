@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior;
 
+import java.io.Serial;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
@@ -8,6 +10,7 @@ import org.apache.wicket.markup.html.navigation.paging.IPageableItems;
 
 public class NoRecordsBehavior extends Behavior {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String CSS_CLASS = "norecords";

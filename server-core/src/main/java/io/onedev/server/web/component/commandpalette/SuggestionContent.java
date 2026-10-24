@@ -1,11 +1,13 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
 
 public class SuggestionContent implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String url;

@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import static io.onedev.commons.utils.FileUtils.hasSymbolLinks;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -22,6 +23,7 @@ import io.onedev.server.validation.validator.PathValidator;
 @Editable
 public abstract class PublishReportStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String reportName;

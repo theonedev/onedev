@@ -5,12 +5,14 @@ import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class IssueDescriptionChangeData extends IssueChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String oldDescription;

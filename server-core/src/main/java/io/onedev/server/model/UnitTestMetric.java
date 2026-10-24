@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.util.MetricIndicator;
 import io.onedev.server.web.component.chart.line.LineSeries;
@@ -15,6 +17,7 @@ import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
 )
 public class UnitTestMetric extends AbstractEntity implements BuildMetric {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

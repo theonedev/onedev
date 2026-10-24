@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.drawcardbeanlist;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import io.onedev.server.web.editable.BeanEditor;
  */
 public abstract class DrawCardBeanItemEditPanel<T extends Serializable> extends Panel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<T> items;

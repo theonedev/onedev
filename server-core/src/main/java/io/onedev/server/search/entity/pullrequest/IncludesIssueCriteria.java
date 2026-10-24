@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -23,6 +24,7 @@ import io.onedev.server.xodus.PullRequestInfoService;
 
 public class IncludesIssueCriteria extends Criteria<PullRequest> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Issue issue;

@@ -13,6 +13,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -28,6 +29,7 @@ import static io.onedev.server.security.SecurityUtils.asPrincipals;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class AccessToken extends AbstractEntity implements AuthenticationInfo {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Column(nullable=false)

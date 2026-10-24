@@ -2,6 +2,7 @@ package io.onedev.server.web.component.user.aisetting;
 
 import static io.onedev.server.model.User.Type.ORDINARY;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import io.onedev.server.service.UserService;
 @Editable
 public class EntitlementEditBean implements Serializable{
 	
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private boolean entitleToAll;

@@ -14,11 +14,13 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
+import java.io.Serial;
 import java.util.List;
 
 @Editable(order=200, name="Tag creation")
 public class TagCreateTrigger extends JobTrigger {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String tags;

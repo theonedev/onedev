@@ -1,7 +1,10 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serial;
+
 public class IssueCommentFacade extends EntityFacade {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long issueId;

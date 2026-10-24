@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.security;
 
+import java.io.Serial;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.service.SettingService;
@@ -12,6 +14,7 @@ import jakarta.validation.constraints.NotEmpty;
 @Editable
 public class SignUpBean extends User {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_EMAIL_ADDRESS = "emailAddress";

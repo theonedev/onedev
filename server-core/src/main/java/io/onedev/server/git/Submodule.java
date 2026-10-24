@@ -1,11 +1,13 @@
 package io.onedev.server.git;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
 
 public class Submodule implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final String SEPARATOR = ":";

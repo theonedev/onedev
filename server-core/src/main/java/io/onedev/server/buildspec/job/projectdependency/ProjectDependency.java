@@ -21,6 +21,7 @@ import io.onedev.server.web.util.WicketUtils;
 import org.jspecify.annotations.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 @Editable
 public class ProjectDependency implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String projectPath;

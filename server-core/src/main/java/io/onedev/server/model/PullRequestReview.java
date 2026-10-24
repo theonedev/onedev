@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -22,6 +23,7 @@ import io.onedev.server.rest.annotation.Immutable;
 )
 public class PullRequestReview extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_REQUEST = "request";

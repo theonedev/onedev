@@ -8,11 +8,13 @@ import io.onedev.server.search.code.query.FileQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.eclipse.jgit.lib.ObjectId;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RevisionAndPathParam extends ParamSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String NAME = "revision-and-path";

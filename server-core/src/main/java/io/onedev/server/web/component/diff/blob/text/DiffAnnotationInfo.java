@@ -1,11 +1,13 @@
 package io.onedev.server.web.component.diff.blob.text;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.web.util.AnnotationInfo;
 
 public class DiffAnnotationInfo implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final AnnotationInfo oldAnnotations;

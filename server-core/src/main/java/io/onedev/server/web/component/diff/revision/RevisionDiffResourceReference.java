@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.diff.revision;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -13,6 +14,7 @@ import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class RevisionDiffResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public RevisionDiffResourceReference() {

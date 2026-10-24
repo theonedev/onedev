@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior.sortable;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
@@ -17,6 +19,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
 public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String sortable;

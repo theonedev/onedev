@@ -16,11 +16,13 @@ import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.Repository;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
 public abstract class PullRequestTrigger extends JobTrigger {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String branches;

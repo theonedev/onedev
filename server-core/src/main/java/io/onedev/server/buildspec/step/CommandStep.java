@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 @Editable(order=100, name="Execute Commands")
 public class CommandStep extends Step {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String USE_TTY_HELP = "Many commands print outputs with ANSI colors in "

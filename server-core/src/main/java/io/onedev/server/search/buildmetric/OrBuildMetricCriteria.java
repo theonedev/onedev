@@ -1,5 +1,6 @@
 package io.onedev.server.search.buildmetric;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import jakarta.persistence.criteria.Root;
 
 public class OrBuildMetricCriteria extends BuildMetricCriteria {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<? extends BuildMetricCriteria> criterias;

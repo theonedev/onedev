@@ -7,6 +7,7 @@ import io.onedev.server.rest.annotation.Immutable;
 import org.apache.commons.lang3.StringUtils;
 
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.util.Date;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
@@ -14,6 +15,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 @MappedSuperclass
 public abstract class EntityComment extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final int MAX_CONTENT_LEN = 100000;

@@ -10,6 +10,7 @@ import org.unbescape.html.HtmlEscape;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,7 @@ import java.util.Map;
 @Editable
 public class EmailTemplates implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String DEFAULT_SIMPLE_NOTIFICATION;

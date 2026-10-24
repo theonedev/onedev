@@ -1,11 +1,13 @@
 package io.onedev.server.git.service;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
 public class PathChange implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final ObjectId oldObjectId;

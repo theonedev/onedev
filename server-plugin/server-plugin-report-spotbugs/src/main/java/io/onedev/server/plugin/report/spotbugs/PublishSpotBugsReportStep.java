@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 @Editable(order=10000, group=StepGroup.PUBLISH, name="SpotBugs Report")
 public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Editable(order=100, description="Specify SpotBugs result xml file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>, "

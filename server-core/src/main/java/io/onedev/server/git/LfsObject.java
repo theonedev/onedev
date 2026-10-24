@@ -14,6 +14,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.concurrent.locks.Lock;
@@ -38,6 +39,7 @@ import io.onedev.server.util.IOUtils;
 
 public class LfsObject implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -97,6 +99,7 @@ public class LfsObject implements Serializable {
 	public boolean exists() {
 		return getProjectService().runOnActiveServer(projectId, new ClusterTask<Boolean>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -171,6 +174,7 @@ public class LfsObject implements Serializable {
 	public void delete() {
 		getProjectService().runOnActiveServer(projectId, new ClusterTask<Void>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -191,6 +195,7 @@ public class LfsObject implements Serializable {
 	public MediaType detectMediaType(String fileName) {
 		return getProjectService().runOnActiveServer(projectId, new ClusterTask<MediaType> () {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

@@ -9,6 +9,7 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import static io.onedev.server.search.code.FieldConstants.BLOB_PATH;
 
 public abstract class BlobQuery implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String directory;

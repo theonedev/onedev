@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import static io.onedev.server.model.GitLfsLock.PROP_PATH;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -30,6 +31,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class GitLfsLock extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_PROJECT = "project";

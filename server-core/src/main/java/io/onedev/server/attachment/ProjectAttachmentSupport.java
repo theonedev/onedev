@@ -1,6 +1,7 @@
 package io.onedev.server.attachment;
 
 import java.io.InputStream;
+import java.io.Serial;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ import io.onedev.server.web.resource.AttachmentResourceReference;
 @JsonTypeInfo(use=Id.CLASS)
 public class ProjectAttachmentSupport implements AttachmentSupport {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final int MAX_FILE_SIZE = 20*1024*1024; // mega bytes

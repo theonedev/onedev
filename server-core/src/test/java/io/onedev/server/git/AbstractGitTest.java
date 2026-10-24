@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.jspecify.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 
 public abstract class AbstractGitTest extends AppLoaderMocker {
 
@@ -64,6 +65,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 		
 		Mockito.when(AppLoader.getInstance(GitLocation.class)).thenReturn(new GitLocation() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.logging.workspace;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -16,6 +17,7 @@ import io.onedev.server.service.ProjectService;
 
 public class WorkspaceLoggingSupport implements LoggingSupport {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final WorkspaceLoggingIdentity identity;

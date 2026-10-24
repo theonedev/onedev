@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.project.choice;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import io.onedev.server.web.component.select2.ResponseFiller;
 
 public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final IModel<List<Project>> choicesModel;
@@ -70,6 +72,7 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 		
 		List<Project> similarities = new Similarities<Project>(projects) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

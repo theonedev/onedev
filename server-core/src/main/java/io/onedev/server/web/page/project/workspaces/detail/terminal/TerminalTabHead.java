@@ -2,6 +2,8 @@ package io.onedev.server.web.page.project.workspaces.detail.terminal;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
+
 import jakarta.inject.Inject;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -22,6 +24,7 @@ import io.onedev.server.workspace.WorkspaceService;
 
 public class TerminalTabHead extends Panel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final TerminalTab tab;

@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.job.gitcredential;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import io.onedev.server.annotation.Editable;
 @ClassValidating
 public class SshCredential implements GitCredential, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String keySecret;

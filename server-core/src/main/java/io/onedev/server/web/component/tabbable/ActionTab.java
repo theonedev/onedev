@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.tabbable;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
@@ -8,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 
 public abstract class ActionTab extends Tab {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final IModel<String> titleModel;

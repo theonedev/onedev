@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -27,6 +28,7 @@ import io.onedev.server.git.service.GitService;
 @Table(indexes={@Index(columnList="request_id"), @Index(columnList="date")})
 public class PullRequestUpdate extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String REFS_PREFIX = "refs/updates/";

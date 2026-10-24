@@ -13,11 +13,13 @@ import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -34,6 +36,7 @@ public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 
 		new ResponseFiller<>(response).fill(new Similarities<>(users) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

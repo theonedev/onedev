@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.workspace;
 
+import java.io.Serial;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.From;
@@ -13,6 +15,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class IssueEmptyCriteria extends Criteria<Workspace> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final int operator;

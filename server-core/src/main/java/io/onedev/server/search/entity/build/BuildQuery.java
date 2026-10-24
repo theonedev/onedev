@@ -42,6 +42,7 @@ import static io.onedev.server.util.QueryUtils.getNumber;
 import static io.onedev.server.util.QueryUtils.getUser;
 import static io.onedev.server.util.QueryUtils.getValue;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -85,6 +86,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class BuildQuery extends EntityQuery<Build> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public BuildQuery(@Nullable Criteria<Build> criteria, List<EntitySort> sorts) {

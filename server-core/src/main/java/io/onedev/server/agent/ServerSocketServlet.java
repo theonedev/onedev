@@ -3,6 +3,7 @@ package io.onedev.server.agent;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.time.Duration;
 
 import jakarta.inject.Inject;
@@ -23,6 +24,7 @@ import io.onedev.server.service.AgentTokenService;
 @Singleton
 public class ServerSocketServlet extends JettyWebSocketServlet {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Inject

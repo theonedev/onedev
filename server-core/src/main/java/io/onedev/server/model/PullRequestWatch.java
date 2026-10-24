@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.rest.annotation.Immutable;
 
@@ -12,6 +14,7 @@ import jakarta.persistence.*;
 })
 public class PullRequestWatch extends EntityWatch {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_REQUEST = "request";

@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.buildspec.job.projectdependency;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditPanel;
 
 class ProjectDependencyListEditPanel extends DrawCardBeanListEditPanel<ProjectDependency> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ProjectDependencyListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
@@ -52,6 +54,7 @@ class ProjectDependencyListEditPanel extends DrawCardBeanListEditPanel<ProjectDe
 			int index, DrawCardBeanItemEditPanel.EditCallback callback) {
 		return new ProjectDependencyEditPanel(id, items, index, callback) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -78,6 +81,7 @@ class ProjectDependencyListEditPanel extends DrawCardBeanListEditPanel<ProjectDe
 
 		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of(_T("Project"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -89,6 +93,7 @@ class ProjectDependencyListEditPanel extends DrawCardBeanListEditPanel<ProjectDe
 
 		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of(_T("Build"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

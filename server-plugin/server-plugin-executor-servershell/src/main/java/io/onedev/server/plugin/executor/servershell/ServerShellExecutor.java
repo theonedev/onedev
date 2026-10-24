@@ -13,6 +13,7 @@ import static io.onedev.k8shelper.JobHelper.buildStepSkipMessage;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ import io.onedev.server.web.util.Testable;
 		+ "on a dedicated agent host, especially for untrusted jobs.")
 public class ServerShellExecutor extends JobExecutor implements Testable<Testable.None> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	static final int ORDER = 400;
@@ -352,6 +354,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<Testabl
 	@Editable(name="Specify Shell/Batch Commands to Run")
 	public static class TestData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String commands;

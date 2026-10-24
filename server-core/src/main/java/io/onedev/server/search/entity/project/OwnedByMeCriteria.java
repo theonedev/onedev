@@ -2,6 +2,8 @@ package io.onedev.server.search.entity.project;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.From;
@@ -17,6 +19,7 @@ import io.onedev.server.util.ProjectScope;
 
 public class OwnedByMeCriteria extends OwnedByCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

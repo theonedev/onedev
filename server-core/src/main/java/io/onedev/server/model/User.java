@@ -7,6 +7,7 @@ import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
 import static io.onedev.server.security.SecurityUtils.isAdministrator;
 
+import java.io.Serial;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -75,6 +76,7 @@ import io.onedev.server.exception.NotAcceptableException;
 @Editable
 public class User extends AbstractEntity implements AuthenticationInfo {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public enum Type {ORDINARY, SERVICE, AI};

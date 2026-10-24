@@ -2,6 +2,7 @@ package io.onedev.server.model.support.pullrequest;
 
 import static io.onedev.server.oem.OemUtils.translateHtml;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import io.onedev.server.util.usage.Usage;
 @Editable
 public class ProjectPullRequestSetting implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private List<NamedPullRequestQuery> namedQueries;

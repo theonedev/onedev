@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -22,6 +23,7 @@ import io.onedev.server.model.support.administration.sso.SsoConnector;
 @Table(indexes={@Index(columnList=SsoProvider.PROP_NAME)})
 public class SsoProvider extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_NAME = "name";

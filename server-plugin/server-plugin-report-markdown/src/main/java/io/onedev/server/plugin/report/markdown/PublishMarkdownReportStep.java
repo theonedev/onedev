@@ -19,6 +19,7 @@ import io.onedev.server.persistence.SessionService;
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.List;
 
 import static io.onedev.commons.utils.LockUtils.write;
@@ -26,6 +27,7 @@ import static io.onedev.commons.utils.LockUtils.write;
 @Editable(order=1100, group=StepGroup.PUBLISH, name="Markdown Report")
 public class PublishMarkdownReportStep extends PublishReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String CATEGORY = "markdown";

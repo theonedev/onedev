@@ -3,10 +3,12 @@ package io.onedev.server.util.facade;
 import io.onedev.server.model.AccessToken;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.Date;
 
 public class AccessTokenFacade extends EntityFacade {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long ownerId;

@@ -8,6 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import java.io.Serial;
 import java.util.Date;
 
 import static io.onedev.server.model.Alert.PROP_DATE;
@@ -18,6 +19,7 @@ import static io.onedev.server.model.Alert.PROP_SUBJECT;
 @Table(indexes={@Index(columnList=PROP_DATE), @Index(columnList= PROP_SUBJECT)})
 public class Alert extends AbstractEntity {
     
+    @Serial
     private static final long serialVersionUID = 1L;
 
 	public static final int MAX_SUBJECT_LEN = 255;

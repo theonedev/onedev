@@ -9,6 +9,7 @@ import static io.onedev.server.model.Agent.PROP_PAUSED;
 import static io.onedev.server.model.AgentLastUsedDate.PROP_VALUE;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ import io.onedev.server.service.AgentService;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Agent extends AbstractEntity {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String NAME_NAME = "Name";

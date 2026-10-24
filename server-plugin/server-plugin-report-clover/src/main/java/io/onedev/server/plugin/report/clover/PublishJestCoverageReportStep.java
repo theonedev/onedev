@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.report.clover;
 
+import java.io.Serial;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.step.StepGroup;
@@ -10,6 +12,7 @@ import io.onedev.server.annotation.Patterns;
 @Editable(order=10000, group=StepGroup.PUBLISH, name="Jest Coverage Report")
 public class PublishJestCoverageReportStep extends PublishCloverReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Editable(order=100, description="Specify Jest coverage report file in clover format relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>, "

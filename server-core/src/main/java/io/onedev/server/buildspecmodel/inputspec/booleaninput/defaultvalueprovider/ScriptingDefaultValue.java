@@ -1,5 +1,7 @@
 package io.onedev.server.buildspecmodel.inputspec.booleaninput.defaultvalueprovider;
 
+import java.io.Serial;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.GroovyUtils;
@@ -10,6 +12,7 @@ import io.onedev.server.annotation.ScriptChoice;
 @Editable(order=400, name="Evaluate script to get default value")
 public class ScriptingDefaultValue implements DefaultValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String scriptName;

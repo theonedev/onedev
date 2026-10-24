@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 
 public class Pair<L, R> implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private L left;

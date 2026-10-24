@@ -1,5 +1,6 @@
 package io.onedev.server.model.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.ZoneId;
@@ -13,6 +14,7 @@ import io.onedev.server.util.DateUtils;
 @Embeddable
 public class TimeGroups implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_DAY = "day";

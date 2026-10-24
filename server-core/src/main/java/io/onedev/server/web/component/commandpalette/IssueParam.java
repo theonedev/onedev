@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 
 public class IssueParam extends ParamSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public IssueParam(boolean optional) {

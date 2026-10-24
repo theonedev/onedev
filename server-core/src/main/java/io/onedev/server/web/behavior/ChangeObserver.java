@@ -1,5 +1,6 @@
 package io.onedev.server.web.behavior;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,6 +11,7 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
 public abstract class ChangeObserver extends Behavior {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private Collection<String> observables;

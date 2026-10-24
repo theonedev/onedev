@@ -29,6 +29,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.io.Serial;
 import java.io.Serializable;
 
 @Path("/job-runs")
@@ -139,6 +140,7 @@ public class JobRunResource {
 	
 	public static class JobRerun implements Serializable {
 		
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Api(order=100)

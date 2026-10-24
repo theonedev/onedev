@@ -1,5 +1,6 @@
 package io.onedev.server.web.util.resourcebundle.testdata.b;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 public class Js2ResourceReferenceB extends JavaScriptResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public Js2ResourceReferenceB() {

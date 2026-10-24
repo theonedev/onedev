@@ -1,9 +1,12 @@
 package io.onedev.server.web.component.floating;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 
 public class ComponentTarget implements AlignTarget {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Component component;

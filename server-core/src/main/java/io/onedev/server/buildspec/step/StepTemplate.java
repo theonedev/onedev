@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.step;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable
 public class StepTemplate implements NamedElement {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_STEPS = "steps";

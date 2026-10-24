@@ -5,6 +5,8 @@ import static io.onedev.server.model.IssueField.PROP_ORDINAL;
 import static io.onedev.server.model.IssueField.PROP_TYPE;
 import static io.onedev.server.model.IssueField.PROP_VALUE;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,6 +27,7 @@ import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
 		uniqueConstraints={@UniqueConstraint(columnNames={"issue_id", PROP_NAME, PROP_VALUE})})
 public class IssueField extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_ISSUE = "issue";

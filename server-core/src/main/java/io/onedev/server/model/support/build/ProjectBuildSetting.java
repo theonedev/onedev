@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.build;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +27,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 @Editable
 public class ProjectBuildSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final int DEFAULT_CACHE_PRESERVE_DAYS = 7;

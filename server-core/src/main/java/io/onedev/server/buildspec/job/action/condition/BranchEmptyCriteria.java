@@ -3,6 +3,8 @@ package io.onedev.server.buildspec.job.action.condition;
 import static io.onedev.server.buildspec.job.action.condition.ActionCondition.getRuleName;
 import static io.onedev.server.model.Build.NAME_BRANCH;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -15,6 +17,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class BranchEmptyCriteria extends Criteria<Build> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final int operator;

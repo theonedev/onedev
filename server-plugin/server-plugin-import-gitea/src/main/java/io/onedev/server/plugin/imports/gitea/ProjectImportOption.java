@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.imports.gitea;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import io.onedev.server.model.Role;
 @Editable
 public class ProjectImportOption implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<String> publicRoleNames = new ArrayList<>();

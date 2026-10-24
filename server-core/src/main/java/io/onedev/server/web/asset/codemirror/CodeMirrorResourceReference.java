@@ -1,5 +1,6 @@
 package io.onedev.server.web.asset.codemirror;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -16,6 +17,7 @@ import io.onedev.server.web.resourcebundle.ResourceBundle;
 @ResourceBundle
 public class CodeMirrorResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public CodeMirrorResourceReference() {

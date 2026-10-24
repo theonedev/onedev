@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,6 +20,7 @@ import io.onedev.server.model.support.EntityComment;
 })
 public class CodeCommentReply extends EntityComment {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_COMMENT = "comment";

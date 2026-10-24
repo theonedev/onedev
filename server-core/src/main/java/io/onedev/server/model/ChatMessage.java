@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +16,7 @@ import io.onedev.commons.utils.StringUtils;
 @Table(indexes={@Index(columnList="chat_id")})
 public class ChatMessage extends AbstractEntity {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
     public static final int MAX_CONTENT_LEN = 100000;

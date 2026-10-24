@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ public class IssueQueryGrammarTest {
 
 	private CodeAssist codeAssist = new CodeAssist(IssueQueryLexer.class, false) {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override

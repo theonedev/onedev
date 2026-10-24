@@ -16,12 +16,14 @@ import io.onedev.server.persistence.TransactionService;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Editable(name="Close Iteration", order=400)
 public class CloseIterationStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String iterationName;

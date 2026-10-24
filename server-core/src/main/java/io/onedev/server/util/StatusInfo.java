@@ -3,10 +3,12 @@ package io.onedev.server.util;
 import io.onedev.server.model.Build;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 
 public class StatusInfo implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long requestId;

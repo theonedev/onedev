@@ -1,11 +1,13 @@
 package io.onedev.server.search.entity;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.util.criteria.Criteria;
 
 public class EntitySort implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public enum Direction {ASCENDING, DESCENDING};

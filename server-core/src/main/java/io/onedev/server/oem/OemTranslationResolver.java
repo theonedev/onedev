@@ -3,6 +3,7 @@ package io.onedev.server.oem;
 import static io.onedev.server.oem.OemUtils.translateHtml;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.google.common.base.Preconditions;
  */
 public class OemTranslationResolver implements IComponentResolver {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String TAG_NAME = "t";

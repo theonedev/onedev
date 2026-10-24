@@ -9,11 +9,13 @@ import org.bouncycastle.openpgp.bc.BcPGPSecretKeyRing;
 
 import org.jspecify.annotations.Nullable;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
 public class GpgSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private byte[] encodedSigningKey;

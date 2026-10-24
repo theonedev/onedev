@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job.action;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,6 +44,7 @@ import io.onedev.server.web.util.WicketUtils;
 @ClassValidating
 public class RunProjectJobAction extends PostBuildAction implements Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String projectPath;
@@ -270,6 +272,7 @@ public class RunProjectJobAction extends PostBuildAction implements Validatable 
 	@Editable
 	public static class JobParam implements Serializable {
 	
+		@Serial
 		private static final long serialVersionUID = 1L;
 	
 		private String name;

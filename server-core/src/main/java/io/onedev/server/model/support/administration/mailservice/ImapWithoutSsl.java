@@ -2,11 +2,13 @@ package io.onedev.server.model.support.administration.mailservice;
 
 import io.onedev.server.annotation.Editable;
 
+import java.io.Serial;
 import java.util.Properties;
 
 @Editable(order=300, name="No SSL")
 public class ImapWithoutSsl implements ImapSslSetting {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private int port = 143;

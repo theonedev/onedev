@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import static io.onedev.server.model.Dashboard.PROP_NAME;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -28,6 +29,7 @@ import io.onedev.server.model.support.widget.Widget;
 		uniqueConstraints={@UniqueConstraint(columnNames={"owner_id", PROP_NAME})})
 public class Dashboard extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_OWNER = "owner";

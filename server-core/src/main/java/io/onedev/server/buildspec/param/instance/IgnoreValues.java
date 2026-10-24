@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.instance;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(name="Ignore this param")
 public class IgnoreValues implements ValuesProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String DISPLAY_NAME = "Ignore this param";

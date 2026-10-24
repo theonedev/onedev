@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.select2;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -12,6 +13,7 @@ import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class Select2ResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public Select2ResourceReference() {

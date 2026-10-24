@@ -2,6 +2,7 @@ package io.onedev.server.plugin.imports.gitea;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +22,12 @@ import io.onedev.server.web.util.ImportStep;
 
 public class GiteaIssueImporter implements IssueImporter {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final ImportStep<ImportServer> serverStep = new ImportStep<ImportServer>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -41,6 +44,7 @@ public class GiteaIssueImporter implements IssueImporter {
 	
 	private final ImportStep<ImportRepository> repositoryStep = new ImportStep<ImportRepository>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -59,6 +63,7 @@ public class GiteaIssueImporter implements IssueImporter {
 	
 	private final ImportStep<IssueImportOption> optionStep = new ImportStep<IssueImportOption>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override

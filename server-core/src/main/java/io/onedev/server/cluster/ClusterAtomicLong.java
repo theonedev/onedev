@@ -1,5 +1,6 @@
 package io.onedev.server.cluster;
 
+import java.io.Serial;
 import java.util.Map;
 
 import com.hazelcast.core.HazelcastInstance;
@@ -45,6 +46,7 @@ public final class ClusterAtomicLong {
     private enum Operation { INCREMENT, COMPARE_AND_SET, MAX }
 
     private static final class Update implements EntryProcessor<String, Long, Long> {
+        @Serial
         private static final long serialVersionUID = 1L;
         private final Operation operation;
         private final long expected;
@@ -78,6 +80,7 @@ public final class ClusterAtomicLong {
     }
 
     private static final class SetBackupValue implements EntryProcessor<String, Long, Long> {
+        @Serial
         private static final long serialVersionUID = 1L;
         private final long value;
 

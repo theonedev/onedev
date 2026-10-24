@@ -6,6 +6,7 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -64,6 +65,7 @@ public class PlaywrightReportParser {
 			TestSuite testSuite = new TestSuite(testSuiteData.name, status, duration,
 					testSuiteData.blobPath, testSuiteData.position) {
 
+				@Serial
 				private static final long serialVersionUID = 1L;
 
 				@Nullable
@@ -80,6 +82,7 @@ public class PlaywrightReportParser {
 				testCases.add(new TestCase(testSuite, testCaseData.name, testCaseData.status,
 						testCaseData.statusText, testCaseData.duration) {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Nullable
@@ -473,6 +476,7 @@ public class PlaywrightReportParser {
 
 	static class ResultData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		int retry;
@@ -500,6 +504,7 @@ public class PlaywrightReportParser {
 
 	static class AttachmentData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		String name;

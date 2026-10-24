@@ -2,6 +2,8 @@ package io.onedev.server.web.component.tristateswitch;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
+
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -18,6 +20,7 @@ import org.apache.wicket.util.convert.ConversionException;
  */
 public class TriStateSwitch extends FormComponent<Boolean> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public TriStateSwitch(String id) {

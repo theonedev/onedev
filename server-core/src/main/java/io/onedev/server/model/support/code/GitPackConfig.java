@@ -5,11 +5,13 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Numeric;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 
 @Editable
 public class GitPackConfig implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Api(description = "Leave empty for default setting", example = "0")

@@ -1,11 +1,13 @@
 package io.onedev.server.plugin.pack.maven;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MavenData implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Map<String, String> sha256BlobHashes = new LinkedHashMap<>();

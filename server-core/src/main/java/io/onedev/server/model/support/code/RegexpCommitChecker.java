@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.code;
 
+import java.io.Serial;
 import java.util.regex.PatternSyntaxException;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -10,6 +11,7 @@ import io.onedev.server.annotation.RegExp;
 @Editable(order=200, name="Regular Expression")
 public class RegexpCommitChecker implements CommitMessageChecker {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String pattern;

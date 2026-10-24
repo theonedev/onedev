@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.drawcardbeanlist;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ import io.onedev.server.web.editable.BeanContext;
  */
 public abstract class DrawCardBeanListViewPanel<T extends Serializable> extends Panel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	protected final List<T> items = new ArrayList<>();
@@ -61,6 +63,7 @@ public abstract class DrawCardBeanListViewPanel<T extends Serializable> extends 
 
 		IDataProvider<T> dataProvider = new ListDataProvider<T>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -72,6 +75,7 @@ public abstract class DrawCardBeanListViewPanel<T extends Serializable> extends 
 
 		add(new DataTable<T, Void>("items", columns, dataProvider, Integer.MAX_VALUE) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -88,6 +92,7 @@ public abstract class DrawCardBeanListViewPanel<T extends Serializable> extends 
 	private IColumn<T, Void> newDetailColumn() {
 		return new AbstractColumn<T, Void>(Model.of("")) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -96,6 +101,7 @@ public abstract class DrawCardBeanListViewPanel<T extends Serializable> extends 
 				Fragment fragment = new Fragment(componentId, "showDetailFrag", DrawCardBeanListViewPanel.this);
 				fragment.add(new AjaxLink<Void>("link") {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override

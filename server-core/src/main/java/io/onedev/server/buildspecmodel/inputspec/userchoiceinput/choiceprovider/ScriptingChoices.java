@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import io.onedev.server.annotation.ScriptChoice;
 @Editable(order=300, name="Evaluate script to get choices")
 public class ScriptingChoices implements ChoiceProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ScriptingChoices.class);

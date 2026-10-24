@@ -18,6 +18,7 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -751,6 +752,7 @@ public class DefaultDataService implements DataService, Serializable {
 				createRoot(bean);
 			} else {
 				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(PROP_TYPE, PROP_NOTIFY_OWN_EVENTS)) {
+					@Serial
 					private static final long serialVersionUID = 1L;
 	
 					@Override
@@ -803,6 +805,7 @@ public class DefaultDataService implements DataService, Serializable {
 
 			manualConfigs.add(new ManualConfig("Specify System Settings", null, 
 					systemSetting, excludedProps) {
+				@Serial
 				private static final long serialVersionUID = 1L;
 	
 				@Override
@@ -905,6 +908,7 @@ public class DefaultDataService implements DataService, Serializable {
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
 			manualConfigs.add(new ManualConfig("Specify Service Desk Setting", null, 
 					setting.getValue(), new HashSet<>(), true) {
+				@Serial
 				private static final long serialVersionUID = 1L;
 	
 				@Override
@@ -940,6 +944,7 @@ public class DefaultDataService implements DataService, Serializable {
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
 			Serializable backupSetting = setting.getValue();
 			manualConfigs.add(new ManualConfig("Specify Backup Setting", null, backupSetting) {
+				@Serial
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -1031,12 +1036,14 @@ public class DefaultDataService implements DataService, Serializable {
 				BackupSetting backupSetting = (BackupSetting) setting.getValue();
 				transactionService.runAfterCommit(new ClusterRunnable() {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void run() {
 						clusterService.submitToAllServers(new ClusterTask<Void>() {
 
+							@Serial
 							private static final long serialVersionUID = 1L;
 
 							@Override

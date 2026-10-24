@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.workspace.spec;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,6 +38,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @ClassValidating
 public class WorkspaceSpec implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_NAME = "name";

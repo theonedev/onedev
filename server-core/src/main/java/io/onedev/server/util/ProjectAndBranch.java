@@ -1,10 +1,13 @@
 package io.onedev.server.util;
 
+import java.io.Serial;
+
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 
 public class ProjectAndBranch extends ProjectAndRevision {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public ProjectAndBranch(Long projectId, String branch) {

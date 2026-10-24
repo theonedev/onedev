@@ -5,12 +5,14 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
 public class IssuesDeleted extends ProjectEvent {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Collection<Long> issueIds;

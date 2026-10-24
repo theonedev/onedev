@@ -4,6 +4,7 @@ import static io.onedev.server.model.support.NamedQuery.COMMON_NAME_PREFIX;
 import static io.onedev.server.model.support.NamedQuery.PERSONAL_NAME_PREFIX;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,6 +45,7 @@ import io.onedev.server.web.util.ConfirmClickModifier;
 
 class CommitQueryWatchesPanel extends GenericPanel<User> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     
     private SelectionColumn<QueryInfo, Void> selectionColumn;

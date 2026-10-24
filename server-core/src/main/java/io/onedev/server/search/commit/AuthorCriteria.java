@@ -1,5 +1,6 @@
 package io.onedev.server.search.commit;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -10,6 +11,7 @@ import io.onedev.server.model.Project;
 
 public class AuthorCriteria extends PersonCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public AuthorCriteria(List<String> values) {

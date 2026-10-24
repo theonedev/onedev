@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -18,6 +19,7 @@ import io.onedev.server.model.support.issue.changedata.IssueChangeData;
 		@Index(columnList="issue_id"), @Index(columnList="user_id")})
 public class IssueChange extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_ISSUE = "issue";

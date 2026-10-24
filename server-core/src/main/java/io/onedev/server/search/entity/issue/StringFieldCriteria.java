@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.issue;
 
+import java.io.Serial;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
@@ -10,6 +12,7 @@ import io.onedev.server.model.IssueField;
 
 public class StringFieldCriteria extends FieldCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String value;

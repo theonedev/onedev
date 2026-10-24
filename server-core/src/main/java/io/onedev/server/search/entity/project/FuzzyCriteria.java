@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.project;
 
 import static io.onedev.server.search.entity.project.ProjectQueryLexer.Is;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class FuzzyCriteria extends Criteria<Project> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String value;

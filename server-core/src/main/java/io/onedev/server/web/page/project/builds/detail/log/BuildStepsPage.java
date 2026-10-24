@@ -6,6 +6,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,6 +52,7 @@ import io.onedev.server.web.resource.BuildLogResource;
 import io.onedev.server.web.resource.BuildLogResourceReference;
 
 public class BuildStepsPage extends BuildDetailPage {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final int MAX_ENTRIES = 5000;
@@ -88,6 +90,7 @@ public class BuildStepsPage extends BuildDetailPage {
 		add(new TimeProgressBar("progress", progressData != null ? progressData.get("expected") / 1000.0 : 0,
 				"var(--info)", false).setElapsed(progressData != null ? progressData.get("elapsed") / 1000.0 : 0));
 		var autoUpdateContainer = new WebMarkupContainer("autoUpdateContainer") {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -98,6 +101,7 @@ public class BuildStepsPage extends BuildDetailPage {
 		};
 		autoUpdateContainer.setOutputMarkupPlaceholderTag(true);
 		autoUpdateContainer.add(new AjaxLink<Void>("autoUpdate") {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -124,6 +128,7 @@ public class BuildStepsPage extends BuildDetailPage {
 		add(autoUpdateContainer);
 
 		refresh = new AbstractPostAjaxBehavior() {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -141,6 +146,7 @@ public class BuildStepsPage extends BuildDetailPage {
 		};
 		add(refresh);
 		resume = new AbstractPostAjaxBehavior() {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -153,6 +159,7 @@ public class BuildStepsPage extends BuildDetailPage {
 		};
 		add(resume);
 		add(new ChangeObserver() {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

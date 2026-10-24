@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.setting.general;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -11,6 +12,7 @@ import io.onedev.server.annotation.ParentChoice;
 @Editable
 public class ParentBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String parentPath;

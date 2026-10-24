@@ -2,6 +2,7 @@ package io.onedev.server.web.util.editbean;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import io.onedev.server.service.ProjectService;
 @Editable
 public class ProjectAuthorizationBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String projectPath;

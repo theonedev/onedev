@@ -5,10 +5,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.wicket.protocol.ws.api.registry.IKey;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class PageKey implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String sessionId;

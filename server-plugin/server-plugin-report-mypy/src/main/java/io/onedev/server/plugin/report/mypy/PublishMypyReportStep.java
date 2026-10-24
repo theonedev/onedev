@@ -18,6 +18,7 @@ import io.onedev.server.util.IOUtils;
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 @Editable(order=10000, group=StepGroup.PUBLISH, name="Mypy Report")
 public class PublishMypyReportStep extends PublishProblemReportStep {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public PublishMypyReportStep() {

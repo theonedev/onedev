@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.spec;
 
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import io.onedev.server.util.HierarchicalContext;
 @Editable
 public abstract class ParamSpec extends InputSpec {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Editable(order=10)

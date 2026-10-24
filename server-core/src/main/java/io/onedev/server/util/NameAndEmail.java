@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -10,6 +11,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String name;

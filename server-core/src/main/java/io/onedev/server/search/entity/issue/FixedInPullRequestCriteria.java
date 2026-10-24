@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
+import java.io.Serial;
 import java.util.Collection;
 
 import org.jspecify.annotations.Nullable;
@@ -17,6 +18,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class FixedInPullRequestCriteria extends Criteria<Issue> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Project project;

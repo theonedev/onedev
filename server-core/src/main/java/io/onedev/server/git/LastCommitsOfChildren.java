@@ -2,6 +2,7 @@ package io.onedev.server.git;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -35,6 +36,7 @@ import io.onedev.server.git.LastCommitsOfChildren.Value;
  */
 public final class LastCommitsOfChildren extends HashMap<String, Value> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public LastCommitsOfChildren(Repository repo, AnyObjectId until) {
@@ -194,6 +196,7 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 
 	public static class Value implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final ObjectId id;

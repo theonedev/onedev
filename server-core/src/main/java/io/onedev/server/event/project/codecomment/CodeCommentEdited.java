@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.codecomment;
 
+import java.io.Serial;
 import java.util.Date;
 
 import io.onedev.server.model.CodeComment;
@@ -9,6 +10,7 @@ import io.onedev.server.util.commenttext.MarkdownText;
 
 public class CodeCommentEdited extends CodeCommentEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public CodeCommentEdited(User user, CodeComment comment) {

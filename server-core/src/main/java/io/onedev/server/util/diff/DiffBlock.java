@@ -1,5 +1,6 @@
 package io.onedev.server.util.diff;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 
 public class DiffBlock<T> implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final DiffMatchPatch.Operation operation;

@@ -3,6 +3,7 @@ package io.onedev.server.web.component.user.accesstoken;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.Comparator.comparing;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ import io.onedev.server.web.util.UserAware;
 @Editable
 public class AccessTokenAuthorizationBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String projectPath;

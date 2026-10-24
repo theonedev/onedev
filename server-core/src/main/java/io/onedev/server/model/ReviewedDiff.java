@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.util.Date;
 
 import static io.onedev.server.model.ReviewedDiff.*;
@@ -16,6 +17,7 @@ import static io.onedev.server.model.ReviewedDiff.*;
 )
 public class ReviewedDiff extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_USER = "user";

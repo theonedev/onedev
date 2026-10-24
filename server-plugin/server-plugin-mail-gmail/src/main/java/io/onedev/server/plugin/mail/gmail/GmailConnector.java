@@ -19,6 +19,7 @@ import jakarta.mail.Message;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.function.Consumer;
 @Editable(name="Gmail", order=300)
 public class GmailConnector implements MailConnector {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";

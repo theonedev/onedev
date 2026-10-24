@@ -1,5 +1,6 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serial;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
@@ -8,6 +9,7 @@ import io.onedev.server.util.MapProxy;
 
 public class AccessTokenCache extends MapProxy<Long, AccessTokenFacade> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public AccessTokenCache(Map<Long, AccessTokenFacade> delegate) {

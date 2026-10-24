@@ -1,11 +1,14 @@
 package io.onedev.server.buildspecmodel.inputspec.integerinput.defaultvalueprovider;
 
+import java.io.Serial;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private int value;

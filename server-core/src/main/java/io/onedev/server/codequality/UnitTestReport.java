@@ -37,6 +37,7 @@ import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 public class UnitTestReport implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String CATEGORY = "unit-test";
@@ -235,6 +236,7 @@ public class UnitTestReport implements Serializable {
 	
 	public static abstract class TestSuite implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private final String name;
@@ -269,6 +271,7 @@ public class UnitTestReport implements Serializable {
 	
 	public static abstract class TestCase implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private final TestSuite testSuite;
@@ -328,6 +331,7 @@ public class UnitTestReport implements Serializable {
 
 	private static class ReadReport implements ClusterTask<UnitTestReport> {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Long projectId;

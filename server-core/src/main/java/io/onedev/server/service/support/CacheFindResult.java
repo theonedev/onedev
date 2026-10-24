@@ -1,11 +1,13 @@
 package io.onedev.server.service.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.k8shelper.CacheAvailability;
 
 public class CacheFindResult implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final Long projectId;

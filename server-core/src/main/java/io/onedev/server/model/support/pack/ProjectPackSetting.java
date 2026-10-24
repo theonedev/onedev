@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.pack;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class ProjectPackSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private List<NamedPackQuery> namedQueries;

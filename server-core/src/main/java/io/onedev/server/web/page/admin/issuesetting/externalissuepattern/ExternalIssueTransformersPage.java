@@ -2,6 +2,8 @@ package io.onedev.server.web.page.admin.issuesetting.externalissuepattern;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -18,6 +20,7 @@ import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 
 public class ExternalIssueTransformersPage extends IssueSettingPage {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String oldAuditContent;

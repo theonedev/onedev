@@ -31,6 +31,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,6 +110,7 @@ import io.onedev.server.web.util.Testable;
 		+ "settings as job pods need to access it to download source and artifacts")
 public class KubernetesExecutor extends JobExecutor implements KubernetesAware, Testable<TestData> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	static final int ORDER = 700;
@@ -316,6 +318,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		var server = servers.get(RandomUtils.secure().randomInt(0, servers.size()));
 		return clusterService.runOnServer(server, ()-> getJobService().runJob(jobContext, new JobRunnable() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -1109,6 +1112,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	@Editable(name="Specify a Docker Image to Test Against")
 	public static class TestData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String dockerImage;

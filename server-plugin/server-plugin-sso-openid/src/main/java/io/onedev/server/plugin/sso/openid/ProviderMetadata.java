@@ -1,11 +1,13 @@
 package io.onedev.server.plugin.sso.openid;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
 
 public class ProviderMetadata implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String issuer;

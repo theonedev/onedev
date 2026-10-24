@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration.jobexecutor;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -22,6 +23,7 @@ import io.onedev.server.util.usage.Usage;
 @Editable
 public abstract class JobExecutor implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private boolean enabled = true;

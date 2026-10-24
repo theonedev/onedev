@@ -1,5 +1,6 @@
 package io.onedev.server.model.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -17,6 +18,7 @@ import io.onedev.server.model.User;
 @Embeddable
 public class LastActivity implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String COLUMN_USER = "LAST_ACTIVITY_USER";

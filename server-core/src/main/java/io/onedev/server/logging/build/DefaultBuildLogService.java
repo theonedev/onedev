@@ -5,6 +5,7 @@ import static io.onedev.commons.utils.LockUtils.write;
 
 import java.io.InputStream;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
@@ -183,6 +184,7 @@ public class DefaultBuildLogService implements BuildLogService, Serializable {
 					new SnapshotMetadata(context.getLogVersion(), getStageSupports(context)));
 			var snapshot = context.runOnActiveServer(new ClusterTask<BuildLogSnapshot>() {
 
+				@Serial
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -227,6 +229,7 @@ public class DefaultBuildLogService implements BuildLogService, Serializable {
 	public void clear(BuildLogContext context) {
 		context.runOnActiveServer(new ClusterTask<Void>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

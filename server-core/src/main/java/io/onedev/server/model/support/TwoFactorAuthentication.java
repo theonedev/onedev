@@ -2,6 +2,7 @@ package io.onedev.server.model.support;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -25,6 +26,7 @@ import io.onedev.server.model.User;
 
 public class TwoFactorAuthentication implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String secretKey;

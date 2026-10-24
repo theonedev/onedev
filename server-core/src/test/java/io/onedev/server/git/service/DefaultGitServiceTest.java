@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +62,7 @@ public class DefaultGitServiceTest extends AbstractGitTest {
 		var settingService = mock(SettingService.class);
 		when(settingService.getGpgSetting()).thenReturn(new GpgSetting() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

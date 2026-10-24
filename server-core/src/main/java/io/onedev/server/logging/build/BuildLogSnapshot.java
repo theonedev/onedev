@@ -1,5 +1,6 @@
 package io.onedev.server.logging.build;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import io.onedev.server.logging.LogEntry;
 /** Combined stream entries and the corresponding positions in the stage files. */
 public class BuildLogSnapshot implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	BuildLogSnapshot() {

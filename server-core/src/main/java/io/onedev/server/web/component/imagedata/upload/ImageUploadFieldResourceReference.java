@@ -8,10 +8,12 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
+import java.io.Serial;
 import java.util.List;
 
 public class ImageUploadFieldResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public ImageUploadFieldResourceReference() {

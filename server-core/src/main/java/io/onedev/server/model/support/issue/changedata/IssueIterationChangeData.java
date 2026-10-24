@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import io.onedev.server.notification.ActivityDetail;
 
 public class IssueIterationChangeData extends IssueChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<String> oldIterations;

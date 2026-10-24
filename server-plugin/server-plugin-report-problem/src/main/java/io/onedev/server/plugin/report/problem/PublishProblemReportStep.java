@@ -31,6 +31,7 @@ import static io.onedev.server.codequality.CodeProblem.Severity.*;
 @Editable
 public abstract class PublishProblemReportStep extends PublishReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private Severity failThreshold = HIGH;

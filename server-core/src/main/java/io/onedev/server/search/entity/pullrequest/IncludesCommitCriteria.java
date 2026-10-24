@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import java.io.Serial;
 import java.util.Collection;
 
 import org.jspecify.annotations.Nullable;
@@ -21,6 +22,7 @@ import io.onedev.server.xodus.PullRequestInfoService;
 
 public class IncludesCommitCriteria extends Criteria<PullRequest> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Project project;

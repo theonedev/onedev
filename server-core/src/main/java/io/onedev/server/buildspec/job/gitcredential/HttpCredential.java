@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job.gitcredential;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import io.onedev.server.annotation.Editable;
 @ClassValidating
 public class HttpCredential implements GitCredential, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String accessTokenSecret;

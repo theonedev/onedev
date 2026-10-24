@@ -1,5 +1,7 @@
 package io.onedev.server.search.buildmetric;
 
+import java.io.Serial;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
@@ -10,6 +12,7 @@ import io.onedev.server.model.Build;
 
 public class JobCriteria extends BuildMetricCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String jobName;

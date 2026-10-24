@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.setting.authorization;
 
 import io.onedev.server.annotation.Editable;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 @Editable
 public class GroupAuthorizationsBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<GroupAuthorizationBean> authorizations = new ArrayList<>();

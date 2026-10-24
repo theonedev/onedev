@@ -1,5 +1,6 @@
 package io.onedev.server.event.project;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -8,6 +9,7 @@ import io.onedev.server.model.Project;
 
 public class CommitIndexed extends ProjectEvent {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final ObjectId commitId;

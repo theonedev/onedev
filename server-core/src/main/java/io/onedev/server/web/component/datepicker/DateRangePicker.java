@@ -2,6 +2,7 @@ package io.onedev.server.web.component.datepicker;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.Locale;
 
@@ -22,6 +23,7 @@ import io.onedev.server.web.page.base.BasePage;
 
 public class DateRangePicker extends TextField<DateRange> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 		
 	private final IConverter<DateRange> converter;

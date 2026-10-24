@@ -1,6 +1,7 @@
 package io.onedev.server.model.support;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -35,6 +36,7 @@ import nl.altindag.ssl.SSLFactory;
 @Editable(order=100)
 public class AiModelSetting implements Serializable {
     
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private static final int MODEL_LIST_TIMEOUT_SECONDS = 30;

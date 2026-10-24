@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.workspace.spec;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -9,6 +10,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class ShortcutConfig implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
     private String name;

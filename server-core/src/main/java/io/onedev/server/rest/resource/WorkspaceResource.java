@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -172,6 +173,7 @@ public class WorkspaceResource {
 	@EntityCreate(Workspace.class)
 	public static class WorkspaceCreateData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Api(order=100)

@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import io.onedev.server.validation.Validatable;
 @Editable
 @ClassValidating
 public class ExternalIssueTransformers implements Serializable, Validatable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private List<Entry> entries = new ArrayList<>();
@@ -61,6 +63,7 @@ public class ExternalIssueTransformers implements Serializable, Validatable {
 	@Editable
 	public static class Entry implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String pattern;

@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -16,6 +18,7 @@ import io.onedev.server.util.ProjectScope;
 
 public class ApprovedByUserCriteria extends ApprovedByCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final User user;

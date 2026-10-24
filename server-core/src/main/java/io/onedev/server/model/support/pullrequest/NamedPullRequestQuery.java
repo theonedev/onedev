@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.pullrequest;
 
+import java.io.Serial;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.support.NamedQuery;
@@ -9,6 +11,7 @@ import io.onedev.server.annotation.PullRequestQuery;
 @Editable
 public class NamedPullRequestQuery implements NamedQuery {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String name;

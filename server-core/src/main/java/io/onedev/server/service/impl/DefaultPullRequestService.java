@@ -17,6 +17,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SO
 import static java.util.Arrays.asList;
 
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -159,6 +160,7 @@ import io.onedev.server.xodus.PullRequestInfoService;
 public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		implements PullRequestService, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestService.class);
@@ -809,12 +811,14 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 		transactionService.runAfterCommit(new ClusterRunnable() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void run() {
 				projectService.submitToActiveServer(projectId, new ClusterTask<Void>() {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -822,12 +826,14 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 						try {
 							LockUtils.call(getSerialLockName(requestId), true, new ClusterTask<Void>() {
 
+								@Serial
 								private static final long serialVersionUID = 1L;
 
 								@Override
 								public Void call() {
 									transactionService.run(new ClusterRunnable() {
 
+										@Serial
 										private static final long serialVersionUID = 1L;
 
 										@Override

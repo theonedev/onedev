@@ -1,5 +1,6 @@
 package io.onedev.server.git.command;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -15,6 +16,7 @@ import io.onedev.server.git.GitUtils;
 
 public class LogCommit implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String hash;

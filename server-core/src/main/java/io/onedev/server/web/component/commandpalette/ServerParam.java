@@ -4,11 +4,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.web.page.admin.ServerDetailPage;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ServerParam extends ParamSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public ServerParam() {

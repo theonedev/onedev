@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.imports.youtrack;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -22,6 +23,7 @@ import io.onedev.server.web.editable.BeanEditor;
 @ClassValidating
 public class ImportProjects implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ImportServer server;

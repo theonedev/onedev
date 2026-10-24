@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.report.checkstyle;
 
+import java.io.Serial;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.step.StepGroup;
@@ -10,6 +12,7 @@ import io.onedev.server.annotation.Patterns;
 @Editable(order=10000, group=StepGroup.PUBLISH, name="ESLint Report")
 public class PublishESLintReportStep extends PublishCheckstyleReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Editable(order=100, description="Specify ESLint report file in checkstyle format under <a href='${docsite}/concepts#job-workdir'>job working directory</a>. "

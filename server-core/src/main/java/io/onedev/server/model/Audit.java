@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import static io.onedev.server.model.Audit.PROP_ACTION;
 import static io.onedev.server.model.Audit.PROP_DATE;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
@@ -22,6 +23,7 @@ import jakarta.persistence.Table;
 )
 public class Audit extends AbstractEntity { 
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final int MAX_ACTION_LEN = 512;

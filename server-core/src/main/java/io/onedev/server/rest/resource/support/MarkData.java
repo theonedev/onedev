@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.model.support.Mark;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class MarkData implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String commitHash;

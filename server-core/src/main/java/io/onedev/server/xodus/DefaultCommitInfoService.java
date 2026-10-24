@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.time.ZoneId;
@@ -113,6 +114,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 public class DefaultCommitInfoService extends AbstractEnvironmentService
 		implements CommitInfoService, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoService.class);
@@ -781,6 +783,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public List<NameAndEmail> getUsers(Long projectId) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -803,6 +806,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public List<String> getFiles(Long projectId) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -840,6 +844,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public Map<String, Integer> getLineStats(Long projectId) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -891,6 +896,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public Collection<ObjectId> getDescendants(Long projectId, Collection<ObjectId> ancestors) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -1045,6 +1051,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public int getCommitCount(Long projectId) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -1067,6 +1074,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public int getFileCount(Long projectId) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -1178,6 +1186,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public Map<Integer, Integer> getOverallContributions(Long projectId) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -1200,6 +1209,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public List<GitContributor> getTopContributors(Long projectId, int top, int fromDay, int toDay) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -1433,6 +1443,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 	public Collection<ObjectId> getFixCommits(Long projectId, Long issueId, boolean headOnly) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -1476,6 +1487,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 											  Long projectId, Collection<String> files) {
 		return projectService.runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

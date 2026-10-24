@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.imports.url;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 
@@ -35,6 +36,7 @@ import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 @ClassValidating
 public class ImportServer implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String url;
@@ -172,6 +174,7 @@ public class ImportServer implements Serializable, Validatable {
 	@Editable
 	public static class Authentication implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private String userName;

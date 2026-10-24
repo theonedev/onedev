@@ -4,6 +4,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.util.Date;
 
 @Entity
@@ -14,6 +15,7 @@ import java.util.Date;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class IssueSchedule extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static String PROP_ISSUE = "issue";

@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -28,6 +29,7 @@ import io.onedev.server.util.patternset.PatternSet;
 		"to build artifacts directory, so that they can be accessed after job is completed")
 public class PublishArtifactStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String sourcePath;

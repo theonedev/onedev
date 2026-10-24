@@ -4,6 +4,7 @@ import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.All;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.Any;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,6 +37,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 
 public class LinkMatchCriteria extends Criteria<Issue> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String linkName;

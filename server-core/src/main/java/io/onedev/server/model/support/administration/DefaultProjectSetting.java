@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +17,7 @@ import io.onedev.server.annotation.Patterns;
 @Editable
 public class DefaultProjectSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String senderEmails;

@@ -1,11 +1,14 @@
 package io.onedev.server.entityreference;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.Project;
 
 public class WorkspaceReference extends EntityReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String TYPE = "workspace";

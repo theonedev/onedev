@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
@@ -22,6 +24,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cache(usage= CacheConcurrencyStrategy.READ_WRITE)
 public class ProjectLabel extends EntityLabel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static String PROP_PROJECT = "project";

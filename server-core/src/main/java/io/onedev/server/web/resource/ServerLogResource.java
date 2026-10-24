@@ -8,6 +8,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class ServerLogResource extends AbstractResource {
 
 	private static final String PARAM_SERVER = "server";
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

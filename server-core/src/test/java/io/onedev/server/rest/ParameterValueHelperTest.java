@@ -3,6 +3,7 @@ package io.onedev.server.rest;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.function.Function;
 
@@ -166,6 +167,7 @@ public class ParameterValueHelperTest extends AppLoaderMocker {
     }
 
     public static class TestEntity extends AbstractEntity {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         private String name;

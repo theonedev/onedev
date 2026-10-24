@@ -17,12 +17,14 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.util.SuggestionUtils;
 
 import jakarta.validation.Valid;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
 @Editable
 public class IssueCreationSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String applicableProjects;

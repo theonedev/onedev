@@ -1,5 +1,7 @@
 package io.onedev.server.buildspec.job.trigger;
 
+import java.io.Serial;
+
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.event.project.ProjectEvent;
@@ -10,6 +12,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=310, name="Pull request merge", description="Job will run on merge commit of target branch and source branch")
 public class PullRequestMergeTrigger extends PullRequestTrigger {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

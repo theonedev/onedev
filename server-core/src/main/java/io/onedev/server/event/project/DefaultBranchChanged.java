@@ -1,5 +1,6 @@
 package io.onedev.server.event.project;
 
+import java.io.Serial;
 import java.util.Date;
 
 import io.onedev.server.model.Project;
@@ -8,6 +9,7 @@ import io.onedev.server.util.ProjectScopedCommit;
 
 public class DefaultBranchChanged extends ProjectEvent implements ProjectScopedCommitAware {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String defaultBranch;

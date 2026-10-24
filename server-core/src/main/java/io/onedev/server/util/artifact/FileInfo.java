@@ -1,9 +1,12 @@
 package io.onedev.server.util.artifact;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 public class FileInfo extends ArtifactInfo {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final long length;

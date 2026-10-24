@@ -1,6 +1,7 @@
 package io.onedev.server.web;
 
 import java.io.IOException;
+import java.io.Serial;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -17,6 +18,7 @@ import io.onedev.server.persistence.SessionService;
 @Singleton
 public class DefaultWicketServlet extends WicketServlet {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final SessionService sessionService;

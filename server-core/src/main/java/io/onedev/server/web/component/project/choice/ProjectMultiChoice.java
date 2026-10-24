@@ -2,6 +2,7 @@ package io.onedev.server.web.component.project.choice;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import io.onedev.server.web.component.select2.Select2MultiChoice;
 
 public class ProjectMultiChoice extends Select2MultiChoice<Project> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public ProjectMultiChoice(String id, IModel<Collection<Project>> model, IModel<List<Project>> choicesModel) {

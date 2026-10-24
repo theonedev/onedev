@@ -5,10 +5,12 @@ import io.onedev.server.annotation.Editable;
 import jakarta.validation.Valid;
 import org.jspecify.annotations.Nullable;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Editable
 public class WikiSetting implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private WikiFolder folder;
 

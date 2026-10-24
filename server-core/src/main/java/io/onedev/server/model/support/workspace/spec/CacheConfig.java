@@ -2,6 +2,7 @@ package io.onedev.server.model.support.workspace.spec;
 
 import static io.onedev.k8shelper.UploadStrategy.UPLOAD_IF_NOT_EXACT_MATCH;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable
 public class CacheConfig implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String key;

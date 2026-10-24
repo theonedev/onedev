@@ -4,10 +4,12 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.security.SecurityUtils;
 
+import java.io.Serial;
 import java.util.Date;
 
 public class CodeCommentDeleted extends ProjectEvent {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long commentId;

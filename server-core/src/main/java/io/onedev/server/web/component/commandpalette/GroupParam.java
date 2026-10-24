@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 
 public class GroupParam extends ParamSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public GroupParam(boolean optional) {

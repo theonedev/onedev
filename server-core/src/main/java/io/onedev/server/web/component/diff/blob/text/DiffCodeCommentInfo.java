@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.diff.blob.text;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -9,6 +10,7 @@ import io.onedev.server.web.util.DiffPlanarRange;
 
 public class DiffCodeCommentInfo implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final long id;

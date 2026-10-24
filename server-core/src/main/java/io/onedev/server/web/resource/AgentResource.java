@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Properties;
@@ -33,6 +34,7 @@ import io.onedev.server.security.SecurityUtils;
 
 public class AgentResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

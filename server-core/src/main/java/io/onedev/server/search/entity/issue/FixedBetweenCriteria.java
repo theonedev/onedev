@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +31,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class FixedBetweenCriteria extends Criteria<Issue> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Project project;

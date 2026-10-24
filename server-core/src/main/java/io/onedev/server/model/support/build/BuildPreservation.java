@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.build;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.annotation.BuildQuery;
@@ -8,6 +9,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class BuildPreservation implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String condition;

@@ -12,6 +12,7 @@
  */
 package io.onedev.server.web.component.select2;
 
+import java.io.Serial;
 import java.util.Collection;
 
 import org.apache.wicket.model.IDetachable;
@@ -44,6 +45,7 @@ import org.json.JSONWriter;
  */
 public abstract class ChoiceProvider<T> implements IDetachable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**

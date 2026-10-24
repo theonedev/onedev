@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -13,6 +15,7 @@ public class IssueMention extends AbstractEntity {
 	
 	public static final String PROP_ISSUE = "issue";
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne

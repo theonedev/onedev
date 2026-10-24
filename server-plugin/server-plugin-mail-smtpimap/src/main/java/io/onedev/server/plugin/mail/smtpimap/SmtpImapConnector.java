@@ -14,6 +14,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -21,6 +22,7 @@ import java.util.function.Consumer;
 @Editable(name="SMTP/IMAP", order=100)
 public class SmtpImapConnector implements MailConnector {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String smtpHost;

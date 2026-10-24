@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.Set;
 
 public class MapProxy<K, V> implements Map<K, V>, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	protected final Map<K, V> delegate;

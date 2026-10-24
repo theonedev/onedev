@@ -1,11 +1,13 @@
 package io.onedev.server.web.component.issue.workflowreconcile;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
 public class UndefinedFieldValuesResolution implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Map<String, String> renames;

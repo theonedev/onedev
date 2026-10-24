@@ -1,5 +1,7 @@
 package io.onedev.server.exception.handler;
 
+import java.io.Serial;
+
 import io.onedev.server.exception.HttpResponse;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -7,6 +9,7 @@ import jakarta.validation.ValidationException;
 
 public class ValidationExceptionHandler extends AbstractExceptionHandler<ValidationException> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

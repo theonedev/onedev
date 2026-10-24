@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.buildspec.param.spec;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
 class ParamSpecListViewPanel extends DrawCardBeanListViewPanel<ParamSpec> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ParamSpecListViewPanel(String id, List<Serializable> elements) {
@@ -57,6 +59,7 @@ class ParamSpecListViewPanel extends DrawCardBeanListViewPanel<ParamSpec> {
 
 		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of(_T("Name"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -68,6 +71,7 @@ class ParamSpecListViewPanel extends DrawCardBeanListViewPanel<ParamSpec> {
 
 		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of(_T("Type"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.workspace;
 
+import java.io.Serial;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
@@ -11,6 +12,7 @@ import io.onedev.server.workspace.WorkspaceService;
 
 public abstract class WorkspaceEvent extends ProjectEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long workspaceId;

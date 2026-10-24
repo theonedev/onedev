@@ -1,5 +1,6 @@
 package io.onedev.server.entityreference;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -14,6 +15,7 @@ import io.onedev.server.model.Project;
 
 public abstract class EntityReference implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long projectId;

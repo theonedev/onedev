@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -43,6 +44,7 @@ import io.onedev.server.security.TrustCertsSSLSocketFactory;
 @Editable(name="Generic LDAP", order=200)
 public class LdapAuthenticator extends Authenticator {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	protected static final String PROP_AUTHENTICATION_REQUIRED = "authenticationRequired";

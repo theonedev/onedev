@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import static io.onedev.server.model.ProjectLastActivityDate.PROP_VALUE;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -17,6 +18,7 @@ import jakarta.persistence.Table;
 @Table(indexes={@Index(columnList= PROP_VALUE)})
 public class ProjectLastActivityDate extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_VALUE = "value";

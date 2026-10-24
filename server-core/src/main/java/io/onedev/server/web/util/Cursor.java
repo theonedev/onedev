@@ -1,5 +1,6 @@
 package io.onedev.server.web.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -12,6 +13,7 @@ import io.onedev.server.web.WebConstants;
 
 public class Cursor implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String query;

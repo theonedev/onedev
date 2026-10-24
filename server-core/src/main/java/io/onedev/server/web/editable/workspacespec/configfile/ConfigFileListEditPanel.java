@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.workspacespec.configfile;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditPanel;
 
 class ConfigFileListEditPanel extends DrawCardBeanListEditPanel<ConfigFile> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ConfigFileListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
@@ -44,6 +46,7 @@ class ConfigFileListEditPanel extends DrawCardBeanListEditPanel<ConfigFile> {
 
 		columns.add(new AbstractColumn<ConfigFile, Void>(Model.of(_T("Path"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

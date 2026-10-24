@@ -1,9 +1,11 @@
 package io.onedev.server.model.support.build;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /** Status and timing of an executed step, excluding initialization and finalization. */
 public class StepExecution implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public enum Status {

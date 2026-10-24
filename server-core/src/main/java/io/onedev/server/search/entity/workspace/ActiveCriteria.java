@@ -1,9 +1,12 @@
 package io.onedev.server.search.entity.workspace;
 
+import java.io.Serial;
+
 import io.onedev.server.model.Workspace;
 
 public class ActiveCriteria extends StatusCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

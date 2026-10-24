@@ -2,6 +2,7 @@ package io.onedev.server.web.component.suggestionapply;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -13,6 +14,7 @@ import io.onedev.server.annotation.Multiline;
 @Editable(name="Commit Suggestion")
 public class SuggestionApplyBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String branch;

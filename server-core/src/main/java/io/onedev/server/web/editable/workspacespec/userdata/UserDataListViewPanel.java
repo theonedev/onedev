@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.workspacespec.userdata;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
 class UserDataListViewPanel extends DrawCardBeanListViewPanel<UserData> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	UserDataListViewPanel(String id, List<Serializable> elements) {
@@ -36,6 +38,7 @@ class UserDataListViewPanel extends DrawCardBeanListViewPanel<UserData> {
 
 		columns.add(new AbstractColumn<UserData, Void>(Model.of(_T("Key"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -47,6 +50,7 @@ class UserDataListViewPanel extends DrawCardBeanListViewPanel<UserData> {
 
 		columns.add(new AbstractColumn<UserData, Void>(Model.of(_T("#Entries"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

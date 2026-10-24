@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
@@ -19,6 +21,7 @@ import io.onedev.server.rest.annotation.Immutable;
 )
 public class PullRequestLabel extends EntityLabel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static String PROP_REQUEST = "request";

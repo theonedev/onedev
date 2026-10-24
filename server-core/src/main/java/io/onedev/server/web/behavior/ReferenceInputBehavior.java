@@ -3,6 +3,7 @@ package io.onedev.server.web.behavior;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -21,6 +22,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 
 public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final int REFERENCE_SUGGESTION_LIMIT = 5;

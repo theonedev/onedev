@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -11,6 +12,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(name="Active Directory", order=100)
 public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String groupSearchBase;

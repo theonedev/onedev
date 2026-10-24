@@ -1,11 +1,13 @@
 package io.onedev.server.web.component.chart.line;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 public class LineSeries implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PERCENTAGE_FORMATTER = "function(value) {return value+'%';}";

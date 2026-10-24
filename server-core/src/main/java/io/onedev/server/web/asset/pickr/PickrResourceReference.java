@@ -1,5 +1,6 @@
 package io.onedev.server.web.asset.pickr;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.Application;
@@ -11,6 +12,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 public class PickrResourceReference extends JavaScriptResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PickrResourceReference() {

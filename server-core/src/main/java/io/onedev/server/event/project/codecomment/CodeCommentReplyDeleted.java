@@ -3,12 +3,14 @@ package io.onedev.server.event.project.codecomment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.security.SecurityUtils;
 
+import java.io.Serial;
 import java.util.Date;
 
 public class CodeCommentReplyDeleted extends CodeCommentEvent {
 
 	private final Long replyId;
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public CodeCommentReplyDeleted(CodeCommentReply reply) {

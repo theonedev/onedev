@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.build;
 
+import java.io.Serial;
 import java.util.ArrayList;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -19,6 +20,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class FuzzyCriteria extends Criteria<Build> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String value;

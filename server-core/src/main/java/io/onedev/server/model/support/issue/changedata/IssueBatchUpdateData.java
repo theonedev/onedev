@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import io.onedev.server.buildspecmodel.inputspec.Input;
 
 public class IssueBatchUpdateData extends IssueFieldChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String oldState;

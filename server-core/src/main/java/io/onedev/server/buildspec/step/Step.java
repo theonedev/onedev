@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import static io.onedev.k8shelper.ExecuteCondition.SUCCESSFUL;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -18,6 +19,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 @Editable
 public abstract class Step implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String name;

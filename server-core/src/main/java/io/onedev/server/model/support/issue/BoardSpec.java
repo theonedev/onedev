@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,6 +49,7 @@ import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
 @Editable
 public class BoardSpec implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String NULL_COLUMN = StringChoiceProvider.SPECIAL_CHOICE_PREFIX + "Null";

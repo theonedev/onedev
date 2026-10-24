@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.Optional;
 
 import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
@@ -20,6 +21,7 @@ import static java.util.Optional.ofNullable;
 
 public class FileQueryOption implements QueryOption {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String term;

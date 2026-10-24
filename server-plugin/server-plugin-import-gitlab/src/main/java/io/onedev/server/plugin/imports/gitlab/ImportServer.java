@@ -2,6 +2,7 @@ package io.onedev.server.plugin.imports.gitlab;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -90,6 +91,7 @@ import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
 @ClassValidating
 public class ImportServer implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImportServer.class);

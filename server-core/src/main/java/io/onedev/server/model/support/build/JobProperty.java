@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.build;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable
 public class JobProperty implements NamedElement {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String name;

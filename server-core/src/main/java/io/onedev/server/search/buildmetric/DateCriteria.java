@@ -1,5 +1,6 @@
 package io.onedev.server.search.buildmetric;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -13,6 +14,7 @@ import io.onedev.server.util.QueryUtils;
 
 public class DateCriteria extends BuildMetricCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final int operator;

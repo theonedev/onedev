@@ -1,6 +1,7 @@
 package io.onedev.server.model.support.issue.field;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +60,7 @@ public class FieldUtils {
 	private static final MetaDataKey<Class<? extends Serializable>> FIELD_BEAN_CLASS_KEY =
 			new MetaDataKey<>() {
 
+				@Serial
 				private static final long serialVersionUID = 1L;
 
 			};
@@ -66,6 +68,7 @@ public class FieldUtils {
 	private static final MetaDataKey<Class<? extends Serializable>> FIELD_BEAN_CLASS_WITH_DEFAULT_VALUE_KEY =
 			new MetaDataKey<>() {
 
+				@Serial
 				private static final long serialVersionUID = 1L;
 
 			};
@@ -427,6 +430,7 @@ public class FieldUtils {
 	public static HierarchicalContext newHierarchicalContext(Project project, BeanDescriptor beanDescriptor, Serializable fieldBean) {
 		return new HierarchicalContext(newContextHierarchical(project, beanDescriptor, fieldBean)) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

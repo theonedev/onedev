@@ -1,5 +1,7 @@
 package io.onedev.server.buildspec.job.action.condition;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -12,6 +14,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class AlwaysCriteria extends Criteria<Build> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

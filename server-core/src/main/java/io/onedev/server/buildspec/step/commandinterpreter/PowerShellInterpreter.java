@@ -1,5 +1,7 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
+import java.io.Serial;
+
 import io.onedev.k8shelper.InterpreterFacade;
 import io.onedev.k8shelper.PowerShellInterpreterFacade;
 import io.onedev.server.annotation.Code;
@@ -11,6 +13,7 @@ import jakarta.validation.constraints.NotEmpty;
 @Editable(order=300, name="PowerShell")
 public class PowerShellInterpreter extends Interpreter {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String powershell = "powershell.exe";

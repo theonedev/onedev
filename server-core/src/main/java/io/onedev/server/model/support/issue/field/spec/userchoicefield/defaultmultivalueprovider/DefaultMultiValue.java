@@ -12,6 +12,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 @Editable(name="Value")
 public class DefaultMultiValue implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<String> value;

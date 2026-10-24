@@ -4,6 +4,7 @@ import static io.onedev.commons.codeassist.FenceAware.unfence;
 import static io.onedev.commons.utils.StringUtils.unescape;
 import static org.apache.commons.lang3.StringUtils.join;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
 
 public class CommitQuery implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<CommitCriteria> criterias;

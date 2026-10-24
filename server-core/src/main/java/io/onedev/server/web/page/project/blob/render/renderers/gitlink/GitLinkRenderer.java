@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.gitlink;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -8,6 +10,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 public class GitLinkRenderer implements BlobRenderer {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.builds.detail.report;
 
+import java.io.Serial;
+
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
@@ -15,6 +17,7 @@ import org.jspecify.annotations.Nullable;
 
 public class BuildReportTab extends BuildTab {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Class<? extends BuildMetricStatsPage<?>> statsPageClass;
@@ -53,6 +56,7 @@ public class BuildReportTab extends BuildTab {
 	public Component render(String componentId) {
 		return new PageTabHead(componentId, this) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

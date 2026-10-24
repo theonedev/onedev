@@ -6,6 +6,7 @@ import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -639,6 +640,7 @@ public class UserResource {
 
 	public static class UserData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		@Api(order=5, description="ID of the user")
@@ -723,6 +725,7 @@ public class UserResource {
 	@EntityCreate(User.class)
 	public static class UserCreateData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		@Api(order=50, exampleProvider = "getTypeExample", description="Specify account type")
@@ -822,6 +825,7 @@ public class UserResource {
 
 	public static class UserUpdateData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		@Api(order=100, description="Login name of the user")
@@ -873,6 +877,7 @@ public class UserResource {
 	
 	public static class QueriesAndWatches implements Serializable {
 		
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		ArrayList<NamedProjectQuery> projectQueries;

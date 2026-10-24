@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Collection;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -63,6 +64,7 @@ public class CommitQueryTest extends AbstractGitTest {
 		
 		Project project = new Project() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -92,6 +94,7 @@ public class CommitQueryTest extends AbstractGitTest {
 		ObjectId oldCommitId = git.getRepository().resolve("main~1");
 		RefUpdated event = new RefUpdated(project, "refs/heads/main", oldCommitId, newCommitId) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

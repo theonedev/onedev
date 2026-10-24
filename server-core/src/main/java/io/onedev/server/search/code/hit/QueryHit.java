@@ -1,5 +1,6 @@
 package io.onedev.server.search.code.hit;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.apache.wicket.Component;
@@ -10,6 +11,7 @@ import io.onedev.commons.utils.PlanarRange;
 
 public abstract class QueryHit implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String filePath;

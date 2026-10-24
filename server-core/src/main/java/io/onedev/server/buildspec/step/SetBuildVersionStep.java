@@ -14,6 +14,7 @@ import io.onedev.server.persistence.TransactionService;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 @Editable(order=260, name="Set Build Version")
 public class SetBuildVersionStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String buildVersion;

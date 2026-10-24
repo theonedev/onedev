@@ -1,10 +1,12 @@
 package io.onedev.server.plugin.pack.helm;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
 
 public class HelmData implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     
     private final Map<String, Object> metadata;

@@ -4,6 +4,7 @@ import static io.onedev.agent.job.LogRequest.toZoneId;
 import static io.onedev.server.util.DateUtils.getZoneId;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,7 @@ import io.onedev.server.security.SecurityUtils;
 
 public class AgentLogResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_AGENT = "agent";

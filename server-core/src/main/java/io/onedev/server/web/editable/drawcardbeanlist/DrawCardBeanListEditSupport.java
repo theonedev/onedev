@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.drawcardbeanlist;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
@@ -23,6 +24,7 @@ import io.onedev.server.web.editable.PropertyViewer;
  */
 public abstract class DrawCardBeanListEditSupport<T extends Serializable> implements EditSupport {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -32,12 +34,14 @@ public abstract class DrawCardBeanListEditSupport<T extends Serializable> implem
 			if (elementClass == getElementClass()) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
 					public PropertyViewer renderForView(String componentId, IModel<List<Serializable>> model) {
 						return new PropertyViewer(componentId, descriptor) {
 
+							@Serial
 							private static final long serialVersionUID = 1L;
 
 							@Override
@@ -47,6 +51,7 @@ public abstract class DrawCardBeanListEditSupport<T extends Serializable> implem
 								} else {
 									return new EmptyValueLabel(id) {
 
+										@Serial
 										private static final long serialVersionUID = 1L;
 
 										@Override

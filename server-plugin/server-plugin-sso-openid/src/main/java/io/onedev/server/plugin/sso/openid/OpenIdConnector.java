@@ -3,6 +3,7 @@ package io.onedev.server.plugin.sso.openid;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ import net.minidev.json.JSONObject;
 @Editable(name="OpenID", order=10000, description="Refer to this <a href='${docsite}/tutorials/security/sso-with-okta' target='_blank'>tutorial</a> for an example setup")
 public class OpenIdConnector extends SsoConnector {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(OpenIdConnector.class);

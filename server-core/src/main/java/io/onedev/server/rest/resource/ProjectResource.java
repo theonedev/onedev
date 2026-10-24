@@ -4,6 +4,7 @@ import static io.onedev.server.util.DateUtils.parseISO8601Date;
 import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.time.ZoneId.systemDefault;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -418,6 +419,7 @@ public class ProjectResource {
 	
 	public static class CloneUrl implements Serializable {
 		
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String http;
@@ -445,6 +447,7 @@ public class ProjectResource {
 	@EntityCreate(Project.class)
 	public static class ProjectData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		@Api(order=50)
@@ -681,6 +684,7 @@ public class ProjectResource {
 	
 	public static class ProjectSetting implements Serializable {
 		
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private ArrayList<BranchProtection> branchProtections = new ArrayList<>();

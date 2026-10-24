@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.buildspec.job.postbuildaction;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
 class PostBuildActionListViewPanel extends DrawCardBeanListViewPanel<PostBuildAction> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	PostBuildActionListViewPanel(String id, List<Serializable> elements) {
@@ -38,6 +40,7 @@ class PostBuildActionListViewPanel extends DrawCardBeanListViewPanel<PostBuildAc
 
 		columns.add(new AbstractColumn<PostBuildAction, Void>(Model.of(_T("Description"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -49,6 +52,7 @@ class PostBuildActionListViewPanel extends DrawCardBeanListViewPanel<PostBuildAc
 
 		columns.add(new AbstractColumn<PostBuildAction, Void>(Model.of(_T("Condition"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

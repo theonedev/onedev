@@ -12,6 +12,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @Editable(name="Use value of specified parameter/secret")
 public class PassthroughValue implements ValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String DISPLAY_NAME = "Use value of specified parameter";

@@ -1,5 +1,7 @@
 package io.onedev.server.search.code.hit;
 
+import java.io.Serial;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
@@ -12,6 +14,7 @@ import io.onedev.commons.utils.PlanarRange;
 
 public class TextHit extends QueryHit {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String line;

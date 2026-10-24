@@ -5,10 +5,12 @@ import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import java.io.Serial;
 import java.util.List;
 
 public class CommitterCriteria extends PersonCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public CommitterCriteria(List<String> values) {

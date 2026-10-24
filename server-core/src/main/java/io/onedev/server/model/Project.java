@@ -13,6 +13,7 @@ import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.File;
+import java.io.Serial;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -168,6 +169,7 @@ import io.onedev.server.xodus.CommitInfoService;
 @Editable
 public class Project extends AbstractEntity implements LabelSupport<ProjectLabel> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final Long DEFAULT_ID = -1L;

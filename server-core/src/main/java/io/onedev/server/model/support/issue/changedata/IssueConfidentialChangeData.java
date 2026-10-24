@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import io.onedev.server.notification.ActivityDetail;
 
 public class IssueConfidentialChangeData extends IssueChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final boolean oldConfidential;

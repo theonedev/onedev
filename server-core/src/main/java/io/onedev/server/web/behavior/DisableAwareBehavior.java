@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -7,6 +9,7 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 
 public class DisableAwareBehavior extends Behavior {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.git;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public interface BlobIdentFilter extends Serializable {
@@ -8,6 +9,7 @@ public interface BlobIdentFilter extends Serializable {
 	
 	public static final BlobIdentFilter ALL = new BlobIdentFilter() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -19,6 +21,7 @@ public interface BlobIdentFilter extends Serializable {
 	
 	public static final BlobIdentFilter TREE = new BlobIdentFilter() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override

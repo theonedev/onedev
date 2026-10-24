@@ -8,12 +8,14 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.*;
 
 import static java.util.Comparator.comparingInt;
 
 public class BlobTarget extends ProblemTarget {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final PlanarRange location;
@@ -53,6 +55,7 @@ public class BlobTarget extends ProblemTarget {
 	
 	public static class GroupKey extends ProblemTarget.GroupKey {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		public GroupKey(String name) {

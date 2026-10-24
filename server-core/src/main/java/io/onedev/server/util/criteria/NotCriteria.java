@@ -1,5 +1,6 @@
 package io.onedev.server.util.criteria;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 
 public class NotCriteria<T> extends Criteria<T> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	protected final Criteria<T> criteria;

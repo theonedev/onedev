@@ -6,6 +6,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.File;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -126,6 +127,7 @@ import jakarta.persistence.criteria.Root;
 public class DefaultWorkspaceService extends BaseEntityService<Workspace> 
 		implements WorkspaceService, Runnable, SchedulableTask, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWorkspaceService.class);

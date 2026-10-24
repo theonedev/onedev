@@ -19,6 +19,7 @@ import jakarta.mail.Message;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.function.Consumer;
 @Editable(name="Microsoft 365", order=200)
 public class Office365Connector implements MailConnector {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String clientId;

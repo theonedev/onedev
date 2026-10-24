@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.field.spec;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import io.onedev.server.buildspecmodel.inputspec.datetimeinput.defaultvalueprovi
 @Editable(order=600, name=FieldSpec.DATE_TIME)
 public class DateTimeField extends FieldSpec {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private DefaultValueProvider defaultValueProvider;

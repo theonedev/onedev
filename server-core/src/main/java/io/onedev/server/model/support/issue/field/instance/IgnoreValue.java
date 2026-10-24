@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.field.instance;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(name="Ignore this field")
 public class IgnoreValue implements ValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String DISPLAY_NAME = "Ignore this field";

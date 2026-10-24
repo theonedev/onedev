@@ -8,15 +8,18 @@ import io.onedev.server.web.util.ImportStep;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 public class YouTrackIssueImporter implements IssueImporter {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final ImportStep<ImportServer> serverStep = new ImportStep<ImportServer>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -33,6 +36,7 @@ public class YouTrackIssueImporter implements IssueImporter {
 	
 	private final ImportStep<ImportProject> projectStep = new ImportStep<ImportProject>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -51,6 +55,7 @@ public class YouTrackIssueImporter implements IssueImporter {
 	
 	private final ImportStep<ImportOption> optionStep = new ImportStep<ImportOption>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override

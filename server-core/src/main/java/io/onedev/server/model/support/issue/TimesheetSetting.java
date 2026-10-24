@@ -11,6 +11,7 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 
 import org.jspecify.annotations.Nullable;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import static io.onedev.server.model.Issue.NAME_PROJECT;
 @Editable
 public class TimesheetSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public enum DateRangeType {MONTH, WEEK};

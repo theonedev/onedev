@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration.sso;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +14,7 @@ import org.jspecify.annotations.Nullable;
 @Editable
 public abstract class SsoConnector implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public abstract String getButtonImageUrl();

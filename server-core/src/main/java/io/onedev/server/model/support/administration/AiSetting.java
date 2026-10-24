@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.Min;
@@ -17,6 +18,7 @@ import io.onedev.server.model.support.JevSetting;
 @Editable
 public class AiSetting implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static final String DEFAULT_CODE_EXPLANATION_PROMPT = "Help me understand highlighted text.";

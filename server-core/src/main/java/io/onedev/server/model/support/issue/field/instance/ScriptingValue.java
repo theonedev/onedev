@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.field.instance;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import io.onedev.server.annotation.ScriptChoice;
 @Editable
 public class ScriptingValue implements ValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String DISPLAY_NAME = "Evaluate script to get value";

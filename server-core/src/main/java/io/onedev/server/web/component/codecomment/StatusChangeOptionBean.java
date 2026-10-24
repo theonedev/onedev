@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.codecomment;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.annotation.Editable;
@@ -9,6 +10,7 @@ import io.onedev.server.annotation.OmitName;
 @Editable(name="Confirm your action")
 public class StatusChangeOptionBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String note;

@@ -16,6 +16,7 @@
  */
 package org.apache.wicket.extensions.ajax.markup.html.autocomplete;
 
+import java.io.Serial;
 import java.util.Iterator;
 
 import org.apache.wicket.Application;
@@ -46,6 +47,7 @@ import io.onedev.server.util.HierarchicalContext;
  */
 public abstract class AutoCompleteBehavior<T> extends AbstractAutoCompleteBehavior
 {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final IAutoCompleteRenderer<T> renderer;

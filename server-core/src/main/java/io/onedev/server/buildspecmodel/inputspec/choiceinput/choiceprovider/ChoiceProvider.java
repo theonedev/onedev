@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public abstract class ChoiceProvider implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public abstract Map<String, String> getChoices(boolean allPossible);

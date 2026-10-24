@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import io.onedev.server.notification.ActivityDetail;
 
 public class IssueStateChangeData extends IssueFieldChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String oldState;

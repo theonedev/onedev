@@ -2,6 +2,7 @@ package io.onedev.server.web.component.job;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
 
 public class JobMultiChoice extends Select2MultiChoice<String> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public JobMultiChoice(String id, IModel<Collection<String>> model, IModel<List<String>> choicesModel, boolean tagsMode) {

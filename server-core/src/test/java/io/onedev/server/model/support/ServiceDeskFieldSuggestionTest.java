@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -40,6 +41,7 @@ class ServiceDeskFieldSuggestionTest {
 
 	@Editable
 	public static class Fields implements Serializable {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String type;

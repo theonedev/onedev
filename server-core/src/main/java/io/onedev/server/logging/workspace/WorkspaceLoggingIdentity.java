@@ -1,6 +1,7 @@
 package io.onedev.server.logging.workspace;
 
 import java.io.File;
+import java.io.Serial;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.logging.LoggingIdentity;
@@ -9,6 +10,7 @@ import io.onedev.server.workspace.WorkspaceService;
 
 class WorkspaceLoggingIdentity implements LoggingIdentity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long projectId;

@@ -6,6 +6,7 @@ import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.util.List;
 
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
@@ -14,6 +15,7 @@ import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 		"This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor")
 public class PullImageStep extends CraneStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String srcImage;

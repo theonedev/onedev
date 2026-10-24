@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.branches;
 
+import java.io.Serial;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.RevisionChoice;
@@ -10,6 +12,7 @@ import jakarta.validation.constraints.NotEmpty;
 @Editable
 public class CreateBranchBeanWithRevision extends CreateBranchBean {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String revision;

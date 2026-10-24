@@ -1,5 +1,6 @@
 package io.onedev.server.web.asset.jqueryui;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 public class JQueryUIResourceReference extends JavaScriptResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public JQueryUIResourceReference() {

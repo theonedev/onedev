@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import io.onedev.server.annotation.Interpolative;
 @Editable
 public class EnvVar implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String name;

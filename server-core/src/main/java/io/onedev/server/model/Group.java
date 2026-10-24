@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import io.onedev.server.util.facade.UserFacade;
 @Editable
 public class Group extends AbstractEntity implements BasePermission {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_ADMINISTRATOR = "administrator";

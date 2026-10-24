@@ -2,6 +2,7 @@ package io.onedev.server.web.page.admin.usermanagement;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.List;
@@ -25,6 +26,7 @@ import io.onedev.server.validation.Validatable;
 @ClassValidating
 public class NewInvitationBean implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String emailAddresses;

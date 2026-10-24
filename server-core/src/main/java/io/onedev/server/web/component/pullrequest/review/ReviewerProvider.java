@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.pullrequest.review;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 
 public abstract class ReviewerProvider extends AbstractUserChoiceProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -38,6 +40,7 @@ public abstract class ReviewerProvider extends AbstractUserChoiceProvider {
 		
 		new ResponseFiller<User>(response).fill(new Similarities<User>(users) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

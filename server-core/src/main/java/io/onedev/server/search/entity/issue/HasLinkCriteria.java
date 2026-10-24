@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class HasLinkCriteria extends Criteria<Issue> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String linkName;

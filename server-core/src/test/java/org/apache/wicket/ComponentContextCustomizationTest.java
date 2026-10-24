@@ -2,6 +2,8 @@ package org.apache.wicket;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.Serial;
+
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
@@ -41,6 +43,7 @@ public class ComponentContextCustomizationTest {
 	@Test
 	public void initializationResolvesTheCurrentComponentAndItsParents() {
 		var page = new WebPage() {
+			@Serial
 			private static final long serialVersionUID = 1L;
 		};
 		var initialized = new boolean[1];
@@ -69,6 +72,7 @@ public class ComponentContextCustomizationTest {
 			}
 		};
 		new WebPage() {
+			@Serial
 			private static final long serialVersionUID = 1L;
 		}.add(link);
 		assertSame(failure, assertThrows(WicketRuntimeException.class,

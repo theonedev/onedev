@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 		"command with specified arguments. This step can be executed by Docker or sandbox executors")
 public class RunImagetoolsStep extends Step {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String arguments;

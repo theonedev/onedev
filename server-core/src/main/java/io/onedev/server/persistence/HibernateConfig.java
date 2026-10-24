@@ -10,6 +10,7 @@ import static org.hibernate.cfg.AvailableSettings.JAKARTA_JDBC_USER;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Properties;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import org.hibernate.cfg.Environment;
 
 public class HibernateConfig extends Properties {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String ENV_PASS_FILE ="hibernate_connection_password_file";

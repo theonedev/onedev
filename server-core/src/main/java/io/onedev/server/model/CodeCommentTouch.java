@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
@@ -13,6 +15,7 @@ import static io.onedev.server.model.CodeCommentTouch.*;
 @Table(indexes={@Index(columnList="project_id"), @Index(columnList= PROP_COMMENT_ID)})
 public class CodeCommentTouch extends EntityTouch {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_PROJECT = "project";

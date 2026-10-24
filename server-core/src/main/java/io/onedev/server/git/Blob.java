@@ -2,6 +2,7 @@ package io.onedev.server.git;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +26,7 @@ import io.onedev.server.web.component.markdown.SuggestionSupport.Selection;
 
 public class Blob implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final int MAX_LOADED_BLOB_SIZE = 5*1024*1024;
@@ -163,6 +165,7 @@ public class Blob implements Serializable {
 	
 	public static class Text implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Charset charset;

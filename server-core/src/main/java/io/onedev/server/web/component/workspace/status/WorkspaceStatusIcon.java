@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.workspace.status;
 
+import java.io.Serial;
 import java.util.Collection;
 
 import org.apache.wicket.behavior.AttributeAppender;
@@ -17,6 +18,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 
 public class WorkspaceStatusIcon extends SpriteImage {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final IModel<Status> model;

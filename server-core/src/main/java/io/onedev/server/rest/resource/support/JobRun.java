@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import io.onedev.server.rest.annotation.Api;
 
 public abstract class JobRun implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Api(order=250) 

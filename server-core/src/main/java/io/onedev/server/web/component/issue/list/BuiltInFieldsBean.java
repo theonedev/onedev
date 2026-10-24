@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.list;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import io.onedev.server.annotation.IterationChoice;
 @Editable
 public class BuiltInFieldsBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String NAME_STATE = "State";

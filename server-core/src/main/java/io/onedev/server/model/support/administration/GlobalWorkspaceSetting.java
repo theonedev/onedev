@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
 @Editable
 public class GlobalWorkspaceSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<NamedWorkspaceQuery> namedQueries = new ArrayList<>();

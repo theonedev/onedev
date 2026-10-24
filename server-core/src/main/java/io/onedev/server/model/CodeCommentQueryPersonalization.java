@@ -8,6 +8,7 @@ import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
 
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.util.ArrayList;
 
 @Entity
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 )
 public class CodeCommentQueryPersonalization extends AbstractEntity implements QueryPersonalization<NamedCodeCommentQuery> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.LAZY)

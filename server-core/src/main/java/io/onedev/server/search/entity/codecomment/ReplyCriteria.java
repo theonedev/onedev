@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.codecomment;
 
 import static io.onedev.commons.utils.match.WildcardUtils.matchString;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class ReplyCriteria extends Criteria<CodeComment> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String value;

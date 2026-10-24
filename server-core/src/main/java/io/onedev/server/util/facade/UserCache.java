@@ -2,6 +2,7 @@ package io.onedev.server.util.facade;
 
 import static java.util.stream.Collectors.toSet;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import io.onedev.server.util.Similarities;
 
 public class UserCache extends MapProxy<Long, UserFacade> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	// Keep only lookup hints: the replicated map can change on another cluster node.

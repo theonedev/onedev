@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.user.choice;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import io.onedev.server.web.component.select2.ChoiceProvider;
 
 public abstract class AbstractUserChoiceProvider extends ChoiceProvider<User> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Override

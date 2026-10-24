@@ -5,6 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.net.URLEncoder;
 
 import jakarta.ws.rs.client.Client;
@@ -33,6 +34,7 @@ import io.onedev.server.util.IOUtils;
 
 public class PatchResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_PROJECT = "project";

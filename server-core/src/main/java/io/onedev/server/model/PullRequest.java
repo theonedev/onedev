@@ -31,6 +31,7 @@ import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.lang.ThreadLocal.withInitial;
 
+import java.io.Serial;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -128,6 +129,7 @@ import io.onedev.server.xodus.VisitInfoService;
 public class PullRequest extends ProjectBelonging 
 		implements AttachmentStorageSupport, LabelSupport<PullRequestLabel> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 		
 	public static final int MAX_TITLE_LEN = 255;

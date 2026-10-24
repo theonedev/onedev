@@ -1,10 +1,13 @@
 package io.onedev.server.buildspecmodel.inputspec.booleaninput.defaultvalueprovider;
 
+import java.io.Serial;
+
 import io.onedev.server.annotation.Editable;
 
 @Editable(order=200, name="false")
 public class FalseDefaultValue implements DefaultValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

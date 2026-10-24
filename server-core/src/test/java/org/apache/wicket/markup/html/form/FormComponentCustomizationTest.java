@@ -2,6 +2,8 @@ package org.apache.wicket.markup.html.form;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.Serial;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
@@ -45,6 +47,7 @@ public class FormComponentCustomizationTest {
 	@Test
 	public void errorsOnOrdinaryChildrenInvalidateCompositeEditor() {
 		var editor = new FormComponentPanel<String>("editor") {
+			@Serial
 			private static final long serialVersionUID = 1L;
 		};
 		var child = new Label("child");

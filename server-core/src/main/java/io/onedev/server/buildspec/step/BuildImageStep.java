@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 		"step instead")
 public class BuildImageStep extends Step {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String buildPath;
@@ -144,6 +146,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=100, name="Push to container registry")
 	public static class RegistryOutput implements Output {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String tags;
@@ -175,6 +178,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=200, name="Export as OCI layout")
 	public static class OCIOutput implements Output {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private String destPath;

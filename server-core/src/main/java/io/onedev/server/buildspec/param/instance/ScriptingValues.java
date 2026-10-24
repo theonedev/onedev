@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.instance;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import io.onedev.server.annotation.ScriptChoice;
 @Editable(name="Evaluate script to get values or secrets")
 public class ScriptingValues implements ValuesProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String DISPLAY_NAME = "Evaluate script to get values";

@@ -2,6 +2,7 @@ package io.onedev.server.plugin.imports.jiracloud;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,10 +17,12 @@ import io.onedev.server.web.util.ImportStep;
 
 public class JiraProjectImporter extends ProjectImporter {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final ImportStep<ImportServer> serverStep = new ImportStep<ImportServer>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -36,6 +39,7 @@ public class JiraProjectImporter extends ProjectImporter {
 	
 	private final ImportStep<ImportProjects> projectsStep = new ImportStep<ImportProjects>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -58,6 +62,7 @@ public class JiraProjectImporter extends ProjectImporter {
 	
 	private final ImportStep<ImportOption> optionStep = new ImportStep<ImportOption>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override

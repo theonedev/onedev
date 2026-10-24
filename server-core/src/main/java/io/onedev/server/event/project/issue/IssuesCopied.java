@@ -7,12 +7,14 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 
+import java.io.Serial;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class IssuesCopied extends ProjectEvent {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long sourceProjectId;

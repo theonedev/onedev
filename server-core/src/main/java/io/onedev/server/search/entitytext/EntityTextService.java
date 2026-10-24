@@ -11,6 +11,7 @@ import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -92,6 +93,7 @@ import io.onedev.server.util.lucene.LuceneUtils;
 
 public abstract class EntityTextService<T extends ProjectBelonging> implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(EntityTextService.class);

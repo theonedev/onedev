@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -219,6 +220,7 @@ public class CodeCommentResource {
 				var newBlobIdent = GitUtils.getNewBlobIdent(entry, newCommitId.name());
 				var blobChange = new BlobChange(changeType, oldBlobIdent, newBlobIdent, context.getWhitespaceOption()) {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -306,6 +308,7 @@ public class CodeCommentResource {
 	@EntityCreate(CodeComment.class)
 	public static class CodeCommentCreateData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private Long projectId;

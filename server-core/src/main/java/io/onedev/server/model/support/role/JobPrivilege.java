@@ -10,6 +10,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 
 import org.jspecify.annotations.Nullable;
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.List;
 @Editable
 public class JobPrivilege implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String jobNames;

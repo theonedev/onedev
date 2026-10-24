@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.workspacespec.configfile;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.util.List;
 
 import io.onedev.server.model.support.workspace.spec.ConfigFile;
@@ -9,6 +10,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanItemEditPanel;
 
 class ConfigFileEditPanel extends DrawCardBeanItemEditPanel<ConfigFile> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ConfigFileEditPanel(String id, List<ConfigFile> configFiles, int configFileIndex, EditCallback callback) {

@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.job.action;
 
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import io.onedev.server.web.editable.BeanEditor;
 @Editable(name="Run job", order=100)
 public class RunJobAction extends PostBuildAction {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String jobName;

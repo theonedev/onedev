@@ -4,6 +4,7 @@ import io.onedev.server.model.support.TimeGroups;
 
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.util.Date;
 
 import static io.onedev.server.model.IssueStateHistory.PROP_DATE;
@@ -18,6 +19,7 @@ import static io.onedev.server.model.support.TimeGroups.*;
 })
 public class IssueStateHistory extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_ISSUE = "issue";

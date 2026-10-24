@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.workspace.spec;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable
 public class UserData implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String key;

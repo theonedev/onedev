@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.imports.gitlab;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import io.onedev.server.web.editable.BeanEditor;
 @ClassValidating
 public class ImportProjects extends ImportGroup implements Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String parentOneDevProject;

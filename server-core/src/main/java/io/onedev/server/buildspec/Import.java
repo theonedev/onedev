@@ -2,6 +2,7 @@ package io.onedev.server.buildspec;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import io.onedev.server.web.util.WicketUtils;
 @ClassValidating
 public class Import implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(Import.class);

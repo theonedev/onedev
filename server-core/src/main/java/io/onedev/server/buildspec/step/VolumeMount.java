@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.step;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import io.onedev.server.buildspec.BuildSpec;
 @Editable
 public class VolumeMount implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String source;

@@ -2,6 +2,7 @@ package io.onedev.server.model.support.issue.transitionspec;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.text.MessageFormat;
 
 import io.onedev.server.annotation.Editable;
@@ -9,6 +10,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=200, name="Pull request is opened or updated")
 public class PullRequestOpenedOrUpdatedSpec extends PullRequestSpec {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

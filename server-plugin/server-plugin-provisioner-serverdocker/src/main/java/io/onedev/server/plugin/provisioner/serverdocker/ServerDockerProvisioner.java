@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -85,6 +86,7 @@ import io.onedev.server.workspace.WorkspaceRuntime;
 			on a dedicated agent host, especially for untrusted workspaces.""")
 public class ServerDockerProvisioner extends WorkspaceProvisioner implements DockerAware, Testable<ServerDockerProvisioner.TestData> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final int ORDER = 50;
@@ -273,6 +275,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 	@Editable(name="Specify a Docker Image to Test Against")
 	public static class TestData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String dockerImage;

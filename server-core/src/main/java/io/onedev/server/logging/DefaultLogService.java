@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -332,6 +333,7 @@ public class DefaultLogService implements LogService, Serializable {
 	public List<LogEntry> readLogEntries(LoggingSupport loggingSupport, int from, int count) {
 		return loggingSupport.runOnActiveServer(new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -368,6 +370,7 @@ public class DefaultLogService implements LogService, Serializable {
 	public LogSnippet readLogSnippetReversely(LoggingSupport loggingSupport, int count) {
 		return loggingSupport.runOnActiveServer(new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

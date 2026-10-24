@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.rest.annotation.Api;
@@ -7,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public class CompareContextData implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Api(description="Full old commit hash, or all zeros for an empty repository state")

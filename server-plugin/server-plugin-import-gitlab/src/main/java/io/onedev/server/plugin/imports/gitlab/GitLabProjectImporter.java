@@ -2,6 +2,7 @@ package io.onedev.server.plugin.imports.gitlab;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,10 +15,12 @@ import io.onedev.server.web.util.ImportStep;
 
 public class GitLabProjectImporter extends ProjectImporter {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final ImportStep<ImportServer> serverStep = new ImportStep<ImportServer>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -34,6 +37,7 @@ public class GitLabProjectImporter extends ProjectImporter {
 	
 	private final ImportStep<ImportProjects> projectsStep = new ImportStep<ImportProjects>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -56,6 +60,7 @@ public class GitLabProjectImporter extends ProjectImporter {
 	
 	private final ImportStep<ProjectImportOption> optionStep = new ImportStep<ProjectImportOption>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override

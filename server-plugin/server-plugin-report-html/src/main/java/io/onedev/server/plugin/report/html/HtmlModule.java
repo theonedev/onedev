@@ -19,6 +19,7 @@ import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,6 +94,7 @@ public class HtmlModule extends AbstractPluginModule {
 	
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private final Long projectId;

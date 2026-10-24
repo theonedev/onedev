@@ -3,6 +3,8 @@ package io.onedev.server.model;
 import static io.onedev.server.model.BuildParam.PROP_NAME;
 import static io.onedev.server.model.BuildParam.PROP_VALUE;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,6 +27,7 @@ import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
 		uniqueConstraints={@UniqueConstraint(columnNames={"build_id", PROP_NAME, PROP_VALUE})})
 public class BuildParam extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_BUILD = "build";

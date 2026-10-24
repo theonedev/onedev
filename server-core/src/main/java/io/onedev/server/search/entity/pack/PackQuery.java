@@ -19,6 +19,7 @@ import static io.onedev.server.util.QueryUtils.getLabelSpec;
 import static io.onedev.server.util.QueryUtils.getUser;
 import static io.onedev.server.util.QueryUtils.getValue;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +55,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class PackQuery extends EntityQuery<Pack> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PackQuery(@Nullable Criteria<Pack> criteria, List<EntitySort> sorts) {

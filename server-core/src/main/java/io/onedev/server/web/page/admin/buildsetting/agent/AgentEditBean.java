@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import io.onedev.server.annotation.Editable;
 @ClassValidating
 public class AgentEditBean implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<AgentAttribute> attributes = new ArrayList<>();

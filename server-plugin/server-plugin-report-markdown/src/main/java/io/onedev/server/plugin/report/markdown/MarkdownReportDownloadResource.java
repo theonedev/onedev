@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 
 public class MarkdownReportDownloadResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_PROJECT = "project";

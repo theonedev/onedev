@@ -1,11 +1,14 @@
 package io.onedev.server.exception.handler;
 
+import java.io.Serial;
+
 import org.eclipse.jetty.io.EofException;
 
 import io.onedev.server.exception.HttpResponse;
 
 public class EofExceptionHandler extends AbstractExceptionHandler<EofException> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import io.onedev.server.notification.ActivityDetail;
 
 public class PullRequestMergeStrategyChangeData extends PullRequestChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final MergeStrategy oldStrategy;

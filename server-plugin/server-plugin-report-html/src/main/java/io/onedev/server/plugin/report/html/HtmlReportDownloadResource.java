@@ -15,6 +15,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
+import java.io.Serial;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,6 +26,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HtmlReportDownloadResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_PROJECT = "project";

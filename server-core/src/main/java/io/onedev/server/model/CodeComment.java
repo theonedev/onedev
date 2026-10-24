@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import static io.onedev.server.model.CodeComment.PROP_CREATE_DATE;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -51,6 +52,7 @@ import io.onedev.server.xodus.VisitInfoService;
 		@Index(columnList=PROP_CREATE_DATE), @Index(columnList= LastActivity.COLUMN_DATE)})
 public class CodeComment extends ProjectBelonging implements AttachmentStorageSupport {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final int MAX_CONTENT_LEN = 100000;

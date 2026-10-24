@@ -1,10 +1,13 @@
 package io.onedev.server.plugin.imports.bitbucketcloud;
 
+import java.io.Serial;
+
 import io.onedev.server.annotation.Editable;
 
 @Editable
 public class ChildrenImportRepositories extends ImportRepositories {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

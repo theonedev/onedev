@@ -1,5 +1,7 @@
 package io.onedev.server.model.support;
 
+import java.io.Serial;
+
 import jakarta.persistence.*;
 
 import io.onedev.server.model.AbstractEntity;
@@ -8,6 +10,7 @@ import io.onedev.server.model.User;
 @MappedSuperclass
 public abstract class EntityReaction extends AbstractEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static final String PROP_USER = "user";

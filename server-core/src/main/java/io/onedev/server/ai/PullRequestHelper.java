@@ -1,5 +1,6 @@
 package io.onedev.server.ai;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -173,6 +174,7 @@ public class PullRequestHelper {
         var newDiffBlobIdent = GitUtils.getNewBlobIdent(matchingEntry, newCommitId.name());
         var blobChange = new BlobChange(changeType, oldDiffBlobIdent, newDiffBlobIdent, WhitespaceOption.IGNORE_TRAILING) {
 
+            @Serial
             private static final long serialVersionUID = 1L;
 
             @Override

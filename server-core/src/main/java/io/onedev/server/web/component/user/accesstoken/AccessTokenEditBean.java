@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.user.accesstoken;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +24,7 @@ import io.onedev.server.security.SecurityUtils;
 @Editable
 public class AccessTokenEditBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String name;

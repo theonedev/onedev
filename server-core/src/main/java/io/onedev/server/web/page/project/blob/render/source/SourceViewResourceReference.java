@@ -1,6 +1,7 @@
 
 package	io.onedev.server.web.page.project.blob.render.source;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -21,6 +22,7 @@ import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class SourceViewResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public SourceViewResourceReference() {

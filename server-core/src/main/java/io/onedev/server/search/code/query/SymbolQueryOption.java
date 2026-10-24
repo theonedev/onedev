@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 
 public class SymbolQueryOption implements QueryOption {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String term;
@@ -146,6 +148,7 @@ public class SymbolQueryOption implements QueryOption {
 
 	public static class Match implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Symbol symbol;

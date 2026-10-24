@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.svg;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -11,6 +13,7 @@ import org.apache.wicket.markup.resolver.IComponentResolver;
 
 public class SpriteImageResolver implements IComponentResolver {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String TAG_NAME = "svg";

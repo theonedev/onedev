@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -60,6 +61,7 @@ import io.onedev.server.web.util.TextUtils;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Workspace extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static ThreadLocal<Stack<Workspace>> stack = ThreadLocal.withInitial(Stack::new);

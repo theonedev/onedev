@@ -1,5 +1,6 @@
 package io.onedev.server.web.component;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +12,7 @@ import org.apache.wicket.Component;
 /** A repeating view whose children can be reordered without detaching their feedback panels. */
 public class RepeatingView extends org.apache.wicket.markup.repeater.RepeatingView {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private List<String> childOrder = List.of();

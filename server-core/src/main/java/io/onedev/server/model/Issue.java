@@ -24,6 +24,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,6 +130,7 @@ import io.onedev.server.xodus.VisitInfoService;
 @Editable
 public class Issue extends ProjectBelonging implements AttachmentStorageSupport {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final int MAX_TITLE_LEN = 255;

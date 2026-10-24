@@ -2,6 +2,7 @@ package io.onedev.server.plugin.executor.remoteshell;
 
 import static io.onedev.agent.WebsocketUtils.call;
 
+import java.io.Serial;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -37,6 +38,7 @@ import io.onedev.server.terminal.Shell;
 		+ "This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a>")
 public class RemoteShellExecutor extends ServerShellExecutor {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	static final int ORDER = 600;
@@ -72,6 +74,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
 		AgentCallable<Boolean> runnable = (agentId) -> getJobService().runJob(jobContext, new JobRunnable() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

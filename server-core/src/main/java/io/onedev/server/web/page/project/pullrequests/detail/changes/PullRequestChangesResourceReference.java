@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.pullrequests.detail.changes;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -10,6 +11,7 @@ import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class PullRequestChangesResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PullRequestChangesResourceReference() {

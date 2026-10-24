@@ -1,5 +1,6 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import io.onedev.server.util.MapProxy;
 
 public class RoleCache extends MapProxy<Long, RoleFacade> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public RoleCache(Map<Long, RoleFacade> delegate) {

@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.layout;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 
 public class SidebarMenu implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Header menuHeader;
@@ -71,6 +73,7 @@ public class SidebarMenu implements Serializable {
 	
 	public static class Header implements Serializable {
 		
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final String imageUrl;

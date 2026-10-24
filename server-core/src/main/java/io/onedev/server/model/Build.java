@@ -22,6 +22,7 @@ import static io.onedev.server.model.support.TimeGroups.PROP_WEEK;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
 import java.io.File;
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
@@ -129,6 +130,7 @@ import io.onedev.server.web.util.TextUtils;
 public class Build extends ProjectBelonging 
 		implements AttachmentStorageSupport, LabelSupport<BuildLabel> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String ARTIFACTS_DIR = "artifacts";

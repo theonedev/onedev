@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -12,6 +13,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=100, name="All groups")
 public class AllGroups implements ChoiceProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

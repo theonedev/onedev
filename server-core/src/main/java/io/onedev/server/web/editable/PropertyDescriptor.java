@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +30,7 @@ import io.onedev.server.util.ReflectionUtils;
 
 public class PropertyDescriptor implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Class<?> beanClass;

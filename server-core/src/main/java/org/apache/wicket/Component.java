@@ -20,6 +20,7 @@ package org.apache.wicket;
 import io.onedev.server.util.ComponentHierarchical;
 import io.onedev.server.util.HierarchicalContext;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -235,6 +236,7 @@ public abstract class Component
 	/** Log. */
 	private static final Logger log = LoggerFactory.getLogger(Component.class);
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -290,12 +292,14 @@ public abstract class Component
 	/** meta data for user specified markup id */
 	private static final MetaDataKey<String> MARKUP_ID_KEY = new MetaDataKey<>()
 	{
+		@Serial
 		private static final long serialVersionUID = 1L;
 	};
 
 	/** meta data for user specified markup id */
 	private static final MetaDataKey<FeedbackMessages> FEEDBACK_KEY = new MetaDataKey<>()
 	{
+		@Serial
 		private static final long serialVersionUID = 1L;
 	};
 
@@ -303,6 +307,7 @@ public abstract class Component
 	/** Basic model IModelComparator implementation for normal object models */
 	private static final IModelComparator defaultModelComparator = new IModelComparator()
 	{
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -411,6 +416,7 @@ public abstract class Component
 	 */
 	static final MetaDataKey<String> ADDED_AT_KEY = new MetaDataKey<>()
 	{
+		@Serial
 		private static final long serialVersionUID = 1L;
 	};
 
@@ -420,6 +426,7 @@ public abstract class Component
 	 */
 	static final MetaDataKey<String> CONSTRUCTED_AT_KEY = new MetaDataKey<>()
 	{
+		@Serial
 		private static final long serialVersionUID = 1L;
 	};
 

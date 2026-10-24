@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.workspacespec.cacheconfig;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import io.onedev.server.web.util.TextUtils;
 
 class CacheConfigListEditPanel extends DrawCardBeanListEditPanel<CacheConfig> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	CacheConfigListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
@@ -45,6 +47,7 @@ class CacheConfigListEditPanel extends DrawCardBeanListEditPanel<CacheConfig> {
 
 		columns.add(new AbstractColumn<CacheConfig, Void>(Model.of(_T("Cache Key"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -56,6 +59,7 @@ class CacheConfigListEditPanel extends DrawCardBeanListEditPanel<CacheConfig> {
 
 		columns.add(new AbstractColumn<CacheConfig, Void>(Model.of(_T("#Paths"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -67,6 +71,7 @@ class CacheConfigListEditPanel extends DrawCardBeanListEditPanel<CacheConfig> {
 
 		columns.add(new AbstractColumn<CacheConfig, Void>(Model.of(_T("Upload Strategy"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

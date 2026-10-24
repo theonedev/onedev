@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec.showcondition;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import io.onedev.server.annotation.OmitName;
 @Editable
 public class ShowCondition implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(ShowCondition.class);

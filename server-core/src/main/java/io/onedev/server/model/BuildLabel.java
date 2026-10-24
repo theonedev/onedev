@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
@@ -18,6 +20,7 @@ import io.onedev.server.rest.annotation.Api;
 )
 public class BuildLabel extends EntityLabel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static String PROP_BUILD = "build";

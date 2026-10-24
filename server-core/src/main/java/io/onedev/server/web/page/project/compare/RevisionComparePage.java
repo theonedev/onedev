@@ -5,6 +5,7 @@ import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.search.commit.Revision.Type.COMMIT;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -727,6 +728,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	
 	public static class State implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		public ProjectAndRevision leftSide;

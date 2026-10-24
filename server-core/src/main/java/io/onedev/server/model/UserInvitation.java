@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import java.io.Serial;
 import java.util.UUID;
 
 import static io.onedev.server.model.UserInvitation.PROP_EMAIL_ADDRESS;
@@ -20,6 +21,7 @@ import static io.onedev.server.model.UserInvitation.PROP_INVITATION_CODE;
 @Editable
 public class UserInvitation extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_EMAIL_ADDRESS = "emailAddress";

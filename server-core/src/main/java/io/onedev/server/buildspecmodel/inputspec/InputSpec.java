@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public abstract class InputSpec implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(InputSpec.class);
@@ -244,7 +246,7 @@ public abstract class InputSpec implements Serializable {
 		buffer.append("@Editable(name=").append("\"").append(description).append("\", translatable=false)\n");
 		buffer.append("class " + className + " implements java.io.Serializable {\n");
 		buffer.append("\n");
-		buffer.append("    private static final long serialVersionUID = 1L;\n");
+		buffer.append("    @Serial private static final long serialVersionUID = 1L;\n");
 		buffer.append("\n");
 		Map<String, Integer> indexes = new HashMap<>();
 		int index = 1;

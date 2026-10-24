@@ -1,5 +1,7 @@
 package io.onedev.server.git.exception;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -7,6 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 public class ObsoleteCommitException extends ExplicitException {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final ObjectId oldCommitId;

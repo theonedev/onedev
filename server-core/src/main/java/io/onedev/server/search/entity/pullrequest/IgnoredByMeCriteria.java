@@ -3,6 +3,8 @@ package io.onedev.server.search.entity.pullrequest;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IgnoredByMe;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.From;
@@ -18,6 +20,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class IgnoredByMeCriteria extends Criteria<PullRequest> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

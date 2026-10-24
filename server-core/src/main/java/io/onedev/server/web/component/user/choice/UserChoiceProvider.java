@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.user.choice;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
@@ -15,6 +16,7 @@ import io.onedev.server.web.component.select2.ResponseFiller;
 
 public class UserChoiceProvider extends AbstractUserChoiceProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final IModel<List<User>> choicesModel;
@@ -38,6 +40,7 @@ public class UserChoiceProvider extends AbstractUserChoiceProvider {
 		
 		List<User> similarities = new Similarities<User>(users) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

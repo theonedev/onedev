@@ -17,6 +17,7 @@ import io.onedev.server.persistence.dao.Dao;
 
 import org.jspecify.annotations.Nullable;
 import java.io.File;
+import java.io.Serial;
 
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.codequality.UnitTestReport.getReportLockName;
@@ -24,6 +25,7 @@ import static io.onedev.server.codequality.UnitTestReport.getReportLockName;
 @Editable
 public abstract class PublishUnitTestReportStep extends PublishReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Override

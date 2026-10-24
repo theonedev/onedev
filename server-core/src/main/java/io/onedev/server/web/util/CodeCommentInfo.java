@@ -1,5 +1,6 @@
 package io.onedev.server.web.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import io.onedev.server.model.CodeComment;
 
 public class CodeCommentInfo implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final long id;

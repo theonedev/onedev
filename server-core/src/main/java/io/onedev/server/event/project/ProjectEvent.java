@@ -1,5 +1,6 @@
 package io.onedev.server.event.project;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +24,7 @@ import io.onedev.server.util.commenttext.CommentText;
 
 public abstract class ProjectEvent extends Event implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final ThreadLocal<List<Long>> participatingUserIdsHolder = new ThreadLocal<>();

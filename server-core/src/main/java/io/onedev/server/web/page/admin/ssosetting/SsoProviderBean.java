@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.admin.ssosetting;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -17,6 +18,7 @@ import io.onedev.server.web.page.security.SsoProcessPage;
 @Editable
 public class SsoProviderBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String name;

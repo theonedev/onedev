@@ -1,5 +1,6 @@
 package io.onedev.server.web.asset.katex;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -12,6 +13,7 @@ import io.onedev.server.web.resourcebundle.ResourceBundle;
 @ResourceBundle
 public class KatexResourceReference extends JavaScriptResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public KatexResourceReference() {

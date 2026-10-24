@@ -2,6 +2,8 @@ package io.onedev.server.model;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 		uniqueConstraints={@UniqueConstraint(columnNames={"source_id", "target_id", "spec_id"})})
 public class IssueLink extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_SOURCE = "source";

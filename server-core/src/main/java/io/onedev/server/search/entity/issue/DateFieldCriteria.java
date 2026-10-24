@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -12,6 +13,7 @@ import io.onedev.server.util.QueryUtils;
 
 public class DateFieldCriteria extends FieldCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Date date;

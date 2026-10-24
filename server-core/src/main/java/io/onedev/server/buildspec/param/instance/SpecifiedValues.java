@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.instance;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import io.onedev.server.annotation.Interpolative;
 @Editable(name="Use specified values or job secrets")
 public class SpecifiedValues implements ValuesProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String DISPLAY_NAME = "Use specified values";

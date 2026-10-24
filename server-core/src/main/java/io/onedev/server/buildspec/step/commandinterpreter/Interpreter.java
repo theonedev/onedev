@@ -5,12 +5,14 @@ import io.onedev.k8shelper.InterpreterFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.BuildSpec;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 @Editable
 public abstract class Interpreter implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String commands;

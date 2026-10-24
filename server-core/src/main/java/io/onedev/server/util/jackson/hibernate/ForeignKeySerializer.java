@@ -1,6 +1,7 @@
 package io.onedev.server.util.jackson.hibernate;
 
 import java.io.IOException;
+import java.io.Serial;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -12,6 +13,7 @@ import io.onedev.server.model.AbstractEntity;
 
 public final class ForeignKeySerializer extends StdSerializer<AbstractEntity> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public ForeignKeySerializer(Class<AbstractEntity> entityClass) {

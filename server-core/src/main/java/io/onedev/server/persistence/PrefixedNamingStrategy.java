@@ -1,11 +1,14 @@
 package io.onedev.server.persistence;
 
+import java.io.Serial;
+
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 
 public class PrefixedNamingStrategy extends PhysicalNamingStrategyStandardImpl {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String prefix;

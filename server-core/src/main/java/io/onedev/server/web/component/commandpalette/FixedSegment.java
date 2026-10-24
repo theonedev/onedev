@@ -1,7 +1,10 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.io.Serial;
+
 public class FixedSegment implements UrlSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String path;

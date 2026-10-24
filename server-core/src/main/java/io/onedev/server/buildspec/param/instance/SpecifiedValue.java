@@ -7,12 +7,14 @@ import io.onedev.server.model.Build;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 @Editable(name="Use specified value or job secret")
 public class SpecifiedValue implements ValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String DISPLAY_NAME = "Use specified value";

@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.servicelocator;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
 public class ServiceLocatorListEditSupport extends DrawCardBeanListEditSupport<ServiceLocator> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

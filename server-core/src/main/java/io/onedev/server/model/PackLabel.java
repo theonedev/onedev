@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import io.onedev.server.model.support.EntityLabel;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.Immutable;
@@ -13,6 +15,7 @@ import jakarta.persistence.*;
 )
 public class PackLabel extends EntityLabel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static String PROP_PACK = "pack";

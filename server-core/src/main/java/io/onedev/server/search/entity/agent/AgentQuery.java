@@ -17,6 +17,7 @@ import static io.onedev.server.search.entity.agent.AgentQueryParser.Online;
 import static io.onedev.server.search.entity.agent.AgentQueryParser.Paused;
 import static io.onedev.server.util.QueryUtils.getValue;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +56,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class AgentQuery extends EntityQuery<Agent> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public AgentQuery(@Nullable Criteria<Agent> criteria, List<EntitySort> sorts) {

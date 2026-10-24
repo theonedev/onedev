@@ -29,6 +29,7 @@ import static org.eclipse.jgit.lib.Constants.R_HEADS;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.text.MessageFormat;
@@ -1331,6 +1332,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	public ArtifactInfo getSiteArtifactInfo(Long projectId, String siteArtifactPath) {
 		return runOnActiveServer(projectId, new ClusterTask<>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -1663,6 +1665,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	private BatchWorker getSyncWorker(Long projectId) {
 		return new BatchWorker("project-" + projectId + "-sync") {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

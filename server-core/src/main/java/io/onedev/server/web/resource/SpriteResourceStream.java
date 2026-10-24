@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,7 @@ import io.onedev.commons.utils.StringUtils;
 
 public class SpriteResourceStream implements IResourceStream {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Class<?> scope;

@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.code;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @ClassValidating
 public class FileProtection implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String paths;

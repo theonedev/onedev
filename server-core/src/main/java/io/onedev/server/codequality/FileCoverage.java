@@ -1,7 +1,10 @@
 package io.onedev.server.codequality;
 
+import java.io.Serial;
+
 public class FileCoverage extends NamedCoverage {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public FileCoverage(String blobPath, int totalBranches, int coveredBranches,

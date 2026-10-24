@@ -1,5 +1,6 @@
 package io.onedev.server.model.support;
 
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import io.onedev.server.annotation.OmitName;
 @MappedSuperclass
 public class BaseGpgKey extends AbstractEntity implements Validatable {
     
+    @Serial
     private static final long serialVersionUID = 1L;
     
     public static final String PROP_CONTENT = "content";

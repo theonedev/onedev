@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import static io.onedev.server.model.IssueWork.PROP_DATE;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -32,6 +33,7 @@ public class IssueWork extends AbstractEntity {
 
 	private static final int MAX_CONTENT_LEN = 1000;
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_USER = "user";

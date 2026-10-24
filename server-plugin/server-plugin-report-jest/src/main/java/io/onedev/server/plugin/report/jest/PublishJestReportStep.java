@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.report.jest;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import io.onedev.server.annotation.Patterns;
 @Editable(order=10000, group=StepGroup.PUBLISH, name="Jest Test Report")
 public class PublishJestReportStep extends PublishUnitTestReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Editable(order=100, description="Specify Jest test result file in json format relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>. "

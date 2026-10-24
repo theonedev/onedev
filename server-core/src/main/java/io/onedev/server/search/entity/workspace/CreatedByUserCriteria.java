@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.workspace;
 
+import java.io.Serial;
 import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
@@ -15,6 +16,7 @@ import io.onedev.server.util.ProjectScope;
 
 public class CreatedByUserCriteria extends CreatedByCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final User user;

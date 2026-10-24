@@ -24,6 +24,7 @@ import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 
 public class CoverageStats implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(CoverageStats.class);
@@ -115,6 +116,7 @@ public class CoverageStats implements Serializable {
 
 	private static class ReadReport implements ClusterTask<CoverageStats> {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Long projectId;
@@ -149,6 +151,7 @@ public class CoverageStats implements Serializable {
 
 	private static class GetLineCoverages implements ClusterTask<Map<String, Map<Integer, CoverageStatus>>> {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Long projectId;

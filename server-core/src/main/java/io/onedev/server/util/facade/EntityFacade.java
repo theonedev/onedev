@@ -1,5 +1,6 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -7,6 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class EntityFacade implements Serializable, Comparable<EntityFacade> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long id;

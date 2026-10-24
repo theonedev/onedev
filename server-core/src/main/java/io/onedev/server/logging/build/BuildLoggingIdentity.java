@@ -4,6 +4,7 @@ import static io.onedev.k8shelper.JobHelper.FINALIZATION;
 import static io.onedev.k8shelper.JobHelper.INITIALIZATION;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.Objects;
 
 import io.onedev.k8shelper.JobHelper;
@@ -13,6 +14,7 @@ import io.onedev.server.model.Build;
 /** Identifies the log file of one named build stage. */
 public class BuildLoggingIdentity implements LoggingIdentity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long projectId;

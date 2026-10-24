@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.build;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -16,6 +17,7 @@ import io.onedev.server.util.ProjectScopedCommitAware;
 
 public abstract class BuildEvent extends ProjectEvent implements ProjectScopedCommitAware {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private Long buildId;

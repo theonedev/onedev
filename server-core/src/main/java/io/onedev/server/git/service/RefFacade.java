@@ -1,6 +1,7 @@
 package io.onedev.server.git.service;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -13,6 +14,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 public class RefFacade implements Comparable<RefFacade>, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String name;

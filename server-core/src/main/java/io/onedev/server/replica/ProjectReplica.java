@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.File;
+import java.io.Serial;
 import java.io.Serializable;
 
 import static io.onedev.server.replica.ProjectReplica.Type.PRIMARY;
@@ -12,6 +13,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FileUtils.readFileToString;
 
 public class ProjectReplica implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final String TYPE_FILE = "type";

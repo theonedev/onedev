@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.buildspec.job.trigger;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditPanel;
 
 class JobTriggerListEditPanel extends DrawCardBeanListEditPanel<JobTrigger> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	JobTriggerListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
@@ -45,6 +47,7 @@ class JobTriggerListEditPanel extends DrawCardBeanListEditPanel<JobTrigger> {
 			DrawCardBeanItemEditPanel.EditCallback callback) {
 		return new JobTriggerEditPanel(id, items, index, callback) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -66,6 +69,7 @@ class JobTriggerListEditPanel extends DrawCardBeanListEditPanel<JobTrigger> {
 
 		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of(_T("Description"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -77,6 +81,7 @@ class JobTriggerListEditPanel extends DrawCardBeanListEditPanel<JobTrigger> {
 
 		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of(_T("#Params"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

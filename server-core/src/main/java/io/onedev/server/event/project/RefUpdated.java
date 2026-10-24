@@ -1,5 +1,6 @@
 package io.onedev.server.event.project;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
@@ -20,6 +21,7 @@ import io.onedev.server.util.commenttext.PlainText;
 
 public class RefUpdated extends ProjectEvent implements ProjectScopedCommitAware {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String refName;

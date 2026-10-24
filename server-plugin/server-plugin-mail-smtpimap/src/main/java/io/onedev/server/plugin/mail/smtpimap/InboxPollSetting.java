@@ -8,11 +8,13 @@ import io.onedev.server.model.support.administration.mailservice.ImapSslSetting;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 
 @Editable
 public class InboxPollSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String imapHost;

@@ -1,5 +1,6 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import io.onedev.server.util.MapProxy;
 
 public class GroupCache extends MapProxy<Long, GroupFacade> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public GroupCache(Map<Long, GroupFacade> delegate) {

@@ -6,15 +6,18 @@ import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 public class UrlProjectImporter extends ProjectImporter {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final ImportStep<ImportServer> serverStep = new ImportStep<ImportServer>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override

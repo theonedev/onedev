@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable(name="Value")
 public class Choice implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String value;

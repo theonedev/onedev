@@ -6,10 +6,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronExpression;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class JobSchedule implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final ObjectId commitId;

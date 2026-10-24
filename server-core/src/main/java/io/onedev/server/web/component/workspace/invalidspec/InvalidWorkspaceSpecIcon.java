@@ -2,6 +2,8 @@ package io.onedev.server.web.component.workspace.invalidspec;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
+
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
@@ -10,6 +12,7 @@ import io.onedev.server.model.Workspace;
 
 public class InvalidWorkspaceSpecIcon extends GenericPanel<Workspace> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public InvalidWorkspaceSpecIcon(String id, IModel<Workspace> workspaceModel) {

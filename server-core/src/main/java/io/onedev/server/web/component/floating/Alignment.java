@@ -1,9 +1,11 @@
 package io.onedev.server.web.component.floating;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Alignment implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final AlignTarget target;

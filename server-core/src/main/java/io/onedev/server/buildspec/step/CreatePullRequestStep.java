@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.step;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable(name="Create Pull Request", order=350)
 public class CreatePullRequestStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 		
 	private String targetBranch;

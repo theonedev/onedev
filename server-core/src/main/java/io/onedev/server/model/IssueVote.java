@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.onedev.server.rest.annotation.Immutable;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -21,6 +22,7 @@ import jakarta.persistence.UniqueConstraint;
 )
 public class IssueVote extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne

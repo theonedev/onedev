@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.workspace.spec.shell;
 
+import java.io.Serial;
+
 import io.onedev.k8shelper.ShellFacility;
 import io.onedev.k8shelper.WindowsBatchFacility;
 import io.onedev.server.annotation.Code;
@@ -9,6 +11,7 @@ import io.onedev.server.annotation.Interpolative;
 @Editable(order=200, name="Windows Batch")
 public class WindowsBatchShell extends WorkspaceShell {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Editable(order=100, descriptionProvider="getSetupCommandDescription")

@@ -10,11 +10,13 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
 public abstract class PackChoiceProvider extends ChoiceProvider<Pack> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -66,6 +67,7 @@ import jakarta.validation.Validator;
 @ClassValidating
 public class BuildSpec implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final LoadingCache<String, byte[]> parseCache =  

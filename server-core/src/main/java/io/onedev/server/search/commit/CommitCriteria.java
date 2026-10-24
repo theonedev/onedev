@@ -1,5 +1,6 @@
 package io.onedev.server.search.commit;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.commons.codeassist.AntlrUtils;
@@ -10,6 +11,7 @@ import io.onedev.server.model.Project;
 
 public abstract class CommitCriteria implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public abstract void fill(Project project, RevListOptions options);

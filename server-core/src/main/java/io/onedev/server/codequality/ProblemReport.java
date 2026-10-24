@@ -22,6 +22,7 @@ import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 
 public class ProblemReport implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(ProblemReport.class);
@@ -159,6 +160,7 @@ public class ProblemReport implements Serializable {
 
 	private static class ReadReport implements ClusterTask<ProblemReport> {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Long projectId;
@@ -193,6 +195,7 @@ public class ProblemReport implements Serializable {
 
 	private static class GetCodeProblems implements ClusterTask<Map<String, Collection<CodeProblem>>> {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Long projectId;

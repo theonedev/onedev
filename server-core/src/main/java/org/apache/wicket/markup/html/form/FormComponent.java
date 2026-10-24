@@ -16,6 +16,7 @@
  */
 package org.apache.wicket.markup.html.form;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -208,6 +209,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 				.getResourceSettings()
 				.getThrowExceptionOnMissingResource())
 			{
+				@Serial
 				private static final long serialVersionUID = 1L;
 
 				@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -362,6 +364,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 
 	private static final String NO_RAW_INPUT = "[-NO-RAW-INPUT-]";
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**

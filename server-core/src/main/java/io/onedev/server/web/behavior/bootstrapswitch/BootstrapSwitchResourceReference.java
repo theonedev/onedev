@@ -1,5 +1,6 @@
 package io.onedev.server.web.behavior.bootstrapswitch;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class BootstrapSwitchResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public BootstrapSwitchResourceReference() {

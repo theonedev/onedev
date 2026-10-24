@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import static io.onedev.agent.AgentUtils.buildAuthConfig;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 public abstract class CraneStep extends CommandStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String trustCertificates;

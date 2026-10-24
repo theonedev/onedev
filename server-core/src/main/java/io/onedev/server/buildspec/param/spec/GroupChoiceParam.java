@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.spec;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=160, name=ParamSpec.GROUP)
 public class GroupChoiceParam extends ParamSpec {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private ChoiceProvider choiceProvider = new AllGroups();

@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.buildspec.job.jobdependency;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import io.onedev.server.web.util.TextUtils;
 
 class JobDependencyListViewPanel extends DrawCardBeanListViewPanel<JobDependency> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	JobDependencyListViewPanel(String id, List<Serializable> elements) {
@@ -37,6 +39,7 @@ class JobDependencyListViewPanel extends DrawCardBeanListViewPanel<JobDependency
 
 		columns.add(new AbstractColumn<JobDependency, Void>(Model.of(_T("Job"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -48,6 +51,7 @@ class JobDependencyListViewPanel extends DrawCardBeanListViewPanel<JobDependency
 
 		columns.add(new AbstractColumn<JobDependency, Void>(Model.of(_T("#Params"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -59,6 +63,7 @@ class JobDependencyListViewPanel extends DrawCardBeanListViewPanel<JobDependency
 
 		columns.add(new AbstractColumn<JobDependency, Void>(Model.of(_T("Require Successful"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

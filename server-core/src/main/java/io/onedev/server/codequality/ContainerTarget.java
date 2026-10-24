@@ -1,11 +1,14 @@
 package io.onedev.server.codequality;
 
+import java.io.Serial;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.wicket.Component;
 
 public class ContainerTarget extends ProblemTarget {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public ContainerTarget(String name, String platform) {
@@ -14,6 +17,7 @@ public class ContainerTarget extends ProblemTarget {
 	
 	public static class GroupKey extends ProblemTarget.GroupKey {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final String platform;

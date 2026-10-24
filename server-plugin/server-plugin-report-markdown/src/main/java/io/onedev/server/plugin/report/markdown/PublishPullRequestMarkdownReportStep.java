@@ -17,6 +17,7 @@ import io.onedev.server.persistence.SessionService;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 
 import static io.onedev.commons.utils.LockUtils.write;
@@ -26,6 +27,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 		description="This report will be displayed in pull request overview page if build is triggered by pull request")
 public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String CATEGORY = "pull-request-markdown";

@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration.workspaceprovisioner;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.concurrent.Future;
 
@@ -30,6 +31,7 @@ import io.onedev.server.workspace.WorkspaceService;
 @ExtensionPoint
 public abstract class WorkspaceProvisioner implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
 	private boolean enabled = true;

@@ -2,6 +2,7 @@ package io.onedev.server.notification;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 
 public class ActivityDetail implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String htmlVersion;
@@ -54,6 +56,7 @@ public class ActivityDetail implements Serializable {
 	public Component render(String componentId) {
 		return new Label(componentId, Emojis.getInstance().apply(htmlVersion)) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -155,6 +158,7 @@ public class ActivityDetail implements Serializable {
 		
 		return new ActivityDetail(htmlVersion, textVersion) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -174,6 +178,7 @@ public class ActivityDetail implements Serializable {
 		Long issueId = issue.getId();
 		return new ActivityDetail(htmlVersion, textVersion) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -193,6 +198,7 @@ public class ActivityDetail implements Serializable {
 		Long requestId = request.getId();
 		return new ActivityDetail(htmlVersion, textVersion) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -212,6 +218,7 @@ public class ActivityDetail implements Serializable {
 
 		return new ActivityDetail(htmlVersion, textVersion) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.terminal;
 
+import java.io.Serial;
+
 import org.apache.wicket.Application;
 import org.apache.wicket.Session;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -23,6 +25,7 @@ import io.onedev.commons.utils.StringUtils;
 
 public abstract class TerminalPanel extends Panel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public TerminalPanel(String id) {

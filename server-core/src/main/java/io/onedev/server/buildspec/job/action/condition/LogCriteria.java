@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job.action.condition;
 
+import java.io.Serial;
 import java.util.regex.Pattern;
 
 import org.jspecify.annotations.Nullable;
@@ -16,6 +17,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class LogCriteria extends Criteria<Build> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String value;

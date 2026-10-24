@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.buildspec.param.spec;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanItemEditPanel;
 
 abstract class ParamSpecEditPanel extends DrawCardBeanItemEditPanel<ParamSpec> implements InputContext {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ParamSpecEditPanel(String id, List<ParamSpec> paramSpecs, int paramSpecIndex, EditCallback callback) {

@@ -50,6 +50,7 @@ import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
 public final class VersionedXmlDoc implements Document, Externalizable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Pattern SPECIAL_CHARACTERS = Pattern.compile("&#\\d+;");

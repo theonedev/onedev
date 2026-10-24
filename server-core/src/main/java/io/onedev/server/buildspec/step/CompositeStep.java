@@ -8,11 +8,13 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class CompositeStep extends Step {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Override

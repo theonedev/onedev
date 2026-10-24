@@ -2,6 +2,8 @@ package io.onedev.server.web.component.progress;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.Serial;
+
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.IMarkupResourceStreamProvider;
 import org.apache.wicket.markup.html.WebPage;
@@ -66,6 +68,7 @@ class TimeProgressBarTest {
 	}
 
 	private static class TestPage extends WebPage implements IMarkupResourceStreamProvider {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		TestPage(TimeProgressBar progress) {

@@ -23,6 +23,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import org.jspecify.annotations.Nullable;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ import static io.onedev.server.entityreference.ReferenceUtils.transformReference
  */
 class LastCommitsResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_PROJECT = "project";

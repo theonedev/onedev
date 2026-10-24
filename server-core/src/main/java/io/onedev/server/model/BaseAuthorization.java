@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
@@ -21,6 +23,7 @@ import io.onedev.server.rest.annotation.Immutable;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class BaseAuthorization extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_PROJECT = "project";

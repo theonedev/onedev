@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.buildspec.job.postbuildaction;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanItemEditPanel;
 public abstract class PostBuildActionEditPanel extends DrawCardBeanItemEditPanel<PostBuildAction>
 		implements BuildSpecAware, JobAware {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PostBuildActionEditPanel(String id, List<PostBuildAction> actions, int actionIndex, EditCallback callback) {

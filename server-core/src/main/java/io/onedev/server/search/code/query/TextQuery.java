@@ -10,10 +10,12 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import org.jspecify.annotations.Nullable;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.List;
 
 public class TextQuery extends BlobQuery {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String term;

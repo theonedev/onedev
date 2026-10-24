@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.field.spec;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=160, name=FieldSpec.GROUP)
 public class GroupChoiceField extends FieldSpec {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private ChoiceProvider choiceProvider = new AllGroups();

@@ -8,6 +8,7 @@ import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -106,6 +107,7 @@ public class UnitTestModule extends AbstractPluginModule {
 	
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private final Long projectId;

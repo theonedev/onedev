@@ -12,6 +12,7 @@
  */
 package io.onedev.server.web.component.select2;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +31,7 @@ import org.apache.wicket.model.IModel;
  */
 public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T>> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public Select2MultiChoice(String id, IModel<Collection<T>> model, ChoiceProvider<T> provider) {

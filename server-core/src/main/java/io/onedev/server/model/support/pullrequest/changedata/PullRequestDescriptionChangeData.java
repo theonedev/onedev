@@ -3,11 +3,13 @@ package io.onedev.server.model.support.pullrequest.changedata;
 import io.onedev.server.notification.ActivityDetail;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PullRequestDescriptionChangeData extends PullRequestChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String oldDescription;

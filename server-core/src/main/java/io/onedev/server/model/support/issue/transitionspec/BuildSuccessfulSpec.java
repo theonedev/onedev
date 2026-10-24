@@ -2,6 +2,7 @@ package io.onedev.server.model.support.issue.transitionspec;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable(order=400, name="Build is successful")
 public class BuildSuccessfulSpec extends AutoSpec {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String jobNames;

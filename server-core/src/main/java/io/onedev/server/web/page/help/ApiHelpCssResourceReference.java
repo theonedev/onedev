@@ -1,9 +1,12 @@
 package io.onedev.server.web.page.help;
 
+import java.io.Serial;
+
 import org.apache.wicket.request.resource.CssResourceReference;
 
 public class ApiHelpCssResourceReference extends CssResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public ApiHelpCssResourceReference() {

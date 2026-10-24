@@ -3,6 +3,7 @@ package io.onedev.server.plugin.executor.remotedocker;
 import static io.onedev.agent.WebsocketUtils.call;
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -38,6 +39,7 @@ import io.onedev.server.terminal.Shell;
 @Editable(order=RemoteDockerExecutor.ORDER, description="This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>")
 public class RemoteDockerExecutor extends ServerDockerExecutor {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	static final int ORDER = 500;

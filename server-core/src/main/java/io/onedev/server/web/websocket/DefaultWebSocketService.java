@@ -4,6 +4,7 @@ import static io.onedev.server.web.behavior.ChangeObserver.containsObservable;
 import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
 
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -50,6 +51,7 @@ import io.onedev.server.web.page.base.BasePage;
 @Singleton
 public class DefaultWebSocketService implements WebSocketService, SessionListener, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWebSocketService.class);
@@ -159,6 +161,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 	public void notifyObservablesChange(Collection<String> observables, @Nullable PageKey sourcePageKey) {
 		transactionService.runAfterCommit(new ClusterRunnable() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

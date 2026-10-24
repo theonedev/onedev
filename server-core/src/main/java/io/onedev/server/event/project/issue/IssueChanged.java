@@ -14,11 +14,13 @@ import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Map;
 
 public class IssueChanged extends IssueEvent implements ProjectScopedCommitAware {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long changeId;

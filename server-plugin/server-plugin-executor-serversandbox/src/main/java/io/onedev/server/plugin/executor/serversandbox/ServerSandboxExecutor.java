@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.executor.serversandbox;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,6 +53,7 @@ import io.onedev.server.web.util.Testable;
 @ClassValidating
 public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, Testable<ServerSandboxExecutor.TestData>, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String sandboxExecutable = "sbx";
@@ -254,7 +256,7 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 
 	protected SandboxSettings getSandboxSettings(String jobToken) {
 		return new SandboxSettings(template, cpus, memory, alwaysPullTemplateImage, alwaysPullContainerImage,
-				OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl().toString(), cpuLimit, memoryLimit, runOptions, networkOptions,
+                OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl(), cpuLimit, memoryLimit, runOptions, networkOptions,
 				getRegistryLogins(jobToken));
 	}
 
@@ -262,6 +264,7 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 	public boolean execute(JobContext context, TaskLogger logger) {
 		ClusterTask<Boolean> runnable = () -> OneDev.getInstance(JobService.class).runJob(context, new JobRunnable() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			private transient volatile SandboxJob sandboxJob;
@@ -310,13 +313,13 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 	@Editable(name="Test Sandbox Executor")
 	public static class TestData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String dockerImage;
 
 		@Editable(name="Optional Docker Image", description="""
-				Optionally specify a docker image to also test running commands in a \
-				container inside the sandbox. The image must contain sh.""")
+				If specified, test running command in a Docker container besides in sandbox shell""")
 		@OmitName
 		public String getDockerImage() {
 			return dockerImage;

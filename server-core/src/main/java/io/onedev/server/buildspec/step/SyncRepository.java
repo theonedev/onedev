@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.step;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ import io.onedev.server.model.Project;
 @Editable
 public abstract class SyncRepository extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final PercentEscaper CREDENTIAL_ESCAPER = new PercentEscaper("-._~", false);

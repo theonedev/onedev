@@ -1,5 +1,7 @@
 package io.onedev.server.exception.handler;
 
+import java.io.Serial;
+
 import io.onedev.server.exception.HttpResponse;
 
 import org.hibernate.ObjectNotFoundException;
@@ -8,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class ObjectNotFoundExceptionHandler extends AbstractExceptionHandler<ObjectNotFoundException> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

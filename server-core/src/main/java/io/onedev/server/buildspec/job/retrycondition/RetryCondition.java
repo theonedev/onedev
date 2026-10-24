@@ -7,6 +7,7 @@ import static io.onedev.server.buildspec.job.retrycondition.RetryConditionLexer.
 import static io.onedev.server.buildspec.job.retrycondition.RetryConditionLexer.IsNotEmpty;
 import static io.onedev.server.model.Build.NAME_LOG;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class RetryCondition extends Criteria<RetryContext> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Criteria<RetryContext> criteria;

@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.notebook;
 
+import java.io.Serial;
+
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -15,6 +17,7 @@ import io.onedev.server.web.resource.RawBlobResourceReference;
 
 public class NotebookViewPanel extends BlobViewPanel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public NotebookViewPanel(String id, BlobRenderContext context) {

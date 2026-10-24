@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 @Table(indexes={@Index(columnList="user_id"), @Index(columnList="ai_id")})
 public class Chat extends AbstractEntity {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final int MAX_TITLE_LEN = 255;

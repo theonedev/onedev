@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.iteration.choice;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import io.onedev.server.web.component.select2.ChoiceProvider;
 
 public abstract class AbstractIterationChoiceProvider extends ChoiceProvider<Iteration> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.commons.utils.PlanarRange;
@@ -7,6 +8,7 @@ import io.onedev.server.rest.annotation.Api;
 
 public class PlanarRangeData implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Api(description="Zero-based start row (inclusive). Must be non-negative", exampleProvider="getZeroExample")

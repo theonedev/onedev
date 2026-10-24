@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.report.playwright;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import io.onedev.server.plugin.report.unittest.TestArtifactResourceReference;
 
 public class PlaywrightTestCaseDetailPanel extends Panel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PlaywrightTestCaseDetailPanel(String id, Build build, String reportName,

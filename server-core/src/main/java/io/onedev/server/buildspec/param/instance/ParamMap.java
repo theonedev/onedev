@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.instance;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import io.onedev.server.web.util.WicketUtils;
 @Editable
 public class ParamMap implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<ParamInstance> params = new ArrayList<>();

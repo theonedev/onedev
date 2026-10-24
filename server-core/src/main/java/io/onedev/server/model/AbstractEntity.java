@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +27,7 @@ import io.onedev.server.persistence.annotation.EntityId;
 @JsonIgnoreProperties("handler")
 public abstract class AbstractEntity implements Serializable, Comparable<AbstractEntity> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_ID = "id";

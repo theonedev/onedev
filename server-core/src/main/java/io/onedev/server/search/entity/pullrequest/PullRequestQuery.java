@@ -52,6 +52,7 @@ import static io.onedev.server.util.QueryUtils.getNumber;
 import static io.onedev.server.util.QueryUtils.getUser;
 import static io.onedev.server.util.QueryUtils.getValue;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,6 +93,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class PullRequestQuery extends EntityQuery<PullRequest> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PullRequestQuery(@Nullable Criteria<PullRequest> criteria, List<EntitySort> sorts, List<EntitySort> baseSorts) {

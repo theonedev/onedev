@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -17,6 +18,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeDa
 @Table(indexes={@Index(columnList="request_id"), @Index(columnList="user_id")})
 public class PullRequestChange extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_REQUEST = "request";

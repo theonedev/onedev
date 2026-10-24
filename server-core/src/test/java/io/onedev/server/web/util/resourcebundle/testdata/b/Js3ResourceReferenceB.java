@@ -1,5 +1,6 @@
 package io.onedev.server.web.util.resourcebundle.testdata.b;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import io.onedev.server.web.resourcebundle.ResourceBundle;
 @ResourceBundle
 public class Js3ResourceReferenceB extends JavaScriptResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public Js3ResourceReferenceB() {

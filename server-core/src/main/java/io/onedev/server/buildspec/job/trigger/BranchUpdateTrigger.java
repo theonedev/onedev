@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job.trigger;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 
 public class BranchUpdateTrigger extends JobTrigger {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String branches;

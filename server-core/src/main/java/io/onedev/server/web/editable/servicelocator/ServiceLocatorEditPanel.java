@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.servicelocator;
 
+import java.io.Serial;
 import java.util.List;
 
 import static io.onedev.server.web.translation.Translation._T;
@@ -12,6 +13,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanItemEditPanel;
 abstract class ServiceLocatorEditPanel extends DrawCardBeanItemEditPanel<ServiceLocator>
 		implements BuildSpecAware, JobAware {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ServiceLocatorEditPanel(String id, List<ServiceLocator> locators, int locatorIndex, EditCallback callback) {

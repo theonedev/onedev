@@ -2,6 +2,7 @@ package io.onedev.server.workspace;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 
 public class WorkspaceContext implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final WorkspaceSpec spec;

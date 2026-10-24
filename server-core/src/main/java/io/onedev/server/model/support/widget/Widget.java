@@ -3,6 +3,7 @@ package io.onedev.server.model.support.widget;
 import io.onedev.server.annotation.Editable;
 
 import jakarta.validation.constraints.Size;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Editable
 public class Widget implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private List<WidgetTab<TabState>> tabs = new ArrayList<>();

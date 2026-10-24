@@ -5,6 +5,7 @@ import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1129,6 +1130,7 @@ public class UserListPage extends AdministrationPage {
 
 	public static class State implements Serializable {
 		
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		public String query;

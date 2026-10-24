@@ -3,6 +3,7 @@ package io.onedev.server.security;
 import static io.onedev.server.security.SecurityUtils.getUser;
 
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -119,6 +120,7 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 		
 		return new AuthorizationInfo() {
 			
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

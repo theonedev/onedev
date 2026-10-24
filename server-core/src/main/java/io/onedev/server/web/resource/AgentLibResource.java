@@ -2,6 +2,7 @@ package io.onedev.server.web.resource;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Collection;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import io.onedev.server.security.SecurityUtils;
 
 public class AgentLibResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

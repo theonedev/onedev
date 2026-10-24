@@ -2,6 +2,7 @@ package io.onedev.server.plugin.report.jest;
 
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -71,6 +72,7 @@ public class JestReportParser {
 			var testSuiteMessage = message;
 			TestSuite testSuite = new TestSuite(blobPath!=null?blobPath:name, status, duration, blobPath, null) {
 
+				@Serial
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -84,6 +86,7 @@ public class JestReportParser {
 				var testCaseMessage = testCaseData.message;
 				testCases.add(new TestCase(testSuite, testCaseData.name, testCaseData.status, testCaseData.statusText, 0) {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override

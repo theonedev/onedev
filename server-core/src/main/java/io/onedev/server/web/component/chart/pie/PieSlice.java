@@ -1,9 +1,11 @@
 package io.onedev.server.web.component.chart.pie;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class PieSlice implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String name;

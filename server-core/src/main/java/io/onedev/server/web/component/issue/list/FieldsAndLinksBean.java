@@ -2,6 +2,7 @@ package io.onedev.server.web.component.issue.list;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import io.onedev.server.model.LinkSpec;
 @Editable
 public class FieldsAndLinksBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<String> fields;

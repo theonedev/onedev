@@ -3,6 +3,8 @@ package io.onedev.server.web.component.fileview;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
+import java.io.Serial;
+
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -16,6 +18,7 @@ import io.onedev.agent.workspace.FileData;
 
 public class FileViewPanel extends GenericPanel<FileData> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String fileContent;

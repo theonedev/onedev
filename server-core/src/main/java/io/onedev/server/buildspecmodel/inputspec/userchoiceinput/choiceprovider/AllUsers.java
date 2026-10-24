@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import io.onedev.server.web.util.WicketUtils;
 @Editable(order=130, name="All users")
 public class AllUsers implements ChoiceProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.indexedpath;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -23,6 +24,7 @@ import io.onedev.server.web.component.link.DropdownLink;
  */
 public class IndexedPathsPanel extends GenericPanel<List<PathInfo>> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public IndexedPathsPanel(String id, IModel<List<PathInfo>> model) {
@@ -37,6 +39,7 @@ public class IndexedPathsPanel extends GenericPanel<List<PathInfo>> {
 
 		var link = new DropdownLink("link") {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -44,6 +47,7 @@ public class IndexedPathsPanel extends GenericPanel<List<PathInfo>> {
 				Fragment fragment = new Fragment(id, "dropdownFrag", IndexedPathsPanel.this);
 				fragment.add(new ListView<>("paths", indexedPaths) {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.issue;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import io.onedev.server.model.User;
 
 public abstract class IssueEvent extends ProjectEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long issueId;

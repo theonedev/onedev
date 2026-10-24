@@ -1,5 +1,6 @@
 package io.onedev.server.search.commit;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import io.onedev.commons.utils.match.WildcardUtils;
 
 public class MessageCriteria extends CommitCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<String> values;

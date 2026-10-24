@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job.action;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -13,6 +14,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public abstract class PostBuildAction implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String condition;

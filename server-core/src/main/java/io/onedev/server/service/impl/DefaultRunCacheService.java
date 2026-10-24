@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectStreamException;
 import java.io.OutputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -55,6 +56,7 @@ import io.onedev.server.util.concurrent.Prioritized;
 @Singleton
 public class DefaultRunCacheService implements RunCacheService, Serializable, SchedulableTask {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final int HOUSE_KEEPING_PRIORITY = 50;

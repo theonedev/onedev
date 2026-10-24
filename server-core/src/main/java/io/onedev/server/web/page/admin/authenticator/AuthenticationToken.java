@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.admin.authenticator;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -10,6 +11,7 @@ import io.onedev.server.annotation.Password;
 @Editable
 public class AuthenticationToken implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String userName;

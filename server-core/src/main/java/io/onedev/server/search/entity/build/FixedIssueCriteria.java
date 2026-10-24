@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.build;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import io.onedev.server.xodus.CommitInfoService;
 
 public class FixedIssueCriteria extends Criteria<Build> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Issue issue;

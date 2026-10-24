@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.builds.detail;
 import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -560,6 +561,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				if (SecurityUtils.canAccessLog(getBuild())) {
 					tabs.add(new BuildTab(Model.of(_T("Steps")), BuildStepsPage.class, BuildStepsPage.paramsOf(getBuild())) {
+						@Serial
 						private static final long serialVersionUID = 1L;
 
 						@Override

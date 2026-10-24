@@ -1,5 +1,6 @@
 package io.onedev.server.assets;
 
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -28,6 +29,7 @@ public class AssetsSyncManager {
 
 	private static final BatchWorker SYNC_WORKER = new BatchWorker("assets-sync") {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override

@@ -14,6 +14,7 @@ package io.onedev.server.web.component.select2;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Serial;
 import java.util.Collection;
 
 import org.apache.wicket.IRequestListener;
@@ -49,6 +50,7 @@ import io.onedev.server.web.editable.InplacePropertyEditPanel;
  */
 abstract class AbstractSelect2Choice<T, M> extends FormComponent<M> implements IRequestListener {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Settings settings = new Settings(this);

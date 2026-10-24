@@ -14,6 +14,7 @@ package io.onedev.server.web.component.select2;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
@@ -35,6 +36,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
  */
 public final class Settings implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private AbstractSelect2Choice<?, ?> select2;

@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.workspace.spec.shell;
 
+import java.io.Serial;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.k8shelper.PowerShellFacility;
@@ -11,6 +13,7 @@ import io.onedev.server.annotation.Interpolative;
 @Editable(order=300, name="PowerShell")
 public class PowerShell extends WorkspaceShell {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String powershell = "powershell.exe";

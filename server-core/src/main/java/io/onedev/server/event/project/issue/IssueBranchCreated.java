@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.issue;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
@@ -11,6 +12,7 @@ import io.onedev.server.service.UserService;
 
 public class IssueBranchCreated extends IssueEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String branch;

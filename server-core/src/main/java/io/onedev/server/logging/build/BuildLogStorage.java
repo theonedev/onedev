@@ -1,6 +1,7 @@
 package io.onedev.server.logging.build;
 
 import java.io.File;
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.model.Build;
@@ -8,6 +9,7 @@ import io.onedev.server.model.Build;
 /** Storage directory and shared lock for all stage logs of a build. */
 public class BuildLogStorage implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long projectId;

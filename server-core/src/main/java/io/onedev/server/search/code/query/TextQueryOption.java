@@ -18,6 +18,7 @@ import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectLoader;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
 
 public class TextQueryOption implements QueryOption {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String term;
@@ -216,6 +218,7 @@ public class TextQueryOption implements QueryOption {
 
 	public static class Match implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private final String line;

@@ -3,10 +3,12 @@ package io.onedev.server.event.project;
 import io.onedev.server.event.Event;
 import io.onedev.server.model.Project;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class ProjectDeleted extends Event implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long projectId;

@@ -15,6 +15,7 @@ import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static java.util.stream.Collectors.toList;
 
 import java.io.File;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,6 +93,7 @@ import jakarta.validation.constraints.NotEmpty;
 @ClassValidating
 public class ServerDockerExecutor extends JobExecutor implements DockerAware, Testable<TestData>, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	static final int ORDER = 50;
@@ -351,6 +353,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
 		ClusterTask<Boolean> runnable = () -> getJobService().runJob(jobContext, new JobRunnable() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -688,6 +691,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	@Editable(name="Specify a Docker Image to Test Against")
 	public static class TestData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String dockerImage;

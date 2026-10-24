@@ -1,11 +1,13 @@
 package io.onedev.server.git.service;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.eclipse.jgit.diff.DiffEntry;
 
 public class DiffEntryFacade implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final DiffEntry.ChangeType changeType;

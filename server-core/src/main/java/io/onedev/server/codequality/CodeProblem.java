@@ -3,10 +3,12 @@ package io.onedev.server.codequality;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class CodeProblem implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public enum Severity {

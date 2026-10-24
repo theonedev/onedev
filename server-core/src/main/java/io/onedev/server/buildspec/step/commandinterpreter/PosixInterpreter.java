@@ -1,5 +1,7 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
+import java.io.Serial;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.k8shelper.InterpreterFacade;
@@ -11,6 +13,7 @@ import io.onedev.server.annotation.Interpolative;
 @Editable(order=100, name="POSIX Compatible Shell")
 public class PosixInterpreter extends Interpreter {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String shell = "sh";

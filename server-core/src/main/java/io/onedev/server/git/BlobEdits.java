@@ -1,5 +1,6 @@
 package io.onedev.server.git;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 
 public class BlobEdits implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Set<String> oldPaths;

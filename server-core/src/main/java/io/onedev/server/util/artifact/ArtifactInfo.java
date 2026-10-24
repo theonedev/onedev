@@ -4,6 +4,7 @@ import io.onedev.server.rest.annotation.Api;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Objects;
 @Api(exampleProvider = "getExample")
 public abstract class ArtifactInfo implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String path;

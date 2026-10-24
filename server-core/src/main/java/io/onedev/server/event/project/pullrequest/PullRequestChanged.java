@@ -1,5 +1,7 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -18,6 +20,7 @@ import io.onedev.server.util.commenttext.MarkdownText;
 
 public class PullRequestChanged extends PullRequestEvent implements ProjectScopedCommitAware {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long changeId;

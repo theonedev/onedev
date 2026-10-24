@@ -1,5 +1,6 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +14,7 @@ import io.onedev.server.util.MapProxy;
 
 public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	// Keep only lookup hints: email addresses can change on another cluster node.

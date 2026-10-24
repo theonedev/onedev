@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,6 +209,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 			}
 			projectService.runOnActiveServer(sourceProjectId, new ClusterTask<Void>() {
 
+				@Serial
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -502,12 +504,14 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 			if (activeServer != null) {
 				transactionService.runAfterCommit(new ClusterRunnable() {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void run() {
 						clusterService.runOnServer(activeServer, new ClusterTask<Void>() {
 
+							@Serial
 							private static final long serialVersionUID = 1L;
 
 							@Override

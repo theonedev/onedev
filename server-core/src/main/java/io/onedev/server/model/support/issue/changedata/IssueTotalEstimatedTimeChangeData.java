@@ -6,12 +6,14 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class IssueTotalEstimatedTimeChangeData extends IssueChangeData {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final int oldValue;

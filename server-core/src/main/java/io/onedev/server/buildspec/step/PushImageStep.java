@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -19,6 +20,7 @@ import io.onedev.server.buildspec.BuildSpec;
 		"This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor")
 public class PushImageStep extends CraneStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String srcPath;

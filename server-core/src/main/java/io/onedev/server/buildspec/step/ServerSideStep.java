@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.step;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -20,6 +21,7 @@ import io.onedev.server.web.editable.EditableStringVisitor;
 
 public abstract class ServerSideStep extends Step {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

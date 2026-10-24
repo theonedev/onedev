@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.channelnotification;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,7 @@ import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 @ClassValidating
 public class ChannelNotificationSetting implements ContributedProjectSetting, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<ChannelNotification> notifications = new ArrayList<>();

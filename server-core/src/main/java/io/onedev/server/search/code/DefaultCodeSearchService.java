@@ -7,6 +7,7 @@ import static io.onedev.server.search.code.FieldConstants.BLOB_SYMBOL_LIST;
 
 import java.io.IOException;
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
@@ -118,6 +119,7 @@ public class DefaultCodeSearchService implements CodeSearchService, Serializable
 		Long projectId = project.getId();
 		return projectService.runOnActiveServer(projectId, new ClusterTask<List<QueryHit>>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -196,6 +198,7 @@ public class DefaultCodeSearchService implements CodeSearchService, Serializable
 		// Use Java serialization to maintain symbol parent/child relationship relying on object identity comparison 
 		byte[] bytes = projectService.runOnActiveServer(projectId, new ClusterTask<byte[]>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

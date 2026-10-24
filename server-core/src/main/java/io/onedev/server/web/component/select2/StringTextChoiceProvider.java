@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.select2;
 
+import java.io.Serial;
 import java.util.Collection;
 
 /**
@@ -9,6 +10,7 @@ import java.util.Collection;
  */
 public abstract class StringTextChoiceProvider extends TextChoiceProvider<String> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

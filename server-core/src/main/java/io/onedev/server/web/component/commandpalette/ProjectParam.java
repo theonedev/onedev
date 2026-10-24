@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import io.onedev.server.web.mapper.ProjectMapperUtils;
 
 public class ProjectParam extends ParamSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public ProjectParam(boolean optional) {

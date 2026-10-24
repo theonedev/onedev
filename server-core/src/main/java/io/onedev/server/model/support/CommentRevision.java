@@ -1,5 +1,6 @@
 package io.onedev.server.model.support;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
@@ -16,6 +17,7 @@ import io.onedev.server.model.User;
 @MappedSuperclass
 public abstract class CommentRevision extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
     public static final String PROP_USER = "user";

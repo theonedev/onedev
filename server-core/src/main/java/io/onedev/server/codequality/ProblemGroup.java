@@ -1,11 +1,13 @@
 package io.onedev.server.codequality;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class ProblemGroup implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final ProblemTarget.GroupKey key;

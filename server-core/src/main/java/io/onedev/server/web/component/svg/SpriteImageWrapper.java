@@ -1,11 +1,14 @@
 package io.onedev.server.web.component.svg;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
 public class SpriteImageWrapper extends Panel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String href;

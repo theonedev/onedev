@@ -16,12 +16,14 @@ import io.onedev.server.annotation.Editable;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import java.io.Serial;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Editable(name="Twitch", order=200, description = "Single sign on via twitch.tv")
 public class TwitchConnector extends OpenIdConnector {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

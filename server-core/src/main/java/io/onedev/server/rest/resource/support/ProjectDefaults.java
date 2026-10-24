@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 @ClassValidating
 public class ProjectDefaults implements Serializable, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private ArrayList<BranchProtection> branchProtections = new ArrayList<>();
@@ -215,6 +217,7 @@ public class ProjectDefaults implements Serializable, Validatable {
 
 	public static class BuildDefaults implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private List<JobProperty> jobProperties = new ArrayList<>();
@@ -292,6 +295,7 @@ public class ProjectDefaults implements Serializable, Validatable {
 
 	public static class IssueDefaults implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String branchPrefix;
@@ -318,6 +322,7 @@ public class ProjectDefaults implements Serializable, Validatable {
 
 	public static class PullRequestDefaults implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private MergeStrategy defaultMergeStrategy;

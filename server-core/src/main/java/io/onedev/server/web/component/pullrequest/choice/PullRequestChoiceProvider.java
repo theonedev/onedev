@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.pullrequest.choice;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +28,7 @@ import io.onedev.server.web.component.select2.ResponseFiller;
 
 public abstract class PullRequestChoiceProvider extends ChoiceProvider<PullRequest> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final boolean useNumber;

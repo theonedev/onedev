@@ -1,5 +1,6 @@
 package io.onedev.server.service.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 
 public class RunCacheInfo implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final String key;

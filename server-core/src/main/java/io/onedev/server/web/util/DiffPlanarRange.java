@@ -1,5 +1,7 @@
 package io.onedev.server.web.util;
 
+import java.io.Serial;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -7,6 +9,7 @@ import io.onedev.commons.utils.PlanarRange;
 
 public class DiffPlanarRange extends PlanarRange {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public final boolean leftSide;

@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.workspacespec.configfile;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
 public class ConfigFileListEditSupport extends DrawCardBeanListEditSupport<ConfigFile> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -12,10 +12,12 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.Model;
 
 import java.io.File;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 
 public class PullRequestSummaryMarkdownPart extends PullRequestSummaryPart {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long projectId;
@@ -33,6 +35,7 @@ public class PullRequestSummaryMarkdownPart extends PullRequestSummaryPart {
 		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 		String markdown = projectService.runOnActiveServer(projectId, new ClusterTask<String>() {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

@@ -1,6 +1,7 @@
 package io.onedev.server.jetty;
 
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -201,12 +202,14 @@ public class DefaultJettyService implements JettyService, Serializable {
 				SystemSetting systemSetting = (SystemSetting) setting.getValue();
 				transactionService.runAfterCommit(new ClusterRunnable() {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void run() {
 						clusterService.submitToAllServers(new ClusterTask<Void>() {
 
+							@Serial
 							private static final long serialVersionUID = 1L;
 
 							@Override

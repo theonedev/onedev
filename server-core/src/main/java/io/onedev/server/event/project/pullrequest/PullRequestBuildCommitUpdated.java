@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -10,6 +11,7 @@ import io.onedev.server.util.ProjectScopedCommit;
 
 public class PullRequestBuildCommitUpdated extends PullRequestEvent implements ProjectScopedCommitAware {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PullRequestBuildCommitUpdated(PullRequest request) {

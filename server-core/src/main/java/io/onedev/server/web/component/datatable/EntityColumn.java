@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.datatable;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IStyledColumn;
@@ -14,6 +16,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 
 public class EntityColumn<T extends AbstractEntity> implements IStyledColumn<T, String> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Class<T> entityType;

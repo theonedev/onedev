@@ -12,6 +12,8 @@
  */
 package io.onedev.server.web.component.select2;
 
+import java.io.Serial;
+
 import org.json.JSONException;
 import org.json.JSONWriter;
 
@@ -26,6 +28,7 @@ import org.json.JSONWriter;
  */
 public abstract class TextChoiceProvider<T> extends ChoiceProvider<T> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	protected abstract String getDisplayText(T choice);

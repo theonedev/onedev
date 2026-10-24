@@ -14,12 +14,14 @@ import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.web.util.SuggestionUtils;
 
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 @Editable
 public class RegistryLogin implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String registryUrl;

@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.imports.jiracloud;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class IssuePriorityMapping implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String jiraIssuePriority;

@@ -15,11 +15,13 @@ import io.onedev.server.persistence.TransactionService;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
+import java.io.Serial;
 import java.util.List;
 
 @Editable(order=265, name="Set Build Description")
 public class SetBuildDescriptionStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String buildDescription;

@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serial;
 import java.net.URLEncoder;
 
 import jakarta.ws.rs.client.Client;
@@ -46,6 +47,7 @@ import io.onedev.server.util.IOUtils;
 
 public class AttachmentResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_PROJECT = "project";

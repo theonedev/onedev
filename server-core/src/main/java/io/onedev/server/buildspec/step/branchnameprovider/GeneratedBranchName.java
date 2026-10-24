@@ -1,5 +1,7 @@
 package io.onedev.server.buildspec.step.branchnameprovider;
 
+import java.io.Serial;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
@@ -11,6 +13,7 @@ import io.onedev.server.service.IssueService;
 		AI model in <i>Administration / AI Settings</i> to generate good branch name""")
 public class GeneratedBranchName implements BranchNameProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

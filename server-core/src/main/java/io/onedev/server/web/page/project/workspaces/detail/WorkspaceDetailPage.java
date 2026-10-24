@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.workspaces.detail;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,6 +74,7 @@ import io.onedev.server.workspace.WorkspaceService;
 
 public abstract class WorkspaceDetailPage extends ProjectPage {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PARAM_WOPKSPACE = "workspace";

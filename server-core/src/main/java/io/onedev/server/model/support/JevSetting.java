@@ -1,6 +1,7 @@
 package io.onedev.server.model.support;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -27,6 +28,7 @@ import nl.altindag.ssl.SSLFactory;
 @Editable
 public class JevSetting implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_BASE_URL = "https://api.typesafe.ai/v1";

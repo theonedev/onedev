@@ -1,10 +1,13 @@
 package io.onedev.server.util;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 
 public class ComponentHierarchical implements Hierarchical {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Component component;

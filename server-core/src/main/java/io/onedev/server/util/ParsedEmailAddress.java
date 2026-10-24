@@ -2,10 +2,12 @@ package io.onedev.server.util;
 
 import io.onedev.commons.utils.StringUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class ParsedEmailAddress implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String name;

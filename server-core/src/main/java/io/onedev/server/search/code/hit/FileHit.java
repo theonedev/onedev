@@ -1,5 +1,7 @@
 package io.onedev.server.search.code.hit;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +15,7 @@ import io.onedev.commons.utils.LinearRange;
 
 public class FileHit extends QueryHit {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final LinearRange match;

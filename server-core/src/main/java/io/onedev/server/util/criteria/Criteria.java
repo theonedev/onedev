@@ -1,5 +1,6 @@
 package io.onedev.server.util.criteria;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 
 public abstract class Criteria<T> implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final int IN_CLAUSE_LIMIT = 1000;

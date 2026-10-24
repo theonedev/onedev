@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.server.model.IssueComment.PROP_MESSAGE_ID;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -29,6 +30,7 @@ import io.onedev.server.util.facade.IssueCommentFacade;
 		@Index(columnList=PROP_MESSAGE_ID)})
 public class IssueComment extends EntityComment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_ISSUE = "issue";

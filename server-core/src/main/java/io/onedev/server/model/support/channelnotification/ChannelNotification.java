@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.channelnotification;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -23,6 +24,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 @Editable
 public class ChannelNotification implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String webhookUrl;

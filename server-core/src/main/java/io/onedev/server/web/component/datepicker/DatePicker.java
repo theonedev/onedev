@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.datepicker;
 
+import java.io.Serial;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,6 +22,7 @@ import io.onedev.server.web.page.base.BasePage;
 
 public class DatePicker extends DateTextField {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final boolean withTime;

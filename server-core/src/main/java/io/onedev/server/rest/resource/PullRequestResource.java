@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toList;
 import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -648,6 +649,7 @@ public class PullRequestResource {
 	@EntityCreate(PullRequest.class)
 	public static class PullRequestOpenData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private Long targetProjectId;

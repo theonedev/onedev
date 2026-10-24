@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.Serial;
+
 import org.junit.jupiter.api.Test;
 
 import io.onedev.server.model.AbstractEntity;
@@ -87,6 +89,7 @@ public class BasicLazyInitializerTest {
 	}
 
 	private static class EntityReference extends AbstractEntity {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Initializer initializer;

@@ -1,5 +1,6 @@
 package io.onedev.server.util.criteria;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +26,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 
 public class OrCriteria<T> extends Criteria<T> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	protected final List<Criteria<T>> criterias;

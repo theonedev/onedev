@@ -4,6 +4,7 @@ import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toSet;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import io.onedev.server.util.patternset.PatternSet;
 
 public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	// Keep only lookup hints and validate against the current replicated records.

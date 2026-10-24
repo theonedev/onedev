@@ -3,6 +3,7 @@ package io.onedev.server.web.component.ai.chat;
 import static io.onedev.server.security.SecurityUtils.getUser;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,6 +69,7 @@ import io.onedev.server.web.component.user.UserAvatar;
 
 public class ChatPanel extends Panel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String COOKIE_ACTIVE_AI = "active-ai";

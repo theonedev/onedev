@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.link.copytoclipboard;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.markup.head.HeaderItem;
@@ -10,6 +11,7 @@ import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class CopyToClipboardResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public CopyToClipboardResourceReference() {

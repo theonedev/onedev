@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.workspacespec.cacheconfig;
 
+import java.io.Serial;
 import java.util.List;
 
 import static io.onedev.server.web.translation.Translation._T;
@@ -9,6 +10,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanItemEditPanel;
 
 class CacheConfigEditPanel extends DrawCardBeanItemEditPanel<CacheConfig> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	CacheConfigEditPanel(String id, List<CacheConfig> configs, int configIndex, EditCallback callback) {

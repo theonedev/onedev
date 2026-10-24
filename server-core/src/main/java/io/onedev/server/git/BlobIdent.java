@@ -1,5 +1,6 @@
 package io.onedev.server.git;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import io.onedev.server.util.RevisionAndPath;
 
 public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**

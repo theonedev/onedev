@@ -1,5 +1,6 @@
 package io.onedev.server.model.support;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -10,6 +11,7 @@ import io.onedev.server.annotation.Patterns;
 @Editable
 public class ProjectAiSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String excludedReviewFiles;	

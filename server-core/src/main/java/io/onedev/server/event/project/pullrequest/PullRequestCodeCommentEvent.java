@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.io.Serial;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
@@ -10,6 +11,7 @@ import io.onedev.server.model.User;
 
 public abstract class PullRequestCodeCommentEvent extends PullRequestEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long commentId;

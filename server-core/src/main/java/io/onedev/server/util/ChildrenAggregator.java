@@ -1,11 +1,13 @@
 package io.onedev.server.util;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 public abstract class ChildrenAggregator<T> implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public List<T> getAggregatedChildren(@Nullable T node) {

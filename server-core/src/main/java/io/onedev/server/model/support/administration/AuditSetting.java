@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.constraints.Min;
@@ -10,6 +11,7 @@ import io.onedev.server.annotation.OmitName;
 @Editable
 public class AuditSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_PRESERVE_DAYS = "preserveDays";

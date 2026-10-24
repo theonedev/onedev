@@ -10,6 +10,7 @@ import io.onedev.server.model.support.BuildMetric;
 import org.antlr.v4.runtime.*;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +21,7 @@ import static io.onedev.server.search.buildmetric.BuildMetricQueryParser.*;
 
 public class BuildMetricQuery implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final BuildMetricCriteria criteria;

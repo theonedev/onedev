@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.workspaces.detail.terminal;
 
+import java.io.Serial;
+
 import jakarta.inject.Inject;
 
 import org.apache.wicket.Component;
@@ -18,6 +20,7 @@ import io.onedev.server.workspace.WorkspaceService;
 
 public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_SHELL = "shell";

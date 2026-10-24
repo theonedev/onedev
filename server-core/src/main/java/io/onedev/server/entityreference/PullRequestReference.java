@@ -1,11 +1,14 @@
 package io.onedev.server.entityreference;
 
+import java.io.Serial;
+
 import io.onedev.server.model.Project;
 
 import org.jspecify.annotations.Nullable;
 
 public class PullRequestReference extends EntityReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TYPE = "PR";

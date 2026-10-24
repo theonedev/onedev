@@ -1,5 +1,7 @@
 package io.onedev.server.web.component;
 
+import java.io.Serial;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -10,6 +12,7 @@ import io.onedev.server.web.page.base.BasePage;
 
 public abstract class AjaxLazyLoadPanel extends org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel<Component> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public AjaxLazyLoadPanel(String id) {

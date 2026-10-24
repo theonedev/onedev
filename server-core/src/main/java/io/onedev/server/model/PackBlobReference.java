@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -8,6 +10,7 @@ import jakarta.persistence.*;
 		uniqueConstraints={@UniqueConstraint(columnNames={"pack_id", "packBlob_id"})})
 public class PackBlobReference extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_PACK = "pack";

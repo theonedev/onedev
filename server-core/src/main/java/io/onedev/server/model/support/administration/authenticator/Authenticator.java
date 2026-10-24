@@ -8,12 +8,14 @@ import io.onedev.server.util.usage.Usage;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Editable
 @JsonTypeInfo(use=Id.CLASS)
 public abstract class Authenticator implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String defaultGroup;

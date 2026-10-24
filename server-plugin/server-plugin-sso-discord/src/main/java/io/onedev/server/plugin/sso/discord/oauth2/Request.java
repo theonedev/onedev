@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -15,6 +16,7 @@ import org.jspecify.annotations.Nullable;
 import org.apache.http.entity.ContentType;
 
 public class Request implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private static final String AUTHORIZE_ENDPOINT = "https://discord.com/api/oauth2/authorize";
 	private static final String USER_AGENT = "onedev";

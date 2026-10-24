@@ -1,6 +1,7 @@
 package io.onedev.server.rest.resource;
 
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -531,6 +532,7 @@ public class IssueResource {
 	@EntityCreate(Issue.class)
 	public static class IssueOpenData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Api(order=100)
@@ -621,6 +623,7 @@ public class IssueResource {
 	
 	public static class StateTransitionData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Api(order=100)
@@ -667,6 +670,7 @@ public class IssueResource {
 
 	public static class FixCommit implements Serializable {
 		
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private Long projectId;

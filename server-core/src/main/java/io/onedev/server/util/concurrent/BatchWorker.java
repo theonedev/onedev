@@ -1,5 +1,6 @@
 package io.onedev.server.util.concurrent;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import com.google.common.base.Preconditions;
 
 public abstract class BatchWorker implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String id;

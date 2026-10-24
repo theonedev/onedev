@@ -2,6 +2,7 @@ package io.onedev.server.search.commit;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import io.onedev.server.service.UserService;
 
 public abstract class PersonCriteria extends CommitCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<String> values;

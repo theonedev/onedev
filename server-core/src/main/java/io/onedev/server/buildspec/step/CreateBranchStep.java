@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.step;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable(name="Create Branch", order=280)
 public class CreateBranchStep extends ServerSideStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private BranchNameProvider branchNameProvider = new GeneratedBranchName();

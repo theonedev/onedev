@@ -10,6 +10,7 @@ import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +64,7 @@ import io.onedev.server.web.util.WicketUtils;
 @ClassValidating
 public class Job implements NamedElement, Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String SELECTION_PREFIX = "jobs/";

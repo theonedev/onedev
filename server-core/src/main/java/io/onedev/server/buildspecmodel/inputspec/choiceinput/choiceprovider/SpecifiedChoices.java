@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -29,6 +30,7 @@ import io.onedev.server.annotation.OmitName;
 @ClassValidating
 public class SpecifiedChoices extends ChoiceProvider implements Validatable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<Choice> choices = new ArrayList<>();

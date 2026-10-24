@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.field.spec;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=1110, name=FieldSpec.ITERATION)
 public class IterationChoiceField extends FieldSpec {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job.action;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -31,6 +32,7 @@ import io.onedev.server.security.SecurityUtils;
 @Editable(name="Create issue", order=300)
 public class CreateIssueAction extends PostBuildAction {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String issueTitle;

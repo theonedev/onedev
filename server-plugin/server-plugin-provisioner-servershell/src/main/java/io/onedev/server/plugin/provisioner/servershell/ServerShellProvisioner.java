@@ -15,6 +15,7 @@ import static java.util.stream.Collectors.toMap;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +63,7 @@ import io.onedev.server.workspace.WorkspaceRuntime;
 		on a dedicated agent host, especially for untrusted workspaces.""")
 public class ServerShellProvisioner extends WorkspaceProvisioner implements Testable<Testable.None> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	static final int ORDER = 400;

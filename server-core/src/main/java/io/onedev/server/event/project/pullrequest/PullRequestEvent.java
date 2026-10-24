@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
@@ -13,6 +14,7 @@ import io.onedev.server.model.User;
 
 public abstract class PullRequestEvent extends ProjectEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long requestId;

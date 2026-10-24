@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 
 public class BoardParam extends ParamSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public BoardParam(boolean optional) {

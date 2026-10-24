@@ -14,6 +14,7 @@ package io.onedev.server.web.component.select2;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -31,6 +32,7 @@ import org.apache.wicket.util.string.Strings;
  */
 public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public Select2Choice(String id, IModel<T> model, ChoiceProvider<T> provider) {

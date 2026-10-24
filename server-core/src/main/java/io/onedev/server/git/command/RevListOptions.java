@@ -1,5 +1,6 @@
 package io.onedev.server.git.command;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,6 +13,7 @@ import io.onedev.server.git.command.RevListCommand.Order;
 
 public class RevListOptions implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
     private List<String> revisions = new ArrayList<>();

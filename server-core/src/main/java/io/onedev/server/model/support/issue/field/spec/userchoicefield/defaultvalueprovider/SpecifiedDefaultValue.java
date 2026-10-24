@@ -8,6 +8,7 @@ import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
 import jakarta.validation.constraints.Size;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 		description = "For a particular project, the first matching entry will be used")
 public class SpecifiedDefaultValue implements DefaultValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<DefaultValue> defaultValues = new ArrayList<>();

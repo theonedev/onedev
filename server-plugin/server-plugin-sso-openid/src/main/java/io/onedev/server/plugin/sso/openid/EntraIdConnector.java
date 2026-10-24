@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.sso.openid;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import net.minidev.json.JSONObject;
 @Editable(name="Microsoft Entra ID", order=125)
 public class EntraIdConnector extends OpenIdConnector {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String tenantId;

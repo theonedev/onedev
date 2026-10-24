@@ -3,6 +3,8 @@ package io.onedev.server.model;
 import static io.onedev.server.model.AgentAttribute.PROP_NAME;
 import static io.onedev.server.model.AgentAttribute.PROP_VALUE;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,6 +33,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class AgentAttribute extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_AGENT = "agent";

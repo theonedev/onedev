@@ -1,11 +1,14 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.io.Serial;
+
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
 public class PullRequestOpened extends PullRequestEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PullRequestOpened(PullRequest request) {

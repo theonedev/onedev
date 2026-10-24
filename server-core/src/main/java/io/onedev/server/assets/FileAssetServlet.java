@@ -1,6 +1,7 @@
 package io.onedev.server.assets;
 
 import java.io.File;
+import java.io.Serial;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -17,6 +18,7 @@ import com.google.common.base.Preconditions;
  */
 public class FileAssetServlet extends AssetServlet {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileAssetServlet.class);

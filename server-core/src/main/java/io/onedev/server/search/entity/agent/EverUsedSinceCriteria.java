@@ -7,6 +7,7 @@ import static io.onedev.server.search.entity.agent.AgentQueryLexer.EverUsedSince
 import static io.onedev.server.util.QueryUtils.getDateValue;
 import static io.onedev.server.util.QueryUtils.getPath;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
@@ -22,6 +23,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class EverUsedSinceCriteria extends Criteria<Agent> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Date date;

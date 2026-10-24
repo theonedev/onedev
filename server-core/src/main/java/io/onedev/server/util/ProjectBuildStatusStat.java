@@ -1,11 +1,13 @@
 package io.onedev.server.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.server.model.Build;
 
 public class ProjectBuildStatusStat implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long projectId;

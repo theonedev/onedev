@@ -9,6 +9,7 @@ import static io.onedev.server.search.commit.CommitQueryLexer.SINCE;
 import static io.onedev.server.search.commit.CommitQueryLexer.TAG;
 import static io.onedev.server.search.commit.CommitQueryLexer.UNTIL;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -25,6 +26,7 @@ import io.onedev.server.model.Project;
 
 public class Revision implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public enum Type {BRANCH, TAG, BUILD, COMMIT};

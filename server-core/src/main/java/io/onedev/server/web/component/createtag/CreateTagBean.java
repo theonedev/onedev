@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.createtag;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.ConstraintValidatorContext;
@@ -18,6 +19,7 @@ import io.onedev.server.annotation.OmitName;
 @ClassValidating
 public class CreateTagBean implements Validatable, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String name;

@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
 public class CommitParam extends ParamSegment {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public CommitParam(boolean optional) {

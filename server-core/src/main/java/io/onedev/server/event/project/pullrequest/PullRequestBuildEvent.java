@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.io.Serial;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
@@ -8,6 +9,7 @@ import io.onedev.server.model.Build;
 
 public class PullRequestBuildEvent extends PullRequestEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long buildId;

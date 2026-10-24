@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.buildspec.job.projectdependency;
 
+import java.io.Serial;
 import java.util.List;
 
 import static io.onedev.server.web.translation.Translation._T;
@@ -11,6 +12,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanItemEditPanel;
 abstract class ProjectDependencyEditPanel extends DrawCardBeanItemEditPanel<ProjectDependency>
 		implements BuildSpecAware, JobAware {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ProjectDependencyEditPanel(String id, List<ProjectDependency> dependencies, int dependencyIndex,

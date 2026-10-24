@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.spec.userchoiceparam;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.
 @Editable(order=150, name= ParamSpec.USER)
 public class UserChoiceParam extends ParamSpec {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private ChoiceProvider choiceProvider = new AllUsers();

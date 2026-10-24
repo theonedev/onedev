@@ -9,11 +9,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.util.*;
 
 @Editable(name="Evaluate script to get value or secret")
 public class ScriptingValue implements ValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String DISPLAY_NAME = "Evaluate script to get value";

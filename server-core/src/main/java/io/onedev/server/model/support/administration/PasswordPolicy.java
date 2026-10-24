@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -9,6 +10,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class PasswordPolicy implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private int minLength = 8;

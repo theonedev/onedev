@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -16,6 +18,7 @@ import io.onedev.server.model.support.EntityReaction;
 )
 public class IssueWorkReaction extends EntityReaction {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_WORK = "work";

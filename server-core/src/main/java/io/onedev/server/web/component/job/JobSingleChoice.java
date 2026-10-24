@@ -2,6 +2,7 @@ package io.onedev.server.web.component.job;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
@@ -11,6 +12,7 @@ import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
 
 public class JobSingleChoice extends Select2Choice<String> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public JobSingleChoice(String id, IModel<String> model, IModel<List<String>> choicesModel, boolean tagsMode) {

@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.role;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +16,7 @@ import io.onedev.server.annotation.OmitName;
 @Editable(order=200, name="All except")
 public class ExcludeIssueFields implements IssueFieldSet {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<String> excludeFields = new ArrayList<>();

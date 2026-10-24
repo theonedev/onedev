@@ -1,5 +1,6 @@
 package io.onedev.server.assets;
 
+import java.io.Serial;
 import java.net.URL;
 
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ClasspathAssetServlet extends AssetServlet {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Class<?> packageLocator;

@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.servicelocator;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
 class ServiceLocatorListViewPanel extends DrawCardBeanListViewPanel<ServiceLocator> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	ServiceLocatorListViewPanel(String id, List<Serializable> elements) {
@@ -45,6 +47,7 @@ class ServiceLocatorListViewPanel extends DrawCardBeanListViewPanel<ServiceLocat
 
 		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of(_T("Applicable Services"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -59,6 +62,7 @@ class ServiceLocatorListViewPanel extends DrawCardBeanListViewPanel<ServiceLocat
 
 		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of(_T("Applicable Images"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -73,6 +77,7 @@ class ServiceLocatorListViewPanel extends DrawCardBeanListViewPanel<ServiceLocat
 
 		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of(_T("#Node Selector Entries"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

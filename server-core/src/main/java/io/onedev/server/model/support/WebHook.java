@@ -13,6 +13,7 @@ import io.onedev.server.annotation.Editable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
 @Editable
 public class WebHook implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public enum EventType {

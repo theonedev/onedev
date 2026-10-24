@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectStreamException;
 import java.io.OutputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -143,6 +144,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 	private static final BatchWorker SYNC_WORKER = new BatchWorker("data-sync") {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -841,6 +843,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 		var remoteServer = clusterService.getLocalServerAddress();
 		clusterService.submitToAllServers(new ClusterTask<Void>() {
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

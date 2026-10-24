@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +28,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 
 public abstract class FieldCriteria extends Criteria<Issue> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String fieldName;

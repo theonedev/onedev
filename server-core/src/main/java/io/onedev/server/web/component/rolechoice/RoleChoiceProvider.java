@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.rolechoice;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import io.onedev.server.web.component.select2.ResponseFiller;
 
 public class RoleChoiceProvider extends AbstractRoleChoiceProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final IModel<Collection<Role>> choicesModel;
@@ -31,6 +33,7 @@ public class RoleChoiceProvider extends AbstractRoleChoiceProvider {
 	public void query(String term, int page, Response<Role> response) {
 		List<Role> similarities = new Similarities<Role>(choicesModel.getObject()) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

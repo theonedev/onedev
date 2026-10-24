@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.issue.field.instance;
 
+import java.io.Serial;
+
 import io.onedev.server.annotation.Editable;
 
 /**
@@ -8,6 +10,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class JevDecideValue extends SpecifiedValue {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String DISPLAY_NAME = "Decide by Jev";

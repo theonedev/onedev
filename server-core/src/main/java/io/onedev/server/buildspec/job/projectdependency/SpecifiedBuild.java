@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job.projectdependency;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable(order=200, name="Specify by Build Number")
 public class SpecifiedBuild implements BuildProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String buildNumber;

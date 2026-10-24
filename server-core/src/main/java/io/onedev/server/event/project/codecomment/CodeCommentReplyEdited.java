@@ -5,10 +5,12 @@ import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.security.SecurityUtils;
 
+import java.io.Serial;
 import java.util.Date;
 
 public class CodeCommentReplyEdited extends CodeCommentEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long replyId;

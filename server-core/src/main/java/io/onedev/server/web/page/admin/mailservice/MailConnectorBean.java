@@ -3,11 +3,13 @@ package io.onedev.server.web.page.admin.mailservice;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.administration.mailservice.MailConnector;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Editable
 public class MailConnectorBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private MailConnector mailConnector;

@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
+import java.io.Serial;
+
 import jakarta.validation.constraints.NotEmpty;
 
 import io.onedev.server.annotation.Editable;
@@ -7,6 +9,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=300)
 public class SearchGroupsUsingFilter implements GroupRetrieval {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String groupSearchBase;

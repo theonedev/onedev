@@ -4,6 +4,7 @@ import static io.onedev.agent.AgentUtils.buildAuthConfig;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 		"This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor")
 public class BuildImageWithKanikoStep extends CommandStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String buildContext;
@@ -190,6 +192,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 	@Editable(order=100, name="Push to container registry")
 	public static class RegistryOutput implements Output {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private String destinations;
@@ -228,6 +231,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 	@Editable(order=200, name="Export as OCI layout")
 	public static class OCIOutput implements Output {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String destPath;

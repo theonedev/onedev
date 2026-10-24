@@ -902,6 +902,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			if (jobServer != null) {
 				clusterService.runOnServer(jobServer, new ClusterTask<Void>() {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -944,6 +945,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 				return new JobShell(build.getId(), terminal.getSessionId()) {
 
+					@Serial
 					private static final long serialVersionUID = 1L;
 
 					@Override

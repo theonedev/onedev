@@ -2,6 +2,8 @@ package io.onedev.server.buildspec.step;
 
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 
+import java.io.Serial;
+
 import io.onedev.k8shelper.PruneBuilderCacheFacade;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.annotation.Editable;
@@ -18,6 +20,7 @@ import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 		"to remove cache of the builder used by the Docker or sandbox executor")
 public class PruneBuilderCacheStep extends Step {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String options;

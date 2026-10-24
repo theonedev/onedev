@@ -1,5 +1,7 @@
 package io.onedev.server.exception.handler;
 
+import java.io.Serial;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -7,6 +9,7 @@ import io.onedev.server.exception.HttpResponse;
 
 public class EntityNotFoundExceptionHandler extends AbstractExceptionHandler<EntityNotFoundException> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.workflowreconcile;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.WorkflowReconcileP
 @Editable
 public class UndefinedFieldValueResolution implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public enum FixType {CHANGE_TO_ANOTHER_VALUE, DELETE_THIS_VALUE}

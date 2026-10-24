@@ -2,6 +2,7 @@ package io.onedev.server.rest.resource;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -445,6 +446,7 @@ public class RepositoryResource {
 	// applications to consume
 	public static class FileEditResponse implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		String commitHash;
@@ -453,6 +455,7 @@ public class RepositoryResource {
 
 	public static class RefResponse implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		String refName;
@@ -464,6 +467,7 @@ public class RepositoryResource {
 
 	public static class CreateBranchRequest implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String branchName;
@@ -493,6 +497,7 @@ public class RepositoryResource {
 
 	public static class CreateTagRequest implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String tagName;
@@ -532,6 +537,7 @@ public class RepositoryResource {
 
 	public static class DirectoryChild implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		String path;
@@ -542,6 +548,7 @@ public class RepositoryResource {
 	
 	public static class FileResponse implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		String path;
@@ -563,6 +570,7 @@ public class RepositoryResource {
 	
 	public static class CommitResponse implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		String commitHash;

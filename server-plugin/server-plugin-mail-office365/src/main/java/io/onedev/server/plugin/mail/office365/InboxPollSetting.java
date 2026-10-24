@@ -3,11 +3,13 @@ package io.onedev.server.plugin.mail.office365;
 import io.onedev.server.annotation.Editable;
 
 import jakarta.validation.constraints.Min;
+import java.io.Serial;
 import java.io.Serializable;
 
 @Editable
 public class InboxPollSetting implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private int pollInterval = 60;

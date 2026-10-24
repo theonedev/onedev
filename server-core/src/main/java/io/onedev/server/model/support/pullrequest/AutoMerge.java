@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.pullrequest;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.jspecify.annotations.Nullable;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.OptimisticLock;
 @Embeddable
 public class AutoMerge implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String COLUMN_ENABLED = "AUTO_MERGE_ENABLED";

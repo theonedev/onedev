@@ -29,6 +29,7 @@ import static io.onedev.server.codequality.CoverageStats.getReportLockName;
 @Editable
 public abstract class PublishCoverageReportStep extends PublishReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Override

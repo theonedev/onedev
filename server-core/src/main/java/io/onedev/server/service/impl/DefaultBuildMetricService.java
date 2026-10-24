@@ -8,6 +8,7 @@ import static io.onedev.server.model.support.BuildMetric.PROP_BUILD;
 import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
 import static io.onedev.server.model.support.TimeGroups.PROP_DAY;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -242,6 +243,7 @@ public class DefaultBuildMetricService implements BuildMetricService {
 	
 	private static class Key implements Serializable {
 		
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Long projectId;

@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import io.onedev.server.model.Project;
 		"This step can only be executed by a docker aware executor. It runs under <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>")
 public class SCPCommandStep extends CommandStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String privateKeySecret;

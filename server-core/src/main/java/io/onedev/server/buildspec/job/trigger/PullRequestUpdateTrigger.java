@@ -1,5 +1,7 @@
 package io.onedev.server.buildspec.job.trigger;
 
+import java.io.Serial;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.TriggerMatch;
@@ -13,6 +15,7 @@ import io.onedev.server.event.project.pullrequest.PullRequestBuildCommitUpdated;
 		+ "<code>[skip job]</code>, <code>[job skip]</code>, or <code>[no job]</code>")
 public class PullRequestUpdateTrigger extends PullRequestTrigger {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

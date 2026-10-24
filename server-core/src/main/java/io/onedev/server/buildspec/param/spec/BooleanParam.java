@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.spec;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=300, name=ParamSpec.BOOLEAN)
 public class BooleanParam extends ParamSpec {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private DefaultValueProvider defaultValueProvider = new FalseDefaultValue();

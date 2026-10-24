@@ -1,5 +1,7 @@
 package io.onedev.server.exception.handler;
 
+import java.io.Serial;
+
 import io.onedev.server.exception.HttpResponse;
 import io.onedev.server.exception.HttpResponseBody;
 import io.onedev.server.security.SecurityUtils;
@@ -12,6 +14,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 
 public class UnauthorizedExceptionHandler extends AbstractExceptionHandler<UnauthorizedException> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Override

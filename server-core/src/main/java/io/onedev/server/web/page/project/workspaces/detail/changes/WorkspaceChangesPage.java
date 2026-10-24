@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.workspaces.detail.changes;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import io.onedev.agent.workspace.GitExecutionResult;
 
 public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_FILE = "file";
@@ -83,6 +85,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	private final IModel<List<RepositoryInfo>> repositoriesModel = new LoadableDetachableModel<>() {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -1267,6 +1270,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	private static class Selection implements Serializable {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		final String repository;
@@ -1279,6 +1283,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	private static class RepositoryInfo implements Serializable {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		final String path;
@@ -1291,6 +1296,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	private static class FileEntry implements Serializable {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		final char indexStatus;
@@ -1337,6 +1343,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	private static class StatusInfo implements Serializable {
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		final List<FileEntry> entries;

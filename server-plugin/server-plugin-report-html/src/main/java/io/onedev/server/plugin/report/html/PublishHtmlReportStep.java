@@ -4,6 +4,7 @@ import static io.onedev.commons.utils.LockUtils.write;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -29,6 +30,7 @@ import io.onedev.server.persistence.SessionService;
 @Editable(order=1070, group= StepGroup.PUBLISH, name="Html Report")
 public class PublishHtmlReportStep extends PublishReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String CATEGORY = "html";

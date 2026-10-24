@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,6 +29,7 @@ import io.onedev.server.util.facade.EmailAddressFacade;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class EmailAddress extends AbstractEntity {
     
+    @Serial
     private static final long serialVersionUID = 1L;
     
     public static final String PROP_OWNER = "owner";

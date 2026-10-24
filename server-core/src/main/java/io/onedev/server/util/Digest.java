@@ -3,6 +3,7 @@ package io.onedev.server.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -13,6 +14,7 @@ import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
 public class Digest implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String SHA256 = "SHA-256";

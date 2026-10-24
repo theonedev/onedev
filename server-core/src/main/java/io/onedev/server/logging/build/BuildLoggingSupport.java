@@ -1,5 +1,6 @@
 package io.onedev.server.logging.build;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,7 @@ import io.onedev.server.service.ProjectService;
 /** Logging support for one named build stage. */
 public class BuildLoggingSupport implements LoggingSupport {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long projectId;

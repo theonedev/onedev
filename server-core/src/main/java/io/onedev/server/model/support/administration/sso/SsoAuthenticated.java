@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration.sso;
 
+import java.io.Serial;
 import java.util.Collection;
 
 import org.jspecify.annotations.Nullable;
@@ -8,6 +9,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticated
 
 public class SsoAuthenticated extends Authenticated {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String subject;

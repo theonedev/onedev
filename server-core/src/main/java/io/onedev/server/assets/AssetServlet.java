@@ -1,6 +1,7 @@
 package io.onedev.server.assets;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.net.URL;
 
 import jakarta.servlet.DispatcherType;
@@ -23,6 +24,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
  */
 public abstract class AssetServlet extends ResourceServlet {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
     private org.eclipse.jetty.util.resource.ResourceFactory.Closeable resourceFactory;

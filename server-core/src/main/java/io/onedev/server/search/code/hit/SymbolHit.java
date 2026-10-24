@@ -1,5 +1,7 @@
 package io.onedev.server.search.code.hit;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
@@ -10,6 +12,7 @@ import io.onedev.commons.utils.LinearRange;
 
 public class SymbolHit extends QueryHit {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Symbol symbol;

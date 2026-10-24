@@ -1,5 +1,6 @@
 package io.onedev.server.web.asset.plantuml;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.apache.wicket.markup.head.HeaderItem;
@@ -12,6 +13,7 @@ import io.onedev.server.web.resourcebundle.ResourceBundle;
 @ResourceBundle
 public class PlantUmlResourceReference extends BaseDependentResourceReference {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public PlantUmlResourceReference() {

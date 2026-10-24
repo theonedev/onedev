@@ -12,6 +12,7 @@
  */
 package io.onedev.server.web.component.select2;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.json.JSONException;
@@ -26,6 +27,7 @@ import io.onedev.server.web.component.select2.json.Json;
  * @author igor
  */
 public final class AjaxSettings implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private CharSequence url;

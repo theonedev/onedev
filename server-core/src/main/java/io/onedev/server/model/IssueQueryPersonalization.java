@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -28,6 +29,7 @@ import io.onedev.server.util.watch.QueryWatchSupport;
 )
 public class IssueQueryPersonalization extends AbstractEntity implements QueryPersonalization<NamedIssueQuery> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_PROJECT = "project";

@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.field.spec.userchoicefield;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import io.onedev.server.util.usage.Usage;
 @Editable(order=150, name= FieldSpec.USER)
 public class UserChoiceField extends FieldSpec {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private ChoiceProvider choiceProvider = new AllUsers();

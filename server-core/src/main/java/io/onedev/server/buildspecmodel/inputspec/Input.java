@@ -1,5 +1,6 @@
 package io.onedev.server.buildspecmodel.inputspec;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
  */
 public class Input implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(Input.class);

@@ -1,5 +1,6 @@
 package io.onedev.server.search.buildmetric;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -11,6 +12,7 @@ import io.onedev.commons.utils.StringUtils;
 
 public abstract class BuildMetricCriteria implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private boolean withParens;

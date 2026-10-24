@@ -2,6 +2,7 @@ package io.onedev.server.git;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -12,6 +13,7 @@ import com.google.common.base.Objects;
 
 public class BlameCommit implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final String hash;

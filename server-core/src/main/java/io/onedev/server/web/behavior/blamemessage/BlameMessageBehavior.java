@@ -1,5 +1,6 @@
 package io.onedev.server.web.behavior.blamemessage;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.apache.wicket.Component;
@@ -18,6 +19,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
 public abstract class BlameMessageBehavior extends AbstractPostAjaxBehavior {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

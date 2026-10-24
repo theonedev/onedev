@@ -4,12 +4,14 @@ import org.eclipse.angus.mail.util.MailSSLSocketFactory;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.security.TrustCertsSSLSocketFactory;
 
+import java.io.Serial;
 import java.security.GeneralSecurityException;
 import java.util.Properties;
 
 @Editable
 public abstract class SmtpWithSsl implements SmtpSslSetting {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private boolean trustAll;

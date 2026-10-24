@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.report.playwright;
 
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import io.onedev.server.codequality.UnitTestReport.TestCase;
 @Editable(order=10000, group=StepGroup.PUBLISH, name="Playwright Test Report")
 public class PublishPlaywrightReportStep extends PublishUnitTestReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Editable(order=100, description="""

@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.code;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +28,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 @Editable
 public class TagProtection implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private boolean enabled = true;

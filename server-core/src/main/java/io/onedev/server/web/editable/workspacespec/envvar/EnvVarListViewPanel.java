@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.workspacespec.envvar;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
 class EnvVarListViewPanel extends DrawCardBeanListViewPanel<EnvVar> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	EnvVarListViewPanel(String id, List<Serializable> elements) {
@@ -36,6 +38,7 @@ class EnvVarListViewPanel extends DrawCardBeanListViewPanel<EnvVar> {
 
 		columns.add(new AbstractColumn<EnvVar, Void>(Model.of(_T("Name"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -47,6 +50,7 @@ class EnvVarListViewPanel extends DrawCardBeanListViewPanel<EnvVar> {
 
 		columns.add(new AbstractColumn<EnvVar, Void>(Model.of(_T("Value"))) {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

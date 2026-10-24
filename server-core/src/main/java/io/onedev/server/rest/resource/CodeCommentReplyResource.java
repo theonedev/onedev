@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.inject.Inject;
@@ -101,6 +102,7 @@ public class CodeCommentReplyResource {
 	@EntityCreate(CodeCommentReply.class)
 	public static class CodeCommentReplyCreateData implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private Long commentId;

@@ -1,7 +1,10 @@
 package io.onedev.server.web.component.floating;
 
+import java.io.Serial;
+
 public class RectTarget implements AlignTarget {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static final int CURSOR_WIDTH = 6;

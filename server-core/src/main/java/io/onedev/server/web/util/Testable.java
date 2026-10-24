@@ -1,5 +1,6 @@
 package io.onedev.server.web.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import io.onedev.commons.utils.TaskLogger;
@@ -10,6 +11,7 @@ public interface Testable<T extends Serializable> {
 	
 	public static class None implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 	}

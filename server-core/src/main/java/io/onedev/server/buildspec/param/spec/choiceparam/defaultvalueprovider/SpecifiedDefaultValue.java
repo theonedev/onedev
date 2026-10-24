@@ -8,12 +8,14 @@ import io.onedev.server.annotation.OmitName;
 
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String value;

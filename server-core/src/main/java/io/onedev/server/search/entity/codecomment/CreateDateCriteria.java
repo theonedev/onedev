@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.codecomment;
 
+import java.io.Serial;
 import java.util.Date;
 
 import org.jspecify.annotations.Nullable;
@@ -15,6 +16,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class CreateDateCriteria extends Criteria<CodeComment> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final int operator;

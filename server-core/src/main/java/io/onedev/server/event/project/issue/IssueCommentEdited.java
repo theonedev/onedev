@@ -5,10 +5,12 @@ import io.onedev.server.service.IssueCommentService;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.security.SecurityUtils;
 
+import java.io.Serial;
 import java.util.Date;
 
 public class IssueCommentEdited extends IssueEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Long commentId;

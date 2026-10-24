@@ -1,5 +1,6 @@
 package io.onedev.server.web.util;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import io.onedev.server.annotation.OmitName;
 @Editable
 public class NamedIssueQueriesBean extends NamedQueriesBean<NamedIssueQuery> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private List<NamedIssueQuery> queries = new ArrayList<>();

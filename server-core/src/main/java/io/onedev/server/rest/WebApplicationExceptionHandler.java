@@ -1,5 +1,7 @@
 package io.onedev.server.rest;
 
+import java.io.Serial;
+
 import io.onedev.server.exception.HttpResponse;
 import io.onedev.server.exception.HttpResponseBody;
 import io.onedev.server.exception.handler.AbstractExceptionHandler;
@@ -9,6 +11,7 @@ import jakarta.ws.rs.WebApplicationException;
 
 public class WebApplicationExceptionHandler extends AbstractExceptionHandler<WebApplicationException> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

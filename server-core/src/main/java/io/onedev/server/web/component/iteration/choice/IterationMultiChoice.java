@@ -2,6 +2,7 @@ package io.onedev.server.web.component.iteration.choice;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.Serial;
 import java.util.Collection;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -13,6 +14,7 @@ import io.onedev.server.web.component.select2.Select2MultiChoice;
 
 public class IterationMultiChoice extends Select2MultiChoice<Iteration> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public IterationMultiChoice(String id, IModel<Collection<Iteration>> selectionsModel, IModel<Collection<Iteration>>choicesModel) {

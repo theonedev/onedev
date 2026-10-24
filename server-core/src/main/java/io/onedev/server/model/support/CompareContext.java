@@ -7,11 +7,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 
 @Embeddable
 public class CompareContext implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_PULL_REQUEST = "pullRequest";

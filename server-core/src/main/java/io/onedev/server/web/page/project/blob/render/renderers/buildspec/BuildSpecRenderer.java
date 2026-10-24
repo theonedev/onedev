@@ -11,11 +11,13 @@ import io.onedev.server.web.page.project.blob.render.source.SourceViewPanel;
 import org.apache.wicket.Component;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.List;
 import java.util.stream.IntStream;
 
 public class BuildSpecRenderer implements BlobRenderer {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String POSITION_PREFIX = "buildspec-";

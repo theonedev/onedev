@@ -2,10 +2,12 @@ package io.onedev.server.exception.handler;
 
 import io.onedev.server.util.ReflectionUtils;
 
+import java.io.Serial;
 import java.util.List;
 
 public abstract class AbstractExceptionHandler<T extends Throwable> implements ExceptionHandler<T> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Class<T> exceptionClass;

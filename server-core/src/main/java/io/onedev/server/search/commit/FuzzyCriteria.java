@@ -2,6 +2,7 @@ package io.onedev.server.search.commit;
 
 import static io.onedev.commons.utils.match.WildcardUtils.matchString;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import io.onedev.server.model.Project;
 
 public class FuzzyCriteria extends CommitCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<String> values;

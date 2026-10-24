@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.workspacespec.envvar;
 
+import java.io.Serial;
 import java.util.List;
 
 import static io.onedev.server.web.translation.Translation._T;
@@ -9,6 +10,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanItemEditPanel;
 
 class EnvVarEditPanel extends DrawCardBeanItemEditPanel<EnvVar> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	EnvVarEditPanel(String id, List<EnvVar> envVars, int envVarIndex, EditCallback callback) {

@@ -9,6 +9,7 @@ import io.onedev.server.search.entity.SortField;
 
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
@@ -26,6 +27,7 @@ import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 )
 public class Pack extends AbstractEntity implements LabelSupport<PackLabel> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String NAME_PROJECT = "Project";

@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.*;
 
 import io.onedev.server.model.support.EntityReaction;
@@ -11,6 +13,7 @@ import io.onedev.server.model.support.EntityReaction;
 )
 public class PullRequestCommentReaction extends EntityReaction {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static final String PROP_COMMENT = "comment";

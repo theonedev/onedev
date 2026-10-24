@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.step;
 
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 @Editable(order=50, name="Checkout Code")
 public class CheckoutStep extends Step {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private GitCredential cloneCredential = new DefaultCredential();

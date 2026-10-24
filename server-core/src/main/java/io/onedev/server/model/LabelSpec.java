@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import static io.onedev.server.model.LabelSpec.PROP_NAME;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -26,6 +27,7 @@ import io.onedev.server.rest.annotation.Api;
 @Editable
 public class LabelSpec extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_NAME = "name";

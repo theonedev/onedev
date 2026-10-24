@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -32,6 +33,7 @@ import io.onedev.server.rest.annotation.Immutable;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Iteration extends AbstractEntity {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public static final int MAX_DESCRIPTION_LEN = 15000;

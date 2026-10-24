@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
@@ -29,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 )
 public class WorkspaceQueryPersonalization extends AbstractEntity implements QueryPersonalization<NamedWorkspaceQuery> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.LAZY)

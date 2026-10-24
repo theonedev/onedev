@@ -1,5 +1,6 @@
 package io.onedev.server.web.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.apache.wicket.Component;
@@ -9,6 +10,7 @@ import io.onedev.server.web.editable.BeanContext;
 
 public abstract class ImportStep<T extends Serializable> implements WizardStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private T setting;

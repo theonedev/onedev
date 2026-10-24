@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import io.onedev.server.buildspecmodel.inputspec.Input;
 
 public class ParamCombination implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<ParamSpec> paramSpecs;

@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.ParseException;
 
@@ -16,6 +17,7 @@ import io.onedev.server.annotation.Editable;
 @ClassValidating
 public class BackupSetting implements Serializable, Validatable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String schedule;

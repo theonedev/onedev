@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -28,6 +29,7 @@ import io.onedev.server.util.watch.QueryWatchSupport;
 )
 public class PullRequestQueryPersonalization extends AbstractEntity implements QueryPersonalization<NamedPullRequestQuery> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch=FetchType.LAZY)

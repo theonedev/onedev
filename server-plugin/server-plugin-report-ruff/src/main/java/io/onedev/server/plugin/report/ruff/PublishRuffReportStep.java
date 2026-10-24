@@ -18,12 +18,14 @@ import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.io.File;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 @Editable(order=10000, group=StepGroup.PUBLISH, name="Ruff Report")
 public class PublishRuffReportStep extends PublishProblemReportStep {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public PublishRuffReportStep() {

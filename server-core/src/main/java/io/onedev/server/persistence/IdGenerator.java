@@ -1,5 +1,6 @@
 package io.onedev.server.persistence;
 
+import java.io.Serial;
 import java.util.EnumSet;
 
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -11,6 +12,7 @@ import io.onedev.commons.loader.AppLoader;
 
 public class IdGenerator implements BeforeExecutionGenerator {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

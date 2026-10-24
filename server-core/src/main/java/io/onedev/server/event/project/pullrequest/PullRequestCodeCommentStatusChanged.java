@@ -1,5 +1,7 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.io.Serial;
+
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
@@ -12,6 +14,7 @@ import io.onedev.server.util.commenttext.MarkdownText;
 
 public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long changeId;

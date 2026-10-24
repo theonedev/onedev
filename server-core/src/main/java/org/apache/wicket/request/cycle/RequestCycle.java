@@ -16,6 +16,7 @@
  */
 package org.apache.wicket.request.cycle;
 
+import java.io.Serial;
 import java.util.Optional;
 
 import java.io.Serializable;
@@ -931,6 +932,7 @@ public class RequestCycle implements IRequestCycle, IEventSink, IMetadataContext
 
 	private static class ResourceUrlCacheKey implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final ResourceReference resourceReference;
@@ -967,6 +969,7 @@ public class RequestCycle implements IRequestCycle, IEventSink, IMetadataContext
 	
 	private static class PageUrlCacheKey implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final Class<?> pageClass;

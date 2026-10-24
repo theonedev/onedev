@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.pack.npm;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import org.jspecify.annotations.Nullable;
 
 public class NpmData implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final byte[] packageMetadata;

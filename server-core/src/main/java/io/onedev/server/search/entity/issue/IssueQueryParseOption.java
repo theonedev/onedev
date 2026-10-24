@@ -1,9 +1,11 @@
 package io.onedev.server.search.entity.issue;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class IssueQueryParseOption implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private boolean withProjectCriteria = true;

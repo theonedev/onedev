@@ -2,6 +2,7 @@ package io.onedev.server.search.commit;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import io.onedev.server.model.Project;
 
 public class RevisionCriteria extends CommitCriteria {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<Revision> revisions;

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -219,6 +220,7 @@ public class ApiHelpJsonTest extends AppLoaderMocker {
 	public static class InternalResource { @GET public String get() { return null; } }
 
 	public static class TestEntity extends AbstractEntity {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		@Api(description = "<b>Name</b> &amp; description") private String name;
 		@Immutable private String immutable;
@@ -228,8 +230,9 @@ public class ApiHelpJsonTest extends AppLoaderMocker {
 	}
 
 	public enum Mode { FIRST, SECOND }
-	public abstract static class Choice implements Serializable { private static final long serialVersionUID = 1L; }
+	public abstract static class Choice implements Serializable { @Serial private static final long serialVersionUID = 1L; }
 	public static class FirstChoice extends Choice {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		private Mode mode;
 		private Date date;
@@ -248,6 +251,7 @@ public class ApiHelpJsonTest extends AppLoaderMocker {
 		}
 	}
 	public static class SecondChoice extends Choice {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		private String value;
 

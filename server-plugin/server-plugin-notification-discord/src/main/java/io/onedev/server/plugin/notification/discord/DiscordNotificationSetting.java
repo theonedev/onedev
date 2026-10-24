@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.notification.discord;
 
+import java.io.Serial;
+
 import io.onedev.server.model.support.channelnotification.ChannelNotificationSetting;
 import io.onedev.server.annotation.Editable;
 
@@ -8,6 +10,7 @@ import io.onedev.server.annotation.Editable;
 		"same webhook url")
 public class DiscordNotificationSetting extends ChannelNotificationSetting {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 }

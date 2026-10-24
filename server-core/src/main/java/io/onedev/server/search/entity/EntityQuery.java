@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private Criteria<T> criteria;

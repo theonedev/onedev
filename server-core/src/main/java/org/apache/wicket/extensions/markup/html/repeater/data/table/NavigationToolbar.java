@@ -16,6 +16,8 @@
  */
 package org.apache.wicket.extensions.markup.html.repeater.data.table;
 
+import java.io.Serial;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -30,6 +32,7 @@ import org.apache.wicket.model.IModel;
  */
 public class NavigationToolbar extends AbstractToolbar
 {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -44,6 +47,7 @@ public class NavigationToolbar extends AbstractToolbar
 
 		WebMarkupContainer span = new WebMarkupContainer("span") {
 
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 			@Override

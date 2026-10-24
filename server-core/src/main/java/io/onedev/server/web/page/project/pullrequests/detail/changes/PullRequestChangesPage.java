@@ -5,6 +5,7 @@ import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -932,6 +933,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	
 	public static class State implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		public String oldCommitHash;

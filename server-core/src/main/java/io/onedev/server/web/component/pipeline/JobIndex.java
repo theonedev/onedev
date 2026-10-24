@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.pipeline;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import io.onedev.server.buildspec.job.Job;
 
 public class JobIndex implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final int column;

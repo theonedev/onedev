@@ -12,6 +12,7 @@ import static io.onedev.server.model.Build.NAME_PROJECT;
 import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
 import static io.onedev.server.model.Build.NAME_TAG;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +54,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 
 public class ActionCondition extends Criteria<Build> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Criteria<Build> criteria;

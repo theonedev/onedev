@@ -1,5 +1,7 @@
 package io.onedev.server.exception.handler;
 
+import java.io.Serial;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.MultivaluedHashMap;
@@ -13,6 +15,7 @@ import io.onedev.server.security.SecurityUtils;
 
 public class AuthenticationExceptionHandler extends AbstractExceptionHandler<AuthenticationException> {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -2,11 +2,13 @@ package io.onedev.server.model.support.administration.mailservice;
 
 import io.onedev.server.annotation.Editable;
 
+import java.io.Serial;
 import java.util.Properties;
 
 @Editable(order=100, name="Implicit SSL")
 public class ImapImplicitSsl extends ImapWithSsl {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private int port = 993;

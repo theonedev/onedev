@@ -1,5 +1,6 @@
 package io.onedev.server.util.interpolative;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import io.onedev.server.util.interpolative.InterpolativeParser.SegmentContext;
 
 public class Interpolative implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final List<Segment> segments;
@@ -65,6 +67,7 @@ public class Interpolative implements Serializable {
 	
 	public static class Segment implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		public enum Type {LITERAL, VARIABLE};

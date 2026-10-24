@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.choice;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +32,7 @@ import io.onedev.server.web.component.select2.ResponseFiller;
 
 public abstract class IssueChoiceProvider extends ChoiceProvider<Issue> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final boolean useNumber;

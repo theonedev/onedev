@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.issue;
 
+import java.io.Serial;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
@@ -8,6 +9,7 @@ import io.onedev.server.model.Issue;
 
 public class IssueCommitsAttached extends IssueEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public IssueCommitsAttached(Issue issue) {

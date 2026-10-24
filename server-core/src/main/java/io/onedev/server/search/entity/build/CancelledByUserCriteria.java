@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.build;
 
+import java.io.Serial;
 import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
@@ -16,6 +17,7 @@ import io.onedev.server.util.criteria.Criteria;
 
 public class CancelledByUserCriteria extends Criteria<Build> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final User user;

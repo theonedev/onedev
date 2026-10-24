@@ -15,12 +15,14 @@ import static io.onedev.server.buildspec.param.ParamUtils.isCoveredBy;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 import static java.util.stream.Collectors.toSet;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
 @Editable(order=500, name="Dependency job finished")
 public class DependencyFinishedTrigger extends JobTrigger {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

@@ -1,10 +1,12 @@
 package io.onedev.server.util.artifact;
 
 import org.jspecify.annotations.Nullable;
+import java.io.Serial;
 import java.util.List;
 
 public class DirectoryInfo extends ArtifactInfo {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final List<ArtifactInfo> children;

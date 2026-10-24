@@ -4,6 +4,7 @@ import static io.onedev.server.codequality.UnitTestReport.ARTIFACTS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -32,6 +33,7 @@ import io.onedev.server.web.util.MimeUtils;
 
 public class TestArtifactResource extends AbstractResource {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_PROJECT = "project";

@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.apache.wicket.Component;
 
 public abstract class PullRequestSummaryPart implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final String reportName;

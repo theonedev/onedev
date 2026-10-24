@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.report.cppcheck;
 
 import java.io.File;
+import java.io.Serial;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import io.onedev.server.util.XmlUtils;
 @Editable(order=10000, group=StepGroup.PUBLISH, name="Cppcheck Report")
 public class PublishCppcheckReportStep extends PublishProblemReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Editable(order=100, description="Specify cppcheck xml result file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>. "

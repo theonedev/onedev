@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import io.onedev.server.security.SecurityUtils;
 
 public class PullRequestsDeleted extends ProjectEvent {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final Collection<Long> requestIds;

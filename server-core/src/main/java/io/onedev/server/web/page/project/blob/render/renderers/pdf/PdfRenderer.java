@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.pdf;
 
+import java.io.Serial;
+
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Component;
 
@@ -9,6 +11,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 public class PdfRenderer implements BlobRenderer {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

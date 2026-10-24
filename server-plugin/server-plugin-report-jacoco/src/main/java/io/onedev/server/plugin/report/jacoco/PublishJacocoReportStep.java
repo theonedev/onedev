@@ -2,6 +2,7 @@ package io.onedev.server.plugin.report.jacoco;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import io.onedev.server.util.XmlUtils;
 @Editable(order=10000, group=StepGroup.PUBLISH, name="JaCoCo Coverage Report")
 public class PublishJacocoReportStep extends PublishCoverageReportStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Editable(order=100, description="Specify JaCoCo coverage xml report file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>, "

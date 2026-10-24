@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import io.onedev.server.web.editable.BeanEditor;
 @Editable(order=10000, name="Use Step Template", description="Run specified step template")
 public class UseTemplateStep extends CompositeStep {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_TEMPLATE_NAME = "templateName";

@@ -1,9 +1,12 @@
 package io.onedev.server.rest.resource.support;
 
+import java.io.Serial;
+
 import io.onedev.server.rest.annotation.Api;
 
 public class FileCreateOrUpdateRequest extends FileEditRequest {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Api(description="Base64 encoding of created/updated file content")

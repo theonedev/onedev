@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.tabbable;
 
+import java.io.Serial;
+
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.Page;
@@ -11,6 +13,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class PageTabHead extends Panel {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final PageTab tab;

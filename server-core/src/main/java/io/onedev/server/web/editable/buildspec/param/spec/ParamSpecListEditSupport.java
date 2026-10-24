@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.buildspec.param.spec;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
 public class ParamSpecListEditSupport extends DrawCardBeanListEditSupport<ParamSpec> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

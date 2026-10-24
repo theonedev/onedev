@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.branch.create;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.ConstraintValidatorContext;
@@ -17,6 +18,7 @@ import io.onedev.server.annotation.OmitName;
 @ClassValidating
 public class CreateBranchBean implements Validatable, Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String name;

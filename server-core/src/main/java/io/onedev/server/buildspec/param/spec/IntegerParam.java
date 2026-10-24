@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.spec;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import io.onedev.server.annotation.Editable;
 @Editable(order=400, name=ParamSpec.INTEGER)
 public class IntegerParam extends ParamSpec {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private Integer minValue;

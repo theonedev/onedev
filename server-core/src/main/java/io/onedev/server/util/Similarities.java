@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 
 public abstract class Similarities<T> extends ArrayList<T> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public Similarities(Collection<T> collection) {

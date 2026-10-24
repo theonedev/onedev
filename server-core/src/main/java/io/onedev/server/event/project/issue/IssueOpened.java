@@ -1,5 +1,6 @@
 package io.onedev.server.event.project.issue;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import io.onedev.server.util.commenttext.MarkdownText;
 
 public class IssueOpened extends IssueEvent implements ProjectScopedCommitAware {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Collection<String> listeningEmailAddresses;

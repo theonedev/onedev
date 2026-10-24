@@ -1,11 +1,13 @@
 package io.onedev.server.codequality;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.apache.wicket.Component;
 
 public abstract class ProblemTarget implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private final GroupKey groupKey;
@@ -20,6 +22,7 @@ public abstract class ProblemTarget implements Serializable {
 
 	public static abstract class GroupKey implements Serializable {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private final String name;

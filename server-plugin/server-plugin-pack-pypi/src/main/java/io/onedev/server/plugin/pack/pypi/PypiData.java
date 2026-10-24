@@ -1,10 +1,12 @@
 package io.onedev.server.plugin.pack.pypi;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 public class PypiData implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Map<String, List<String>> attributes;

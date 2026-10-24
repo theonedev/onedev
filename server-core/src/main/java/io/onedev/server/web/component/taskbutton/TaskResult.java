@@ -2,10 +2,12 @@ package io.onedev.server.web.component.taskbutton;
 
 import org.unbescape.html.HtmlEscape;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class TaskResult implements Serializable {
 	
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	final boolean successful;
@@ -34,6 +36,7 @@ public class TaskResult implements Serializable {
 	
 	public static class PlainMessage implements Message {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private String text;
@@ -50,6 +53,7 @@ public class TaskResult implements Serializable {
 	
 	public static class HtmlMessgae implements Message {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		private String text;

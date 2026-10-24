@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
+import java.io.Serial;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.entityreference.ReferencedFromAware;
@@ -9,6 +11,7 @@ import io.onedev.server.notification.ActivityDetail;
 public class PullRequestReferencedFromCodeCommentData 
 		extends PullRequestChangeData implements ReferencedFromAware<CodeComment> {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Long commentId;

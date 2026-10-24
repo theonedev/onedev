@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.param.instance;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import io.onedev.server.annotation.Editable;
 @Editable
 public class ParamInstances implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String name;

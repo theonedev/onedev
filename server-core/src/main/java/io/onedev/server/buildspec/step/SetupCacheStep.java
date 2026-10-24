@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import static io.onedev.k8shelper.UploadStrategy.UPLOAD_IF_NOT_EXACT_MATCH;
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,7 @@ import io.onedev.server.util.patternset.PatternSet;
 		on how to use job cache""")
 public class SetupCacheStep extends Step {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String key;
