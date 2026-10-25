@@ -47,8 +47,6 @@ public class HibernateConfig extends Properties {
 			if (value != null)
 				putIfAbsent(current, value);
 		});
-		if ("org.hibernate.dialect.MySQL5InnoDBDialect".equals(getProperty(DIALECT)))
-			put(DIALECT, "org.hibernate.dialect.MySQLDialect");
 		
 		String value = System.getenv(ENV_PASS_FILE);
 		if (value != null) {
@@ -72,6 +70,11 @@ public class HibernateConfig extends Properties {
 		String url = getProperty(JAKARTA_JDBC_URL);
 		url = Strings.CS.replace(url, "${installDir}", installDir.getAbsolutePath());
 		setProperty(JAKARTA_JDBC_URL, url);
+		// Normalize the effective dialect after applying all environment overrides.
+		if ("org.hibernate.dialect.MySQL5InnoDBDialect".equals(getProperty(DIALECT))) {
+			setProperty(DIALECT, url.startsWith("jdbc:mariadb:")
+					? "org.hibernate.dialect.MariaDBDialect" : "org.hibernate.dialect.MySQLDialect");
+		}
 	}
 
 	public String getDialect() {
