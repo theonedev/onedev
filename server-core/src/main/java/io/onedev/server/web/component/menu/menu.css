@@ -7,10 +7,10 @@
 	margin:0; 
 	padding: 0;
 }
-.floating.menu li:hover, .floating.menu li:focus {
+.floating.menu li:hover, .floating.menu li:focus, .floating.menu li a.dropdown-open {
 	background-color: var(--light);
 }
-.dark-mode .floating.menu li:hover, .dark-mode .floating.menu li:focus {
+.dark-mode .floating.menu li:hover, .dark-mode .floating.menu li:focus, .dark-mode .floating.menu li a.dropdown-open {
 	background-color: var(--dark-mode-light-primary);
 }
 
@@ -21,7 +21,7 @@
 .dark-mode .floating.menu li a {
 	color: var(--dark-mode-gray);
 }
-.dark-mode .floating.menu li:hover a, .dark-mode .floating.menu li:focus a {
+.dark-mode .floating.menu li:hover a, .dark-mode .floating.menu li:focus a, .dark-mode .floating.menu li a.dropdown-open {
 	color: var(--primary);
 }
 .floating.menu li a .icon-tick {

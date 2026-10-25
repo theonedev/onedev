@@ -4,7 +4,6 @@ import static io.onedev.server.web.component.floating.AlignPlacement.bottom;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +37,7 @@ import org.unbescape.html.HtmlEscape;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.ParamSpecAware;
+import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.util.CollectionUtils;
@@ -140,7 +140,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Step step = steps.get(index);
-						new StepEditModalPanel(target, step) {
+						new StepEditModalPanel(target, step, isExecuteInSandbox()) {
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, Step step) {
@@ -218,7 +218,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 									public void onClick(AjaxRequestTarget target) {
 										dropdown.close();
 										Step step = SerializationUtils.clone(steps.get(index));
-										new StepEditModalPanel(target, step) {
+										new StepEditModalPanel(target, step, isExecuteInSandbox()) {
 
 											@Override
 											protected void onSave(AjaxRequestTarget target, Step step) {
@@ -349,6 +349,12 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 			return null;
 	}
 
+	private boolean isExecuteInSandbox() {
+		var jobAware = findParent(JobAware.class);
+		var job = jobAware != null ? jobAware.getJob() : null;
+		return job != null && job.isExecuteInSandbox();
+	}
+
 	@Override
 	public boolean needExplicitSubmit() {
 		return true;
@@ -371,15 +377,10 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 				protected void onSelect(AjaxRequestTarget target, Class<? extends Step> type) {
 					dropdown.close();
 
-					Step step;
-					try {
-						step = type.getDeclaredConstructor().newInstance();
-					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-							 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-						throw new RuntimeException(e);
-					}
+					var executeInSandbox = isExecuteInSandbox();
+					var step = StepEditModalPanel.newStep(type, executeInSandbox);
 
-					new StepEditModalPanel(target, step) {
+					new StepEditModalPanel(target, step, executeInSandbox) {
 
 						@Override
 						protected void onSave(AjaxRequestTarget target, Step step) {

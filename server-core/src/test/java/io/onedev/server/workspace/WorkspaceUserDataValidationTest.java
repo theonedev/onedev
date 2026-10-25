@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import io.onedev.agent.workspace.ProvisionMode;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.workspace.spec.UserData;
@@ -26,7 +27,7 @@ class WorkspaceUserDataValidationTest {
             data.setEntries(List.of(UserDataEntry.of("/home/user/data", null)));
             var spec = new WorkspaceSpec();
             spec.setName("test");
-            spec.setRunInContainer(true);
+            spec.setProvisionMode(ProvisionMode.DOCKER);
             spec.setImage("image");
             spec.setUserDatas(List.of(data));
             var workspace = new Workspace() {

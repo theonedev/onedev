@@ -442,11 +442,14 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	}
 
 	private boolean isApplicable(Build build, JobExecutor executor) {
-		if (!build.getJob().getRequiredServices().isEmpty()
+		var job = build.getJob();
+		if (job.isExecuteInSandbox() != (executor instanceof SandboxAware))
+			return false;
+		if (!job.getRequiredServices().isEmpty()
 				&& !(executor instanceof DockerAware) && !(executor instanceof SandboxAware))
 			return false;
 			
-		for (var step: build.getJob().getSteps()) {
+		for (var step: job.getSteps()) {
 			if (!step.isApplicable(build, executor)) 
 				return false;
 		}
@@ -540,6 +543,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 		Job job;
 		JobExecutor jobExecutor;
+		String sandboxTemplate;
 		String sequentialKey;
 		JobAuthorizationContext.push(build.getJobAuthorizationContext());
 		Build.push(build);
@@ -547,6 +551,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			job = build.getJob();
 			String jobExecutorName = interpolator.interpolate(job.getJobExecutor());
 			jobExecutor = interpolator.interpolateProperties(getJobExecutor(build, jobExecutorName, jobLogger));
+			sandboxTemplate = job.isExecuteInSandbox() ? interpolator.interpolate(job.getSandboxTemplate()) : null;
 			String sequentialGroup = interpolator.interpolate(job.getSequentialGroup());
 			if (sequentialGroup != null)
 				sequentialKey = jobExecutorName + ":" + sequentialGroup;
@@ -569,7 +574,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			JobAuthorizationContext.pop();
 		}
 
-		JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
+		JobContext jobContext = new JobContext(jobToken, jobExecutor, sandboxTemplate, projectId, projectPath,
 				projectGitDir, buildId, buildNumber, buildSequence, actions, refName, commitId,
 				services, timeout, build.getSecretMasker());
 		

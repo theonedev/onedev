@@ -49,6 +49,7 @@ import com.hazelcast.map.IMap;
 import io.onedev.agent.AgentUtils;
 import io.onedev.agent.workspace.FileData;
 import io.onedev.agent.workspace.GitExecutionResult;
+import io.onedev.agent.workspace.ProvisionMode;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -85,7 +86,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Workspace.Status;
-import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.persistence.SequenceGenerator;
@@ -306,7 +306,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 								}	
 							} else if (AUTO_DISCOVERED_PROVISIONER_NAME.equals(provisionerName)) {
 								if (pinnedAgentId != null)
-									AgentProvisionerUtils.deleteWorkspace(projectId, workspaceNumber, pinnedAgentId);
+									AgentProvisionerUtils.deleteWorkspace(ProvisionMode.HOST,
+											projectId, workspaceNumber, pinnedAgentId);
 								else
 									ServerProvisionerUtils.deleteWorkspace(projectId, workspaceNumber, pinnedServerAddress);
 							} else if (provisionerName != null) {
@@ -703,7 +704,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	}
 
 	private boolean isApplicable(Workspace workspace, WorkspaceSpec spec, WorkspaceProvisioner provisioner) {
-		if (spec.isRunInContainer() != (provisioner instanceof DockerAware))
+		if (spec.getProvisionMode() != provisioner.getProvisionMode())
 			return false;
 		else		
 			return provisioner.isApplicable(workspace.getProject());
@@ -774,15 +775,19 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				return provisioner;
 			}
 
-			if (spec.isRunInContainer()) {
+			if (spec.getProvisionMode() == ProvisionMode.DOCKER) {
 				throw new ExplicitException(interpolate("""
 					No applicable provisioner discovered for current workspace. \
 					Please check if docker is installed on ${productName} server, or configure \
 					a kubernetes provisioner if you would like workspaces to run as pods"""));
+			} else if (spec.getProvisionMode() == ProvisionMode.SANDBOX) {
+				throw new ExplicitException(interpolate("""
+					No applicable provisioner discovered for current workspace. \
+					Please check if Docker Sandboxes (sbx) is installed on ${productName} server"""));
 			} else {
 				throw new ExplicitException("""
 					No applicable provisioner discovered for current workspace. \
-					Please add a shell provisioner in menu 'Administration / Workspace Provisioners'""");
+					Please add a host provisioner in menu 'Administration / Workspace Provisioners'""");
 			}
 		}
 	}
@@ -1140,7 +1145,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		return clusterService.runOnServer(server, () -> {
 			var runtime = workspaceRuntimes.get(workspaceId);
 			if (runtime != null)
-				return runtime.readFileData(path);
+				return runtime.readFile(path);
 			else
 				return null;
 		});

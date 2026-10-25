@@ -2942,4 +2942,20 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
+	private void migrate57(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (var specTuple : doc.getValue()) {
+			if (((ScalarNode) specTuple.getKeyNode()).getValue().equals("jobs")) {
+				for (var jobNodeItem : ((SequenceNode) specTuple.getValueNode()).getValue()) {
+					var jobNode = (MappingNode) jobNodeItem;
+					if (getScalarProperty(jobNode, "executeInSandbox") == null) {
+						jobNode.getValue().add(new NodeTuple(
+								new ScalarNode(Tag.STR, "executeInSandbox"),
+								new ScalarNode(Tag.BOOL, "false")));
+					}
+				}
+			}
+		}
+	}
+
 }

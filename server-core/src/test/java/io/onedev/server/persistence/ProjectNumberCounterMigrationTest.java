@@ -23,9 +23,11 @@ public class ProjectNumberCounterMigrationTest {
 
     @Test
     public void migratesForkScopesAndRegistersIdsForTheNewTable() throws Exception {
-        Files.writeString(directory.resolve("Projects.xml"), "<list><project><id>1</id></project></list>");
+        Files.writeString(directory.resolve("Projects.xml"),
+                "<list><project><id>1</id><workspaceSpecs/></project></list>");
         Files.writeString(directory.resolve("Projects.xml.2"),
-                "<list><project><id>2</id><forkedFrom>1</forkedFrom></project><project><id>3</id></project></list>");
+                "<list><project><id>2</id><forkedFrom>1</forkedFrom><workspaceSpecs/></project>"
+                        + "<project><id>3</id><workspaceSpecs/></project></list>");
         var types = Map.of("Issue", 11L, "PullRequest", 21L, "Build", 31L, "Workspace", 41L);
         for (var entry : types.entrySet()) {
             writeEntity(entry.getKey() + "s.xml", 1, 1, 5);

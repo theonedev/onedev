@@ -13,10 +13,13 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 
 abstract class MenuPanel extends Panel {
 	
+	private FloatingPanel submenu;
+
 	public MenuPanel(String id) {
 		super(id);
 	}
@@ -79,6 +82,7 @@ abstract class MenuPanel extends Panel {
 						link.add(new Label("shortcut", " "));
 					else
 						link.add(new WebMarkupContainer("shortcut").setVisible(false));
+					link.add(new WebMarkupContainer("submenu").setVisible(menuItem instanceof SubMenuItem));
 					fragment.add(link);
 					item.add(fragment);
 				} else {
@@ -96,6 +100,12 @@ abstract class MenuPanel extends Panel {
 			add(new WebMarkupContainer("help").setVisible(false));
 	}
 	
+	void onSubMenuOpened(FloatingPanel submenu) {
+		if (this.submenu != null && this.submenu.getParent() != null)
+			this.submenu.close();
+		this.submenu = submenu;
+	}
+
 	protected abstract List<MenuItem> getMenuItems();
 
 	@Nullable

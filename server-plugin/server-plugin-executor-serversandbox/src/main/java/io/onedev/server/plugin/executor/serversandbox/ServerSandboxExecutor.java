@@ -9,21 +9,23 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import io.onedev.server.annotation.OmitName;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
+import org.jspecify.annotations.Nullable;
+
 import io.onedev.agent.SandboxSettings;
-import io.onedev.agent.job.SandboxJob;
-import io.onedev.agent.job.ShellJobData;
+import io.onedev.agent.job.SandboxJobController;
+import io.onedev.agent.job.SandboxJobData;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.cluster.ClusterTask;
@@ -43,7 +45,7 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=450, name="Server Sandbox Executor", description="Runs shell and Docker steps in a fresh Docker Sandbox on the server. "
+@Editable(order=ServerSandboxExecutor.ORDER, name="Server Sandbox Executor", description="Runs shell and Docker steps in a fresh Docker Sandbox on the server. "
 		+ "Job services run inside the sandbox and are accessible by service name from shell and container steps. "
 		+ "The sandbox and its services are deleted after each job. "
 		+ "See <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> "
@@ -56,9 +58,9 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private String sandboxExecutable = "sbx";
+	static final int ORDER = 350;
 
-	private String template;
+	private String sandboxExecutable = "sbx";
 
 	private boolean alwaysPullTemplateImage = true;
 
@@ -73,10 +75,6 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 	private String runOptions;
 
 	private String networkOptions;
-
-	private String cpuLimit;
-
-	private String memoryLimit;
 
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 
@@ -152,26 +150,6 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 		this.networkOptions = networkOptions;
 	}
 
-	@Editable(order=530, group="Container Settings", placeholder="No limit", description="Optionally specify the CPU limit of each container "
-			+ "run by a step or service inside the sandbox, for example 0.5 or 2. This is passed to Docker as <code>--cpus</code>.")
-	public String getCpuLimit() {
-		return cpuLimit;
-	}
-
-	public void setCpuLimit(String cpuLimit) {
-		this.cpuLimit = cpuLimit;
-	}
-
-	@Editable(order=540, group="Container Settings", placeholder="No limit", description="Optionally specify the memory limit of each container "
-			+ "run by a step or service inside the sandbox, for example 512m or 2g. This is passed to Docker as <code>--memory</code>.")
-	public String getMemoryLimit() {
-		return memoryLimit;
-	}
-
-	public void setMemoryLimit(String memoryLimit) {
-		this.memoryLimit = memoryLimit;
-	}
-
 	@Editable(order=50100, group="More Settings", name="Sandbox Executable", description="Path to the Docker Sandboxes sbx executable")
 	@NotEmpty
 	public String getSandboxExecutable() {
@@ -180,20 +158,6 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 
 	public void setSandboxExecutable(String sandboxExecutable) {
 		this.sandboxExecutable = sandboxExecutable;
-	}
-
-	@Editable(order=110, placeholder="Use default template", description="""
-			Optional shell template image. Leave empty to use Docker Sandbox's built-in shell-docker \
-			template. For ordinary jobs, base custom templates on <code>docker/sandbox-templates:shell</code>, \
-			with Python 3 and Git. For jobs that need to interact with docker daemon or builder, \
-			use <code>docker/sandbox-templates:shell-docker</code> as the base image. Job setup, shell \
-			commands, and cache operations run as root inside the sandbox.""")
-	public String getTemplate() {
-		return template;
-	}
-
-	public void setTemplate(String template) {
-		this.template = template;
 	}
 
 	@Editable(order=600, group="More Settings", description="Whether or not to always pull the template image when "
@@ -254,9 +218,9 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 		return jobMatch == null || JobMatch.parse(jobMatch, true, true).matches(context);
 	}
 
-	protected SandboxSettings getSandboxSettings(String jobToken) {
-		return new SandboxSettings(template, cpus, memory, alwaysPullTemplateImage, alwaysPullContainerImage,
-                OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl(), cpuLimit, memoryLimit, runOptions, networkOptions,
+	protected SandboxSettings getSandboxSettings(String jobToken, @Nullable String sandboxTemplate) {
+		return new SandboxSettings(sandboxTemplate, cpus, memory, alwaysPullTemplateImage, alwaysPullContainerImage,
+                OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl(), runOptions, networkOptions,
 				getRegistryLogins(jobToken));
 	}
 
@@ -267,7 +231,7 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 			@Serial
 			private static final long serialVersionUID = 1L;
 
-			private transient volatile SandboxJob sandboxJob;
+			private transient volatile SandboxJobController sandboxController;
 
 			private transient TaskLogger sandboxLogger;
 
@@ -276,24 +240,26 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 				notifyJobRunning(context.getBuildId(), null);
 				logger.log("Executing job with sandbox executor '" + getName() + "'...");
 				sandboxLogger = logger;
-				sandboxJob = new SandboxJob(getSandboxExecutable(), getSandboxSettings(context.getJobToken()));
-				var data = new ShellJobData(context.getJobToken(), getName(), context.getProjectPath(),
+				var settings = getSandboxSettings(context.getJobToken(), context.getSandboxTemplate());
+				sandboxController = new SandboxJobController(getSandboxExecutable(), settings);
+				var data = new SandboxJobData(context.getJobToken(), getName(), context.getProjectPath(),
 						context.getProjectId(), context.getRefName(), context.getCommitId().name(),
-						context.getBuildNumber(), context.getSubmitSequence(), context.getActions(), context.getSecretMasker());
-				return sandboxJob.run(data, context.getServices(), Bootstrap.getTrustCertsDir(), Map.of(), logger);
+						context.getBuildNumber(), context.getSubmitSequence(), context.getActions(), context.getSecretMasker(),
+						context.getServices(), settings);
+				return sandboxController.runJob(data, context.getServices(), Bootstrap.getTrustCertsDir(), Map.of(), logger);
 			}
 
 			@Override
 			public void resume(JobContext context) {
-				if (sandboxJob != null)
-					sandboxJob.resume(sandboxLogger);
+				if (sandboxController != null)
+					sandboxController.resume(sandboxLogger);
 			}
 
 			@Override
 			public Shell openShell(JobContext context, JobTerminal terminal) {
-				if (sandboxJob == null)
+				if (sandboxController == null)
 					throw new ExplicitException("Sandbox not running");
-				return new CommandlineShell(terminal, sandboxJob.openShell());
+				return new CommandlineShell(terminal, sandboxController.openShell());
 			}
 		});
 		logger.log("Pending resource allocation...");
@@ -306,8 +272,9 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 
 	@Override
 	public void test(TestData data, TaskLogger logger) {
-		new SandboxJob(getSandboxExecutable(), getSandboxSettings(UUID.randomUUID().toString()))
-				.test(data.getDockerImage(), Bootstrap.getTrustCertsDir(), logger);
+		var dockerImage = data.isTestContainer() ? data.getImage() : null;
+		new SandboxJobController(getSandboxExecutable(), getSandboxSettings(UUID.randomUUID().toString(), data.getTemplate()))
+				.testSandbox(dockerImage, Bootstrap.getTrustCertsDir(), logger);
 	}
 
 	@Editable(name="Test Sandbox Executor")
@@ -316,17 +283,43 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 		@Serial
 		private static final long serialVersionUID = 1L;
 
-		private String dockerImage;
+		private String template;
 
-		@Editable(name="Optional Docker Image", description="""
-				If specified, test running command in a Docker container besides in sandbox shell""")
-		@OmitName
-		public String getDockerImage() {
-			return dockerImage;
+		private boolean testContainer;
+
+		private String image;
+
+		@Editable(order=100, description="""
+				Specify a Docker sandbox shell template image to test against. This image should \
+				contain Python 3 and Git, and also configured with docker daemon if you also want \
+				to run container inside it""")
+		@NotEmpty
+		public String getTemplate() {
+			return template;
 		}
 
-		public void setDockerImage(String dockerImage) {
-			this.dockerImage = dockerImage;
+		public void setTemplate(String template) {
+			this.template = template;
+		}
+
+		@Editable(order=200, description="Enable to also test running a command in a Docker container inside the sandbox")
+		public boolean isTestContainer() {
+			return testContainer;
+		}
+
+		public void setTestContainer(boolean testContainer) {
+			this.testContainer = testContainer;
+		}
+
+		@Editable(order=300, name="container:image", description="Specify the container image to test against")
+		@DependsOn(property="testContainer")
+		@NotEmpty
+		public String getImage() {
+			return image;
+		}
+
+		public void setImage(String image) {
+			this.image = image;
 		}
 	}
 

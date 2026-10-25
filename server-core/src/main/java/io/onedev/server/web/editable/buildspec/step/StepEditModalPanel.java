@@ -2,6 +2,7 @@ package io.onedev.server.web.editable.buildspec.step;
 
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.ParamSpecAware;
+import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -13,10 +14,25 @@ import java.lang.reflect.InvocationTargetException;
 abstract class StepEditModalPanel extends ModalPanel implements BuildSpecAware, ParamSpecAware {
 
 	private Step step;
+
+	private final boolean executeInSandbox;
 	
-	public StepEditModalPanel(AjaxRequestTarget target, Step step) {
+	public StepEditModalPanel(AjaxRequestTarget target, Step step, boolean executeInSandbox) {
 		super(target);
 		this.step = step;
+		this.executeInSandbox = executeInSandbox;
+	}
+
+	static Step newStep(Class<? extends Step> stepType, boolean executeInSandbox) {
+		try {
+			var step = stepType.getDeclaredConstructor().newInstance();
+			if (stepType == CommandStep.class && executeInSandbox)
+				((CommandStep) step).setRunInContainer(false);
+			return step;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -35,13 +51,7 @@ abstract class StepEditModalPanel extends ModalPanel implements BuildSpecAware, 
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Class<? extends Step> stepType) {
-				Step newStep;
-				try {
-					newStep = stepType.getDeclaredConstructor().newInstance();
-				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-						 | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-					throw new RuntimeException(e);
-				}
+				var newStep = newStep(stepType, executeInSandbox);
 				new BeanDescriptor(Step.class).copyProperties(step, newStep);
 				step = newStep;
 				

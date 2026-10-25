@@ -218,7 +218,8 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 		var spec = new WorkspaceSpec(); spec.setName("dev"); project.getWorkspaceSpecs().add(spec);
 		when(projects.load(Project.DEFAULT_ID)).thenReturn(project);
 		var audit = mock(AuditService.class);
-		var resource = new SettingResource(mock(SettingService.class), audit, validator);
+		var settings = mock(SettingService.class);
+		var resource = new SettingResource(settings, audit, validator);
 		inject(resource, "projectService", projects);
 		var role = new Role(); role.setId(5L); role.setName("Reader");
 		var transactions = mock(TransactionService.class);
@@ -233,6 +234,7 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 				var xml = mockStatic(VersionedXmlDoc.class)) {
 			var subscription = mock(SubscriptionService.class);
 			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
+			oneDev.when(() -> OneDev.getInstance(SettingService.class)).thenReturn(settings);
 			security.when(SecurityUtils::isAdministrator).thenReturn(true);
 			when(subscription.isSubscriptionActive()).thenReturn(true);
 			var document = mock(VersionedXmlDoc.class); when(document.toXML()).thenReturn("audit");
@@ -319,13 +321,15 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 		project.getCodeIndexingSetting().setAnalyzeFiles("**.java");
 		when(projects.load(Project.DEFAULT_ID)).thenReturn(project);
 		var audit = mock(AuditService.class);
-		var resource = new SettingResource(mock(SettingService.class), audit, validator);
+		var settings = mock(SettingService.class);
+		var resource = new SettingResource(settings, audit, validator);
 		inject(resource, "projectService", projects);
 		var transactions = mock(TransactionService.class);
 		inject(resource, "transactionService", transactions);
 		try (var security = mockStatic(SecurityUtils.class); var oneDev = mockStatic(OneDev.class)) {
 			var subscription = mock(SubscriptionService.class);
 			oneDev.when(() -> OneDev.getInstance(SubscriptionService.class)).thenReturn(subscription);
+			oneDev.when(() -> OneDev.getInstance(SettingService.class)).thenReturn(settings);
 			security.when(SecurityUtils::isAdministrator).thenReturn(true);
 			when(subscription.isSubscriptionActive()).thenReturn(true);
 			var defaults = new ProjectDefaults(); defaults.setCodeIndexingSetting(null);

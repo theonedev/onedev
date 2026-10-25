@@ -43,6 +43,7 @@ import io.onedev.agent.AgentUtils;
 import io.onedev.agent.AwaitableFutureTask;
 import io.onedev.agent.workspace.FileData;
 import io.onedev.agent.workspace.GitExecutionResult;
+import io.onedev.agent.workspace.ProvisionMode;
 import io.onedev.agent.workspace.WorkspaceUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -294,11 +295,13 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 	}
 
 	@Override
+	public ProvisionMode getProvisionMode() {
+		return ProvisionMode.DOCKER;
+	}
+
+	@Override
 	public WorkspaceRuntime provision(WorkspaceContext context, TaskLogger workspaceLogger) {		
 		checkApplicable();
-
-		if (!context.getSpec().isRunInContainer()) 
-			throw new ExplicitException("This workspace can only be provisioned by shell provisioner");
 
 		var serverAddress = getClusterService().getLocalServerAddress();
 		workspaceLogger.log("Provisioning workspace on server '" + serverAddress + "'...");
@@ -403,8 +406,8 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 							getCpuLimit(), getMemoryLimit());
 					docker.processKiller(newDockerKiller(newDocker(), containerName, workspaceLogger));
 
-					if (!context.getSpec().getContainerPorts().isEmpty()) {
-						for (int containerPort : context.getSpec().getContainerPorts())
+					if (!context.getSpec().getExposedPorts().isEmpty()) {
+						for (int containerPort : context.getSpec().getExposedPorts())
 							docker.addArgs("--expose", String.valueOf(containerPort));
 						docker.addArgs("-P");
 					}
@@ -444,14 +447,14 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 				awaitContainerReady(future, containerReadyFile);
 
 				Map<Integer, Integer> portMappings;
-				if (!context.getSpec().getContainerPorts().isEmpty())
-					portMappings = getPublishedPorts(newDocker(), containerName, context.getSpec().getContainerPorts());
+				if (!context.getSpec().getExposedPorts().isEmpty())
+					portMappings = getPublishedPorts(newDocker(), containerName, context.getSpec().getExposedPorts());
 				else
 					portMappings = new HashMap<>();
 
 				var portHost = getPortHost();
 				var tailscaleIp = getTailscaleIp(newDocker(), containerName,
-						context.getScriptConfig(), context.getSpec().getContainerPorts());
+						context.getScriptConfig(), context.getSpec().getExposedPorts());
 				
 				var containerWorkDirPath = containerWorkspacePath + "/work";
 				return new WorkspaceRuntime() {
@@ -464,7 +467,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 
 					@Override
 					@Nullable
-					public FileData readFileData(String path) {
+					public FileData readFile(String path) {
 						return WorkspaceUtils.readFileData(newDocker(), containerName, containerWorkDirPath, path);
 					}
 

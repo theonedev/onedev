@@ -26,7 +26,7 @@ public class CacheEntry implements Serializable {
 	@Editable(order=100, description = """
 			Specify cache path. Non-absolute path is considered to be relative to 
 			<a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.
-			Note that shell related executors runs directly on host machine, and only accept relative paths""")
+			Host executors run directly on the host machine and only accept relative paths""")
 	@Path
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty

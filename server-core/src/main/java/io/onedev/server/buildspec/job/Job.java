@@ -88,6 +88,10 @@ public class Job implements NamedElement, Validatable {
 	private String name;
 	
 	private String jobExecutor;
+
+	private boolean executeInSandbox;
+
+	private String sandboxTemplate;
 	
 	private List<Step> steps = new ArrayList<>();
 	
@@ -187,7 +191,28 @@ public class Job implements NamedElement, Validatable {
 		return SuggestionUtils.suggest(applicableJobExecutors, matchWith);
 	}
 	
-	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='${docsite}/concepts#job-workdir'>job working directory</a>")
+	@Editable(order=210, description="Enable to execute this job in a sandbox VM")
+	public boolean isExecuteInSandbox() {
+		return executeInSandbox;
+	}
+
+	public void setExecuteInSandbox(boolean executeInSandbox) {
+		this.executeInSandbox = executeInSandbox;
+	}
+
+	@Editable(order=220)
+	@Interpolative(variableSuggester="suggestVariables")
+	@DependsOn(property="executeInSandbox")
+	@NotEmpty
+	public String getSandboxTemplate() {
+		return sandboxTemplate;
+	}
+
+	public void setSandboxTemplate(String sandboxTemplate) {
+		this.sandboxTemplate = sandboxTemplate;
+	}
+
+	@Editable(order=300, description="Steps will be executed serially on same node, sharing the same <a href='${docsite}/concepts#job-workdir'>job working directory</a>")
 	public List<@Valid Step> getSteps() {
 		return steps;
 	}

@@ -41,11 +41,12 @@
 		<module>server-plugin-import-youtrack</module>
 		<module>server-plugin-import-url</module>
 		<module>server-plugin-executor-remotedocker</module>
-		<module>server-plugin-executor-servershell</module>
-		<module>server-plugin-executor-remoteshell</module>
+		<module>server-plugin-executor-serverhost</module>
+		<module>server-plugin-executor-remotehost</module>
 		<module>server-plugin-executor-serversandbox</module>
-		<module>server-plugin-provisioner-servershell</module>
+		<module>server-plugin-provisioner-serverhost</module>
 		<module>server-plugin-provisioner-serverdocker</module>
+		<module>server-plugin-provisioner-serversandbox</module>
 		<module>server-plugin-report-unittest</module>
 		<module>server-plugin-report-junit</module>
 		<module>server-plugin-report-gtest</module>

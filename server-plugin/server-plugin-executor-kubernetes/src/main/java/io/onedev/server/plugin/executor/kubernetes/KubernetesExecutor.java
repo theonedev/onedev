@@ -67,15 +67,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.CompositeFacade;
 import io.onedev.k8shelper.JobHelper;
 import io.onedev.k8shelper.LeafFacade;
-import io.onedev.k8shelper.PruneBuilderCacheFacade;
 import io.onedev.k8shelper.RegistryLoginFacade;
-import io.onedev.k8shelper.RunContainerFacade;
-import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.server.OneDev;
@@ -778,8 +774,8 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				if (facade instanceof CommandFacade) {
 					CommandFacade commandFacade = (CommandFacade) facade;
 					if (commandFacade.getImage() == null) {
-						throw new ExplicitException("This step can only be executed by server shell "
-								+ "executor or remote shell executor");
+						throw new ExplicitException("This step can only be executed by server host "
+								+ "executor or remote host executor");
 					}
 
 					stepContainerSpec = newHashMap(
@@ -801,13 +797,6 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 					stepContainerSpec.put("env", envs);
 					var runAs = commandFacade.getRunAs();
 					setupSecurityContext(stepContainerSpec, runAs);
-				} else if (facade instanceof BuildImageFacade) {
-					throw new ExplicitException("This step can only be executed by server docker executor or " +
-							"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");
-				} else if (facade instanceof RunContainerFacade || facade instanceof RunImagetoolsFacade
-						|| facade instanceof PruneBuilderCacheFacade) {
-					throw new ExplicitException("This step can only be executed by server docker executor or " +
-							"remote docker executor");
 				} else {
 					if (facade instanceof SetupCacheFacade) {
 						var setupCacheFacade = (SetupCacheFacade) facade;

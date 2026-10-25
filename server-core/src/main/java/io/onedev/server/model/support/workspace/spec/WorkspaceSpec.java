@@ -1,30 +1,11 @@
 package io.onedev.server.model.support.workspace.spec;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import jakarta.validation.ConstraintValidatorContext;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-
-import org.apache.commons.io.FilenameUtils;
-
+import io.onedev.agent.workspace.ProvisionMode;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.DependsOn;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.Multiline;
-import io.onedev.server.annotation.SuggestionProvider;
+import io.onedev.server.annotation.*;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.model.support.workspace.spec.shell.PosixShell;
@@ -33,6 +14,20 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.util.SuggestionUtils;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.io.FilenameUtils;
 
 @Editable
 @ClassValidating
@@ -55,9 +50,11 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	private String provisioner;
 
-	private boolean runInContainer;
+	private ProvisionMode provisionMode = ProvisionMode.HOST;
 
 	private String image;
+
+	private String template;
 
 	private WorkspaceShell shell = new PosixShell();
 
@@ -77,7 +74,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	private String runAs = "0:0";
 	
-	private List<Integer> containerPorts = new ArrayList<>();
+	private List<Integer> exposedPorts = new ArrayList<>();
 
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 
@@ -154,13 +151,14 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		return SuggestionUtils.suggest(provisionerNames, matchWith);
 	}
 
-	@Editable(order = 100, description = "Whether or not to create the workspace inside container")
-	public boolean isRunInContainer() {
-		return runInContainer;
+	@Editable(order = 100, description = "Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)")
+	@NotNull
+	public ProvisionMode getProvisionMode() {
+		return provisionMode;
 	}
 
-	public void setRunInContainer(boolean runInContainer) {
-		this.runInContainer = runInContainer;
+	public void setProvisionMode(ProvisionMode provisionMode) {
+		this.provisionMode = provisionMode;
 	}
 
 	@Editable(order = 200, name = "container:image", description = """
@@ -168,7 +166,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		have <a href='https://git-scm.com' target='_blank'>git</a>, <a href='https://git-lfs.com' target='_blank'>git-lfs</a>, <a href='https://curl.se' target='_blank'>curl</a>, and <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> installed
 		""")
 	@Interpolative(variableSuggester="suggestVariables")
-	@DependsOn(property = "runInContainer")
+	@DependsOn(property = "provisionMode", value = "DOCKER")
 	@NotEmpty
 	public String getImage() {
 		return image;
@@ -176,6 +174,18 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	@Editable(order = 210)
+	@Interpolative(variableSuggester="suggestVariables")
+	@DependsOn(property = "provisionMode", value = "SANDBOX")
+	@NotEmpty
+	public String getTemplate() {
+		return template;
+	}
+
+	public void setTemplate(String template) {
+		this.template = template;
 	}
 
 	@Editable(order = 300, description = """
@@ -194,7 +204,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	@Editable(order = 350, name = "User Data", description = """
 			Optionally define user data for the workspace. User data populated by a workspace will be uploaded 
 			after the workspace is deleted, and can be reused by other workspaces created by same user""")
-	@DependsOn(property = "runInContainer")
+	@DependsOn(property = "provisionMode", value = "HOST", inverse = true)
 	public List<@Valid UserData> getUserDatas() {
 		return userDatas;
 	}
@@ -204,16 +214,16 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	}
 
 	@Editable(order = 375, name="Exposed Ports", placeholder = "No exposed ports", description = """
-			Optionally specify container ports to expose. These ports will be mapped to random ports on host 
+			Optionally specify workspace ports to expose. These ports will be mapped to random ports on host
 			which will be displayed on the workspace page""")
-	@DependsOn(property = "runInContainer")
+	@DependsOn(property = "provisionMode", value = "HOST", inverse = true)
 	@NotNull
-	public List<@NotNull Integer> getContainerPorts() {
-		return containerPorts;
+	public List<@NotNull Integer> getExposedPorts() {
+		return exposedPorts;
 	}
 
-	public void setContainerPorts(List<Integer> containerPorts) {
-		this.containerPorts = containerPorts;
+	public void setExposedPorts(List<Integer> exposedPorts) {
+		this.exposedPorts = exposedPorts;
 	}
 
 	@Editable(order = 400, name = "Environment Variables", description = "Optionally specify environment variables")
@@ -273,7 +283,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	@Editable(order = 1400, name = "Run As", group = "More Settings", description = "Specify uid:gid to run container as")
 	@Interpolative(variableSuggester="suggestVariables")
-	@DependsOn(property = "runInContainer")
+	@DependsOn(property = "provisionMode", value = "DOCKER")
 	@Pattern(regexp = "(\\d+:\\d+)?", message = "Should be specified in form of <uid>:<gid>")
 	@NotEmpty
 	public String getRunAs() {
@@ -289,7 +299,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 			For built-in registry, use <code>@server_url@</code> for registry url, 
 			<code>@workspace_token@</code> for user name, and access token for password
 			""")
-	@DependsOn(property = "runInContainer")
+	@DependsOn(property = "provisionMode", value = "DOCKER")
 	@NotNull
 	public List<@NotNull @Valid RegistryLogin> getRegistryLogins() {
 		return registryLogins;
@@ -300,7 +310,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	}
 
 	@Editable(order = 1550, group = "More Settings", description = "Optionally define config files for the workspace")
-	@DependsOn(property = "runInContainer")
+	@DependsOn(property = "provisionMode", value = "HOST", inverse = true)
 	public List<@Valid ConfigFile> getConfigFiles() {
 		return configFiles;
 	}
@@ -332,10 +342,10 @@ public class WorkspaceSpec implements Serializable, Validatable {
 				if (path == null || path.isEmpty())
 					continue;
 				if (!path.contains("@")) {
-					if (!isRunInContainer() && FilenameUtils.getPrefixLength(path) > 0) {
+					if (getProvisionMode() == ProvisionMode.HOST && FilenameUtils.getPrefixLength(path) > 0) {
 						context.buildConstraintViolationWithTemplate(""
-									+ "Item #" + (i + 1) + ": absolute path '" 
-									+ path + "' is not allowed when not running in container")
+									+ "Item #" + (i + 1) + ": absolute path '"
+									+ path + "' is not allowed for host provision mode")
 								.addPropertyNode(PROP_CACHE_CONFIGS).addConstraintViolation();
 						isValid = false;
 					}

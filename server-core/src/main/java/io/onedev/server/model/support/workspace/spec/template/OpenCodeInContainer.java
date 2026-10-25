@@ -2,6 +2,7 @@ package io.onedev.server.model.support.workspace.spec.template;
 
 import java.util.List;
 
+import io.onedev.agent.workspace.ProvisionMode;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.workspace.spec.EnvVar;
@@ -23,7 +24,7 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
         var workspaceSpec = new WorkspaceSpec();
         
         workspaceSpec.setName(getName());
-        workspaceSpec.setRunInContainer(true);
+        workspaceSpec.setProvisionMode(ProvisionMode.DOCKER);
         workspaceSpec.setImage("1dev/opencode");
         workspaceSpec.setRunAs("1001:1001");
         var shell = new PosixShell();

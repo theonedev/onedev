@@ -1,14 +1,19 @@
 package io.onedev.server.workspace;
 
+import static io.onedev.agent.WebsocketUtils.call;
+import static io.onedev.agent.workspace.StopWorkspaceRequest.TIMEOUT_MILLIS;
+
+import java.io.Serializable;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.agent.Message;
-import io.onedev.agent.MessageTypes;
+import io.onedev.agent.workspace.ProvisionMode;
+import io.onedev.agent.workspace.StopWorkspaceRequest;
 import io.onedev.agent.workspace.WorkspaceDeleteRequest;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
@@ -28,6 +33,33 @@ public final class AgentProvisionerUtils {
 
 	public static Long getAllocatedAgent() {
 		return ALLOCATED_AGENT.get();
+	}
+
+	/** Call the workspace agent, stopping the workspace if interrupted or timed out. */
+	public static <T extends Serializable> T callWorkspaceAgent(Session session, String token,
+			Serializable request) {
+		return callWorkspaceAgent(session, token, request, null);
+	}
+
+	/**
+	 * Call the workspace agent, stopping the workspace if interrupted or timed out.
+	 * Run the optional cancellation callback after attempting to stop the workspace.
+	 */
+	public static <T extends Serializable> T callWorkspaceAgent(Session session, String token,
+			Serializable request, @Nullable Runnable onCancel) {
+		try {
+			return call(session, request, 0L);
+		} catch (InterruptedException | TimeoutException e) {
+			try {
+				call(session, new StopWorkspaceRequest(token), TIMEOUT_MILLIS);
+			} catch (Exception e2) {
+				logger.error("Error stopping workspace", e2);
+			} finally {
+				if (onCancel != null)
+					onCancel.run();
+			}
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static <T> Future<T> submitTask(@Nullable String pinnedServerAddress, @Nullable Long pinnedAgentId,
@@ -57,11 +89,11 @@ public final class AgentProvisionerUtils {
 				});
 	}
 
-	public static void deleteWorkspace(Long projectId, Long workspaceNumber,
+	public static void deleteWorkspace(ProvisionMode provisionMode, Long projectId, Long workspaceNumber,
 			@Nullable Long pinnedAgentId) {
 		if (pinnedAgentId == null) {
 			logger.warn(
-					"Workspace agent unknown. Skipping deleting workspace directory (project id: {}, workspace number: {})",
+					"Workspace agent unknown. Skipping deleting workspace storage (project id: {}, workspace number: {})",
 					projectId, workspaceNumber);
 			return;
 		}
@@ -69,13 +101,16 @@ public final class AgentProvisionerUtils {
 		Session session = getAgentSession(pinnedAgentId, false);
 		if (session == null) {
 			logger.warn(
-					"Workspace agent offline. Skipping deleting workspace directory (project id: {}, workspace number: {})",
+					"Workspace agent offline. Skipping deleting workspace storage (project id: {}, workspace number: {})",
 					projectId, workspaceNumber);
 			return;
 		}
 
-		new Message(MessageTypes.DELETE_WORKSPACE, 
-				new WorkspaceDeleteRequest(projectId, workspaceNumber)).sendBy(session);
+		try {
+			call(session, new WorkspaceDeleteRequest(provisionMode, projectId, workspaceNumber));
+		} catch (InterruptedException | TimeoutException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static void persistAgent(Long workspaceId, Long agentId) {

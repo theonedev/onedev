@@ -20,12 +20,28 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
+import io.onedev.server.model.support.workspace.spec.template.ClaudeCodeInContainer;
+import io.onedev.server.model.support.workspace.spec.template.ClaudeCodeInHost;
+import io.onedev.server.model.support.workspace.spec.template.ClaudeCodeInSandbox;
+import io.onedev.server.model.support.workspace.spec.template.CodexInContainer;
+import io.onedev.server.model.support.workspace.spec.template.CodexInHost;
+import io.onedev.server.model.support.workspace.spec.template.CodexInSandbox;
+import io.onedev.server.model.support.workspace.spec.template.CursorInContainer;
+import io.onedev.server.model.support.workspace.spec.template.CursorInHost;
+import io.onedev.server.model.support.workspace.spec.template.CursorInSandbox;
+import io.onedev.server.model.support.workspace.spec.template.OpenCodeInContainer;
+import io.onedev.server.model.support.workspace.spec.template.OpenCodeInHost;
+import io.onedev.server.model.support.workspace.spec.template.OpenCodeInSandbox;
+import io.onedev.server.model.support.workspace.spec.template.WorkspaceSpecTemplate;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.menu.SubMenuItem;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
@@ -159,39 +175,67 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 			}
 
 		});
-		fragment.add(new AjaxLink<Void>("createFromTemplate") {
+		fragment.add(new MenuLink("createFromTemplate") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				new BeanEditModalPanel<WorkspaceSpecTemplateBean>(target, new WorkspaceSpecTemplateBean()) {
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				return List.of(
+						newTemplateCategory("Claude Code", dropdown, new ClaudeCodeInContainer(), new ClaudeCodeInSandbox(), new ClaudeCodeInHost()),
+						newTemplateCategory("Codex", dropdown, new CodexInContainer(), new CodexInSandbox(), new CodexInHost()),
+						newTemplateCategory("Cursor", dropdown, new CursorInContainer(), new CursorInSandbox(), new CursorInHost()),
+						newTemplateCategory("OpenCode", dropdown, new OpenCodeInContainer(), new OpenCodeInSandbox(), new OpenCodeInHost()));
+			}
+
+		});
+		fragment.setOutputMarkupId(true);
+		return fragment;
+	}
+
+	private MenuItem newTemplateCategory(String label, FloatingPanel dropdown, WorkspaceSpecTemplate containerTemplate,
+			WorkspaceSpecTemplate sandboxTemplate, WorkspaceSpecTemplate hostTemplate) {
+		return new SubMenuItem() {
+
+			@Override
+			public String getLabel() {
+				return label;
+			}
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel submenu) {
+				return List.of(
+						newTemplateItem(_T("In Container"), containerTemplate, submenu, dropdown),
+						newTemplateItem(_T("In Sandbox"), sandboxTemplate, submenu, dropdown),
+						newTemplateItem(_T("In Host"), hostTemplate, submenu, dropdown));
+			}
+
+		};
+	}
+
+	private MenuItem newTemplateItem(String label, WorkspaceSpecTemplate template, FloatingPanel submenu, FloatingPanel dropdown) {
+		return new MenuItem() {
+
+			@Override
+			public String getLabel() {
+				return label;
+			}
+
+			@Override
+			public WebMarkupContainer newLink(String id) {
+				return new AjaxLink<Void>(id) {
 
 					@Override
-					protected String onSave(AjaxRequestTarget target, WorkspaceSpecTemplateBean bean) {
-						var spec = bean.getTemplate().createWorkspaceSpec();
-						for (WorkspaceSpec existing : getProject().getWorkspaceSpecs()) {
-							if (existing.getName().equals(spec.getName()))
-								return _T("Another workspace spec with the same name already exists");
-						}
-						close();
-						getProject().getWorkspaceSpecs().add(spec);
-						var newAuditContent = VersionedXmlDoc.fromBean(spec).toXML();
-						getProjectService().update(getProject());
-						auditService.audit(getProject(), "created workspace spec \"" + spec.getName() + "\"", null, newAuditContent);
-						target.add(container);
-						return null;
-					}
-
-					@Override
-					protected boolean isLeaveConfirm() {
-						return false;
+					public void onClick(AjaxRequestTarget target) {
+						var spec = template.createWorkspaceSpec();
+						spec.setName(null);
+						submenu.close();
+						dropdown.close();
+						newWorkspaceSpecEditPanel(target, spec);
 					}
 
 				};
 			}
 
-		});		
-		fragment.setOutputMarkupId(true);
-		return fragment;
+		};
 	}
 
 	@Override

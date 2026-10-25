@@ -55,7 +55,7 @@ public abstract class WorkspaceRuntime {
      * exec, etc.). Return {@code null} if the file does not exist.
      */
     @Nullable
-    public abstract FileData readFileData(String path);
+    public abstract FileData readFile(String path);
 
     public synchronized Map<String, String> getShellLabels() {
         return new LinkedHashMap<>(labels);

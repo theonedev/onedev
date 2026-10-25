@@ -444,8 +444,8 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 								CommandFacade commandFacade = ((CommandFacade) facade).replacePlaceholders(buildDir);
 
 								if (commandFacade.getImage() == null) {
-									throw new ExplicitException("This step can only be executed by server shell "
-											+ "executor or remote shell executor");
+									throw new ExplicitException("This step can only be executed by server host "
+											+ "executor or remote host executor");
 								}
 								var entrypointArgs = JobUtils.getEntrypointArgs(buildDir, commandFacade, position);
 

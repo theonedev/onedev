@@ -56,7 +56,7 @@ public class WorkspaceRuntimeTest {
         }
 
         @Override
-        public FileData readFileData(String path) {
+        public FileData readFile(String path) {
             throw new UnsupportedOperationException();
         }
 
