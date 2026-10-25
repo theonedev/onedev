@@ -291,8 +291,8 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 
 		@Editable(order=100, description="""
 				Specify a Docker sandbox shell template image to test against. This image should \
-				contain Python 3 and Git, provide passwordless sudo for its default user, and be configured with a Docker daemon if you also want \
-				to run container inside it""")
+				contain Python 3 and Git. To also test running a container, configure a Docker daemon \
+				and provide passwordless sudo if the default user is non-root""")
 		@NotEmpty
 		public String getTemplate() {
 			return template;
