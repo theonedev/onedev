@@ -10,9 +10,11 @@ import static java.lang.System.lineSeparator;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.hibernate.cfg.AvailableSettings.DIALECT;
+import static org.hibernate.cfg.AvailableSettings.JAKARTA_JDBC_URL;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -1060,6 +1062,7 @@ public class Upgrade extends AbstractPlugin {
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
 			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, UTF_8);
+			hibernateProps = migrateHibernateDialects(hibernateProps);
 			hibernateProps = Strings.CS.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
 					"hibernate.hikari.autoCommit=true");
 			hibernateProps = Strings.CS.replace(hibernateProps, "javax.persistence.validation.mode",
@@ -1209,6 +1212,33 @@ public class Upgrade extends AbstractPlugin {
 		restoreExecutables(upgradeDir);
 	}
 	
+	static String migrateHibernateDialects(String hibernateProps) throws IOException {
+		var properties = new Properties();
+		properties.load(new StringReader(hibernateProps));
+		var dialectMatcher = Pattern.compile("(?m)^(\\h*([#!]\\h*)?hibernate\\.dialect\\h*[=:]\\h*)"
+				+ "org\\.hibernate\\.dialect\\.MySQL5InnoDBDialect(?=\\h*$)").matcher(hibernateProps);
+		var migrated = new StringBuilder();
+		while (dialectMatcher.find()) {
+			var connectionProperties = properties;
+			if (dialectMatcher.group(2) != null) {
+				// Commented examples have their own connection settings, separated by blank lines.
+				var example = hibernateProps.substring(dialectMatcher.start()).split("\\r?\\n[ \\t]*\\r?\\n", 2)[0];
+				connectionProperties = new Properties();
+				var urlMatcher = Pattern.compile("(?m)^\\h*[#!]\\h*((?:hibernate\\.connection|jakarta\\.persistence\\.jdbc)"
+						+ "\\.url\\h*[=:][^\\r\\n]*)$").matcher(example);
+				while (urlMatcher.find())
+					connectionProperties.load(new StringReader(urlMatcher.group(1)));
+			}
+			// Persist the file's configuration, independently of environment overrides.
+			var url = connectionProperties.getProperty(JAKARTA_JDBC_URL,
+					connectionProperties.getProperty("hibernate.connection.url", ""));
+			var dialect = url.startsWith("jdbc:mariadb:")
+					? "org.hibernate.dialect.MariaDBDialect" : "org.hibernate.dialect.MySQLDialect";
+			dialectMatcher.appendReplacement(migrated, Matcher.quoteReplacement(dialectMatcher.group(1) + dialect));
+		}
+		return dialectMatcher.appendTail(migrated).toString();
+	}
+
 	static String migrateWrapperConf(String wrapperConf) {
 		var mainClassPattern = Pattern.compile(
 				"(?m)^(\\h*wrapper\\.java\\.mainclass\\h*=\\h*)([\\w.]+\\.WrapperSimpleApp)(\\h*(?:#.*)?)$");
