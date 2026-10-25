@@ -200,7 +200,7 @@ public class Job implements NamedElement, Validatable {
 		this.executeInSandbox = executeInSandbox;
 	}
 
-	@Editable(order=220)
+	@Editable(order=220, description="Shell commands run as the template image's default user. A non-root default user must have passwordless sudo access.")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property="executeInSandbox")
 	@NotEmpty
