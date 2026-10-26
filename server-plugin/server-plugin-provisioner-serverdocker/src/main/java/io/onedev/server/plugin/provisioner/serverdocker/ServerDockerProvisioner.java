@@ -307,6 +307,12 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 		workspaceLogger.log("Provisioning workspace on server '" + serverAddress + "'...");
 		ServerProvisionerUtils.persistServerAddress(context.getWorkspaceId(), serverAddress);		
 
+		var containerName = "workspace-" + getName() + "-" + context.getProjectId() + "-" + context.getWorkspaceNumber();
+		var initContainerName = containerName + "-user-data-init";
+		// Stop containers left by a crash before accessing their writable workspace on the host.
+		WorkspaceUtils.deleteContainerIfExist(newDocker(), containerName, workspaceLogger);
+		WorkspaceUtils.deleteContainerIfExist(newDocker(), initContainerName, workspaceLogger);
+
 		var workspaceDir = ServerProvisionerUtils.getWorkspaceDir(context);
 		FileUtils.createDir(workspaceDir);
 
@@ -334,10 +340,9 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 				WORKSPACE_PATH + "/work");
 		
 		var cacheProvisioners = new ArrayList<CacheProvisioner>();
-		var cacheConfigIndex = 1;
 		for (var cacheConfig : context.getSpec().getCacheConfigs()) {
-			var cacheProvisioner = new ServerWorkspaceCacheProvisioner(cacheConfig.getFacade(), cacheConfigIndex++, context);
-			cacheProvisioner.download(workspaceDir, workspaceLogger);
+			var cacheProvisioner = new ServerWorkspaceCacheProvisioner(cacheConfig.getFacade(), context);
+			cacheProvisioner.download(workspaceDir, workspaceLogger, true);
 			cacheProvisioners.add(cacheProvisioner);
 		}
 
@@ -373,15 +378,11 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 		}
 		
 		try {
-			var containerName = "workspace-" + getName() + "-" + context.getProjectId() + "-" + context.getWorkspaceNumber();
 			var userDataInitEntrypointArgs = userDataProvisioner.getInitEntrypointArgs(WORKSPACE_PATH);
 			if (userDataInitEntrypointArgs != null) {
 				workspaceLogger.log("Initializing new user data...");
 
 				callWithRegistryLogins(docker, allRegistryLogins, () -> {
-					var initContainerName = containerName + "-user-data-init";
-					WorkspaceUtils.deleteContainerIfExist(docker, initContainerName, workspaceLogger);
-
 					WorkspaceUtils.setCommonDockerRunOptions(docker, initContainerName, runAs, isAlwaysPullImage(),
 							getCpuLimit(), getMemoryLimit());
 					docker.processKiller(newDockerKiller(newDocker(), initContainerName, workspaceLogger));
@@ -399,8 +400,6 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 				workspaceLogger.log("Starting docker container...");
 
 				callWithRegistryLogins(docker, allRegistryLogins, () -> {
-					WorkspaceUtils.deleteContainerIfExist(docker, containerName, workspaceLogger);
-
 					WorkspaceUtils.setCommonDockerRunOptions(docker, containerName, runAs, 
 							isAlwaysPullImage() && userDataInitEntrypointArgs == null,
 							getCpuLimit(), getMemoryLimit());
@@ -502,7 +501,8 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 							if (SystemUtils.IS_OS_LINUX && !osIds.equals("0:0")) 
 								changeOwner(newDocker(), osIds, workspaceDir, osIds, workspaceLogger);
 
-							upload(workspaceDir, userDataProvisioner, cacheProvisioners, workspaceLogger);
+							if (context.isDeleted())
+								upload(workspaceDir, userDataProvisioner, cacheProvisioners, workspaceLogger);
 						}
 					}
 

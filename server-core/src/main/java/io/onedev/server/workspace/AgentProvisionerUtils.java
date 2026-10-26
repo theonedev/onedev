@@ -6,6 +6,7 @@ import static io.onedev.agent.workspace.StopWorkspaceRequest.TIMEOUT_MILLIS;
 import java.io.Serializable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.jspecify.annotations.Nullable;
@@ -47,11 +48,16 @@ public final class AgentProvisionerUtils {
 	 */
 	public static <T extends Serializable> T callWorkspaceAgent(Session session, String token,
 			Serializable request, @Nullable Runnable onCancel) {
+		return callWorkspaceAgent(session, token, request, onCancel, () -> false);
+	}
+
+	public static <T extends Serializable> T callWorkspaceAgent(Session session, String token,
+			Serializable request, @Nullable Runnable onCancel, BooleanSupplier uploadData) {
 		try {
 			return call(session, request, 0L);
 		} catch (InterruptedException | TimeoutException e) {
 			try {
-				call(session, new StopWorkspaceRequest(token), TIMEOUT_MILLIS);
+				call(session, new StopWorkspaceRequest(token, uploadData.getAsBoolean()), TIMEOUT_MILLIS);
 			} catch (Exception e2) {
 				logger.error("Error stopping workspace", e2);
 			} finally {

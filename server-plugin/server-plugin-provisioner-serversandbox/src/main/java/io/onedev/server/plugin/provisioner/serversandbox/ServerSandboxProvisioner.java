@@ -234,7 +234,7 @@ public class ServerSandboxProvisioner extends WorkspaceProvisioner implements Te
 
 			@Override
 			public void await() {
-				controller.awaitRunner();
+				controller.awaitRunner(context::isDeleted);
 			}
 
 			@Override

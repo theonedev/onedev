@@ -51,6 +51,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.SandboxAware;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.HierarchicalContext;
@@ -87,9 +88,9 @@ public class Job implements NamedElement, Validatable {
 	
 	private String name;
 	
-	private String jobExecutor;
-
 	private boolean executeInSandbox;
+
+	private String jobExecutor;
 
 	private String sandboxTemplate;
 	
@@ -146,6 +147,15 @@ public class Job implements NamedElement, Validatable {
 		return new ArrayList<>();
 	}
 
+	@Editable(order=190, description="Enable to execute this job in a sandbox VM")
+	public boolean isExecuteInSandbox() {
+		return executeInSandbox;
+	}
+
+	public void setExecuteInSandbox(boolean executeInSandbox) {
+		this.executeInSandbox = executeInSandbox;
+	}
+
 	@Editable(order=200, placeholderProvider="getJobExecutorPlaceholder", descriptionProvider="getJobExecutorDescription")
 	@Interpolative(literalSuggester="suggestJobExecutors", variableSuggester="suggestVariables")
 	public String getJobExecutor() {
@@ -177,13 +187,15 @@ public class Job implements NamedElement, Validatable {
 		List<String> applicableJobExecutors = new ArrayList<>();
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
 		String jobName = (String) EditContext.get().getInputValue(PROP_NAME);
+		boolean executeInSandbox = (boolean) EditContext.get().getInputValue("executeInSandbox");
 		if (jobName != null) {
 			String branch = page.getBlobIdent().revision;
 			if (branch == null)
 				branch = "main";
 			JobMatchContext context = new JobMatchContext(page.getProject(), branch, null, jobName);
 			for (JobExecutor executor: OneDev.getInstance(SettingService.class).getJobExecutors()) {
-				if (executor.isEnabled() && executor.isApplicable(context))
+				if (executor.isEnabled() && executeInSandbox == (executor instanceof SandboxAware)
+						&& executor.isApplicable(context))
 					applicableJobExecutors.add(executor.getName());
 			}
 		}
@@ -191,15 +203,6 @@ public class Job implements NamedElement, Validatable {
 		return SuggestionUtils.suggest(applicableJobExecutors, matchWith);
 	}
 	
-	@Editable(order=210, description="Enable to execute this job in a sandbox VM")
-	public boolean isExecuteInSandbox() {
-		return executeInSandbox;
-	}
-
-	public void setExecuteInSandbox(boolean executeInSandbox) {
-		this.executeInSandbox = executeInSandbox;
-	}
-
 	@Editable(order=220, description="Shell commands run as the template image's default user. Non-root users need passwordless sudo for containers, services, and protected caches. Opening a build terminal or resuming a paused job needs sudo only when the non-root template user does not own the build directory.")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property="executeInSandbox")

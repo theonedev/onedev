@@ -100,7 +100,7 @@ public class CacheConfig implements Serializable {
 	}
 	
 	@Editable(order=400, description = """
-			Specify cache upload strategy after build successful. <i>Upload If Not Exact Match</i> 
+			Specify cache upload strategy before deleting an active workspace. <i>Upload If Not Exact Match</i>
 			means to upload when no cache found with matching key and checksum , and 
 			<i>Upload If Changed</i> means to upload if some files in cache path are changed""")
 	@NotNull

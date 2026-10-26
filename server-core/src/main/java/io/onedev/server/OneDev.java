@@ -232,7 +232,9 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		clusterService.preStop();
 		SecurityUtils.bindAsSystem();
 		try {
-			sessionService.run(() -> listenerRegistry.post(new SystemStopping()));
+			// Shutdown listeners may wait for tasks that need database connections.
+			if (sessionFactoryService.getSessionFactory() != null)
+				listenerRegistry.invokeListeners(new SystemStopping());
 		} catch (ServerNotReadyException ignore) {
 		}
 	}
@@ -257,7 +259,8 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 
 		try {
 			jettyServiceProvider.get().stop();
-			sessionService.run(() -> listenerRegistry.post(new SystemStopped()));
+			if (sessionFactoryService.getSessionFactory() != null)
+				listenerRegistry.invokeListeners(new SystemStopped());
 			
 			taskScheduler.stop();
 			sessionFactoryService.stop();

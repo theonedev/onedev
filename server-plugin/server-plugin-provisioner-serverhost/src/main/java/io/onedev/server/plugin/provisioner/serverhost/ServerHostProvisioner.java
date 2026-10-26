@@ -168,14 +168,13 @@ public class ServerHostProvisioner extends WorkspaceProvisioner implements Testa
 		workspaceLogger.log("Setting up cache...");
 
 		var cacheProvisioners = new ArrayList<CacheProvisioner>();
-		var cacheConfigIndex = 1;
 		for (var cacheConfig : context.getSpec().getCacheConfigs()) {
 			for (var path : cacheConfig.getPaths()) {
 				if (FilenameUtils.getPrefixLength(path) > 0)
 					throw new ExplicitException("Host provisioner does not allow absolute cache path: " + path);
 			}
-			var cacheProvisioner = new ServerWorkspaceCacheProvisioner(cacheConfig.getFacade(), cacheConfigIndex++, context);
-			cacheProvisioner.download(workspaceDir, workspaceLogger);
+			var cacheProvisioner = new ServerWorkspaceCacheProvisioner(cacheConfig.getFacade(), context);
+			cacheProvisioner.download(workspaceDir, workspaceLogger, true);
 			cacheProvisioners.add(cacheProvisioner);
 		}
 
@@ -229,8 +228,10 @@ public class ServerHostProvisioner extends WorkspaceProvisioner implements Testa
 				} finally {
 					try {
 						teardownShellProvisioned(scriptConfig, workspaceDir, envVars, workspaceLogger);
-						for (var cacheProvisioner : cacheProvisioners)
-							cacheProvisioner.upload(workspaceDir, workspaceLogger);
+						if (context.isDeleted()) {
+							for (var cacheProvisioner : cacheProvisioners)
+								cacheProvisioner.upload(workspaceDir, workspaceLogger);
+						}
 					} finally {
 						for (var shellId : getShellLabels().keySet())
 							terminateShell(shellId);

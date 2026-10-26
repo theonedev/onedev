@@ -8,8 +8,8 @@ public class ServerJobCacheProvisioner extends ServerCacheProvisioner {
 		
 	private final JobContext jobContext;
 
-	public ServerJobCacheProvisioner(CacheConfigFacade config, int configIndex, JobContext jobContext) {
-		super(config, configIndex);
+	public ServerJobCacheProvisioner(CacheConfigFacade config, JobContext jobContext) {
+		super(config);
 		this.jobContext = jobContext;
 	}
 

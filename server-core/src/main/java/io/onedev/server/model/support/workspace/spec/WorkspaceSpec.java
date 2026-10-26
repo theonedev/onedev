@@ -11,6 +11,7 @@ import io.onedev.server.model.support.administration.workspaceprovisioner.Worksp
 import io.onedev.server.model.support.workspace.spec.shell.PosixShell;
 import io.onedev.server.model.support.workspace.spec.shell.WorkspaceShell;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -48,9 +49,9 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	private String description;
 
-	private String provisioner;
-
 	private ProvisionMode provisionMode = ProvisionMode.HOST;
+
+	private String provisioner;
 
 	private String image;
 
@@ -115,7 +116,17 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		}
 	}
 
-	@Editable(order=55, placeholderProvider="getProvisionerPlaceholder", descriptionProvider="getProvisionerDescription")
+	@Editable(order = 55, description = "Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)")
+	@NotNull
+	public ProvisionMode getProvisionMode() {
+		return provisionMode;
+	}
+
+	public void setProvisionMode(ProvisionMode provisionMode) {
+		this.provisionMode = provisionMode;
+	}
+
+	@Editable(order=100, placeholderProvider="getProvisionerPlaceholder", descriptionProvider="getProvisionerDescription")
 	@Interpolative(literalSuggester="suggestProvisioners", variableSuggester="suggestVariables")
 	public String getProvisioner() {
 		return provisioner;
@@ -144,21 +155,13 @@ public class WorkspaceSpec implements Serializable, Validatable {
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestProvisioners(String matchWith) {
 		List<String> provisionerNames = new ArrayList<>();
+		var provisionMode = (ProvisionMode) EditContext.get().getInputValue("provisionMode");
 		for (WorkspaceProvisioner provisioner: OneDev.getInstance(SettingService.class).getWorkspaceProvisioners()) {
-			if (provisioner.isEnabled() && provisioner.isApplicable(Project.get()))
+			if (provisioner.isEnabled() && provisioner.getProvisionMode() == provisionMode
+					&& provisioner.isApplicable(Project.get()))
 				provisionerNames.add(provisioner.getName());
 		}
 		return SuggestionUtils.suggest(provisionerNames, matchWith);
-	}
-
-	@Editable(order = 100, description = "Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)")
-	@NotNull
-	public ProvisionMode getProvisionMode() {
-		return provisionMode;
-	}
-
-	public void setProvisionMode(ProvisionMode provisionMode) {
-		this.provisionMode = provisionMode;
 	}
 
 	@Editable(order = 200, name = "container:image", description = """

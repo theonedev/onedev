@@ -42,12 +42,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.jspecify.annotations.Nullable;
@@ -766,7 +766,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 					));
 
 			Map<String, String> cacheMounts = new LinkedHashMap<>();
-			var cacheConfigIndex = new AtomicInteger(1);
+
 			entryFacade.traverse((facade, position) -> {
 				String containerName = getContainerName(position);
 				containerNames.add(containerName);
@@ -801,11 +801,10 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 					if (facade instanceof SetupCacheFacade) {
 						var setupCacheFacade = (SetupCacheFacade) facade;
 						var cacheProvisioner = new ServerJobCacheProvisioner(
-								setupCacheFacade.getCacheConfig(), cacheConfigIndex.getAndIncrement(), jobContext);
+								setupCacheFacade.getCacheConfig(), jobContext);
 						for (var path: setupCacheFacade.getCacheConfig().getPaths()) {
-							var absolutePathIndex = cacheProvisioner.getAbsolutePathIndexes().get(path);
-							if (absolutePathIndex != null)
-								cacheMounts.put(path, cacheProvisioner.getSubPath(absolutePathIndex));
+							if (FilenameUtils.getPrefixLength(path) > 0)
+								cacheMounts.put(path, cacheProvisioner.getDataPath(path));
 						}
 					}
 					stepContainerSpec = newHashMap(

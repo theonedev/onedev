@@ -10,7 +10,6 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +103,6 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 			listener.notify(event);
 	}
 
-	@Transactional
 	@Override
 	public void post(Object event) {
 		if (event instanceof ProjectEvent) {
@@ -141,11 +139,10 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 					return null;
 				}));
 			}
-		} else if (event instanceof ActiveServerChanged) {
-			ActiveServerChanged activeServerChanged = (ActiveServerChanged) event;
+		} else if (event instanceof ActiveServerChanged activeServerChanged) {
 			transactionService.runAfterCommit(() -> clusterService.submitToServer(activeServerChanged.getActiveServer(), () -> {
 				try {
-					sessionService.run(() -> invokeListeners(event));
+					invokeListeners(event);
 				} catch (Throwable t) {
 					logger.error("Error invoking listeners", t);
 				}

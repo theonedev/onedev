@@ -35,8 +35,8 @@ import io.onedev.server.service.RunCacheService;
 
 public abstract class ServerCacheProvisioner extends CacheProvisioner {
 
-	public ServerCacheProvisioner(CacheConfigFacade config, int configIndex) {
-		super(config, configIndex);
+	public ServerCacheProvisioner(CacheConfigFacade config) {
+		super(config);
 	}
 
 	@Override

@@ -295,7 +295,6 @@ public class DefaultIssueInfoService extends AbstractEnvironmentService
 		}
 	}
 
-	@Sessional
 	@Listen
 	public void on(ActiveServerChanged event) {
 		for (var projectId: event.getProjectIds()) {

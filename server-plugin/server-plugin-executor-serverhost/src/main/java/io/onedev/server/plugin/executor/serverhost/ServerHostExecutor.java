@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -168,7 +167,7 @@ public class ServerHostExecutor extends JobExecutor implements Testable<Testable
 
 					getJobService().reportJobWorkDir(jobContext, workDir.getAbsolutePath());
 					CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
-					var cacheConfigIndex = new AtomicInteger(1);
+
 					initializationCompleted = true;
 					successful = entryFacade.execute(new LeafHandler() {
 
@@ -251,7 +250,7 @@ public class ServerHostExecutor extends JobExecutor implements Testable<Testable
 										throw new ExplicitException("Host executor does not allow absolute cache path: " + path);
 								}
 								var cacheProvisioner = new ServerJobCacheProvisioner(setupCacheFacade.getCacheConfig(), 
-										cacheConfigIndex.getAndIncrement(), jobContext);
+										jobContext);
 								cacheProvisioner.download(buildDir, jobLogger);
 								cacheProvisioners.add(cacheProvisioner);
 							} else if (facade instanceof ServerSideFacade) {

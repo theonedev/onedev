@@ -26,7 +26,7 @@ public class ServerUserDataProvisioner extends UserDataProvisioner {
 
 	@Nullable
 	public String getInitEntrypointArgs(String workspaceContainerPath) {
-		var storedPaths = new HashSet<String>();
+		var storedSubPaths = new HashSet<String>();
 		for (var userData : userDatas) {
 			var key = userData.getKey();
 			var dataStorageDir = getUserService().getWorkspaceDataDir(userId, key, false);
@@ -37,34 +37,33 @@ public class ServerUserDataProvisioner extends UserDataProvisioner {
 					var path = entry.getPath();
 					var pathIndex = pathIndexes.get(path);
 					if (pathIndex != null && new File(dataStorageDir, String.valueOf(pathIndex)).exists())
-						storedPaths.add(path);
+						storedSubPaths.add(getDataPath(key, path));
 				}
 			});
 		}
 
-		var initPaths = new HashSet<String>();
-		for (var path : pathIndexes.keySet()) {
-			if (!storedPaths.contains(path))
-				initPaths.add(path);
-		}
-
 		var initEntrypointArgs = new StringBuilder();
-		var userDataContainerPath = workspaceContainerPath + "/" + USER_DATA_DIR;
-		for (var entry : pathIndexes.entrySet()) {
-			var path = entry.getKey();
-			var pathIndex = entry.getValue();
-			if (initPaths.contains(path)) {
-				var targetPath = workspaceContainerPath + "/" + getSubPath(pathIndex);
-				var quotedPath = "'" + path.replace("'", "'\"'\"'") + "'";
-				initEntrypointArgs.append(" ; ");
-				initEntrypointArgs.append("if [ ! -e ").append(targetPath).append(" ]; then ");
-				initEntrypointArgs.append("if [ -e ").append(quotedPath).append(" ]; then ");
-				initEntrypointArgs.append("cp -a ").append(quotedPath).append(" ").append(targetPath);
-				initEntrypointArgs.append("; else mkdir -p ").append(targetPath).append("; fi; fi");
+		for (var userData : userDatas) {
+			for (var entry : userData.getEntries()) {
+				var path = entry.getPath();
+				var subPath = getDataPath(userData.getKey(), path);
+				if (!storedSubPaths.contains(subPath)) {
+					var targetPath = workspaceContainerPath + "/" + subPath;
+					var targetParent = targetPath.substring(0, targetPath.lastIndexOf('/'));
+					var statePath = workspaceContainerPath + "/" + getStatePath(userData.getKey(), path);
+					var quotedPath = "'" + path.replace("'", "'\"'\"'") + "'";
+					initEntrypointArgs.append(" ; ");
+					initEntrypointArgs.append("if [ ! -e ").append(targetPath).append(" ]; then ");
+					initEntrypointArgs.append("mkdir -p ").append(targetParent).append("; ");
+					initEntrypointArgs.append("if [ -e ").append(quotedPath).append(" ]; then ");
+					initEntrypointArgs.append("cp -a ").append(quotedPath).append(" ").append(targetPath);
+					initEntrypointArgs.append("; else mkdir -p ").append(targetPath).append("; fi; ");
+					initEntrypointArgs.append("if [ ! -e ").append(statePath).append(" ]; then touch ").append(statePath).append("; fi; fi");
+				}
 			}
 		}
 		if (initEntrypointArgs.length() > 0)
-			return "set -e ; mkdir -p " + userDataContainerPath + initEntrypointArgs;
+			return "set -e" + initEntrypointArgs;
 		else
 			return null;
 	}

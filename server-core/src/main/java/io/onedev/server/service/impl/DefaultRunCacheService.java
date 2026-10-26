@@ -4,6 +4,7 @@ import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +17,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -273,10 +275,16 @@ public class DefaultRunCacheService implements RunCacheService, Serializable, Sc
 			boolean wasNew = !pathIndexes.containsKey(path);
 			int index = PathIndexUtils.allocate(pathIndexes, path);
 			var pathFile = new File(cacheDir, String.valueOf(index));
-			try (var os = new FileOutputStream(pathFile)) {
-				cacheStreamHandler.accept(os);
+			var tempFile = FileUtils.createTempFile("data-", ".tmp", cacheDir);
+			try {
+				try (var os = new FileOutputStream(tempFile)) {
+					cacheStreamHandler.accept(os);
+				}
+				Files.move(tempFile.toPath(), pathFile.toPath(), REPLACE_EXISTING);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
+			} finally {
+				FileUtils.deletePath(tempFile);
 			}
 			if (wasNew)
 				PathIndexUtils.write(cacheDir, pathIndexes);

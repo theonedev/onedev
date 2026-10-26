@@ -292,7 +292,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							checkSignal.release();
 
 							// Delete workspace storage after workspace server is removed to
-							// give a chance for cache to be uploaded
+							// give a chance for cache and user data to be uploaded
 							while (workspaceServers.containsKey(workspaceId))
 								Thread.sleep(1000);
 
@@ -518,8 +518,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			taskFuture.cancel(true);
 
 		/*
-		 * Wait till all workspaces running on this server are stopped and finished uploading user data 
-		 * and caches. For workspaces initiated from current server, they will be cancelled above; for
+		 * Wait till all workspaces running on this server are stopped. For workspaces
+		 * initiated from current server, they will be cancelled above; for
 		 * workspaces initiated from other servers, they will be cancelled via NodeStopping event sent 
 		 * to other servers
 		 */

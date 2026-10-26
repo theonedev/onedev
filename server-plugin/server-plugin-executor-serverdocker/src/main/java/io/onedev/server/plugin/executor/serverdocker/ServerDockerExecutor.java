@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.jspecify.annotations.Nullable;
@@ -405,7 +404,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 					var osIds = getOsIds(jobLogger);
 					getJobService().reportJobWorkDir(jobContext, containerWorkDirPath);
 					CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
-					var cacheConfigIndex = new AtomicInteger(1);
+
 					var dockerSettings = new DockerSettings(isMountDockerSock(), getDockerSockPath(), getCpuLimit(),
 							getMemoryLimit(), getRunOptions(), List.of(), isAlwaysPullImage());
 					var stepContainerContext = new JobUtils.StepContainerContext(dockerSettings, network, buildDir,
@@ -559,7 +558,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 										checkoutFacade.isWithSubmodules(), cloneDepth, infoLogger, warningLogger);
 							} else if (facade instanceof SetupCacheFacade) {
 								SetupCacheFacade setupCacheFacade = (SetupCacheFacade) facade;
-								var cacheProvisioner = new ServerJobCacheProvisioner(setupCacheFacade.getCacheConfig(), cacheConfigIndex.getAndIncrement(), jobContext);
+								var cacheProvisioner = new ServerJobCacheProvisioner(setupCacheFacade.getCacheConfig(), jobContext);
 								cacheProvisioner.download(buildDir, jobLogger);
 								cacheProvisioners.add(cacheProvisioner);
 							} else if (facade instanceof ServerSideFacade) {

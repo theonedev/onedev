@@ -11,9 +11,8 @@ public class ServerWorkspaceCacheProvisioner extends ServerCacheProvisioner {
 	
 	private final WorkspaceContext workspaceContext;
 
-	public ServerWorkspaceCacheProvisioner(CacheConfigFacade config, int configIndex, 
-				WorkspaceContext workspaceContext) {
-		super(config, configIndex);
+	public ServerWorkspaceCacheProvisioner(CacheConfigFacade config, WorkspaceContext workspaceContext) {
+		super(config);
 		this.workspaceContext = workspaceContext;
 	}
 
