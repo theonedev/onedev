@@ -40,7 +40,7 @@ public class ProjectDependency implements Serializable {
 
 	private boolean requireSuccessful = true;
 	
-	private String artifacts = "**";
+	private String artifacts;
 	
 	private String destinationPath;
 	
@@ -105,11 +105,14 @@ public class ProjectDependency implements Serializable {
 		return null;
 	}
 	
-	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='${docsite}/concepts#job-workdir'>job working directory</a>. "
-			+ "Only published artifacts (via artifact publish step) can be retrieved.")
+	@Editable(order=400, name="Artifacts to Retrieve", placeholder="Do not retrieve", description=""
+			+ "Optionally specify artifacts to retrieve from the dependency into "
+			+ "<a href='${docsite}/concepts#job-workdir'>job working directory</a>. "
+			+ "Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not "
+			+ "retrieve any artifacts")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
-	@NotEmpty
+	@Nullable
 	public String getArtifacts() {
 		return artifacts;
 	}
