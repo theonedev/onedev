@@ -298,7 +298,7 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 
 		@Editable(order=100, description="""
 				Specify a Docker sandbox shell template image to test against. This image must \
-				have Git and Python3 installed. To also test container, Docker must be \
+				have shell, Git, and Python3 installed. To also test container, Docker must be \
 				configured in the image, and a non-root default user must have passwordless \
 				sudo access""")
 		@NotEmpty
@@ -319,7 +319,8 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 			this.testContainer = testContainer;
 		}
 
-		@Editable(order=300, name="container:image", description="Specify the container image to test against")
+		@Editable(order=300, name="container:image", description="""
+			Specify the container image to test against. The image must have shell installed""")
 		@DependsOn(property="testContainer")
 		@NotEmpty
 		public String getImage() {

@@ -166,7 +166,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	@Editable(order = 60, name = "container:image", description = """
 		Specify container image to create workspace inside. This image must have \
-		Git and tmux installed""")
+		shell, Git, and tmux installed""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property = "provisionMode", value = "DOCKER")
 	@NotEmpty
@@ -180,7 +180,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	@Editable(order = 70, description = """
 		Specify sandbox template image to create workspace from. This image must \
-		have Git, Python 3, and tmux installed""")
+		have shell, Git, Python 3, and tmux installed""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property = "provisionMode", value = "SANDBOX")
 	@NotEmpty

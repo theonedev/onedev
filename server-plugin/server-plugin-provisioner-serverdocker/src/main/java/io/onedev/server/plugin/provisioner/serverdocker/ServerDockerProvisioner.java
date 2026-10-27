@@ -290,7 +290,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 
 		private String dockerImage;
 
-		@Editable(description="Specify a Docker image to test against. The image must have Git and tmux installed")
+		@Editable(description="Specify a Docker image to test against. The image must have shell, Git, and tmux installed")
 		@OmitName
 		@NotEmpty
 		public String getDockerImage() {

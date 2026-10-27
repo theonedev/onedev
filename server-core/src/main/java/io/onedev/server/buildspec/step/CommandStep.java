@@ -64,7 +64,8 @@ public class CommandStep extends Step {
 		this.runInContainer = runInContainer;
 	}
 	
-	@Editable(order=100, name="container:image", description="Specify container image to execute commands inside")
+	@Editable(order=100, name="container:image", description="""
+		Specify container image to execute commands inside. The image must have shell installed""")
 	@DependsOn(property="runInContainer")
 	@Interpolative(variableSuggester="suggestDynamicVariables")
 	@NotEmpty

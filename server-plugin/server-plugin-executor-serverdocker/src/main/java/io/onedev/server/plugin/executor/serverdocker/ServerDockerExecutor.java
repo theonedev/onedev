@@ -696,7 +696,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 		private String dockerImage;
 
-		@Editable
+		@Editable(description = "Specify a Docker image to test against. The image must have shell installed")
 		@OmitName
 		@NotEmpty
 		public String getDockerImage() {

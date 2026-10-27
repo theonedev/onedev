@@ -205,8 +205,8 @@ public class Job implements NamedElement, Validatable {
 	
 	@Editable(order=195, description="""
 		Specify the sandbox template image used to run this job. The image must \
-		have Git and Python 3 installed. If the job runs Docker-related steps or \
-		services, Docker must be configured in the image, and a non-root \
+		have shell, Git, and Python 3 installed. If the job runs Docker-related \
+		steps or services, Docker must be configured in the image, and a non-root \
 		default user must have passwordless sudo access.""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property="executeInSandbox")
