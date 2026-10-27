@@ -9,6 +9,12 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Editable {
 
+	/**
+	 * Property group name. The bean class may define a static, no-argument
+	 * {@code Map<String, String> getGroupDescriptions()} method to supply descriptions
+	 * displayed below group names in the bean editor. Map keys are the original
+	 * group names; descriptions should handle translation if needed.
+	 */
 	String group() default "";
 	
 	String icon() default "";

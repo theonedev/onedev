@@ -3,6 +3,7 @@ package io.onedev.server.web.editable;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -45,6 +46,7 @@ import io.onedev.server.util.HierarchicalContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Named;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.xstream.ObjectMap;
 
 public class BeanEditor extends ValueEditor<Serializable> {
@@ -268,6 +270,11 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 		groupsView = new RepeatingView("groups");
 		add(groupsView);
+
+		Map<String, String> groupDescriptions = null;
+		var groupDescriptionsMethod = ReflectionUtils.findMethod(descriptor.getBeanClass(), "getGroupDescriptions");
+		if (groupDescriptionsMethod != null && Modifier.isStatic(groupDescriptionsMethod.getModifiers()))
+			groupDescriptions = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), "getGroupDescriptions");
 		
 		for (Map.Entry<String, List<PropertyContext<Serializable>>> entry: propertyContexts.entrySet()) {
 			WebMarkupContainer groupContainer = new WebMarkupContainer(groupsView.newChildId());
@@ -283,6 +290,10 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				groupName = _T(groupName);
 			toggleLink.add(new Label("groupName", groupName));
 			groupContainer.add(toggleLink);
+
+			String groupDescription = groupDescriptions != null ? groupDescriptions.get(entry.getKey()) : null;
+			toggleLink.add(new Label("groupDescription", groupDescription)
+					.setVisible(!entry.getKey().isEmpty() && groupDescription != null && !groupDescription.isBlank()));
 			
 			RepeatingView propertiesView = new RepeatingView("properties");
 			groupContainer.add(propertiesView);

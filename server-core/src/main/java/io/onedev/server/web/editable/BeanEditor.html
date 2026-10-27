@@ -1,6 +1,12 @@
-<wicket:panel>
+<wicket:panel xmlns:wicket="http://www.w3.org/1999/xhtml">
     <div wicket:id="groups" class="group bean-properties">
-        <a wicket:id="toggle" class="toggle d-flex align-items-center"><span wicket:id="groupName" class="mr-3"></span> <wicket:svg href="arrow" class="icon ml-auto"/></a>
+        <a wicket:id="toggle" class="toggle d-flex align-items-center">
+            <span class="mr-3">
+                <span wicket:id="groupName" class="d-block"></span>
+                <span wicket:id="groupDescription" class="text-muted font-size-sm mt-1 d-block"></span>
+            </span>
+            <wicket:svg href="arrow" class="icon ml-auto"/>
+        </a>
         <div>
 			<div wicket:id="properties" class="form-group">
 				<wicket:enclosure child="name">

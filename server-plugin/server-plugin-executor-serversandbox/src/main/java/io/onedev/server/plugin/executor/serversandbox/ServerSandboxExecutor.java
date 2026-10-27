@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.executor.serversandbox;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -77,6 +79,11 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 	private String networkOptions;
 
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
+
+	@SuppressWarnings("unused")
+	private static Map<String, String> getGroupDescriptions() {
+		return Map.of("Container Settings", _T("These settings are only used when running Docker containers inside the sandbox VM."));
+	}
 
 	@Editable(order=500, group="Container Settings", description="Whether or not to always pull images when running containers or building images "
 			+ "inside the sandbox. If disabled, cached images are used when available.")
