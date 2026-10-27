@@ -1105,7 +1105,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 
 		private String dockerImage;
 
-		@Editable
+		@Editable(description = "Specify a Docker image to test against. The image must have shell installed")
 		@OmitName
 		@NotEmpty
 		public String getDockerImage() {
