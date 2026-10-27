@@ -118,7 +118,8 @@ abstract class TaskFeedbackPanel extends Panel {
 			private String getData() {
 				Map<String, Object> data = new HashMap<>();
 				data.put("logEntries", getLogEntries());
-				data.put("finished", getResult() != null);
+				// Keep polling if the task completed after the result label was configured.
+				data.put("finished", getResult() != null && resultLabel.isVisible());
 				
 				try {
 					return OneDev.getInstance(ObjectMapper.class).writeValueAsString(data);

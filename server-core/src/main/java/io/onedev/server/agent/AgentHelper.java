@@ -22,6 +22,7 @@ import io.onedev.server.persistence.SessionService;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.ResourceService;
+import io.onedev.server.service.SettingService;
 
 public class AgentHelper {
 
@@ -33,6 +34,7 @@ public class AgentHelper {
 
 	public static void test(@Nullable String agentQuery, String resourceName, int concurrency,
 			TestData testData, TaskLogger logger) {
+		testData.setServerUrl(OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl());
 		var token = testData.getToken();
 		getLogService().addLogger(token, logger);
 		testTokens.add(token);

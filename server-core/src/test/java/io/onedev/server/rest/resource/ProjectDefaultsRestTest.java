@@ -215,7 +215,8 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 		project.getGitPackConfig().setThreads("2");
 		project.getCodeIndexingSetting().setAnalyzeFiles("**.java");
 		project.getAiSetting().setExcludedReviewFiles("vendor/**");
-		var spec = new WorkspaceSpec(); spec.setName("dev"); project.getWorkspaceSpecs().add(spec);
+		var spec = new WorkspaceSpec(); spec.setName("dev"); spec.setImage("workspace-image");
+		project.getWorkspaceSpecs().add(spec);
 		when(projects.load(Project.DEFAULT_ID)).thenReturn(project);
 		var audit = mock(AuditService.class);
 		var settings = mock(SettingService.class);
@@ -342,7 +343,9 @@ class ProjectDefaultsRestTest extends HibernateValidationTestSupport {
 			assertThrows(ExplicitException.class, () -> resource.setProjectDefaults(nullElements));
 			var duplicateSpecs = new ProjectDefaults();
 			var firstSpec = new WorkspaceSpec(); firstSpec.setName("dev");
+			firstSpec.setImage("workspace-image");
 			var secondSpec = new WorkspaceSpec(); secondSpec.setName("dev");
+			secondSpec.setImage("workspace-image");
 			secondSpec.setDescription("Different configuration with the same name");
 			duplicateSpecs.getWorkspaceSpecs().addAll(List.of(firstSpec, secondSpec));
 			assertPaths(validator.validate(duplicateSpecs), "workspaceSpecs");

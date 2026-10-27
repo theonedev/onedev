@@ -37,6 +37,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import io.onedev.agent.RuntimeTestUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -489,7 +490,7 @@ public final class KubernetesUtils {
 	public static void testCluster(Supplier<Commandline> kubectlFactory, String namespace,
 				String image, String helperImage, String serverUrl, String testToken,
 				@Nullable String storageClass, String storageSize, boolean alwaysPullImage,
-				TaskLogger taskLogger) {
+				boolean testWorkspace, TaskLogger taskLogger) {
 		checkClusterAccess(kubectlFactory, taskLogger);
 		ensureNamespace(kubectlFactory, namespace, taskLogger);
 
@@ -547,11 +548,12 @@ public final class KubernetesUtils {
 				initContainerSpec.put("imagePullPolicy", "Always");
 			setupSecurityContext(initContainerSpec, "0:0");
 
+			var commands = RuntimeTestUtils.getContainerTestCommands(testWorkspace);
 			Map<Object, Object> mainContainerSpec = newLinkedHashMap(
 					"name", TEST_MAIN_CONTAINER_NAME,
 					"image", image,
 					"command", Lists.newArrayList("sh", "-c"),
-					"args", Lists.newArrayList("echo hello from container"),
+					"args", Lists.newArrayList(commands),
 					"volumeMounts", Lists.newArrayList(newLinkedHashMap(
 							"name", volumeName,
 							"mountPath", containerTestDirPath)));

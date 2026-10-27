@@ -32,6 +32,7 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.agent.AgentUtils;
 import io.onedev.agent.DockerSettings;
+import io.onedev.agent.RuntimeTestUtils;
 import io.onedev.agent.job.JobUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.bootstrap.SecretMasker;
@@ -682,9 +683,9 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	public void test(TestData testData, TaskLogger jobLogger) {
 		checkApplicable();
 		var docker = newDocker();
-		AgentUtils.testDocker(docker, getRegistryLogins(UUID.randomUUID().toString()), 
+		RuntimeTestUtils.testDocker(docker, getRegistryLogins(UUID.randomUUID().toString()),
 				testData.getDockerImage(), getCpuLimit(), getMemoryLimit(), getRunOptions(), 
-				this::getHostPath, jobLogger);
+				false, this::getHostPath, jobLogger);
 	}
 	
 	@Editable(name="Specify a Docker Image to Test Against")

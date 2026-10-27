@@ -394,7 +394,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		try {
 			testCluster(this::newKubectl, namespace, testData.getDockerImage(),
 					IMAGE_REPO + ":" + getVersion(), getServerUrl(), UUID.randomUUID().toString(),
-					getStorageClass(), getStorageSize(), isAlwaysPullImage(), jobLogger);
+					getStorageClass(), getStorageSize(), isAlwaysPullImage(), false, jobLogger);
 		} finally {
 			deleteNamespace(namespace, jobLogger);
 		}

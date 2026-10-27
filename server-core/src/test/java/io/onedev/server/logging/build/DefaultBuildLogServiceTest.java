@@ -337,8 +337,7 @@ class DefaultBuildLogServiceTest {
 		var logs = org.mockito.Mockito.spy(new DefaultLogService());
 		inject(logs, "webSocketService", mock(WebSocketService.class));
 		inject(logs, "clusterService", mock(ClusterService.class));
-		inject(logs, "transactionService", transactions);
-		var instructionSessions = mock(SessionService.class);
+		var instructionTransactions = mock(TransactionService.class);
 		org.mockito.Mockito.doAnswer(it -> {
 			var lock = (java.util.concurrent.locks.ReentrantReadWriteLock)
 					io.onedev.commons.utils.LockUtils.getReadWriteLock(Build.getLogLockName(1L, 2L));
@@ -346,8 +345,8 @@ class DefaultBuildLogServiceTest {
 			assertEquals(0, lock.getReadHoldCount());
 			it.getArgument(0, Runnable.class).run();
 			return null;
-		}).when(instructionSessions).run(any());
-		inject(logs, "sessionService", instructionSessions);
+		}).when(instructionTransactions).run(any());
+		inject(logs, "transactionService", instructionTransactions);
 		var service = newService(logs);
 		var logger = service.newLogger(build);
 		logger.log("before initialization");
@@ -356,7 +355,7 @@ class DefaultBuildLogServiceTest {
 		logger.log(JobHelper.buildStepStartMessage(List.of(0)));
 		logger.log("##onedev[SetBuildVersion '1.2.3']");
 		assertEquals("1.2.3", build.getVersion());
-		org.mockito.Mockito.verify(instructionSessions, org.mockito.Mockito.times(1)).run(any());
+		org.mockito.Mockito.verify(instructionTransactions, org.mockito.Mockito.times(1)).run(any());
 		logger.log("step output");
 		logger.log(JobHelper.buildStepEndMessage(List.of(0), JobHelper.StepEventKind.SUCCESSFUL));
 		logger.log("between steps");
@@ -420,15 +419,15 @@ class DefaultBuildLogServiceTest {
 		var router = new java.util.concurrent.atomic.AtomicReference<io.onedev.commons.utils.TaskLogger>();
 		var lock = (java.util.concurrent.locks.ReentrantReadWriteLock)
 				io.onedev.commons.utils.LockUtils.getReadWriteLock(Build.getLogLockName(1L, 2L));
-		var sessions = mock(SessionService.class);
+		var transactions = mock(TransactionService.class);
 		org.mockito.Mockito.doAnswer(it -> {
 			assertFalse(Thread.holdsLock(router.get()));
 			assertFalse(lock.isWriteLockedByCurrentThread());
 			assertEquals(0, lock.getReadHoldCount());
 			it.getArgument(0, Runnable.class).run();
 			return null;
-		}).when(sessions).run(any());
-		inject(logs, "sessionService", sessions);
+		}).when(transactions).run(any());
+		inject(logs, "transactionService", transactions);
 		var writerEntered = new java.util.concurrent.CountDownLatch(1);
 		var writerReleased = new java.util.concurrent.CountDownLatch(1);
 		var pause = new java.util.concurrent.atomic.AtomicBoolean();

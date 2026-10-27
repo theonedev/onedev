@@ -33,6 +33,7 @@ import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.ResourceService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.service.support.AgentCallable;
 import io.onedev.server.terminal.Shell;
 
@@ -114,7 +115,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 							getCpuLimit(), getMemoryLimit(), getRunOptions(), registryLogins,
 							isAlwaysPullImage(), getDockerBuilder(), getNetworkOptions(),
 							isBuildxImageBuildEnabled(), isBuilderCachePruneEnabled(), isImagetoolsEnabled());
-					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
+					var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
+					DockerJobData jobData = new DockerJobData(serverUrl, jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getSubmitSequence(), jobContext.getActions(),
 							jobContext.getSecretMasker(), jobContext.getServices(), dockerSettings);

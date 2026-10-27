@@ -2,7 +2,7 @@ package io.onedev.server.plugin.executor.serverhost;
 
 import static io.onedev.agent.AgentUtils.newInfoLogger;
 import static io.onedev.agent.AgentUtils.newWarningLogger;
-import static io.onedev.agent.AgentUtils.testCommands;
+import static io.onedev.agent.RuntimeTestUtils.testHost;
 import static io.onedev.agent.job.JobUtils.getBuildDir;
 import static io.onedev.k8shelper.JobHelper.stringifyStepPosition;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
@@ -335,7 +335,7 @@ public class ServerHostExecutor extends JobExecutor implements Testable<Testable
 	
 	@Override
 	public void test(None testData, TaskLogger jobLogger) {
-		testCommands(jobLogger);
+		testHost(null, jobLogger);
 	}
 	
 	@Editable(name="Specify Shell/Batch Commands to Run")

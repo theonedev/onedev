@@ -176,8 +176,8 @@ public class ServerSandboxProvisioner extends WorkspaceProvisioner implements Te
 		private String template;
 
 		@Editable(description="""
-				Specify a Docker sandbox template image to test against. \
-				The image should contain Python 3 and Git""")
+			Specify a Docker sandbox template image to test against. The image must have \
+			Git, Python 3, and tmux installed""")
 		@OmitName
 		@NotEmpty
 		public String getTemplate() {

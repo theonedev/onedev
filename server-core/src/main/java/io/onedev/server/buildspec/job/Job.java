@@ -203,7 +203,11 @@ public class Job implements NamedElement, Validatable {
 		return SuggestionUtils.suggest(applicableJobExecutors, matchWith);
 	}
 	
-	@Editable(order=195, description="Shell commands run as the template image's default user. Non-root users need passwordless sudo for containers, services, and protected caches. Opening a build terminal or resuming a paused job needs sudo only when the non-root template user does not own the build directory.")
+	@Editable(order=195, description="""
+		Specify the sandbox template image used to run this job. The image must \
+		have Git and Python 3 installed. If the job runs Docker-related steps or \
+		services, Docker must be configured in the image, and a non-root \
+		default user must have passwordless sudo access.""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property="executeInSandbox")
 	@NotEmpty

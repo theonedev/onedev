@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -41,6 +42,7 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.agent.AgentUtils;
 import io.onedev.agent.AwaitableFutureTask;
+import io.onedev.agent.RuntimeTestUtils;
 import io.onedev.agent.workspace.FileData;
 import io.onedev.agent.workspace.GitExecutionResult;
 import io.onedev.agent.workspace.ProvisionMode;
@@ -71,6 +73,7 @@ import io.onedev.server.model.support.administration.workspaceprovisioner.Worksp
 import io.onedev.server.model.support.workspace.spec.ConfigFile;
 import io.onedev.server.model.support.workspace.spec.EnvVar;
 import io.onedev.server.model.support.workspace.spec.UserData;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
@@ -80,6 +83,7 @@ import io.onedev.server.web.util.Testable;
 import io.onedev.server.workspace.ServerProvisionerUtils;
 import io.onedev.server.workspace.WorkspaceContext;
 import io.onedev.server.workspace.WorkspaceRuntime;
+import nl.altindag.ssl.SSLFactory;
 
 @Editable(order=ServerDockerProvisioner.ORDER, name="Server Docker Provisioner", description = """
 			This provisioner creates workspaces inside Docker containers on ${productName} server.
@@ -268,9 +272,14 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 	public void test(TestData testData, TaskLogger jobLogger) {
 		checkApplicable();
 		var docker = newDocker();
-		AgentUtils.testDocker(docker, getRegistryLoginFacades(testData.getDockerImage()),
+		var token = UUID.randomUUID().toString();
+		var registryLogins = getRegistryLoginFacades(token);
+		RuntimeTestUtils.testDocker(docker, registryLogins,
 				testData.getDockerImage(), getCpuLimit(), getMemoryLimit(), getRunOptions(),
-				this::getHostPath, jobLogger);
+				true, this::getHostPath, jobLogger);
+		var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
+		RuntimeTestUtils.testDockerServerConnection(docker, registryLogins, serverUrl, token, getRunOptions(),
+				OneDev.getInstance(SSLFactory.class), jobLogger);
 	}
 
 	@Editable(name="Specify a Docker Image to Test Against")
@@ -281,7 +290,7 @@ public class ServerDockerProvisioner extends WorkspaceProvisioner implements Doc
 
 		private String dockerImage;
 
-		@Editable
+		@Editable(description="Specify a Docker image to test against. The image must have Git and tmux installed")
 		@OmitName
 		@NotEmpty
 		public String getDockerImage() {

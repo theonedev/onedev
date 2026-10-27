@@ -1,10 +1,9 @@
 package io.onedev.server.plugin.provisioner.serverhost;
 
 import static io.onedev.server.oem.OemUtils.interpolate;
-import static io.onedev.agent.AgentUtils.testCommands;
+import static io.onedev.agent.RuntimeTestUtils.testHost;
 import static io.onedev.agent.workspace.WorkspaceUtils.setupShellProvisioned;
 import static io.onedev.agent.workspace.WorkspaceUtils.teardownShellProvisioned;
-import static io.onedev.agent.workspace.WorkspaceUtils.testTmuxAvailability;
 import static io.onedev.k8shelper.WorkspaceHelper.buildEnvVars;
 import static io.onedev.server.workspace.ServerProvisionerUtils.getWorkDir;
 import static io.onedev.server.workspace.ServerProvisionerUtils.getWorkspaceDir;
@@ -106,8 +105,7 @@ public class ServerHostProvisioner extends WorkspaceProvisioner implements Testa
 	public void test(None testData, TaskLogger logger) {
 		checkApplicable();
 		
-		testCommands(logger);
-		testTmuxAvailability(newTmux(), logger);
+		testHost(newTmux(), logger);
 	}
 
 	public Commandline newTmux() {

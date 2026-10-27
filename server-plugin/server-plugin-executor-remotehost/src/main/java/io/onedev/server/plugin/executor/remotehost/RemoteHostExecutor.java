@@ -31,6 +31,7 @@ import io.onedev.server.plugin.executor.serverhost.ServerHostExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.ResourceService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.service.support.AgentCallable;
 import io.onedev.server.terminal.Shell;
 
@@ -92,7 +93,8 @@ public class RemoteHostExecutor extends ServerHostExecutor {
 						getName(), agentData.getName()));
 
 				String jobToken = jobContext.getJobToken();
-				HostJobData jobData = new HostJobData(jobToken, getName(), jobContext.getProjectPath(),
+				var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
+				HostJobData jobData = new HostJobData(serverUrl, jobToken, getName(), jobContext.getProjectPath(),
 						jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 						jobContext.getBuildNumber(), jobContext.getSubmitSequence(), jobContext.getActions(), 
 						jobContext.getSecretMasker());
