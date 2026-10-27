@@ -203,7 +203,7 @@ public class Job implements NamedElement, Validatable {
 		return SuggestionUtils.suggest(applicableJobExecutors, matchWith);
 	}
 	
-	@Editable(order=220, description="Shell commands run as the template image's default user. Non-root users need passwordless sudo for containers, services, and protected caches. Opening a build terminal or resuming a paused job needs sudo only when the non-root template user does not own the build directory.")
+	@Editable(order=195, description="Shell commands run as the template image's default user. Non-root users need passwordless sudo for containers, services, and protected caches. Opening a build terminal or resuming a paused job needs sudo only when the non-root template user does not own the build directory.")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property="executeInSandbox")
 	@NotEmpty

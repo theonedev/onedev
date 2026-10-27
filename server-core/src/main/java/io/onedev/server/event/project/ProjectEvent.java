@@ -63,6 +63,10 @@ public abstract class ProjectEvent extends Event implements Serializable {
 	public Project getProject() {
 		return OneDev.getInstance(ProjectService.class).load(projectId);
 	}
+
+	public Long getProjectId() {
+		return projectId;
+	}
 	
 	@Nullable
 	public User getUser() {

@@ -105,9 +105,8 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 
 	@Override
 	public void post(Object event) {
-		if (event instanceof ProjectEvent) {
-			ProjectEvent projectEvent = (ProjectEvent) event;
-			Long projectId = projectEvent.getProject().getId();
+		if (event instanceof ProjectEvent projectEvent) {
+            Long projectId = projectEvent.getProjectId();
 			transactionService.runAfterCommit(() -> projectService.submitToActiveServer(projectId, () -> {
 				SecurityUtils.bindAsSystem();
 				try {
@@ -125,9 +124,8 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 				}
 				return null;
 			}));
-		} else if (event instanceof ProjectDeleted) {
-			ProjectDeleted projectDeleted = (ProjectDeleted) event;
-			Long projectId = projectDeleted.getProjectId();
+		} else if (event instanceof ProjectDeleted projectDeleted) {
+            Long projectId = projectDeleted.getProjectId();
 			String activeServer = projectService.getActiveServer(projectId, false);
 			if (activeServer != null) {
 				transactionService.runAfterCommit(() -> clusterService.submitToServer(activeServer, () -> {

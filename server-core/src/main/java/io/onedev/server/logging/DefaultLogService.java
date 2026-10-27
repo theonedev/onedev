@@ -43,7 +43,6 @@ import io.onedev.server.logging.instruction.LogInstruction;
 import io.onedev.server.logging.instruction.LogInstructionParser.InstructionContext;
 import io.onedev.server.logging.instruction.LogInstructionParser.ParamContext;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.web.websocket.WebSocketService;
@@ -70,9 +69,6 @@ public class DefaultLogService implements LogService, Serializable {
 	@Inject
 	private TransactionService transactionService;
 
-	@Inject
-	private SessionService sessionService;
-	
 	private final Map<File, LogSnippet> recentSnippets = new ConcurrentHashMap<>();
 	
 	private final Map<String, TaskLogger> loggers = new ConcurrentHashMap<>();
@@ -212,7 +208,7 @@ public class DefaultLogService implements LogService, Serializable {
 							values.add(LogInstruction.getValue(value));
 						params.put(paramName, values);
 					}
-					sessionService.run(() -> instruction.execute(params));
+					transactionService.run(() -> instruction.execute(params));
 					return true;
 				}
 			}

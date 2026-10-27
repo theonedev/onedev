@@ -49,7 +49,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	private String description;
 
-	private ProvisionMode provisionMode = ProvisionMode.HOST;
+	private ProvisionMode provisionMode = ProvisionMode.DOCKER;
 
 	private String provisioner;
 
@@ -164,7 +164,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		return SuggestionUtils.suggest(provisionerNames, matchWith);
 	}
 
-	@Editable(order = 200, name = "container:image", description = """
+	@Editable(order = 60, name = "container:image", description = """
 		Specify container image to create workspace inside. Note that this image should 
 		have <a href='https://git-scm.com' target='_blank'>git</a>, <a href='https://git-lfs.com' target='_blank'>git-lfs</a>, <a href='https://curl.se' target='_blank'>curl</a>, and <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> installed
 		""")
@@ -179,7 +179,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		this.image = image;
 	}
 
-	@Editable(order = 210)
+	@Editable(order = 70)
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property = "provisionMode", value = "SANDBOX")
 	@NotEmpty
