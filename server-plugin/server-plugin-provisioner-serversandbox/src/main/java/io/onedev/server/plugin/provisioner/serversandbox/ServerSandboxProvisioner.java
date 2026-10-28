@@ -44,11 +44,11 @@ import io.onedev.server.workspace.WorkspaceRuntime;
 
 @Editable(order=ServerSandboxProvisioner.ORDER, name="Server Sandbox Provisioner", description="""
 		Runs workspaces directly in a Docker Sandbox on the server. Setup commands and terminals run as the template image's default user.
-		The sandbox is stopped between sessions to preserve files and removed when the workspace is deleted.
+		The sandbox is removed when the workspace is deleted.
 		Select <b>Sandbox</b> as the workspace spec's provision mode. To use Docker in workspace commands,
 		select a sandbox template that provides Docker in the workspace spec.
-		See <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a>
-		for host setup and login. For untrusted workspaces, use a Remote Sandbox Provisioner on a dedicated agent host.""")
+		Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a>
+		to set up the server host. For untrusted workspaces, use a Remote Sandbox Provisioner on a dedicated agent host.""")
 public class ServerSandboxProvisioner extends WorkspaceProvisioner implements Testable<ServerSandboxProvisioner.TestData> {
 
 	@Serial
@@ -177,7 +177,8 @@ public class ServerSandboxProvisioner extends WorkspaceProvisioner implements Te
 
 		@Editable(description="""
 			Specify a Docker sandbox template image to test against. The image must have \
-			shell, Git, Python 3, and tmux installed""")
+			shell, Git, Git LFS, Python 3, and tmux installed. See the \
+			<a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.""")
 		@OmitName
 		@NotEmpty
 		public String getTemplate() {

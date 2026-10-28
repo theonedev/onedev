@@ -50,8 +50,8 @@ import io.onedev.server.web.util.Testable;
 @Editable(order=ServerSandboxExecutor.ORDER, name="Server Sandbox Executor", description="Runs shell and Docker steps in a fresh Docker Sandbox on the server. "
 		+ "Job services run inside the sandbox and are accessible by service name from shell and container steps. "
 		+ "The sandbox and its services are deleted after each job. "
-		+ "See <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> "
-		+ "for host setup, login, and security practices. "
+		+ "Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> "
+		+ "to set up the server host. "
 		+ "<b class='text-warning'>WARNING:</b> For better security, use a Remote Sandbox Executor "
 		+ "on a dedicated agent host, especially for untrusted jobs.")
 @ClassValidating
@@ -298,9 +298,10 @@ public class ServerSandboxExecutor extends JobExecutor implements SandboxAware, 
 
 		@Editable(order=100, description="""
 				Specify a Docker sandbox shell template image to test against. The image must \
-				have shell, Git, and Python3 installed. To also test container, Docker must be \
+				have shell, Git, Git LFS, and Python 3 installed. To also test a container, Docker must be \
 				configured in the image, and a non-root default user must have passwordless \
-				sudo access""")
+				sudo access. See the \
+				<a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.""")
 		@NotEmpty
 		public String getTemplate() {
 			return template;
