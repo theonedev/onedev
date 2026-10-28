@@ -30,15 +30,18 @@ onedev.server.datePicker = {
 			}
 		});		
 
+		$input.add(calendar.calendarContainer).keydown(function(e) {
+			if (e.keyCode == 27 && open) {
+				// Consume Escape before closing so the enclosing overlay stays open.
+				e.preventDefault();
+				e.stopPropagation();
+				$input[0].focus();
+				calendar.close();
+			}
+		});
+
 		$input.keydown(function(e) {
-			/* 
-			 * Perform actions in a timeout for two reasons:
-			 * 1. When Return is pressed, postpone submitting the form to give form chance to process 
-			 * dirty flags
-			 * 2. When datepicker is opened and Esc is pressed, postpone closing the datepicker to let 
-			 * enclosing dialog/dropdown knows that there is a datepicker opening and will not close 
-			 * itself
-			 */
+			// Postpone submitting the form to give it a chance to process dirty flags.
 			setTimeout(function() {
 				if (e.keyCode == 13) { // Enter
 					var submitButton = $input.closest('form').find("input[type='submit'],button[type='submit']");
@@ -47,8 +50,6 @@ onedev.server.datePicker = {
 					} else {
 						$input.trigger("change");
 					}
-					calendar.close();
-				} else if (e.keyCode == 27) { // Esc
 					calendar.close();
 				}
 			}, 0);

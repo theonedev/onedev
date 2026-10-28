@@ -595,7 +595,7 @@ onedev.server = {
 		},
 		/*
 		 * Whether the element is an editable control that should consume the first
-		 * Escape to blur (two-tier Escape: blur first, then dismiss overlays).
+		 * Escape to blur when no dismissible overlay is open.
 		 * Mirrors jQuery Hotkeys focus filters (text inputs / contenteditable)
 		 * plus readonly/disabled checks used by canInput.
 		 */
@@ -622,8 +622,8 @@ onedev.server = {
 			return false;
 		},
 		/*
-		 * If an editable control has focus, blur it and return true so Escape
-		 * dismiss handlers can skip overlay close on this keypress.
+		 * If an editable control has focus, blur it and return true so other
+		 * Escape handlers can skip this keypress.
 		 */
 		blurFocusedEditable: function() {
 			var element = document.activeElement;
@@ -633,17 +633,22 @@ onedev.server = {
 			return true;
 		},
 		/*
-		 * Widgets that handle Escape themselves (close picker/hints/etc.).
-		 * When these are open, do not steal Escape for blur-first behavior.
+		 * Let open overlays handle Escape before blurring the focused field.
+		 * Pinned side info is part of the page and should not prevent blurring.
 		 */
-		isEscapeConsumedByWidget: function() {
-			return $(".select2-dropdown:visible").length != 0
+		isEscapeConsumedByOverlay: function() {
+			return $(".modal:visible").length != 0
+					|| $(".sidebar.sidebar-docked:visible").length != 0
+					|| $(".select2-dropdown:visible").length != 0
 					|| $(".dropdown.open").length != 0
 					|| $("body>.floating").length != 0
 					|| $(".pcr-app.visible").length != 0
 					|| $(".atwho-view:visible").length != 0
 					|| $(".CodeMirror-hints:visible").length != 0
-					|| $(".flatpickr-calendar.open").length != 0;
+					|| $(".flatpickr-calendar.open").length != 0
+					|| $(".side-info:not(.closed):visible").filter(function() {
+						return onedev.server.sideInfo && onedev.server.sideInfo.isOverlayMode($(this));
+					}).length != 0;
 		},
 		isDevice: function() {
 			var ua = navigator.userAgent.toLowerCase();
@@ -1089,17 +1094,17 @@ onedev.server = {
 
 /*
  * Register Escape handling when this script loads so it runs before dismiss
- * handlers attached later from onDomReady / component init. Two-tier Escape:
- * blur focused editables first; only then allow overlay dismiss on a later press.
+ * handlers attached later from onDomReady / component init. Blur focused
+ * editables only when no overlay needs to handle Escape.
  * Target-level handlers that already preventDefault (CodeMirror hints, Select2,
- * etc.) take priority; isEscapeConsumedByWidget covers remaining widget UIs.
+ * etc.) take priority; isEscapeConsumedByOverlay covers remaining overlay UIs.
  */
 $(document).keydown(function(e) {
 	if (e.keyCode == 27) { // ESC
 		var alreadyHandled = e.isDefaultPrevented();
 		e.preventDefault();
 		if (!alreadyHandled
-				&& !onedev.server.util.isEscapeConsumedByWidget()
+				&& !onedev.server.util.isEscapeConsumedByOverlay()
 				&& onedev.server.util.blurFocusedEditable()) {
 			e.stopImmediatePropagation();
 		}
