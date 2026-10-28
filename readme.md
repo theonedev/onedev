@@ -106,10 +106,11 @@ Typed parameters. Matrix jobs. CI/CD logic reuses. Cache management.
 
 ## 🚀 Versatile CI/CD executors from simple to scale
 
-Run CI/CD out-of-box in container or on bare metal. Run massive jobs concurrently
-with Kubernetes or agents.
-[**Example1**](https://docs.onedev.io/tutorials/cicd/agent-farm)
-[**Example2**](https://docs.onedev.io/tutorials/cicd/k8s-farm)
+Run CI/CD in containers, on bare metal, or in isolated sandbox VMs.
+Scale job execution with Kubernetes or agents.
+[**Tutorial1**](https://docs.onedev.io/tutorials/cicd/agent-farm)
+[**Tutorial2**](https://docs.onedev.io/tutorials/cicd/k8s-farm)
+[**Tutorial3**](https://docs.onedev.io/tutorials/sandbox/working-with-sandbox)
 
 ![job executors](./doc/images/job-executors.png)
 
@@ -172,8 +173,10 @@ Query with natural language. Explain code snippets, help understand codebase, re
 
 ## 🧑‍💻 Workspaces for Vibe Coding
 
-Work on any branch with preconfigured dev containers on server. Use OpenCode, Claude Code, Codex, or other terminal agents in browser without setting up local environment.
-[**Tutorial**](https://docs.onedev.io/tutorials/ai/working-with-workspaces)
+Work on any branch in preconfigured dev containers or isolated sandbox VMs.
+Use OpenCode, Claude Code, Codex, or other terminal agents in the browser without setting up a local environment.
+[**Tutorial1**](https://docs.onedev.io/tutorials/ai/working-with-workspaces)
+[**Tutorial2**](https://docs.onedev.io/tutorials/sandbox/working-with-sandbox)
 
 ![workspace](./doc/images/workspace.png)
 
