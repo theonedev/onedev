@@ -610,3 +610,10 @@ body.markdown-editor-expanded {
 	color: var(--danger);
 	white-space: pre-wrap;
 }
+.markdown-rendered .mermaid-error-summary {
+	margin-bottom: 1.2rem;
+}
+.markdown-rendered .mermaid-error {
+	color: var(--danger);
+	white-space: pre;
+}

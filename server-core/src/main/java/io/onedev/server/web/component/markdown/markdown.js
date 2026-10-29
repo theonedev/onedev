@@ -1353,14 +1353,8 @@ onedev.server.markdown = {
 			onedev.server.markdown.translations["copied"]);
 
 		var $mermaid = $container.find(".mermaid");
-		if ($mermaid.length != 0) 
-			mermaid.init(undefined, $mermaid, function(id) {
-				var svg = document.getElementById(id);
-				if (svg && svg.viewBox.baseVal.width > 0) {
-					// Keep labels readable instead of shrinking wide diagrams to fit the page.
-					$(svg).css({width: svg.viewBox.baseVal.width, maxWidth: "none", height: "auto"});
-				}
-			});
+		if ($mermaid.length != 0)
+			onedev.server.mermaid.render($mermaid);
 
 		var $plantuml = $container.find(".plantuml");
 		if ($plantuml.length != 0 && onedev.server.plantuml)
