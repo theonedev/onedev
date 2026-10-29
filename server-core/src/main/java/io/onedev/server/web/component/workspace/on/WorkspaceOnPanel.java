@@ -10,6 +10,7 @@ import io.onedev.server.model.Workspace;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.commit.CommitLink;
+import io.onedev.server.web.component.markdown.ReferenceTooltipBehavior;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -27,11 +28,13 @@ public class WorkspaceOnPanel extends GenericPanel<Workspace> {
 		if (workspace.getIssue() != null) {
 			add(new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class,
 					IssueActivitiesPage.paramsOf(workspace.getIssue()))
-					.setBody(Model.of(workspace.getOnDescription())));
+					.setBody(Model.of(workspace.getOnDescription()))
+					.add(new ReferenceTooltipBehavior(workspace.getIssue().getReference())));
 		} else if (workspace.getRequest() != null) {
 			add(new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class,
 					PullRequestActivitiesPage.paramsOf(workspace.getRequest()))
-					.setBody(Model.of(workspace.getOnDescription())));
+					.setBody(Model.of(workspace.getOnDescription()))
+					.add(new ReferenceTooltipBehavior(workspace.getRequest().getReference())));
 		} else if (workspace.getBranch() != null) {
 			add(new BranchLink("link", new ProjectAndBranch(workspace.getProject(), workspace.getBranch())) {
 

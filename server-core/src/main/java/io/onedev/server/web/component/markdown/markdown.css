@@ -509,16 +509,9 @@ body.markdown-editor-expanded {
 
 #reference-tooltip {
 	z-index: 1000;
-	background-color: var(--light-info); 
-	border-radius: 0.42rem; 
-	color: var(--info);
 	font-size: 12px; 
 	padding: 1rem; 
 	box-shadow: 0px 10px 30px 0px rgba(82, 63, 105, 0.08);
-}
-.dark-mode #reference-tooltip {
-	background-color: var(--dark-mode-light-info); 
-	color: var(--info);
 }
 
 .markdown-image-loading {

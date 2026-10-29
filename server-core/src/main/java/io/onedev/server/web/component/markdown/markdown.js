@@ -1439,8 +1439,7 @@ onedev.server.markdown = {
 			});	
 		}
 		
-		var alignment = {targetX: 0, targetY: 0, x: 0, y: 100};
-		$container.find(".reference").hover(function() {
+		onedev.server.markdown.initReferenceTooltips($container.find(".reference"), function() {
 			var $reference = $(this);
 			var referenceType;
 			var referenceId = $reference.data("reference");
@@ -1457,15 +1456,9 @@ onedev.server.markdown = {
 			} else if ($reference.hasClass("workspace")) {
 				referenceType = "workspace";
 			}
-			if (referenceType) {
-				var $tooltip = $("<div id='reference-tooltip'>" + onedev.server.markdown.translations["loading"] + "</div>");
-				$tooltip.data("trigger", this);
-				$tooltip.data("alignment", alignment);
-				$("body").append($tooltip);
+			if (referenceType)
 				referenceCallback(referenceType, referenceId);
-				return $tooltip;
-			}
-		}, alignment);
+		}, translations);
 		
 		onedev.server.markdown.initRendered(containerId);
 		
@@ -1478,6 +1471,18 @@ onedev.server.markdown = {
 		});
 		
 		lozad("#" + containerId + " .markdown-rendered img").observe();
+	},
+	initReferenceTooltips: function($references, callback, translations) {
+		onedev.server.markdown.translations = translations;
+		var alignment = {targetX: 0, targetY: 0, x: 0, y: 100};
+		$references.hover(function() {
+			var $tooltip = $("<div id='reference-tooltip' class='bg-white border rounded'>" + translations["loading"] + "</div>");
+			$tooltip.data("trigger", this);
+			$tooltip.data("alignment", alignment);
+			$("body").append($tooltip);
+			callback.call(this);
+			return $tooltip;
+		}, alignment);
 	},
 	renderIssueTooltip: function(title, state, stateFontColor, stateBackgroundColor) {
 		var $tooltip = $("#reference-tooltip");

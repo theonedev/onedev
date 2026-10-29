@@ -40,14 +40,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
-import io.onedev.server.service.IssueService;
 import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.asset.lozad.LozadResourceReference;
 import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -81,15 +76,6 @@ public class MarkdownViewer extends GenericPanel<String> {
 
 	@Inject
 	private MarkdownService markdownService;
-
-	@Inject
-	private IssueService issueService;
-
-	@Inject
-	private PullRequestService pullRequestService;
-
-	@Inject
-	private SettingService settingService;
 
 	@Inject
 	private BuildService buildService;
@@ -223,48 +209,13 @@ public class MarkdownViewer extends GenericPanel<String> {
 				String referenceId = params.getParameterValue(REFERENCE_ID).toString();
 				switch (referenceType) {
 				case "issue":
-					EntityReference reference = IssueReference.of(referenceId, null);
-					var issue = issueService.find(reference.getProject(), reference.getNumber());
-					// check permission here as issue project may not be the same as current project
-					if (issue != null && SecurityUtils.canAccessIssue(issue)) {
-						String color = settingService.getIssueSetting().getStateSpec(issue.getState()).getColor();
-						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s');", 
-								Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(issue.getTitle())), 
-								JavaScriptEscape.escapeJavaScript(issue.getState()), 
-								ColorUtils.isLight(color)? "black": "white", color);
-						target.appendJavaScript(script);
-					} else {
-						target.appendJavaScript("onedev.server.markdown.renderIssueTooltip();");
-					}
+					ReferenceTooltipBehavior.renderTooltip(target, IssueReference.of(referenceId, null));
 					break;
 				case "pull request":
-					reference = PullRequestReference.of(referenceId, null);
-					var request = pullRequestService.find(reference.getProject(), reference.getNumber());
-					// check permission here as target project may not be the same as current project
-					if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
- 	 					String status = request.getStatus().toString();
-						String statusCss;
-						switch (request.getStatus()) {
-						case OPEN:
-							statusCss = "badge-warning";
-							break;
-						case MERGED:
-							statusCss = "badge-success";
-							break;
-						default:
-							statusCss = "badge-danger";
-						}
-						
-						String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s');", 
-								Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(request.getTitle())), 
-								status, statusCss);
-						target.appendJavaScript(script);
-					} else {
-						target.appendJavaScript("onedev.server.markdown.renderPullRequestTooltip();");
-					}
+					ReferenceTooltipBehavior.renderTooltip(target, PullRequestReference.of(referenceId, null));
 					break;
 				case "build":
-					reference = BuildReference.of(referenceId, null);
+					EntityReference reference = BuildReference.of(referenceId, null);
 					var build = buildService.find(reference.getProject(), reference.getNumber());
 					// check permission here as build project may not be the same as current project
 					if (build != null && SecurityUtils.canAccessProject(build.getProject())) {
