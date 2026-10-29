@@ -100,6 +100,7 @@ public class NewProjectPage extends LayoutPage {
 						newProject.setKey(editProject.getKey());
 						newProject.setDescription(editProject.getDescription());
 						newProject.setCodeManagement(editProject.isCodeManagement());
+						newProject.setWikiManagement(editProject.isWikiManagement());
 						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setPackManagement(editProject.isPackManagement());
 						newProject.setTimeTracking(editProject.isTimeTracking());
