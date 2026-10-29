@@ -425,7 +425,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return getWorkspace().getReference().toString(getProject());
+		return "workspace " + getWorkspace().getReference().toString(getProject());
 	}
 
 	public static PageParameters paramsOf(Workspace workspace) {

@@ -755,7 +755,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 	@Override
 	protected String getPageTitle() {
-		var pageTitle = getBuild().getReference().toString(getProject());
+		var pageTitle = "build " + getBuild().getReference().toString(getProject());
 		if (getBuild().getVersion() != null)
 			pageTitle += " (" + getBuild().getVersion() + ")";
 		return pageTitle;
