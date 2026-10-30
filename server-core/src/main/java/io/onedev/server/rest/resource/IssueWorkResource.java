@@ -64,6 +64,7 @@ public class IssueWorkResource {
 				|| !SecurityUtils.isAdministrator() && !work.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
+		SecurityUtils.checkWorkOnProject(work.getIssue().getProject());
 		workService.createOrUpdate(work);
 		
 		return work.getId();

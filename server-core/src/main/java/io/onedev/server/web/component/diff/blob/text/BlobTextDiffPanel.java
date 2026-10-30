@@ -361,11 +361,12 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 						script = String.format("onedev.server.blobTextDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
 								getMarkupId(), jsonOfPosition, convertToJson(commentRange), markUrl, 
 								escapeJavaScript(getMarkedText(commentRange)),
-								SecurityUtils.getAuthUser()!=null);
+								SecurityUtils.getAuthUser()!=null && SecurityUtils.canWorkOnProject(change.getProject()));
 						target.appendJavaScript(script);
 						break;
 					case "addComment":
 						Preconditions.checkNotNull(SecurityUtils.getAuthUser());
+						SecurityUtils.checkWorkOnProject(change.getProject());
 						
 						commentRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
 						getAnnotationSupport().onAddComment(target, commentRange);
@@ -564,7 +565,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		translations.put("add-problem-comment", _T("Add comment"));
 
 		var jsonOfMarkRange = convertToJson(markRange);
-		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s);",
+		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, 
 				change.getNewBlobIdent().revision,
@@ -574,7 +575,8 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 				jsonOfMarkRange, convertToJson(openCommentInfo), 
 				convertToJson(annotationInfoModel.getObject()), 
 				commentContainerId, convertToJson(translations),
-				getSymbolContextJson(), convertToJson(oemService.getDocsite()));
+				getSymbolContextJson(), convertToJson(oemService.getDocsite()),
+				getAnnotationSupport() != null && SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(change.getProject()));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 

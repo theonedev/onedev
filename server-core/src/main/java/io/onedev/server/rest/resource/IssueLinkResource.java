@@ -21,6 +21,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import io.onedev.server.service.IssueLinkService;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.security.SecurityUtils;
 
 @Path("/issue-links")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -70,6 +71,8 @@ public class IssueLinkResource {
 				&& !canEditIssueLink(link.getTarget().getProject(), link.getSpec())) {
 			throw new UnauthorizedException();
 		}
+		SecurityUtils.checkWorkOnProject(link.getSource().getProject());
+		SecurityUtils.checkWorkOnProject(link.getTarget().getProject());
 		linkService.delete(link);
 		return Response.ok().build();
 	}

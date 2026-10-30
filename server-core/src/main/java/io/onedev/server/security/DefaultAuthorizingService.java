@@ -27,11 +27,13 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.permission.BasePermission;
+import io.onedev.server.security.permission.MaintainProject;
 import io.onedev.server.security.permission.ConfidentialIssuesPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
@@ -52,6 +54,9 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 
 	@Inject
 	private IssueAuthorizationService issueAuthorizationService;
+
+	@Inject
+	private SubscriptionService subscriptionService;
     
     private final MetaDataKey<Map<String, AuthorizationInfo>> AUTHORIZATION_INFOS = new MetaDataKey<>() {};    
 	
@@ -141,6 +146,14 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 						if (!basePermission.isApplicable(result.getLeft()))							
 							return false;
 					} 
+					if (permission instanceof ProjectPermission projectPermission
+							&& projectPermission.getProject().isMaintenance()
+							&& subscriptionService.isSubscriptionActive()
+							&& projectPermission.isWrite()) {
+						var maintenance = new ProjectPermission(projectPermission.getProject(), new MaintainProject());
+						if (result.getRight().stream().noneMatch(it -> it.implies(maintenance)))
+							return false;
+					}
 					return result.getRight().stream().anyMatch(it -> it.implies(permission));
 				});
 			}

@@ -45,6 +45,7 @@ public class IssueWatchResource {
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
+		SecurityUtils.checkWorkOnProject(watch.getIssue().getProject());
 		watchService.createOrUpdate(watch);
 		return watch.getId();
 	}

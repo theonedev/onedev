@@ -8,5 +8,9 @@ import org.jspecify.annotations.Nullable;
 public interface BasePermission extends Permission {
 	
 	boolean isApplicable(@Nullable UserFacade user);
+
+	default boolean isWrite() {
+		return false;
+	}
 	
 }

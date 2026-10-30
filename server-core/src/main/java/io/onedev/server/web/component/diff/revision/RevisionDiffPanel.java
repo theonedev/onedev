@@ -967,6 +967,7 @@ public abstract class RevisionDiffPanel extends Panel {
 										super.onSubmit(target);
 
 										String content = contentInput.getModelObject();
+										SecurityUtils.checkWorkOnProject(getProject());
 										if (content.length() > CodeComment.MAX_CONTENT_LEN) {
 											error(_T("Comment too long"));
 											target.add(feedback);
@@ -2194,6 +2195,7 @@ public abstract class RevisionDiffPanel extends Panel {
 								 super.onSubmit(target);
 
 								 String content = contentInput.getModelObject();
+								 SecurityUtils.checkWorkOnProject(getProject());
 								 if (content.length() > CodeComment.MAX_CONTENT_LEN) {
 									 error(_T("Comment too long"));
 									 target.add(feedback);

@@ -1292,6 +1292,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				fragment.add(new EntityWatchesPanel("watches") {
 
 					@Override
+					protected Project getProject() {
+						return PullRequestDetailPage.this.getProject();
+					}
+
+					@Override
 					protected void onSaveWatch(EntityWatch watch) {
 						pullRequestWatchService.createOrUpdate((PullRequestWatch) watch);
 					}
@@ -2019,7 +2024,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 
 		operationsContainer.setOutputMarkupPlaceholderTag(true);
-		operationsContainer.setVisible(SecurityUtils.getAuthUser() != null);
+		operationsContainer.setVisible(SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(getProject()));
 
 		operationsContainer.add(new MenuLink("updateSourceBranch") {
 
@@ -2142,6 +2147,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				return SecurityUtils.canWriteCode(getPullRequest().getProject())
+						&& getPullRequest().getSourceProject() != null
+						&& SecurityUtils.canWorkOnProject(getPullRequest().getSourceProject())
 						&& getPullRequest().isOpen()
 						&& getPullRequest().getSourceHead() != null
 						&& getPullRequest().isSourceOutdated();
@@ -2456,6 +2463,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	 */
 	private Object checkUpdateSourceBranch(boolean updateByMerge) {
 		var request = getPullRequest();
+		SecurityUtils.checkWorkOnProject(request.getTargetProject());
+		SecurityUtils.checkWorkOnProject(request.getSourceProject());
 		var user = SecurityUtils.getAuthUser();
 		var project = request.getProject();
 		var protection = request.getSourceProject().getBranchProtection(request.getSourceBranch(), user);
@@ -2501,6 +2510,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 	private void updateSourceBranch(ObjectId commitId) {
 		var request = getPullRequest();
+		SecurityUtils.checkWorkOnProject(request.getTargetProject());
+		SecurityUtils.checkWorkOnProject(request.getSourceProject());
 		if (!request.getSourceProject().equals(request.getTargetProject()))
 			gitService.fetch(request.getSourceProject(), request.getTargetProject(), commitId.name());
 		var oldCommitId = request.getSourceHead();

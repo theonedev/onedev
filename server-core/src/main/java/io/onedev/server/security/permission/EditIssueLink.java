@@ -6,7 +6,7 @@ import org.apache.shiro.authz.Permission;
 
 import org.jspecify.annotations.Nullable;
 
-public class EditIssueLink implements BasePermission {
+public class EditIssueLink implements WritePermission {
 
 	private final LinkSpec link;
 	

@@ -58,6 +58,7 @@ import io.onedev.server.security.permission.ManageCodeComments;
 import io.onedev.server.security.permission.ManageIssues;
 import io.onedev.server.security.permission.ManageJob;
 import io.onedev.server.security.permission.ManageProject;
+import io.onedev.server.security.permission.MaintainProject;
 import io.onedev.server.security.permission.ManagePullRequests;
 import io.onedev.server.security.permission.ManageWorkspaces;
 import io.onedev.server.security.permission.ReadCode;
@@ -138,6 +139,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	private boolean manageWorkspaces;
 
 	private boolean createWorkspaces;
+
+	private boolean maintenance;
 	
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -421,6 +424,18 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.createWorkspaces = createWorkspaces;
 	}
 
+	@Editable(order=1000, name="Work while Maintenance", description="""
+			Allow to work on a project while in maintenance mode. Permission for each action is still required""")
+	@DependsOn(property="manageProject", value="false")
+	@ShowCondition("isSubscriptionActive")
+	public boolean isMaintenance() {
+		return maintenance;
+	}
+
+	public void setMaintenance(boolean maintenance) {
+		this.maintenance = maintenance;
+	}
+
 	public Collection<BaseAuthorization> getBaseAuthorizations() {
 		return baseAuthorizations;
 	}
@@ -449,6 +464,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	private Collection<BasePermission> getPermissions() {
 		Collection<BasePermission> permissions = Lists.newArrayList(new AccessProject());
 		
+		if (maintenance)
+			permissions.add(new MaintainProject());
 		if (manageProject) 
 			permissions.add(new ManageProject());
 		if (createChildren)

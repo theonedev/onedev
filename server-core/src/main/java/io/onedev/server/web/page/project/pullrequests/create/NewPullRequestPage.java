@@ -1215,7 +1215,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(target.getProject()) 
+		return SecurityUtils.canWorkOnProject(target.getProject())
+				&& SecurityUtils.canReadCode(target.getProject())
 				&& SecurityUtils.canReadCode(source.getProject());
 	}
 

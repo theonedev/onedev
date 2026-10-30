@@ -4,7 +4,7 @@ import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 import org.jetbrains.annotations.Nullable;
 
-public class CreateWorkspaces implements BasePermission {
+public class CreateWorkspaces implements WritePermission {
 
 	@Override
 	public boolean implies(Permission p) {

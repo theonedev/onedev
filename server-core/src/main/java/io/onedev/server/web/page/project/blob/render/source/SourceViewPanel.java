@@ -511,7 +511,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							
 					String position = BlobRenderer.getSourcePosition(range);
 					String script = String.format("onedev.server.sourceView.openSelectionPopover(%s, '%s', %s);", 
-							convertToJson(range), context.getPositionUrl(position), SecurityUtils.getAuthUser()!=null);
+							convertToJson(range), context.getPositionUrl(position), SecurityUtils.getAuthUser()!=null && SecurityUtils.canWorkOnProject(context.getProject()));
 					target.appendJavaScript(script);
 					break;
 				case "explainSelection":
@@ -525,6 +525,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					break;
 				case "addComment":
 					Preconditions.checkNotNull(SecurityUtils.getAuthUser());
+					SecurityUtils.checkWorkOnProject(context.getProject());
 					range = getRange(params, "param1", "param2", "param3", "param4");
 					var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 					var containTooLongLines = false;
@@ -623,6 +624,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							super.onSubmit(target);
 							
 							String content = contentInput.getModelObject();
+							SecurityUtils.checkWorkOnProject(context.getProject());
 							if (content.length() > CodeComment.MAX_CONTENT_LEN) {
 								error("Comment too long");
 								target.add(feedback);
@@ -1079,7 +1081,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		translations.put("add-problem-comment", _T("Add comment"));
 
 		String script = String.format("onedev.server.sourceView.onDomReady("
-				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', %s, %s);", 
+				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', %s, %s, %s);",
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				convertToJson(openCommentInfo),
@@ -1092,7 +1094,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				sourceFormat.getTabSize(),
 				sourceFormat.getLineWrapMode(), 
 				convertToJson(annotationInfoModel.getObject()), 
-				convertToJson(translations));
+				convertToJson(translations), SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(context.getProject()));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		if (markRange != null) {

@@ -547,7 +547,7 @@ public class DefaultMailService implements MailService, Serializable {
 											sendMailAsync(newArrayList(fromInternetAddress.getAddress()), newArrayList(), newArrayList(),
 													subject, htmlBody, textBody, null, null, threadingReferences);
 										} else {
-											if (!SecurityUtils.canReadCode(involvedPullRequest.getProject())) {
+											if (SecurityUtils.canReadCode(fromUser.asSubject(), involvedPullRequest.getProject())) {
 												addComment(involvedPullRequest, message, fromInternetAddress, fromUser, receiverInternetAddresses);
 											} else {
 												throw new UnauthorizedException("Code read permission required for project: %s" 
@@ -689,6 +689,8 @@ public class DefaultMailService implements MailService, Serializable {
 	
 	private void addComment(Issue issue, Message message, InternetAddress authorInternetAddress, @Nullable User author, 
 							Collection<InternetAddress> receiverInternetAddresses) {
+		if (issue.getProject().isMaintenance() && !SecurityUtils.canWorkOnProject(SecurityUtils.asSubject(author), issue.getProject()))
+			throw new UnauthorizedException("Project is in maintenance mode");
 		String messageId = getMessageId(message);
 		if (messageId != null && issueCommentService.findByMessageId(messageId) != null) {
 			logger.warn("Ignored creating issue comment from message as comment with same message id already exists");
@@ -718,6 +720,8 @@ public class DefaultMailService implements MailService, Serializable {
 	
 	private void addComment(PullRequest pullRequest, Message message, InternetAddress authorInternetAddress, 
 							User author, Collection<InternetAddress> receiverInternetAddresses) {
+		if (pullRequest.getProject().isMaintenance() && !SecurityUtils.canWorkOnProject(SecurityUtils.asSubject(author), pullRequest.getProject()))
+			throw new UnauthorizedException("Project is in maintenance mode");
 		String messageId = getMessageId(message);
 		if (messageId != null && pullRequestCommentService.findByMessageId(messageId) != null) {
 			logger.warn("Ignored creating pull request comment from message as comment with same message id already exists");
@@ -725,6 +729,7 @@ public class DefaultMailService implements MailService, Serializable {
 		}
 
 		PullRequestComment comment = new PullRequestComment();
+		comment.setRequest(pullRequest);
 		comment.setUser(author);
 		if (messageId != null)
 			comment.setMessageId(messageId);
@@ -740,6 +745,8 @@ public class DefaultMailService implements MailService, Serializable {
 	private Issue openIssue(Message message, Project project, InternetAddress submitterInternetAddress, 
 							@Nullable User submitter, ParsedEmailAddress parsedSystemAddress, 
 							Collection<InternetAddress> receiverInternetAddresses) {
+		if (project.isMaintenance() && !SecurityUtils.canWorkOnProject(SecurityUtils.asSubject(submitter), project))
+			throw new UnauthorizedException("Project is in maintenance mode");
 		String messageId = getMessageId(message);
 		if (messageId != null) {
 			var existingIssue = issueService.findByMessageId(messageId);

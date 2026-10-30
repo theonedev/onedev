@@ -55,6 +55,7 @@ public class IssueCommentResource {
 		if (!canAccessIssue(comment.getIssue()) || !isAdministrator() && !comment.getUser().equals(getUser())) {
 			throw new UnauthorizedException();
 		}
+		SecurityUtils.checkWorkOnProject(comment.getIssue().getProject());
 		commentService.create(comment);
 		return comment.getId();
 	}

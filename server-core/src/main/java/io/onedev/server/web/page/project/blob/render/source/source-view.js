@@ -1,7 +1,7 @@
 onedev.server.sourceView = {
 	onDomReady: function(filePath, fileContent, openComment, markRange, symbolTooltipId, 
 			revision, blameInfos, callback, blameMessageCallback, tabSize, lineWrapMode, 
-			annotationInfo, translations) {
+			annotationInfo, translations, canComment) {
 		onedev.server.sourceView.translations = translations;
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
@@ -27,6 +27,7 @@ onedev.server.sourceView = {
 		onedev.server.codemirror.setModeByFileName(cm, filePath);
 
 		$sourceView.data("callback", callback);
+		$sourceView.data("canComment", canComment);
 		$sourceView.data("blameMessageCallback", blameMessageCallback);
 		
 	    if (markRange)
@@ -281,7 +282,8 @@ onedev.server.sourceView = {
 					sanitize: false, 
 					placement: "top",
 					container: ".source-view>.code",
-					content: onedev.server.codeProblem.renderProblems(problems, onedev.server.sourceView.translations),
+					content: onedev.server.codeProblem.renderProblems(problems, onedev.server.sourceView.translations,
+							$(".source-view").data("canComment")),
 					template: `<div data-line='${line}' class='popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>`
 				}).on("shown.bs.popover", function() {
 					var $currentPopover = $(".problem-popover[data-line='" + line + "']");

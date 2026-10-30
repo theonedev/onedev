@@ -7,6 +7,7 @@ import static io.onedev.server.util.EmailAddressUtils.describe;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.io.ObjectStreamException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -157,7 +158,7 @@ public class IssueNotificationManager implements Serializable {
 
 			@Override
 			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-				return userService.query().stream().map(it -> it.getIssueQueryPersonalization()).collect(Collectors.toList());
+				return userService.query().stream().map(User::getIssueQueryPersonalization).collect(Collectors.toList());
 			}
 
 			@Override
@@ -296,9 +297,8 @@ public class IssueNotificationManager implements Serializable {
 			}
 		}
 		
-		if (event.getCommentText() instanceof MarkdownText) {
-			MarkdownText markdown = (MarkdownText) event.getCommentText();
-			for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
+		if (event.getCommentText() instanceof MarkdownText markdown) {
+            for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
 				User mentionedUser = userService.findByName(userName);
 				if (mentionedUser != null) {
 					mentionService.mention(issue, mentionedUser);
@@ -509,14 +509,8 @@ public class IssueNotificationManager implements Serializable {
 	}
 
 	private TaskFailedCallback newTaskFailedCallback(Long aiId, Long issueId) {
-		return new TaskFailedCallback() {
-		
-			public void onTaskFailed(String workspaceReference) {
-				createComment(userService.load(aiId), issueService.load(issueId),
-						"Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
-			}
-
-		};
+		return workspaceReference -> createComment(userService.load(aiId), issueService.load(issueId),
+                "Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
 	}
 
 	@Transactional
@@ -564,7 +558,7 @@ public class IssueNotificationManager implements Serializable {
 				
 				var url = urlService.urlFor(issue, true);
 				String textDetail = "" +
-						"Previous project: " + event.getSourceProject().getPath() + 
+						"Previous project: " + event.getSourceProject().getPath() +
 						"\n" +
 						"Current project: " + event.getTargetProject().getPath() + 
 						"\n";
@@ -623,7 +617,8 @@ public class IssueNotificationManager implements Serializable {
 		}
 	}
 
-	public Object writeReplace() throws ObjectStreamException {
+	@Serial
+    public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(IssueNotificationManager.class);
 	}
 

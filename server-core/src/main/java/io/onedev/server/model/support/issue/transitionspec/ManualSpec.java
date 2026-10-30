@@ -119,6 +119,8 @@ public class ManualSpec extends TransitionSpec {
 	}
 
 	public boolean canTransit(Subject subject, Issue issue, @Nullable String state) {
+		if (!SecurityUtils.canWorkOnProject(subject, issue.getProject()))
+			return false;
 		if ((state == null || getToStates().isEmpty() || getToStates().contains(state)) 
 				&& (getFromStates().isEmpty() || getFromStates().contains(issue.getState())) 
 				&& isAuthorized(subject, issue)) {

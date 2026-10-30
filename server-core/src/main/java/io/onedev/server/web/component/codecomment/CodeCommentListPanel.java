@@ -187,7 +187,8 @@ public abstract class CodeCommentListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null
+						&& SecurityUtils.canWorkOnProject(getProject()));
 			}
 
 			@Override
@@ -615,7 +616,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(selectionColumn != null);
+				setVisible(selectionColumn != null && SecurityUtils.canWorkOnProject(getProject()));
 			}
 
 		});

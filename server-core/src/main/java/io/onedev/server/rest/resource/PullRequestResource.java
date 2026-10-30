@@ -285,6 +285,7 @@ public class PullRequestResource {
 
 		if (!SecurityUtils.canReadCode(target.getProject()) || !SecurityUtils.canReadCode(source.getProject()))
 			throw new UnauthorizedException();
+		SecurityUtils.checkWorkOnProject(target.getProject());
 
 		PullRequest request = new PullRequest();
 		request.setSubmitter(user);
@@ -414,6 +415,7 @@ public class PullRequestResource {
 		if (user == null)
 			throw new UnauthorizedException();
 
+		SecurityUtils.checkWorkOnProject(request.getProject());
 		pullRequestReviewService.review(user, request, true, note);
 
 		return Response.ok().build();
@@ -430,6 +432,7 @@ public class PullRequestResource {
 		if (user == null)
 			throw new UnauthorizedException();
 
+		SecurityUtils.checkWorkOnProject(request.getProject());
 		pullRequestReviewService.review(user, request, false, note);
 
 		return Response.ok().build();

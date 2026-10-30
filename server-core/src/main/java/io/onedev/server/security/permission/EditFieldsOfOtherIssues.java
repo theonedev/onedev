@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import io.onedev.server.util.facade.UserFacade;
 
-public class EditFieldsOfOtherIssues implements BasePermission {
+public class EditFieldsOfOtherIssues implements WritePermission {
 
 	@Override
 	public boolean implies(Permission p) {

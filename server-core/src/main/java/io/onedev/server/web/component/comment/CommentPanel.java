@@ -210,7 +210,8 @@ public abstract class CommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(isQuoteEnabled() && SecurityUtils.getAuthUser() != null && getComment() != null);
+				setVisible(isQuoteEnabled() && SecurityUtils.getAuthUser() != null && getComment() != null
+						&& SecurityUtils.canWorkOnProject(getProject()));
 			}
 			
 		});
@@ -255,8 +256,13 @@ public abstract class CommentPanel extends Panel {
 
 		if (getReactionSupport() != null) {
 			viewer.add(new ReactionListPanel("reactions") {
-				
-			@Override
+
+				@Override
+				protected Project getProject() {
+					return CommentPanel.this.getProject();
+				}
+
+				@Override
 				protected Collection<? extends EntityReaction> getReactions() {
 					return getReactionSupport().getReactions();
 				}

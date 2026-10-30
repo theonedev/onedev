@@ -45,6 +45,7 @@ public class IssueVoteResource {
 				|| !SecurityUtils.isAdministrator() && !vote.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
+		SecurityUtils.checkWorkOnProject(vote.getIssue().getProject());
 		voteService.create(vote);
 		return vote.getId();
 	}

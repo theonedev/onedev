@@ -11,6 +11,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.progress.IssueProgressPanel;
@@ -42,7 +43,8 @@ public abstract class IssueOperationsPanel extends Panel {
 		}, true));
 		
 		addOrReplace(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, 
-				NewIssuePage.paramsOf(getIssue().getProject())));
+				NewIssuePage.paramsOf(getIssue().getProject()))
+				.setVisible(SecurityUtils.canWorkOnProject(getIssue().getProject())));
 		
 		super.onBeforeRender();
 	}

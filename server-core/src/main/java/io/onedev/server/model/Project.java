@@ -203,6 +203,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NAME_DESCRIPTION = "Description";
 	
 	public static final String PROP_DESCRIPTION = "description";
+
+	public static final String PROP_MAINTENANCE = "maintenance";
 	
 	public static final String PROP_FORKED_FROM = "forkedFrom";
 	
@@ -291,6 +293,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
+
+	private boolean maintenance;
 	
     @OneToMany(mappedBy="project")
     private Collection<Build> builds = new ArrayList<>();
@@ -563,6 +567,25 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setDescription(String description) {
 		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
+	}
+
+	@Editable(order=225, descriptionProvider="getMaintenanceDescription")
+	@SubscriptionRequired
+	public boolean isMaintenance() {
+		return maintenance;
+	}
+
+	public void setMaintenance(boolean maintenance) {
+		this.maintenance = maintenance;
+	}
+
+	@SuppressWarnings("unused")
+	private static String getMaintenanceDescription() {
+		var description = _T("If enabled, only project managers and users with maintenance permission can work on this project");
+		if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
+			description += ". " + _T("<b class='text-warning'>NOTE: </b>Maintenance mode is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days");
+		}
+		return description;
 	}
 
 	public ArrayList<BranchProtection> getBranchProtections() {
@@ -1110,11 +1133,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@SuppressWarnings("unused")
 	private static String getTimeTrackingDescription() {
+		var description = _T("Enable <a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets");
 		if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
-			return _T("<b class='text-warning'>NOTE: </b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days");
-		} else {
-			return _T("Enable <a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets");
+			description += ". " + _T("<b class='text-warning'>NOTE: </b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days");
 		}
+		return description;
 	}
 
 	@Editable(order=400, name="Package Management", descriptionProvider = "getPackManagementDescription")

@@ -9632,4 +9632,15 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate254(File dataDir, Stack<Integer> versions) {
+		for (File file : Objects.requireNonNull(dataDir.listFiles())) {
+			if (file.getName().startsWith("Projects.xml") || file.getName().startsWith("Roles.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.addElement("maintenance").setText("false");
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

@@ -160,6 +160,7 @@ public class CodeCommentResource {
 		var project = RestProjectUtils.loadProject(projectService, data.getProjectId());
 		if (!SecurityUtils.canReadCode(project))
 			throw new UnauthorizedException();
+		SecurityUtils.checkWorkOnProject(project);
 
 		var mark = data.getMark().toMark();
 		var contextData = data.getCompareContext();

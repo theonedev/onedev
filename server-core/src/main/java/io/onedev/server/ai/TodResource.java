@@ -538,6 +538,7 @@ public class TodResource {
 
         var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
         var issue = getIssue(currentProject, issueReference);
+        SecurityUtils.checkWorkOnProject(issue.getProject());
         var comment = new IssueComment();
         comment.setIssue(issue);
         comment.setContent(commentContent);
@@ -792,6 +793,7 @@ public class TodResource {
             throw new NotAcceptableException("Time tracking needs to be enabled for the project");
         if (!SecurityUtils.canAccessIssue(issue))
             throw new UnauthorizedException("No permission to access issue: " + issueReference);
+        SecurityUtils.checkWorkOnProject(issue.getProject());
 
         var work = new IssueWork();
         work.setIssue(issue);
@@ -1151,6 +1153,7 @@ public class TodResource {
         var target = createPullRequestEssentialInfo.target;
         var source = createPullRequestEssentialInfo.source;
         var submitter = createPullRequestEssentialInfo.submitter;
+        SecurityUtils.checkWorkOnProject(target.getProject());
 
         var mergeStrategyName = (String) data.remove("mergeStrategy");            
         var mergeStrategy = getMergeStrategy(target.getProject(), mergeStrategyName);
@@ -1498,6 +1501,7 @@ public class TodResource {
         var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
+        SecurityUtils.checkWorkOnProject(pullRequest.getProject());
         pullRequestReviewService.review(user, pullRequest, true, trimToNull(comment));
         return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
@@ -1516,6 +1520,7 @@ public class TodResource {
         var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
+        SecurityUtils.checkWorkOnProject(pullRequest.getProject());
         pullRequestReviewService.review(user, pullRequest, false, trimToNull(comment));
         return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
@@ -1645,6 +1650,7 @@ public class TodResource {
         var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
 
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
+        SecurityUtils.checkWorkOnProject(pullRequest.getProject());
         var comment = new PullRequestComment();
         comment.setRequest(pullRequest);
         comment.setContent(commentContent);
@@ -1672,6 +1678,7 @@ public class TodResource {
         var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
+        SecurityUtils.checkWorkOnProject(pullRequest.getProject());
         var comment = PullRequestHelper.addCodeComment(pullRequest, user, filePath, fromLineNumber, toLineNumber, commentContent);
         return CodeCommentHelper.getIdentity(comment);
     }

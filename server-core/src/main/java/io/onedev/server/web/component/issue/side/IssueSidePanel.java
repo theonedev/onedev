@@ -139,6 +139,11 @@ public abstract class IssueSidePanel extends Panel {
 		addOrReplace(watchesContainer = new EntityWatchesPanel("watches") {
 
 			@Override
+			protected Project getProject() {
+				return IssueSidePanel.this.getProject();
+			}
+
+			@Override
 			protected void onSaveWatch(EntityWatch watch) {
 				OneDev.getInstance(IssueWatchService.class).createOrUpdate((IssueWatch) watch);
 			}
@@ -556,6 +561,12 @@ public abstract class IssueSidePanel extends Panel {
 		});
 		
 		AjaxLink<Void> voteLink = new AjaxLink<Void>("vote") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canWorkOnProject(getProject()));
+			}
 
 			private IssueVote getVote(User user) {
 				for (IssueVote vote: getIssue().getVotes()) {

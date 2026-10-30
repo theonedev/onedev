@@ -64,6 +64,7 @@ public class CodeCommentReplyResource {
 		var comment = commentService.load(data.getCommentId());
 		if (!SecurityUtils.canReadCode(comment.getProject()))
 			throw new UnauthorizedException();
+		SecurityUtils.checkWorkOnProject(comment.getProject());
 		var reply = new CodeCommentReply();
 		reply.setComment(comment);
 		reply.setUser(user);

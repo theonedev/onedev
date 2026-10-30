@@ -291,7 +291,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(getComment().getProject()));
 			}
 
 		});
@@ -307,7 +307,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(getComment().getProject()));
 			}
 			
 		};
@@ -936,7 +936,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.getAuthUser() != null);
+					setVisible(SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(getComment().getProject()));
 				}
 
 			});

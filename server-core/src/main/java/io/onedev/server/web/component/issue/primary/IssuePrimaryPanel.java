@@ -379,11 +379,13 @@ public abstract class IssuePrimaryPanel extends Panel {
 				RepeatingView linkedIssuesView = new RepeatingView("linkedIssues");
 				for (IssueLink issueLink: group.getIssueLinks()) {
 					LinkDeleteListener deleteListener;
-					if (canEditIssueLink) { 
+					if (canEditIssueLink && SecurityUtils.canWorkOnProject(issueLink.getLinked(getIssue()).getProject())) {
 						deleteListener = new LinkDeleteListener() {
 	
 							@Override
 							void onDelete(AjaxRequestTarget target, Issue linkedIssue) {
+								SecurityUtils.checkWorkOnProject(getProject());
+								SecurityUtils.checkWorkOnProject(linkedIssue.getProject());
 								issueChangeService.removeLink(SecurityUtils.getUser(), linkSpecService.load(specId), getIssue(), 
 										linkedIssue, opposite);
 								notifyIssueChange(target, getIssue());
@@ -398,7 +400,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 				}
 				item.add(linkedIssuesView);
 				
-				if (canEditIssueLink) {
+				if (canEditIssueLink && group.getIssueLinks().stream()
+						.allMatch(it -> SecurityUtils.canWorkOnProject(it.getLinked(getIssue()).getProject()))) {
 					item.add(new SortBehavior() {
 											
 						@Override
@@ -411,6 +414,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 									var issueLinkId = (Long) it.next().getDefaultModelObject();
 									issueLinks.add(issueLinkService.load(issueLinkId));
 								}
+								SecurityUtils.checkWorkOnProject(getProject());
+								issueLinks.forEach(it -> SecurityUtils.checkWorkOnProject(it.getLinked(getIssue()).getProject()));
 								
 								if (fromIndex != toIndex && fromIndex < issueLinks.size() && toIndex < issueLinks.size()) {
 									var movedIssueLink = issueLinks.remove(fromIndex);
@@ -616,7 +621,11 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 						private boolean checkLink(AjaxRequestTarget target, Issue linkIssue) {
 							LinkSpec spec = linkSpecService.load(specId);
-							if (getIssue().getId().equals(linkIssue.getId())) {
+							if (!SecurityUtils.canWorkOnProject(linkIssue.getProject())) {
+								form.error(_T("Project is in maintenance mode"));
+								target.add(form);
+								return false;
+							} else if (getIssue().getId().equals(linkIssue.getId())) {
 								form.error(_T("Cannot link to self: " + linkIssue.getReference().toString(getProject())));
 								target.add(form);
 								return false;
@@ -630,6 +639,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 						}
 
 						private void addLink(AjaxRequestTarget target, Issue linkIssue) {
+							SecurityUtils.checkWorkOnProject(getProject());
+							SecurityUtils.checkWorkOnProject(linkIssue.getProject());
 							LinkSpec spec = linkSpecService.load(specId);
 							issueChangeService.addLink(SecurityUtils.getUser(), spec, getIssue(), linkIssue, opposite);
 							notifyIssueChange(target, getIssue());

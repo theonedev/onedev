@@ -31,7 +31,7 @@ onedev.server.codeProblem = {
 				return "badge-secondary";
 		}
 	},
-	renderProblems: function(problems, translations) {
+	renderProblems: function(problems, translations, canComment) {
 		var $container = $("<div></div>");
 		for (var i in problems) {
 			var problem = problems[i];
@@ -41,7 +41,8 @@ onedev.server.codeProblem = {
 			$content.html(problem.message);
 			
 			$content.prepend(`<span class='badge badge-sm mr-2 ${severityInfo}'>${translations[problem.severity]}</span>`);
-			$content.append(`<a data-tippy-content='${translations["add-problem-comment"]}' class='add-comment ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='${onedev.server.icons}#comment'/></svg></a>`);
+			if (canComment)
+				$content.append(`<a data-tippy-content='${translations["add-problem-comment"]}' class='add-comment ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='${onedev.server.icons}#comment'/></svg></a>`);
 		}
 		return $container.html();
 	} 

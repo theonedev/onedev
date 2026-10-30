@@ -165,7 +165,8 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null && (getQueryPersonalization() != null || canEditCommonQueries()));
+				setVisible(SecurityUtils.getAuthUser() != null && (getQueryPersonalization() != null || canEditCommonQueries())
+						&& (Project.get() == null || SecurityUtils.canWorkOnProject(Project.get())));
 			}
 
 			private Component newPersonalQueriesEditor(String componentId, ModalPanel modal) {

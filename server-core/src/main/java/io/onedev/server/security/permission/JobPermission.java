@@ -36,6 +36,11 @@ public class JobPermission implements BasePermission {
 	}
 
 	@Override
+	public boolean isWrite() {
+		return privilege.isWrite();
+	}
+
+	@Override
 	public boolean isApplicable(@Nullable UserFacade user) {
 		return privilege.isApplicable(user);
 	}

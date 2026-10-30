@@ -34,6 +34,7 @@ public class CodeCommentHelper {
 
         if (!SecurityUtils.canReadCode(subject, comment.getProject()))
             throw new UnauthorizedException();
+        SecurityUtils.checkWorkOnProject(subject, comment.getProject());
 
         var reply = new CodeCommentReply();
         reply.setComment(comment);

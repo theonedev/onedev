@@ -6,7 +6,7 @@ import org.apache.shiro.authz.Permission;
 import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 
-public class EditIssueField implements BasePermission {
+public class EditIssueField implements WritePermission {
 
 	private final Collection<String> fields;
 	

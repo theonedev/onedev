@@ -267,6 +267,7 @@ public class IssueHelper {
 
     @SuppressWarnings("unchecked")
     public static Issue createIssue(Subject subject, Project project, Map<String, Serializable> data) {
+        SecurityUtils.checkWorkOnProject(subject, project);
         normalizeData(data);
 
         var issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();

@@ -339,7 +339,8 @@ public abstract class CommitListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null
+						&& SecurityUtils.canWorkOnProject(getProject()));
 			}
 
 			@Override

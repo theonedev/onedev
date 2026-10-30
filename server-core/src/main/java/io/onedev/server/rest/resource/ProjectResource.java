@@ -475,6 +475,9 @@ public class ProjectResource {
 		@Api(order = 500, description="May be empty")
 		private String description;
 
+		@Api(order = 525)
+		private boolean maintenance;
+
 		@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 		@Api(order = 550)
 		private Date createDate;
@@ -558,6 +561,14 @@ public class ProjectResource {
 
 		public void setDescription(String description) {
 			this.description = description;
+		}
+
+		public boolean isMaintenance() {
+			return maintenance;
+		}
+
+		public void setMaintenance(boolean maintenance) {
+			this.maintenance = maintenance;
 		}
 
 		public Date getCreateDate() {
@@ -648,6 +659,7 @@ public class ProjectResource {
 			project.setName(getName());
 			project.setKey(getKey());
 			project.setDescription(getDescription());
+			project.setMaintenance(isMaintenance());
 			project.setCodeManagement(isCodeManagement());
 			project.setWikiManagement(isWikiManagement());
 			project.setPackManagement(isPackManagement());
@@ -667,6 +679,7 @@ public class ProjectResource {
 			data.setKey(project.getKey());
 			data.setPath(project.getPath());
 			data.setDescription(project.getDescription());
+			data.setMaintenance(project.isMaintenance());
 			data.setCreateDate(project.getCreateDate());
 			data.setCodeManagement(project.isCodeManagement());
 			data.setWikiManagement(project.isWikiManagement());

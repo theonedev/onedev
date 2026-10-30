@@ -232,7 +232,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			
 		});
 		
-		if (SecurityUtils.getAuthUser() != null) {
+		if (SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(getIssue().getProject())) {
 			Fragment fragment = new Fragment("addComment", "addCommentFrag", this);
 			fragment.setOutputMarkupId(true);
 			CommentInput input = new CommentInput("comment", Model.of(""), false) {
@@ -313,6 +313,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			add(fragment);
 		} else {
 			Fragment fragment = new Fragment("addComment", "loginToCommentFrag", this);
+			fragment.setVisible(SecurityUtils.canWorkOnProject(getIssue().getProject()));
 			fragment.add(new AjaxLink<Void>("login") {
 
 				@Override

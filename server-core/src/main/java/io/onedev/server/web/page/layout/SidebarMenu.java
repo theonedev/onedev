@@ -7,6 +7,7 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 
 import io.onedev.server.web.component.floating.FloatingPanel;
 
@@ -91,6 +92,10 @@ public class SidebarMenu implements Serializable {
 
 		public String getLabel() {
 			return label;
+		}
+
+		protected Component newBadge(String componentId) {
+			return new WebMarkupContainer(componentId).setVisible(false);
 		}
 
 		protected boolean hasMoreInfo() {

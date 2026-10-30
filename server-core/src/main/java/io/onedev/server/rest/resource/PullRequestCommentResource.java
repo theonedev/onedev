@@ -53,6 +53,7 @@ public class PullRequestCommentResource {
 				|| !SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();
 		}
+		SecurityUtils.checkWorkOnProject(comment.getProject());
 
 		commentService.create(comment, new ArrayList<>());
 		

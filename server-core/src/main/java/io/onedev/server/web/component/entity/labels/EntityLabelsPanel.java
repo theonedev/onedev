@@ -11,10 +11,14 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.model.LabelSpec;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.EntityLabel;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.web.component.LabelBadge;
+import io.onedev.server.web.component.MaintenanceBadge;
 
 public class EntityLabelsPanel<T extends EntityLabel> extends Panel {
 
@@ -29,6 +33,8 @@ public class EntityLabelsPanel<T extends EntityLabel> extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new MaintenanceBadge("maintenance", this::isMaintenance));
+
 		add(new ListView<LabelSpec>("labels", new LoadableDetachableModel<List<LabelSpec>>() {
 
 			@Override
@@ -53,7 +59,12 @@ public class EntityLabelsPanel<T extends EntityLabel> extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!model.getObject().getLabels().isEmpty());
+		setVisible(isMaintenance() || !model.getObject().getLabels().isEmpty());
+	}
+
+	private boolean isMaintenance() {
+		return model.getObject() instanceof Project project && project.isMaintenance()
+				&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive();
 	}
 
 	@Override

@@ -43,6 +43,7 @@ public class PullRequestWatchResource {
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
+		SecurityUtils.checkWorkOnProject(watch.getRequest().getProject());
 		watchService.createOrUpdate(watch);
 		return watch.getId();
 	}

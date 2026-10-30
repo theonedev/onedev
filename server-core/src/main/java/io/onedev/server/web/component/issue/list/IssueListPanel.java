@@ -299,7 +299,8 @@ public abstract class IssueListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null
+						&& (getProject() == null || SecurityUtils.canWorkOnProject(getProject())));
 			}
 
 			@Override
@@ -514,7 +515,7 @@ public abstract class IssueListPanel extends Panel {
 
 								@Override
 								public boolean evaluate(Project object) {
-									return cache.get(object.getId()).isIssueManagement();
+									return cache.get(object.getId()).isIssueManagement() && SecurityUtils.canWorkOnProject(object);
 								}
 								
 							});							
@@ -541,7 +542,8 @@ public abstract class IssueListPanel extends Panel {
 			});	
 		} else {
 			PageParameters params = NewIssuePage.paramsOf(getProject(), getBaseQuery().toString());
-			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, params));
+			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, params)
+					.setVisible(SecurityUtils.canWorkOnProject(getProject())));
 		}
 		
 		add(new ModalLink("fieldsAndLinks") {
@@ -1018,6 +1020,7 @@ public abstract class IssueListPanel extends Panel {
 													for (IModel<Issue> each : selectionColumn.getSelections())
 														issues.add(each.getObject());
 													var user = SecurityUtils.getUser();
+													issues.forEach(it -> SecurityUtils.checkWorkOnProject(it.getProject()));
 													getIssueService().move(user, issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
@@ -1173,6 +1176,7 @@ public abstract class IssueListPanel extends Panel {
 												return;
 											}
 											getTransactionService().run(()-> {
+												issues.forEach(it -> SecurityUtils.checkWorkOnProject(it.getProject()));
 												getIssueService().delete(issues, getProject());
 												for (var issue: issues) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
@@ -1387,6 +1391,7 @@ public abstract class IssueListPanel extends Panel {
 														issues.add(it.next());
 													}
 													var user = SecurityUtils.getUser();
+													issues.forEach(it -> SecurityUtils.checkWorkOnProject(it.getProject()));
 													OneDev.getInstance(IssueService.class).move(user, issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
@@ -1546,6 +1551,7 @@ public abstract class IssueListPanel extends Panel {
 												return;
 											}
 											getTransactionService().run(()-> {
+												issues.forEach(it -> SecurityUtils.checkWorkOnProject(it.getProject()));
 												getIssueService().delete(issues, getProject());
 												for (var issue: issues) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
@@ -1622,6 +1628,7 @@ public abstract class IssueListPanel extends Panel {
 											Collection<Issue> issues = new ArrayList<>();
 											for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 												issues.add(it.next());
+											issues.forEach(it -> SecurityUtils.checkWorkOnProject(it.getProject()));
 											getWatchService().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
 											Session.get().success(_T("Watch status changed"));
 										}
@@ -1783,7 +1790,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public boolean evaluate(Project object) {
-						return cache.get(object.getId()).isIssueManagement();
+						return cache.get(object.getId()).isIssueManagement() && SecurityUtils.canWorkOnProject(object);
 					}
 					
 				});
@@ -1800,7 +1807,8 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null
+						&& (getProject() == null || SecurityUtils.canWorkOnProject(getProject())));
 			}
 			
 		});

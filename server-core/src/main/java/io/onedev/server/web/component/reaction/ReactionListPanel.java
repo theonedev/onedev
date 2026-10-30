@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.security.SecurityUtils;
@@ -54,7 +55,7 @@ public abstract class ReactionListPanel extends Panel {
             @Override
             protected void onConfigure() {
                 super.onConfigure();
-                setVisible(SecurityUtils.getUser() != null);
+                setVisible(SecurityUtils.getUser() != null && SecurityUtils.canWorkOnProject(getProject()));
             }
 
             @Override
@@ -105,7 +106,7 @@ public abstract class ReactionListPanel extends Panel {
                     @Override
                     protected void onConfigure() {
                         super.onConfigure();
-                        setEnabled(SecurityUtils.getUser() != null);
+                        setEnabled(SecurityUtils.getUser() != null && SecurityUtils.canWorkOnProject(getProject()));
                     }
 
                 };
@@ -138,6 +139,8 @@ public abstract class ReactionListPanel extends Panel {
         });
         setOutputMarkupId(true);
     }
+
+    protected abstract Project getProject();
 
     protected abstract Collection<? extends EntityReaction> getReactions();
 

@@ -326,6 +326,7 @@ public class IssueResource {
 		Project project = RestProjectUtils.loadProject(projectService, data.getProjectId());
     	if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
+		SecurityUtils.checkWorkOnProject(project);
 
 		if (data.getIterationIds() != null && !data.getIterationIds().isEmpty() && !SecurityUtils.canScheduleIssues(project))
 			throw new UnauthorizedException("No permission to schedule issue. Remove iterationIds if you want to create issue without scheduling it.");

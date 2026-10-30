@@ -262,7 +262,8 @@ public abstract class PullRequestListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null
+						&& (getProject() == null || SecurityUtils.canWorkOnProject(getProject())));
 			}
 
 			@Override
@@ -318,6 +319,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 											var requests = selectionColumn.getSelections().stream()
 													.map(it->it.getObject()).collect(toList());
+											requests.forEach(it -> SecurityUtils.checkWorkOnProject(it.getProject()));
 											pullRequestWatchService.setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 											selectionColumn.getSelections().clear();
 											Session.get().success(_T("Watch status changed"));
@@ -518,6 +520,7 @@ public abstract class PullRequestListPanel extends Panel {
 											Collection<PullRequest> requests = new ArrayList<>();
 											for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 												requests.add(it.next());
+											requests.forEach(it -> SecurityUtils.checkWorkOnProject(it.getProject()));
 											pullRequestWatchService.setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 											Session.get().success(_T("Watch status changed"));
 										}
@@ -738,7 +741,8 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null
+						&& (getProject() == null || SecurityUtils.canWorkOnProject(getProject())));
 			}
 			
 		});
@@ -869,6 +873,7 @@ public abstract class PullRequestListPanel extends Panel {
 						@Override
 						protected List<Project> load() {
 							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new ReadCode()));
+							projects.removeIf(it -> !SecurityUtils.canWorkOnProject(it));
 							projects.sort(projectService.cloneCache().comparingPath());
 							return projects;
 						}
@@ -890,7 +895,7 @@ public abstract class PullRequestListPanel extends Panel {
 			});
 		} else {
 			add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class,
-					NewPullRequestPage.paramsOf(getProject())));		
+					NewPullRequestPage.paramsOf(getProject())).setVisible(SecurityUtils.canWorkOnProject(getProject())));
 		}
 		body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));

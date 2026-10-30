@@ -59,6 +59,7 @@ import io.onedev.server.web.opengraph.OpenGraphHeaderMeta;
 import io.onedev.server.web.opengraph.OpenGraphHeaderMetaType;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.SidebarMenu;
+import io.onedev.server.web.component.MaintenanceBadge;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
@@ -258,7 +259,12 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware, Ch
 		}
 
 		String avatarUrl = OneDev.getInstance(AvatarService.class).getProjectAvatarUrl(getProject().getId());
-		var menu = new SidebarMenu(new SidebarMenu.Header(avatarUrl, getProject().getName()), menuItems);
+		var menu = new SidebarMenu(new SidebarMenu.Header(avatarUrl, getProject().getName()) {
+			@Override
+			protected Component newBadge(String componentId) {
+				return new MaintenanceBadge(componentId, () -> getProject().isMaintenance() && isSubscriptionActive());
+			}
+		}, menuItems);
 
 		var contributions = new ArrayList<>(OneDev.getExtensions(ProjectMenuContribution.class));
 		contributions.sort(Comparator.comparing(ProjectMenuContribution::getOrder));

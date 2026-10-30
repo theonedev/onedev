@@ -228,7 +228,8 @@ public abstract class PackListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null
+						&& (getProject() == null || SecurityUtils.canWorkOnProject(getProject())));
 			}
 
 			@Override
@@ -401,7 +402,8 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getProject() != null && SecurityUtils.canWritePack(getProject()));
+				setVisible(getProject() != null && SecurityUtils.canWorkOnProject(getProject())
+						&& SecurityUtils.canWritePack(getProject()));
 			}
 			
 		});

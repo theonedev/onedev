@@ -230,7 +230,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		});
 		container.setOutputMarkupId(true);
 				
-		if (getLoginUser() != null) {
+		if (getLoginUser() != null && SecurityUtils.canWorkOnProject(getProject())) {
 			Fragment fragment = new Fragment("addComment", "addCommentFrag", this);
 			fragment.setOutputMarkupId(true);
 
@@ -315,6 +315,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			container.add(fragment);
 		} else {
 			Fragment fragment = new Fragment("addComment", "loginToCommentFrag", this);
+			fragment.setVisible(SecurityUtils.canWorkOnProject(getProject()));
 			fragment.add(new Link<Void>("login") {
 
 				@Override

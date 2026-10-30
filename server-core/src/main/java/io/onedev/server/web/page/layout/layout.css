@@ -354,7 +354,7 @@
 		flex-wrap: wrap;
 	}
 
-	.sidebar-minimized .sidebar-brand, .sidebar-minimized .menu-header-text, 
+	.sidebar-minimized .sidebar-brand, .sidebar-minimized .menu-header-text, .sidebar-minimized .menu-header-badge,
 	.sidebar-minimized .menu-body .menu-body, .sidebar-minimized .menu-bullet,
 	.sidebar-minimized .sidebar-menu>.menu-body>.menu-item>.menu-link>.menu-text, 
 	.sidebar-minimized .sidebar-menu>.menu-body>.menu-item>.menu-link>.menu-arrow, 

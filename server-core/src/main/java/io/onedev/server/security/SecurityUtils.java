@@ -75,6 +75,7 @@ import io.onedev.server.security.permission.ManageCodeComments;
 import io.onedev.server.security.permission.ManageIssues;
 import io.onedev.server.security.permission.ManageJob;
 import io.onedev.server.security.permission.ManageProject;
+import io.onedev.server.security.permission.MaintainProject;
 import io.onedev.server.security.permission.ManagePullRequests;
 import io.onedev.server.security.permission.ManageWorkspaces;
 import io.onedev.server.security.permission.ProjectPermission;
@@ -359,6 +360,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	 * @return
 	 */
 	public static boolean canOpenTerminal(Subject subject, Build build) {
+		if (!canWorkOnProject(subject, build.getProject()))
+			return false;
 		var user = getAuthUser(subject);
 		if (user == null)
 			return false;
@@ -401,6 +404,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canEditIssueFields(Subject subject, Issue issue) {
+		if (!canWorkOnProject(subject, issue.getProject()))
+			return false;
 		return issue.getSubmitter().equals(getAuthUser(subject)) 
 				|| subject.isPermitted(new ProjectPermission(issue.getProject(), new EditFieldsOfOtherIssues()));
 	}
@@ -493,6 +498,26 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				|| !issue.isConfidential() && canAccessProject(subject, issue.getProject());
 	}
 	
+	/** Checks the maintenance restriction only; the action's normal permission is still required. */
+	public static boolean canWorkOnProject(Subject subject, Project project) {
+		return !project.isMaintenance()
+				|| !OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()
+				|| subject.isPermitted(new ProjectPermission(project, new MaintainProject()));
+	}
+
+	public static boolean canWorkOnProject(Project project) {
+		return canWorkOnProject(getSubject(), project);
+	}
+
+	public static void checkWorkOnProject(Project project) {
+		checkWorkOnProject(getSubject(), project);
+	}
+
+	public static void checkWorkOnProject(Subject subject, Project project) {
+		if (!canWorkOnProject(subject, project))
+			throw new UnauthorizedException("Project is in maintenance mode");
+	}
+
 	public static boolean canCreateChildren(Project project) {
 		return canCreateChildren(getSubject(), project);
 	}
@@ -644,11 +669,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canModifyOrDelete(Subject subject, Workspace workspace) {
+		if (!canWorkOnProject(subject, workspace.getProject()))
+			return false;
 		return canManageWorkspaces(subject, workspace.getProject()) 
 				|| workspace.getUser().equals(getAuthUser(subject));
 	}
 
 	public static boolean canChangeStatus(Subject subject, CodeComment comment) {
+		if (!canWorkOnProject(subject, comment.getProject()))
+			return false;
 		var user = getAuthUser(subject);
 		if (user == null)
 			return false;
@@ -672,53 +701,71 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canModifyOrDelete(Subject subject, CodeComment comment) {
+		if (!canWorkOnProject(subject, comment.getProject()))
+			return false;
 		return canManageCodeComments(subject, comment.getProject()) 
 				|| comment.getUser().equals(getAuthUser(subject));
 	}
 	
 	public static boolean canModifyOrDelete(CodeCommentReply reply) {
+		if (!canWorkOnProject(reply.getComment().getProject()))
+			return false;
 		var subject = getSubject();
 		return canManageCodeComments(subject, reply.getComment().getProject()) 
 				|| reply.getUser().equals(getAuthUser(subject));
 	}
 	
 	public static boolean canModifyOrDelete(PullRequestComment comment) {
+		if (!canWorkOnProject(comment.getProject()))
+			return false;
 		var subject = getSubject();
 		return canManagePullRequests(subject, comment.getRequest().getTargetProject())
 				|| comment.getUser().equals(getAuthUser(subject));
 	}
 	
 	public static boolean canModifyOrDelete(IssueComment comment) {
+		if (!canWorkOnProject(comment.getIssue().getProject()))
+			return false;
 		var subject = getSubject();
 		return canManageIssues(subject, comment.getIssue().getProject())
 				|| comment.getUser().equals(getAuthUser(subject));
 	}
 
 	public static boolean canModifyOrDelete(IssueWork work) {
+		if (!canWorkOnProject(work.getIssue().getProject()))
+			return false;
 		var subject = getSubject();
 		return canManageIssues(subject, work.getIssue().getProject())
 				|| work.getUser().equals(getAuthUser(subject));
 	}
 
 	public static boolean canModifyOrDelete(IssueVote vote) {
+		if (!canWorkOnProject(vote.getIssue().getProject()))
+			return false;
 		var subject = getSubject();
 		return canManageIssues(subject, vote.getIssue().getProject())
 				|| vote.getUser().equals(getAuthUser(subject));
 	}
 
 	public static boolean canModifyOrDelete(IssueWatch watch) {
+		if (!canWorkOnProject(watch.getIssue().getProject()))
+			return false;
 		var subject = getSubject();
 		return canManageIssues(subject, watch.getIssue().getProject())
 				|| watch.getUser().equals(getAuthUser(subject));
 	}
 
 	public static boolean canModifyOrDelete(PullRequestWatch watch) {
+		if (!canWorkOnProject(watch.getRequest().getProject()))
+			return false;
 		var subject = getSubject();
 		return canManagePullRequests(subject, watch.getRequest().getProject())
 				|| watch.getUser().equals(getAuthUser(subject));
 	}
 
 	public static boolean canModifyOrDelete(PullRequestReview review) {
+		if (!canWorkOnProject(review.getRequest().getProject()))
+			return false;
 		var subject = getSubject();
 		return canModifyPullRequest(review.getRequest()) || review.getUser().equals(getAuthUser(subject));
 	}
@@ -728,6 +775,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canModifyPullRequest(Subject subject, PullRequest request) {
+		if (!canWorkOnProject(subject, request.getTargetProject()))
+			return false;
 		var user = getAuthUser(subject);
 		return canManagePullRequests(subject, request.getTargetProject())
 				|| user != null && (user.equals(request.getSubmitter()) || request.getAssignees().contains(user));
@@ -738,6 +787,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 
 	public static boolean canModifyIssue(Subject subject, Issue issue) {
+		if (!canWorkOnProject(subject, issue.getProject()))
+			return false;
 		return canManageIssues(subject, issue.getProject())
 				|| issue.getSubmitter().equals(getAuthUser(subject));
 	}
@@ -868,15 +919,17 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				if (!isAnonymous(principal) || getSettingService().getSecuritySetting().isEnableAnonymousAccess())
 					addIdsPermittedByDefaultRole(cache, authorizedProjectIds, permission);
 			
-				return authorizedProjectIds.stream().map(projectService::load).collect(toSet());
+				return authorizedProjectIds.stream().map(projectService::load)
+						.filter(it -> !permission.isWrite() || canWorkOnProject(subject, it)).collect(toSet());
 			} else {
 				return new HashSet<>();
 			}
 		}
 	}
 	
-	private static Collection<User> filterApplicableUsers(Collection<User> users, BasePermission permission) {
-		return users.stream().filter(it -> permission.isApplicable(it.getFacade())).collect(toList());
+	private static Collection<User> filterApplicableUsers(Collection<User> users, Project project, BasePermission permission) {
+		return users.stream().filter(it -> permission.isApplicable(it.getFacade())
+				&& (!permission.isWrite() || !project.isMaintenance() || canWorkOnProject(it.asSubject(), project))).collect(toList());
 	}
 
 	public static Collection<User> getAuthorizedUsers(Project project, BasePermission permission) {
@@ -891,7 +944,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		Project current = project;
 		do {
 			if (current.isPermittedByLoginUser(permission))
-				return filterApplicableUsers(cache.getUsers(), permission);
+				return filterApplicableUsers(cache.getUsers(), project, permission);
 
 			for (UserAuthorization authorization: current.getUserAuthorizations()) {
 				if (authorization.getRole().implies(permission))
@@ -912,7 +965,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				authorizedUsers.add(authorization.getUser());
 		}
 
-		return filterApplicableUsers(authorizedUsers, permission);
+		return filterApplicableUsers(authorizedUsers, project, permission);
 	}
 
 	private static void populateAccessibleReportNames(Map<String, Collection<String>> accessibleReportNames,

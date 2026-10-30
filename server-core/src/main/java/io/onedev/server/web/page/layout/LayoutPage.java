@@ -470,6 +470,7 @@ public abstract class LayoutPage extends BasePage {
 					Fragment fragment = new Fragment("header", "menuHeaderFrag", LayoutPage.this);
 					fragment.add(new ExternalImage("icon", Model.of(header.getImageUrl())));
 					fragment.add(new Label("label", header.getLabel()));
+					fragment.add(header.newBadge("badge"));
 					if (header.hasMoreInfo()) {
 						fragment.add(new DropdownLink("moreInfo") {
 

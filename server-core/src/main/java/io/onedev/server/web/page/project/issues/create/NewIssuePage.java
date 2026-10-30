@@ -15,6 +15,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
@@ -73,6 +74,11 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	protected void onDetach() {
 		templateModel.detach();
 		super.onDetach();
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return super.isPermitted() && SecurityUtils.canWorkOnProject(getProject());
 	}
 
 	@Override

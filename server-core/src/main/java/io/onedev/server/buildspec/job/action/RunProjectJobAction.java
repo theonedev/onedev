@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.NotAcceptableException;
 
 import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.util.ThreadContext;
+import org.apache.shiro.subject.support.SubjectThreadState;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -205,8 +205,9 @@ public class RunProjectJobAction extends PostBuildAction implements Validatable 
 			throw new UnauthorizedException();
 
 		var user = SecurityUtils.getUser(subject);
-		ThreadContext.bind(subject);
+		var threadState = new SubjectThreadState(subject);
 		try {
+			threadState.bind();
 			String refName;
 			if (branch != null) {
 				refName = GitUtils.branch2ref(branch);
@@ -230,7 +231,7 @@ public class RunProjectJobAction extends PostBuildAction implements Validatable 
 			getJobService().submit(user, project, commit.copy(), jobName, jobParamMap, refName, null, null, 
 					"Triggered via post build action of job '" + build.getJobName() + "' in project '" + build.getProject().getPath() + "'");
 		} finally {
-			ThreadContext.unbindSubject();
+			threadState.restore();
 		}		
 	}
 

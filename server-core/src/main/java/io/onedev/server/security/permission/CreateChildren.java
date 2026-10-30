@@ -4,7 +4,7 @@ import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 import org.jetbrains.annotations.Nullable;
 
-public class CreateChildren implements BasePermission {
+public class CreateChildren implements WritePermission {
 
 	@Override
 	public boolean implies(Permission p) {

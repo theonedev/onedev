@@ -17,6 +17,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.security.SecurityUtils;
@@ -110,7 +111,8 @@ public abstract class EntityWatchesPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null && SecurityUtils.getAuthUser().getType() != SERVICE);
+				setVisible(SecurityUtils.getAuthUser() != null && SecurityUtils.getAuthUser().getType() != SERVICE
+						&& SecurityUtils.canWorkOnProject(getProject()));
 			}
 
 			@Override
@@ -156,6 +158,8 @@ public abstract class EntityWatchesPanel extends Panel {
 	}
 
 	protected abstract AbstractEntity getEntity();
+
+	protected abstract Project getProject();
 	
 	protected abstract void onSaveWatch(EntityWatch watch);
 	

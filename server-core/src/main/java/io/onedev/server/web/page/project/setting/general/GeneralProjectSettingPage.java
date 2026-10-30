@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.setting.general;
 import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_WIKI_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_DESCRIPTION;
+import static io.onedev.server.model.Project.PROP_MAINTENANCE;
 import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_KEY;
 import static io.onedev.server.model.Project.PROP_NAME;
@@ -68,7 +69,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		}
 
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_KEY, 
-				PROP_DESCRIPTION, PROP_CODE_MANAGEMENT, PROP_WIKI_MANAGEMENT, PROP_PACK_MANAGEMENT,
+				PROP_DESCRIPTION, PROP_MAINTENANCE, PROP_CODE_MANAGEMENT, PROP_WIKI_MANAGEMENT, PROP_PACK_MANAGEMENT,
 				PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
 		
 		LabelsBean labelsBean = LabelsBean.of(getProject());

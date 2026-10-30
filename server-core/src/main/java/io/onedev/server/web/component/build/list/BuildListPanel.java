@@ -265,7 +265,8 @@ public abstract class BuildListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(querySubmitted && queryModel.getObject() != null);
-				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null
+						&& (getProject() == null || SecurityUtils.canWorkOnProject(getProject())));
 			}
 
 			@Override
@@ -733,7 +734,8 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getProject() != null && SecurityUtils.canManageBuilds(getProject()));
+				setVisible(getProject() != null && SecurityUtils.canWorkOnProject(getProject())
+						&& SecurityUtils.canManageBuilds(getProject()));
 			}
 			
 		});
@@ -1015,7 +1017,8 @@ public abstract class BuildListPanel extends Panel {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.getAuthUser() != null && getPage() instanceof ProjectBuildsPage);
+					setVisible(SecurityUtils.getAuthUser() != null && getPage() instanceof ProjectBuildsPage
+							&& SecurityUtils.canWorkOnProject(getProject()));
 				}
 				
 			});

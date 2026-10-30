@@ -2,11 +2,12 @@ onedev.server.blobTextDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, oldPath, newPath, 
 						 callback, blameMessageCallback, markRange, openComment, 
-						 annotationInfo, commentContainerId, translations, symbolContext, docsite) {
+						 annotationInfo, commentContainerId, translations, symbolContext, docsite, canComment) {
 		onedev.server.blobTextDiff.translations = translations;
 		var $container = $("#" + containerId);
 		$container.data("commentContainerId", commentContainerId);
 		$container.data("callback", callback);
+		$container.data("canComment", canComment);
 		$container.data("oldPath", oldPath);
 		$container.data("newPath", newPath);
 		$container.data("blameMessageCallback", blameMessageCallback);
@@ -917,7 +918,8 @@ onedev.server.blobTextDiff = {
 					sanitize: false, 
 					placement: "top", 
 					container: $container,
-					content: onedev.server.codeProblem.renderProblems(problems, onedev.server.blobTextDiff.translations),
+					content: onedev.server.codeProblem.renderProblems(problems, onedev.server.blobTextDiff.translations,
+							$container.data("canComment")),
 					template: `<div data-line='${line}' class='${oldOrNew} popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>`
 				}).on("shown.bs.popover", function() {
 					var $currentPopover = $(`.problem-popover.${oldOrNew}[data-line='${line}']`);
