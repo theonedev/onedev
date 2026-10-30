@@ -53,10 +53,14 @@ test.describe('product branding', () => {
       await page.locator('.web-hooks a.btn-primary').click();
       const editor = page.locator('form.webhook-edit');
       await expect(editor).toBeVisible();
-      const description = language === 'zh'
-        ? `此密钥允许您确保发送到 payload URL 的 POST 请求来自 ${productName}。设置密钥后，您将在 webhook POST 请求中收到 X-OneDev-Signature 头`
-        : `The secret which allows you to ensure that POST requests sent to the payload URL are from ${productName}. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request`;
-      await expect(editor.getByText(description, { exact: true })).toBeVisible();
+      const secret = editor.locator('.property-secret');
+      await expect(secret.locator('label')).toContainText(language === 'zh' ? '密钥' : 'Secret');
+      const description = secret.locator('.editable-description');
+      await expect(description).toBeVisible();
+      // Branding and protocol identifiers must survive translation or its English fallback.
+      for (const text of [productName, 'X-OneDev-Signature', 'HMAC-SHA256', 'UTF-8']) {
+        await expect(description).toContainText(text);
+      }
       // Opening the editor exercises Ajax rendering without saving a webhook.
       await editor.locator('.modal-header button.close').click();
       await expect(editor).toHaveCount(0);

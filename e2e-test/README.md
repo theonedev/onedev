@@ -81,6 +81,12 @@ by default). Its SSH fixture waits up to 60 seconds for a TCP connection to the
 host and port in that URL, after HTTP readiness. This also supports custom SSH
 ports without making other tests depend on SSH.
 
+For an existing sandbox whose Server URL uses standard HTTP/HTTPS ports, the
+default advertised SSH URL uses port 22. If OneDev actually listens on port 6611,
+set **Administration → System Settings → SSH Root URL** explicitly, for example
+`ssh://test.onedev.io:6611`. Otherwise these tests can reach the host's SSH service
+instead of OneDev, even when the HTTP tests use `127.0.0.1:6610`.
+
 It tests Ed25519 and 3072-bit RSA keys, with separate RSA cases
 forcing SHA-256 and SHA-512 signatures. Each case generates a temporary key,
 checks that cloning fails before registration, registers the key for a test user
