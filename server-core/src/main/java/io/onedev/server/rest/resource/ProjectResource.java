@@ -452,6 +452,7 @@ public class ProjectResource {
 		
 		@Api(order=50)
 		@Id
+		@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 		private Long id;
 		
 		@Api(order = 100, description="Represents the parent project of this project. Remove this property if "
