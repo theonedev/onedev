@@ -98,10 +98,18 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<b class='text-danger'>참고: </b>Kubernetes 프로비저너는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>참고: </b>원격 Docker 프로비저너는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote host provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>원격 호스트 프로비저너는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox executor is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>원격 샌드박스 실행기는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>참고: </b>원격 샌드박스 프로비저너는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>참고: </b>SendGrid 통합은 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("<b class='text-warning'>NOTE: </b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-warning'>참고: </b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>시간 추적</a>은 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
+		m.put("<b class='text-warning'>NOTE: </b>Maintenance mode is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-warning'>참고: </b>유지 관리 모드는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("<b>NOTE: </b> Service desk only takes effect if <a wicket:id=\"mailConnector\">mail service</a> is defined and its <tt>check incoming email</tt> option is enabled. Also <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>sub addressing</a> needs to be enabled for the system email address. Check <a href=\"${docsite}/tutorials/issue/service-desk\" target='_blank'>this tutorial</a> for details", 
 			"<b>참고: </b> 서비스 데스크는 <a wicket:id=\"mailConnector\">메일 서비스</a>가 정의되고 <tt>수신 이메일 확인</tt> 옵션이 활성화된 경우에만 작동합니다. 또한 시스템 이메일 주소에 대해 <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>서브 어드레싱</a>이 활성화되어야 합니다. 자세한 내용은 <a href=\"${docsite}/tutorials/issue/service-desk\" target='_blank'>이 튜토리얼</a>을 확인하세요");
 		m.put("<b>NOTE: </b> Service desk only takes effect if <a wicket:id=\"mailConnector\">mail service</a> is defined and its <tt>check incoming email</tt> option is enabled. Also <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>sub addressing</a> needs to be enabled for the system email address. Check <a href=\"https://medium.com/p/e56d62c27e57\" target='_blank'>this tutorial</a> for details", 
@@ -350,6 +358,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Allow Empty", "빈 값 허용");
 		m.put("Allow Empty Value", "빈 값 허용");
 		m.put("Allow Multiple", "다중 허용");
+		m.put("Allow to work on a project while in maintenance mode. Permission for each action is still required", 
+			"유지 관리 모드에서도 프로젝트 작업을 허용합니다. 각 작업에 대한 권한은 여전히 필요합니다");
 		m.put("Allowed Licenses", "허용된 라이선스");
 		m.put("Allowed Self Sign-Up Email Domain", "허용된 자체 가입 이메일 도메인");
 		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
@@ -359,7 +369,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"프로젝트를 명령줄에서 컴파일하려면 아래 내용을 $HOME/.m2/settings.xml에 추가하세요");
 		m.put("Always", "항상");
+		m.put("Always Pull Container Image", "항상 컨테이너 이미지를 가져오기");
 		m.put("Always Pull Image", "항상 이미지 가져오기");
+		m.put("Always Pull Template Image", "항상 템플릿 이미지를 가져오기");
 		m.put("Amend", "수정");
 		m.put("An issue already linked for {0}. Unlink it first", "{0}에 대해 이미 연결된 이슈가 있습니다. 먼저 연결을 해제하세요");
 		m.put("An unexpected exception occurred", "예기치 않은 예외가 발생했습니다");
@@ -601,6 +613,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Build Volume Storage Size", "빌드 볼륨 저장소 크기");
 		m.put("Build administrative permission for all jobs inside a project, including batch operations over multiple builds", 
 			"프로젝트 내 모든 작업에 대한 빌드 관리 권한, 여러 빌드에 대한 일괄 작업 포함");
+		m.put("Build docker image with buildx. This step can be executed by docker or sandbox executors. Docker executors use their configured buildx builder; sandbox executors use the default builder inside the sandbox. To build image with Kubernetes executor, please use kaniko step instead", 
+			"buildx를 사용하여 도커 이미지를 빌드합니다. 이 단계는 도커 또는 샌드박스 실행기가 실행할 수 있습니다. 도커 실행기는 구성된 buildx 빌더를 사용하고, 샌드박스 실행기는 샌드박스 내부의 기본 빌더를 사용합니다. Kubernetes 실행기로 이미지를 빌드하려면 대신 kaniko 단계를 사용하세요.");
 		m.put("Build docker image with kaniko. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"kaniko로 도커 이미지를 빌드합니다. 이 단계는 서버 도커 실행기, 원격 도커 실행기 또는 Kubernetes 실행기에 의해 실행되어야 합니다.");
 		m.put("Build duration statistics", "빌드 지속 시간 통계");
@@ -652,7 +666,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU 집약적 작업 동시성");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "밀리초 단위의 CPU 성능. 일반적으로 (CPU 코어)*1000입니다");
 		m.put("CPU cores", "CPU 코어");
+		m.put("CPU count for each sandbox. Leave empty to use the Docker Sandboxes default (All CPUs).", 
+			"각 샌드박스의 CPU 수. 비워 두면 Docker Sandboxes 기본값(모든 CPU)을 사용합니다.");
 		m.put("CPU request for the workspace container.", "워크스페이스 컨테이너의 CPU 요청.");
+		m.put("CPUs", "CPU");
 		m.put("Cache \"{0}\" deleted", "캐시 \"{0}\" 삭제됨");
 		m.put("Cache Config", "캐시 구성");
 		m.put("Cache Entries", "캐시 항목");
@@ -957,6 +974,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Contact Name", "연락처 이름");
 		m.put("Container Image", "컨테이너 이미지");
 		m.put("Container Image(s)", "컨테이너 이미지(들)");
+		m.put("Container Settings", "컨테이너 설정");
 		m.put("Container default", "컨테이너 기본값");
 		m.put("Content", "내용");
 		m.put("Content Type", "콘텐츠 유형");
@@ -1018,12 +1036,28 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Create Workspace", "워크스페이스 생성");
 		m.put("Create Workspace Spec", "워크스페이스 사양 생성");
 		m.put("Create Workspaces", "워크스페이스 생성");
+		m.put("Create a workspace spec running Claude Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Claude Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"워크스페이스 호스트에서 Claude Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a>가 워크스페이스 호스트에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 워크스페이스 호스트에 설치되어 있고 Claude Code를 위한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 호스트 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"격리를 위해 샌드박스에서 Claude Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>샌드박스 템플릿 이미지</a>를 나중에 사용자 정의할 수 있습니다.");
 		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적으로 컨테이너 내에서 Claude Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Create a workspace spec running Codex directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Codex</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"워크스페이스 호스트에서 Codex를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a>가 워크스페이스 호스트에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 워크스페이스 호스트에 설치되어 있고 Codex를 위한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 호스트 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
+		m.put("Create a workspace spec running Codex inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"격리를 위해 샌드박스에서 Codex를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>샌드박스 템플릿 이미지</a>를 나중에 사용자 정의할 수 있습니다.");
 		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적으로 컨테이너 내에서 Codex를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Create a workspace spec running Cursor directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Cursor CLI</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"워크스페이스 호스트에서 Cursor를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a>가 워크스페이스 호스트에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 워크스페이스 호스트에 설치되어 있고 Cursor CLI를 위한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 호스트 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
+		m.put("Create a workspace spec running Cursor inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"격리를 위해 샌드박스에서 Cursor를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>샌드박스 템플릿 이미지</a>를 나중에 사용자 정의할 수 있습니다.");
 		m.put("Create a workspace spec running Cursor inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적을 위해 컨테이너 내부에서 Cursor를 실행하는 워크스페이스 사양을 생성합니다.\n필요한 경우 나중에 <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
+		m.put("Create a workspace spec running Open Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Open Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"워크스페이스 호스트에서 Open Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>가 워크스페이스 호스트에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 워크스페이스 호스트에 설치되어 있고 Open Code를 위한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 호스트 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"격리를 위해 샌드박스에서 Open Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>샌드박스 템플릿 이미지</a>를 나중에 사용자 정의할 수 있습니다.");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"격리 및 보안 목적으로 컨테이너 내에서 Open Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 나중에 <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>컨테이너 이미지</a>를 사용자 정의할 수 있습니다");
 		m.put("Create an issue for this failure", "이 실패에 대한 문제를 생성하세요");
@@ -1306,6 +1340,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Docker Hub", "도커 허브");
 		m.put("Docker Image", "도커 이미지");
 		m.put("Docker Sock Path", "도커 소켓 경로");
+		m.put("Docker sandbox default", "도커 샌드박스 기본값");
 		m.put("Dockerfile", "도커파일");
 		m.put("Documentation", "문서");
 		m.put("Don't have an account yet?", "아직 계정이 없으신가요?");
@@ -1433,6 +1468,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enable this to retrieve Git LFS files", "Git LFS 파일을 검색하려면 이 옵션을 활성화하십시오");
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"CI/CD 작업 중 생성된 빌드 캐시를 업로드할 수 있도록 허용하려면 이를 활성화합니다. 업로드된 캐시는 캐시 키가 일치하는 한 프로젝트의 후속 빌드에서 사용할 수 있습니다");
+		m.put("Enable to also test running a command in a Docker container inside the sandbox", "샌드박스 내부에서 도커 컨테이너에서 명령을 실행하는 테스트를 활성화합니다.");
+		m.put("Enable to execute this job in a sandbox VM", "이 작업을 샌드박스 VM에서 실행하도록 활성화합니다.");
 		m.put("End Point", "엔드 포인트");
 		m.put("Enforce Password Policy", "비밀번호 정책 시행");
 		m.put("Enforce Two-factor Authentication", "이중 인증을 강제합니다");
@@ -1520,6 +1557,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Excludes", "제외");
 		m.put("Execute Commands", "명령 실행");
 		m.put("Execute Commands via SSH", "SSH를 통해 명령 실행");
+		m.put("Execute In Sandbox", "샌드박스에서 실행");
 		m.put("Execution paused", "실행 일시 중지");
 		m.put("Exit Run As", "Run As 종료");
 		m.put("Exited run as", "실행 종료됨");
@@ -1835,6 +1873,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Identify Field", "식별 필드");
 		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
 			"활성화된 경우, 저장소 파일을 탐색하거나 차이를 볼 때 코드 인덱싱을 자동으로 트리거하려면 로그인 세션이 필요합니다.\n이는 익명의 AI 크롤러가 모든 과거 커밋의 인덱싱을 트리거하고 거대한 인덱스 캐시를 생성하는 것을 방지하기 위해 공개 프로젝트에 유용합니다.");
+		m.put("If enabled, only project managers and users with maintenance permission can work on this project", 
+			"활성화된 경우, 프로젝트 관리자와 유지 관리 권한이 있는 사용자만 이 프로젝트에서 작업할 수 있습니다");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"활성화되면 예약된 백업이 현재 <span wicket:id=\"leadServer\"></span> 리드 서버에서 실행됩니다");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -1898,7 +1938,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"현재 프로젝트로 문제를 가져오는 중입니다. 프로젝트 포크 그래프 전체에 문제가 없는 경우에만 문제 번호가 유지되며, 중복 문제 번호를 방지합니다");
 		m.put("Importing projects from {0}", "{0}에서 프로젝트 가져오는 중");
 		m.put("Imports", "가져오기");
+		m.put("In Container", "컨테이너에서");
+		m.put("In Host", "호스트에서");
 		m.put("In Projects", "프로젝트 내");
+		m.put("In Sandbox", "샌드박스에서");
 		m.put("In case IMAP host certificate is self-signed or its CA root is not accepted, you may tell ${productName} to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into ${productName}</a> instead", 
 			"IMAP 호스트 인증서가 자체 서명되었거나 CA 루트가 허용되지 않는 경우, ${productName}에 인증서 검사를 우회하도록 지시할 수 있습니다. <b class='text-danger'>경고: </b> 신뢰할 수 없는 네트워크에서는 중간자 공격으로 이어질 수 있으므로, 대신 <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>인증서를 ${productName}에 가져오기</a>를 수행해야 합니다");
 		m.put("In case SMTP host certificate is self-signed or its CA root is not accepted, you may tell ${productName} to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into ${productName}</a> instead", 
@@ -2252,6 +2295,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Mail service not configured", "메일 서비스가 구성되지 않음");
 		m.put("Mail service settings saved", "메일 서비스 설정이 저장됨");
 		m.put("Main Repository", "메인 저장소");
+		m.put("Maintenance", "유지 관리");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
 			"<a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 이상</a>이 설치되어 있는지 확인하세요.");
 		m.put("Make sure current user has permission to run docker containers", "현재 사용자가 도커 컨테이너를 실행할 권한이 있는지 확인하세요");
@@ -2305,6 +2349,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Max Loop Count", "최대 반복 횟수");
 		m.put("Max Upload File Size (MB)", "최대 업로드 파일 크기 (MB)");
 		m.put("Max Value", "최대 값");
+		m.put("Maximum concurrent jobs on each server. Leave empty to use its CPU count.", "각 서버에서 최대 동시 작업 수. 비워 두면 CPU 수를 사용합니다.");
 		m.put("Maximum number of attempts including the initial run before giving up", "포기하기 전 초기 실행을 포함한 최대 시도 횟수");
 		m.put("Maximum number of entries to return when search code in repository", "저장소에서 코드 검색 시 반환할 최대 항목 수");
 		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
@@ -2316,6 +2361,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Memory", "메모리");
 		m.put("Memory Limit", "메모리 제한");
 		m.put("Memory Request", "메모리 요청");
+		m.put("Memory for each sandbox, for example 2g. Leave empty to use the Docker Sandboxes default (50% of host memory).", 
+			"각 샌드박스의 메모리, 예: 2g. 비워 두면 Docker Sandboxes 기본값(호스트 메모리의 50%)을 사용합니다.");
 		m.put("Memory request for the workspace container.", "워크스페이스 컨테이너의 메모리 요청.");
 		m.put("Mention Someone", "누군가를 언급하기");
 		m.put("Mention someone", "누군가를 언급하기");
@@ -2658,6 +2705,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Operations", "작업");
 		m.put("Optional", "선택 사항");
 		m.put("Optional instructions that define how the AI user should behave", "AI 사용자가 어떻게 동작해야 하는지 정의하는 선택적 지침");
+		m.put("Optional registry logins for steps and services that use container images inside the sandbox. These logins are not used to pull the sandbox template image. Logins specified in a step or service override these for the same registry. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password.", 
+			"샌드박스 내부에서 컨테이너 이미지를 사용하는 단계 및 서비스에 대한 선택적 레지스트리 로그인. 이러한 로그인은 샌드박스 템플릿 이미지를 가져오는 데 사용되지 않습니다. 단계 또는 서비스에서 지정된 로그인이 동일한 레지스트리에 대해 이를 재정의합니다. 내장 레지스트리의 경우, 레지스트리 URL로 <code>@server_url@</code>, 사용자 이름으로 <code>@job_token@</code>, 비밀번호로 액세스 토큰을 사용하세요.");
 		m.put("Optionally add new users to specified default group", "선택적으로 새 사용자를 지정된 기본 그룹에 추가하십시오");
 		m.put("Optionally add newly authenticated user to specified group if membership information is not available", 
 			"선택적으로 인증된 새 사용자를 지정된 그룹에 추가하십시오. 멤버십 정보가 없는 경우");
@@ -2708,6 +2757,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 <span class='text-info'>쉼표로 구분된</span> 스캔 플랫폼을 지정하세요. 예를 들어 <tt>linux/amd64,linux/arm64</tt>. OCI 레이아웃의 모든 플랫폼을 스캔하려면 비워 두세요.");
 		m.put("Optionally specify API key for authentication", "인증을 위해 API 키를 선택적으로 지정");
 		m.put("Optionally specify CPU limit for the workspace container.", "워크스페이스 컨테이너의 CPU 제한을 선택적으로 지정하세요.");
+		m.put("Optionally specify Docker options to create the network for jobs using services. Multiple options should be separated by space, and single options containing spaces should be quoted.", 
+			"서비스를 사용하는 작업에 대한 네트워크를 생성하기 위해 Docker 옵션을 선택적으로 지정합니다. 여러 옵션은 공백으로 구분해야 하며, 공백이 포함된 단일 옵션은 따옴표로 묶어야 합니다.");
+		m.put("Optionally specify Docker options to run containers inside the sandbox. Multiple options should be separated by space, and single options containing spaces should be quoted. Do not specify <code>--network</code> or <code>--net</code> for jobs using services, as their network is managed automatically. File paths refer to the sandbox filesystem; relative file paths are resolved from the job working directory.", 
+			"샌드박스 내부에서 컨테이너를 실행하기 위해 Docker 옵션을 선택적으로 지정합니다. 여러 옵션은 공백으로 구분해야 하며, 공백이 포함된 단일 옵션은 따옴표로 묶어야 합니다. 서비스가 있는 작업의 경우 <code>--network</code> 또는 <code>--net</code>을 지정하지 마세요. 네트워크는 자동으로 관리됩니다. 파일 경로는 샌드박스 파일 시스템을 참조하며, 상대 파일 경로는 작업 작업 디렉토리에서 해결됩니다.");
 		m.put("Optionally specify Dockerfile relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"<a href='${docsite}/concepts#job-workdir' target='_blank'>작업 디렉토리</a>에 상대적인 Dockerfile을 선택적으로 지정하세요. 위에서 지정된 빌드 경로 아래의 <tt>Dockerfile</tt> 파일을 사용하려면 비워 두세요");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "선택적으로 Renovate CLI에서 사용할 JavaScript 구성을 지정하세요.");
@@ -2751,8 +2804,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"kubectl이 클러스터에 액세스하는 데 사용하는 kubeconfig 파일의 절대 경로를 선택적으로 지정하세요. 비워 두면 kubectl이 클러스터 액세스를 자동으로 결정합니다 (${productName} 자체가 클러스터에서 실행되는 경우 작동합니다)");
 		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
 			"kubectl 실행 파일의 절대 경로를 선택적으로 지정하세요. 시스템 PATH에서 kubectl을 사용하려면 비워 두세요.");
-		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint", 
-			"웹훅 POST 요청에 포함할 추가 HTTP 헤더를 선택적으로 지정하세요. 예를 들어 수신 엔드포인트에서 요구하는 Authorization 헤더");
+		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint. X-OneDev-Signature is generated automatically and cannot be overridden", 
+			"웹훅 POST 요청에 포함할 추가 HTTP 헤더를 선택적으로 지정합니다. 예를 들어, 수신 엔드포인트에서 요구하는 Authorization 헤더를 추가할 수 있습니다. X-OneDev-Signature는 자동으로 생성되며 재정의할 수 없습니다");
 		m.put("Optionally specify additional options for buildx build command", "선택적으로 buildx 빌드 명령의 추가 옵션을 지정하세요.");
 		m.put("Optionally specify allowed <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> origins. For a CORS simple or preflight request, if value of request header <code>Origin</code> is included here, the response header <code>Access-Control-Allow-Origin</code> will be set to the same value", 
 			"선택적으로 허용된 <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> 출처를 지정하세요. CORS 간단 또는 사전 요청의 경우, 요청 헤더 <code>Origin</code>의 값이 여기에 포함되어 있으면 응답 헤더 <code>Access-Control-Allow-Origin</code>이 동일한 값으로 설정됩니다.");
@@ -2903,12 +2956,15 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify required reviewers for changes of specified branch", "선택적으로 지정된 브랜치 변경 사항에 대한 필요한 검토자를 지정하세요.");
 		m.put("Optionally specify revision to create branch from. Leave empty to create from build commit", 
 			"선택적으로 브랜치를 생성할 리비전을 지정하세요. 빌드 커밋에서 생성하려면 비워 두세요.");
+		m.put("Optionally specify sandbox memory, for example 2g", "샌드박스 메모리를 선택적으로 지정합니다. 예: 2g");
 		m.put("Optionally specify separate directory to store build artifacts. Non-absolute directory is considered to be relative to site directory", 
 			"선택적으로 빌드 아티팩트를 저장할 별도의 디렉터리를 지정하세요. 절대 디렉터리가 아닌 경우 사이트 디렉터리에 상대적으로 간주됩니다.");
 		m.put("Optionally specify separate directory to store git lfs files. Non-absolute directory is considered to be relative to site directory", 
 			"선택적으로 git lfs 파일을 저장할 별도의 디렉터리를 지정하세요. 절대 디렉터리가 아닌 경우 사이트 디렉터리에 상대적으로 간주됩니다.");
 		m.put("Optionally specify separate directory to store package files. Non-absolute directory is considered to be relative to site directory", 
 			"선택적으로 패키지 파일을 저장할 별도의 디렉터리를 지정하세요. 절대 디렉터리가 아닌 경우 사이트 디렉터리에 상대적으로 간주됩니다.");
+		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
+			"이 작업에 필요한 서비스를 선택적으로 지정합니다. <b class='text-warning'>참고:</b> 서비스는 Docker, Kubernetes 및 샌드박스 실행기에서 지원됩니다.");
 		m.put("Optionally specify space-separated accessible site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. The public site is always accessible", 
 			"선택적으로 공백으로 구분된 접근 가능한 사이트 이름을 지정합니다. '*' 또는 '?'를 사용하여 와일드카드 매칭을 할 수 있습니다. '-'로 시작하면 제외됩니다. 공용 사이트는 항상 접근 가능합니다");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
@@ -2960,6 +3016,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 작업에서 지정된 서비스 포드를 실행할 위치를 지정하십시오. 첫 번째로 매칭되는 로케이터가 사용됩니다. 로케이터가 없으면 실행기의 노드 선택기가 사용됩니다.");
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"선택적으로 컨테이너의 작업 디렉토리를 지정하십시오. 컨테이너의 기본 작업 디렉토리를 사용하려면 비워두십시오.");
+		m.put("Optionally specify workspace ports to expose. These ports will be mapped to random ports on host\nwhich will be displayed on the workspace page", 
+			"노출할 워크스페이스 포트를 선택적으로 지정합니다. 이러한 포트는 호스트의 임의의 포트에 매핑되며\n워크스페이스 페이지에 표시됩니다.");
 		m.put("Options", "옵션");
 		m.put("Or below to build.gradle.kts (Kotlin)", "또는 아래 내용을 build.gradle.kts (Kotlin)에 추가하세요.");
 		m.put("Or manually enter the secret key below in your authenticator app", "또는 아래의 비밀 키를 인증 앱에 수동으로 입력하세요");
@@ -3054,6 +3112,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Path containing spaces or starting with dash needs to be quoted", "공백이 포함되거나 대시로 시작하는 경로는 따옴표로 묶어야 합니다.");
 		m.put("Path placeholder", "경로 자리표시자");
 		m.put("Path to kubectl", "kubectl 경로");
+		m.put("Path to the Docker Sandboxes sbx executable", "Docker Sandboxes sbx 실행 파일의 경로");
 		m.put("Paths", "경로들");
 		m.put("Pattern", "패턴");
 		m.put("Pause", "일시 중지");
@@ -3232,6 +3291,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Project does not have any code yet", "프로젝트에 아직 코드가 없습니다");
 		m.put("Project forked", "프로젝트가 포크되었습니다");
 		m.put("Project id", "프로젝트 ID");
+		m.put("Project is in maintenance mode", "프로젝트가 유지 관리 모드에 있습니다");
 		m.put("Project list", "프로젝트 목록");
 		m.put("Project manage privilege required to delete \"{0}\"", "\"{0}\"를 삭제하려면 프로젝트 관리 권한이 필요합니다");
 		m.put("Project manage privilege required to modify \"{0}\"", "\"{0}\"를 수정하려면 프로젝트 관리 권한이 필요합니다");
@@ -3265,9 +3325,12 @@ public class Translation_ko extends TranslationResourceBundle {
 			"풀 리퀘스트 댓글을 요약할 때 사용할 프롬프트입니다. 표시 언어는 자동으로 추가됩니다");
 		m.put("Properties", "속성");
 		m.put("Provide server id (guild id) to restrict access only to server members", "서버 멤버만 접근할 수 있도록 서버 ID(길드 ID)를 제공하세요");
+		m.put("Provision Mode", "프로비저닝 모드");
 		m.put("Provisioner", "프로비저너");
 		m.put("Proxy", "프록시");
 		m.put("Prune Builder Cache", "빌더 캐시 정리");
+		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
+			"도커 buildx 빌더의 이미지 캐시를 정리합니다. 이 단계는 Docker 또는 샌드박스 실행기가 사용하는 빌더의 캐시를 제거하기 위해 docker buildx prune 명령을 호출합니다.");
 		m.put("Public Key", "공개 키");
 		m.put("Public Roles", "공개 역할");
 		m.put("Public site", "공용 사이트");
@@ -3432,7 +3495,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Remember Me", "날 기억해줘");
 		m.put("Remote Docker Executor", "원격 도커 실행기");
 		m.put("Remote Docker Provisioner", "원격 Docker 프로비저너");
+		m.put("Remote Host Executor", "원격 호스트 실행기");
+		m.put("Remote Host Provisioner", "원격 호스트 프로비저너");
 		m.put("Remote Machine", "원격 머신");
+		m.put("Remote Sandbox Executor", "원격 샌드박스 실행기");
+		m.put("Remote Sandbox Provisioner", "원격 샌드박스 프로비저너");
 		m.put("Remote URL", "원격 URL");
 		m.put("Remote Url", "원격 URL");
 		m.put("Remove", "제거");
@@ -3562,11 +3629,15 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Run below commands to install this package", "이 패키지를 설치하려면 아래 명령을 실행하십시오");
 		m.put("Run below commands to use this chart", "이 차트를 사용하려면 아래 명령을 실행하십시오");
 		m.put("Run below commands to use this package", "이 패키지를 사용하려면 아래 명령을 실행하십시오");
+		m.put("Run docker buildx imagetools command with specified arguments. This step can be executed by Docker or sandbox executors", 
+			"지정된 인수로 docker buildx imagetools 명령을 실행합니다. 이 단계는 Docker 또는 샌드박스 실행기가 실행할 수 있습니다.");
 		m.put("Run job", "작업 실행");
 		m.put("Run job in another project", "다른 프로젝트에서 작업 실행");
 		m.put("Run on Bare Metal/Virtual Machine", "베어 메탈/가상 머신에서 실행");
 		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
 			"프로젝트 소스를 <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>다양한 잠금 파일</a>의 취약점을 위해 osv 스캐너를 실행하세요. 이는 도커 인식 실행자에 의해서만 실행될 수 있습니다.");
+		m.put("Run specified docker container. <a href='${docsite}/concepts#job-workdir' target='_blank'>Job workdir</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. This step can be executed by Docker or sandbox executors", 
+			"지정된 도커 컨테이너를 실행합니다. <a href='${docsite}/concepts#job-workdir' target='_blank'>작업 작업 디렉토리</a>가 컨테이너에 마운트되고 해당 경로가 환경 변수 <code>ONEDEV_WORKDIR</code>에 배치됩니다. 이 단계는 Docker 또는 샌드박스 실행기가 실행할 수 있습니다.");
 		m.put("Run specified step template", "지정된 단계 템플릿 실행");
 		m.put("Run this job", "이 작업 실행");
 		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
@@ -3578,6 +3649,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Run via Docker Container", "Docker 컨테이너를 통해 실행");
 		m.put("Running", "실행 중");
 		m.put("Running Takes", "실행 소요 시간");
+		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
+			"신선한 Docker Sandbox에서 <a href='/~administration/agents' target='_blank'>에이전트</a> 호스트에서 셸 및 도커 단계를 실행합니다. 작업 서비스는 샌드박스 내부에서 실행되며 셸 및 컨테이너 단계에서 서비스 이름으로 액세스할 수 있습니다. 작업 후 샌드박스와 서비스는 삭제됩니다. 각 에이전트 호스트를 설정하려면 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>샌드박스 작업</a>을 따르세요.");
+		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on the server. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up the server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Sandbox Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"신선한 Docker Sandbox에서 서버에서 셸 및 도커 단계를 실행합니다. 작업 서비스는 샌드박스 내부에서 실행되며 셸 및 컨테이너 단계에서 서비스 이름으로 액세스할 수 있습니다.\n작업 후 샌드박스와 서비스는 삭제됩니다.\n서버 호스트를 설정하려면 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>샌드박스 작업</a>을 따르세요. <b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 작업의 경우 전용 에이전트 호스트에서 원격 샌드박스 실행기를 사용하세요.");
+		m.put("Runs workspaces directly in a Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Setup commands and terminals run as the template image's default user. The sandbox is removed when the workspace is deleted. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
+			"Docker Sandbox에서 <a href='/~administration/agents' target='_blank'>에이전트</a> 호스트에서 워크스페이스를 직접 실행합니다. 설정 명령과 터미널은 템플릿 이미지의 기본 사용자로 실행됩니다. 워크스페이스가 삭제되면 샌드박스도 제거됩니다. 각 에이전트 호스트를 설정하려면 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>샌드박스 작업</a>을 따르세요.");
+		m.put("Runs workspaces directly in a Docker Sandbox on the server. Setup commands and terminals run as the template image's default user.\nThe sandbox is removed when the workspace is deleted.\nSelect <b>Sandbox</b> as the workspace spec's provision mode. To use Docker in workspace commands,\nselect a sandbox template that provides Docker in the workspace spec.\nFollow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a>\nto set up the server host. For untrusted workspaces, use a Remote Sandbox Provisioner on a dedicated agent host.", 
+			"Docker Sandbox에서 서버에서 워크스페이스를 직접 실행합니다. 설정 명령과 터미널은 템플릿 이미지의 기본 사용자로 실행됩니다.\n워크스페이스가 삭제되면 샌드박스도 제거됩니다.\n워크스페이스 사양의 프로비저닝 모드로 <b>샌드박스</b>를 선택하세요. 워크스페이스 명령에서 Docker를 사용하려면,\n워크스페이스 사양에서 Docker를 제공하는 샌드박스 템플릿을 선택하세요.\n서버 호스트를 설정하려면 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>샌드박스 작업</a>\n을 따르세요. 신뢰할 수 없는 워크스페이스의 경우, 전용 에이전트 호스트에서 원격 샌드박스 프로비저너를 사용하세요.");
 		m.put("SMTP Host", "SMTP 호스트");
 		m.put("SMTP Password", "SMTP 비밀번호");
 		m.put("SMTP User", "SMTP 사용자");
@@ -3599,6 +3678,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("SSO provider updated", "SSO 제공자가 업데이트되었습니다");
 		m.put("STAGED", "스테이지됨");
 		m.put("SUCCESSFUL", "성공");
+		m.put("Sandbox Executable", "샌드박스 실행 파일");
+		m.put("Sandbox Template", "샌드박스 템플릿");
 		m.put("Save", "저장");
 		m.put("Save Prompt", "프롬프트 저장");
 		m.put("Save Query", "쿼리 저장");
@@ -3670,9 +3751,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Server", "서버");
 		m.put("Server Docker Executor", "서버 Docker 실행자");
 		m.put("Server Docker Provisioner", "서버 Docker 프로비저너");
+		m.put("Server Host Executor", "서버 호스트 실행기");
+		m.put("Server Host Provisioner", "서버 호스트 프로비저너");
 		m.put("Server Id", "서버 ID");
 		m.put("Server Information", "서버 정보");
 		m.put("Server Log", "서버 로그");
+		m.put("Server Sandbox Executor", "서버 샌드박스 실행기");
+		m.put("Server Sandbox Provisioner", "서버 샌드박스 프로비저너");
 		m.put("Server Setup", "서버 설정");
 		m.put("Server URL", "서버 URL");
 		m.put("Server fingerprint", "서버 지문");
@@ -3877,6 +3962,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify CPD result xml file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
 			"CPD 결과 xml 파일을 <a href='${docsite}/concepts#job-workdir'>작업 디렉토리</a> 기준으로 상대 경로로 지정합니다. 예: <tt>target/cpd.xml</tt>. 패턴 매칭에는 * 또는 ?를 사용하세요");
 		m.put("Specify Commit Message", "커밋 메시지를 지정합니다");
+		m.put("Specify Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
+			"테스트할 도커 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 tmux가 설치되어 있어야 합니다.");
 		m.put("Specify ESLint report file in checkstyle format under <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
 			"체크스타일 형식의 ESLint 보고서 파일을 <a href='${docsite}/concepts#job-workdir'>작업 디렉토리</a> 아래에 지정합니다. 이 파일은 ESLint 옵션 <tt>'-f checkstyle'</tt> 및 <tt>'-o'</tt>로 생성할 수 있습니다. 패턴 매칭에는 * 또는 ?를 사용하세요");
 		m.put("Specify GitHub API url, for instance <tt>https://api.github.com</tt>", "GitHub API URL을 지정합니다. 예: <tt>https://api.github.com</tt>");
@@ -3944,6 +4031,14 @@ public class Translation_ko extends TranslationResourceBundle {
 			"작업을 자동으로 실행하기 위한 <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron 일정</a>을 지정합니다. <b class='text-info'>참고:</b> 리소스를 절약하기 위해 cron 표현식의 초는 무시되며 최소 일정 간격은 1분입니다");
 		m.put("Specify a Container Image to Test Against", "테스트할 컨테이너 이미지를 지정하세요.");
 		m.put("Specify a Docker Image to Test Against", "테스트할 Docker 이미지를 지정합니다");
+		m.put("Specify a Docker image to test against. The image must have shell installed", "테스트할 도커 이미지를 지정합니다. 이미지에는 셸이 설치되어 있어야 합니다.");
+		m.put("Specify a Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
+			"테스트할 도커 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 tmux가 설치되어 있어야 합니다.");
+		m.put("Specify a Docker sandbox shell template image to test against. The image must have shell, Git, Git LFS, and Python 3 installed. To also test a container, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"테스트할 도커 샌드박스 셸 템플릿 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 Python 3이 설치되어 있어야 합니다. 컨테이너를 테스트하려면, 이미지에 Docker가 구성되어 있어야 하며, 비루트 기본 사용자가 비밀번호 없이 sudo 액세스 권한을 가져야 합니다. <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>템플릿 설정 가이드</a>를 참조하세요.");
+		m.put("Specify a Docker sandbox template image to test against. The image must have shell, Git, Git LFS, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"테스트할 도커 샌드박스 템플릿 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS, Python 3 및 tmux가 설치되어 있어야 합니다. <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>템플릿 설정 가이드</a>를 참조하세요.");
+		m.put("Specify a Sandbox Template to Test Against", "테스트할 샌드박스 템플릿을 지정합니다.");
 		m.put("Specify a custom field of Enum type", "Enum 유형의 사용자 정의 필드를 지정합니다");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "지정된 작업의 고정된 이슈를 필터링/정렬하기 위한 기본 쿼리를 지정합니다");
 		m.put("Specify a folder relative to the repository root. Leave empty to upload to the root folder.", 
@@ -4000,8 +4095,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify branch, tag or commit in above project to import build spec from", "위 프로젝트에서 빌드 사양을 가져오기 위한 브랜치, 태그 또는 커밋을 지정합니다");
 		m.put("Specify by Build Number", "빌드 번호로 지정합니다");
 		m.put("Specify cache entries", "캐시 항목 지정");
+		m.put("Specify cache path. Non-absolute path is considered to be relative to\n<a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.\nHost executors run directly on the host machine and only accept relative paths", 
+			"캐시 경로를 지정합니다. 절대 경로가 아닌 경로는\n<a href='${docsite}/concepts#job-workdir' target='_blank'>작업 작업 디렉토리</a>를 기준으로 상대적으로 간주됩니다.\n호스트 실행기는 호스트 머신에서 직접 실행되며 상대 경로만 허용합니다.");
+		m.put("Specify cache path. Non-absolute path is considered to be relative to working directory.\nHost provisioners only accept relative paths", 
+			"캐시 경로를 지정합니다. 절대 경로가 아닌 경로는 작업 디렉토리를 기준으로 상대적으로 간주됩니다.\n호스트 프로비저너는 상대 경로만 허용합니다.");
 		m.put("Specify cache upload strategy after build successful. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
 			"빌드가 성공한 후 캐시 업로드 전략을 지정하십시오. <i>정확히 일치하지 않으면 업로드</i>는\n일치하는 키와 체크섬이 없는 경우 업로드를 의미하며,\n<i>변경된 경우 업로드</i>는 캐시 경로의 일부 파일이 변경된 경우 업로드를 의미합니다");
+		m.put("Specify cache upload strategy before deleting an active workspace. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
+			"활성 워크스페이스를 삭제하기 전에 캐시 업로드 전략을 지정합니다. <i>정확히 일치하지 않을 경우 업로드</i>\n는 키와 체크섬이 일치하는 캐시를 찾을 수 없을 때 업로드를 의미하며,\n<i>변경된 경우 업로드</i>는 캐시 경로의 일부 파일이 변경된 경우 업로드를 의미합니다.");
 		m.put("Specify certificate to trust if you are using self-signed certificate for remote repository", 
 			"원격 저장소에 대해 자체 서명 인증서를 사용하는 경우 신뢰할 인증서를 지정합니다");
 		m.put("Specify certificates to trust if you are using self-signed certificates for your docker registries", 
@@ -4028,6 +4129,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify condition to retry build upon failure", "실패 시 빌드를 재시도할 조건을 지정하세요.");
 		m.put("Specify configuration discovery url of your OpenID provider, for instance: <code>https://openid.example.com/.well-known/openid-configuration</code>. Make sure to use HTTPS protocol as ${productName} relies on TLS encryption to ensure token validity", 
 			"OpenID 공급자의 구성 검색 URL을 지정하세요. 예: <code>https://openid.example.com/.well-known/openid-configuration</code>. ${productName}는 토큰 유효성을 보장하기 위해 TLS 암호화에 의존하므로 HTTPS 프로토콜을 사용해야 합니다");
+		m.put("Specify container image to create workspace inside. The image must have shell, Git, Git LFS, and tmux installed", 
+			"워크스페이스 내부를 생성할 컨테이너 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 tmux가 설치되어 있어야 합니다.");
+		m.put("Specify container image to execute commands inside. The image must have shell installed", 
+			"명령을 실행할 컨테이너 이미지를 지정합니다. 이미지에는 셸이 설치되어 있어야 합니다.");
 		m.put("Specify container image to run", "실행할 컨테이너 이미지를 지정하세요.");
 		m.put("Specify content of the config file", "구성 파일의 내용을 지정하세요");
 		m.put("Specify cppcheck xml result file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
@@ -4177,6 +4282,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify root URL to access this server", "이 서버에 액세스할 루트 URL을 지정하세요.");
 		m.put("Specify ruff json result file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
 			"ruff json 결과 파일을 <a href='${docsite}/concepts#job-workdir'>작업 디렉토리</a> 기준으로 상대 경로로 지정하세요. 이 파일은 ruff json 출력 형식 옵션으로 생성할 수 있습니다. 예: <code>--exit-zero --output-format json --output-file ruff-result.json</code>. 이 단계는 구성된 임계값에 따라 빌드를 실패시키므로, ruff 명령은 위반 사항이 있어도 실패하지 않습니다. 패턴 매칭에는 * 또는 ?를 사용하세요");
+		m.put("Specify sandbox template image to create workspace from. The image must have shell, Git, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"워크스페이스를 생성할 샌드박스 템플릿 이미지를 지정합니다. 이미지에는 셸, Git, Python 3 및 tmux가 설치되어 있어야 합니다. <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>템플릿 설정 가이드</a>를 참조하세요.");
 		m.put("Specify shell commands to execute under the <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"<a href='${docsite}/concepts#job-workdir' target='_blank'>작업 디렉토리</a>에서 실행할 셸 명령을 지정하세요");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "SCP 명령의 소스 매개변수를 지정하세요. 예: <code>app.tar.gz</code>.");
@@ -4215,6 +4322,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"역할에 대한 코드 권한을 지정하세요. 쓰기 권한은 CreateWorkspaces 권한을 포함합니다");
 		m.put("Specify the condition current build must satisfy to execute this action", "현재 빌드가 이 작업을 실행하기 위해 충족해야 하는 조건을 지정하십시오.");
 		m.put("Specify the condition preserved builds must match", "보존된 빌드가 일치해야 하는 조건을 지정하십시오.");
+		m.put("Specify the container image to test against. The image must have shell installed", "테스트할 컨테이너 이미지를 지정합니다. 이미지에는 셸이 설치되어 있어야 합니다.");
 		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. ${productName} creates the namespace if it does not yet exist.", 
 			"이 프로비저너의 워크스페이스를 호스팅할 쿠버네티스 네임스페이스를 지정하세요. ${productName}은 네임스페이스가 아직 존재하지 않을 경우 생성합니다.");
 		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now ${productName} only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
@@ -4223,6 +4331,9 @@ public class Translation_ko extends TranslationResourceBundle {
 			"SSH 서버가 클라이언트와 연결을 설정하는 데 사용하는 개인 키(PEM 형식)를 지정하십시오.");
 		m.put("Specify the repository folder to store wiki pages.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
 			"위키 페이지를 저장할 저장소 폴더를 지정하세요.\n프로젝트 저장소에 위키 페이지를 저장하지 않으려면, 지정된 폴더는\nGit 서브모듈일 수 있습니다. 위키 페이지 패널에서 파일을 제외하려면, 위키 루트 폴더에\n해당 폴더를 기준으로 Git 무시 패턴을 포함한 <code>.wikiignore</code> 파일을 추가하세요.");
+		m.put("Specify the sandbox CLI executable", "샌드박스 CLI 실행 파일을 지정합니다.");
+		m.put("Specify the sandbox template image used to run this job. The image must have shell, Git, Git LFS, and Python 3 installed. If the job runs Docker-related steps or services, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"이 작업을 실행하는 데 사용되는 샌드박스 템플릿 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 Python 3이 설치되어 있어야 합니다. 작업이 Docker 관련 단계나 서비스를 실행하는 경우, 이미지에 Docker가 구성되어 있어야 하며, 비루트 기본 사용자가 비밀번호 없이 sudo 액세스 권한을 가져야 합니다. <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>템플릿 설정 가이드</a>를 참조하세요.");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a ${productName} group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at ${productName} side", 
 			"그룹 멤버십 정보를 검색할 전략을 지정하세요. LDAP 그룹에 적절한 권한을 부여하려면 동일한 이름의 ${productName} 그룹이 정의되어야 합니다. ${productName} 측에서 그룹 멤버십을 관리하려면 <tt>그룹 검색 안 함</tt> 전략을 사용하세요");
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
@@ -4239,6 +4350,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"웹 UI 세션 타임아웃을 분 단위로 지정하세요. 브라우저가 열려 있을 때 만료되지 않으려면 비워 두세요. 이 값을 변경해도 기존 세션에는 영향을 미치지 않습니다.");
 		m.put("Specify webhook url to post events", "이벤트를 게시할 웹훅 URL을 지정하십시오.");
 		m.put("Specify whether to create a work in progress pull request", "작업 진행 중인 풀 리퀘스트를 생성할지 여부를 지정합니다");
+		m.put("Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)", 
+			"워크스페이스를 샌드박스, Docker 컨테이너 또는 호스트(베어본)에서 직접 프로비저닝할지 여부를 지정합니다.");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here", 
 			"닫힌 GitHub 이슈에 사용할 상태를 지정하세요.<br><b>참고: </b> 적절한 옵션이 없을 경우 ${productName} 이슈 상태를 사용자 정의할 수 있습니다");
 		m.put("Specify which issue state to use for closed GitLab issues.<br><b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here", 
@@ -4416,6 +4529,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Test", "테스트");
 		m.put("Test Case", "테스트 케이스");
 		m.put("Test Cases", "테스트 케이스들");
+		m.put("Test Container", "테스트 컨테이너");
+		m.put("Test Sandbox Executor", "테스트 샌드박스 실행기");
 		m.put("Test Settings", "테스트 설정");
 		m.put("Test Suite", "테스트 스위트");
 		m.put("Test Suites", "테스트 스위트들");
@@ -4438,12 +4553,12 @@ public class Translation_ko extends TranslationResourceBundle {
 			"작업을 수동으로 실행할 권한. 이는 빌드 로그, 빌드 파이프라인 및 모든 게시된 보고서에 접근할 권한을 포함합니다");
 		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
 			"기본 이메일 주소는 알림을 받고 Gravatar(활성화된 경우)를 표시하는 데 사용됩니다. 또한 이메일 주소가 비공개로 유지되지 않는 한 웹 기반 Git 작업에도 사용됩니다.");
-		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from ${productName}. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
-			"POST 요청이 ${productName}에서 보낸 것임을 확인할 수 있도록 하는 비밀입니다. 비밀을 설정하면 웹훅 POST 요청에서 X-OneDev-Signature 헤더를 받게 됩니다");
 		m.put("The service desk feature enables user to create issues by sending emails to ${productName}. Issues can be discussed over email completely, without the need of logging to ${productName}.", 
 			"서비스 데스크 기능을 통해 사용자가 ${productName}에 이메일을 보내 이슈를 생성할 수 있습니다. 이슈는 ${productName}에 로그인하지 않고도 이메일로 완전히 논의할 수 있습니다");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
 			"서비스 데스크 기능을 사용하면 사용자가 이메일을 통해 OneDev에 이슈를 생성할 수 있습니다. 이슈는 OneDev에 로그인하지 않고도 이메일로 완전히 논의될 수 있습니다.");
+		m.put("The shared secret used to verify webhook POST requests from ${productName}. X-OneDev-Signature contains the lowercase hexadecimal HMAC-SHA256 of the raw request body, using the UTF-8 encoded secret as the key. Verify it with a constant-time comparison before parsing the body. The secret itself is not sent. Use HTTPS to protect the webhook payload", 
+			"${productName}에서 보낸 웹훅 POST 요청을 검증하기 위해 사용되는 공유 비밀입니다. X-OneDev-Signature는 UTF-8로 인코딩된 비밀을 키로 사용하여 원시 요청 본문의 소문자 16진수 HMAC-SHA256을 포함합니다. 본문을 파싱하기 전에 상수 시간 비교를 통해 이를 검증하세요. 비밀 자체는 전송되지 않습니다. 웹훅 페이로드를 보호하려면 HTTPS를 사용하세요");
 		m.put("Then add the package", "그런 다음 패키지를 추가하세요");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "TOTP 인증기에 표시된 패스코드를 입력하여 확인하세요");
 		m.put("Then publish package from project directory like below", "아래와 같이 프로젝트 디렉토리에서 패키지를 게시하세요");
@@ -4462,6 +4577,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("There are unsaved changes, discard and continue?", "저장되지 않은 변경 사항이 있습니다. 폐기하고 계속하시겠습니까?");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"이 인증기는 일반적으로 모바일 폰에서 실행됩니다. Google Authenticator, Microsoft Authenticator, Authy, 1Password 등이 예입니다.");
+		m.put("These settings are only used when running Docker containers inside the sandbox VM.", 
+			"이 설정은 샌드박스 VM 내부에서 Docker 컨테이너를 실행할 때만 사용됩니다.");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
 			"이 <span wicket:id=\"elementTypeName\"></span>는 <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>에서 가져왔습니다");
 		m.put("This Month", "이번 달");
@@ -4482,10 +4599,16 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 날짜는 <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 형식</a>을 사용합니다");
 		m.put("This email address is being used", "이 이메일 주소는 사용 중입니다");
 		m.put("This email address is not verified", "이 이메일 주소는 인증되지 않았습니다");
+		m.put("This executor runs build jobs as Docker containers on ${productName} server. <b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"이 실행기는 ${productName} 서버에서 Docker 컨테이너로 빌드 작업을 실행합니다. <b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 작업의 경우 전용 에이전트 호스트에서 원격 Docker 실행기를 사용하세요.");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
 			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신에서 Docker 컨테이너로 빌드 작업을 실행합니다");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"이 실행자는 Kubernetes 클러스터에서 Pod로 빌드 작업을 실행합니다. 에이전트가 필요하지 않습니다.<b class='text-danger'>참고:</b> 작업 Pod가 소스 및 아티팩트를 다운로드하기 위해 시스템 설정에서 서버 URL이 올바르게 지정되었는지 확인하세요");
+		m.put("This executor runs build jobs directly on remote hosts via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"이 실행기는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 호스트에서 직접 빌드 작업을 실행합니다.");
+		m.put("This executor runs build jobs directly on the ${productName} server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Host Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"이 실행기는 ${productName} 서버 호스트에서 직접 빌드 작업을 실행합니다. <b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 작업의 경우 전용 에이전트 호스트에서 원격 호스트 실행기를 사용하세요.");
 		m.put("This field is required", "이 필드는 필수입니다");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"이 필터는 현재 사용자의 LDAP 항목을 결정하는 데 사용됩니다. 예: <i>(&(uid={0})(objectclass=person))</i>. 이 예에서 <i>{0}</i>는 현재 사용자의 로그인 이름을 나타냅니다.");
@@ -4548,6 +4671,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This permission enables one to schedule issues into iterations", "이 권한은 이슈를 반복 작업에 일정으로 추가할 수 있도록 합니다");
 		m.put("This property is imported from {0}", "이 속성은 {0}에서 가져왔습니다");
 		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "이 프로비저너는 Kubernetes 클러스터 내에서 작업 공간을 pod로 생성합니다.");
+		m.put("This provisioner creates workspaces directly on remote agent hosts, and requires tmux to be installed on matched agents", 
+			"이 프로비저너는 원격 에이전트 호스트에서 직접 워크스페이스를 생성하며, 매칭된 에이전트에 tmux가 설치되어 있어야 합니다.");
+		m.put("This provisioner creates workspaces directly on the ${productName} server host, and requires\ntmux to be installed on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Host Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
+			"이 프로비저너는 ${productName} 서버 호스트에서 직접 워크스페이스를 생성하며,\n${productName} 서버에 tmux가 설치되어 있어야 합니다.\n<b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 워크스페이스의 경우\n전용 에이전트 호스트에서 원격 호스트 프로비저너를 사용하세요.");
+		m.put("This provisioner creates workspaces inside Docker containers on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
+			"이 프로비저너는 ${productName} 서버에서 Docker 컨테이너 내부에 워크스페이스를 생성합니다.\n<b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 워크스페이스의 경우\n전용 에이전트 호스트에서 원격 Docker 프로비저너를 사용하세요.");
 		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
 			"이 프로비저너는 \n<a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 Docker 컨테이너 내에서 작업 공간을 생성합니다.");
 		m.put("This pull request has been discarded", "이 풀 리퀘스트는 폐기되었습니다");
@@ -4990,8 +5119,12 @@ public class Translation_ko extends TranslationResourceBundle {
 			"컨테이너를 실행하거나 이미지를 빌드할 때 항상 이미지를 가져올지 여부. 이 옵션을 활성화하면 동일한 노드에서 실행되는 악성 작업이 이미지를 교체하는 것을 방지할 수 있습니다");
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"컨테이너 실행 시 항상 이미지를 풀할지 여부. 악의적인 작업에 의해 이미지가 교체되는 것을 방지하기 위해 이 옵션을 활성화해야 합니다");
+		m.put("Whether or not to always pull images when running containers or building images inside the sandbox. If disabled, cached images are used when available.", 
+			"샌드박스 내부에서 컨테이너를 실행하거나 이미지를 빌드할 때 항상 이미지를 가져올지 여부. 비활성화된 경우, 사용 가능한 경우 캐시된 이미지를 사용합니다.");
 		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
 			"컨테이너를 실행할 때 항상 이미지를 가져올지 여부. 활성화하면 동일한 노드에서 실행 중인 악성 워크로드에 의해 이미지가 대체되는 것을 방지합니다.");
+		m.put("Whether or not to always pull the template image when creating a sandbox. If disabled, a cached image is used when available.", 
+			"샌드박스를 생성할 때 항상 템플릿 이미지를 가져올지 여부. 비활성화된 경우, 사용 가능한 경우 캐시된 이미지를 사용합니다.");
 		m.put("Whether or not to be able to access time tracking info of issues", "문제의 시간 추적 정보를 액세스할 수 있는지 여부");
 		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
 			"종속성 대시보드 이슈를 생성할지 여부입니다. 비활성화된 경우, Renovate는 이슈를 생성하거나 업데이트하지 않으며, 기존 이슈는 수동으로 닫을 수 있습니다. 속도 제한과 같은 옵션은 여전히 Renovate 구성으로 제어할 수 있습니다.");
@@ -5043,6 +5176,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether the password must contain at least one number", "비밀번호에 최소한 하나의 숫자가 포함되어야 하는지 여부");
 		m.put("Whether the password must contain at least one special character", "비밀번호에 최소한 하나의 특수 문자가 포함되어야 하는지 여부");
 		m.put("Whether the password must contain at least one uppercase letter", "비밀번호에 최소한 하나의 대문자가 포함되어야 하는지 여부");
+		m.put("Whether to always pull the template image when creating a sandbox", "샌드박스를 생성할 때 항상 템플릿 이미지를 가져올지 여부");
 		m.put("Whole Word", "전체 단어");
 		m.put("Widget", "위젯");
 		m.put("Widget Tab", "위젯 탭");
@@ -5376,132 +5510,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("<b class='text-danger'>NOTE: </b>Remote host provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>참고: </b>원격 호스트 프로비저너는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
-		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox executor is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>참고: </b>원격 샌드박스 실행기는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
-		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>참고: </b>원격 샌드박스 프로비저너는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
-		m.put("Always Pull Container Image", "항상 컨테이너 이미지를 가져오기");
-		m.put("Always Pull Template Image", "항상 템플릿 이미지를 가져오기");
-		m.put("Build docker image with buildx. This step can be executed by docker or sandbox executors. Docker executors use their configured buildx builder; sandbox executors use the default builder inside the sandbox. To build image with Kubernetes executor, please use kaniko step instead", 
-			"buildx를 사용하여 도커 이미지를 빌드합니다. 이 단계는 도커 또는 샌드박스 실행기가 실행할 수 있습니다. 도커 실행기는 구성된 buildx 빌더를 사용하고, 샌드박스 실행기는 샌드박스 내부의 기본 빌더를 사용합니다. Kubernetes 실행기로 이미지를 빌드하려면 대신 kaniko 단계를 사용하세요.");
-		m.put("CPU count for each sandbox. Leave empty to use the Docker Sandboxes default (All CPUs).", 
-			"각 샌드박스의 CPU 수. 비워 두면 Docker Sandboxes 기본값(모든 CPU)을 사용합니다.");
-		m.put("CPUs", "CPU");
-		m.put("Container Settings", "컨테이너 설정");
-		m.put("Create a workspace spec running Claude Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Claude Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"워크스페이스 호스트에서 Claude Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a>가 워크스페이스 호스트에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 워크스페이스 호스트에 설치되어 있고 Claude Code를 위한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 호스트 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Claude Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"격리를 위해 샌드박스에서 Claude Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>샌드박스 템플릿 이미지</a>를 나중에 사용자 정의할 수 있습니다.");
-		m.put("Create a workspace spec running Codex directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Codex</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"워크스페이스 호스트에서 Codex를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a>가 워크스페이스 호스트에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 워크스페이스 호스트에 설치되어 있고 Codex를 위한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 호스트 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Codex inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"격리를 위해 샌드박스에서 Codex를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>샌드박스 템플릿 이미지</a>를 나중에 사용자 정의할 수 있습니다.");
-		m.put("Create a workspace spec running Cursor directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Cursor CLI</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"워크스페이스 호스트에서 Cursor를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a>가 워크스페이스 호스트에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 워크스페이스 호스트에 설치되어 있고 Cursor CLI를 위한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 호스트 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Cursor inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"격리를 위해 샌드박스에서 Cursor를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>샌드박스 템플릿 이미지</a>를 나중에 사용자 정의할 수 있습니다.");
-		m.put("Create a workspace spec running Open Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Open Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"워크스페이스 호스트에서 Open Code를 직접 실행하는 워크스페이스 사양을 생성합니다.\n생성된 사양을 사용하는 워크스페이스는 동일한 환경과 설정을 공유합니다.\n이 템플릿을 사용하려면 다음을 확인하세요:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>가 워크스페이스 호스트에 설치되어 있어야 합니다</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a>가 워크스페이스 호스트에 설치되어 있고 Open Code를 위한 동반 스킬이 설치되어 있어야 합니다</li>\n    <li>'관리 / 워크스페이스 프로비저너'에서 '적용 가능한 프로젝트'가 적절히 구성된 호스트 프로비저너가 추가되어 있어야 합니다</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"격리를 위해 샌드박스에서 Open Code를 실행하는 워크스페이스 사양을 생성합니다.\n필요에 따라 <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>샌드박스 템플릿 이미지</a>를 나중에 사용자 정의할 수 있습니다.");
-		m.put("Docker sandbox default", "도커 샌드박스 기본값");
-		m.put("Enable to also test running a command in a Docker container inside the sandbox", "샌드박스 내부에서 도커 컨테이너에서 명령을 실행하는 테스트를 활성화합니다.");
-		m.put("Enable to execute this job in a sandbox VM", "이 작업을 샌드박스 VM에서 실행하도록 활성화합니다.");
-		m.put("Execute In Sandbox", "샌드박스에서 실행");
-		m.put("In Container", "컨테이너에서");
-		m.put("In Host", "호스트에서");
-		m.put("In Sandbox", "샌드박스에서");
-		m.put("Maximum concurrent jobs on each server. Leave empty to use its CPU count.", "각 서버에서 최대 동시 작업 수. 비워 두면 CPU 수를 사용합니다.");
-		m.put("Memory for each sandbox, for example 2g. Leave empty to use the Docker Sandboxes default (50% of host memory).", 
-			"각 샌드박스의 메모리, 예: 2g. 비워 두면 Docker Sandboxes 기본값(호스트 메모리의 50%)을 사용합니다.");
-		m.put("Optional registry logins for steps and services that use container images inside the sandbox. These logins are not used to pull the sandbox template image. Logins specified in a step or service override these for the same registry. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password.", 
-			"샌드박스 내부에서 컨테이너 이미지를 사용하는 단계 및 서비스에 대한 선택적 레지스트리 로그인. 이러한 로그인은 샌드박스 템플릿 이미지를 가져오는 데 사용되지 않습니다. 단계 또는 서비스에서 지정된 로그인이 동일한 레지스트리에 대해 이를 재정의합니다. 내장 레지스트리의 경우, 레지스트리 URL로 <code>@server_url@</code>, 사용자 이름으로 <code>@job_token@</code>, 비밀번호로 액세스 토큰을 사용하세요.");
-		m.put("Optionally specify Docker options to create the network for jobs using services. Multiple options should be separated by space, and single options containing spaces should be quoted.", 
-			"서비스를 사용하는 작업에 대한 네트워크를 생성하기 위해 Docker 옵션을 선택적으로 지정합니다. 여러 옵션은 공백으로 구분해야 하며, 공백이 포함된 단일 옵션은 따옴표로 묶어야 합니다.");
-		m.put("Optionally specify Docker options to run containers inside the sandbox. Multiple options should be separated by space, and single options containing spaces should be quoted. Do not specify <code>--network</code> or <code>--net</code> for jobs using services, as their network is managed automatically. File paths refer to the sandbox filesystem; relative file paths are resolved from the job working directory.", 
-			"샌드박스 내부에서 컨테이너를 실행하기 위해 Docker 옵션을 선택적으로 지정합니다. 여러 옵션은 공백으로 구분해야 하며, 공백이 포함된 단일 옵션은 따옴표로 묶어야 합니다. 서비스가 있는 작업의 경우 <code>--network</code> 또는 <code>--net</code>을 지정하지 마세요. 네트워크는 자동으로 관리됩니다. 파일 경로는 샌드박스 파일 시스템을 참조하며, 상대 파일 경로는 작업 작업 디렉토리에서 해결됩니다.");
-		m.put("Optionally specify sandbox memory, for example 2g", "샌드박스 메모리를 선택적으로 지정합니다. 예: 2g");
-		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
-			"이 작업에 필요한 서비스를 선택적으로 지정합니다. <b class='text-warning'>참고:</b> 서비스는 Docker, Kubernetes 및 샌드박스 실행기에서 지원됩니다.");
-		m.put("Optionally specify workspace ports to expose. These ports will be mapped to random ports on host\nwhich will be displayed on the workspace page", 
-			"노출할 워크스페이스 포트를 선택적으로 지정합니다. 이러한 포트는 호스트의 임의의 포트에 매핑되며\n워크스페이스 페이지에 표시됩니다.");
-		m.put("Path to the Docker Sandboxes sbx executable", "Docker Sandboxes sbx 실행 파일의 경로");
-		m.put("Provision Mode", "프로비저닝 모드");
-		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
-			"도커 buildx 빌더의 이미지 캐시를 정리합니다. 이 단계는 Docker 또는 샌드박스 실행기가 사용하는 빌더의 캐시를 제거하기 위해 docker buildx prune 명령을 호출합니다.");
-		m.put("Remote Host Executor", "원격 호스트 실행기");
-		m.put("Remote Host Provisioner", "원격 호스트 프로비저너");
-		m.put("Remote Sandbox Executor", "원격 샌드박스 실행기");
-		m.put("Remote Sandbox Provisioner", "원격 샌드박스 프로비저너");
-		m.put("Run docker buildx imagetools command with specified arguments. This step can be executed by Docker or sandbox executors", 
-			"지정된 인수로 docker buildx imagetools 명령을 실행합니다. 이 단계는 Docker 또는 샌드박스 실행기가 실행할 수 있습니다.");
-		m.put("Run specified docker container. <a href='${docsite}/concepts#job-workdir' target='_blank'>Job workdir</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. This step can be executed by Docker or sandbox executors", 
-			"지정된 도커 컨테이너를 실행합니다. <a href='${docsite}/concepts#job-workdir' target='_blank'>작업 작업 디렉토리</a>가 컨테이너에 마운트되고 해당 경로가 환경 변수 <code>ONEDEV_WORKDIR</code>에 배치됩니다. 이 단계는 Docker 또는 샌드박스 실행기가 실행할 수 있습니다.");
-		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
-			"신선한 Docker Sandbox에서 <a href='/~administration/agents' target='_blank'>에이전트</a> 호스트에서 셸 및 도커 단계를 실행합니다. 작업 서비스는 샌드박스 내부에서 실행되며 셸 및 컨테이너 단계에서 서비스 이름으로 액세스할 수 있습니다. 작업 후 샌드박스와 서비스는 삭제됩니다. 각 에이전트 호스트를 설정하려면 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>샌드박스 작업</a>을 따르세요.");
-		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on the server. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up the server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Sandbox Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"신선한 Docker Sandbox에서 서버에서 셸 및 도커 단계를 실행합니다. 작업 서비스는 샌드박스 내부에서 실행되며 셸 및 컨테이너 단계에서 서비스 이름으로 액세스할 수 있습니다.\n작업 후 샌드박스와 서비스는 삭제됩니다.\n서버 호스트를 설정하려면 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>샌드박스 작업</a>을 따르세요. <b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 작업의 경우 전용 에이전트 호스트에서 원격 샌드박스 실행기를 사용하세요.");
-		m.put("Runs workspaces directly in a Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Setup commands and terminals run as the template image's default user. The sandbox is removed when the workspace is deleted. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
-			"Docker Sandbox에서 <a href='/~administration/agents' target='_blank'>에이전트</a> 호스트에서 워크스페이스를 직접 실행합니다. 설정 명령과 터미널은 템플릿 이미지의 기본 사용자로 실행됩니다. 워크스페이스가 삭제되면 샌드박스도 제거됩니다. 각 에이전트 호스트를 설정하려면 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>샌드박스 작업</a>을 따르세요.");
-		m.put("Runs workspaces directly in a Docker Sandbox on the server. Setup commands and terminals run as the template image's default user.\nThe sandbox is removed when the workspace is deleted.\nSelect <b>Sandbox</b> as the workspace spec's provision mode. To use Docker in workspace commands,\nselect a sandbox template that provides Docker in the workspace spec.\nFollow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a>\nto set up the server host. For untrusted workspaces, use a Remote Sandbox Provisioner on a dedicated agent host.", 
-			"Docker Sandbox에서 서버에서 워크스페이스를 직접 실행합니다. 설정 명령과 터미널은 템플릿 이미지의 기본 사용자로 실행됩니다.\n워크스페이스가 삭제되면 샌드박스도 제거됩니다.\n워크스페이스 사양의 프로비저닝 모드로 <b>샌드박스</b>를 선택하세요. 워크스페이스 명령에서 Docker를 사용하려면,\n워크스페이스 사양에서 Docker를 제공하는 샌드박스 템플릿을 선택하세요.\n서버 호스트를 설정하려면 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>샌드박스 작업</a>\n을 따르세요. 신뢰할 수 없는 워크스페이스의 경우, 전용 에이전트 호스트에서 원격 샌드박스 프로비저너를 사용하세요.");
-		m.put("Sandbox Executable", "샌드박스 실행 파일");
-		m.put("Sandbox Template", "샌드박스 템플릿");
-		m.put("Server Host Executor", "서버 호스트 실행기");
-		m.put("Server Host Provisioner", "서버 호스트 프로비저너");
-		m.put("Server Sandbox Executor", "서버 샌드박스 실행기");
-		m.put("Server Sandbox Provisioner", "서버 샌드박스 프로비저너");
-		m.put("Specify Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
-			"테스트할 도커 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 tmux가 설치되어 있어야 합니다.");
-		m.put("Specify a Docker image to test against. The image must have shell installed", "테스트할 도커 이미지를 지정합니다. 이미지에는 셸이 설치되어 있어야 합니다.");
-		m.put("Specify a Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
-			"테스트할 도커 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 tmux가 설치되어 있어야 합니다.");
-		m.put("Specify a Docker sandbox shell template image to test against. The image must have shell, Git, Git LFS, and Python 3 installed. To also test a container, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"테스트할 도커 샌드박스 셸 템플릿 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 Python 3이 설치되어 있어야 합니다. 컨테이너를 테스트하려면, 이미지에 Docker가 구성되어 있어야 하며, 비루트 기본 사용자가 비밀번호 없이 sudo 액세스 권한을 가져야 합니다. <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>템플릿 설정 가이드</a>를 참조하세요.");
-		m.put("Specify a Docker sandbox template image to test against. The image must have shell, Git, Git LFS, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"테스트할 도커 샌드박스 템플릿 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS, Python 3 및 tmux가 설치되어 있어야 합니다. <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>템플릿 설정 가이드</a>를 참조하세요.");
-		m.put("Specify a Sandbox Template to Test Against", "테스트할 샌드박스 템플릿을 지정합니다.");
-		m.put("Specify cache path. Non-absolute path is considered to be relative to\n<a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.\nHost executors run directly on the host machine and only accept relative paths", 
-			"캐시 경로를 지정합니다. 절대 경로가 아닌 경로는\n<a href='${docsite}/concepts#job-workdir' target='_blank'>작업 작업 디렉토리</a>를 기준으로 상대적으로 간주됩니다.\n호스트 실행기는 호스트 머신에서 직접 실행되며 상대 경로만 허용합니다.");
-		m.put("Specify cache path. Non-absolute path is considered to be relative to working directory.\nHost provisioners only accept relative paths", 
-			"캐시 경로를 지정합니다. 절대 경로가 아닌 경로는 작업 디렉토리를 기준으로 상대적으로 간주됩니다.\n호스트 프로비저너는 상대 경로만 허용합니다.");
-		m.put("Specify cache upload strategy before deleting an active workspace. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
-			"활성 워크스페이스를 삭제하기 전에 캐시 업로드 전략을 지정합니다. <i>정확히 일치하지 않을 경우 업로드</i>\n는 키와 체크섬이 일치하는 캐시를 찾을 수 없을 때 업로드를 의미하며,\n<i>변경된 경우 업로드</i>는 캐시 경로의 일부 파일이 변경된 경우 업로드를 의미합니다.");
-		m.put("Specify container image to create workspace inside. The image must have shell, Git, Git LFS, and tmux installed", 
-			"워크스페이스 내부를 생성할 컨테이너 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 tmux가 설치되어 있어야 합니다.");
-		m.put("Specify container image to execute commands inside. The image must have shell installed", 
-			"명령을 실행할 컨테이너 이미지를 지정합니다. 이미지에는 셸이 설치되어 있어야 합니다.");
-		m.put("Specify sandbox template image to create workspace from. The image must have shell, Git, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"워크스페이스를 생성할 샌드박스 템플릿 이미지를 지정합니다. 이미지에는 셸, Git, Python 3 및 tmux가 설치되어 있어야 합니다. <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>템플릿 설정 가이드</a>를 참조하세요.");
-		m.put("Specify the container image to test against. The image must have shell installed", "테스트할 컨테이너 이미지를 지정합니다. 이미지에는 셸이 설치되어 있어야 합니다.");
-		m.put("Specify the sandbox CLI executable", "샌드박스 CLI 실행 파일을 지정합니다.");
-		m.put("Specify the sandbox template image used to run this job. The image must have shell, Git, Git LFS, and Python 3 installed. If the job runs Docker-related steps or services, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"이 작업을 실행하는 데 사용되는 샌드박스 템플릿 이미지를 지정합니다. 이미지에는 셸, Git, Git LFS 및 Python 3이 설치되어 있어야 합니다. 작업이 Docker 관련 단계나 서비스를 실행하는 경우, 이미지에 Docker가 구성되어 있어야 하며, 비루트 기본 사용자가 비밀번호 없이 sudo 액세스 권한을 가져야 합니다. <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>템플릿 설정 가이드</a>를 참조하세요.");
-		m.put("Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)", 
-			"워크스페이스를 샌드박스, Docker 컨테이너 또는 호스트(베어본)에서 직접 프로비저닝할지 여부를 지정합니다.");
-		m.put("Test Container", "테스트 컨테이너");
-		m.put("Test Sandbox Executor", "테스트 샌드박스 실행기");
-		m.put("These settings are only used when running Docker containers inside the sandbox VM.", 
-			"이 설정은 샌드박스 VM 내부에서 Docker 컨테이너를 실행할 때만 사용됩니다.");
-		m.put("This executor runs build jobs as Docker containers on ${productName} server. <b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"이 실행기는 ${productName} 서버에서 Docker 컨테이너로 빌드 작업을 실행합니다. <b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 작업의 경우 전용 에이전트 호스트에서 원격 Docker 실행기를 사용하세요.");
-		m.put("This executor runs build jobs directly on remote hosts via <a href='/~administration/agents' target='_blank'>agents</a>", 
-			"이 실행기는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 호스트에서 직접 빌드 작업을 실행합니다.");
-		m.put("This executor runs build jobs directly on the ${productName} server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Host Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"이 실행기는 ${productName} 서버 호스트에서 직접 빌드 작업을 실행합니다. <b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 작업의 경우 전용 에이전트 호스트에서 원격 호스트 실행기를 사용하세요.");
-		m.put("This provisioner creates workspaces directly on remote agent hosts, and requires tmux to be installed on matched agents", 
-			"이 프로비저너는 원격 에이전트 호스트에서 직접 워크스페이스를 생성하며, 매칭된 에이전트에 tmux가 설치되어 있어야 합니다.");
-		m.put("This provisioner creates workspaces directly on the ${productName} server host, and requires\ntmux to be installed on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Host Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
-			"이 프로비저너는 ${productName} 서버 호스트에서 직접 워크스페이스를 생성하며,\n${productName} 서버에 tmux가 설치되어 있어야 합니다.\n<b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 워크스페이스의 경우\n전용 에이전트 호스트에서 원격 호스트 프로비저너를 사용하세요.");
-		m.put("This provisioner creates workspaces inside Docker containers on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
-			"이 프로비저너는 ${productName} 서버에서 Docker 컨테이너 내부에 워크스페이스를 생성합니다.\n<b class='text-warning'>경고:</b> 더 나은 보안을 위해, 특히 신뢰할 수 없는 워크스페이스의 경우\n전용 에이전트 호스트에서 원격 Docker 프로비저너를 사용하세요.");
-		m.put("Whether or not to always pull images when running containers or building images inside the sandbox. If disabled, cached images are used when available.", 
-			"샌드박스 내부에서 컨테이너를 실행하거나 이미지를 빌드할 때 항상 이미지를 가져올지 여부. 비활성화된 경우, 사용 가능한 경우 캐시된 이미지를 사용합니다.");
-		m.put("Whether or not to always pull the template image when creating a sandbox. If disabled, a cached image is used when available.", 
-			"샌드박스를 생성할 때 항상 템플릿 이미지를 가져올지 여부. 비활성화된 경우, 사용 가능한 경우 캐시된 이미지를 사용합니다.");
-		m.put("Whether to always pull the template image when creating a sandbox", "샌드박스를 생성할 때 항상 템플릿 이미지를 가져올지 여부");
+		m.put("Work in Maintenance Mode", "유지 관리 모드에서 작업");
 	}
 		
 	@Override

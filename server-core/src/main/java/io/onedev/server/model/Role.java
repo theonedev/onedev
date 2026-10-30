@@ -424,7 +424,7 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.createWorkspaces = createWorkspaces;
 	}
 
-	@Editable(order=1000, name="Work while Maintenance", description="""
+	@Editable(order=1000, name="Work in Maintenance Mode", description="""
 			Allow to work on a project while in maintenance mode. Permission for each action is still required""")
 	@DependsOn(property="manageProject", value="false")
 	@ShowCondition("isSubscriptionActive")

@@ -98,10 +98,18 @@ public class Translation_pt extends TranslationResourceBundle {
 			"<b class='text-danger'>NOTA: </b>O provisionador Kubernetes é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
 		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>NOTA: </b>O provisionador remoto de docker é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
+		m.put("<b class='text-danger'>NOTE: </b>Remote host provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>NOTA: </b>O provisionador de host remoto é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
+		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox executor is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>NOTA: </b>O executor de sandbox remoto é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
+		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>NOTA: </b>O provisionador de sandbox remoto é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
 		m.put("<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>NOTA: </b>A integração com SendGrid é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
 		m.put("<b class='text-warning'>NOTE: </b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-warning'>NOTA: </b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>Rastreamento de tempo</a> é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
+		m.put("<b class='text-warning'>NOTE: </b>Maintenance mode is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-warning'>NOTA: </b>O modo de manutenção é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
 		m.put("<b>NOTE: </b> Service desk only takes effect if <a wicket:id=\"mailConnector\">mail service</a> is defined and its <tt>check incoming email</tt> option is enabled. Also <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>sub addressing</a> needs to be enabled for the system email address. Check <a href=\"${docsite}/tutorials/issue/service-desk\" target='_blank'>this tutorial</a> for details", 
 			"<b>NOTA: </b> O service desk só entra em vigor se o <a wicket:id=\"mailConnector\">serviço de e-mail</a> estiver definido e sua opção <tt>verificar e-mail recebido</tt> estiver habilitada. Além disso, é necessário habilitar o <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>subendereçamento</a> para o endereço de e-mail do sistema. Consulte <a href=\"${docsite}/tutorials/issue/service-desk\" target='_blank'>este tutorial</a> para mais detalhes");
 		m.put("<b>NOTE: </b> Service desk only takes effect if <a wicket:id=\"mailConnector\">mail service</a> is defined and its <tt>check incoming email</tt> option is enabled. Also <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>sub addressing</a> needs to be enabled for the system email address. Check <a href=\"https://medium.com/p/e56d62c27e57\" target='_blank'>this tutorial</a> for details", 
@@ -350,6 +358,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Allow Empty", "Permitir Vazio");
 		m.put("Allow Empty Value", "Permitir Valor Vazio");
 		m.put("Allow Multiple", "Permitir Múltiplos");
+		m.put("Allow to work on a project while in maintenance mode. Permission for each action is still required", 
+			"Permitir trabalhar em um projeto enquanto estiver no modo de manutenção. Permissão para cada ação ainda é necessária");
 		m.put("Allowed Licenses", "Licenças Permitidas");
 		m.put("Allowed Self Sign-Up Email Domain", "Domínio de Email Permitido para Auto Cadastro");
 		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
@@ -359,7 +369,9 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"Além disso, adicione abaixo ao $HOME/.m2/settings.xml se você quiser compilar o projeto a partir da linha de comando");
 		m.put("Always", "Sempre");
+		m.put("Always Pull Container Image", "Sempre Puxar Imagem de Container");
 		m.put("Always Pull Image", "Sempre Puxar Imagem");
+		m.put("Always Pull Template Image", "Sempre Puxar Imagem de Template");
 		m.put("Amend", "Emendar");
 		m.put("An issue already linked for {0}. Unlink it first", "Um problema já está vinculado a {0}. Desvincule-o primeiro");
 		m.put("An unexpected exception occurred", "Ocorreu uma exceção inesperada");
@@ -601,6 +613,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Build Volume Storage Size", "Tamanho de Armazenamento de Volume de Build");
 		m.put("Build administrative permission for all jobs inside a project, including batch operations over multiple builds", 
 			"Permissão administrativa de build para todos os jobs dentro de um projeto, incluindo operações em lote sobre múltiplos builds");
+		m.put("Build docker image with buildx. This step can be executed by docker or sandbox executors. Docker executors use their configured buildx builder; sandbox executors use the default builder inside the sandbox. To build image with Kubernetes executor, please use kaniko step instead", 
+			"Construa a imagem Docker com buildx. Esta etapa pode ser executada por executores Docker ou sandbox. Os executores Docker usam seu builder buildx configurado; os executores sandbox usam o builder padrão dentro do sandbox. Para construir imagens com o executor Kubernetes, use a etapa kaniko em vez disso");
 		m.put("Build docker image with kaniko. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"Build de imagem docker com kaniko. Esta etapa precisa ser executada pelo executor docker do servidor, executor docker remoto ou executor Kubernetes");
 		m.put("Build duration statistics", "Estatísticas de duração de build");
@@ -652,7 +666,10 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "Concorrência de Tarefa Intensiva de CPU");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "Capacidade de CPU em millis. Normalmente é (núcleos de CPU)*1000");
 		m.put("CPU cores", "Núcleos de CPU");
+		m.put("CPU count for each sandbox. Leave empty to use the Docker Sandboxes default (All CPUs).", 
+			"Contagem de CPUs para cada sandbox. Deixe vazio para usar o padrão dos Sandboxes Docker (Todas as CPUs).");
 		m.put("CPU request for the workspace container.", "Solicitação de CPU para o contêiner do workspace.");
+		m.put("CPUs", "CPUs");
 		m.put("Cache \"{0}\" deleted", "Cache \"{0}\" excluído");
 		m.put("Cache Config", "Configuração de Cache");
 		m.put("Cache Entries", "Entradas de Cache");
@@ -957,6 +974,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Contact Name", "Nome de Contato");
 		m.put("Container Image", "Imagem do Container");
 		m.put("Container Image(s)", "Imagem(s) do Container");
+		m.put("Container Settings", "Configurações do Container");
 		m.put("Container default", "Container padrão");
 		m.put("Content", "Conteúdo");
 		m.put("Content Type", "Tipo de Conteúdo");
@@ -1018,12 +1036,28 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Create Workspace", "Criar Workspace");
 		m.put("Create Workspace Spec", "Criar Especificação de Workspace");
 		m.put("Create Workspaces", "Criar Workspaces");
+		m.put("Create a workspace spec running Claude Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Claude Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Crie uma especificação de workspace executando Claude Code diretamente no host do workspace.\nWorkspaces usando a especificação criada compartilharão os mesmos ambientes e configurações.\nPara usar este template, certifique-se de que:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> está instalado no host do workspace</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> está instalado no host do workspace e habilidades complementares estão instaladas para o Claude Code</li>\n    <li>Um provisionador de host foi adicionado em 'Administração / Provisionadores de Workspace' com 'projetos aplicáveis' configurados corretamente</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"Crie uma especificação de workspace executando Claude Code dentro de um sandbox para isolamento.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>imagem de template do sandbox</a>\nposteriormente para atender às suas necessidades, se desejar");
 		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Crie uma especificação de workspace executando Claude Code dentro de um contêiner para fins de isolamento e segurança.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>imagem do contêiner</a>\nposteriormente para atender às suas necessidades, se desejar");
+		m.put("Create a workspace spec running Codex directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Codex</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Crie uma especificação de workspace executando Codex diretamente no host do workspace.\nWorkspaces usando a especificação criada compartilharão os mesmos ambientes e configurações.\nPara usar este template, certifique-se de que:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> está instalado no host do workspace</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> está instalado no host do workspace e habilidades complementares estão instaladas para o Codex</li>\n    <li>Um provisionador de host foi adicionado em 'Administração / Provisionadores de Workspace' com 'projetos aplicáveis' configurados corretamente</li>\n</ul>");
+		m.put("Create a workspace spec running Codex inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"Crie uma especificação de workspace executando Codex dentro de um sandbox para isolamento.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>imagem de template do sandbox</a>\nposteriormente para atender às suas necessidades, se desejar");
 		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Crie uma especificação de workspace executando Codex dentro de um contêiner para fins de isolamento e segurança.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>imagem do contêiner</a>\nposteriormente para atender às suas necessidades, se desejar");
+		m.put("Create a workspace spec running Cursor directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Cursor CLI</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Crie uma especificação de workspace executando Cursor diretamente no host do workspace.\nWorkspaces usando a especificação criada compartilharão os mesmos ambientes e configurações.\nPara usar este template, certifique-se de que:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> está instalado no host do workspace</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> está instalado no host do workspace e habilidades complementares estão instaladas para o Cursor CLI</li>\n    <li>Um provisionador de host foi adicionado em 'Administração / Provisionadores de Workspace' com 'projetos aplicáveis' configurados corretamente</li>\n</ul>");
+		m.put("Create a workspace spec running Cursor inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"Crie uma especificação de workspace executando Cursor dentro de um sandbox para isolamento.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>imagem de template do sandbox</a>\nposteriormente para atender às suas necessidades, se desejar");
 		m.put("Create a workspace spec running Cursor inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Crie uma especificação de workspace executando o Cursor dentro de um contêiner para fins de isolamento e segurança.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>imagem do contêiner</a>\nposteriormente para atender às suas necessidades, se desejar");
+		m.put("Create a workspace spec running Open Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Open Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"Crie uma especificação de workspace executando Open Code diretamente no host do workspace.\nWorkspaces usando a especificação criada compartilharão os mesmos ambientes e configurações.\nPara usar este template, certifique-se de que:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> está instalado no host do workspace</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> está instalado no host do workspace e habilidades complementares estão instaladas para o Open Code</li>\n    <li>Um provisionador de host foi adicionado em 'Administração / Provisionadores de Workspace' com 'projetos aplicáveis' configurados corretamente</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"Crie uma especificação de workspace executando Open Code dentro de um sandbox para isolamento.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>imagem de template do sandbox</a>\nposteriormente para atender às suas necessidades, se desejar");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"Crie uma especificação de workspace executando Open Code dentro de um contêiner para fins de isolamento e segurança.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>imagem do contêiner</a>\nposteriormente para atender às suas necessidades, se desejar");
 		m.put("Create an issue for this failure", "Criar um problema para esta falha");
@@ -1306,6 +1340,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Docker Hub", "Docker Hub");
 		m.put("Docker Image", "Imagem Docker");
 		m.put("Docker Sock Path", "Caminho do Docker Sock");
+		m.put("Docker sandbox default", "Padrão de sandbox Docker");
 		m.put("Dockerfile", "Dockerfile");
 		m.put("Documentation", "Documentação");
 		m.put("Don't have an account yet?", "Ainda não tem uma conta?");
@@ -1433,6 +1468,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Enable this to retrieve Git LFS files", "Habilite isso para recuperar arquivos Git LFS");
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"Habilitar para permitir o upload de cache de build gerado durante o trabalho de CI/CD. O cache enviado pode ser usado por builds subsequentes do projeto, desde que a chave do cache corresponda");
+		m.put("Enable to also test running a command in a Docker container inside the sandbox", "Habilite para também testar a execução de um comando em um container Docker dentro do sandbox");
+		m.put("Enable to execute this job in a sandbox VM", "Habilite para executar este trabalho em uma VM sandbox");
 		m.put("End Point", "Ponto de Extremidade");
 		m.put("Enforce Password Policy", "Impor Política de Senha");
 		m.put("Enforce Two-factor Authentication", "Impor Autenticação de Dois Fatores");
@@ -1520,6 +1557,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Excludes", "Exclui");
 		m.put("Execute Commands", "Executar Comandos");
 		m.put("Execute Commands via SSH", "Executar Comandos via SSH");
+		m.put("Execute In Sandbox", "Executar no Sandbox");
 		m.put("Execution paused", "Execução pausada");
 		m.put("Exit Run As", "Sair de Executar Como");
 		m.put("Exited run as", "Saída do modo executar como");
@@ -1835,6 +1873,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Identify Field", "Campo de Identificação");
 		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
 			"Se ativado, uma sessão de login é necessária para acionar automaticamente a indexação de código ao navegar pelos arquivos do repositório ou visualizar diferenças.\nIsso é útil para projetos públicos para evitar que rastreadores de IA anônimos acionem a indexação de cada commit histórico e gerem um enorme cache de índice.");
+		m.put("If enabled, only project managers and users with maintenance permission can work on this project", 
+			"Se ativado, apenas gerentes de projeto e usuários com permissão de manutenção podem trabalhar neste projeto");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"Se habilitado, o backup agendado será executado no servidor principal que é <span wicket:id=\"leadServer\"></span> atualmente");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -1898,7 +1938,10 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Importando problemas para o projeto atual. Observe que os números dos problemas só serão mantidos se todo o gráfico de fork do projeto não tiver nenhum problema para evitar números duplicados");
 		m.put("Importing projects from {0}", "Importando projetos de {0}");
 		m.put("Imports", "Importações");
+		m.put("In Container", "No Container");
+		m.put("In Host", "No Host");
 		m.put("In Projects", "Nos Projetos");
+		m.put("In Sandbox", "No Sandbox");
 		m.put("In case IMAP host certificate is self-signed or its CA root is not accepted, you may tell ${productName} to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into ${productName}</a> instead", 
 			"Se o certificado do host IMAP for autoassinado ou sua CA raiz não for aceita, você pode instruir o ${productName} a ignorar a verificação do certificado. <b class='text-danger'>AVISO: </b> Em uma rede não confiável, isso pode levar a um ataque man-in-the-middle, e você deve <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>importar o certificado para o ${productName}</a> em vez disso");
 		m.put("In case SMTP host certificate is self-signed or its CA root is not accepted, you may tell ${productName} to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into ${productName}</a> instead", 
@@ -2252,6 +2295,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Mail service not configured", "Serviço de email não configurado");
 		m.put("Mail service settings saved", "Configurações do serviço de email salvas");
 		m.put("Main Repository", "Repositório Principal");
+		m.put("Maintenance", "Manutenção");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
 			"Certifique-se de que <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 ou superior</a> está instalado");
 		m.put("Make sure current user has permission to run docker containers", "Certifique-se de que o usuário atual tem permissão para executar contêineres docker");
@@ -2305,6 +2349,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Max Loop Count", "Contagem Máxima de Loops");
 		m.put("Max Upload File Size (MB)", "Tamanho Máximo de Arquivo para Upload (MB)");
 		m.put("Max Value", "Valor Máximo");
+		m.put("Maximum concurrent jobs on each server. Leave empty to use its CPU count.", "Máximo de trabalhos concorrentes em cada servidor. Deixe vazio para usar a contagem de CPUs.");
 		m.put("Maximum number of attempts including the initial run before giving up", "Número máximo de tentativas, incluindo a execução inicial, antes de desistir");
 		m.put("Maximum number of entries to return when search code in repository", "Número máximo de entradas a retornar ao pesquisar código no repositório");
 		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
@@ -2316,6 +2361,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Memory", "Memória");
 		m.put("Memory Limit", "Limite de Memória");
 		m.put("Memory Request", "Requisição de Memória");
+		m.put("Memory for each sandbox, for example 2g. Leave empty to use the Docker Sandboxes default (50% of host memory).", 
+			"Memória para cada sandbox, por exemplo 2g. Deixe vazio para usar o padrão dos Sandboxes Docker (50% da memória do host).");
 		m.put("Memory request for the workspace container.", "Solicitação de memória para o contêiner do workspace.");
 		m.put("Mention Someone", "Mencionar Alguém");
 		m.put("Mention someone", "Mencionar alguém");
@@ -2658,6 +2705,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Operations", "Operações");
 		m.put("Optional", "Opcional");
 		m.put("Optional instructions that define how the AI user should behave", "Instruções opcionais que definem como o usuário de IA deve se comportar");
+		m.put("Optional registry logins for steps and services that use container images inside the sandbox. These logins are not used to pull the sandbox template image. Logins specified in a step or service override these for the same registry. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password.", 
+			"Logins opcionais de registro para etapas e serviços que usam imagens de container dentro do sandbox. Esses logins não são usados para puxar a imagem de template do sandbox. Logins especificados em uma etapa ou serviço substituem estes para o mesmo registro. Para o registro embutido, use <code>@server_url@</code> para a URL do registro, <code>@job_token@</code> para o nome de usuário e o token de acesso para a senha.");
 		m.put("Optionally add new users to specified default group", "Opcionalmente adicione novos usuários ao grupo padrão especificado");
 		m.put("Optionally add newly authenticated user to specified group if membership information is not available", 
 			"Opcionalmente adicione o usuário autenticado ao grupo especificado se as informações de associação não estiverem disponíveis");
@@ -2708,6 +2757,10 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Opcionalmente especifique <span class='text-info'>plataformas separadas por vírgula</span> para escanear, por exemplo <tt>linux/amd64,linux/arm64</tt>. Deixe vazio para escanear todas as plataformas no layout OCI");
 		m.put("Optionally specify API key for authentication", "Opcionalmente, especifique a chave de API para autenticação");
 		m.put("Optionally specify CPU limit for the workspace container.", "Opcionalmente, especifique o limite de CPU para o contêiner do workspace.");
+		m.put("Optionally specify Docker options to create the network for jobs using services. Multiple options should be separated by space, and single options containing spaces should be quoted.", 
+			"Opcionalmente, especifique opções do Docker para criar a rede para trabalhos que usam serviços. Múltiplas opções devem ser separadas por espaço, e opções únicas contendo espaços devem ser colocadas entre aspas.");
+		m.put("Optionally specify Docker options to run containers inside the sandbox. Multiple options should be separated by space, and single options containing spaces should be quoted. Do not specify <code>--network</code> or <code>--net</code> for jobs using services, as their network is managed automatically. File paths refer to the sandbox filesystem; relative file paths are resolved from the job working directory.", 
+			"Opcionalmente, especifique opções do Docker para executar containers dentro do sandbox. Múltiplas opções devem ser separadas por espaço, e opções únicas contendo espaços devem ser colocadas entre aspas. Não especifique <code>--network</code> ou <code>--net</code> para trabalhos que usam serviços, pois sua rede é gerenciada automaticamente. Caminhos de arquivos referem-se ao sistema de arquivos do sandbox; caminhos de arquivos relativos são resolvidos a partir do diretório de trabalho do trabalho.");
 		m.put("Optionally specify Dockerfile relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"Opcionalmente, especifique o Dockerfile relativo ao <a href='${docsite}/concepts#job-workdir' target='_blank'>diretório de trabalho do trabalho</a>. Deixe vazio para usar o arquivo <tt>Dockerfile</tt> no caminho de build especificado acima");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "Opcionalmente especifique a configuração JavaScript a ser usada pelo Renovate CLI");
@@ -2751,8 +2804,8 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Opcionalmente, especifique o caminho absoluto para o arquivo kubeconfig usado pelo kubectl para acessar o cluster. Deixe vazio para que o kubectl determine o acesso ao cluster automaticamente (funciona quando o próprio ${productName} é executado no cluster).");
 		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
 			"Opcionalmente, especifique o caminho absoluto para o executável kubectl. Deixe vazio para usar o kubectl do PATH do sistema.");
-		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint", 
-			"Especifique opcionalmente cabeçalhos HTTP adicionais para incluir na solicitação POST do webhook, por exemplo, um cabeçalho de Autorização exigido pelo endpoint receptor");
+		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint. X-OneDev-Signature is generated automatically and cannot be overridden", 
+			"Opcionalmente, especifique cabeçalhos HTTP adicionais para incluir na solicitação POST do webhook, por exemplo, um cabeçalho de Autorização exigido pelo endpoint receptor. X-OneDev-Signature é gerado automaticamente e não pode ser substituído");
 		m.put("Optionally specify additional options for buildx build command", "Opcionalmente especifique opções adicionais para o comando de construção buildx");
 		m.put("Optionally specify allowed <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> origins. For a CORS simple or preflight request, if value of request header <code>Origin</code> is included here, the response header <code>Access-Control-Allow-Origin</code> will be set to the same value", 
 			"Opcionalmente especifique origens <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> permitidas. Para uma solicitação simples ou prévia de CORS, se o valor do cabeçalho de solicitação <code>Origin</code> estiver incluído aqui, o cabeçalho de resposta <code>Access-Control-Allow-Origin</code> será configurado com o mesmo valor");
@@ -2903,12 +2956,15 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Optionally specify required reviewers for changes of specified branch", "Opcionalmente especifique revisores necessários para mudanças no branch especificado");
 		m.put("Optionally specify revision to create branch from. Leave empty to create from build commit", 
 			"Opcionalmente especifique revisão para criar branch. Deixe vazio para criar a partir do commit de construção");
+		m.put("Optionally specify sandbox memory, for example 2g", "Opcionalmente, especifique a memória do sandbox, por exemplo 2g");
 		m.put("Optionally specify separate directory to store build artifacts. Non-absolute directory is considered to be relative to site directory", 
 			"Opcionalmente especifique diretório separado para armazenar artefatos de construção. Diretório não absoluto é considerado relativo ao diretório do site");
 		m.put("Optionally specify separate directory to store git lfs files. Non-absolute directory is considered to be relative to site directory", 
 			"Opcionalmente especifique diretório separado para armazenar arquivos git lfs. Diretório não absoluto é considerado relativo ao diretório do site");
 		m.put("Optionally specify separate directory to store package files. Non-absolute directory is considered to be relative to site directory", 
 			"Opcionalmente especifique diretório separado para armazenar arquivos de pacote. Diretório não absoluto é considerado relativo ao diretório do site");
+		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
+			"Opcionalmente, especifique os serviços necessários para este trabalho. <b class='text-warning'>NOTA:</b> Serviços são suportados por executores Docker, Kubernetes e sandbox");
 		m.put("Optionally specify space-separated accessible site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. The public site is always accessible", 
 			"Opcionalmente, especifique nomes de sites acessíveis separados por espaço. Use '*' ou '?' para correspondência curinga. Prefixe com '-' para excluir. O site público é sempre acessível");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
@@ -2960,6 +3016,8 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Opcionalmente especifique onde executar pods de serviço especificados no trabalho. O primeiro localizador correspondente será usado. Se nenhum localizador for encontrado, o seletor de nó do executor será usado");
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"Opcionalmente especifique o diretório de trabalho do contêiner. Deixe vazio para usar o diretório de trabalho padrão do contêiner");
+		m.put("Optionally specify workspace ports to expose. These ports will be mapped to random ports on host\nwhich will be displayed on the workspace page", 
+			"Opcionalmente, especifique as portas do workspace a serem expostas. Essas portas serão mapeadas para portas aleatórias no host\nque serão exibidas na página do workspace");
 		m.put("Options", "Opções");
 		m.put("Or below to build.gradle.kts (Kotlin)", "Ou o seguinte ao build.gradle.kts (Kotlin)");
 		m.put("Or manually enter the secret key below in your authenticator app", "Ou insira manualmente a chave secreta abaixo no seu aplicativo autenticador");
@@ -3054,6 +3112,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Path containing spaces or starting with dash needs to be quoted", "Caminho contendo espaços ou começando com traço precisa ser citado");
 		m.put("Path placeholder", "Placeholder de Caminho");
 		m.put("Path to kubectl", "Caminho para kubectl");
+		m.put("Path to the Docker Sandboxes sbx executable", "Caminho para o executável sbx dos Sandboxes Docker");
 		m.put("Paths", "Caminhos");
 		m.put("Pattern", "Padrão");
 		m.put("Pause", "Pausar");
@@ -3232,6 +3291,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Project does not have any code yet", "O projeto ainda não possui nenhum código");
 		m.put("Project forked", "Projeto bifurcado");
 		m.put("Project id", "ID do projeto");
+		m.put("Project is in maintenance mode", "O projeto está no modo de manutenção");
 		m.put("Project list", "Lista de Projetos");
 		m.put("Project manage privilege required to delete \"{0}\"", "Privilégio de gerenciamento de projeto necessário para excluir \"{0}\"");
 		m.put("Project manage privilege required to modify \"{0}\"", "Privilégio de gerenciamento de projeto necessário para modificar \"{0}\"");
@@ -3265,9 +3325,12 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Prompt para usar ao resumir comentários de pull request. O idioma de exibição será adicionado automaticamente");
 		m.put("Properties", "Propriedades");
 		m.put("Provide server id (guild id) to restrict access only to server members", "Forneça o ID do servidor (ID do guild) para restringir o acesso apenas aos membros do servidor");
+		m.put("Provision Mode", "Modo de Provisionamento");
 		m.put("Provisioner", "Provisionador");
 		m.put("Proxy", "Proxy");
 		m.put("Prune Builder Cache", "Limpar Cache do Builder");
+		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
+			"Limpe o cache de imagens do builder buildx do Docker. Esta etapa chama o comando docker buildx prune para remover o cache do builder usado pelo executor Docker ou sandbox");
 		m.put("Public Key", "Chave Pública");
 		m.put("Public Roles", "Funções Públicas");
 		m.put("Public site", "Site público");
@@ -3432,7 +3495,11 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Remember Me", "Lembrar-me");
 		m.put("Remote Docker Executor", "Executor Docker remoto");
 		m.put("Remote Docker Provisioner", "Provisionador Docker Remoto");
+		m.put("Remote Host Executor", "Executor de Host Remoto");
+		m.put("Remote Host Provisioner", "Provisionador de Host Remoto");
 		m.put("Remote Machine", "Máquina remota");
+		m.put("Remote Sandbox Executor", "Executor de Sandbox Remoto");
+		m.put("Remote Sandbox Provisioner", "Provisionador de Sandbox Remoto");
 		m.put("Remote URL", "URL remoto");
 		m.put("Remote Url", "URL remoto");
 		m.put("Remove", "Remover");
@@ -3562,11 +3629,15 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Run below commands to install this package", "Execute os comandos abaixo para instalar este pacote");
 		m.put("Run below commands to use this chart", "Execute os comandos abaixo para usar este gráfico");
 		m.put("Run below commands to use this package", "Execute os comandos abaixo para usar este pacote");
+		m.put("Run docker buildx imagetools command with specified arguments. This step can be executed by Docker or sandbox executors", 
+			"Execute o comando docker buildx imagetools com os argumentos especificados. Esta etapa pode ser executada por executores Docker ou sandbox");
 		m.put("Run job", "Executar trabalho");
 		m.put("Run job in another project", "Executar trabalho em outro projeto");
 		m.put("Run on Bare Metal/Virtual Machine", "Executar em Bare Metal/Máquina Virtual");
 		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
 			"Execute o scanner osv para escanear a fonte do projeto em busca de vulnerabilidades em <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>vários arquivos de bloqueio</a>. Só pode ser executado por executor compatível com docker.");
+		m.put("Run specified docker container. <a href='${docsite}/concepts#job-workdir' target='_blank'>Job workdir</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. This step can be executed by Docker or sandbox executors", 
+			"Execute o container Docker especificado. <a href='${docsite}/concepts#job-workdir' target='_blank'>Diretório de trabalho do trabalho</a> é montado no container e seu caminho é colocado na variável de ambiente <code>ONEDEV_WORKDIR</code>. Esta etapa pode ser executada por executores Docker ou sandbox");
 		m.put("Run specified step template", "Executar modelo de etapa especificado");
 		m.put("Run this job", "Executar este trabalho");
 		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
@@ -3578,6 +3649,14 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Run via Docker Container", "Executar via contêiner Docker");
 		m.put("Running", "Executando");
 		m.put("Running Takes", "Executando leva");
+		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
+			"Executa etapas de shell e Docker em um Sandbox Docker novo em um host <a href='/~administration/agents' target='_blank'>agente</a>. Os serviços do trabalho são executados dentro do sandbox e são acessíveis pelo nome do serviço a partir de etapas de shell e container. O sandbox e seus serviços são excluídos após cada trabalho. Siga <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Trabalhando com Sandbox</a> para configurar cada host agente.");
+		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on the server. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up the server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Sandbox Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"Executa etapas de shell e Docker em um Sandbox Docker novo no servidor. Os serviços do trabalho são executados dentro do sandbox e são acessíveis pelo nome do serviço a partir de etapas de shell e container. O sandbox e seus serviços são excluídos após cada trabalho. Siga <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Trabalhando com Sandbox</a> para configurar o host do servidor. <b class='text-warning'>AVISO:</b> Para maior segurança, use um Executor de Sandbox Remoto em um host agente dedicado, especialmente para trabalhos não confiáveis.");
+		m.put("Runs workspaces directly in a Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Setup commands and terminals run as the template image's default user. The sandbox is removed when the workspace is deleted. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
+			"Executa workspaces diretamente em um Sandbox Docker em um host <a href='/~administration/agents' target='_blank'>agente</a>. Comandos de configuração e terminais são executados como o usuário padrão da imagem de template. O sandbox é removido quando o workspace é excluído. Siga <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Trabalhando com Sandbox</a> para configurar cada host agente.");
+		m.put("Runs workspaces directly in a Docker Sandbox on the server. Setup commands and terminals run as the template image's default user.\nThe sandbox is removed when the workspace is deleted.\nSelect <b>Sandbox</b> as the workspace spec's provision mode. To use Docker in workspace commands,\nselect a sandbox template that provides Docker in the workspace spec.\nFollow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a>\nto set up the server host. For untrusted workspaces, use a Remote Sandbox Provisioner on a dedicated agent host.", 
+			"Executa workspaces diretamente em um Sandbox Docker no servidor. Comandos de configuração e terminais são executados como o usuário padrão da imagem de template.\nO sandbox é removido quando o workspace é excluído.\nSelecione <b>Sandbox</b> como o modo de provisionamento da especificação do workspace. Para usar Docker em comandos do workspace,\nselecione um template de sandbox que forneça Docker na especificação do workspace.\nSiga <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Trabalhando com Sandbox</a>\npara configurar o host do servidor. Para workspaces não confiáveis, use um Provisionador de Sandbox Remoto em um host agente dedicado.");
 		m.put("SMTP Host", "Host SMTP");
 		m.put("SMTP Password", "Senha SMTP");
 		m.put("SMTP User", "Usuário SMTP");
@@ -3599,6 +3678,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("SSO provider updated", "Provedor SSO atualizado");
 		m.put("STAGED", "ESTAGIADO");
 		m.put("SUCCESSFUL", "SUCESSO");
+		m.put("Sandbox Executable", "Executável do Sandbox");
+		m.put("Sandbox Template", "Template do Sandbox");
 		m.put("Save", "Salvar");
 		m.put("Save Prompt", "Salvar Prompt");
 		m.put("Save Query", "Salvar consulta");
@@ -3670,9 +3751,13 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Server", "Servidor");
 		m.put("Server Docker Executor", "Executor Docker do servidor");
 		m.put("Server Docker Provisioner", "Provisionador Docker do Servidor");
+		m.put("Server Host Executor", "Executor de Host do Servidor");
+		m.put("Server Host Provisioner", "Provisionador de Host do Servidor");
 		m.put("Server Id", "ID do servidor");
 		m.put("Server Information", "Informações do servidor");
 		m.put("Server Log", "Log do servidor");
+		m.put("Server Sandbox Executor", "Executor de Sandbox do Servidor");
+		m.put("Server Sandbox Provisioner", "Provisionador de Sandbox do Servidor");
 		m.put("Server Setup", "Configuração do servidor");
 		m.put("Server URL", "URL do servidor");
 		m.put("Server fingerprint", "Impressão digital do servidor");
@@ -3877,6 +3962,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Specify CPD result xml file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
 			"Especifique o arquivo xml de resultado do CPD relativo ao <a href='${docsite}/concepts#job-workdir'>diretório de trabalho do job</a>, por exemplo, <tt>target/cpd.xml</tt>. Use * ou ? para correspondência de padrão");
 		m.put("Specify Commit Message", "Especifique a Mensagem de Commit");
+		m.put("Specify Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
+			"Especifique a imagem Docker para testar. A imagem deve ter shell, Git, Git LFS e tmux instalados");
 		m.put("Specify ESLint report file in checkstyle format under <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
 			"Especifique o arquivo de relatório do ESLint no formato checkstyle no <a href='${docsite}/concepts#job-workdir'>diretório de trabalho do job</a>. Este arquivo pode ser gerado com a opção do ESLint <tt>'-f checkstyle'</tt> e <tt>'-o'</tt>. Use * ou ? para correspondência de padrão");
 		m.put("Specify GitHub API url, for instance <tt>https://api.github.com</tt>", "Especifique a URL da API do GitHub, por exemplo <tt>https://api.github.com</tt>");
@@ -3944,6 +4031,14 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Especifique um <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron schedule</a> para disparar o job automaticamente. <b class='text-info'>Nota:</b> Para economizar recursos, os segundos na expressão cron serão ignorados, e o intervalo mínimo de agendamento é de um minuto");
 		m.put("Specify a Container Image to Test Against", "Especifique uma Imagem de Contêiner para Testar");
 		m.put("Specify a Docker Image to Test Against", "Especifique uma Imagem Docker para Testar");
+		m.put("Specify a Docker image to test against. The image must have shell installed", "Especifique uma imagem Docker para testar. A imagem deve ter shell instalado");
+		m.put("Specify a Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
+			"Especifique uma imagem Docker para testar. A imagem deve ter shell, Git, Git LFS e tmux instalados");
+		m.put("Specify a Docker sandbox shell template image to test against. The image must have shell, Git, Git LFS, and Python 3 installed. To also test a container, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"Especifique uma imagem de template de shell de sandbox Docker para testar. A imagem deve ter shell, Git, Git LFS e Python 3 instalados. Para também testar um container, o Docker deve estar configurado na imagem, e um usuário padrão não-root deve ter acesso sudo sem senha. Veja o <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>guia de configuração do template</a>.");
+		m.put("Specify a Docker sandbox template image to test against. The image must have shell, Git, Git LFS, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"Especifique uma imagem de template de sandbox Docker para testar. A imagem deve ter shell, Git, Git LFS, Python 3 e tmux instalados. Veja o <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>guia de configuração do template</a>.");
+		m.put("Specify a Sandbox Template to Test Against", "Especifique um Template de Sandbox para Testar");
 		m.put("Specify a custom field of Enum type", "Especifique um campo personalizado do tipo Enum");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "Especifique uma consulta padrão para filtrar/ordenar issues resolvidas dos jobs especificados");
 		m.put("Specify a folder relative to the repository root. Leave empty to upload to the root folder.", 
@@ -4000,8 +4095,14 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Specify branch, tag or commit in above project to import build spec from", "Especifique o branch, tag ou commit no projeto acima para importar a especificação de build");
 		m.put("Specify by Build Number", "Especifique por Número de Build");
 		m.put("Specify cache entries", "Especifique entradas de cache");
+		m.put("Specify cache path. Non-absolute path is considered to be relative to\n<a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.\nHost executors run directly on the host machine and only accept relative paths", 
+			"Especifique o caminho do cache. Caminhos não absolutos são considerados relativos ao\n<a href='${docsite}/concepts#job-workdir' target='_blank'>diretório de trabalho do trabalho</a>.\nExecutores de host executam diretamente na máquina host e aceitam apenas caminhos relativos");
+		m.put("Specify cache path. Non-absolute path is considered to be relative to working directory.\nHost provisioners only accept relative paths", 
+			"Especifique o caminho do cache. Caminhos não absolutos são considerados relativos ao diretório de trabalho.\nProvisionadores de host aceitam apenas caminhos relativos");
 		m.put("Specify cache upload strategy after build successful. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
 			"Especifique a estratégia de upload de cache após a construção bem-sucedida. <i>Carregar Se Não Houver Correspondência Exata</i>\nsignifica carregar quando nenhum cache for encontrado com chave e checksum correspondentes, e\n<i>Carregar Se Alterado</i> significa carregar se alguns arquivos no caminho do cache forem alterados");
+		m.put("Specify cache upload strategy before deleting an active workspace. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
+			"Especifique a estratégia de upload de cache antes de excluir um workspace ativo. <i>Fazer Upload se Não Houver Correspondência Exata</i>\nsignifica fazer upload quando nenhum cache for encontrado com chave e checksum correspondentes, e\n<i>Fazer Upload se Alterado</i> significa fazer upload se alguns arquivos no caminho do cache forem alterados");
 		m.put("Specify certificate to trust if you are using self-signed certificate for remote repository", 
 			"Especifique o certificado para confiar caso esteja usando certificado autoassinado para o repositório remoto");
 		m.put("Specify certificates to trust if you are using self-signed certificates for your docker registries", 
@@ -4028,6 +4129,10 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Specify condition to retry build upon failure", "Especifique a condição para tentar novamente a construção em caso de falha");
 		m.put("Specify configuration discovery url of your OpenID provider, for instance: <code>https://openid.example.com/.well-known/openid-configuration</code>. Make sure to use HTTPS protocol as ${productName} relies on TLS encryption to ensure token validity", 
 			"Especifique a URL de descoberta de configuração do seu provedor OpenID, por exemplo: <code>https://openid.example.com/.well-known/openid-configuration</code>. Certifique-se de usar o protocolo HTTPS, pois o ${productName} depende da criptografia TLS para garantir a validade do token");
+		m.put("Specify container image to create workspace inside. The image must have shell, Git, Git LFS, and tmux installed", 
+			"Especifique a imagem do container para criar o workspace dentro. A imagem deve ter shell, Git, Git LFS e tmux instalados");
+		m.put("Specify container image to execute commands inside. The image must have shell installed", 
+			"Especifique a imagem do container para executar comandos dentro. A imagem deve ter shell instalado");
 		m.put("Specify container image to run", "Especifique a imagem do contêiner para executar");
 		m.put("Specify content of the config file", "Especifique o conteúdo do arquivo de configuração");
 		m.put("Specify cppcheck xml result file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
@@ -4177,6 +4282,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Specify root URL to access this server", "Especifique a URL raiz para acessar este servidor");
 		m.put("Specify ruff json result file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
 			"Especifique o arquivo json de resultado do ruff relativo ao <a href='${docsite}/concepts#job-workdir'>diretório de trabalho do job</a>. Este arquivo pode ser gerado com a opção de formato de saída json do ruff, por exemplo, <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Observe que não falhamos o comando ruff em caso de violações, pois esta etapa falhará o build com base no limite configurado. Use * ou ? para correspondência de padrão");
+		m.put("Specify sandbox template image to create workspace from. The image must have shell, Git, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"Especifique a imagem de template de sandbox para criar o workspace. A imagem deve ter shell, Git, Python 3 e tmux instalados. Veja o <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>guia de configuração do template</a>.");
 		m.put("Specify shell commands to execute under the <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"Especifique os comandos shell para executar no <a href='${docsite}/concepts#job-workdir' target='_blank'>diretório de trabalho do job</a>");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "Especifique o parâmetro de origem para o comando SCP, por exemplo <code>app.tar.gz</code>");
@@ -4215,6 +4322,7 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Especifique o privilégio de código para o papel. A permissão de Escrita implica a permissão de CriarWorkspaces");
 		m.put("Specify the condition current build must satisfy to execute this action", "Especifique a condição que a build atual deve satisfazer para executar esta ação");
 		m.put("Specify the condition preserved builds must match", "Especifique a condição que as builds preservadas devem corresponder");
+		m.put("Specify the container image to test against. The image must have shell installed", "Especifique a imagem do container para testar. A imagem deve ter shell instalado");
 		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. ${productName} creates the namespace if it does not yet exist.", 
 			"Especifique o namespace do Kubernetes para hospedar os workspaces deste provisionador. ${productName} cria o namespace se ele ainda não existir.");
 		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now ${productName} only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
@@ -4223,6 +4331,9 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Especifique a chave privada (em formato PEM) usada pelo servidor SSH para estabelecer conexões com o cliente");
 		m.put("Specify the repository folder to store wiki pages.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
 			"Especifique a pasta do repositório para armazenar páginas wiki.\nSe você não quiser armazenar páginas wiki no repositório do projeto, a pasta especificada\npode ser um submódulo Git. Para excluir arquivos do painel de Páginas Wiki, adicione um arquivo <code>.wikiignore</code>\nna pasta raiz do wiki com padrões de exclusão do Git relativos a essa pasta");
+		m.put("Specify the sandbox CLI executable", "Especifique o executável CLI do sandbox");
+		m.put("Specify the sandbox template image used to run this job. The image must have shell, Git, Git LFS, and Python 3 installed. If the job runs Docker-related steps or services, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"Especifique a imagem de template do sandbox usada para executar este trabalho. A imagem deve ter shell, Git, Git LFS e Python 3 instalados. Se o trabalho executar etapas ou serviços relacionados ao Docker, o Docker deve estar configurado na imagem, e um usuário padrão não-root deve ter acesso sudo sem senha. Veja o <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>guia de configuração do template</a>.");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a ${productName} group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at ${productName} side", 
 			"Especifique a estratégia para recuperar informações de associação de grupo. Para conceder permissões apropriadas a um grupo LDAP, um grupo ${productName} com o mesmo nome deve ser definido. Use a estratégia <tt>Não Recuperar Grupos</tt> se desejar gerenciar associações de grupo no lado do ${productName}");
 		m.put("Specify timeout in seconds when communicating with mail server", "Especifique o tempo limite em segundos ao se comunicar com o servidor de e-mail");
@@ -4239,6 +4350,8 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Especifique o tempo limite da sessão da interface web em minutos. Deixe vazio para nunca expirar quando o navegador estiver aberto. Sessões existentes não serão afetadas após alterar este valor.");
 		m.put("Specify webhook url to post events", "Especifique a URL do webhook para postar eventos");
 		m.put("Specify whether to create a work in progress pull request", "Especifique se deseja criar um pull request de trabalho em andamento");
+		m.put("Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)", 
+			"Especifique se deseja provisionar o workspace em um sandbox, container Docker ou diretamente no host (barebone)");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here", 
 			"Especifique qual estado de issue usar para issues fechadas do GitHub.<br><b>NOTA: </b> Você pode personalizar os estados de issue do ${productName} caso não haja uma opção apropriada aqui");
 		m.put("Specify which issue state to use for closed GitLab issues.<br><b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here", 
@@ -4416,6 +4529,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Test", "Teste");
 		m.put("Test Case", "Caso de Teste");
 		m.put("Test Cases", "Casos de Teste");
+		m.put("Test Container", "Testar Container");
+		m.put("Test Sandbox Executor", "Testar Executor de Sandbox");
 		m.put("Test Settings", "Configurações de Teste");
 		m.put("Test Suite", "Suite de Teste");
 		m.put("Test Suites", "Suites de Teste");
@@ -4438,12 +4553,12 @@ public class Translation_pt extends TranslationResourceBundle {
 			"A permissão para executar o trabalho manualmente. Também implica a permissão para acessar o log de construção, o pipeline de construção e todos os relatórios publicados");
 		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
 			"O endereço de email principal é usado para receber notificações e exibir seu gravatar (se habilitado). Também é usado para operações Git baseadas na web, a menos que os endereços de email sejam mantidos privados.");
-		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from ${productName}. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
-			"O segredo que permite garantir que as solicitações POST enviadas para a URL de payload sejam do ${productName}. Quando você define um segredo, receberá o cabeçalho X-OneDev-Signature na solicitação POST do webhook");
 		m.put("The service desk feature enables user to create issues by sending emails to ${productName}. Issues can be discussed over email completely, without the need of logging to ${productName}.", 
 			"O recurso de service desk permite que o usuário crie issues enviando emails para ${productName}. As issues podem ser discutidas completamente por email, sem a necessidade de fazer login no ${productName}.");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
 			"O recurso de service desk permite ao usuário criar questões enviando emails para o OneDev. As questões podem ser discutidas completamente por email, sem a necessidade de fazer login no OneDev.");
+		m.put("The shared secret used to verify webhook POST requests from ${productName}. X-OneDev-Signature contains the lowercase hexadecimal HMAC-SHA256 of the raw request body, using the UTF-8 encoded secret as the key. Verify it with a constant-time comparison before parsing the body. The secret itself is not sent. Use HTTPS to protect the webhook payload", 
+			"O segredo compartilhado usado para verificar solicitações POST de webhook do ${productName}. X-OneDev-Signature contém o HMAC-SHA256 hexadecimal em minúsculas do corpo bruto da solicitação, usando o segredo codificado em UTF-8 como chave. Verifique-o com uma comparação de tempo constante antes de analisar o corpo. O próprio segredo não é enviado. Use HTTPS para proteger a carga útil do webhook");
 		m.put("Then add the package", "Em seguida, adicione o pacote");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "Então insira o código mostrado no autenticador TOTP para verificar");
 		m.put("Then publish package from project directory like below", "Então publique o pacote do diretório do projeto como abaixo");
@@ -4462,6 +4577,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("There are unsaved changes, discard and continue?", "Existem alterações não salvas, descartar e continuar?");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"Esses autenticadores normalmente funcionam no seu celular, alguns exemplos são Google Authenticator, Microsoft Authenticator, Authy, 1Password, etc.");
+		m.put("These settings are only used when running Docker containers inside the sandbox VM.", 
+			"Essas configurações são usadas apenas ao executar containers Docker dentro da VM sandbox.");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
 			"Este <span wicket:id=\"elementTypeName\"></span> foi importado de <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>");
 		m.put("This Month", "Este mês");
@@ -4482,10 +4599,16 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Esta data está usando o <a href=\"https://www.w3.org/TR/NOTE-datetime\">formato ISO 8601</a>");
 		m.put("This email address is being used", "Este endereço de email está sendo usado");
 		m.put("This email address is not verified", "Este endereço de email não está verificado");
+		m.put("This executor runs build jobs as Docker containers on ${productName} server. <b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"Este executor executa trabalhos de construção como containers Docker no servidor ${productName}. <b class='text-warning'>AVISO:</b> Para maior segurança, use um Executor Docker Remoto em um host agente dedicado, especialmente para trabalhos não confiáveis.");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
 			"Este executor executa trabalhos de build como contêineres Docker em máquinas remotas via <a href='/~administration/agents' target='_blank'>agentes</a>");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"Este executor executa trabalhos de build como pods em um cluster Kubernetes. Nenhum agente é necessário.<b class='text-danger'>Nota:</b> Certifique-se de que a URL do servidor está especificada corretamente nas configurações do sistema, pois os pods de trabalho precisam acessá-la para baixar o código-fonte e os artefatos");
+		m.put("This executor runs build jobs directly on remote hosts via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"Este executor executa trabalhos de construção diretamente em hosts remotos via <a href='/~administration/agents' target='_blank'>agentes</a>");
+		m.put("This executor runs build jobs directly on the ${productName} server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Host Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"Este executor executa trabalhos de construção diretamente no host do servidor ${productName}. <b class='text-warning'>AVISO:</b> Para maior segurança, use um Executor de Host Remoto em um host agente dedicado, especialmente para trabalhos não confiáveis.");
 		m.put("This field is required", "Este campo é obrigatório");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"Este filtro é usado para determinar a entrada LDAP do usuário atual. Por exemplo: <i>(&(uid={0})(objectclass=person))</i>. Neste exemplo, <i>{0}</i> representa o nome de login do usuário atual.");
@@ -4548,6 +4671,12 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("This permission enables one to schedule issues into iterations", "Esta permissão permite agendar problemas em iterações");
 		m.put("This property is imported from {0}", "Esta propriedade é importada de {0}");
 		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "Este provisionador cria workspaces como pods dentro do cluster Kubernetes");
+		m.put("This provisioner creates workspaces directly on remote agent hosts, and requires tmux to be installed on matched agents", 
+			"Este provisionador cria workspaces diretamente em hosts agentes remotos e requer que o tmux esteja instalado nos agentes correspondentes");
+		m.put("This provisioner creates workspaces directly on the ${productName} server host, and requires\ntmux to be installed on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Host Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
+			"Este provisionador cria workspaces diretamente no host do servidor ${productName} e requer\nque o tmux esteja instalado no servidor ${productName}.\n<b class='text-warning'>AVISO:</b> Para maior segurança, use um Provisionador de Host Remoto\nem um host agente dedicado, especialmente para workspaces não confiáveis.");
+		m.put("This provisioner creates workspaces inside Docker containers on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
+			"Este provisionador cria workspaces dentro de containers Docker no servidor ${productName}.\n<b class='text-warning'>AVISO:</b> Para maior segurança, use um Provisionador Docker Remoto\nem um host agente dedicado, especialmente para workspaces não confiáveis.");
 		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
 			"Este provisionador cria workspaces dentro de contêineres Docker em uma máquina remota via\n<a href='/~administration/agents' target='_blank'>agentes</a>.");
 		m.put("This pull request has been discarded", "Este pull request foi descartado");
@@ -4990,8 +5119,12 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Se sempre puxar a imagem ao executar o container ou construir imagens ou não. Esta opção deve ser habilitada para evitar que imagens sejam substituídas por jobs maliciosos executados no mesmo nó");
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"Se deve ou não sempre puxar a imagem ao executar o contêiner. Esta opção deve ser habilitada para evitar que imagens sejam substituídas por operações maliciosas");
+		m.put("Whether or not to always pull images when running containers or building images inside the sandbox. If disabled, cached images are used when available.", 
+			"Se deve ou não sempre puxar imagens ao executar containers ou construir imagens dentro do sandbox. Se desativado, imagens em cache são usadas quando disponíveis.");
 		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
 			"Se deve ou não sempre puxar a imagem ao executar o contêiner. Habilitar evita que imagens sejam substituídas por cargas de trabalho maliciosas executadas no mesmo nó.");
+		m.put("Whether or not to always pull the template image when creating a sandbox. If disabled, a cached image is used when available.", 
+			"Se deve ou não sempre puxar a imagem de template ao criar um sandbox. Se desativado, uma imagem em cache é usada quando disponível.");
 		m.put("Whether or not to be able to access time tracking info of issues", "Se será possível acessar informações de rastreamento de tempo das issues ou não");
 		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
 			"Se deve ou não criar um problema no painel de dependências. Se desativado, o Renovate não criará ou atualizará problemas, e problemas existentes podem ser fechados manualmente. Opções como limites de taxa ainda podem ser controladas por meio da configuração do Renovate");
@@ -5043,6 +5176,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Whether the password must contain at least one number", "Se a senha deve conter pelo menos um número");
 		m.put("Whether the password must contain at least one special character", "Se a senha deve conter pelo menos um caractere especial");
 		m.put("Whether the password must contain at least one uppercase letter", "Se a senha deve conter pelo menos uma letra maiúscula");
+		m.put("Whether to always pull the template image when creating a sandbox", "Se deve sempre puxar a imagem de template ao criar um sandbox");
 		m.put("Whole Word", "Palavra Inteira");
 		m.put("Widget", "Widget");
 		m.put("Widget Tab", "Aba do Widget");
@@ -5376,132 +5510,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("<b class='text-danger'>NOTE: </b>Remote host provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>NOTA: </b>O provisionador de host remoto é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
-		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox executor is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>NOTA: </b>O executor de sandbox remoto é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
-		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>NOTA: </b>O provisionador de sandbox remoto é um recurso empresarial. <a href='${website}/pricing' target='_blank'>Experimente grátis</a> por 30 dias");
-		m.put("Always Pull Container Image", "Sempre Puxar Imagem de Container");
-		m.put("Always Pull Template Image", "Sempre Puxar Imagem de Template");
-		m.put("Build docker image with buildx. This step can be executed by docker or sandbox executors. Docker executors use their configured buildx builder; sandbox executors use the default builder inside the sandbox. To build image with Kubernetes executor, please use kaniko step instead", 
-			"Construa a imagem Docker com buildx. Esta etapa pode ser executada por executores Docker ou sandbox. Os executores Docker usam seu builder buildx configurado; os executores sandbox usam o builder padrão dentro do sandbox. Para construir imagens com o executor Kubernetes, use a etapa kaniko em vez disso");
-		m.put("CPU count for each sandbox. Leave empty to use the Docker Sandboxes default (All CPUs).", 
-			"Contagem de CPUs para cada sandbox. Deixe vazio para usar o padrão dos Sandboxes Docker (Todas as CPUs).");
-		m.put("CPUs", "CPUs");
-		m.put("Container Settings", "Configurações do Container");
-		m.put("Create a workspace spec running Claude Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Claude Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Crie uma especificação de workspace executando Claude Code diretamente no host do workspace.\nWorkspaces usando a especificação criada compartilharão os mesmos ambientes e configurações.\nPara usar este template, certifique-se de que:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> está instalado no host do workspace</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> está instalado no host do workspace e habilidades complementares estão instaladas para o Claude Code</li>\n    <li>Um provisionador de host foi adicionado em 'Administração / Provisionadores de Workspace' com 'projetos aplicáveis' configurados corretamente</li>\n</ul>");
-		m.put("Create a workspace spec running Claude Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"Crie uma especificação de workspace executando Claude Code dentro de um sandbox para isolamento.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>imagem de template do sandbox</a>\nposteriormente para atender às suas necessidades, se desejar");
-		m.put("Create a workspace spec running Codex directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Codex</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Crie uma especificação de workspace executando Codex diretamente no host do workspace.\nWorkspaces usando a especificação criada compartilharão os mesmos ambientes e configurações.\nPara usar este template, certifique-se de que:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> está instalado no host do workspace</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> está instalado no host do workspace e habilidades complementares estão instaladas para o Codex</li>\n    <li>Um provisionador de host foi adicionado em 'Administração / Provisionadores de Workspace' com 'projetos aplicáveis' configurados corretamente</li>\n</ul>");
-		m.put("Create a workspace spec running Codex inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"Crie uma especificação de workspace executando Codex dentro de um sandbox para isolamento.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>imagem de template do sandbox</a>\nposteriormente para atender às suas necessidades, se desejar");
-		m.put("Create a workspace spec running Cursor directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Cursor CLI</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Crie uma especificação de workspace executando Cursor diretamente no host do workspace.\nWorkspaces usando a especificação criada compartilharão os mesmos ambientes e configurações.\nPara usar este template, certifique-se de que:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> está instalado no host do workspace</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> está instalado no host do workspace e habilidades complementares estão instaladas para o Cursor CLI</li>\n    <li>Um provisionador de host foi adicionado em 'Administração / Provisionadores de Workspace' com 'projetos aplicáveis' configurados corretamente</li>\n</ul>");
-		m.put("Create a workspace spec running Cursor inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"Crie uma especificação de workspace executando Cursor dentro de um sandbox para isolamento.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>imagem de template do sandbox</a>\nposteriormente para atender às suas necessidades, se desejar");
-		m.put("Create a workspace spec running Open Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Open Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"Crie uma especificação de workspace executando Open Code diretamente no host do workspace.\nWorkspaces usando a especificação criada compartilharão os mesmos ambientes e configurações.\nPara usar este template, certifique-se de que:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> está instalado no host do workspace</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> está instalado no host do workspace e habilidades complementares estão instaladas para o Open Code</li>\n    <li>Um provisionador de host foi adicionado em 'Administração / Provisionadores de Workspace' com 'projetos aplicáveis' configurados corretamente</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"Crie uma especificação de workspace executando Open Code dentro de um sandbox para isolamento.\nVocê pode personalizar a <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>imagem de template do sandbox</a>\nposteriormente para atender às suas necessidades, se desejar");
-		m.put("Docker sandbox default", "Padrão de sandbox Docker");
-		m.put("Enable to also test running a command in a Docker container inside the sandbox", "Habilite para também testar a execução de um comando em um container Docker dentro do sandbox");
-		m.put("Enable to execute this job in a sandbox VM", "Habilite para executar este trabalho em uma VM sandbox");
-		m.put("Execute In Sandbox", "Executar no Sandbox");
-		m.put("In Container", "No Container");
-		m.put("In Host", "No Host");
-		m.put("In Sandbox", "No Sandbox");
-		m.put("Maximum concurrent jobs on each server. Leave empty to use its CPU count.", "Máximo de trabalhos concorrentes em cada servidor. Deixe vazio para usar a contagem de CPUs.");
-		m.put("Memory for each sandbox, for example 2g. Leave empty to use the Docker Sandboxes default (50% of host memory).", 
-			"Memória para cada sandbox, por exemplo 2g. Deixe vazio para usar o padrão dos Sandboxes Docker (50% da memória do host).");
-		m.put("Optional registry logins for steps and services that use container images inside the sandbox. These logins are not used to pull the sandbox template image. Logins specified in a step or service override these for the same registry. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password.", 
-			"Logins opcionais de registro para etapas e serviços que usam imagens de container dentro do sandbox. Esses logins não são usados para puxar a imagem de template do sandbox. Logins especificados em uma etapa ou serviço substituem estes para o mesmo registro. Para o registro embutido, use <code>@server_url@</code> para a URL do registro, <code>@job_token@</code> para o nome de usuário e o token de acesso para a senha.");
-		m.put("Optionally specify Docker options to create the network for jobs using services. Multiple options should be separated by space, and single options containing spaces should be quoted.", 
-			"Opcionalmente, especifique opções do Docker para criar a rede para trabalhos que usam serviços. Múltiplas opções devem ser separadas por espaço, e opções únicas contendo espaços devem ser colocadas entre aspas.");
-		m.put("Optionally specify Docker options to run containers inside the sandbox. Multiple options should be separated by space, and single options containing spaces should be quoted. Do not specify <code>--network</code> or <code>--net</code> for jobs using services, as their network is managed automatically. File paths refer to the sandbox filesystem; relative file paths are resolved from the job working directory.", 
-			"Opcionalmente, especifique opções do Docker para executar containers dentro do sandbox. Múltiplas opções devem ser separadas por espaço, e opções únicas contendo espaços devem ser colocadas entre aspas. Não especifique <code>--network</code> ou <code>--net</code> para trabalhos que usam serviços, pois sua rede é gerenciada automaticamente. Caminhos de arquivos referem-se ao sistema de arquivos do sandbox; caminhos de arquivos relativos são resolvidos a partir do diretório de trabalho do trabalho.");
-		m.put("Optionally specify sandbox memory, for example 2g", "Opcionalmente, especifique a memória do sandbox, por exemplo 2g");
-		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
-			"Opcionalmente, especifique os serviços necessários para este trabalho. <b class='text-warning'>NOTA:</b> Serviços são suportados por executores Docker, Kubernetes e sandbox");
-		m.put("Optionally specify workspace ports to expose. These ports will be mapped to random ports on host\nwhich will be displayed on the workspace page", 
-			"Opcionalmente, especifique as portas do workspace a serem expostas. Essas portas serão mapeadas para portas aleatórias no host\nque serão exibidas na página do workspace");
-		m.put("Path to the Docker Sandboxes sbx executable", "Caminho para o executável sbx dos Sandboxes Docker");
-		m.put("Provision Mode", "Modo de Provisionamento");
-		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
-			"Limpe o cache de imagens do builder buildx do Docker. Esta etapa chama o comando docker buildx prune para remover o cache do builder usado pelo executor Docker ou sandbox");
-		m.put("Remote Host Executor", "Executor de Host Remoto");
-		m.put("Remote Host Provisioner", "Provisionador de Host Remoto");
-		m.put("Remote Sandbox Executor", "Executor de Sandbox Remoto");
-		m.put("Remote Sandbox Provisioner", "Provisionador de Sandbox Remoto");
-		m.put("Run docker buildx imagetools command with specified arguments. This step can be executed by Docker or sandbox executors", 
-			"Execute o comando docker buildx imagetools com os argumentos especificados. Esta etapa pode ser executada por executores Docker ou sandbox");
-		m.put("Run specified docker container. <a href='${docsite}/concepts#job-workdir' target='_blank'>Job workdir</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. This step can be executed by Docker or sandbox executors", 
-			"Execute o container Docker especificado. <a href='${docsite}/concepts#job-workdir' target='_blank'>Diretório de trabalho do trabalho</a> é montado no container e seu caminho é colocado na variável de ambiente <code>ONEDEV_WORKDIR</code>. Esta etapa pode ser executada por executores Docker ou sandbox");
-		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
-			"Executa etapas de shell e Docker em um Sandbox Docker novo em um host <a href='/~administration/agents' target='_blank'>agente</a>. Os serviços do trabalho são executados dentro do sandbox e são acessíveis pelo nome do serviço a partir de etapas de shell e container. O sandbox e seus serviços são excluídos após cada trabalho. Siga <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Trabalhando com Sandbox</a> para configurar cada host agente.");
-		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on the server. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up the server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Sandbox Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"Executa etapas de shell e Docker em um Sandbox Docker novo no servidor. Os serviços do trabalho são executados dentro do sandbox e são acessíveis pelo nome do serviço a partir de etapas de shell e container. O sandbox e seus serviços são excluídos após cada trabalho. Siga <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Trabalhando com Sandbox</a> para configurar o host do servidor. <b class='text-warning'>AVISO:</b> Para maior segurança, use um Executor de Sandbox Remoto em um host agente dedicado, especialmente para trabalhos não confiáveis.");
-		m.put("Runs workspaces directly in a Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Setup commands and terminals run as the template image's default user. The sandbox is removed when the workspace is deleted. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
-			"Executa workspaces diretamente em um Sandbox Docker em um host <a href='/~administration/agents' target='_blank'>agente</a>. Comandos de configuração e terminais são executados como o usuário padrão da imagem de template. O sandbox é removido quando o workspace é excluído. Siga <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Trabalhando com Sandbox</a> para configurar cada host agente.");
-		m.put("Runs workspaces directly in a Docker Sandbox on the server. Setup commands and terminals run as the template image's default user.\nThe sandbox is removed when the workspace is deleted.\nSelect <b>Sandbox</b> as the workspace spec's provision mode. To use Docker in workspace commands,\nselect a sandbox template that provides Docker in the workspace spec.\nFollow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a>\nto set up the server host. For untrusted workspaces, use a Remote Sandbox Provisioner on a dedicated agent host.", 
-			"Executa workspaces diretamente em um Sandbox Docker no servidor. Comandos de configuração e terminais são executados como o usuário padrão da imagem de template.\nO sandbox é removido quando o workspace é excluído.\nSelecione <b>Sandbox</b> como o modo de provisionamento da especificação do workspace. Para usar Docker em comandos do workspace,\nselecione um template de sandbox que forneça Docker na especificação do workspace.\nSiga <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Trabalhando com Sandbox</a>\npara configurar o host do servidor. Para workspaces não confiáveis, use um Provisionador de Sandbox Remoto em um host agente dedicado.");
-		m.put("Sandbox Executable", "Executável do Sandbox");
-		m.put("Sandbox Template", "Template do Sandbox");
-		m.put("Server Host Executor", "Executor de Host do Servidor");
-		m.put("Server Host Provisioner", "Provisionador de Host do Servidor");
-		m.put("Server Sandbox Executor", "Executor de Sandbox do Servidor");
-		m.put("Server Sandbox Provisioner", "Provisionador de Sandbox do Servidor");
-		m.put("Specify Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
-			"Especifique a imagem Docker para testar. A imagem deve ter shell, Git, Git LFS e tmux instalados");
-		m.put("Specify a Docker image to test against. The image must have shell installed", "Especifique uma imagem Docker para testar. A imagem deve ter shell instalado");
-		m.put("Specify a Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
-			"Especifique uma imagem Docker para testar. A imagem deve ter shell, Git, Git LFS e tmux instalados");
-		m.put("Specify a Docker sandbox shell template image to test against. The image must have shell, Git, Git LFS, and Python 3 installed. To also test a container, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"Especifique uma imagem de template de shell de sandbox Docker para testar. A imagem deve ter shell, Git, Git LFS e Python 3 instalados. Para também testar um container, o Docker deve estar configurado na imagem, e um usuário padrão não-root deve ter acesso sudo sem senha. Veja o <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>guia de configuração do template</a>.");
-		m.put("Specify a Docker sandbox template image to test against. The image must have shell, Git, Git LFS, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"Especifique uma imagem de template de sandbox Docker para testar. A imagem deve ter shell, Git, Git LFS, Python 3 e tmux instalados. Veja o <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>guia de configuração do template</a>.");
-		m.put("Specify a Sandbox Template to Test Against", "Especifique um Template de Sandbox para Testar");
-		m.put("Specify cache path. Non-absolute path is considered to be relative to\n<a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.\nHost executors run directly on the host machine and only accept relative paths", 
-			"Especifique o caminho do cache. Caminhos não absolutos são considerados relativos ao\n<a href='${docsite}/concepts#job-workdir' target='_blank'>diretório de trabalho do trabalho</a>.\nExecutores de host executam diretamente na máquina host e aceitam apenas caminhos relativos");
-		m.put("Specify cache path. Non-absolute path is considered to be relative to working directory.\nHost provisioners only accept relative paths", 
-			"Especifique o caminho do cache. Caminhos não absolutos são considerados relativos ao diretório de trabalho.\nProvisionadores de host aceitam apenas caminhos relativos");
-		m.put("Specify cache upload strategy before deleting an active workspace. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
-			"Especifique a estratégia de upload de cache antes de excluir um workspace ativo. <i>Fazer Upload se Não Houver Correspondência Exata</i>\nsignifica fazer upload quando nenhum cache for encontrado com chave e checksum correspondentes, e\n<i>Fazer Upload se Alterado</i> significa fazer upload se alguns arquivos no caminho do cache forem alterados");
-		m.put("Specify container image to create workspace inside. The image must have shell, Git, Git LFS, and tmux installed", 
-			"Especifique a imagem do container para criar o workspace dentro. A imagem deve ter shell, Git, Git LFS e tmux instalados");
-		m.put("Specify container image to execute commands inside. The image must have shell installed", 
-			"Especifique a imagem do container para executar comandos dentro. A imagem deve ter shell instalado");
-		m.put("Specify sandbox template image to create workspace from. The image must have shell, Git, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"Especifique a imagem de template de sandbox para criar o workspace. A imagem deve ter shell, Git, Python 3 e tmux instalados. Veja o <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>guia de configuração do template</a>.");
-		m.put("Specify the container image to test against. The image must have shell installed", "Especifique a imagem do container para testar. A imagem deve ter shell instalado");
-		m.put("Specify the sandbox CLI executable", "Especifique o executável CLI do sandbox");
-		m.put("Specify the sandbox template image used to run this job. The image must have shell, Git, Git LFS, and Python 3 installed. If the job runs Docker-related steps or services, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"Especifique a imagem de template do sandbox usada para executar este trabalho. A imagem deve ter shell, Git, Git LFS e Python 3 instalados. Se o trabalho executar etapas ou serviços relacionados ao Docker, o Docker deve estar configurado na imagem, e um usuário padrão não-root deve ter acesso sudo sem senha. Veja o <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>guia de configuração do template</a>.");
-		m.put("Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)", 
-			"Especifique se deseja provisionar o workspace em um sandbox, container Docker ou diretamente no host (barebone)");
-		m.put("Test Container", "Testar Container");
-		m.put("Test Sandbox Executor", "Testar Executor de Sandbox");
-		m.put("These settings are only used when running Docker containers inside the sandbox VM.", 
-			"Essas configurações são usadas apenas ao executar containers Docker dentro da VM sandbox.");
-		m.put("This executor runs build jobs as Docker containers on ${productName} server. <b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"Este executor executa trabalhos de construção como containers Docker no servidor ${productName}. <b class='text-warning'>AVISO:</b> Para maior segurança, use um Executor Docker Remoto em um host agente dedicado, especialmente para trabalhos não confiáveis.");
-		m.put("This executor runs build jobs directly on remote hosts via <a href='/~administration/agents' target='_blank'>agents</a>", 
-			"Este executor executa trabalhos de construção diretamente em hosts remotos via <a href='/~administration/agents' target='_blank'>agentes</a>");
-		m.put("This executor runs build jobs directly on the ${productName} server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Host Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"Este executor executa trabalhos de construção diretamente no host do servidor ${productName}. <b class='text-warning'>AVISO:</b> Para maior segurança, use um Executor de Host Remoto em um host agente dedicado, especialmente para trabalhos não confiáveis.");
-		m.put("This provisioner creates workspaces directly on remote agent hosts, and requires tmux to be installed on matched agents", 
-			"Este provisionador cria workspaces diretamente em hosts agentes remotos e requer que o tmux esteja instalado nos agentes correspondentes");
-		m.put("This provisioner creates workspaces directly on the ${productName} server host, and requires\ntmux to be installed on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Host Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
-			"Este provisionador cria workspaces diretamente no host do servidor ${productName} e requer\nque o tmux esteja instalado no servidor ${productName}.\n<b class='text-warning'>AVISO:</b> Para maior segurança, use um Provisionador de Host Remoto\nem um host agente dedicado, especialmente para workspaces não confiáveis.");
-		m.put("This provisioner creates workspaces inside Docker containers on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
-			"Este provisionador cria workspaces dentro de containers Docker no servidor ${productName}.\n<b class='text-warning'>AVISO:</b> Para maior segurança, use um Provisionador Docker Remoto\nem um host agente dedicado, especialmente para workspaces não confiáveis.");
-		m.put("Whether or not to always pull images when running containers or building images inside the sandbox. If disabled, cached images are used when available.", 
-			"Se deve ou não sempre puxar imagens ao executar containers ou construir imagens dentro do sandbox. Se desativado, imagens em cache são usadas quando disponíveis.");
-		m.put("Whether or not to always pull the template image when creating a sandbox. If disabled, a cached image is used when available.", 
-			"Se deve ou não sempre puxar a imagem de template ao criar um sandbox. Se desativado, uma imagem em cache é usada quando disponível.");
-		m.put("Whether to always pull the template image when creating a sandbox", "Se deve sempre puxar a imagem de template ao criar um sandbox");
+		m.put("Work in Maintenance Mode", "Trabalhar no Modo de Manutenção");
 	}
 		
 	@Override

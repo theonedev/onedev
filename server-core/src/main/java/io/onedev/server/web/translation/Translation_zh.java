@@ -124,10 +124,18 @@ public class Translation_zh extends TranslationResourceBundle {
 			"<b class='text-danger'>注意：</b> Kubernetes 配置器是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("<b class='text-danger'>NOTE: </b>Remote docker provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意：</b> 远程 docker 配置器是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a> 30 天");
+		m.put("<b class='text-danger'>NOTE: </b>Remote host provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意：</b>远程主机配置器是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a>30天");
+		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox executor is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意：</b>远程沙箱执行器是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a>30天");
+		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意：</b>远程沙箱配置器是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a>30天");
 		m.put("<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意：</b> SendGrid 集成是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("<b class='text-warning'>NOTE: </b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-warning'>注意：</b><a href='${docsite}/tutorials/issue/time-tracking' target='_blank'>时间跟踪</a> 是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a> 30 天");
+		m.put("<b class='text-warning'>NOTE: </b>Maintenance mode is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-warning'>注意: </b>维护模式是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a>30 天");
 		m.put("<b>NOTE: </b> Service desk only takes effect if <a wicket:id=\"mailConnector\">mail service</a> is defined and its <tt>check incoming email</tt> option is enabled. Also <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>sub addressing</a> needs to be enabled for the system email address. Check <a href=\"${docsite}/tutorials/issue/service-desk\" target='_blank'>this tutorial</a> for details", 
 			"<b>注意：</b> 服务台仅在定义了 <a wicket:id=\"mailConnector\">邮件服务</a> 并启用了其 <tt>检查收件邮件</tt> 选项时生效。此外，还需要为系统电子邮件地址启用 <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>子地址</a>。详情请查看 <a href=\"${docsite}/tutorials/issue/service-desk\" target='_blank'>本教程</a>");
 		m.put("<b>NOTE: </b> Service desk only takes effect if <a wicket:id=\"mailConnector\">mail service</a> is defined and its <tt>check incoming email</tt> option is enabled. Also <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>sub addressing</a> needs to be enabled for the system email address. Check <a href=\"https://medium.com/p/e56d62c27e57\" target='_blank'>this tutorial</a> for details", 
@@ -376,6 +384,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Allow Empty", "允许为空");
 		m.put("Allow Empty Value", "允许空值");
 		m.put("Allow Multiple", "允许多个");
+		m.put("Allow to work on a project while in maintenance mode. Permission for each action is still required", 
+			"允许在维护模式下处理项目。每个操作仍然需要权限");
 		m.put("Allowed Licenses", "允许的许可证");
 		m.put("Allowed Self Sign-Up Email Domain", "允许自助注册的邮箱域名");
 		m.put("Also accepts cross-project linking in form of <code>projectpath#100</code> or <code>PROJECTKEY-100</code>", 
@@ -385,7 +395,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
 			"如果您想从命令行编译项目，请将以下内容添加到 $HOME/.m2/settings.xml");
 		m.put("Always", "总是");
+		m.put("Always Pull Container Image", "始终拉取容器镜像");
 		m.put("Always Pull Image", "始终拉取镜像");
+		m.put("Always Pull Template Image", "始终拉取模板镜像");
 		m.put("Amend", "修改");
 		m.put("An issue already linked for {0}. Unlink it first", "已链接到 {0}。先取消链接");
 		m.put("An unexpected exception occurred", "发生意外异常");
@@ -627,6 +639,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Build Volume Storage Size", "构建卷存储大小");
 		m.put("Build administrative permission for all jobs inside a project, including batch operations over multiple builds", 
 			"项目中所有任务的构建管理权限，包括多个构建的批量操作");
+		m.put("Build docker image with buildx. This step can be executed by docker or sandbox executors. Docker executors use their configured buildx builder; sandbox executors use the default builder inside the sandbox. To build image with Kubernetes executor, please use kaniko step instead", 
+			"使用 buildx 构建 docker 镜像。此步骤可以由 docker 或沙箱执行器执行。docker 执行器使用其配置的 buildx 构建器；沙箱执行器使用沙箱内的默认构建器。要使用 Kubernetes 执行器构建镜像，请改用 kaniko 步骤");
 		m.put("Build docker image with kaniko. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"使用kaniko构建docker镜像。此步骤需由服务器docker执行器、远程docker执行器或Kubernetes执行器执行");
 		m.put("Build duration statistics", "构建时长统计");
@@ -678,7 +692,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU 密集型任务并发数");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "CPU 能力（毫秒）。通常为 (CPU 核心数)*1000");
 		m.put("CPU cores", "CPU 核心");
+		m.put("CPU count for each sandbox. Leave empty to use the Docker Sandboxes default (All CPUs).", 
+			"每个沙箱的 CPU 数量。留空以使用 Docker 沙箱的默认值（所有 CPU）。");
 		m.put("CPU request for the workspace container.", "工作区容器的 CPU 请求。");
+		m.put("CPUs", "CPU 数量");
 		m.put("Cache \"{0}\" deleted", "缓存 \"{0}\" 已删除");
 		m.put("Cache Config", "缓存配置");
 		m.put("Cache Entries", "缓存条目");
@@ -983,6 +1000,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Contact Name", "联系人");
 		m.put("Container Image", "容器镜像");
 		m.put("Container Image(s)", "容器镜像");
+		m.put("Container Settings", "容器设置");
 		m.put("Container default", "容器默认");
 		m.put("Content", "内容");
 		m.put("Content Type", "内容类型");
@@ -1044,12 +1062,28 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Create Workspace", "创建工作区");
 		m.put("Create Workspace Spec", "创建工作区规格");
 		m.put("Create Workspaces", "创建工作区");
+		m.put("Create a workspace spec running Claude Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Claude Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个在工作区主机上直接运行 Claude Code 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在工作区主机上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在工作区主机上，并为 Claude Code 安装了配套技能</li>\n    <li>在“管理 / 工作区配置器”中添加了一个主机配置器，并正确配置了“适用项目”</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"创建一个在沙箱中运行 Claude Code 以实现隔离的工作区规范。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>沙箱模板镜像</a>\n以满足您的需求");
 		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Claude Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Create a workspace spec running Codex directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Codex</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个在工作区主机上直接运行 Codex 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在工作区主机上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在工作区主机上，并为 Codex 安装了配套技能</li>\n    <li>在“管理 / 工作区配置器”中添加了一个主机配置器，并正确配置了“适用项目”</li>\n</ul>");
+		m.put("Create a workspace spec running Codex inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"创建一个在沙箱中运行 Codex 以实现隔离的工作区规范。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>沙箱模板镜像</a>\n以满足您的需求");
 		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Codex 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>容器镜像</a>\n以满足您的需求");
+		m.put("Create a workspace spec running Cursor directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Cursor CLI</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个在工作区主机上直接运行 Cursor 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> 已安装在工作区主机上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在工作区主机上，并为 Cursor CLI 安装了配套技能</li>\n    <li>在“管理 / 工作区配置器”中添加了一个主机配置器，并正确配置了“适用项目”</li>\n</ul>");
+		m.put("Create a workspace spec running Cursor inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"创建一个在沙箱中运行 Cursor 以实现隔离的工作区规范。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>沙箱模板镜像</a>\n以满足您的需求");
 		m.put("Create a workspace spec running Cursor inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个工作区规范，在容器内运行 Cursor，以实现隔离和安全目的。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>容器镜像</a>\n以满足您的需求，如果需要的话");
+		m.put("Create a workspace spec running Open Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Open Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个在工作区主机上直接运行 Open Code 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在工作区主机上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在工作区主机上，并为 Open Code 安装了配套技能</li>\n    <li>在“管理 / 工作区配置器”中添加了一个主机配置器，并正确配置了“适用项目”</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
+			"创建一个在沙箱中运行 Open Code 以实现隔离的工作区规范。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>沙箱模板镜像</a>\n以满足您的需求");
 		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired", 
 			"创建一个在容器中运行 Open Code 的工作区规范，以实现隔离和安全目的。\n如果需要，您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>容器镜像</a>\n以满足您的需求");
 		m.put("Create an issue for this failure", "为此失败创建一个工单");
@@ -1332,6 +1366,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Docker Hub", "Docker Hub");
 		m.put("Docker Image", "Docker 镜像");
 		m.put("Docker Sock Path", "Docker Sock 路径");
+		m.put("Docker sandbox default", "Docker 沙箱默认值");
 		m.put("Dockerfile", "Dockerfile");
 		m.put("Documentation", "文档");
 		m.put("Don't have an account yet?", "没有账户？");
@@ -1459,6 +1494,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enable this to retrieve Git LFS files", "启用此选项以检索 Git LFS 文件");
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"启用此选项以允许上传在 CI/CD 任务期间生成的构建缓存。上传的缓存可以被项目后续的构建使用，只要缓存密钥匹配");
+		m.put("Enable to also test running a command in a Docker container inside the sandbox", "启用以测试在沙箱内的 Docker 容器中运行命令");
+		m.put("Enable to execute this job in a sandbox VM", "启用以在沙箱虚拟机中执行此任务");
 		m.put("End Point", "端点");
 		m.put("Enforce Password Policy", "强制执行密码策略");
 		m.put("Enforce Two-factor Authentication", "强制执行两阶段认证");
@@ -1546,6 +1583,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Excludes", "排除项");
 		m.put("Execute Commands", "执行命令");
 		m.put("Execute Commands via SSH", "通过 SSH 执行命令");
+		m.put("Execute In Sandbox", "在沙箱中执行");
 		m.put("Execution paused", "执行已暂停");
 		m.put("Exit Run As", "退出以运行身份");
 		m.put("Exited run as", "退出以...身份运行");
@@ -1861,6 +1899,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Identify Field", "区分字段");
 		m.put("If enabled, a login session is required to automatically trigger code indexing when browsing repository files or viewing diffs.\nThis is useful for public projects to prevent anonymous AI crawlers from triggering indexing of every historical commit and generating a huge index cache.", 
 			"如果启用，则需要登录会话来自动触发代码索引，当浏览存储库文件或查看差异时。\n这对于公共项目很有用，可以防止匿名 AI 爬虫触发每个历史提交的索引并生成巨大的索引缓存。");
+		m.put("If enabled, only project managers and users with maintenance permission can work on this project", 
+			"如果启用，只有项目经理和具有维护权限的用户可以处理此项目");
 		m.put("If enabled, scheduled backup will run on lead server which is <span wicket:id=\"leadServer\"></span> currently", 
 			"如果启用，计划备份将在当前为 <span wicket:id=\"leadServer\"></span> 的主服务器上运行");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
@@ -1924,7 +1964,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"正在将工单导入当前项目。请注意，如果整个项目分叉图没有工单，则工单号将仅保留以避免重复的工单号");
 		m.put("Importing projects from {0}", "从 {0} 导入项目");
 		m.put("Imports", "导入");
+		m.put("In Container", "在容器中");
+		m.put("In Host", "在主机中");
 		m.put("In Projects", "在项目中");
+		m.put("In Sandbox", "在沙箱中");
 		m.put("In case IMAP host certificate is self-signed or its CA root is not accepted, you may tell ${productName} to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into ${productName}</a> instead", 
 			"如果 IMAP 主机证书是自签名的或其 CA 根未被接受，您可以告诉 ${productName} 绕过证书检查。<b class='text-danger'>警告：</b> 在不受信任的网络中，这可能导致中间人攻击，您应该 <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>将证书导入 ${productName}</a> 代替");
 		m.put("In case SMTP host certificate is self-signed or its CA root is not accepted, you may tell ${productName} to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='${docsite}/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into ${productName}</a> instead", 
@@ -2278,6 +2321,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Mail service not configured", "邮件服务未配置");
 		m.put("Mail service settings saved", "邮件服务设置已保存");
 		m.put("Main Repository", "主仓库");
+		m.put("Maintenance", "维护");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 or higher</a> is installed", 
 			"确保已安装 <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 17 或更高版本</a>");
 		m.put("Make sure current user has permission to run docker containers", "确保当前用户有权运行 Docker 容器");
@@ -2331,6 +2375,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Max Loop Count", "最大循环次数");
 		m.put("Max Upload File Size (MB)", "最大上传文件大小 (MB)");
 		m.put("Max Value", "最大值");
+		m.put("Maximum concurrent jobs on each server. Leave empty to use its CPU count.", "每台服务器的最大并发任务数。留空以使用其 CPU 数量。");
 		m.put("Maximum number of attempts including the initial run before giving up", "在放弃之前，包括初始运行在内的最大尝试次数");
 		m.put("Maximum number of entries to return when search code in repository", "搜索代码库时返回的最大条目数");
 		m.put("Maximum number of times this AI user can be awakened in a single task. When the limit is reached, the AI user will not run and a system comment will be posted instead", 
@@ -2342,6 +2387,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Memory", "内存");
 		m.put("Memory Limit", "内存限制");
 		m.put("Memory Request", "内存请求");
+		m.put("Memory for each sandbox, for example 2g. Leave empty to use the Docker Sandboxes default (50% of host memory).", 
+			"每个沙箱的内存，例如 2g。留空以使用 Docker 沙箱的默认值（主机内存的 50%）。");
 		m.put("Memory request for the workspace container.", "工作区容器的内存请求。");
 		m.put("Mention Someone", "提及某人");
 		m.put("Mention someone", "提及某人");
@@ -2684,6 +2731,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Operations", "操作");
 		m.put("Optional", "可选");
 		m.put("Optional instructions that define how the AI user should behave", "定义 AI 用户应如何行为的可选指令");
+		m.put("Optional registry logins for steps and services that use container images inside the sandbox. These logins are not used to pull the sandbox template image. Logins specified in a step or service override these for the same registry. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password.", 
+			"沙箱内使用容器镜像的步骤和服务的可选注册表登录。这些登录信息不会用于拉取沙箱模板镜像。在步骤或服务中指定的登录信息会覆盖同一注册表的这些登录信息。对于内置注册表，请使用 <code>@server_url@</code> 作为注册表 URL，<code>@job_token@</code> 作为用户名，并使用访问令牌作为密码。");
 		m.put("Optionally add new users to specified default group", "可选择将新用户添加到指定的默认组");
 		m.put("Optionally add newly authenticated user to specified group if membership information is not available", 
 			"如果未查询到用户组信息，可选择将新认证的用户添加到指定组");
@@ -2734,6 +2783,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定 <span class='text-info'>逗号分隔</span> 的平台，例如 <tt>linux/amd64,linux/arm64</tt>。留空则扫描 OCI 布局中的所有平台");
 		m.put("Optionally specify API key for authentication", "可选地指定 API 密钥进行身份验证");
 		m.put("Optionally specify CPU limit for the workspace container.", "可选地为工作区容器指定 CPU 限制。");
+		m.put("Optionally specify Docker options to create the network for jobs using services. Multiple options should be separated by space, and single options containing spaces should be quoted.", 
+			"可选地指定 Docker 选项以为使用服务的任务创建网络。多个选项应以空格分隔，包含空格的单个选项应加引号。");
+		m.put("Optionally specify Docker options to run containers inside the sandbox. Multiple options should be separated by space, and single options containing spaces should be quoted. Do not specify <code>--network</code> or <code>--net</code> for jobs using services, as their network is managed automatically. File paths refer to the sandbox filesystem; relative file paths are resolved from the job working directory.", 
+			"可选地指定 Docker 选项以在沙箱内运行容器。多个选项应以空格分隔，包含空格的单个选项应加引号。不要为使用服务的任务指定 <code>--network</code> 或 <code>--net</code>，因为它们的网络是自动管理的。文件路径指的是沙箱文件系统；相对文件路径从任务工作目录解析。");
 		m.put("Optionally specify Dockerfile relative to <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"可选地指定相对于 <a href='${docsite}/concepts#job-workdir' target='_blank'>任务工作目录</a> 的 Dockerfile 路径。留空以使用上述构建路径下的文件 <tt>Dockerfile</tt>");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "可选择指定用于 Renovate CLI 的 JavaScript 配置");
@@ -2777,8 +2830,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选地指定用于 kubectl 访问集群的 kubeconfig 文件的绝对路径。留空以让 kubectl 自动确定集群访问（当 ${productName} 本身运行在集群中时有效）");
 		m.put("Optionally specify absolute path to the kubectl executable. Leave empty to use kubectl from the system PATH.", 
 			"可选地指定 kubectl 可执行文件的绝对路径。留空以使用系统 PATH 中的 kubectl。");
-		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint", 
-			"可选地指定要包含在 webhook POST 请求中的额外 HTTP 头，例如接收端点所需的授权头");
+		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint. X-OneDev-Signature is generated automatically and cannot be overridden", 
+			"可选地指定要包含在 webhook POST 请求中的额外 HTTP 头，例如接收端点所需的 Authorization 头。X-OneDev-Signature 会自动生成，无法被覆盖");
 		m.put("Optionally specify additional options for buildx build command", "可选择为 buildx build 命令指定其他选项");
 		m.put("Optionally specify allowed <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> origins. For a CORS simple or preflight request, if value of request header <code>Origin</code> is included here, the response header <code>Access-Control-Allow-Origin</code> will be set to the same value", 
 			"可选择指定允许的 <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> 来源。对于 CORS 简单请求或预检请求，如果请求头 <code>Origin</code> 的值包含在此处，响应头 <code>Access-Control-Allow-Origin</code> 将设置为相同的值");
@@ -2929,12 +2982,15 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify required reviewers for changes of specified branch", "可选择为指定分支的更改指定所需的审阅者");
 		m.put("Optionally specify revision to create branch from. Leave empty to create from build commit", 
 			"可选择指定用于创建分支的修订版本。留空则从构建提交创建");
+		m.put("Optionally specify sandbox memory, for example 2g", "可选地指定沙箱内存，例如 2g");
 		m.put("Optionally specify separate directory to store build artifacts. Non-absolute directory is considered to be relative to site directory", 
 			"可选择指定单独的目录来存储构建制品。非绝对目录被视为相对于站点目录");
 		m.put("Optionally specify separate directory to store git lfs files. Non-absolute directory is considered to be relative to site directory", 
 			"可选择指定单独的目录来存储 git lfs 文件。非绝对目录被视为相对于站点目录");
 		m.put("Optionally specify separate directory to store package files. Non-absolute directory is considered to be relative to site directory", 
 			"可选择指定单独的目录来存储包文件。非绝对目录被视为相对于站点目录");
+		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
+			"可选地指定此任务所需的服务。<b class='text-warning'>注意：</b>服务由 Docker、Kubernetes 和沙箱执行器支持");
 		m.put("Optionally specify space-separated accessible site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. The public site is always accessible", 
 			"可选地指定以空格分隔的可访问站点名称。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀以排除。公共站点始终可访问");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
@@ -2986,6 +3042,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定要在其中运行任务中指定的服务 pod 的位置。第一个匹配的定位器将被使用。如果没有找到任何定位器，则将使用执行器的节点选择器");
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"可选择指定容器的默认工作目录。留空则使用容器的默认工作目录");
+		m.put("Optionally specify workspace ports to expose. These ports will be mapped to random ports on host\nwhich will be displayed on the workspace page", 
+			"可选地指定要暴露的工作区端口。这些端口将映射到主机上的随机端口\n并显示在工作区页面上");
 		m.put("Options", "选项");
 		m.put("Or below to build.gradle.kts (Kotlin)", "或者以下内容到 build.gradle.kts (Kotlin)");
 		m.put("Or manually enter the secret key below in your authenticator app", "或者在您的身份验证应用中手动输入下面的密钥");
@@ -3080,6 +3138,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Path containing spaces or starting with dash needs to be quoted", "路径包含空格或以破折号开头时需要用引号括起来");
 		m.put("Path placeholder", "路径占位符");
 		m.put("Path to kubectl", "kubectl 的路径");
+		m.put("Path to the Docker Sandboxes sbx executable", "Docker 沙箱的 sbx 可执行文件路径");
 		m.put("Paths", "路径");
 		m.put("Pattern", "模式");
 		m.put("Pause", "暂停");
@@ -3258,6 +3317,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Project does not have any code yet", "项目还没有代码");
 		m.put("Project forked", "项目已分叉");
 		m.put("Project id", "项目 ID");
+		m.put("Project is in maintenance mode", "项目处于维护模式");
 		m.put("Project list", "项目列表");
 		m.put("Project manage privilege required to delete \"{0}\"", "删除 \"{0}\" 需要项目管理员权限");
 		m.put("Project manage privilege required to modify \"{0}\"", "修改 \"{0}\" 需要项目管理员权限");
@@ -3291,9 +3351,12 @@ public class Translation_zh extends TranslationResourceBundle {
 			"用于总结合并请求评论时的提示。显示语言将自动附加");
 		m.put("Properties", "属性");
 		m.put("Provide server id (guild id) to restrict access only to server members", "提供服务器 ID（公会 ID）以仅限制对服务器成员的访问");
+		m.put("Provision Mode", "配置模式");
 		m.put("Provisioner", "配置器");
 		m.put("Proxy", "代理");
 		m.put("Prune Builder Cache", "清理构建器缓存");
+		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
+			"清理 docker buildx 构建器的镜像缓存。此步骤调用 docker buildx prune 命令以删除 Docker 或沙箱执行器使用的构建器缓存");
 		m.put("Public Key", "公钥");
 		m.put("Public Roles", "公共角色");
 		m.put("Public site", "公共站点");
@@ -3458,7 +3521,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Remember Me", "记住我");
 		m.put("Remote Docker Executor", "远程 Docker 执行器");
 		m.put("Remote Docker Provisioner", "远程 Docker 配置器");
+		m.put("Remote Host Executor", "远程主机执行器");
+		m.put("Remote Host Provisioner", "远程主机配置器");
 		m.put("Remote Machine", "远程机器");
+		m.put("Remote Sandbox Executor", "远程沙箱执行器");
+		m.put("Remote Sandbox Provisioner", "远程沙箱配置器");
 		m.put("Remote URL", "远程 URL");
 		m.put("Remote Url", "远程 URL");
 		m.put("Remove", "删除");
@@ -3588,11 +3655,15 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Run below commands to install this package", "运行以下命令安装此包");
 		m.put("Run below commands to use this chart", "运行以下命令使用此 Chart");
 		m.put("Run below commands to use this package", "运行以下命令使用此包");
+		m.put("Run docker buildx imagetools command with specified arguments. This step can be executed by Docker or sandbox executors", 
+			"使用指定参数运行 docker buildx imagetools 命令。此步骤可以由 Docker 或沙箱执行器执行");
 		m.put("Run job", "运行任务");
 		m.put("Run job in another project", "在另一个项目中运行任务");
 		m.put("Run on Bare Metal/Virtual Machine", "在裸机/虚拟机上运行");
 		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
 			"运行 osv 扫描器以扫描项目源中的漏洞，位于<a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>各种锁定文件</a>中。它只能由 docker 相关执行器执行。");
+		m.put("Run specified docker container. <a href='${docsite}/concepts#job-workdir' target='_blank'>Job workdir</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. This step can be executed by Docker or sandbox executors", 
+			"运行指定的 docker 容器。<a href='${docsite}/concepts#job-workdir' target='_blank'>任务工作目录</a> 被挂载到容器中，其路径被放置在环境变量 <code>ONEDEV_WORKDIR</code> 中。此步骤可以由 Docker 或沙箱执行器执行");
 		m.put("Run specified step template", "运行指定的步骤模板");
 		m.put("Run this job", "运行此任务");
 		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
@@ -3604,6 +3675,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Run via Docker Container", "通过 Docker 容器运行");
 		m.put("Running", "运行中");
 		m.put("Running Takes", "运行中");
+		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
+			"在 <a href='/~administration/agents' target='_blank'>代理</a> 主机上的新 Docker 沙箱中运行 shell 和 Docker 步骤。任务服务在沙箱内运行，并可通过服务名称从 shell 和容器步骤访问。沙箱及其服务在每个任务后被删除。请按照 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>使用沙箱</a> 设置每个代理主机。");
+		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on the server. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up the server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Sandbox Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"在服务器上的新 Docker 沙箱中运行 shell 和 Docker 步骤。任务服务在沙箱内运行，并可通过服务名称从 shell 和容器步骤访问。沙箱及其服务在每个任务后被删除。请按照 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>使用沙箱</a> 设置服务器主机。<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程沙箱执行器，特别是对于不可信的任务。");
+		m.put("Runs workspaces directly in a Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Setup commands and terminals run as the template image's default user. The sandbox is removed when the workspace is deleted. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
+			"直接在 <a href='/~administration/agents' target='_blank'>代理</a> 主机上的 Docker 沙箱中运行工作区。设置命令和终端以模板镜像的默认用户身份运行。工作区被删除时，沙箱也会被移除。请按照 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>使用沙箱</a> 设置每个代理主机。");
+		m.put("Runs workspaces directly in a Docker Sandbox on the server. Setup commands and terminals run as the template image's default user.\nThe sandbox is removed when the workspace is deleted.\nSelect <b>Sandbox</b> as the workspace spec's provision mode. To use Docker in workspace commands,\nselect a sandbox template that provides Docker in the workspace spec.\nFollow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a>\nto set up the server host. For untrusted workspaces, use a Remote Sandbox Provisioner on a dedicated agent host.", 
+			"直接在服务器上的 Docker 沙箱中运行工作区。设置命令和终端以模板镜像的默认用户身份运行。\n工作区被删除时，沙箱也会被移除。\n选择 <b>沙箱</b> 作为工作区规范的配置模式。要在工作区命令中使用 Docker，\n请选择一个在工作区规范中提供 Docker 的沙箱模板。\n请按照 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>使用沙箱</a>\n设置服务器主机。对于不可信的工作区，请在专用代理主机上使用远程沙箱配置器。");
 		m.put("SMTP Host", "SMTP 主机");
 		m.put("SMTP Password", "SMTP 密码");
 		m.put("SMTP User", "SMTP 用户");
@@ -3625,6 +3704,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("SSO provider updated", "SSO 提供方已更新");
 		m.put("STAGED", "已暂存");
 		m.put("SUCCESSFUL", "成功");
+		m.put("Sandbox Executable", "沙箱可执行文件");
+		m.put("Sandbox Template", "沙箱模板");
 		m.put("Save", "保存");
 		m.put("Save Prompt", "保存提示");
 		m.put("Save Query", "保存查询");
@@ -3696,9 +3777,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Server", "服务器");
 		m.put("Server Docker Executor", "服务器 Docker 执行器");
 		m.put("Server Docker Provisioner", "服务器 Docker 配置器");
+		m.put("Server Host Executor", "服务器主机执行器");
+		m.put("Server Host Provisioner", "服务器主机配置器");
 		m.put("Server Id", "服务器 ID");
 		m.put("Server Information", "服务器信息");
 		m.put("Server Log", "服务器日志");
+		m.put("Server Sandbox Executor", "服务器沙箱执行器");
+		m.put("Server Sandbox Provisioner", "服务器沙箱配置器");
 		m.put("Server Setup", "服务器设置");
 		m.put("Server URL", "服务器 URL");
 		m.put("Server fingerprint", "服务器指纹");
@@ -3903,6 +3988,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify CPD result xml file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
 			"指定 CPD 结果 xml 文件相对于 <a href='${docsite}/concepts#job-workdir'>任务工作目录</a> 的路径，例如 <tt>target/cpd.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Commit Message", "指定提交消息");
+		m.put("Specify Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
+			"指定用于测试的 Docker 镜像。该镜像必须安装 shell、Git、Git LFS 和 tmux");
 		m.put("Specify ESLint report file in checkstyle format under <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
 			"指定 ESLint 报告文件在 checkstyle 格式下位于 <a href='${docsite}/concepts#job-workdir'>任务工作目录</a> 中。此文件可以通过 ESLint 选项 <tt>'-f checkstyle'</tt> 和 <tt>'-o'</tt> 生成。使用 * 或 ? 进行模式匹配");
 		m.put("Specify GitHub API url, for instance <tt>https://api.github.com</tt>", "指定 GitHub API URL，例如 <tt>https://api.github.com</tt>");
@@ -3970,6 +4057,14 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定一个 <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron 计划</a>以自动触发任务。<b class='text-info'>注意：</b>为节省资源，cron 表达式中的秒数将被忽略，最小调度间隔为一分钟");
 		m.put("Specify a Container Image to Test Against", "指定一个用于测试的容器镜像");
 		m.put("Specify a Docker Image to Test Against", "指定要测试的 Docker 镜像");
+		m.put("Specify a Docker image to test against. The image must have shell installed", "指定用于测试的 Docker 镜像。该镜像必须安装 shell");
+		m.put("Specify a Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
+			"指定用于测试的 Docker 镜像。该镜像必须安装 shell、Git、Git LFS 和 tmux");
+		m.put("Specify a Docker sandbox shell template image to test against. The image must have shell, Git, Git LFS, and Python 3 installed. To also test a container, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"指定用于测试的 Docker 沙箱 shell 模板镜像。该镜像必须安装 shell、Git、Git LFS 和 Python 3。要同时测试容器，镜像中必须配置 Docker，并且非 root 默认用户必须具有无密码的 sudo 访问权限。请参阅 <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>模板设置指南</a>。");
+		m.put("Specify a Docker sandbox template image to test against. The image must have shell, Git, Git LFS, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"指定用于测试的 Docker 沙箱模板镜像。该镜像必须安装 shell、Git、Git LFS、Python 3 和 tmux。请参阅 <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>模板设置指南</a>。");
+		m.put("Specify a Sandbox Template to Test Against", "指定用于测试的沙箱模板");
 		m.put("Specify a custom field of Enum type", "指定枚举类型的自定义字段");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "指定用于过滤/排序指定任务修复工单的默认查询");
 		m.put("Specify a folder relative to the repository root. Leave empty to upload to the root folder.", 
@@ -4026,8 +4121,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify branch, tag or commit in above project to import build spec from", "指定要从上述项目导入构建规范的分支、标签或提交");
 		m.put("Specify by Build Number", "按构建编号指定");
 		m.put("Specify cache entries", "指定缓存条目");
+		m.put("Specify cache path. Non-absolute path is considered to be relative to\n<a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.\nHost executors run directly on the host machine and only accept relative paths", 
+			"指定缓存路径。非绝对路径被视为相对于\n<a href='${docsite}/concepts#job-workdir' target='_blank'>任务工作目录</a>。\n主机执行器直接在主机机器上运行，仅接受相对路径");
+		m.put("Specify cache path. Non-absolute path is considered to be relative to working directory.\nHost provisioners only accept relative paths", 
+			"指定缓存路径。非绝对路径被视为相对于工作目录。\n主机配置器仅接受相对路径");
 		m.put("Specify cache upload strategy after build successful. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
 			"指定构建成功后缓存上传策略。<i>不完全匹配时上传</i>\n意味着当没有找到匹配键和校验和的缓存时上传，而\n<i>如果更改则上传</i>意味着如果缓存路径中的某些文件发生更改则上传。");
+		m.put("Specify cache upload strategy before deleting an active workspace. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
+			"在删除有效工作区之前指定缓存上传策略。<i>如果没有完全匹配则上传</i>\n表示当没有找到具有匹配键和校验和的缓存时上传，\n<i>如果已更改则上传</i> 表示如果缓存路径中的某些文件已更改则上传");
 		m.put("Specify certificate to trust if you are using self-signed certificate for remote repository", 
 			"如果您对远程仓库使用自签名证书，请指定要信任的证书");
 		m.put("Specify certificates to trust if you are using self-signed certificates for your docker registries", 
@@ -4054,6 +4155,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify condition to retry build upon failure", "指定失败时重试构建的条件");
 		m.put("Specify configuration discovery url of your OpenID provider, for instance: <code>https://openid.example.com/.well-known/openid-configuration</code>. Make sure to use HTTPS protocol as ${productName} relies on TLS encryption to ensure token validity", 
 			"指定您的 OpenID 提供方的配置发现 URL，例如：<code>https://openid.example.com/.well-known/openid-configuration</code>。确保使用 HTTPS 协议，因为 ${productName} 依赖 TLS 加密来确保令牌的有效性");
+		m.put("Specify container image to create workspace inside. The image must have shell, Git, Git LFS, and tmux installed", 
+			"指定用于在其中创建工作区的容器镜像。该镜像必须安装 shell、Git、Git LFS 和 tmux");
+		m.put("Specify container image to execute commands inside. The image must have shell installed", 
+			"指定用于在其中执行命令的容器镜像。该镜像必须安装 shell");
 		m.put("Specify container image to run", "指定要运行的容器镜像");
 		m.put("Specify content of the config file", "指定配置文件的内容");
 		m.put("Specify cppcheck xml result file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
@@ -4203,6 +4308,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify root URL to access this server", "指定访问此服务器的根 URL");
 		m.put("Specify ruff json result file relative to <a href='${docsite}/concepts#job-workdir'>job working directory</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
 			"指定 ruff json 结果文件相对于 <a href='${docsite}/concepts#job-workdir'>任务工作目录</a> 的路径。此文件可以通过 ruff json 输出格式选项生成，例如 <code>--exit-zero --output-format json --output-file ruff-result.json</code>。请注意，我们不会因违规而使 ruff 命令失败，因为此步骤将根据配置的阈值使构建失败。使用 * 或 ? 进行模式匹配");
+		m.put("Specify sandbox template image to create workspace from. The image must have shell, Git, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"指定用于创建工作区的沙箱模板镜像。该镜像必须安装 shell、Git、Python 3 和 tmux。请参阅 <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>模板设置指南</a>。");
 		m.put("Specify shell commands to execute under the <a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"指定要在 <a href='${docsite}/concepts#job-workdir' target='_blank'>任务工作目录</a> 下执行的 shell 命令");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "指定 SCP 命令的源参数，例如 <code>app.tar.gz</code>");
@@ -4241,6 +4348,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定角色的代码权限。写权限意味着 CreateWorkspaces 权限");
 		m.put("Specify the condition current build must satisfy to execute this action", "指定当前构建必须满足的条件以执行此操作");
 		m.put("Specify the condition preserved builds must match", "指定保留的构建必须匹配的条件");
+		m.put("Specify the container image to test against. The image must have shell installed", "指定用于测试的容器镜像。该镜像必须安装 shell");
 		m.put("Specify the kubernetes namespace to host workspaces of this provisioner. ${productName} creates the namespace if it does not yet exist.", 
 			"指定用于托管此配置器工作空间的 kubernetes 命名空间。如果尚未存在，${productName} 将创建该命名空间。");
 		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now ${productName} only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
@@ -4249,6 +4357,9 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定用于与客户端建立连接的 SSH 服务器使用的私钥（在 PEM 格式中）");
 		m.put("Specify the repository folder to store wiki pages.\nIf you do not want to store wiki pages in the project repository, the specified folder\ncan be a Git submodule. To exclude files from the wiki Pages panel, add a <code>.wikiignore</code>\nfile in the wiki root folder with Git ignore patterns relative to that folder", 
 			"指定存储 wiki 页面的存储库文件夹。\n如果您不想将 wiki 页面存储在项目存储库中，指定的文件夹\n可以是一个 Git 子模块。要从 wiki 页面面板中排除文件，请在 wiki 根文件夹中添加一个 <code>.wikiignore</code>\n文件，并使用相对于该文件夹的 Git 忽略模式");
+		m.put("Specify the sandbox CLI executable", "指定沙箱 CLI 可执行文件");
+		m.put("Specify the sandbox template image used to run this job. The image must have shell, Git, Git LFS, and Python 3 installed. If the job runs Docker-related steps or services, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
+			"指定用于运行此任务的沙箱模板镜像。该镜像必须安装 shell、Git、Git LFS 和 Python 3。如果任务运行与 Docker 相关的步骤或服务，镜像中必须配置 Docker，并且非 root 默认用户必须具有无密码的 sudo 访问权限。请参阅 <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>模板设置指南</a>。");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a ${productName} group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at ${productName} side", 
 			"指定检索组成员信息的策略。为了向 LDAP 组授予适当权限，应定义一个与之同名的 ${productName} 组。如果希望在 ${productName} 端管理组成员关系，请使用策略 <tt>不检索组</tt>");
 		m.put("Specify timeout in seconds when communicating with mail server", "指定与邮件服务器通信时的超时时间（秒）");
@@ -4265,6 +4376,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定 Web UI 会话超时时间（分钟）。留空表示在浏览器打开时永不过期。更改此值后，现有会话将不受影响。");
 		m.put("Specify webhook url to post events", "指定发布事件的 Webhook URL");
 		m.put("Specify whether to create a work in progress pull request", "指定是否创建一个进行中的合并请求");
+		m.put("Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)", 
+			"指定是否在沙箱、Docker 容器或直接在主机（裸机）上配置工作区");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here", 
 			"指定用于关闭 GitHub 工单的工单状态。<br><b>注意：</b>如果此处没有合适的选项，您可以自定义 ${productName} 工单状态");
 		m.put("Specify which issue state to use for closed GitLab issues.<br><b>NOTE: </b> You may customize ${productName} issue states in case there is no appropriate option here", 
@@ -4442,6 +4555,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Test", "测试");
 		m.put("Test Case", "测试用例");
 		m.put("Test Cases", "测试用例");
+		m.put("Test Container", "测试容器");
+		m.put("Test Sandbox Executor", "测试沙箱执行器");
 		m.put("Test Settings", "测试设置");
 		m.put("Test Suite", "测试套件");
 		m.put("Test Suites", "测试套件");
@@ -4464,12 +4579,12 @@ public class Translation_zh extends TranslationResourceBundle {
 			"手动运行任务的权限。这也隐含访问构建日志、构建流水线和所有已发布报告的权限");
 		m.put("The primary email address is used to receive notifications and show your gravatar (if enabled). It is also used for web-based Git operations unless email addresses are kept private.", 
 			"主邮箱地址用于接收通知并显示您的 gravatar（如果启用）。除非邮箱地址保持私密，否则它也用于基于 Web 的 Git 操作。");
-		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from ${productName}. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
-			"此密钥允许您确保发送到 payload URL 的 POST 请求来自 ${productName}。设置密钥后，您将在 webhook POST 请求中收到 X-OneDev-Signature 头");
 		m.put("The service desk feature enables user to create issues by sending emails to ${productName}. Issues can be discussed over email completely, without the need of logging to ${productName}.", 
 			"服务台功能允许用户通过发送邮件到 ${productName} 来创建工单。工单可以完全通过邮件讨论，无需登录 ${productName}。");
 		m.put("The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over email completely, without the need of logging to OneDev.", 
 			"服务台功能使用户能够通过向 OneDev 发送邮件来创建工单。工单可以完全通过邮件进行讨论，无需登录 OneDev。");
+		m.put("The shared secret used to verify webhook POST requests from ${productName}. X-OneDev-Signature contains the lowercase hexadecimal HMAC-SHA256 of the raw request body, using the UTF-8 encoded secret as the key. Verify it with a constant-time comparison before parsing the body. The secret itself is not sent. Use HTTPS to protect the webhook payload", 
+			"用于验证来自 ${productName} 的 webhook POST 请求的共享密钥。X-OneDev-Signature 包含使用 UTF-8 编码密钥作为密钥的原始请求体的 HMAC-SHA256 小写十六进制值。在解析请求体之前，使用恒定时间比较进行验证。密钥本身不会被发送。使用 HTTPS 保护 webhook 负载");
 		m.put("Then add the package", "然后添加该包");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "然后输入 TOTP 认证器中显示的验证码进行验证");
 		m.put("Then publish package from project directory like below", "然后从项目目录中发布包，如下所示");
@@ -4488,6 +4603,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("There are unsaved changes, discard and continue?", "有未保存的更改，是否丢弃并继续？");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"这些认证器通常在您的手机上运行，例如 Google Authenticator、Microsoft Authenticator、Authy、1Password 等");
+		m.put("These settings are only used when running Docker containers inside the sandbox VM.", 
+			"这些设置仅在沙箱虚拟机内运行 Docker 容器时使用。");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
 			"此 <span wicket:id=\"elementTypeName\"></span> 是从 <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a> 导入的");
 		m.put("This Month", "本月");
@@ -4508,10 +4625,16 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此日期使用<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601格式</a>");
 		m.put("This email address is being used", "此电子邮件地址正在使用");
 		m.put("This email address is not verified", "此邮箱地址未验证");
+		m.put("This executor runs build jobs as Docker containers on ${productName} server. <b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"此执行器在 ${productName} 服务器上将构建任务作为 Docker 容器运行。<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程 Docker 执行器，特别是对于不可信的任务。");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
 			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 在远程机器上以 Docker 容器运行构建任务");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"此执行器在 Kubernetes 集群中以 Pod 形式运行构建任务，无需任何代理。<b class='text-danger'>注意：</b> 确保在系统设置中正确指定服务器 URL，因为任务 Pod 需要访问它以下载源代码和产物");
+		m.put("This executor runs build jobs directly on remote hosts via <a href='/~administration/agents' target='_blank'>agents</a>", 
+			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 直接在远程主机上运行构建任务");
+		m.put("This executor runs build jobs directly on the ${productName} server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Host Executor on a dedicated agent host, especially for untrusted jobs.", 
+			"此执行器直接在 ${productName} 服务器主机上运行构建任务。<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程主机执行器，特别是对于不可信的任务。");
 		m.put("This field is required", "此字段是必填的");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"此过滤器用于确定当前用户的 LDAP 条目。例如：<i>(&(uid={0})(objectclass=person))</i>。在此示例中，<i>{0}</i> 表示当前用户的登录名");
@@ -4574,6 +4697,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
 		m.put("This property is imported from {0}", "此属性是从 {0} 导入的");
 		m.put("This provisioner creates workspaces as pods inside Kubernetes cluster", "此配置器在 Kubernetes 集群内以 pod 的形式创建工作区");
+		m.put("This provisioner creates workspaces directly on remote agent hosts, and requires tmux to be installed on matched agents", 
+			"此配置器直接在远程代理主机上创建工作区，并要求在匹配的代理上安装 tmux");
+		m.put("This provisioner creates workspaces directly on the ${productName} server host, and requires\ntmux to be installed on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Host Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
+			"此配置器直接在 ${productName} 服务器主机上创建工作区，并要求\n在 ${productName} 服务器上安装 tmux。\n<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程主机配置器\n，特别是对于不可信的工作区。");
+		m.put("This provisioner creates workspaces inside Docker containers on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
+			"此配置器在 ${productName} 服务器上的 Docker 容器内创建工作区。\n<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程 Docker 配置器\n，特别是对于不可信的工作区。");
 		m.put("This provisioner creates workspaces inside Docker containers on remote machine via\n<a href='/~administration/agents' target='_blank'>agents</a>.", 
 			"此配置器通过\n<a href='/~administration/agents' target='_blank'>代理</a>在远程机器上的 Docker 容器内创建工作区。");
 		m.put("This pull request has been discarded", "此合并请求已丢弃");
@@ -5016,8 +5145,12 @@ public class Translation_zh extends TranslationResourceBundle {
 			"是否在运行容器或构建镜像时始终拉取镜像。应启用此选项，以避免同一节点上运行的恶意任务替换镜像");
 		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
 			"运行容器时是否总是拉取镜像。应启用此选项以避免镜像被恶意操作替换");
+		m.put("Whether or not to always pull images when running containers or building images inside the sandbox. If disabled, cached images are used when available.", 
+			"是否在沙箱内运行容器或构建镜像时始终拉取镜像。如果禁用，则在可用时使用缓存镜像。");
 		m.put("Whether or not to always pull the image when running the container. Enabling avoids images being replaced by malicious workloads running on the same node.", 
 			"运行容器时是否总是拉取镜像。启用此选项可以避免镜像被运行在同一节点上的恶意工作负载替换。");
+		m.put("Whether or not to always pull the template image when creating a sandbox. If disabled, a cached image is used when available.", 
+			"是否在创建沙箱时始终拉取模板镜像。如果禁用，则在可用时使用缓存镜像。");
 		m.put("Whether or not to be able to access time tracking info of issues", "是否能够访问工单的时间跟踪信息");
 		m.put("Whether or not to create a dependency dashboard issue. If disabled, Renovate will not create or update issues, and existing issues can be closed manually. Options such as rate limits can still be controlled via Renovate configuration", 
 			"是否创建依赖仪表板工单。如果禁用，Renovate 将不会创建或更新工单，现有工单可以手动关闭。选项如速率限制仍然可以通过 Renovate 配置进行控制");
@@ -5069,6 +5202,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether the password must contain at least one number", "密码是否必须至少包含一个数字");
 		m.put("Whether the password must contain at least one special character", "密码是否必须至少包含一个特殊字符");
 		m.put("Whether the password must contain at least one uppercase letter", "密码是否必须至少包含一个大写字母");
+		m.put("Whether to always pull the template image when creating a sandbox", "是否在创建沙箱时始终拉取模板镜像");
 		m.put("Whole Word", "全词");
 		m.put("Widget", "小组件");
 		m.put("Widget Tab", "小组件 Tab");
@@ -5402,132 +5536,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("<b class='text-danger'>NOTE: </b>Remote host provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意：</b>远程主机配置器是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a>30天");
-		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox executor is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意：</b>远程沙箱执行器是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a>30天");
-		m.put("<b class='text-danger'>NOTE: </b>Remote sandbox provisioner is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意：</b>远程沙箱配置器是企业功能。<a href='${website}/pricing' target='_blank'>免费试用</a>30天");
-		m.put("Always Pull Container Image", "始终拉取容器镜像");
-		m.put("Always Pull Template Image", "始终拉取模板镜像");
-		m.put("Build docker image with buildx. This step can be executed by docker or sandbox executors. Docker executors use their configured buildx builder; sandbox executors use the default builder inside the sandbox. To build image with Kubernetes executor, please use kaniko step instead", 
-			"使用 buildx 构建 docker 镜像。此步骤可以由 docker 或沙箱执行器执行。docker 执行器使用其配置的 buildx 构建器；沙箱执行器使用沙箱内的默认构建器。要使用 Kubernetes 执行器构建镜像，请改用 kaniko 步骤");
-		m.put("CPU count for each sandbox. Leave empty to use the Docker Sandboxes default (All CPUs).", 
-			"每个沙箱的 CPU 数量。留空以使用 Docker 沙箱的默认值（所有 CPU）。");
-		m.put("CPUs", "CPU 数量");
-		m.put("Container Settings", "容器设置");
-		m.put("Create a workspace spec running Claude Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Claude Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个在工作区主机上直接运行 Claude Code 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在工作区主机上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在工作区主机上，并为 Claude Code 安装了配套技能</li>\n    <li>在“管理 / 工作区配置器”中添加了一个主机配置器，并正确配置了“适用项目”</li>\n</ul>");
-		m.put("Create a workspace spec running Claude Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"创建一个在沙箱中运行 Claude Code 以实现隔离的工作区规范。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>沙箱模板镜像</a>\n以满足您的需求");
-		m.put("Create a workspace spec running Codex directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Codex</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个在工作区主机上直接运行 Codex 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在工作区主机上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在工作区主机上，并为 Codex 安装了配套技能</li>\n    <li>在“管理 / 工作区配置器”中添加了一个主机配置器，并正确配置了“适用项目”</li>\n</ul>");
-		m.put("Create a workspace spec running Codex inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"创建一个在沙箱中运行 Codex 以实现隔离的工作区规范。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>沙箱模板镜像</a>\n以满足您的需求");
-		m.put("Create a workspace spec running Cursor directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Cursor CLI</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个在工作区主机上直接运行 Cursor 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://cursor.com/docs/cli/overview' target='_blank'>Cursor CLI</a> 已安装在工作区主机上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在工作区主机上，并为 Cursor CLI 安装了配套技能</li>\n    <li>在“管理 / 工作区配置器”中添加了一个主机配置器，并正确配置了“适用项目”</li>\n</ul>");
-		m.put("Create a workspace spec running Cursor inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"创建一个在沙箱中运行 Cursor 以实现隔离的工作区规范。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/cursor' target='_blank'>沙箱模板镜像</a>\n以满足您的需求");
-		m.put("Create a workspace spec running Open Code directly on the workspace host.\nWorkspaces using created spec will share same environments and settings.\nTo use this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on the workspace host</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> is installed on the workspace host and companion skills are installed for Open Code</li>\n    <li>A host provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个在工作区主机上直接运行 Open Code 的工作区规范。\n使用创建的规范的工作区将共享相同的环境和设置。\n要使用此模板，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在工作区主机上</li>\n    <li><a href='https://code.onedev.io/onedev/tod/~files/main/readme.md' target='_blank'>TOD</a> 已安装在工作区主机上，并为 Open Code 安装了配套技能</li>\n    <li>在“管理 / 工作区配置器”中添加了一个主机配置器，并正确配置了“适用项目”</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code inside a sandbox for isolation.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>sandbox template image</a>\nlater to suit your needs if desired", 
-			"创建一个在沙箱中运行 Open Code 以实现隔离的工作区规范。\n您可以稍后自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>沙箱模板镜像</a>\n以满足您的需求");
-		m.put("Docker sandbox default", "Docker 沙箱默认值");
-		m.put("Enable to also test running a command in a Docker container inside the sandbox", "启用以测试在沙箱内的 Docker 容器中运行命令");
-		m.put("Enable to execute this job in a sandbox VM", "启用以在沙箱虚拟机中执行此任务");
-		m.put("Execute In Sandbox", "在沙箱中执行");
-		m.put("In Container", "在容器中");
-		m.put("In Host", "在主机中");
-		m.put("In Sandbox", "在沙箱中");
-		m.put("Maximum concurrent jobs on each server. Leave empty to use its CPU count.", "每台服务器的最大并发任务数。留空以使用其 CPU 数量。");
-		m.put("Memory for each sandbox, for example 2g. Leave empty to use the Docker Sandboxes default (50% of host memory).", 
-			"每个沙箱的内存，例如 2g。留空以使用 Docker 沙箱的默认值（主机内存的 50%）。");
-		m.put("Optional registry logins for steps and services that use container images inside the sandbox. These logins are not used to pull the sandbox template image. Logins specified in a step or service override these for the same registry. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password.", 
-			"沙箱内使用容器镜像的步骤和服务的可选注册表登录。这些登录信息不会用于拉取沙箱模板镜像。在步骤或服务中指定的登录信息会覆盖同一注册表的这些登录信息。对于内置注册表，请使用 <code>@server_url@</code> 作为注册表 URL，<code>@job_token@</code> 作为用户名，并使用访问令牌作为密码。");
-		m.put("Optionally specify Docker options to create the network for jobs using services. Multiple options should be separated by space, and single options containing spaces should be quoted.", 
-			"可选地指定 Docker 选项以为使用服务的任务创建网络。多个选项应以空格分隔，包含空格的单个选项应加引号。");
-		m.put("Optionally specify Docker options to run containers inside the sandbox. Multiple options should be separated by space, and single options containing spaces should be quoted. Do not specify <code>--network</code> or <code>--net</code> for jobs using services, as their network is managed automatically. File paths refer to the sandbox filesystem; relative file paths are resolved from the job working directory.", 
-			"可选地指定 Docker 选项以在沙箱内运行容器。多个选项应以空格分隔，包含空格的单个选项应加引号。不要为使用服务的任务指定 <code>--network</code> 或 <code>--net</code>，因为它们的网络是自动管理的。文件路径指的是沙箱文件系统；相对文件路径从任务工作目录解析。");
-		m.put("Optionally specify sandbox memory, for example 2g", "可选地指定沙箱内存，例如 2g");
-		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
-			"可选地指定此任务所需的服务。<b class='text-warning'>注意：</b>服务由 Docker、Kubernetes 和沙箱执行器支持");
-		m.put("Optionally specify workspace ports to expose. These ports will be mapped to random ports on host\nwhich will be displayed on the workspace page", 
-			"可选地指定要暴露的工作区端口。这些端口将映射到主机上的随机端口\n并显示在工作区页面上");
-		m.put("Path to the Docker Sandboxes sbx executable", "Docker 沙箱的 sbx 可执行文件路径");
-		m.put("Provision Mode", "配置模式");
-		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
-			"清理 docker buildx 构建器的镜像缓存。此步骤调用 docker buildx prune 命令以删除 Docker 或沙箱执行器使用的构建器缓存");
-		m.put("Remote Host Executor", "远程主机执行器");
-		m.put("Remote Host Provisioner", "远程主机配置器");
-		m.put("Remote Sandbox Executor", "远程沙箱执行器");
-		m.put("Remote Sandbox Provisioner", "远程沙箱配置器");
-		m.put("Run docker buildx imagetools command with specified arguments. This step can be executed by Docker or sandbox executors", 
-			"使用指定参数运行 docker buildx imagetools 命令。此步骤可以由 Docker 或沙箱执行器执行");
-		m.put("Run specified docker container. <a href='${docsite}/concepts#job-workdir' target='_blank'>Job workdir</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. This step can be executed by Docker or sandbox executors", 
-			"运行指定的 docker 容器。<a href='${docsite}/concepts#job-workdir' target='_blank'>任务工作目录</a> 被挂载到容器中，其路径被放置在环境变量 <code>ONEDEV_WORKDIR</code> 中。此步骤可以由 Docker 或沙箱执行器执行");
-		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
-			"在 <a href='/~administration/agents' target='_blank'>代理</a> 主机上的新 Docker 沙箱中运行 shell 和 Docker 步骤。任务服务在沙箱内运行，并可通过服务名称从 shell 和容器步骤访问。沙箱及其服务在每个任务后被删除。请按照 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>使用沙箱</a> 设置每个代理主机。");
-		m.put("Runs shell and Docker steps in a fresh Docker Sandbox on the server. Job services run inside the sandbox and are accessible by service name from shell and container steps. The sandbox and its services are deleted after each job. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up the server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Sandbox Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"在服务器上的新 Docker 沙箱中运行 shell 和 Docker 步骤。任务服务在沙箱内运行，并可通过服务名称从 shell 和容器步骤访问。沙箱及其服务在每个任务后被删除。请按照 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>使用沙箱</a> 设置服务器主机。<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程沙箱执行器，特别是对于不可信的任务。");
-		m.put("Runs workspaces directly in a Docker Sandbox on an <a href='/~administration/agents' target='_blank'>agent</a> host. Setup commands and terminals run as the template image's default user. The sandbox is removed when the workspace is deleted. Follow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a> to set up each agent host.", 
-			"直接在 <a href='/~administration/agents' target='_blank'>代理</a> 主机上的 Docker 沙箱中运行工作区。设置命令和终端以模板镜像的默认用户身份运行。工作区被删除时，沙箱也会被移除。请按照 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>使用沙箱</a> 设置每个代理主机。");
-		m.put("Runs workspaces directly in a Docker Sandbox on the server. Setup commands and terminals run as the template image's default user.\nThe sandbox is removed when the workspace is deleted.\nSelect <b>Sandbox</b> as the workspace spec's provision mode. To use Docker in workspace commands,\nselect a sandbox template that provides Docker in the workspace spec.\nFollow <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>Working with Sandbox</a>\nto set up the server host. For untrusted workspaces, use a Remote Sandbox Provisioner on a dedicated agent host.", 
-			"直接在服务器上的 Docker 沙箱中运行工作区。设置命令和终端以模板镜像的默认用户身份运行。\n工作区被删除时，沙箱也会被移除。\n选择 <b>沙箱</b> 作为工作区规范的配置模式。要在工作区命令中使用 Docker，\n请选择一个在工作区规范中提供 Docker 的沙箱模板。\n请按照 <a href='${docsite}/tutorials/sandbox/working-with-sandbox' target='_blank'>使用沙箱</a>\n设置服务器主机。对于不可信的工作区，请在专用代理主机上使用远程沙箱配置器。");
-		m.put("Sandbox Executable", "沙箱可执行文件");
-		m.put("Sandbox Template", "沙箱模板");
-		m.put("Server Host Executor", "服务器主机执行器");
-		m.put("Server Host Provisioner", "服务器主机配置器");
-		m.put("Server Sandbox Executor", "服务器沙箱执行器");
-		m.put("Server Sandbox Provisioner", "服务器沙箱配置器");
-		m.put("Specify Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
-			"指定用于测试的 Docker 镜像。该镜像必须安装 shell、Git、Git LFS 和 tmux");
-		m.put("Specify a Docker image to test against. The image must have shell installed", "指定用于测试的 Docker 镜像。该镜像必须安装 shell");
-		m.put("Specify a Docker image to test against. The image must have shell, Git, Git LFS, and tmux installed", 
-			"指定用于测试的 Docker 镜像。该镜像必须安装 shell、Git、Git LFS 和 tmux");
-		m.put("Specify a Docker sandbox shell template image to test against. The image must have shell, Git, Git LFS, and Python 3 installed. To also test a container, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"指定用于测试的 Docker 沙箱 shell 模板镜像。该镜像必须安装 shell、Git、Git LFS 和 Python 3。要同时测试容器，镜像中必须配置 Docker，并且非 root 默认用户必须具有无密码的 sudo 访问权限。请参阅 <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>模板设置指南</a>。");
-		m.put("Specify a Docker sandbox template image to test against. The image must have shell, Git, Git LFS, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"指定用于测试的 Docker 沙箱模板镜像。该镜像必须安装 shell、Git、Git LFS、Python 3 和 tmux。请参阅 <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>模板设置指南</a>。");
-		m.put("Specify a Sandbox Template to Test Against", "指定用于测试的沙箱模板");
-		m.put("Specify cache path. Non-absolute path is considered to be relative to\n<a href='${docsite}/concepts#job-workdir' target='_blank'>job working directory</a>.\nHost executors run directly on the host machine and only accept relative paths", 
-			"指定缓存路径。非绝对路径被视为相对于\n<a href='${docsite}/concepts#job-workdir' target='_blank'>任务工作目录</a>。\n主机执行器直接在主机机器上运行，仅接受相对路径");
-		m.put("Specify cache path. Non-absolute path is considered to be relative to working directory.\nHost provisioners only accept relative paths", 
-			"指定缓存路径。非绝对路径被视为相对于工作目录。\n主机配置器仅接受相对路径");
-		m.put("Specify cache upload strategy before deleting an active workspace. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
-			"在删除有效工作区之前指定缓存上传策略。<i>如果没有完全匹配则上传</i>\n表示当没有找到具有匹配键和校验和的缓存时上传，\n<i>如果已更改则上传</i> 表示如果缓存路径中的某些文件已更改则上传");
-		m.put("Specify container image to create workspace inside. The image must have shell, Git, Git LFS, and tmux installed", 
-			"指定用于在其中创建工作区的容器镜像。该镜像必须安装 shell、Git、Git LFS 和 tmux");
-		m.put("Specify container image to execute commands inside. The image must have shell installed", 
-			"指定用于在其中执行命令的容器镜像。该镜像必须安装 shell");
-		m.put("Specify sandbox template image to create workspace from. The image must have shell, Git, Python 3, and tmux installed. See the <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"指定用于创建工作区的沙箱模板镜像。该镜像必须安装 shell、Git、Python 3 和 tmux。请参阅 <a href='${docsite}/tutorials/workspace/build-sandbox-template' target='_blank'>模板设置指南</a>。");
-		m.put("Specify the container image to test against. The image must have shell installed", "指定用于测试的容器镜像。该镜像必须安装 shell");
-		m.put("Specify the sandbox CLI executable", "指定沙箱 CLI 可执行文件");
-		m.put("Specify the sandbox template image used to run this job. The image must have shell, Git, Git LFS, and Python 3 installed. If the job runs Docker-related steps or services, Docker must be configured in the image, and a non-root default user must have passwordless sudo access. See the <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>template setup guide</a>.", 
-			"指定用于运行此任务的沙箱模板镜像。该镜像必须安装 shell、Git、Git LFS 和 Python 3。如果任务运行与 Docker 相关的步骤或服务，镜像中必须配置 Docker，并且非 root 默认用户必须具有无密码的 sudo 访问权限。请参阅 <a href='${docsite}/tutorials/cicd/build-sandbox-template' target='_blank'>模板设置指南</a>。");
-		m.put("Specify whether to provision the workspace in a sandbox, Docker container, or directly on the host (barebone)", 
-			"指定是否在沙箱、Docker 容器或直接在主机（裸机）上配置工作区");
-		m.put("Test Container", "测试容器");
-		m.put("Test Sandbox Executor", "测试沙箱执行器");
-		m.put("These settings are only used when running Docker containers inside the sandbox VM.", 
-			"这些设置仅在沙箱虚拟机内运行 Docker 容器时使用。");
-		m.put("This executor runs build jobs as Docker containers on ${productName} server. <b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"此执行器在 ${productName} 服务器上将构建任务作为 Docker 容器运行。<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程 Docker 执行器，特别是对于不可信的任务。");
-		m.put("This executor runs build jobs directly on remote hosts via <a href='/~administration/agents' target='_blank'>agents</a>", 
-			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 直接在远程主机上运行构建任务");
-		m.put("This executor runs build jobs directly on the ${productName} server host. <b class='text-warning'>WARNING:</b> For better security, use a Remote Host Executor on a dedicated agent host, especially for untrusted jobs.", 
-			"此执行器直接在 ${productName} 服务器主机上运行构建任务。<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程主机执行器，特别是对于不可信的任务。");
-		m.put("This provisioner creates workspaces directly on remote agent hosts, and requires tmux to be installed on matched agents", 
-			"此配置器直接在远程代理主机上创建工作区，并要求在匹配的代理上安装 tmux");
-		m.put("This provisioner creates workspaces directly on the ${productName} server host, and requires\ntmux to be installed on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Host Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
-			"此配置器直接在 ${productName} 服务器主机上创建工作区，并要求\n在 ${productName} 服务器上安装 tmux。\n<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程主机配置器\n，特别是对于不可信的工作区。");
-		m.put("This provisioner creates workspaces inside Docker containers on ${productName} server.\n<b class='text-warning'>WARNING:</b> For better security, use a Remote Docker Provisioner\non a dedicated agent host, especially for untrusted workspaces.", 
-			"此配置器在 ${productName} 服务器上的 Docker 容器内创建工作区。\n<b class='text-warning'>警告：</b>为了更好的安全性，请在专用代理主机上使用远程 Docker 配置器\n，特别是对于不可信的工作区。");
-		m.put("Whether or not to always pull images when running containers or building images inside the sandbox. If disabled, cached images are used when available.", 
-			"是否在沙箱内运行容器或构建镜像时始终拉取镜像。如果禁用，则在可用时使用缓存镜像。");
-		m.put("Whether or not to always pull the template image when creating a sandbox. If disabled, a cached image is used when available.", 
-			"是否在创建沙箱时始终拉取模板镜像。如果禁用，则在可用时使用缓存镜像。");
-		m.put("Whether to always pull the template image when creating a sandbox", "是否在创建沙箱时始终拉取模板镜像");
+		m.put("Work in Maintenance Mode", "在维护模式下工作");
 	}
 		
 	@Override
