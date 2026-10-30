@@ -113,8 +113,10 @@ public class WebHook implements Serializable {
 		this.eventTypes = eventTypes;
 	}
 
-	@Editable(order=300, description="The secret which allows you to ensure that POST requests sent to the payload URL are "
-			+ "from ${productName}. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request")
+	@Editable(order=300, description="The shared secret used to verify webhook POST requests from ${productName}. "
+			+ "X-OneDev-Signature contains the lowercase hexadecimal HMAC-SHA256 of the raw request body, "
+			+ "using the UTF-8 encoded secret as the key. Verify it with a constant-time comparison before parsing the body. "
+			+ "The secret itself is not sent. Use HTTPS to protect the webhook payload")
 	@NotEmpty
 	public String getSecret() {
 		return secret;
@@ -125,7 +127,8 @@ public class WebHook implements Serializable {
 	}
 
 	@Editable(order=400, name="Custom Headers", description="Optionally specify additional HTTP headers to include in "
-			+ "the webhook POST request, for example an Authorization header required by the receiving endpoint")
+			+ "the webhook POST request, for example an Authorization header required by the receiving endpoint. "
+			+ "X-OneDev-Signature is generated automatically and cannot be overridden")
 	@NotNull
 	public List<@NotNull @Valid WebHookHeader> getHeaders() {
 		return headers;

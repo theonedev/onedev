@@ -10,10 +10,12 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.HttpHeaders;
 
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -43,9 +45,9 @@ public class WebHookManager {
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
-		String eventJson;
+		byte[] eventBody;
 		try {
-			eventJson = mapper.writeValueAsString(event);
+			eventBody = mapper.writeValueAsBytes(event);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -57,14 +59,16 @@ public class WebHookManager {
 						try (var client = HttpClients.createDefault()) {
 							HttpPost httpPost = new HttpPost(webHook.getPostUrl());
 
-							StringEntity entity = new StringEntity(eventJson, UTF_8.name());
+							ByteArrayEntity entity = new ByteArrayEntity(eventBody);
 							httpPost.setEntity(entity);
 							httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
 							httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
 							httpPost.setHeader(HttpHeaders.ACCEPT_CHARSET, UTF_8.name());
-							httpPost.setHeader(SIGNATURE_HEAD, webHook.getSecret());
 							for (var header : webHook.getHeaders())
 								httpPost.setHeader(header.getName(), header.getValue());
+							// Sign the exact bytes sent, and do not allow custom headers to replace the signature.
+							httpPost.setHeader(SIGNATURE_HEAD, new HmacUtils(HmacAlgorithms.HMAC_SHA_256,
+									webHook.getSecret().getBytes(UTF_8)).hmacHex(eventBody));
 
 							try (var response = client.execute(httpPost)) {
 								HttpEntity responseEntity = response.getEntity();

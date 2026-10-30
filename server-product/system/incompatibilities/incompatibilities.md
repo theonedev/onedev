@@ -1,3 +1,24 @@
+# 17.0.2
+
+### Webhooks
+
+`X-OneDev-Signature` now contains the lowercase hexadecimal HMAC-SHA256 of the exact HTTP request body, using the UTF-8 encoded webhook secret as the key. The value is 64 hexadecimal characters with no prefix. Previously this header contained the secret itself.
+
+Update webhook receivers before upgrading: replace the direct comparison against the secret with HMAC-SHA256 verification of the raw request body, using a constant-time comparison. Do not parse and reserialize the JSON before verification, as this can change the signed bytes. Existing receivers that compare the header directly with the secret will reject deliveries until updated. Custom headers can no longer override `X-OneDev-Signature`.
+
+For example, a Python receiver can verify the header as follows, where `raw_body` is the received body as bytes:
+
+```python
+import hashlib
+import hmac
+
+expected = hmac.new(secret.encode("utf-8"), raw_body, hashlib.sha256).hexdigest()
+received = signature_header or ""
+valid = received.isascii() and hmac.compare_digest(expected, received)
+```
+
+Continue using HTTPS to protect payload confidentiality. HMAC verification does not prevent replay of a previously captured delivery. If an old delivery exposed the secret, rotate it in both ${productName} and the receiver.
+
 # 16.9.0
 
 ### Service Wrapper
