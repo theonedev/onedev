@@ -1,15 +1,12 @@
 package io.onedev.server.security;
 
 import static io.onedev.server.security.SecurityUtils.getUser;
+import static java.util.Objects.requireNonNull;
 
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -107,9 +104,8 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 			
 			if (!SecurityUtils.isAnonymous(principal) || settingService.getSecuritySetting().isEnableAnonymousAccess()) {
 				permissions.add(p -> {
-					if (p instanceof ProjectPermission) {
-						ProjectPermission projectPermission = (ProjectPermission) p;
-						Project project = projectPermission.getProject();
+					if (p instanceof ProjectPermission projectPermission) {
+                        Project project = projectPermission.getProject();
 						Permission privilege = projectPermission.getPrivilege();
 						do {
 							if (project.isPermittedByLoginUser(privilege))
@@ -141,9 +137,8 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 			@Override
 			public Collection<Permission> getObjectPermissions() {
 				return Lists.newArrayList(permission -> {
-					if (permission instanceof BasePermission) {
-						BasePermission basePermission = (BasePermission) permission;	
-						if (!basePermission.isApplicable(result.getLeft()))							
+					if (permission instanceof BasePermission basePermission) {
+                        if (!basePermission.isApplicable(result.getLeft()))
 							return false;
 					} 
 					if (permission instanceof ProjectPermission projectPermission
@@ -151,10 +146,10 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 							&& subscriptionService.isSubscriptionActive()
 							&& projectPermission.isWrite()) {
 						var maintenance = new ProjectPermission(projectPermission.getProject(), new MaintainProject());
-						if (result.getRight().stream().noneMatch(it -> it.implies(maintenance)))
+						if (requireNonNull(result.getRight()).stream().noneMatch(it -> it.implies(maintenance)))
 							return false;
 					}
-					return result.getRight().stream().anyMatch(it -> it.implies(permission));
+					return requireNonNull(result.getRight()).stream().anyMatch(it -> it.implies(permission));
 				});
 			}
 			
@@ -198,7 +193,8 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 		throw new UnsupportedOperationException();
 	}
 	
-	public Object writeReplace() throws ObjectStreamException {
+	@Serial
+    public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(AuthorizingService.class);
 	}
 

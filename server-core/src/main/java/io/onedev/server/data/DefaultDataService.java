@@ -47,6 +47,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.validation.Validator;
 
 import org.apache.shiro.authc.credential.PasswordService;
+import org.bouncycastle.openpgp.PGPException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.hibernate.Session;
@@ -72,6 +73,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
@@ -141,6 +145,7 @@ import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.GpgUtils;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.web.util.editbean.NewUserBean;
 
@@ -831,8 +836,28 @@ public class DefaultDataService implements DataService, Serializable {
 		setting = settingService.findSetting(Key.GPG);
 		if (setting == null || setting.getValue() == null) {
 			GpgSetting gpgSetting = new GpgSetting();
-            settingService.saveGpgSetting(gpgSetting);
-        }
+			var noreplyEmailDomain = systemSetting != null ? systemSetting.getNoreplyEmailDomain()
+					: settingService.getSystemSetting().getNoreplyEmailDomain();
+			try {
+				var generator = GpgUtils.generateKeyRingGenerator(User.SYSTEM_NAME + "<"
+						+ User.SYSTEM_NAME.toLowerCase() + "@" + noreplyEmailDomain + ">");
+				gpgSetting.setEncodedSigningKey(generator.generateSecretKeyRing().getEncoded());
+			} catch (PGPException | IOException e) {
+				throw new RuntimeException("Unable to generate GPG signing key", e);
+			}
+			settingService.saveGpgSetting(gpgSetting);
+		}
+
+		setting = settingService.findSetting(Key.OAUTH_SIGNING_KEY);
+		// A setting with a null value means the administrator explicitly deleted the key.
+		if (setting == null) {
+			try {
+				var key = new RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyIDFromThumbprint(true).generate();
+				settingService.saveOAuthSigningKey(key.toJSONString());
+			} catch (JOSEException e) {
+				throw new RuntimeException("Unable to generate OAuth signing key", e);
+			}
+		}
 		
 		setting = settingService.findSetting(Key.ISSUE);
 		if (setting == null) {

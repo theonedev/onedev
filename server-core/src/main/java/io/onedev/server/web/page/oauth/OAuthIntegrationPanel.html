@@ -1,0 +1,13 @@
+<wicket:panel>
+	<div class="card"><div class="card-body">
+		<details>
+			<summary class="font-weight-bold"><wicket:t>Integration and supported scopes</wicket:t></summary>
+			<p class="mt-4"><wicket:t>Discover endpoints at</wicket:t> <code wicket:id="openidDiscoveryUrl" class="text-break"></code> <wicket:t>or</wicket:t> <code wicket:id="oauthDiscoveryUrl" class="text-break"></code>.</p>
+				<p class="text-muted"><wicket:t>Request role scopes to access projects. The user selects projects they have permission to manage during consent, and access is limited to their own permissions.</wicket:t></p>
+			<div class="table-responsive"><table class="table">
+				<thead><tr><th><wicket:t>Scope</wicket:t></th><th><wicket:t>Access</wicket:t></th></tr></thead>
+				<tbody><tr wicket:id="scopes"><td><code wicket:id="name"></code></td><td wicket:id="description"></td></tr></tbody>
+			</table></div>
+		</details>
+	</div></div>
+</wicket:panel>

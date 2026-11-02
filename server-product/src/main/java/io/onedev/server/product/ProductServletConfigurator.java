@@ -16,6 +16,7 @@ import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.ee11.servlet.FilterHolder;
 import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.servlet.ServletMapping;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -30,6 +31,7 @@ import io.onedev.server.git.GoGetFilter;
 import io.onedev.server.git.hook.GitPostReceiveCallback;
 import io.onedev.server.git.hook.GitPreReceiveCallback;
 import io.onedev.server.jetty.ServletConfigurator;
+import io.onedev.server.oauth.OAuthEndpointServlet;
 import io.onedev.server.security.CorsFilter;
 import io.onedev.server.security.DefaultWebEnvironment;
 import io.onedev.server.web.KeepSessionAliveServlet;
@@ -69,6 +71,9 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 	@Inject
 	private ServerSocketServlet serverServlet;
+
+	@Inject
+	private OAuthEndpointServlet oauthServlet;
 
 	@Inject
 	private Set<SessionListener> sessionListener;
@@ -162,6 +167,15 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/~api/*");	
 		context.addServlet(new ServletHolder(serverServlet), "/~server");
+
+		var oauthHolder = new ServletHolder(oauthServlet);
+		oauthHolder.setName("oauth-provider");
+		context.addServlet(oauthHolder, "/~oauth/token");
+		var oauthMapping = new ServletMapping();
+		oauthMapping.setServletName("oauth-provider");
+		oauthMapping.setPathSpecs(new String[] {"/~oauth/revoke", "/~oauth/userinfo", "/~oauth/jwks",
+				"/.well-known/oauth-authorization-server", "/.well-known/openid-configuration"});
+		context.getServletHandler().addServletMapping(oauthMapping);
 	}
 	
 }

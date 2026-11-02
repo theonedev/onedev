@@ -195,7 +195,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	@Nullable
-	private static User getAuthUser(Subject subject) {
+	public static User getAuthUser(Subject subject) {
 		return getAuthUser((String) subject.getPrincipal());
 	}
 
@@ -420,10 +420,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	public static boolean canScheduleIssues(Subject subject, Project project) {
 		return subject.isPermitted(new ProjectPermission(project, new ScheduleIssues()));
-	}
-
-	public static boolean isAssignedRole(Project project, Role role) {
-		return isAssignedRole(getSubject(), project, role);
 	}
 
 	public static boolean isAssignedRole(Subject subject, Project project, Role role) {

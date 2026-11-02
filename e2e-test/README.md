@@ -5,7 +5,7 @@ the OneDev web interface in Chromium.
 
 ## Setup
 
-Node.js 20 or newer is required. The service desk tests also require Java and
+Node.js 20.19 or newer is required. The service desk tests also require Java and
 Maven to install and run the local GreenMail server.
 
 ```bash
@@ -21,7 +21,7 @@ npm run install:mail-server
 npm test
 ```
 
-By default Playwright starts `./dev.sh run` from the repository root and waits
+By default Playwright starts `./dev.sh prod` from the repository root and waits
 up to ten minutes for `http://127.0.0.1:6610`. If a server is already listening
 there, Playwright reuses it.
 
@@ -230,3 +230,48 @@ Use a dedicated server and one worker, as with the new-issue form tests. Test
 settings are restored, and test projects and users are removed. No external
 mailbox, SMTP credentials or real Jev key is
 required. Both Jev suites run as part of the normal test run.
+
+## OAuth2 and OpenID Connect provider
+
+`tests/oauth-provider.spec.js` replaces the standalone Python/Node callback apps
+and manual Git runner. It uses pinned `openid-client` for both OAuth2 and OIDC
+and automates browser registration and consent with Playwright.
+
+```bash
+npm test -- tests/oauth-provider.spec.js
+```
+
+Use a dedicated test server with its OAuth signing key enabled and the default
+Project Owner, Code Reader, and Code Writer roles. The signing key is created
+on initialization; if it has been deleted, generate one under **Administration
+→ Keys → OAuth Signing Key** before running the suite. The server's advertised
+URL must be reachable by both Chromium and the Node test runner. HTTP is allowed
+for explicitly configured development servers. Git must be installed for the
+Git HTTP case.
+
+The suite creates disposable users, projects, and applications. Fixture teardown
+removes them and any remaining grants/tokens, including after failed tests.
+No separate client configuration, client secrets, Python environment, or manual
+consent is required. Only the application's callback landing page is intercepted;
+all provider endpoints and Git operations use the real OneDev server.
+
+Coverage includes:
+
+- OAuth2 and OIDC with public clients, client-secret Basic, and client-secret POST.
+- Discovery, state validation, S256 PKCE rejection/success, and public-client
+  callbacks with an ephemeral loopback port.
+- OIDC ID-token signature/claim validation using JWKS, userinfo, and refreshed
+  ID-token validation.
+- Role-scoped REST access and exclusion of unselected projects.
+- Access/refresh-token rotation, rejection of preceding access tokens, revocation,
+  refresh-token replay detection, and denied consent.
+- Git ls-remote, clone, fetch, Code Reader push denial, Code Writer push/read-back,
+  project isolation, refresh, and rejection after revocation.
+- Secret rotation and rotate-link visibility on application details and list pages.
+
+The Git case passes issued tokens directly to Git via an isolated environment;
+it does not exercise `git-credential-oauth`'s browser launch or credential cache.
+Requests-OAuthlib interoperability is also no longer part of this JavaScript suite.
+Traces and screenshots are disabled for these tests because the pages contain
+one-time client secrets and authorization codes. Assertions do not print token
+values. Stop a locally started server with `./dev.sh stop` after testing.

@@ -190,6 +190,9 @@ import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AccessTokenAuthorizationService;
 import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.oauth.OAuthProviderService;
+import io.onedev.server.oauth.DefaultOAuthProviderService;
+import io.onedev.server.oauth.OAuthEndpointServlet;
 import io.onedev.server.service.AgentAttributeService;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.AgentTokenService;
@@ -554,6 +557,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentNotificationManager.class);
 		bind(CodeCommentService.class).to(DefaultCodeCommentService.class);
 		bind(AccessTokenService.class).to(DefaultAccessTokenService.class);
+		bind(OAuthProviderService.class).to(DefaultOAuthProviderService.class);
+		bind(OAuthEndpointServlet.class);
 		bind(UserService.class).to(DefaultUserService.class);
 		bind(IssueWatchService.class).to(DefaultIssueWatchService.class);
 		bind(IssueChangeService.class).to(DefaultIssueChangeService.class);
@@ -684,6 +689,9 @@ public class CoreModule extends AbstractPluginModule {
 		bind(ShiroFilter.class).to(DefaultShiroFilter.class);
 		install(new ShiroAopModule());
         contribute(FilterChainConfigurator.class, filterChainManager -> {
+			for (String path: List.of("/~oauth/token", "/~oauth/revoke", "/~oauth/userinfo", "/~oauth/jwks",
+					"/.well-known/oauth-authorization-server", "/.well-known/openid-configuration"))
+				filterChainManager.createChain(path, "noSessionCreation");
 			filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic, authcBearer");
 			filterChainManager.createChain("/**/git-upload-pack", "noSessionCreation, authcBasic, authcBearer");
 			filterChainManager.createChain("/**/git-receive-pack", "noSessionCreation, authcBasic, authcBearer");

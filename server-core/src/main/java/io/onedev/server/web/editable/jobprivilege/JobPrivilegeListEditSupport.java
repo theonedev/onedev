@@ -3,6 +3,7 @@ package io.onedev.server.web.editable.jobprivilege;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.support.role.JobPrivilege;
@@ -12,6 +13,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.beanlist.BeanListPropertyViewer;
 
 public class JobPrivilegeListEditSupport implements EditSupport {
 
@@ -24,14 +26,19 @@ public class JobPrivilegeListEditSupport implements EditSupport {
 
 					@Override
 					public PropertyViewer renderForView(String componentId, final IModel<List<Serializable>> model) {
-						throw new UnsupportedOperationException();
+						return new PropertyViewer(componentId, descriptor) {
+							@Override
+							protected Component newContent(String id, PropertyDescriptor property) {
+								return new BeanListPropertyViewer(id, property, model.getObject());
+							}
+						};
 					}
 
 					@Override
 					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
 						return new JobPrivilegeListEditPanel(componentId, descriptor, model);
 					}
-					
+
 				};
 			}
 		}
@@ -42,5 +49,5 @@ public class JobPrivilegeListEditSupport implements EditSupport {
 	public int getPriority() {
 		return 0;
 	}
-	
+
 }

@@ -1,0 +1,25 @@
+<wicket:extend>
+	<div class="card">
+		<div class="card-body">
+			<div class="alert alert-light alert-notice mb-4">
+				<wicket:t>This key signs OpenID Connect ID tokens. Generating a key enables the OAuth2/OIDC provider, allowing users to register applications and authorize access to their account and projects.</wicket:t>
+			</div>
+			<div wicket:id="content"></div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="undefinedFrag">
+		<p class="text-muted"><wicket:t>The OAuth2/OIDC provider is disabled because no signing key is configured.</wicket:t></p>
+		<a wicket:id="generate" class="btn btn-primary"><wicket:t>Generate</wicket:t></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="definedFrag">
+		<p class="text-success font-weight-bold"><wicket:t>The OAuth2/OIDC provider is enabled.</wicket:t></p>
+		<dl>
+			<dt><wicket:t>Key ID</wicket:t></dt>
+			<dd wicket:id="keyID" class="text-break"></dd>
+			<dt class="mb-2"><wicket:t>Public Key</wicket:t> <a wicket:id="copyPublicKey" t:data-tippy-content="Copy public key"><wicket:svg href="copy" class="icon"/></a></dt>
+			<dd><pre wicket:id="publicKey" class="font-size-sm bg-light p-3 rounded text-wrap text-break"></pre></dd>
+		</dl>
+		<a wicket:id="regenerate" class="btn btn-light-primary mr-2"><wicket:t>Regenerate</wicket:t></a>
+		<a wicket:id="delete" class="btn btn-light-danger"><wicket:t>Delete</wicket:t></a>
+	</wicket:fragment>
+</wicket:extend>

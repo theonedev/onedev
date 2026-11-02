@@ -1,0 +1,42 @@
+<wicket:extend>
+	<div class="m-2 m-sm-5">
+		<div class="card mb-5">
+			<div class="card-header"><div class="card-title"><h5 wicket:id="heading" class="mb-0"></h5></div></div>
+			<div class="card-body">
+				<form wicket:id="form" method="post" class="leave-confirm">
+					<input wicket:id="csrf" type="hidden">
+					<div wicket:id="feedback"></div>
+					<div wicket:id="editor"></div>
+					<div class="d-flex mt-5">
+						<button wicket:id="save" type="submit" class="btn btn-primary dirty-aware mr-2"><wicket:t>Save</wicket:t></button>
+						<a wicket:id="cancel" class="btn btn-light"><wicket:t>Cancel</wicket:t></a>
+					</div>
+				</form>
+			</div>
+		</div>
+		<form wicket:id="manage" method="post" class="card mb-5">
+			<input wicket:id="csrf" type="hidden">
+			<div class="card-header"><div class="card-title"><h5 class="mb-0"><wicket:t>Application Access</wicket:t></h5></div></div>
+			<div class="card-body">
+				<div wicket:id="feedback"></div>
+				<div class="font-weight-bold mb-2"><wicket:t>Client Type</wicket:t></div>
+				<div wicket:id="type" class="mb-4"></div>
+				<div class="font-weight-bold mb-2"><wicket:t>Client ID</wicket:t></div>
+				<div class="d-flex align-items-center mb-4">
+					<span wicket:id="clientId" class="text-monospace text-break font-size-sm mr-2"></span>
+					<a wicket:id="copyClientId" class="flex-shrink-0" t:aria-label="Copy client ID"><wicket:svg href="copy" class="icon"></wicket:svg></a>
+				</div>
+				<div class="font-weight-bold mb-2"><wicket:t>Client Secret</wicket:t></div>
+				<div wicket:id="secret" class="mb-4"></div>
+				<div class="d-flex flex-wrap">
+					<button wicket:id="revoke" type="submit" class="btn btn-light-danger mr-3 mb-2" onclick="return confirm('Revoke all authorizations for this application?')"><wicket:t>Revoke All Authorizations</wicket:t></button>
+					<button wicket:id="delete" type="submit" class="btn btn-light-danger mb-2" onclick="return confirm('Delete this application and all its authorizations?')"><wicket:t>Delete Application</wicket:t></button>
+				</div>
+			</div>
+		</form>
+		<div wicket:id="integration"></div>
+	</div>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="applications"><wicket:t>OAuth Applications</wicket:t></a> <span class="dot"></span> <span wicket:id="applicationName" class="text-truncate"></span>
+	</wicket:fragment>
+</wicket:extend>

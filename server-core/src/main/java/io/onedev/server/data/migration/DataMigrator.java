@@ -9643,4 +9643,8 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate255(File dataDir, Stack<Integer> versions) {
+		// OAuth applications and grants add new tables and an optional AccessToken.oauthGrant association.
+	}
+
 }

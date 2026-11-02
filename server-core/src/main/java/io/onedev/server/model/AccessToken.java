@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.onedev.server.rest.annotation.Immutable;
 import io.onedev.server.security.SecurityUtils;
@@ -24,7 +25,7 @@ import static io.onedev.server.security.SecurityUtils.asPrincipals;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="owner_id"), @Index(columnList = "value")},
+		indexes={@Index(columnList="owner_id"), @Index(columnList = "value"), @Index(columnList="oauthGrant_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"owner_id", "name"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class AccessToken extends AbstractEntity implements AuthenticationInfo {
@@ -50,6 +51,18 @@ public class AccessToken extends AbstractEntity implements AuthenticationInfo {
 	private Date createDate = new Date();
 
 	private Date expireDate;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JsonIgnore
+	private OAuthGrant oauthGrant;
+
+	public OAuthGrant getOauthGrant() {
+		return oauthGrant;
+	}
+
+	public void setOauthGrant(OAuthGrant oauthGrant) {
+		this.oauthGrant = oauthGrant;
+	}
 
 	@OneToMany(mappedBy="token", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -117,8 +130,8 @@ public class AccessToken extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	public Subject asSubject() {
-		// Temporal access token, check AccessTokenService.createTemporal
-		if (isNew() || isHasOwnerPermissions())
+		// isNew() checks temporal access token, check AccessTokenService.createTemporal
+		if (oauthGrant == null && (isNew() || isHasOwnerPermissions()))
 			return getOwner().asSubject();
 		else
 			return SecurityUtils.asSubject(getPrincipals());

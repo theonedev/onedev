@@ -42,6 +42,7 @@ public abstract class AccessTokenListPanel extends Panel {
 			@Override
 			public List<AccessToken> getObject() {
 				var tokens = new ArrayList<>(getUser().getAccessTokens());
+				tokens.removeIf(it -> it.getOauthGrant() != null);
 				Collections.sort(tokens);
 				return tokens;
 			}

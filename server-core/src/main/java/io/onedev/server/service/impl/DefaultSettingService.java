@@ -123,6 +123,17 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 		var settingValue = cache.get(key);	
 		return settingValue != null? settingValue.orElse(null): null;
 	}
+
+	@Override
+	public String getOAuthSigningKey() {
+		return (String) getSettingValue(Key.OAUTH_SIGNING_KEY);
+	}
+
+	@Transactional
+	@Override
+	public void saveOAuthSigningKey(@Nullable String signingKey) {
+		saveSetting(Key.OAUTH_SIGNING_KEY, signingKey);
+	}
 	
 	@Override
 	public SystemSetting getSystemSetting() {

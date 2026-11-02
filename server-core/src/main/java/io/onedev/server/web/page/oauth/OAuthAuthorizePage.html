@@ -1,0 +1,35 @@
+<wicket:extend>
+	<div class="text-left">
+		<p class="mb-4"><strong wicket:id="application" class="text-break"></strong> <wicket:t>wants access to your OneDev account.</wicket:t></p>
+		<dl class="row border-bottom pb-3 mb-4">
+			<dt class="col-sm-4 text-muted font-weight-normal"><wicket:t>Homepage</wicket:t></dt>
+			<dd class="col-sm-8 text-break"><a wicket:id="homepage" rel="noopener noreferrer" target="_blank"></a></dd>
+			<dt class="col-sm-4 text-muted font-weight-normal"><wicket:t>Owner</wicket:t></dt>
+			<dd wicket:id="owner" class="col-sm-8 text-break"></dd>
+			<dt class="col-sm-4 text-muted font-weight-normal"><wicket:t>Signed in as</wicket:t></dt>
+			<dd class="col-sm-8 text-break"><strong wicket:id="user"></strong></dd>
+		</dl>
+		<h6 class="mb-3"><wicket:t>Requested Access</wicket:t></h6>
+		<ul class="pl-4 mb-4"><li wicket:id="scopes" class="mb-2"><span wicket:id="description"></span></li></ul>
+		<form wicket:id="form" method="post" class="mt-4">
+			<input wicket:id="csrf" type="hidden">
+			<div wicket:id="feedback"></div>
+			<wicket:enclosure child="projects">
+				<div class="form-group">
+					<label wicket:for="projects"><wicket:t>Authorize these roles on selected projects and their children</wicket:t></label>
+					<select wicket:id="projects"></select>
+					<div class="text-muted form-text"><wicket:t>Only projects you have permission to manage can be authorized. The application can only exercise permissions you have. Changes to these roles also affect this authorization.</wicket:t></div>
+				</div>
+			</wicket:enclosure>
+			<p class="text-muted mb-0"><wicket:t>Access expires after 30 days. You can revoke access at any time under Authorized Applications.</wicket:t></p>
+			<div class="simple-actions">
+				<button wicket:id="authorize" type="submit" class="btn btn-primary"><wicket:t>Authorize</wicket:t></button>
+				<button wicket:id="deny" type="submit" class="btn btn-light simple-cancel"><wicket:t>Deny</wicket:t></button>
+			</div>
+		</form>
+		<div class="border-top pt-4 mt-4 text-muted font-size-sm">
+			<wicket:t>You will return to:</wicket:t>
+			<div wicket:id="redirect" class="text-break mt-1"></div>
+		</div>
+	</div>
+</wicket:extend>

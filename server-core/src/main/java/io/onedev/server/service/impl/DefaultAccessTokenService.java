@@ -1,5 +1,6 @@
 package io.onedev.server.service.impl;
 
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +26,7 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.facade.AccessTokenCache;
 
@@ -42,6 +44,9 @@ public class DefaultAccessTokenService extends BaseEntityService<AccessToken> im
 
 	@Inject
 	private SessionService sessionService;
+
+	@Inject
+	private SettingService settingService;
 	
 	private volatile AccessTokenCache cache;
 
@@ -67,39 +72,40 @@ public class DefaultAccessTokenService extends BaseEntityService<AccessToken> im
 		}
 	}
 
-	private AccessToken checkDisabled(AccessToken accessToken) {
-		if (accessToken.getOwner().isDisabled())
-			throw new DisabledAccountException("Account is disabled");
-		return accessToken;
-	}
-
     @Override
     public final AccessToken findByValue(String value) {
-		return sessionService.call(new Callable<AccessToken>() {
-
-			@Override
-			public AccessToken call() throws Exception {
-				if (cache != null) {
-					var facade = cache.findByValue(value);
-					if (facade != null) {
-						return checkDisabled(load(facade.getId()));
-					} else {
-						Long userId = temporalAccessTokens.get(value);
-						if (userId != null) {
-							var accessToken = new AccessToken();
-							accessToken.setOwner(userService.load(userId));
-							accessToken.setHasOwnerPermissions(true);
-							accessToken.setValue(value);
-							return checkDisabled(accessToken);
-						} else {
-							return null;
-						}
+		return sessionService.call(() -> {
+            if (cache != null) {
+                var facade = cache.findByValue(value);
+                if (facade != null) {
+                    var token = load(facade.getId());
+					if (token.getOwner().isDisabled())
+						throw new DisabledAccountException("Account is disabled");
+                    if (!value.equals(token.getValue())
+							|| token.isExpired()
+							|| token.getOauthGrant() != null && (settingService.getOAuthSigningKey() == null || !token.getOauthGrant().isActive())) {
+						return null;
 					}
-				} else {
-					throw new ServerNotReadyException();
-				}						
-			}
-		});		
+					return token;
+                } else {
+                    Long userId = temporalAccessTokens.get(value);
+                    if (userId != null) {
+                        var token = new AccessToken();
+						var user = userService.load(userId);
+						if (user.isDisabled())
+							throw new DisabledAccountException("Account is disabled");
+                        token.setOwner(user);
+                        token.setHasOwnerPermissions(true);
+                        token.setValue(value);
+						return token;
+                    } else {
+                        return null;
+                    }
+                }
+            } else {
+                throw new ServerNotReadyException();
+            }
+        });
     }
 
     @Sessional
@@ -107,7 +113,7 @@ public class DefaultAccessTokenService extends BaseEntityService<AccessToken> im
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
 
-		temporalAccessTokens = hazelcastInstance.getMap("temporalAccessTokens");
+		temporalAccessTokens = Objects.requireNonNull(hazelcastInstance).getMap("temporalAccessTokens");
 		
         cache = new AccessTokenCache(hazelcastInstance.getReplicatedMap("accessTokenCache"));
 		for (var token: query())

@@ -83,29 +83,23 @@ import io.onedev.server.service.UserService;
 @Singleton
 public class UserResource {
 
-	private final UserService userService;
-	
-	private final SshKeyService sshKeyService;
-	
-	private final PasswordService passwordService;
-	
-	private final EmailAddressService emailAddressService;
-
-	private final SubscriptionService subscriptionService;
-
-	private final AuditService auditService;
-	
 	@Inject
-	public UserResource(UserService userService, SshKeyService sshKeyService,
-                        PasswordService passwordService, EmailAddressService emailAddressService,
-                        SubscriptionService subscriptionService, AuditService auditService) {
-		this.userService = userService;
-		this.sshKeyService = sshKeyService;
-		this.passwordService = passwordService;
-		this.emailAddressService = emailAddressService;
-		this.subscriptionService = subscriptionService;
-		this.auditService = auditService;
-	}
+	private UserService userService;
+
+	@Inject
+	private SshKeyService sshKeyService;
+
+	@Inject
+	private PasswordService passwordService;
+
+	@Inject
+	private EmailAddressService emailAddressService;
+
+	@Inject
+	private SubscriptionService subscriptionService;
+
+	@Inject
+	private AuditService auditService;
 
 	private UserData getData(User user) {
 		var data = new UserData();
@@ -148,7 +142,9 @@ public class UserResource {
     	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
-		return user.getAccessTokens();
+		return user.getAccessTokens().stream()
+				.filter(token -> token.getOauthGrant() == null)
+				.collect(toList());
     }
 
 	@Api(order=275)

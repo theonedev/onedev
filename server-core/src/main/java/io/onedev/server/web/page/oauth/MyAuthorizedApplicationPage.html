@@ -1,0 +1,41 @@
+<wicket:extend xmlns:wicket="http://www.w3.org/1999/xhtml">
+	<form wicket:id="form" method="post">
+		<input wicket:id="csrf" type="hidden">
+		<h5 wicket:id="name" class="text-break mb-4"></h5>
+		<dl class="row mb-4">
+			<dt class="col-sm-3 font-weight-normal mb-sm-3"><wicket:t>Homepage</wicket:t></dt>
+			<dd class="col-sm-9 mb-3"><a wicket:id="homepage" class="text-break" target="_blank" rel="noopener noreferrer"></a></dd>
+			<dt class="col-sm-3 font-weight-normal mb-sm-3"><wicket:t>Owner</wicket:t></dt>
+			<dd wicket:id="owner" class="col-sm-9 mb-3"></dd>
+			<dt class="col-sm-3 font-weight-normal"><wicket:t>Client ID</wicket:t></dt>
+			<dd class="col-sm-9 mb-0"><code wicket:id="clientId" class="text-break"></code></dd>
+		</dl>
+		<div class="mb-5">
+			<button wicket:id="revokeAll" type="submit" class="btn btn-sm btn-light-danger"><wicket:t>Revoke All</wicket:t></button>
+		</div>
+		<h5 class="border-top pt-5 mb-4"><wicket:t>Authorized Tokens</wicket:t> <span class="text-muted font-size-base ml-2">(<span wicket:id="count"></span>)</span></h5>
+		<p class="text-muted mb-4"><wicket:t>Each token has its own permissions and expiration. Revoking a token also revokes its refresh token. Revoke all to remove this application's access to your account.</wicket:t></p>
+		<div wicket:id="tokens" class="border rounded p-4 mb-4">
+			<dl class="row mb-0">
+				<dt class="col-sm-3 font-weight-normal mb-sm-3"><wicket:t>Authorized</wicket:t></dt>
+				<dd wicket:id="created" class="col-sm-9 mb-3"></dd>
+				<dt class="col-sm-3 font-weight-normal mb-sm-3"><wicket:t>Last token exchange</wicket:t></dt>
+				<dd wicket:id="used" class="col-sm-9 mb-3"></dd>
+				<dt class="col-sm-3 font-weight-normal mb-sm-3"><wicket:t>Access token expires</wicket:t></dt>
+				<dd wicket:id="accessExpires" class="col-sm-9 mb-3"></dd>
+				<dt class="col-sm-3 font-weight-normal mb-sm-3"><wicket:t>Authorization expires</wicket:t></dt>
+				<dd wicket:id="expires" class="col-sm-9 mb-3"></dd>
+				<dt class="col-sm-3 font-weight-normal mb-sm-3"><wicket:t>Redirect URI</wicket:t></dt>
+				<dd class="col-sm-9 mb-3"><code wicket:id="redirectUri" class="text-break"></code></dd>
+				<dt class="col-sm-3 font-weight-normal mb-sm-3"><wicket:t>Scopes</wicket:t></dt>
+				<dd class="col-sm-9 mb-3"><span wicket:id="scopes" class="d-inline-block mr-2"><code wicket:id="scope" class="text-break"></code></span></dd>
+				<dt class="col-sm-3 font-weight-normal"><wicket:t>Projects and roles</wicket:t></dt>
+				<dd wicket:id="projects" class="col-sm-9 text-break mb-0"></dd>
+			</dl>
+			<button wicket:id="revoke" type="submit" class="btn btn-sm btn-light-danger mt-4"><wicket:t>Revoke</wicket:t></button>
+		</div>
+	</form>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="applications"><wicket:t>Authorized Applications</wicket:t></a> <span class="dot"></span> <span wicket:id="name" class="text-truncate"></span>
+	</wicket:fragment>
+</wicket:extend>

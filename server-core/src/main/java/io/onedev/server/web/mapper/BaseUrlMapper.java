@@ -38,6 +38,7 @@ import io.onedev.server.web.page.admin.emailtemplates.StopwatchOverdueTemplatePa
 import io.onedev.server.web.page.admin.emailtemplates.UserInvitationTemplatePage;
 import io.onedev.server.web.page.admin.emailtemplates.WorkspaceNotificationTemplatePage;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
+import io.onedev.server.web.page.admin.oauthsigningkey.OAuthSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupListPage;
@@ -175,6 +176,12 @@ import io.onedev.server.web.page.security.EmailAddressVerificationPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.security.OAuthCallbackPage;
+import io.onedev.server.web.page.oauth.OAuthAuthorizePage;
+import io.onedev.server.web.page.oauth.MyOAuthApplicationsPage;
+import io.onedev.server.web.page.oauth.MyOAuthApplicationPage;
+import io.onedev.server.web.page.oauth.NewMyOAuthApplicationPage;
+import io.onedev.server.web.page.oauth.MyAuthorizedApplicationPage;
+import io.onedev.server.web.page.oauth.MyAuthorizedApplicationsPage;
 import io.onedev.server.web.page.security.PasswordResetPage;
 import io.onedev.server.web.page.security.SignUpPage;
 import io.onedev.server.web.page.security.SsoProcessPage;
@@ -257,6 +264,12 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~my/ssh-keys", MySshKeysPage.class));
 		add(new BasePageMapper("~my/gpg-keys", MyGpgKeysPage.class));
 		add(new BasePageMapper("~my/access-tokens", MyAccessTokensPage.class));
+		add(new BasePageMapper("~my/oauth-applications", MyOAuthApplicationsPage.class));
+		add(new BasePageMapper("~my/oauth-applications/new", NewMyOAuthApplicationPage.class));
+		add(new BasePageMapper("~my/oauth-applications/${application}", MyOAuthApplicationPage.class));
+		add(new BasePageMapper("~my/authorized-applications", MyAuthorizedApplicationsPage.class));
+		add(new BasePageMapper("~my/authorized-applications/${application}", MyAuthorizedApplicationPage.class));
+		add(new BasePageMapper("~oauth/authorize", OAuthAuthorizePage.class));
 		add(new BasePageMapper("~my/two-factor-authentication", MyTwoFactorAuthenticationPage.class));
 		add(new BasePageMapper("~my/sso-accounts", MySsoAccountsPage.class));
 		add(new BasePageMapper("~my/query-watches/#{tab}", MyQueryWatchesPage.class));
@@ -412,6 +425,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/sso-providers/${provider}", SsoProviderDetailPage.class));
 		add(new BasePageMapper("~administration/settings/ssh-server-key", SshServerKeyPage.class));
  		add(new BasePageMapper("~administration/settings/gpg-signing-key", GpgSigningKeyPage.class));
+		add(new BasePageMapper("~administration/settings/oauth-signing-key", OAuthSigningKeyPage.class));
  		add(new BasePageMapper("~administration/settings/gpg-trusted-keys", GpgTrustedKeysPage.class));
 
 		add(new BasePageMapper("~administration/agents", AgentListPage.class));

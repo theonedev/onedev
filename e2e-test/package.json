@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19"
   },
   "scripts": {
     "test": "playwright test",
@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",
-    "nodemailer": "10.0.10"
+    "nodemailer": "10.0.10",
+    "openid-client": "6.8.8"
   }
 }

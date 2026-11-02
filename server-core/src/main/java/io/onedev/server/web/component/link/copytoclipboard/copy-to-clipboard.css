@@ -1,0 +1,8 @@
+code.code-span {
+	cursor: pointer;
+}
+code.code-span.copied,
+.dark-mode code.code-span.copied {
+	background-color: var(--primary);
+	color: white;
+}

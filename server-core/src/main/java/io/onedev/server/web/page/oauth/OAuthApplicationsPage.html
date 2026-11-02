@@ -1,0 +1,37 @@
+<wicket:extend>
+	<div class="m-2 m-sm-5">
+		<div class="card mb-5">
+			<div class="card-body">
+				<div class="mb-4">
+					<a wicket:id="newApplication" class="btn btn-primary"><wicket:svg href="plus" class="icon mr-1"></wicket:svg> <wicket:t>Add New</wicket:t></a>
+				</div>
+				<form wicket:id="applicationList" method="post">
+					<input wicket:id="csrf" type="hidden">
+					<div wicket:id="empty" class="norecords" role="img" t:aria-label="No applications registered yet"></div>
+					<div wicket:id="table" class="table-responsive">
+						<table class="table table-hover">
+							<thead><tr><th><wicket:t>Application</wicket:t></th><th class="d-none d-lg-table-cell"><wicket:t>Client ID</wicket:t></th><th class="d-none d-lg-table-cell"><wicket:t>Client Secret</wicket:t></th><th class="minimum"></th></tr></thead>
+							<tbody>
+								<tr wicket:id="applications">
+									<td class="align-top"><a wicket:id="application" class="font-weight-bold text-break"><span wicket:id="name"></span></a></td>
+									<td class="d-none d-lg-table-cell align-top">
+										<div class="d-flex align-items-center">
+											<span wicket:id="clientId" class="text-monospace text-break font-size-sm mr-2"></span>
+											<a wicket:id="copyClientId" class="flex-shrink-0" t:aria-label="Copy client ID"><wicket:svg href="copy" class="icon"></wicket:svg></a>
+										</div>
+									</td>
+									<td class="d-none d-lg-table-cell align-top"><div wicket:id="secret"></div></td>
+									<td class="minimum align-top text-nowrap">
+										<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" t:data-tippy-content="Edit" t:aria-label="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+										<button wicket:id="delete" type="submit" class="btn btn-xs btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete" t:aria-label="Delete"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div wicket:id="integration"></div>
+	</div>
+</wicket:extend>

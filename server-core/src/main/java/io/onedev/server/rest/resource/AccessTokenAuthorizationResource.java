@@ -4,6 +4,7 @@ import static io.onedev.server.security.SecurityUtils.canManageProject;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
 import static io.onedev.server.security.SecurityUtils.isAdministrator;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.apache.shiro.authz.UnauthorizedException;
@@ -24,6 +25,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -55,6 +57,8 @@ public class AccessTokenAuthorizationResource {
 	@GET
 	public AccessTokenAuthorization getAuthorization(@PathParam("authorizationId") Long authorizationId) {
 		var authorization = accessTokenAuthorizationService.load(authorizationId);
+		if (authorization.getToken().getOauthGrant() != null)
+			throw new NotFoundException("Access token authorization not found");
 		var owner = authorization.getToken().getOwner();
 		if (!isAdministrator() && !owner.equals(getAuthUser())) 
 			throw new UnauthorizedException();
@@ -64,11 +68,13 @@ public class AccessTokenAuthorizationResource {
 	@Api(order=200, description="Create access token authorization. Access token owner should have permission to manage authorized project")
 	@POST
 	public Long createAuthorization(@NotNull AccessTokenAuthorization authorization) {
+		if (authorization.getToken().getOauthGrant() != null)
+			throw new NotFoundException("Access token not found");
 		var owner = authorization.getToken().getOwner();
 		checkAuthorization(owner, authorization.getProject(), BadRequestException::new);
 
 		accessTokenAuthorizationService.createOrUpdate(authorization);
-		if (!getAuthUser().equals(owner)) {
+		if (!Objects.equals(getAuthUser(), owner)) {
 			var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 			auditService.audit(null, "created access token authorization in account \"" + owner.getName() + "\" via RESTful API", null, newAuditContent);
 		}
@@ -79,11 +85,13 @@ public class AccessTokenAuthorizationResource {
 	@Path("/{authorizationId}")
 	@POST
 	public Response updateAuthorization(@PathParam("authorizationId") Long authorizationId, @NotNull AccessTokenAuthorization authorization) {
+		if (authorization.getToken().getOauthGrant() != null)
+			throw new NotFoundException("Access token authorization not found");
 		var owner = authorization.getToken().getOwner();
 		checkAuthorization(owner, authorization.getProject(), NotAcceptableException::new);
 
 		accessTokenAuthorizationService.createOrUpdate(authorization);
-		if (!getAuthUser().equals(owner)) {
+		if (!Objects.equals(getAuthUser(), owner)) {
 			var oldAuditContent = authorization.getOldVersion().toXML();
 			var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 			auditService.audit(null, "changed access token authorization in account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
@@ -111,11 +119,13 @@ public class AccessTokenAuthorizationResource {
 	@DELETE
 	public Response deleteAuthorization(@PathParam("authorizationId") Long authorizationId) {
 		var authorization = accessTokenAuthorizationService.load(authorizationId);
+		if (authorization.getToken().getOauthGrant() != null)
+			throw new NotFoundException("Access token authorization not found");
 		var owner = authorization.getToken().getOwner();
 		if (!isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 		accessTokenAuthorizationService.delete(authorization);
-		if (!getAuthUser().equals(owner)) {
+		if (!Objects.equals(getAuthUser(), owner)) {
 			var oldAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
 			auditService.audit(null, "deleted access token authorization from account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, null);
 		}

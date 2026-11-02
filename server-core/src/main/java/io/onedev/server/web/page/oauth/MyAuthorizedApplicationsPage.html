@@ -1,0 +1,33 @@
+<wicket:extend>
+	<div class="alert alert-notice alert-light mb-5">
+		<wicket:t>Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.</wicket:t>
+	</div>
+	<form wicket:id="applications" method="post">
+		<input wicket:id="csrf" type="hidden">
+		<div wicket:id="empty" class="norecords" role="img" t:aria-label="No authorized applications yet"></div>
+		<div wicket:id="table" class="table-responsive">
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th><wicket:t>Application</wicket:t></th>
+						<th><wicket:t>Owner</wicket:t></th>
+						<th class="text-center"><wicket:t>Tokens</wicket:t></th>
+						<th class="d-none d-md-table-cell"><wicket:t>Last Used</wicket:t></th>
+						<th class="minimum d-none d-sm-table-cell"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr wicket:id="rows">
+						<td class="align-middle"><a wicket:id="detail" class="font-weight-bold text-break"><span wicket:id="name"></span></a></td>
+						<td wicket:id="owner" class="align-middle text-break"></td>
+						<td wicket:id="tokens" class="align-middle text-center"></td>
+						<td wicket:id="used" class="d-none d-md-table-cell align-middle"></td>
+						<td class="minimum align-middle d-none d-sm-table-cell">
+							<button wicket:id="revoke" type="submit" class="btn btn-xs btn-icon btn-light btn-hover-danger" t:data-tippy-content="Revoke" t:aria-label="Revoke"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</form>
+</wicket:extend>

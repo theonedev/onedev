@@ -130,6 +130,7 @@ import io.onedev.server.web.page.admin.emailtemplates.ServiceDeskIssueOpenedTemp
 import io.onedev.server.web.page.admin.emailtemplates.StopwatchOverdueTemplatePage;
 import io.onedev.server.web.page.admin.emailtemplates.UserInvitationTemplatePage;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
+import io.onedev.server.web.page.admin.oauthsigningkey.OAuthSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupListPage;
@@ -168,6 +169,10 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
+import io.onedev.server.web.page.oauth.MyOAuthApplicationsPage;
+import io.onedev.server.web.page.oauth.MyOAuthApplicationPage;
+import io.onedev.server.web.page.oauth.MyAuthorizedApplicationPage;
+import io.onedev.server.web.page.oauth.MyAuthorizedApplicationsPage;
 import io.onedev.server.web.page.my.aisetting.MyEntitlementSettingPage;
 import io.onedev.server.web.page.my.aisetting.MyModelSettingPage;
 import io.onedev.server.web.page.my.aisetting.MyBehaviorPage;
@@ -275,9 +280,10 @@ public abstract class LayoutPage extends BasePage {
 							GpgSigningKeyPage.class, new PageParameters()));
 					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, _T("GPG Trusted Keys"),
 							GpgTrustedKeysPage.class, new PageParameters()));
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, _T("OAuth Signing Key"),
+							OAuthSigningKeyPage.class, new PageParameters()));
 
-					var keysTitle = sshPort!=0? _T("SSH & GPG Keys"): _T("GPG Keys");
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, keysTitle, keyManagementMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Keys"), keyManagementMenuItems));
 
 					List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Fields"), IssueFieldListPage.class, new PageParameters()));
@@ -1278,6 +1284,12 @@ public abstract class LayoutPage extends BasePage {
 							getPage() instanceof MyGpgKeysPage));
 					menuItems.add(newPageMenuItem(_T("Access Tokens"), "token", MyAccessTokensPage.class,
 							getPage() instanceof MyAccessTokensPage));
+					if (getSettingService().getOAuthSigningKey() != null) {
+						menuItems.add(newPageMenuItem(_T("OAuth Applications"), "application", MyOAuthApplicationsPage.class,
+								getPage() instanceof MyOAuthApplicationsPage || getPage() instanceof MyOAuthApplicationPage));
+						menuItems.add(newPageMenuItem(_T("Authorized Applications"), "application2", MyAuthorizedApplicationsPage.class,
+								getPage() instanceof MyAuthorizedApplicationsPage || getPage() instanceof MyAuthorizedApplicationPage));
+					}
 				}
 				if (user.getType() == ORDINARY && !user.isDisabled() && user.isEnforce2FA()) {
 					menuItems.add(newPageMenuItem(_T("Two-factor Authentication"), "shield",

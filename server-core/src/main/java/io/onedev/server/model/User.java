@@ -146,6 +146,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<AccessToken> accessTokens = new ArrayList<>();
+
+	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	private Collection<OAuthGrant> oauthGrants = new ArrayList<>();
+
+	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	private Collection<OAuthApplication> oauthApplications = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)

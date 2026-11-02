@@ -267,10 +267,6 @@ public class DefaultRoleService extends BaseEntityService<Role> implements RoleS
 			issueReporter.setEditableIssueFields(allfieldsExcept);
 		}
 		issueReporter.setEditableIssueLinks(Lists.newArrayList("Related"));
-		
-		jobPrivilege = new JobPrivilege();
-		jobPrivilege.setJobNames("*");
-		issueReporter.getJobPrivileges().add(jobPrivilege);
 
 		create(issueReporter, new ArrayList<>());					
 	}
