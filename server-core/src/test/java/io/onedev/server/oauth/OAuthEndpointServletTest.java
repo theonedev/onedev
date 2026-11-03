@@ -37,7 +37,7 @@ class OAuthEndpointServletTest {
 		when(providerService.isEnabled()).thenReturn(true);
 		var sessions = mock(SessionService.class);
 		when(sessions.call(any())).thenAnswer(it -> ((Callable<?>) it.getArgument(0)).call());
-		for (var name: Map.of("provider", providerService, "sessionService", sessions).entrySet()) {
+		for (var name: Map.of("providerService", providerService, "sessionService", sessions).entrySet()) {
 			var field = OAuthEndpointServlet.class.getDeclaredField(name.getKey());
 			field.setAccessible(true); field.set(servlet, name.getValue());
 		}
