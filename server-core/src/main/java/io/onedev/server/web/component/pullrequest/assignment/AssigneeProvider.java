@@ -27,11 +27,11 @@ public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 		PullRequest request = getPullRequest();
 		UserService userService = OneDev.getInstance(UserService.class);
 
-		List<User> users = new ArrayList<>(SecurityUtils.getAuthorizedUsers(request.getProject(), new WriteCode()));
+		UserCache cache = userService.cloneCache();
+		List<User> users = new ArrayList<>(SecurityUtils.getAuthorizedUsers(request.getProject(), cache, new WriteCode()));
 		
 		users.removeAll(request.getAssignees());
 		
-		UserCache cache = userService.cloneCache();
 		users.sort(cache.comparingDisplayName(request.getParticipants()));
 
 		new ResponseFiller<>(response).fill(new Similarities<>(users) {

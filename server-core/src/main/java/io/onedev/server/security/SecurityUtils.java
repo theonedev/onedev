@@ -878,59 +878,109 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static Collection<Project> getAuthorizedProjects(Subject subject, @Nullable ProjectCache cache, BasePermission permission) {
 		try (var ignored = AuthorizationInfoCache.open()) {
 			var projectService = OneDev.getInstance(ProjectService.class);
-			String principal = (String) subject.getPrincipal();
-			var user = getAuthUser(principal);
-			var accessToken = getAccessToken(principal);
-			if (permission.isApplicable(UserFacade.of(getUser(user, accessToken)))) {
-				if (cache == null)
-					cache = projectService.cloneCache();
-				Collection<Long> authorizedProjectIds = new HashSet<>();
-				if (user != null) {
-					if (user.isRoot() || user.isSystem()) {
-						return cache.getProjects();
-					} else {
-						for (Group group : user.getGroups()) {
-							if (group.isAdministrator())
-								return cache.getProjects();
-							for (GroupAuthorization authorization : group.getAuthorizations()) {
-								if (authorization.getRole().implies(permission))
-									authorizedProjectIds.addAll(getAuthorizedProjectIds(cache, authorization.getProject()));
-							}
-						}
+			if (cache == null)
+				cache = projectService.cloneCache();
+			var authorizedProjectIds = getAuthorizedProjectIds(subject, cache, permission);
+			if (permission.isWrite())
+				filterProjectIdsToWorkOn(subject, cache, authorizedProjectIds);
+			return authorizedProjectIds.stream().map(projectService::load).collect(toSet());
+		}
+	}
 
-						for (UserAuthorization authorization : user.getProjectAuthorizations()) {
+	/** Removes projects blocked by maintenance mode from the supplied collection. */
+	public static void filterProjectsToWorkOn(Subject subject, ProjectCache cache, Collection<Project> projects) {
+		try (var ignored = AuthorizationInfoCache.open()) {
+			var projectIds = projects.stream().map(Project::getId).collect(toSet());
+			filterProjectIdsToWorkOn(subject, cache, projectIds);
+			projects.removeIf(it -> !projectIds.contains(it.getId()));
+		}
+	}
+
+	private static void filterProjectIdsToWorkOn(Subject subject, ProjectCache cache, Collection<Long> projectIds) {
+		if (OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
+			Collection<Long> maintenanceProjectIds = new HashSet<>();
+			for (var projectId: projectIds) {
+				if (cache.get(projectId).isMaintenance())
+					maintenanceProjectIds.add(projectId);
+			}
+			if (!maintenanceProjectIds.isEmpty()) {
+				maintenanceProjectIds.removeAll(getAuthorizedProjectIds(subject, cache, new MaintainProject()));
+				projectIds.removeAll(maintenanceProjectIds);
+			}
+		}
+	}
+
+	private static Collection<Long> getAuthorizedProjectIds(Subject subject, ProjectCache cache, BasePermission permission) {
+		String principal = (String) subject.getPrincipal();
+		var user = getAuthUser(principal);
+		var accessToken = getAccessToken(principal);
+		if (permission.isApplicable(UserFacade.of(getUser(user, accessToken)))) {
+			Collection<Long> authorizedProjectIds = new HashSet<>();
+			if (user != null) {
+				if (user.isRoot() || user.isSystem()) {
+					return new HashSet<>(cache.keySet());
+				} else {
+					for (Group group : user.getGroups()) {
+						if (group.isAdministrator())
+							return new HashSet<>(cache.keySet());
+						for (GroupAuthorization authorization : group.getAuthorizations()) {
 							if (authorization.getRole().implies(permission))
 								authorizedProjectIds.addAll(getAuthorizedProjectIds(cache, authorization.getProject()));
 						}
 					}
-				}
-				if (accessToken != null) {
-					var ownerSubject = accessToken.getOwner().asSubject();
-					for (var authorization : accessToken.getAuthorizations()) {
-						if (authorization.getRole().implies(permission)
-								&& canManageProject(ownerSubject, authorization.getProject()))
+
+					for (UserAuthorization authorization : user.getProjectAuthorizations()) {
+						if (authorization.getRole().implies(permission))
 							authorizedProjectIds.addAll(getAuthorizedProjectIds(cache, authorization.getProject()));
 					}
 				}
-				if (!isAnonymous(principal) || getSettingService().getSecuritySetting().isEnableAnonymousAccess())
-					addIdsPermittedByDefaultRole(cache, authorizedProjectIds, permission);
-			
-				return authorizedProjectIds.stream().map(projectService::load)
-						.filter(it -> !permission.isWrite() || canWorkOnProject(subject, it)).collect(toSet());
-			} else {
-				return new HashSet<>();
 			}
+			if (accessToken != null) {
+				var ownerSubject = accessToken.getOwner().asSubject();
+				for (var authorization : accessToken.getAuthorizations()) {
+					if (authorization.getRole().implies(permission)
+							&& canManageProject(ownerSubject, authorization.getProject()))
+						authorizedProjectIds.addAll(getAuthorizedProjectIds(cache, authorization.getProject()));
+				}
+			}
+			if (!isAnonymous(principal) || getSettingService().getSecuritySetting().isEnableAnonymousAccess())
+				addIdsPermittedByDefaultRole(cache, authorizedProjectIds, permission);
+
+			return authorizedProjectIds;
+		} else {
+			return new HashSet<>();
 		}
 	}
 	
-	private static Collection<User> filterApplicableUsers(Collection<User> users, Project project, BasePermission permission) {
-		return users.stream().filter(it -> permission.isApplicable(it.getFacade())
-				&& (!permission.isWrite() || !project.isMaintenance() || canWorkOnProject(it.asSubject(), project))).collect(toList());
+	private static Collection<User> filterApplicableUsers(UserCache cache, Collection<User> users,
+			Project project, BasePermission permission) {
+		var applicableUsers = users.stream().filter(it -> permission.isApplicable(getUserFacade(cache, it))).collect(toList());
+		if (permission.isWrite() && project.isMaintenance()
+				&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
+			var maintainerIds = getAuthorizedUsers(project, cache, new MaintainProject()).stream()
+					.map(User::getId).collect(toSet());
+			applicableUsers.removeIf(it -> {
+				var facade = getUserFacade(cache, it);
+				return facade.isDisabled() || !facade.isSystem() && !maintainerIds.contains(it.getId());
+			});
+		}
+		return applicableUsers;
+	}
+
+	private static UserFacade getUserFacade(UserCache cache, User user) {
+		var facade = cache.get(user.getId());
+		// Special users and users created in the current transaction may not be cached yet.
+		return facade != null ? facade : user.getFacade();
 	}
 
 	public static Collection<User> getAuthorizedUsers(Project project, BasePermission permission) {
+		return getAuthorizedUsers(project, null, permission);
+	}
+
+	public static Collection<User> getAuthorizedUsers(Project project, @Nullable UserCache cache, BasePermission permission) {
 		var userService = OneDev.getInstance(UserService.class);
-		UserCache cache = userService.cloneCache();
+		if (cache == null)
+			cache = userService.cloneCache();
 
 		Collection<User> authorizedUsers = Sets.newHashSet(userService.getRoot());
 
@@ -940,7 +990,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		Project current = project;
 		do {
 			if (current.isPermittedByLoginUser(permission))
-				return filterApplicableUsers(cache.getUsers(), project, permission);
+				return filterApplicableUsers(cache, cache.getUsers(), project, permission);
 
 			for (UserAuthorization authorization: current.getUserAuthorizations()) {
 				if (authorization.getRole().implies(permission))
@@ -961,7 +1011,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				authorizedUsers.add(authorization.getUser());
 		}
 
-		return filterApplicableUsers(authorizedUsers, project, permission);
+		return filterApplicableUsers(cache, authorizedUsers, project, permission);
 	}
 
 	private static void populateAccessibleReportNames(Map<String, Collection<String>> accessibleReportNames,

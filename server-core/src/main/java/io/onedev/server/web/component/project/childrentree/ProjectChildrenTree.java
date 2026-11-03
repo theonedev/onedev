@@ -25,7 +25,7 @@ public class ProjectChildrenTree extends NestedTree<ProjectFacade> {
 
 	private static final int MAX_DISPLAY_NODES = 1000;
 
-	public static final ProjectFacade MARK_PROJECT = new ProjectFacade(null, null, null, null, null, false, false, null, null, null, null);
+	public static final ProjectFacade MARK_PROJECT = new ProjectFacade(null, null, null, null, null, false, false, false, null, null, null, null);
 	
 	private final Set<Long> expandedProjectIds = new HashSet<>();
 	

@@ -840,7 +840,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskEmailAddress(), 
-				isCodeManagement(), isIssueManagement(), getGitPackConfig(), lastActivityDate.getId(), 
+				isCodeManagement(), isIssueManagement(), isMaintenance(), getGitPackConfig(), lastActivityDate.getId(),
 				idOf(getParent()), idOf(getForkedFrom()));
 	}
 	

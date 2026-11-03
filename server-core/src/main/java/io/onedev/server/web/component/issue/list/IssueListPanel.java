@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Predicate;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
@@ -508,17 +506,10 @@ public abstract class IssueListPanel extends Panel {
 	
 						@Override
 						protected List<Project> load() {
-							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
-							
 							ProjectCache cache = getProjectService().cloneCache();
-							CollectionUtils.filter(projects, new Predicate<Project>() {
-
-								@Override
-								public boolean evaluate(Project object) {
-									return cache.get(object.getId()).isIssueManagement() && SecurityUtils.canWorkOnProject(object);
-								}
-								
-							});							
+							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(cache, new AccessProject()));
+							projects.removeIf(it -> !cache.get(it.getId()).isIssueManagement());
+							SecurityUtils.filterProjectsToWorkOn(SecurityUtils.getSubject(), cache, projects);
 							projects.sort(cache.comparingPath());
 							return projects;
 						}
@@ -1783,18 +1774,11 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 			private List<Project> getTargetProjects(boolean excludeCurrent) {
-				Collection<Project> collection = SecurityUtils.getAuthorizedProjects(new AccessProject());
 				ProjectCache cache = getProjectService().cloneCache();
-				
-				CollectionUtils.filter(collection, new Predicate<Project>() {
+				Collection<Project> collection = SecurityUtils.getAuthorizedProjects(cache, new AccessProject());
+				collection.removeIf(it -> !cache.get(it.getId()).isIssueManagement());
+				SecurityUtils.filterProjectsToWorkOn(SecurityUtils.getSubject(), cache, collection);
 
-					@Override
-					public boolean evaluate(Project object) {
-						return cache.get(object.getId()).isIssueManagement() && SecurityUtils.canWorkOnProject(object);
-					}
-					
-				});
-				
 				if (excludeCurrent)
 					collection.remove(getProject());
 				

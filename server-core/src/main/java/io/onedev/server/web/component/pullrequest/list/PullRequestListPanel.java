@@ -872,9 +872,10 @@ public abstract class PullRequestListPanel extends Panel {
 	
 						@Override
 						protected List<Project> load() {
-							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new ReadCode()));
-							projects.removeIf(it -> !SecurityUtils.canWorkOnProject(it));
-							projects.sort(projectService.cloneCache().comparingPath());
+							var cache = projectService.cloneCache();
+							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(cache, new ReadCode()));
+							SecurityUtils.filterProjectsToWorkOn(SecurityUtils.getSubject(), cache, projects);
+							projects.sort(cache.comparingPath());
 							return projects;
 						}
 						

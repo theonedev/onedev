@@ -288,7 +288,7 @@ public class FacadeLookupCacheTest extends AppLoaderMocker {
 	}
 
 	private static ProjectFacade project(Long id, String path, String key) {
-		return new ProjectFacade(id, "project", key, path, null, true, true,
+		return new ProjectFacade(id, "project", key, path, null, true, true, false,
 				new GitPackConfig(), id, null, null);
 	}
 

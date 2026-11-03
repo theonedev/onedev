@@ -27,9 +27,8 @@ public abstract class ReviewerProvider extends AbstractUserChoiceProvider {
 	public void query(String term, int page, Response<User> response) {
 		PullRequest request = getPullRequest();
 		
-		List<User> users = new ArrayList<>(SecurityUtils.getAuthorizedUsers(request.getProject(), new ReadCode()));
-				
 		UserCache cache = OneDev.getInstance(UserService.class).cloneCache();
+		List<User> users = new ArrayList<>(SecurityUtils.getAuthorizedUsers(request.getProject(), cache, new ReadCode()));
 		users.sort(cache.comparingDisplayName(request.getParticipants()));
 		
 		for (PullRequestReview review: request.getReviews()) {
