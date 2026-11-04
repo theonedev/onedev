@@ -194,6 +194,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Absolute", "絶対");
 		m.put("Absolute or relative url of the image", "画像の絶対または相対 URL");
 		m.put("Absolute or relative url of the link", "リンクの絶対または相対 URL");
+		m.put("Access", "アクセス");
 		m.put("Access Anonymously", "匿名でアクセス");
 		m.put("Access Build Log", "ビルドログにアクセス");
 		m.put("Access Build Pipeline", "ビルドパイプラインにアクセス");
@@ -206,6 +207,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Access Token Secret", "アクセストークンシークレット");
 		m.put("Access Token for Target Project", "ターゲットプロジェクト用アクセストークン");
 		m.put("Access Tokens", "アクセストークン");
+		m.put("Access expires after 30 days. You can revoke access at any time under Authorized Applications.", 
+			"アクセスは30日後に期限切れになります。認可されたアプリケーションでいつでもアクセスを取り消すことができます。");
+		m.put("Access token expires", "アクセストークンの有効期限が切れました");
 		m.put("Access token is intended for api access and repository pull/push. It cannot be used to sign in to web ui", 
 			"アクセストークンは API アクセスおよびリポジトリのプル/プッシュを目的としています。Web UI にサインインするためには使用できません");
 		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
@@ -337,6 +341,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("All RESTful Resources", "すべてのRESTfulリソース");
 		m.put("All Types", "すべてのタイプ");
 		m.put("All accessible", "すべてアクセス可能");
+		m.put("All authorizations for this application have been revoked", "このアプリケーションのすべての認可が取り消されました");
 		m.put("All builds", "すべてのビルド");
 		m.put("All changes", "すべての変更");
 		m.put("All except", "すべて除外");
@@ -413,7 +418,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Applicable Services", "適用可能なサービス");
 		m.put("Applicable Users", "適用可能なユーザー");
 		m.put("Applicable Workspace Projects", "適用可能なワークスペースプロジェクト");
+		m.put("Application", "アプリケーション");
 		m.put("Application (client) ID", "アプリケーション（クライアント）ID");
+		m.put("Application Access", "アプリケーションアクセス");
+		m.put("Application deleted", "アプリケーションが削除されました");
+		m.put("Application registered", "アプリケーションが登録されました");
+		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
+			"アカウントおよび選択されたプロジェクトにアクセスできるアプリケーション。トークンと権限を確認するか、アクセスを取り消すにはアプリケーションを開いてください。");
 		m.put("Apply suggested change from code comment", "コードコメントから提案された変更を適用");
 		m.put("Apply suggested changes from code comments", "コードコメントから提案された変更を適用");
 		m.put("Approve", "承認");
@@ -478,10 +489,18 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Author date", "作成日");
 		m.put("Authored By", "作成者");
 		m.put("Authorization", "認可");
+		m.put("Authorization expires", "認可の有効期限が切れました");
+		m.put("Authorization revoked", "認可が取り消されました");
 		m.put("Authorizations", "認可");
+		m.put("Authorize", "認可する");
+		m.put("Authorize Application", "アプリケーションを認可する");
+		m.put("Authorize these roles on selected projects and their children", "選択されたプロジェクトおよびその子プロジェクトにこれらのロールを認可する");
 		m.put("Authorize user...", "ユーザーを認可...");
+		m.put("Authorized", "認可済み");
+		m.put("Authorized Applications", "認可されたアプリケーション");
 		m.put("Authorized Projects", "認可されたプロジェクト");
 		m.put("Authorized Roles", "認可された役割");
+		m.put("Authorized Tokens", "認可されたトークン");
 		m.put("Auto", "自動");
 		m.put("Auto Merge", "自動マージ");
 		m.put("Auto Spec", "自動仕様");
@@ -767,6 +786,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Check Update", "更新を確認");
 		m.put("Check Vulnerabilities", "脆弱性を確認");
 		m.put("Check Workflow Integrity", "ワークフローの整合性を確認");
+		m.put("Check if the application can securely store a secret. Leave unchecked for desktop, mobile, and browser applications. S256 PKCE is required for all applications.", 
+			"アプリケーションが秘密を安全に保存できるか確認してください。デスクトップ、モバイル、ブラウザアプリケーションの場合はチェックを外してください。すべてのアプリケーションにS256 PKCEが必要です。");
 		m.put("Check out to local directory", "ローカルディレクトリにチェックアウト");
 		m.put("Check this to compare right side with common ancestor of left and right", "左側と右側の共通祖先と比較するにはこれをチェックしてください");
 		m.put("Check this to enforce two-factor authentication for all users in the system", "システム内のすべてのユーザーに対して二要素認証を強制するにはこれをチェックしてください");
@@ -833,9 +854,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Click to select a commit, or shift-click to select multiple commit", "クリックしてコミットを選択、またはシフトクリックして複数のコミットを選択");
 		m.put("Click to show comment of marked text", "クリックしてマークされたテキストのコメントを表示");
 		m.put("Click to show issue details", "クリックして課題の詳細を表示");
+		m.put("Client ID", "クライアントID");
 		m.put("Client ID of this ${productName} instance registered in Google cloud", "Google Cloud に登録されたこの ${productName} インスタンスのクライアント ID");
 		m.put("Client Id", "クライアントID");
 		m.put("Client Secret", "クライアントシークレット");
+		m.put("Client Type", "クライアントタイプ");
 		m.put("Client secret of this ${productName} instance registered in Google cloud", "Google Cloud に登録されたこの ${productName} インスタンスのクライアントシークレット");
 		m.put("Clippy Report", "Clippyレポート");
 		m.put("Clone", "クローン");
@@ -934,6 +957,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Commits are taken from default branch of non-forked repositories", "コミットは非フォークリポジトリのデフォルトブランチから取得されます");
 		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is deleted. Type <code>yes</code> below if you want to continue.", 
 			"以前に ${productName} によって生成されたコミットは、このキーが削除されると未検証として表示されます。続行する場合は、以下に <code>yes</code> と入力してください。");
+		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is regenerated. Type <code>yes</code> below if you want to continue.", 
+			"${productName}によって以前生成されたコミットは、このキーを再生成すると未確認として表示されます。続行する場合は、以下に<code>yes</code>と入力してください。");
 		m.put("Commits were merged into target branch", "コミットはターゲットブランチにマージされました");
 		m.put("Commits were merged into target branch outside of this pull request", "コミットはこのプルリクエスト外でターゲットブランチにマージされました");
 		m.put("Commits were rebased onto target branch", "コミットはターゲットブランチにリベースされました");
@@ -949,6 +974,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Concurrency", "並行性");
 		m.put("Condition", "条件");
 		m.put("Confidential", "機密");
+		m.put("Confidential Client", "機密クライアント");
 		m.put("Config File", "設定ファイル");
 		m.put("Config Files", "設定ファイル");
 		m.put("Configuration Discovery Url", "構成検出URL");
@@ -995,10 +1021,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy Markdown", "Markdownをコピー");
 		m.put("Copy Selected Issues To...", "選択された課題を...にコピー");
 		m.put("Copy as Markdown", "Markdownとしてコピー");
+		m.put("Copy client ID", "クライアントIDをコピー");
+		m.put("Copy client secret", "クライアントシークレットをコピー");
 		m.put("Copy dashboard", "ダッシュボードをコピー");
 		m.put("Copy permanent link", "永久リンクをコピー");
 		m.put("Copy public key", "公開鍵をコピー");
 		m.put("Copy selected text to clipboard", "選択されたテキストをクリップボードにコピー");
+		m.put("Copy the client secret now. It will not be shown again.", "今すぐクライアントシークレットをコピーしてください。再表示されることはありません。");
 		m.put("Copy this executor", "このエグゼキューターをコピー");
 		m.put("Copy this provisioner", "このプロビジョナーをコピー");
 		m.put("Copy this rule", "このルールをコピー");
@@ -1173,6 +1202,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete All Queried Pull Requests", "クエリされたプルリクエストをすべて削除");
 		m.put("Delete All Queried Users", "クエリされたユーザーをすべて削除");
 		m.put("Delete All Queried Workspaces", "クエリされたすべてのワークスペースを削除");
+		m.put("Delete Application", "アプリケーションを削除");
 		m.put("Delete Build", "ビルドを削除");
 		m.put("Delete Comment", "コメントを削除");
 		m.put("Delete Pull Request", "プルリクエストを削除");
@@ -1190,6 +1220,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete Source Branch", "ソースブランチを削除");
 		m.put("Delete Source Branch After Merge", "マージ後にソースブランチを削除");
 		m.put("Delete Workspace If Succeeded", "成功時にワークスペースを削除");
+		m.put("Delete application \"{0}\" and all its authorizations?", "アプリケーション「{0}」とそのすべての認可を削除しますか？");
 		m.put("Delete chat", "チャットを削除");
 		m.put("Delete dashboard", "ダッシュボードを削除");
 		m.put("Delete from branch {0}", "ブランチ {0} から削除");
@@ -1218,6 +1249,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Deletion not allowed due to branch protection rule", "ブランチ保護ルールにより削除は許可されていません");
 		m.put("Deletion not allowed due to tag protection rule", "タグ保護ルールにより削除は許可されていません");
 		m.put("Denied", "拒否");
+		m.put("Deny", "拒否");
 		m.put("Dependencies & Services", "依存関係とサービス");
 		m.put("Dependency Management", "依存関係管理");
 		m.put("Dependency job finished", "依存ジョブが完了");
@@ -1262,6 +1294,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Discarded pull request \"{0}\" ({1})", "プルリクエスト \"{0}\" ({1}) を破棄しました");
 		m.put("Discord", "Discord");
 		m.put("Discord Notifications", "Discord通知");
+		m.put("Discover endpoints at", "エンドポイントを発見");
 		m.put("Display Fields", "表示フィールド");
 		m.put("Display Links", "表示リンク");
 		m.put("Display Months", "表示月");
@@ -1363,6 +1396,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Duration", "期間");
 		m.put("Durations", "期間");
 		m.put("ESLint Report", "ESLint レポート");
+		m.put("Each token has its own permissions and expiration. Revoking a token also revokes its refresh token. Revoke all to remove this application's access to your account.", 
+			"各トークンには独自の権限と有効期限があります。トークンを取り消すと、そのリフレッシュトークンも取り消されます。すべてを取り消して、このアプリケーションのアカウントアクセスを削除します。");
 		m.put("Edit", "編集");
 		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "以下のようにレジストリを追加するために<code>$HOME/.cargo/config.toml</code>を編集します");
 		m.put("Edit <code>$HOME/.gem/credentials</code> to add a source", "ソースを追加するには <code>$HOME/.gem/credentials</code> を編集してください");
@@ -1856,6 +1891,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("History of comparing revisions is unrelated", "リビジョン比較の履歴は無関係です");
 		m.put("History of target branch and source branch is unrelated", "ターゲットブランチとソースブランチの履歴は無関係です");
 		m.put("Home page not found", "ホームページが見つかりません");
+		m.put("Homepage", "ホームページ");
 		m.put("Host name or ip address of remote machine to run commands via SSH", "SSHでコマンドを実行するリモートマシンのホスト名またはIPアドレス");
 		m.put("Hours Per Day", "1日あたりの時間");
 		m.put("How to Publish", "公開方法");
@@ -1993,6 +2029,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Insert this image", "この画像を挿入");
 		m.put("Install Subscription Key", "サブスクリプションキーをインストール");
 		m.put("Integer", "整数");
+		m.put("Integration and supported scopes", "統合とサポートされるスコープ");
 		m.put("Interactive web shell access to running jobs is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"実行中のジョブへのインタラクティブなWebシェルアクセスはエンタープライズ機能です。<a href='${website}/pricing' target='_blank'>30日間無料でお試しください</a>。");
 		m.put("Internal Database", "内部データベース");
@@ -2192,6 +2229,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Key ID", "キーID");
 		m.put("Key Secret", "キーシークレット");
 		m.put("Key Type", "キーの種類");
+		m.put("Keys", "キー");
 		m.put("Kubectl Config File", "Kubectl設定ファイル");
 		m.put("Kubernetes", "Kubernetes");
 		m.put("Kubernetes Executor", "Kubernetesエグゼキューター");
@@ -2213,9 +2251,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Last Published", "最終公開");
 		m.put("Last Update", "最終更新");
 		m.put("Last Updated", "最終更新日");
+		m.put("Last Used", "最終使用");
 		m.put("Last commit", "最終コミット");
 		m.put("Last commit hash", "最終コミットハッシュ");
 		m.put("Last commit index version", "最終コミットインデックスバージョン");
+		m.put("Last token exchange", "最後のトークン交換");
 		m.put("Latest Build of Specified Job", "指定されたジョブの最新ビルド");
 		m.put("Leaf Projects", "リーフプロジェクト");
 		m.put("Least branch coverage", "最小ブランチカバレッジ");
@@ -2227,6 +2267,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"<a href='${docsite}/administration-guide/project-defaults' target='_blank'>デフォルト設定</a>を使用するには空白のままにしてください。");
 		m.put("Left", "左");
 		m.put("Less", "少ない");
+		m.put("Let applications offer sign-in with OneDev. Follow the <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connect provider tutorial</a> to register an application and configure its OIDC client.", 
+			"アプリケーションがOneDevでサインインを提供できるようにします。アプリケーションを登録し、そのOIDCクライアントを設定するには、<a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connectプロバイダーチュートリアル</a>に従ってください。");
 		m.put("License Agreement", "ライセンス契約");
 		m.put("License Setting", "ライセンス設定");
 		m.put("Licensed To", "ライセンス対象");
@@ -2499,8 +2541,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No any", "何もなし");
 		m.put("No any matches", "一致するものがありません");
 		m.put("No applicable transitions or no permission to transit", "適用可能な遷移がないか、遷移する権限がありません");
+		m.put("No applications registered yet", "まだ登録されたアプリケーションはありません");
 		m.put("No attributes defined (can only be edited when agent is online)", "定義された属性なし（エージェントがオンラインの場合のみ編集可能）");
 		m.put("No audits", "監査なし");
+		m.put("No authorized applications yet", "まだ認可されたアプリケーションはありません");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "認証済みのジョブシークレットが見つかりません（プロジェクト: {0}, ジョブシークレット: {1}）");
 		m.put("No branch to cherry-pick to", "チェリーピックするブランチなし");
 		m.put("No branch to revert on", "リバートするブランチなし");
@@ -2620,6 +2664,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Not a verified email of signing ssh key owner", "署名sshキー所有者の確認済みメールではありません");
 		m.put("Not allowed file type: {0}", "許可されていないファイルタイプ: {0}");
 		m.put("Not allowed to modify this file", "このファイルを変更する権限がありません");
+		m.put("Not applicable", "該当なし");
 		m.put("Not assigned", "未割り当て");
 		m.put("Not authorized to create project under \"{0}\"", "\"{0}\"の下にプロジェクトを作成する権限がありません");
 		m.put("Not authorized to create root project", "ルートプロジェクトを作成する権限がありません");
@@ -2631,10 +2676,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Not covered by any test", "いかなるテストでもカバーされていません");
 		m.put("Not displaying any fields", "フィールドを表示していません");
 		m.put("Not displaying any links", "リンクを表示していません");
+		m.put("Not issued", "発行されていません");
 		m.put("Not passed", "未合格");
 		m.put("Not rendered in failsafe mode", "フェイルセーフモードでレンダリングされていません");
 		m.put("Not run", "未実行");
 		m.put("Not specified", "未指定");
+		m.put("Not used", "使用されていません");
 		m.put("Note", "注記");
 		m.put("Nothing changed yet", "まだ何も変更されていません");
 		m.put("Nothing to preview", "プレビューするものがありません");
@@ -2655,6 +2702,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Number of builds to preserve", "保持するビルド数");
 		m.put("Number of project replicas, including primary and backups", "プライマリおよびバックアップを含むプロジェクトレプリカ数");
 		m.put("Number of recent months to show statistics for", "統計を表示する最近の月数");
+		m.put("O Auth Application Bean", "OAuthアプリケーションBean");
+		m.put("OAuth Applications", "OAuthアプリケーション");
+		m.put("OAuth Signing Key", "OAuth署名キー");
 		m.put("OAuth2 Client information | CLIENT ID", "OAuth2クライアント情報 | クライアントID");
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2クライアント情報 | クライアントシークレット");
 		m.put("OCI Layout Directory", "OCIレイアウトディレクトリ");
@@ -2668,6 +2718,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("OS User Name", "OSユーザー名");
 		m.put("OS Version", "OSバージョン");
 		m.put("OS/ARCH", "OS/ARCH");
+		m.put("Oauth signing key", "OAuth署名キー");
 		m.put("Offline", "オフライン");
 		m.put("Ok", "OK");
 		m.put("Old", "旧");
@@ -2681,6 +2732,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"ターゲットブランチがソースブランチに対して高速フォワードできない場合のみマージコミットを作成");
 		m.put("Only projects manageable by access token owner can be authorized", "アクセストークン所有者が管理可能なプロジェクトのみが認可されます");
+		m.put("Only projects you have permission to manage can be authorized. The application can only exercise permissions you have. Changes to these roles also affect this authorization.", 
+			"管理権限を持つプロジェクトのみが認可可能です。アプリケーションは、あなたが持つ権限のみを行使できます。これらのロールの変更は、この認可にも影響します。");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
 			"ここにはシステムレベルの監査イベントのみが表示されます。特定のプロジェクトの監査イベントを表示するには、プロジェクト監査ログページをご覧ください");
 		m.put("Only users able to authenticate via password can be linked", "パスワードで認証できるユーザーのみリンク可能");
@@ -3039,6 +3092,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Overall Spent Time:", "全体の費やした時間:");
 		m.put("Overview", "概要");
 		m.put("Own:", "所有:");
+		m.put("Owner", "所有者");
 		m.put("Ownered By", "所有者");
 		m.put("PEM private key begins with '-----BEGIN RSA PRIVATE KEY-----'", "PEM秘密鍵は '-----BEGIN RSA PRIVATE KEY-----' で始まります");
 		m.put("PENDING", "保留中");
@@ -3306,6 +3360,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"プロジェクトストレージディレクトリ &quot;site/projects/<span wicket:id=\"projectId\"></span>&quot; が${productName}サーバー上で見つかりません");
 		m.put("Projects", "プロジェクト");
 		m.put("Projects Bean", "プロジェクトBeans");
+		m.put("Projects and roles", "プロジェクトとロール");
 		m.put("Projects deleted", "プロジェクトが削除されました");
 		m.put("Projects modified", "プロジェクトが変更されました");
 		m.put("Projects moved", "プロジェクトが移動されました");
@@ -3331,6 +3386,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Prune Builder Cache", "ビルダーキャッシュの削除");
 		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
 			"Docker buildxビルダーのイメージキャッシュを削除します。このステップはDockerまたはサンドボックスエグゼキューターが使用するビルダーのキャッシュを削除するためにdocker buildx pruneコマンドを呼び出します");
+		m.put("Public", "公開");
 		m.put("Public Key", "公開鍵");
 		m.put("Public Roles", "公開の役割");
 		m.put("Public site", "公開サイト");
@@ -3465,6 +3521,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Receivers", "受信者");
 		m.put("Recovery code", "リカバリーコード");
 		m.put("Recursive", "再帰的");
+		m.put("Redirect URI", "リダイレクトURI");
+		m.put("Redirect URIs", "リダイレクトURIs");
 		m.put("Redundant", "冗長");
 		m.put("Ref", "参照");
 		m.put("Ref Name Provider", "リファレンス名プロバイダー");
@@ -3484,6 +3542,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Regenerate", "再生成");
 		m.put("Regenerate Private Key", "秘密鍵を再生成");
 		m.put("Regenerate this access token", "このアクセストークンを再生成");
+		m.put("Regenerating this key revokes all existing authorizations and replaces the public signing key. Applications need to sign in again and refresh their cached signing key. Type <code>yes</code> below to continue.", 
+			"このキーを再生成すると、既存のすべての認可が取り消され、公開署名キーが置き換えられます。アプリケーションは再度サインインし、キャッシュされた署名キーを更新する必要があります。続行するには、以下に<code>yes</code>と入力してください。");
+		m.put("Register Application", "アプリケーションを登録");
 		m.put("Registry Login", "レジストリログイン");
 		m.put("Registry Logins", "レジストリログイン");
 		m.put("Registry Url", "レジストリURL");
@@ -3543,7 +3604,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Request Scopes", "リクエストスコープ");
 		m.put("Request Trial Subscription", "試用版サブスクリプションをリクエスト");
 		m.put("Request review again", "再度レビューをリクエスト");
+		m.put("Request role scopes to access projects. The user selects projects they have permission to manage during consent, and access is limited to their own permissions.", 
+			"プロジェクトにアクセスするためのロールスコープをリクエストします。ユーザーは同意時に管理権限を持つプロジェクトを選択し、アクセスは自身の権限に制限されます。");
 		m.put("Request to sync", "同期をリクエスト");
+		m.put("Requested Access", "リクエストされたアクセス");
 		m.put("Requested For changes", "変更をリクエストしました");
 		m.put("Requested changes to pull request \"{0}\" ({1})", "プルリクエスト\"{0}\"({1})に変更をリクエストしました");
 		m.put("Requested for changes", "変更をリクエストしました");
@@ -3603,6 +3667,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Revision indexing in progress...", "リビジョンのインデックス作成中...");
 		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
 			"リビジョンのインデックス作成中...（インデックス作成後にシンボルナビゲーションとリビジョン内のコンテキストが利用可能になります）");
+		m.put("Revoke", "取り消す");
+		m.put("Revoke All", "すべて取り消す");
+		m.put("Revoke All Authorizations", "すべての認可を取り消す");
+		m.put("Revoke all tokens for \"{0}\"?", "「{0}」のすべてのトークンを取り消しますか？");
+		m.put("Revoke this token and its refresh token?", "このトークンとそのリフレッシュトークンを取り消しますか？");
 		m.put("Right", "右");
 		m.put("Role", "役割");
 		m.put("Role \"{0}\" deleted", "役割\"{0}\"が削除されました");
@@ -3612,6 +3681,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Roles", "役割");
 		m.put("Root Projects", "ルートプロジェクト");
 		m.put("Roslynator Report", "Roslynator レポート");
+		m.put("Rotate Secret", "シークレットをローテーション");
+		m.put("Rotate the client secret and revoke all authorizations?", "クライアントシークレットをローテーションし、すべての認可を取り消しますか？");
 		m.put("RubyGems(s)", "RubyGems(s)");
 		m.put("Ruff Report", "Ruff レポート");
 		m.put("Rule will apply if user operating the tag matches criteria specified here", "タグを操作するユーザーがここで指定された条件に一致する場合にルールが適用されます");
@@ -3693,6 +3764,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Scan Paths", "スキャンパス");
 		m.put("Scan below QR code with your TOTP authenticators", "以下のQRコードをTOTP認証アプリでスキャンしてください");
 		m.put("Schedule Issues", "課題をスケジュール");
+		m.put("Scope", "スコープ");
+		m.put("Scopes", "スコープ");
 		m.put("Script Name", "スクリプト名");
 		m.put("Scripting Value", "スクリプト値");
 		m.put("Search", "検索");
@@ -3883,6 +3956,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Signature verified successfully with tagger's GPG key", "タグ付け者のGPGキーで署名が正常に検証されました");
 		m.put("Signature verified successfully with tagger's SSH key", "タグ付け者のSSHキーで署名が正常に検証されました");
 		m.put("Signature verified successfully with trusted GPG key", "信頼されたGPGキーで署名が正常に検証されました");
+		m.put("Signed in as", "サインイン中のユーザー");
 		m.put("Signed with an unknown GPG key ", "不明なGPGキーで署名されています");
 		m.put("Signed with an unknown ssh key", "未知のsshキーで署名されました");
 		m.put("Signer Email Addresses", "署名者のメールアドレス");
@@ -4251,6 +4325,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify name of the workspace spec", "ワークスペース仕様の名前を指定してください");
 		m.put("Specify network timeout in seconds when authenticate through this system", "このシステムを通じて認証する際のネットワークタイムアウトを秒単位で指定してください。");
 		m.put("Specify node selector of this locator", "このロケーターのノードセレクターを指定してください。");
+		m.put("Specify one URI per line. Use HTTPS, loopback HTTP, or a native application scheme for public clients. URIs must match exactly, except public clients may choose any port for HTTP callbacks to 127.0.0.1 or [::1].", 
+			"1行につき1つのURIを指定してください。公開クライアントの場合は、HTTPS、ループバックHTTP、またはネイティブアプリケーションスキームを使用してください。URIは正確に一致する必要がありますが、公開クライアントは127.0.0.1または[::1]へのHTTPコールバックのポートを任意に選択できます。");
 		m.put("Specify password or access token of specified registry", "指定されたレジストリのパスワードまたはアクセストークンを指定してください。");
 		m.put("Specify password or access token of the registry", "レジストリのパスワードまたはアクセストークンを指定してください");
 		m.put("Specify password to authenticate with", "認証に使用するパスワードを指定してください。");
@@ -5248,6 +5324,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("You will be notified of any activities", "すべての活動について通知されます");
 		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
 			"再生成後、エージェント側でトークンを更新する必要があります。本当に続行しますか？");
+		m.put("You will return to:", "次に戻ります：");
 		m.put("You've been logged out", "ログアウトされました");
 		m.put("YouTrack API URL", "YouTrack API URL");
 		m.put("YouTrack Issue Field", "YouTrack課題フィールド");
@@ -5381,6 +5458,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("on file {0}", "ファイル {0} 上");
 		m.put("opened", "開かれました");
 		m.put("opened <span wicket:id=\"submitDate\"></span>", "開かれました <span wicket:id=\"submitDate\"></span>");
+		m.put("or", "または");
 		m.put("or match another value", "または別の値に一致");
 		m.put("order more", "さらに注文");
 		m.put("outdated", "古い情報");
@@ -5462,6 +5540,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("value needs to be enclosed in parenthesis", "値は丸括弧で囲む必要があります");
 		m.put("value should be quoted", "値は引用符で囲む必要があります");
 		m.put("w%02d", "w%02d");
+		m.put("wants access to your OneDev account.", "あなたのOneDevアカウントへのアクセスを求めています。");
 		m.put("week:Fri", "金");
 		m.put("week:Mon", "月");
 		m.put("week:Sat", "土");
@@ -5510,87 +5589,16 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Access", "アクセス");
-		m.put("Access expires after 30 days. You can revoke access at any time under Authorized Applications.", 
-			"アクセスは30日後に期限切れになります。認可されたアプリケーションでいつでもアクセスを取り消すことができます。");
-		m.put("Access token expires", "アクセストークンの有効期限が切れました");
-		m.put("All authorizations for this application have been revoked", "このアプリケーションのすべての認可が取り消されました");
-		m.put("Application", "アプリケーション");
-		m.put("Application Access", "アプリケーションアクセス");
-		m.put("Application deleted", "アプリケーションが削除されました");
-		m.put("Application registered", "アプリケーションが登録されました");
-		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
-			"アカウントおよび選択されたプロジェクトにアクセスできるアプリケーション。トークンと権限を確認するか、アクセスを取り消すにはアプリケーションを開いてください。");
-		m.put("Authorization expires", "認可の有効期限が切れました");
-		m.put("Authorization revoked", "認可が取り消されました");
-		m.put("Authorize", "認可する");
-		m.put("Authorize Application", "アプリケーションを認可する");
-		m.put("Authorize these roles on selected projects and their children", "選択されたプロジェクトおよびその子プロジェクトにこれらのロールを認可する");
-		m.put("Authorized", "認可済み");
-		m.put("Authorized Applications", "認可されたアプリケーション");
-		m.put("Authorized Tokens", "認可されたトークン");
-		m.put("Check if the application can securely store a secret. Leave unchecked for desktop, mobile, and browser applications. S256 PKCE is required for all applications.", 
-			"アプリケーションが秘密を安全に保存できるか確認してください。デスクトップ、モバイル、ブラウザアプリケーションの場合はチェックを外してください。すべてのアプリケーションにS256 PKCEが必要です。");
-		m.put("Client ID", "クライアントID");
-		m.put("Client Type", "クライアントタイプ");
-		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is regenerated. Type <code>yes</code> below if you want to continue.", 
-			"${productName}によって以前生成されたコミットは、このキーを再生成すると未確認として表示されます。続行する場合は、以下に<code>yes</code>と入力してください。");
-		m.put("Confidential Client", "機密クライアント");
-		m.put("Copy client ID", "クライアントIDをコピー");
-		m.put("Copy client secret", "クライアントシークレットをコピー");
-		m.put("Copy the client secret now. It will not be shown again.", "今すぐクライアントシークレットをコピーしてください。再表示されることはありません。");
-		m.put("Delete Application", "アプリケーションを削除");
-		m.put("Delete application \"{0}\" and all its authorizations?", "アプリケーション「{0}」とそのすべての認可を削除しますか？");
-		m.put("Deny", "拒否");
-		m.put("Discover endpoints at", "エンドポイントを発見");
-		m.put("Each token has its own permissions and expiration. Revoking a token also revokes its refresh token. Revoke all to remove this application's access to your account.", 
-			"各トークンには独自の権限と有効期限があります。トークンを取り消すと、そのリフレッシュトークンも取り消されます。すべてを取り消して、このアプリケーションのアカウントアクセスを削除します。");
-		m.put("Homepage", "ホームページ");
-		m.put("Integration and supported scopes", "統合とサポートされるスコープ");
-		m.put("Keys", "キー");
-		m.put("Last Used", "最終使用");
-		m.put("Last token exchange", "最後のトークン交換");
-		m.put("Let applications offer sign-in with OneDev. Follow the <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connect provider tutorial</a> to register an application and configure its OIDC client.", 
-			"アプリケーションがOneDevでサインインを提供できるようにします。アプリケーションを登録し、そのOIDCクライアントを設定するには、<a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connectプロバイダーチュートリアル</a>に従ってください。");
-		m.put("No applications registered yet", "まだ登録されたアプリケーションはありません");
-		m.put("No authorized applications yet", "まだ認可されたアプリケーションはありません");
-		m.put("Not applicable", "該当なし");
-		m.put("Not issued", "発行されていません");
-		m.put("Not used", "使用されていません");
-		m.put("O Auth Application Bean", "OAuthアプリケーションBean");
-		m.put("OAuth Applications", "OAuthアプリケーション");
-		m.put("OAuth Signing Key", "OAuth署名キー");
-		m.put("Oauth signing key", "OAuth署名キー");
-		m.put("Only projects you have permission to manage can be authorized. The application can only exercise permissions you have. Changes to these roles also affect this authorization.", 
-			"管理権限を持つプロジェクトのみが認可可能です。アプリケーションは、あなたが持つ権限のみを行使できます。これらのロールの変更は、この認可にも影響します。");
-		m.put("Owner", "所有者");
-		m.put("Projects and roles", "プロジェクトとロール");
-		m.put("Public", "公開");
-		m.put("Redirect URI", "リダイレクトURI");
-		m.put("Redirect URIs", "リダイレクトURIs");
-		m.put("Regenerating this key revokes all existing authorizations and replaces the public signing key. Applications need to sign in again and refresh their cached signing key. Type <code>yes</code> below to continue.", 
-			"このキーを再生成すると、既存のすべての認可が取り消され、公開署名キーが置き換えられます。アプリケーションは再度サインインし、キャッシュされた署名キーを更新する必要があります。続行するには、以下に<code>yes</code>と入力してください。");
-		m.put("Register Application", "アプリケーションを登録");
-		m.put("Request role scopes to access projects. The user selects projects they have permission to manage during consent, and access is limited to their own permissions.", 
-			"プロジェクトにアクセスするためのロールスコープをリクエストします。ユーザーは同意時に管理権限を持つプロジェクトを選択し、アクセスは自身の権限に制限されます。");
-		m.put("Requested Access", "リクエストされたアクセス");
-		m.put("Revoke", "取り消す");
-		m.put("Revoke All", "すべて取り消す");
-		m.put("Revoke All Authorizations", "すべての認可を取り消す");
-		m.put("Revoke all tokens for \"{0}\"?", "「{0}」のすべてのトークンを取り消しますか？");
-		m.put("Revoke this token and its refresh token?", "このトークンとそのリフレッシュトークンを取り消しますか？");
-		m.put("Rotate Secret", "シークレットをローテーション");
-		m.put("Rotate the client secret and revoke all authorizations?", "クライアントシークレットをローテーションし、すべての認可を取り消しますか？");
-		m.put("Scope", "スコープ");
-		m.put("Scopes", "スコープ");
-		m.put("Signed in as", "サインイン中のユーザー");
-		m.put("Specify one URI per line. Use HTTPS, loopback HTTP, or a native application scheme for public clients. URIs must match exactly, except public clients may choose any port for HTTP callbacks to 127.0.0.1 or [::1].", 
-			"1行につき1つのURIを指定してください。公開クライアントの場合は、HTTPS、ループバックHTTP、またはネイティブアプリケーションスキームを使用してください。URIは正確に一致する必要がありますが、公開クライアントは127.0.0.1または[::1]へのHTTPコールバックのポートを任意に選択できます。");
-		m.put("This key signs OpenID Connect ID tokens. OneDev generates it automatically. Applications use the public key to verify ID token signatures.", 
-			"このキーはOpenID Connect IDトークンに署名します。OneDevが自動的に生成します。アプリケーションは公開キーを使用してIDトークンの署名を検証します。");
-		m.put("You will return to:", "次に戻ります：");
-		m.put("or", "または");
-		m.put("wants access to your OneDev account.", "あなたのOneDevアカウントへのアクセスを求めています。");
+		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
+			"アプリケーションは、このJSON Web Key Set (JWKS) エンドポイントから公開鍵を取得します。鍵が再生成されてもURLは変わりません。");
+		m.put("Copy public key URL", "公開鍵URLをコピー");
+		m.put("Key Size", "鍵サイズ");
+		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
+			"OneDevは、この鍵を自動的に生成してOpenID Connect IDトークンに署名します。アプリケーションは、その公開鍵を使用して、このOneDevインスタンスを通じてサインインしたユーザーを検証します。");
+		m.put("Public Key JSON", "公開鍵JSON");
+		m.put("Public Key URL", "公開鍵URL");
+		m.put("Signing Algorithm", "署名アルゴリズム");
+		m.put("bits", "ビット");
 	}
 		
 	@Override

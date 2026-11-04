@@ -194,6 +194,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Absolute", "절대");
 		m.put("Absolute or relative url of the image", "이미지의 절대 또는 상대 URL");
 		m.put("Absolute or relative url of the link", "링크의 절대 또는 상대 URL");
+		m.put("Access", "접근");
 		m.put("Access Anonymously", "익명으로 접근");
 		m.put("Access Build Log", "빌드 로그 접근");
 		m.put("Access Build Pipeline", "빌드 파이프라인 접근");
@@ -206,6 +207,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Access Token Secret", "액세스 토큰 비밀");
 		m.put("Access Token for Target Project", "대상 프로젝트에 대한 액세스 토큰");
 		m.put("Access Tokens", "액세스 토큰들");
+		m.put("Access expires after 30 days. You can revoke access at any time under Authorized Applications.", 
+			"접근 권한은 30일 후 만료됩니다. 언제든지 승인된 애플리케이션에서 접근 권한을 취소할 수 있습니다.");
+		m.put("Access token expires", "액세스 토큰 만료");
 		m.put("Access token is intended for api access and repository pull/push. It cannot be used to sign in to web ui", 
 			"액세스 토큰은 API 접근 및 저장소 풀/푸시를 위한 것입니다. 웹 UI에 로그인하는 데 사용할 수 없습니다");
 		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
@@ -337,6 +341,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("All RESTful Resources", "모든 RESTful 리소스");
 		m.put("All Types", "모든 유형");
 		m.put("All accessible", "모든 접근 가능");
+		m.put("All authorizations for this application have been revoked", "이 애플리케이션에 대한 모든 권한이 취소되었습니다.");
 		m.put("All builds", "모든 빌드");
 		m.put("All changes", "모든 변경 사항");
 		m.put("All except", "제외한 모든 것");
@@ -413,7 +418,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Applicable Services", "적용 가능한 서비스");
 		m.put("Applicable Users", "적용 가능한 사용자");
 		m.put("Applicable Workspace Projects", "적용 가능한 워크스페이스 프로젝트");
+		m.put("Application", "애플리케이션");
 		m.put("Application (client) ID", "애플리케이션(클라이언트) ID");
+		m.put("Application Access", "애플리케이션 접근");
+		m.put("Application deleted", "애플리케이션 삭제됨");
+		m.put("Application registered", "애플리케이션 등록됨");
+		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
+			"계정 및 선택된 프로젝트에 접근할 수 있는 애플리케이션입니다. 애플리케이션을 열어 토큰 및 권한을 검토하거나 접근 권한을 취소하세요.");
 		m.put("Apply suggested change from code comment", "코드 댓글에서 제안된 변경 사항 적용");
 		m.put("Apply suggested changes from code comments", "코드 댓글에서 제안된 변경 사항들 적용");
 		m.put("Approve", "승인");
@@ -478,10 +489,18 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Author date", "작성 날짜");
 		m.put("Authored By", "작성자");
 		m.put("Authorization", "권한 부여");
+		m.put("Authorization expires", "권한 만료");
+		m.put("Authorization revoked", "권한 취소됨");
 		m.put("Authorizations", "권한 부여 목록");
+		m.put("Authorize", "승인");
+		m.put("Authorize Application", "애플리케이션 승인");
+		m.put("Authorize these roles on selected projects and their children", "선택된 프로젝트 및 하위 프로젝트에 대해 이러한 역할을 승인합니다.");
 		m.put("Authorize user...", "사용자 승인...");
+		m.put("Authorized", "승인됨");
+		m.put("Authorized Applications", "승인된 애플리케이션");
 		m.put("Authorized Projects", "승인된 프로젝트");
 		m.put("Authorized Roles", "승인된 역할");
+		m.put("Authorized Tokens", "승인된 토큰");
 		m.put("Auto", "자동");
 		m.put("Auto Merge", "자동 병합");
 		m.put("Auto Spec", "자동 사양");
@@ -767,6 +786,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Check Update", "업데이트 확인");
 		m.put("Check Vulnerabilities", "취약점 확인");
 		m.put("Check Workflow Integrity", "워크플로 무결성 확인");
+		m.put("Check if the application can securely store a secret. Leave unchecked for desktop, mobile, and browser applications. S256 PKCE is required for all applications.", 
+			"애플리케이션이 비밀을 안전하게 저장할 수 있는지 확인하세요. 데스크톱, 모바일 및 브라우저 애플리케이션의 경우 선택 해제하세요. 모든 애플리케이션에 대해 S256 PKCE가 필요합니다.");
 		m.put("Check out to local directory", "로컬 디렉토리로 체크아웃");
 		m.put("Check this to compare right side with common ancestor of left and right", "왼쪽과 오른쪽의 공통 조상과 오른쪽을 비교하려면 이것을 선택하세요");
 		m.put("Check this to enforce two-factor authentication for all users in the system", "시스템의 모든 사용자에 대해 이중 인증을 강제하려면 이것을 선택하세요");
@@ -833,9 +854,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Click to select a commit, or shift-click to select multiple commit", "커밋을 선택하려면 클릭하세요, 여러 커밋을 선택하려면 Shift-클릭하세요.");
 		m.put("Click to show comment of marked text", "표시된 텍스트의 주석을 보려면 클릭하세요.");
 		m.put("Click to show issue details", "이슈 세부 정보를 보려면 클릭하세요.");
+		m.put("Client ID", "클라이언트 ID");
 		m.put("Client ID of this ${productName} instance registered in Google cloud", "Google Cloud에 등록된 이 ${productName} 인스턴스의 클라이언트 ID");
 		m.put("Client Id", "클라이언트 ID");
 		m.put("Client Secret", "클라이언트 비밀");
+		m.put("Client Type", "클라이언트 유형");
 		m.put("Client secret of this ${productName} instance registered in Google cloud", "Google Cloud에 등록된 이 ${productName} 인스턴스의 클라이언트 비밀");
 		m.put("Clippy Report", "Clippy 보고서");
 		m.put("Clone", "클론");
@@ -934,6 +957,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Commits are taken from default branch of non-forked repositories", "포크되지 않은 저장소의 기본 브랜치에서 커밋이 가져옵니다");
 		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is deleted. Type <code>yes</code> below if you want to continue.", 
 			"이 키가 삭제되면 이전에 ${productName}에서 생성된 커밋이 확인되지 않은 것으로 표시됩니다. 계속하려면 아래에 <code>yes</code>를 입력하세요");
+		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is regenerated. Type <code>yes</code> below if you want to continue.", 
+			"${productName}에 의해 이전에 생성된 커밋은 이 키가 재생성되면 확인되지 않은 것으로 표시됩니다. 계속하려면 아래에 <code>yes</code>를 입력하세요.");
 		m.put("Commits were merged into target branch", "커밋이 대상 브랜치에 병합되었습니다");
 		m.put("Commits were merged into target branch outside of this pull request", "커밋이 이 풀 리퀘스트 외부에서 대상 브랜치에 병합되었습니다");
 		m.put("Commits were rebased onto target branch", "커밋이 대상 브랜치에 리베이스되었습니다");
@@ -949,6 +974,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Concurrency", "동시성");
 		m.put("Condition", "조건");
 		m.put("Confidential", "기밀");
+		m.put("Confidential Client", "기밀 클라이언트");
 		m.put("Config File", "구성 파일");
 		m.put("Config Files", "구성 파일");
 		m.put("Configuration Discovery Url", "구성 검색 URL");
@@ -995,10 +1021,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy Markdown", "마크다운 복사");
 		m.put("Copy Selected Issues To...", "선택된 이슈를 복사하여...");
 		m.put("Copy as Markdown", "Markdown으로 복사");
+		m.put("Copy client ID", "클라이언트 ID 복사");
+		m.put("Copy client secret", "클라이언트 비밀 복사");
 		m.put("Copy dashboard", "대시보드 복사");
 		m.put("Copy permanent link", "영구 링크 복사");
 		m.put("Copy public key", "공개 키 복사");
 		m.put("Copy selected text to clipboard", "선택된 텍스트를 클립보드에 복사");
+		m.put("Copy the client secret now. It will not be shown again.", "지금 클라이언트 비밀을 복사하세요. 다시 표시되지 않습니다.");
 		m.put("Copy this executor", "이 실행기를 복사");
 		m.put("Copy this provisioner", "이 프로비저너를 복사");
 		m.put("Copy this rule", "이 규칙을 복사");
@@ -1173,6 +1202,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Delete All Queried Pull Requests", "쿼리된 풀 리퀘스트 모두 삭제");
 		m.put("Delete All Queried Users", "쿼리된 사용자 모두 삭제");
 		m.put("Delete All Queried Workspaces", "쿼리된 모든 워크스페이스 삭제");
+		m.put("Delete Application", "애플리케이션 삭제");
 		m.put("Delete Build", "빌드 삭제");
 		m.put("Delete Comment", "댓글 삭제");
 		m.put("Delete Pull Request", "풀 리퀘스트 삭제");
@@ -1190,6 +1220,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Delete Source Branch", "소스 브랜치 삭제");
 		m.put("Delete Source Branch After Merge", "병합 후 소스 브랜치 삭제");
 		m.put("Delete Workspace If Succeeded", "성공 시 워크스페이스 삭제");
+		m.put("Delete application \"{0}\" and all its authorizations?", "애플리케이션 \"{0}\" 및 모든 권한을 삭제하시겠습니까?");
 		m.put("Delete chat", "채팅 삭제");
 		m.put("Delete dashboard", "대시보드 삭제");
 		m.put("Delete from branch {0}", "브랜치 {0}에서 삭제");
@@ -1218,6 +1249,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Deletion not allowed due to branch protection rule", "브랜치 보호 규칙으로 인해 삭제가 허용되지 않음");
 		m.put("Deletion not allowed due to tag protection rule", "태그 보호 규칙으로 인해 삭제가 허용되지 않음");
 		m.put("Denied", "거부됨");
+		m.put("Deny", "거부");
 		m.put("Dependencies & Services", "종속성 및 서비스");
 		m.put("Dependency Management", "종속성 관리");
 		m.put("Dependency job finished", "종속성 작업 완료");
@@ -1262,6 +1294,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Discarded pull request \"{0}\" ({1})", "풀 리퀘스트 \"{0}\" ({1}) 폐기됨");
 		m.put("Discord", "디스코드");
 		m.put("Discord Notifications", "디스코드 알림");
+		m.put("Discover endpoints at", "엔드포인트 검색 위치");
 		m.put("Display Fields", "표시 필드");
 		m.put("Display Links", "표시 링크");
 		m.put("Display Months", "표시 월");
@@ -1363,6 +1396,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Duration", "기간");
 		m.put("Durations", "기간들");
 		m.put("ESLint Report", "ESLint 보고서");
+		m.put("Each token has its own permissions and expiration. Revoking a token also revokes its refresh token. Revoke all to remove this application's access to your account.", 
+			"각 토큰에는 고유한 권한 및 만료 기간이 있습니다. 토큰을 취소하면 새로 고침 토큰도 취소됩니다. 모두 취소하여 이 애플리케이션의 계정 접근을 제거하세요.");
 		m.put("Edit", "편집");
 		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "아래와 같이 레지스트리를 추가하려면 <code>$HOME/.cargo/config.toml</code>을 편집하세요");
 		m.put("Edit <code>$HOME/.gem/credentials</code> to add a source", "<code>$HOME/.gem/credentials</code>를 편집하여 소스를 추가하세요.");
@@ -1856,6 +1891,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("History of comparing revisions is unrelated", "리비전 비교 기록이 관련이 없습니다");
 		m.put("History of target branch and source branch is unrelated", "대상 브랜치와 소스 브랜치의 기록이 관련이 없습니다");
 		m.put("Home page not found", "홈 페이지를 찾을 수 없습니다");
+		m.put("Homepage", "홈페이지");
 		m.put("Host name or ip address of remote machine to run commands via SSH", "SSH를 통해 명령을 실행할 원격 머신의 호스트 이름 또는 IP 주소");
 		m.put("Hours Per Day", "하루당 시간");
 		m.put("How to Publish", "게시 방법");
@@ -1993,6 +2029,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Insert this image", "이 이미지를 삽입");
 		m.put("Install Subscription Key", "구독 키 설치");
 		m.put("Integer", "정수");
+		m.put("Integration and supported scopes", "통합 및 지원되는 범위");
 		m.put("Interactive web shell access to running jobs is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"실행 중인 작업에 대한 대화형 웹 셸 액세스는 엔터프라이즈 기능입니다. <a href='${website}/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("Internal Database", "내부 데이터베이스");
@@ -2192,6 +2229,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Key ID", "키 ID");
 		m.put("Key Secret", "키 비밀");
 		m.put("Key Type", "키 유형");
+		m.put("Keys", "키");
 		m.put("Kubectl Config File", "Kubectl 구성 파일");
 		m.put("Kubernetes", "쿠버네티스");
 		m.put("Kubernetes Executor", "쿠버네티스 실행기");
@@ -2213,9 +2251,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Last Published", "마지막 게시");
 		m.put("Last Update", "마지막 업데이트");
 		m.put("Last Updated", "마지막 업데이트");
+		m.put("Last Used", "마지막 사용");
 		m.put("Last commit", "마지막 커밋");
 		m.put("Last commit hash", "마지막 커밋 해시");
 		m.put("Last commit index version", "마지막 커밋 인덱스 버전");
+		m.put("Last token exchange", "마지막 토큰 교환");
 		m.put("Latest Build of Specified Job", "지정된 작업의 최신 빌드");
 		m.put("Leaf Projects", "리프 프로젝트들");
 		m.put("Least branch coverage", "최소 브랜치 커버리지");
@@ -2227,6 +2267,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<a href='${docsite}/administration-guide/project-defaults' target='_blank'>기본 설정</a>을 사용하려면 비워 두세요");
 		m.put("Left", "왼쪽");
 		m.put("Less", "적음");
+		m.put("Let applications offer sign-in with OneDev. Follow the <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connect provider tutorial</a> to register an application and configure its OIDC client.", 
+			"애플리케이션이 OneDev로 로그인 기능을 제공할 수 있도록 합니다. 애플리케이션을 등록하고 OIDC 클라이언트를 구성하려면 <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connect 제공자 튜토리얼</a>을 따르세요.");
 		m.put("License Agreement", "라이선스 계약");
 		m.put("License Setting", "라이선스 설정");
 		m.put("Licensed To", "라이선스 사용자");
@@ -2499,8 +2541,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No any", "없음");
 		m.put("No any matches", "일치하는 항목이 없습니다");
 		m.put("No applicable transitions or no permission to transit", "적용 가능한 전환 없음 또는 전환 권한 없음");
+		m.put("No applications registered yet", "아직 등록된 애플리케이션이 없습니다.");
 		m.put("No attributes defined (can only be edited when agent is online)", "정의된 속성 없음 (에이전트가 온라인 상태일 때만 편집 가능)");
 		m.put("No audits", "감사 없음");
+		m.put("No authorized applications yet", "아직 승인된 애플리케이션이 없습니다.");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "승인된 작업 비밀 없음 (프로젝트: {0}, 작업 비밀: {1})");
 		m.put("No branch to cherry-pick to", "체리픽할 브랜치 없음");
 		m.put("No branch to revert on", "되돌릴 브랜치 없음");
@@ -2620,6 +2664,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Not a verified email of signing ssh key owner", "서명 ssh 키 소유자의 확인된 이메일이 아님");
 		m.put("Not allowed file type: {0}", "허용되지 않는 파일 유형: {0}");
 		m.put("Not allowed to modify this file", "이 파일을 수정할 수 없습니다.");
+		m.put("Not applicable", "해당 없음");
 		m.put("Not assigned", "할당되지 않음");
 		m.put("Not authorized to create project under \"{0}\"", "\"{0}\" 아래에 프로젝트를 생성할 권한이 없습니다.");
 		m.put("Not authorized to create root project", "루트 프로젝트를 생성할 권한이 없습니다.");
@@ -2631,10 +2676,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Not covered by any test", "어떤 테스트에도 포함되지 않음");
 		m.put("Not displaying any fields", "어떤 필드도 표시되지 않음");
 		m.put("Not displaying any links", "어떤 링크도 표시되지 않음");
+		m.put("Not issued", "발급되지 않음");
 		m.put("Not passed", "통과하지 않음");
 		m.put("Not rendered in failsafe mode", "안전 모드에서 렌더링되지 않음");
 		m.put("Not run", "실행되지 않음");
 		m.put("Not specified", "지정되지 않음");
+		m.put("Not used", "사용되지 않음");
 		m.put("Note", "노트");
 		m.put("Nothing changed yet", "아직 변경된 것이 없습니다");
 		m.put("Nothing to preview", "미리 볼 내용이 없습니다");
@@ -2655,6 +2702,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Number of builds to preserve", "보존할 빌드 수");
 		m.put("Number of project replicas, including primary and backups", "기본 및 백업을 포함한 프로젝트 복제본 수");
 		m.put("Number of recent months to show statistics for", "통계를 표시할 최근 몇 개월 수");
+		m.put("O Auth Application Bean", "OAuth 애플리케이션 빈");
+		m.put("OAuth Applications", "OAuth 애플리케이션");
+		m.put("OAuth Signing Key", "OAuth 서명 키");
 		m.put("OAuth2 Client information | CLIENT ID", "OAuth2 클라이언트 정보 | CLIENT ID");
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2 클라이언트 정보 | CLIENT SECRET");
 		m.put("OCI Layout Directory", "OCI 레이아웃 디렉토리");
@@ -2668,6 +2718,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("OS User Name", "운영 체제 사용자 이름");
 		m.put("OS Version", "운영 체제 버전");
 		m.put("OS/ARCH", "운영 체제/아키텍처");
+		m.put("Oauth signing key", "OAuth 서명 키");
 		m.put("Offline", "오프라인");
 		m.put("Ok", "확인");
 		m.put("Old", "오래된");
@@ -2681,6 +2732,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"대상 브랜치를 소스 브랜치로 빠르게 병합할 수 없는 경우에만 병합 커밋 생성");
 		m.put("Only projects manageable by access token owner can be authorized", "액세스 토큰 소유자가 관리할 수 있는 프로젝트만 승인 가능");
+		m.put("Only projects you have permission to manage can be authorized. The application can only exercise permissions you have. Changes to these roles also affect this authorization.", 
+			"관리 권한이 있는 프로젝트만 승인할 수 있습니다. 애플리케이션은 사용자가 가진 권한만 행사할 수 있습니다. 이러한 역할의 변경은 이 권한에도 영향을 미칩니다.");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
 			"여기에는 시스템 수준 감사 이벤트만 표시됩니다. 특정 프로젝트의 감사 이벤트를 보려면 프로젝트 감사 로그 페이지를 방문하세요");
 		m.put("Only users able to authenticate via password can be linked", "비밀번호로 인증할 수 있는 사용자만 연결할 수 있습니다");
@@ -3039,6 +3092,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Overall Spent Time:", "전체 소요 시간:");
 		m.put("Overview", "개요");
 		m.put("Own:", "소유:");
+		m.put("Owner", "소유자");
 		m.put("Ownered By", "소유자");
 		m.put("PEM private key begins with '-----BEGIN RSA PRIVATE KEY-----'", "PEM 개인 키는 '-----BEGIN RSA PRIVATE KEY-----'로 시작합니다.");
 		m.put("PENDING", "대기 중");
@@ -3306,6 +3360,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"프로젝트 저장 디렉토리 &quot;site/projects/<span wicket:id=\"projectId\"></span>&quot;를 ${productName} 서버에서 찾을 수 없습니다");
 		m.put("Projects", "프로젝트들");
 		m.put("Projects Bean", "프로젝트 빈들");
+		m.put("Projects and roles", "프로젝트 및 역할");
 		m.put("Projects deleted", "프로젝트들이 삭제되었습니다");
 		m.put("Projects modified", "프로젝트들이 수정되었습니다");
 		m.put("Projects moved", "프로젝트들이 이동되었습니다");
@@ -3331,6 +3386,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Prune Builder Cache", "빌더 캐시 정리");
 		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
 			"도커 buildx 빌더의 이미지 캐시를 정리합니다. 이 단계는 Docker 또는 샌드박스 실행기가 사용하는 빌더의 캐시를 제거하기 위해 docker buildx prune 명령을 호출합니다.");
+		m.put("Public", "공개");
 		m.put("Public Key", "공개 키");
 		m.put("Public Roles", "공개 역할");
 		m.put("Public site", "공용 사이트");
@@ -3465,6 +3521,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Receivers", "수신자들");
 		m.put("Recovery code", "복구 코드");
 		m.put("Recursive", "재귀적");
+		m.put("Redirect URI", "리디렉션 URI");
+		m.put("Redirect URIs", "리디렉션 URI들");
 		m.put("Redundant", "중복된");
 		m.put("Ref", "참조");
 		m.put("Ref Name Provider", "참조 이름 제공자");
@@ -3484,6 +3542,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Regenerate", "재생성");
 		m.put("Regenerate Private Key", "개인 키 재생성");
 		m.put("Regenerate this access token", "이 액세스 토큰 재생성");
+		m.put("Regenerating this key revokes all existing authorizations and replaces the public signing key. Applications need to sign in again and refresh their cached signing key. Type <code>yes</code> below to continue.", 
+			"이 키를 재생성하면 기존의 모든 권한이 취소되고 공개 서명 키가 교체됩니다. 애플리케이션은 다시 로그인하고 캐시된 서명 키를 새로 고쳐야 합니다. 계속하려면 아래에 <code>yes</code>를 입력하세요.");
+		m.put("Register Application", "애플리케이션 등록");
 		m.put("Registry Login", "레지스트리 로그인");
 		m.put("Registry Logins", "레지스트리 로그인들");
 		m.put("Registry Url", "레지스트리 URL");
@@ -3543,7 +3604,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Request Scopes", "요청 범위");
 		m.put("Request Trial Subscription", "체험 구독 요청");
 		m.put("Request review again", "다시 검토 요청");
+		m.put("Request role scopes to access projects. The user selects projects they have permission to manage during consent, and access is limited to their own permissions.", 
+			"프로젝트에 접근하기 위해 역할 범위를 요청하세요. 사용자는 동의 과정에서 관리 권한이 있는 프로젝트를 선택하며, 접근은 사용자의 권한으로 제한됩니다.");
 		m.put("Request to sync", "동기화 요청");
+		m.put("Requested Access", "요청된 접근");
 		m.put("Requested For changes", "변경 요청됨");
 		m.put("Requested changes to pull request \"{0}\" ({1})", "풀 리퀘스트 \"{0}\" ({1})에 대한 변경 요청");
 		m.put("Requested for changes", "변경 요청됨");
@@ -3603,6 +3667,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Revision indexing in progress...", "개정 색인 생성 중...");
 		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
 			"리비전 색인 작업 진행 중... (색인이 완료되면 심볼 탐색 및 리비전 내 컨텍스트가 사용 가능해집니다)");
+		m.put("Revoke", "취소");
+		m.put("Revoke All", "모두 취소");
+		m.put("Revoke All Authorizations", "모든 권한 취소");
+		m.put("Revoke all tokens for \"{0}\"?", "\"{0}\"의 모든 토큰을 취소하시겠습니까?");
+		m.put("Revoke this token and its refresh token?", "이 토큰과 새로 고침 토큰을 취소하시겠습니까?");
 		m.put("Right", "오른쪽");
 		m.put("Role", "역할");
 		m.put("Role \"{0}\" deleted", "역할 \"{0}\" 삭제됨");
@@ -3612,6 +3681,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Roles", "역할");
 		m.put("Root Projects", "루트 프로젝트");
 		m.put("Roslynator Report", "Roslynator 보고서");
+		m.put("Rotate Secret", "비밀 교체");
+		m.put("Rotate the client secret and revoke all authorizations?", "클라이언트 비밀을 교체하고 모든 권한을 취소하시겠습니까?");
 		m.put("RubyGems(s)", "RubyGems(s)");
 		m.put("Ruff Report", "Ruff 보고서");
 		m.put("Rule will apply if user operating the tag matches criteria specified here", "태그를 운영하는 사용자가 여기에서 지정된 기준과 일치하는 경우 규칙이 적용됩니다");
@@ -3693,6 +3764,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Scan Paths", "스캔 경로들");
 		m.put("Scan below QR code with your TOTP authenticators", "아래 QR 코드를 TOTP 인증기로 스캔하세요");
 		m.put("Schedule Issues", "이슈 일정");
+		m.put("Scope", "범위");
+		m.put("Scopes", "범위들");
 		m.put("Script Name", "스크립트 이름");
 		m.put("Scripting Value", "스크립팅 값");
 		m.put("Search", "검색");
@@ -3883,6 +3956,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Signature verified successfully with tagger's GPG key", "태거의 GPG 키로 서명이 성공적으로 확인되었습니다");
 		m.put("Signature verified successfully with tagger's SSH key", "태거의 SSH 키로 서명이 성공적으로 확인되었습니다");
 		m.put("Signature verified successfully with trusted GPG key", "신뢰할 수 있는 GPG 키로 서명이 성공적으로 확인되었습니다");
+		m.put("Signed in as", "로그인된 사용자:");
 		m.put("Signed with an unknown GPG key ", "알 수 없는 GPG 키로 서명됨");
 		m.put("Signed with an unknown ssh key", "알 수 없는 ssh 키로 서명됨");
 		m.put("Signer Email Addresses", "서명자 이메일 주소");
@@ -4251,6 +4325,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify name of the workspace spec", "작업 공간 사양의 이름을 지정하세요");
 		m.put("Specify network timeout in seconds when authenticate through this system", "이 시스템을 통해 인증할 때 네트워크 타임아웃(초)을 지정하세요.");
 		m.put("Specify node selector of this locator", "이 로케이터의 노드 선택기를 지정하세요.");
+		m.put("Specify one URI per line. Use HTTPS, loopback HTTP, or a native application scheme for public clients. URIs must match exactly, except public clients may choose any port for HTTP callbacks to 127.0.0.1 or [::1].", 
+			"한 줄에 하나의 URI를 지정하세요. 공개 클라이언트의 경우 HTTPS, 루프백 HTTP 또는 네이티브 애플리케이션 스킴을 사용하세요. URI는 정확히 일치해야 하며, 공개 클라이언트는 HTTP 콜백을 위해 127.0.0.1 또는 [::1]에 대해 임의의 포트를 선택할 수 있습니다.");
 		m.put("Specify password or access token of specified registry", "지정된 레지스트리의 비밀번호 또는 액세스 토큰을 지정하세요.");
 		m.put("Specify password or access token of the registry", "레지스트리의 비밀번호 또는 액세스 토큰을 지정하세요");
 		m.put("Specify password to authenticate with", "인증에 사용할 비밀번호를 지정하세요.");
@@ -5248,6 +5324,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("You will be notified of any activities", "활동에 대한 알림을 받게 됩니다");
 		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
 			"재생성 후 에이전트 측에서 토큰을 업데이트해야 합니다. 계속하시겠습니까?");
+		m.put("You will return to:", "다음으로 돌아갑니다:");
 		m.put("You've been logged out", "로그아웃되었습니다");
 		m.put("YouTrack API URL", "YouTrack API URL");
 		m.put("YouTrack Issue Field", "YouTrack 이슈 필드");
@@ -5381,6 +5458,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("on file {0}", "파일 {0}에서");
 		m.put("opened", "열림");
 		m.put("opened <span wicket:id=\"submitDate\"></span>", "<span wicket:id=\"submitDate\"></span>에 열림");
+		m.put("or", "또는");
 		m.put("or match another value", "또는 다른 값과 일치");
 		m.put("order more", "더 주문하기");
 		m.put("outdated", "구식");
@@ -5462,6 +5540,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("value needs to be enclosed in parenthesis", "값은 괄호로 감싸야 합니다");
 		m.put("value should be quoted", "값은 따옴표로 감싸야 합니다");
 		m.put("w%02d", "w%02d");
+		m.put("wants access to your OneDev account.", "OneDev 계정에 접근하려고 합니다.");
 		m.put("week:Fri", "금");
 		m.put("week:Mon", "월");
 		m.put("week:Sat", "토");
@@ -5510,87 +5589,16 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Access", "접근");
-		m.put("Access expires after 30 days. You can revoke access at any time under Authorized Applications.", 
-			"접근 권한은 30일 후 만료됩니다. 언제든지 승인된 애플리케이션에서 접근 권한을 취소할 수 있습니다.");
-		m.put("Access token expires", "액세스 토큰 만료");
-		m.put("All authorizations for this application have been revoked", "이 애플리케이션에 대한 모든 권한이 취소되었습니다.");
-		m.put("Application", "애플리케이션");
-		m.put("Application Access", "애플리케이션 접근");
-		m.put("Application deleted", "애플리케이션 삭제됨");
-		m.put("Application registered", "애플리케이션 등록됨");
-		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
-			"계정 및 선택된 프로젝트에 접근할 수 있는 애플리케이션입니다. 애플리케이션을 열어 토큰 및 권한을 검토하거나 접근 권한을 취소하세요.");
-		m.put("Authorization expires", "권한 만료");
-		m.put("Authorization revoked", "권한 취소됨");
-		m.put("Authorize", "승인");
-		m.put("Authorize Application", "애플리케이션 승인");
-		m.put("Authorize these roles on selected projects and their children", "선택된 프로젝트 및 하위 프로젝트에 대해 이러한 역할을 승인합니다.");
-		m.put("Authorized", "승인됨");
-		m.put("Authorized Applications", "승인된 애플리케이션");
-		m.put("Authorized Tokens", "승인된 토큰");
-		m.put("Check if the application can securely store a secret. Leave unchecked for desktop, mobile, and browser applications. S256 PKCE is required for all applications.", 
-			"애플리케이션이 비밀을 안전하게 저장할 수 있는지 확인하세요. 데스크톱, 모바일 및 브라우저 애플리케이션의 경우 선택 해제하세요. 모든 애플리케이션에 대해 S256 PKCE가 필요합니다.");
-		m.put("Client ID", "클라이언트 ID");
-		m.put("Client Type", "클라이언트 유형");
-		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is regenerated. Type <code>yes</code> below if you want to continue.", 
-			"${productName}에 의해 이전에 생성된 커밋은 이 키가 재생성되면 확인되지 않은 것으로 표시됩니다. 계속하려면 아래에 <code>yes</code>를 입력하세요.");
-		m.put("Confidential Client", "기밀 클라이언트");
-		m.put("Copy client ID", "클라이언트 ID 복사");
-		m.put("Copy client secret", "클라이언트 비밀 복사");
-		m.put("Copy the client secret now. It will not be shown again.", "지금 클라이언트 비밀을 복사하세요. 다시 표시되지 않습니다.");
-		m.put("Delete Application", "애플리케이션 삭제");
-		m.put("Delete application \"{0}\" and all its authorizations?", "애플리케이션 \"{0}\" 및 모든 권한을 삭제하시겠습니까?");
-		m.put("Deny", "거부");
-		m.put("Discover endpoints at", "엔드포인트 검색 위치");
-		m.put("Each token has its own permissions and expiration. Revoking a token also revokes its refresh token. Revoke all to remove this application's access to your account.", 
-			"각 토큰에는 고유한 권한 및 만료 기간이 있습니다. 토큰을 취소하면 새로 고침 토큰도 취소됩니다. 모두 취소하여 이 애플리케이션의 계정 접근을 제거하세요.");
-		m.put("Homepage", "홈페이지");
-		m.put("Integration and supported scopes", "통합 및 지원되는 범위");
-		m.put("Keys", "키");
-		m.put("Last Used", "마지막 사용");
-		m.put("Last token exchange", "마지막 토큰 교환");
-		m.put("Let applications offer sign-in with OneDev. Follow the <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connect provider tutorial</a> to register an application and configure its OIDC client.", 
-			"애플리케이션이 OneDev로 로그인 기능을 제공할 수 있도록 합니다. 애플리케이션을 등록하고 OIDC 클라이언트를 구성하려면 <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connect 제공자 튜토리얼</a>을 따르세요.");
-		m.put("No applications registered yet", "아직 등록된 애플리케이션이 없습니다.");
-		m.put("No authorized applications yet", "아직 승인된 애플리케이션이 없습니다.");
-		m.put("Not applicable", "해당 없음");
-		m.put("Not issued", "발급되지 않음");
-		m.put("Not used", "사용되지 않음");
-		m.put("O Auth Application Bean", "OAuth 애플리케이션 빈");
-		m.put("OAuth Applications", "OAuth 애플리케이션");
-		m.put("OAuth Signing Key", "OAuth 서명 키");
-		m.put("Oauth signing key", "OAuth 서명 키");
-		m.put("Only projects you have permission to manage can be authorized. The application can only exercise permissions you have. Changes to these roles also affect this authorization.", 
-			"관리 권한이 있는 프로젝트만 승인할 수 있습니다. 애플리케이션은 사용자가 가진 권한만 행사할 수 있습니다. 이러한 역할의 변경은 이 권한에도 영향을 미칩니다.");
-		m.put("Owner", "소유자");
-		m.put("Projects and roles", "프로젝트 및 역할");
-		m.put("Public", "공개");
-		m.put("Redirect URI", "리디렉션 URI");
-		m.put("Redirect URIs", "리디렉션 URI들");
-		m.put("Regenerating this key revokes all existing authorizations and replaces the public signing key. Applications need to sign in again and refresh their cached signing key. Type <code>yes</code> below to continue.", 
-			"이 키를 재생성하면 기존의 모든 권한이 취소되고 공개 서명 키가 교체됩니다. 애플리케이션은 다시 로그인하고 캐시된 서명 키를 새로 고쳐야 합니다. 계속하려면 아래에 <code>yes</code>를 입력하세요.");
-		m.put("Register Application", "애플리케이션 등록");
-		m.put("Request role scopes to access projects. The user selects projects they have permission to manage during consent, and access is limited to their own permissions.", 
-			"프로젝트에 접근하기 위해 역할 범위를 요청하세요. 사용자는 동의 과정에서 관리 권한이 있는 프로젝트를 선택하며, 접근은 사용자의 권한으로 제한됩니다.");
-		m.put("Requested Access", "요청된 접근");
-		m.put("Revoke", "취소");
-		m.put("Revoke All", "모두 취소");
-		m.put("Revoke All Authorizations", "모든 권한 취소");
-		m.put("Revoke all tokens for \"{0}\"?", "\"{0}\"의 모든 토큰을 취소하시겠습니까?");
-		m.put("Revoke this token and its refresh token?", "이 토큰과 새로 고침 토큰을 취소하시겠습니까?");
-		m.put("Rotate Secret", "비밀 교체");
-		m.put("Rotate the client secret and revoke all authorizations?", "클라이언트 비밀을 교체하고 모든 권한을 취소하시겠습니까?");
-		m.put("Scope", "범위");
-		m.put("Scopes", "범위들");
-		m.put("Signed in as", "로그인된 사용자:");
-		m.put("Specify one URI per line. Use HTTPS, loopback HTTP, or a native application scheme for public clients. URIs must match exactly, except public clients may choose any port for HTTP callbacks to 127.0.0.1 or [::1].", 
-			"한 줄에 하나의 URI를 지정하세요. 공개 클라이언트의 경우 HTTPS, 루프백 HTTP 또는 네이티브 애플리케이션 스킴을 사용하세요. URI는 정확히 일치해야 하며, 공개 클라이언트는 HTTP 콜백을 위해 127.0.0.1 또는 [::1]에 대해 임의의 포트를 선택할 수 있습니다.");
-		m.put("This key signs OpenID Connect ID tokens. OneDev generates it automatically. Applications use the public key to verify ID token signatures.", 
-			"이 키는 OpenID Connect ID 토큰에 서명합니다. OneDev가 자동으로 생성합니다. 애플리케이션은 공개 키를 사용하여 ID 토큰 서명을 검증합니다.");
-		m.put("You will return to:", "다음으로 돌아갑니다:");
-		m.put("or", "또는");
-		m.put("wants access to your OneDev account.", "OneDev 계정에 접근하려고 합니다.");
+		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
+			"애플리케이션은 이 JSON Web Key Set (JWKS) 엔드포인트에서 공개 키를 가져옵니다. 키가 재생성되어도 URL은 동일하게 유지됩니다.");
+		m.put("Copy public key URL", "공개 키 URL 복사");
+		m.put("Key Size", "키 크기");
+		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
+			"OneDev는 OpenID Connect ID 토큰에 서명하기 위해 이 키를 자동으로 생성합니다. 애플리케이션은 이 OneDev 인스턴스를 통해 사용자가 로그인했는지 확인하기 위해 공개 키를 사용합니다.");
+		m.put("Public Key JSON", "공개 키 JSON");
+		m.put("Public Key URL", "공개 키 URL");
+		m.put("Signing Algorithm", "서명 알고리즘");
+		m.put("bits", "비트");
 	}
 		
 	@Override

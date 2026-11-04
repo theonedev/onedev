@@ -194,6 +194,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Absolute", "Absolut");
 		m.put("Absolute or relative url of the image", "Absolute oder relative URL des Bildes");
 		m.put("Absolute or relative url of the link", "Absolute oder relative URL des Links");
+		m.put("Access", "Zugriff");
 		m.put("Access Anonymously", "Anonym zugreifen");
 		m.put("Access Build Log", "Build-Log zugreifen");
 		m.put("Access Build Pipeline", "Build-Pipeline zugreifen");
@@ -206,6 +207,9 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Access Token Secret", "Zugriffstoken-Geheimnis");
 		m.put("Access Token for Target Project", "Zugriffstoken für Zielprojekt");
 		m.put("Access Tokens", "Zugriffstoken");
+		m.put("Access expires after 30 days. You can revoke access at any time under Authorized Applications.", 
+			"Zugriff läuft nach 30 Tagen ab. Sie können den Zugriff jederzeit unter Autorisierte Anwendungen widerrufen.");
+		m.put("Access token expires", "Zugriffstoken läuft ab");
 		m.put("Access token is intended for api access and repository pull/push. It cannot be used to sign in to web ui", 
 			"Das Zugriffstoken ist für API-Zugriff und Repository-Pull/Push vorgesehen. Es kann nicht verwendet werden, um sich bei der Web-Benutzeroberfläche anzumelden");
 		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
@@ -337,6 +341,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("All RESTful Resources", "Alle RESTful-Ressourcen");
 		m.put("All Types", "Alle Typen");
 		m.put("All accessible", "Alle zugänglich");
+		m.put("All authorizations for this application have been revoked", "Alle Autorisierungen für diese Anwendung wurden widerrufen");
 		m.put("All builds", "Alle Builds");
 		m.put("All changes", "Alle Änderungen");
 		m.put("All except", "Alle außer");
@@ -413,7 +418,13 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Applicable Services", "Anwendbare Dienste");
 		m.put("Applicable Users", "Anwendbare Benutzer");
 		m.put("Applicable Workspace Projects", "Anwendbare Arbeitsbereichsprojekte");
+		m.put("Application", "Anwendung");
 		m.put("Application (client) ID", "Anwendungs-(Client)-ID");
+		m.put("Application Access", "Anwendungszugriff");
+		m.put("Application deleted", "Anwendung gelöscht");
+		m.put("Application registered", "Anwendung registriert");
+		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
+			"Anwendungen mit Zugriff auf Ihr Konto und ausgewählte Projekte. Öffnen Sie eine Anwendung, um deren Tokens und Berechtigungen zu überprüfen oder den Zugriff zu widerrufen.");
 		m.put("Apply suggested change from code comment", "Vorgeschlagene Änderung aus Code-Kommentar übernehmen");
 		m.put("Apply suggested changes from code comments", "Vorgeschlagene Änderungen aus Code-Kommentaren übernehmen");
 		m.put("Approve", "Genehmigen");
@@ -478,10 +489,18 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Author date", "Autoren-Datum");
 		m.put("Authored By", "Verfasst von");
 		m.put("Authorization", "Autorisierung");
+		m.put("Authorization expires", "Autorisierung läuft ab");
+		m.put("Authorization revoked", "Autorisierung widerrufen");
 		m.put("Authorizations", "Autorisierungen");
+		m.put("Authorize", "Autorisieren");
+		m.put("Authorize Application", "Anwendung autorisieren");
+		m.put("Authorize these roles on selected projects and their children", "Diese Rollen für ausgewählte Projekte und deren Unterprojekte autorisieren");
 		m.put("Authorize user...", "Benutzer autorisieren...");
+		m.put("Authorized", "Autorisiert");
+		m.put("Authorized Applications", "Autorisierte Anwendungen");
 		m.put("Authorized Projects", "Autorisierte Projekte");
 		m.put("Authorized Roles", "Autorisierte Rollen");
+		m.put("Authorized Tokens", "Autorisierte Tokens");
 		m.put("Auto", "Auto");
 		m.put("Auto Merge", "Automatisches Zusammenführen");
 		m.put("Auto Spec", "Automatische Spezifikation");
@@ -767,6 +786,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Check Update", "Update überprüfen");
 		m.put("Check Vulnerabilities", "Schwachstellen überprüfen");
 		m.put("Check Workflow Integrity", "Workflow-Integrität überprüfen");
+		m.put("Check if the application can securely store a secret. Leave unchecked for desktop, mobile, and browser applications. S256 PKCE is required for all applications.", 
+			"Überprüfen Sie, ob die Anwendung ein Geheimnis sicher speichern kann. Lassen Sie dies für Desktop-, Mobil- und Browseranwendungen deaktiviert. S256 PKCE ist für alle Anwendungen erforderlich.");
 		m.put("Check out to local directory", "In lokales Verzeichnis auschecken");
 		m.put("Check this to compare right side with common ancestor of left and right", "Markieren Sie dies, um die rechte Seite mit dem gemeinsamen Vorfahren von links und rechts zu vergleichen");
 		m.put("Check this to enforce two-factor authentication for all users in the system", "Markieren Sie dies, um Zwei-Faktor-Authentifizierung für alle Benutzer im System zu erzwingen");
@@ -833,9 +854,11 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Click to select a commit, or shift-click to select multiple commit", "Klicken, um einen Commit auszuwählen, oder Shift-Klick, um mehrere Commits auszuwählen");
 		m.put("Click to show comment of marked text", "Klicken, um den Kommentar des markierten Textes anzuzeigen");
 		m.put("Click to show issue details", "Klicken, um Problemdetails anzuzeigen");
+		m.put("Client ID", "Client-ID");
 		m.put("Client ID of this ${productName} instance registered in Google cloud", "Client-ID dieser ${productName}-Instanz, die in Google Cloud registriert ist");
 		m.put("Client Id", "Client-ID");
 		m.put("Client Secret", "Client-Secret");
+		m.put("Client Type", "Client-Typ");
 		m.put("Client secret of this ${productName} instance registered in Google cloud", "Client-Secret dieser ${productName}-Instanz, die in Google Cloud registriert ist");
 		m.put("Clippy Report", "Clippy-Bericht");
 		m.put("Clone", "Klonen");
@@ -934,6 +957,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Commits are taken from default branch of non-forked repositories", "Commits stammen aus dem Standard-Branch von nicht geforkten Repositories");
 		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is deleted. Type <code>yes</code> below if you want to continue.", 
 			"Von ${productName} zuvor generierte Commits werden als nicht verifiziert angezeigt, wenn dieser Schlüssel gelöscht wird. Geben Sie unten <code>yes</code> ein, wenn Sie fortfahren möchten.");
+		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is regenerated. Type <code>yes</code> below if you want to continue.", 
+			"Von ${productName} zuvor generierte Commits werden als nicht verifiziert angezeigt, wenn dieser Schlüssel neu generiert wird. Geben Sie <code>yes</code> unten ein, wenn Sie fortfahren möchten.");
 		m.put("Commits were merged into target branch", "Commits wurden in den Ziel-Branch zusammengeführt");
 		m.put("Commits were merged into target branch outside of this pull request", "Commits wurden außerhalb dieses Pull-Requests in den Ziel-Branch zusammengeführt");
 		m.put("Commits were rebased onto target branch", "Commits wurden auf den Ziel-Branch umgestellt");
@@ -949,6 +974,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Concurrency", "Parallelität");
 		m.put("Condition", "Bedingung");
 		m.put("Confidential", "Vertraulich");
+		m.put("Confidential Client", "Vertraulicher Client");
 		m.put("Config File", "Konfigurationsdatei");
 		m.put("Config Files", "Konfigurationsdateien");
 		m.put("Configuration Discovery Url", "Konfigurations-Erkennungs-URL");
@@ -995,10 +1021,13 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Copy Markdown", "Markdown kopieren");
 		m.put("Copy Selected Issues To...", "Ausgewählte Issues kopieren nach...");
 		m.put("Copy as Markdown", "Als Markdown kopieren");
+		m.put("Copy client ID", "Client-ID kopieren");
+		m.put("Copy client secret", "Client-Geheimnis kopieren");
 		m.put("Copy dashboard", "Dashboard kopieren");
 		m.put("Copy permanent link", "Permanenter Link kopieren");
 		m.put("Copy public key", "Öffentlichen Schlüssel kopieren");
 		m.put("Copy selected text to clipboard", "Ausgewählten Text in die Zwischenablage kopieren");
+		m.put("Copy the client secret now. It will not be shown again.", "Kopieren Sie jetzt das Client-Geheimnis. Es wird nicht erneut angezeigt.");
 		m.put("Copy this executor", "Diesen Executor kopieren");
 		m.put("Copy this provisioner", "Diesen Provisioner kopieren");
 		m.put("Copy this rule", "Diese Regel kopieren");
@@ -1173,6 +1202,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Delete All Queried Pull Requests", "Alle abgefragten Pull-Requests löschen");
 		m.put("Delete All Queried Users", "Alle abgefragten Benutzer löschen");
 		m.put("Delete All Queried Workspaces", "Alle abgefragten Arbeitsbereiche löschen");
+		m.put("Delete Application", "Anwendung löschen");
 		m.put("Delete Build", "Build löschen");
 		m.put("Delete Comment", "Kommentar löschen");
 		m.put("Delete Pull Request", "Pull-Request löschen");
@@ -1190,6 +1220,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Delete Source Branch", "Quellbranch löschen");
 		m.put("Delete Source Branch After Merge", "Quellbranch nach dem Merge löschen");
 		m.put("Delete Workspace If Succeeded", "Workspace löschen, wenn erfolgreich");
+		m.put("Delete application \"{0}\" and all its authorizations?", "Anwendung \"{0}\" und alle ihre Autorisierungen löschen?");
 		m.put("Delete chat", "Chat löschen");
 		m.put("Delete dashboard", "Dashboard löschen");
 		m.put("Delete from branch {0}", "Von Branch {0} löschen");
@@ -1218,6 +1249,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Deletion not allowed due to branch protection rule", "Löschen nicht erlaubt aufgrund der Branch-Schutzregel");
 		m.put("Deletion not allowed due to tag protection rule", "Löschen nicht erlaubt aufgrund der Tag-Schutzregel");
 		m.put("Denied", "Verweigert");
+		m.put("Deny", "Ablehnen");
 		m.put("Dependencies & Services", "Abhängigkeiten & Dienste");
 		m.put("Dependency Management", "Abhängigkeitsmanagement");
 		m.put("Dependency job finished", "Abhängigkeitsjob abgeschlossen");
@@ -1262,6 +1294,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Discarded pull request \"{0}\" ({1})", "Pull Request \"{0}\" ({1}) verworfen");
 		m.put("Discord", "Discord");
 		m.put("Discord Notifications", "Discord-Benachrichtigungen");
+		m.put("Discover endpoints at", "Endpunkte entdecken unter");
 		m.put("Display Fields", "Anzeigefelder");
 		m.put("Display Links", "Anzeigelinks");
 		m.put("Display Months", "Anzeigemonate");
@@ -1363,6 +1396,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Duration", "Dauer");
 		m.put("Durations", "Dauern");
 		m.put("ESLint Report", "ESLint-Bericht");
+		m.put("Each token has its own permissions and expiration. Revoking a token also revokes its refresh token. Revoke all to remove this application's access to your account.", 
+			"Jedes Token hat eigene Berechtigungen und ein Ablaufdatum. Das Widerrufen eines Tokens widerruft auch dessen Refresh-Token. Widerrufen Sie alle, um den Zugriff dieser Anwendung auf Ihr Konto zu entfernen.");
 		m.put("Edit", "Bearbeiten");
 		m.put("Edit <code>$HOME/.cargo/config.toml</code> to add a registry like below", "Bearbeiten Sie <code>$HOME/.cargo/config.toml</code>, um ein Registry wie unten hinzuzufügen");
 		m.put("Edit <code>$HOME/.gem/credentials</code> to add a source", "Bearbeiten Sie <code>$HOME/.gem/credentials</code>, um eine Quelle hinzuzufügen.");
@@ -1856,6 +1891,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("History of comparing revisions is unrelated", "Verlauf des Vergleichs von Revisionen ist nicht zusammenhängend");
 		m.put("History of target branch and source branch is unrelated", "Verlauf des Ziel- und Quellzweigs ist nicht zusammenhängend");
 		m.put("Home page not found", "Startseite nicht gefunden");
+		m.put("Homepage", "Startseite");
 		m.put("Host name or ip address of remote machine to run commands via SSH", "Hostname oder IP-Adresse der entfernten Maschine, um Befehle über SSH auszuführen");
 		m.put("Hours Per Day", "Stunden pro Tag");
 		m.put("How to Publish", "Wie veröffentlichen");
@@ -1993,6 +2029,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Insert this image", "Dieses Bild einfügen");
 		m.put("Install Subscription Key", "Abonnement-Schlüssel installieren");
 		m.put("Integer", "Ganzzahl");
+		m.put("Integration and supported scopes", "Integration und unterstützte Bereiche");
 		m.put("Interactive web shell access to running jobs is an enterprise feature. <a href='${website}/pricing' target='_blank'>Try free</a> for 30 days", 
 			"Interaktiver Web-Shell-Zugriff auf laufende Jobs ist eine Enterprise-Funktion. <a href='${website}/pricing' target='_blank'>30 Tage kostenlos testen</a>");
 		m.put("Internal Database", "Interne Datenbank");
@@ -2192,6 +2229,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Key ID", "Schlüssel-ID");
 		m.put("Key Secret", "Schlüssel-Geheimnis");
 		m.put("Key Type", "Schlüsseltyp");
+		m.put("Keys", "Schlüssel");
 		m.put("Kubectl Config File", "Kubectl-Konfigurationsdatei");
 		m.put("Kubernetes", "Kubernetes");
 		m.put("Kubernetes Executor", "Kubernetes-Executor");
@@ -2213,9 +2251,11 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Last Published", "Zuletzt veröffentlicht");
 		m.put("Last Update", "Letztes Update");
 		m.put("Last Updated", "Zuletzt aktualisiert");
+		m.put("Last Used", "Zuletzt verwendet");
 		m.put("Last commit", "Letzter Commit");
 		m.put("Last commit hash", "Letzter Commit-Hash");
 		m.put("Last commit index version", "Letzte Commit-Indexversion");
+		m.put("Last token exchange", "Letzter Token-Austausch");
 		m.put("Latest Build of Specified Job", "Neuester Build des angegebenen Jobs");
 		m.put("Leaf Projects", "Blattprojekte");
 		m.put("Least branch coverage", "Geringste Branch-Abdeckung");
@@ -2227,6 +2267,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Lassen Sie dieses Feld leer, um die <a href='${docsite}/administration-guide/project-defaults' target='_blank'>Standardeinstellung</a> zu verwenden.");
 		m.put("Left", "Links");
 		m.put("Less", "Weniger");
+		m.put("Let applications offer sign-in with OneDev. Follow the <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connect provider tutorial</a> to register an application and configure its OIDC client.", 
+			"Lassen Sie Anwendungen die Anmeldung mit OneDev anbieten. Folgen Sie dem <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID-Connect-Provider-Tutorial</a>, um eine Anwendung zu registrieren und ihren OIDC-Client zu konfigurieren.");
 		m.put("License Agreement", "Lizenzvereinbarung");
 		m.put("License Setting", "Lizenzeinstellung");
 		m.put("Licensed To", "Lizenziert für");
@@ -2499,8 +2541,10 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No any", "Kein Einziger");
 		m.put("No any matches", "Keine Übereinstimmungen");
 		m.put("No applicable transitions or no permission to transit", "Keine anwendbaren Übergänge oder keine Berechtigung zum Übergang");
+		m.put("No applications registered yet", "Noch keine Anwendungen registriert");
 		m.put("No attributes defined (can only be edited when agent is online)", "Keine Attribute definiert (können nur bearbeitet werden, wenn der Agent online ist)");
 		m.put("No audits", "Keine Audits");
+		m.put("No authorized applications yet", "Noch keine autorisierten Anwendungen");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "Kein autorisiertes Job-Geheimnis gefunden (Projekt: {0}, Job-Geheimnis: {1})");
 		m.put("No branch to cherry-pick to", "Kein Branch zum Cherry-Picking");
 		m.put("No branch to revert on", "Kein Branch zum Zurücksetzen");
@@ -2620,6 +2664,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Not a verified email of signing ssh key owner", "Nicht eine verifizierte E-Mail des Besitzers des signierenden SSH-Schlüssels");
 		m.put("Not allowed file type: {0}", "Nicht erlaubter Dateityp: {0}");
 		m.put("Not allowed to modify this file", "Keine Berechtigung, diese Datei zu ändern");
+		m.put("Not applicable", "Nicht zutreffend");
 		m.put("Not assigned", "Nicht zugewiesen");
 		m.put("Not authorized to create project under \"{0}\"", "Nicht berechtigt, ein Projekt unter \"{0}\" zu erstellen");
 		m.put("Not authorized to create root project", "Nicht berechtigt, ein Root-Projekt zu erstellen");
@@ -2631,10 +2676,12 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Not covered by any test", "Nicht durch einen Test abgedeckt");
 		m.put("Not displaying any fields", "Keine Felder angezeigt");
 		m.put("Not displaying any links", "Keine Links angezeigt");
+		m.put("Not issued", "Nicht ausgestellt");
 		m.put("Not passed", "Nicht bestanden");
 		m.put("Not rendered in failsafe mode", "Nicht im Failsafe-Modus gerendert");
 		m.put("Not run", "Nicht ausgeführt");
 		m.put("Not specified", "Nicht angegeben");
+		m.put("Not used", "Nicht verwendet");
 		m.put("Note", "Notiz");
 		m.put("Nothing changed yet", "Noch nichts geändert");
 		m.put("Nothing to preview", "Nichts zu Vorschau anzeigen");
@@ -2655,6 +2702,9 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Number of builds to preserve", "Anzahl der Builds, die erhalten bleiben sollen");
 		m.put("Number of project replicas, including primary and backups", "Anzahl der Projekt-Replikate, einschließlich primärer und Backup-Kopien");
 		m.put("Number of recent months to show statistics for", "Anzahl der letzten Monate, für die Statistiken angezeigt werden sollen");
+		m.put("O Auth Application Bean", "OAuth-Anwendungs-Bean");
+		m.put("OAuth Applications", "OAuth-Anwendungen");
+		m.put("OAuth Signing Key", "OAuth-Signaturschlüssel");
 		m.put("OAuth2 Client information | CLIENT ID", "OAuth2-Client-Informationen | CLIENT-ID");
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2-Client-Informationen | CLIENT-SECRET");
 		m.put("OCI Layout Directory", "OCI-Layout-Verzeichnis");
@@ -2668,6 +2718,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("OS User Name", "Betriebssystem-Benutzername");
 		m.put("OS Version", "Betriebssystem-Version");
 		m.put("OS/ARCH", "OS/ARCH");
+		m.put("Oauth signing key", "OAuth-Signaturschlüssel");
 		m.put("Offline", "Offline");
 		m.put("Ok", "Ok");
 		m.put("Old", "Alt");
@@ -2681,6 +2732,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"Erstelle nur einen Merge-Commit, wenn der Zielbranch nicht auf den Quellbranch vorwärtsgeführt werden kann");
 		m.put("Only projects manageable by access token owner can be authorized", "Nur Projekte, die vom Besitzer des Zugriffstokens verwaltet werden können, dürfen autorisiert werden");
+		m.put("Only projects you have permission to manage can be authorized. The application can only exercise permissions you have. Changes to these roles also affect this authorization.", 
+			"Nur Projekte, die Sie verwalten dürfen, können autorisiert werden. Die Anwendung kann nur Berechtigungen ausüben, die Sie haben. Änderungen an diesen Rollen wirken sich auch auf diese Autorisierung aus.");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
 			"Hier werden nur Audit-Ereignisse auf Systemebene angezeigt. Um Audit-Ereignisse für ein bestimmtes Projekt anzuzeigen, besuchen Sie bitte die Audit-Log-Seite des Projekts");
 		m.put("Only users able to authenticate via password can be linked", "Nur Benutzer, die sich über ein Passwort authentifizieren können, können verknüpft werden");
@@ -3039,6 +3092,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Overall Spent Time:", "Gesamtaufgewendete Zeit:");
 		m.put("Overview", "Übersicht");
 		m.put("Own:", "Eigene:");
+		m.put("Owner", "Eigentümer");
 		m.put("Ownered By", "Besitz von");
 		m.put("PEM private key begins with '-----BEGIN RSA PRIVATE KEY-----'", "PEM-Privatschlüssel beginnt mit '-----BEGIN RSA PRIVATE KEY-----'");
 		m.put("PENDING", "AUSSTEHEND");
@@ -3306,6 +3360,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Das Projekt-Speicherverzeichnis &quot;site/projects/<span wicket:id=\"projectId\"></span>&quot; kann auf keinem ${productName}-Server gefunden werden");
 		m.put("Projects", "Projekte");
 		m.put("Projects Bean", "Projekte-Bean");
+		m.put("Projects and roles", "Projekte und Rollen");
 		m.put("Projects deleted", "Projekte gelöscht");
 		m.put("Projects modified", "Projekte geändert");
 		m.put("Projects moved", "Projekte verschoben");
@@ -3331,6 +3386,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Prune Builder Cache", "Builder-Cache bereinigen");
 		m.put("Prune image cache of docker buildx builder. This step calls docker buildx prune command to remove cache of the builder used by the Docker or sandbox executor", 
 			"Bild-Cache des Docker-Buildx-Builders bereinigen. Dieser Schritt ruft den Befehl docker buildx prune auf, um den Cache des Builders zu entfernen, der vom Docker- oder Sandbox-Executor verwendet wird.");
+		m.put("Public", "Öffentlich");
 		m.put("Public Key", "Öffentlicher Schlüssel");
 		m.put("Public Roles", "Öffentliche Rollen");
 		m.put("Public site", "Öffentliche Seite");
@@ -3465,6 +3521,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Receivers", "Empfänger");
 		m.put("Recovery code", "Wiederherstellungscode");
 		m.put("Recursive", "Rekursiv");
+		m.put("Redirect URI", "Redirect-URI");
+		m.put("Redirect URIs", "Redirect-URIs");
 		m.put("Redundant", "Redundant");
 		m.put("Ref", "Ref");
 		m.put("Ref Name Provider", "Ref-Name-Anbieter");
@@ -3484,6 +3542,9 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Regenerate", "Neu generieren");
 		m.put("Regenerate Private Key", "Privaten Schlüssel neu generieren");
 		m.put("Regenerate this access token", "Diesen Zugriffstoken neu generieren");
+		m.put("Regenerating this key revokes all existing authorizations and replaces the public signing key. Applications need to sign in again and refresh their cached signing key. Type <code>yes</code> below to continue.", 
+			"Das Neugenerieren dieses Schlüssels widerruft alle bestehenden Autorisierungen und ersetzt den öffentlichen Signaturschlüssel. Anwendungen müssen sich erneut anmelden und ihren zwischengespeicherten Signaturschlüssel aktualisieren. Geben Sie <code>yes</code> unten ein, um fortzufahren.");
+		m.put("Register Application", "Anwendung registrieren");
 		m.put("Registry Login", "Registry-Login");
 		m.put("Registry Logins", "Registry-Logins");
 		m.put("Registry Url", "Registry-URL");
@@ -3543,7 +3604,10 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Request Scopes", "Anforderungsbereiche");
 		m.put("Request Trial Subscription", "Testabonnement anfordern");
 		m.put("Request review again", "Überprüfung erneut anfordern");
+		m.put("Request role scopes to access projects. The user selects projects they have permission to manage during consent, and access is limited to their own permissions.", 
+			"Fordern Sie Rollenscopes an, um auf Projekte zuzugreifen. Der Benutzer wählt während der Zustimmung Projekte aus, die er verwalten darf, und der Zugriff ist auf seine eigenen Berechtigungen beschränkt.");
 		m.put("Request to sync", "Synchronisation anfordern");
+		m.put("Requested Access", "Angeforderter Zugriff");
 		m.put("Requested For changes", "Änderungen angefordert");
 		m.put("Requested changes to pull request \"{0}\" ({1})", "Änderungen am Pull-Request \"{0}\" ({1}) angefordert");
 		m.put("Requested for changes", "Änderungen angefordert");
@@ -3603,6 +3667,11 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Revision indexing in progress...", "Revisionsindizierung läuft...");
 		m.put("Revision indexing in progress... (symbol navigation and context in revisions will be available after indexed)", 
 			"Revisionsindexierung läuft... (Symbolnavigation und Kontext in Revisionen sind nach der Indexierung verfügbar)");
+		m.put("Revoke", "Widerrufen");
+		m.put("Revoke All", "Alle widerrufen");
+		m.put("Revoke All Authorizations", "Alle Autorisierungen widerrufen");
+		m.put("Revoke all tokens for \"{0}\"?", "Alle Tokens für \"{0}\" widerrufen?");
+		m.put("Revoke this token and its refresh token?", "Dieses Token und dessen Refresh-Token widerrufen?");
 		m.put("Right", "Rechts");
 		m.put("Role", "Rolle");
 		m.put("Role \"{0}\" deleted", "Rolle \"{0}\" gelöscht");
@@ -3612,6 +3681,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Roles", "Rollen");
 		m.put("Root Projects", "Root-Projekte");
 		m.put("Roslynator Report", "Roslynator-Bericht");
+		m.put("Rotate Secret", "Geheimnis rotieren");
+		m.put("Rotate the client secret and revoke all authorizations?", "Das Client-Geheimnis rotieren und alle Autorisierungen widerrufen?");
 		m.put("RubyGems(s)", "RubyGems(s)");
 		m.put("Ruff Report", "Ruff-Bericht");
 		m.put("Rule will apply if user operating the tag matches criteria specified here", "Regel wird angewendet, wenn der Benutzer, der das Tag bedient, die hier angegebenen Kriterien erfüllt");
@@ -3693,6 +3764,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Scan Paths", "Scan-Pfade");
 		m.put("Scan below QR code with your TOTP authenticators", "Scannen Sie den unten stehenden QR-Code mit Ihren TOTP-Authentifikatoren");
 		m.put("Schedule Issues", "Probleme planen");
+		m.put("Scope", "Bereich");
+		m.put("Scopes", "Bereiche");
 		m.put("Script Name", "Skriptname");
 		m.put("Scripting Value", "Skriptwert");
 		m.put("Search", "Suchen");
@@ -3883,6 +3956,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Signature verified successfully with tagger's GPG key", "Signatur erfolgreich mit dem GPG-Schlüssel des Taggers verifiziert");
 		m.put("Signature verified successfully with tagger's SSH key", "Signatur erfolgreich mit dem SSH-Schlüssel des Taggers verifiziert");
 		m.put("Signature verified successfully with trusted GPG key", "Signatur erfolgreich mit einem vertrauenswürdigen GPG-Schlüssel verifiziert");
+		m.put("Signed in as", "Angemeldet als");
 		m.put("Signed with an unknown GPG key ", "Mit einem unbekannten GPG-Schlüssel signiert");
 		m.put("Signed with an unknown ssh key", "Mit einem unbekannten SSH-Schlüssel signiert");
 		m.put("Signer Email Addresses", "Signer-E-Mail-Adressen");
@@ -4251,6 +4325,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Specify name of the workspace spec", "Geben Sie den Namen der Arbeitsbereichsspezifikation an");
 		m.put("Specify network timeout in seconds when authenticate through this system", "Geben Sie die Netzwerk-Timeout-Zeit in Sekunden an, wenn Sie sich über dieses System authentifizieren.");
 		m.put("Specify node selector of this locator", "Geben Sie den Node-Selector dieses Locators an.");
+		m.put("Specify one URI per line. Use HTTPS, loopback HTTP, or a native application scheme for public clients. URIs must match exactly, except public clients may choose any port for HTTP callbacks to 127.0.0.1 or [::1].", 
+			"Geben Sie eine URI pro Zeile an. Verwenden Sie HTTPS, Loopback-HTTP oder ein natives Anwendungsschema für öffentliche Clients. URIs müssen genau übereinstimmen, außer öffentliche Clients können jeden Port für HTTP-Callbacks zu 127.0.0.1 oder [::1] wählen.");
 		m.put("Specify password or access token of specified registry", "Geben Sie das Passwort oder den Zugriffstoken des angegebenen Registrys an.");
 		m.put("Specify password or access token of the registry", "Geben Sie das Passwort oder Zugriffstoken des Registrys an");
 		m.put("Specify password to authenticate with", "Geben Sie das Passwort zur Authentifizierung an.");
@@ -5248,6 +5324,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("You will be notified of any activities", "Sie werden über alle Aktivitäten benachrichtigt");
 		m.put("You will need to update token at agent side after regeneration. Do you really want to continue?", 
 			"Sie müssen das Token auf der Agent-Seite nach der Regeneration aktualisieren. Möchten Sie wirklich fortfahren?");
+		m.put("You will return to:", "Sie kehren zurück zu:");
 		m.put("You've been logged out", "Sie wurden abgemeldet");
 		m.put("YouTrack API URL", "YouTrack-API-URL");
 		m.put("YouTrack Issue Field", "YouTrack-Issue-Feld");
@@ -5381,6 +5458,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("on file {0}", "in Datei {0}");
 		m.put("opened", "geöffnet");
 		m.put("opened <span wicket:id=\"submitDate\"></span>", "geöffnet <span wicket:id=\"submitDate\"></span>");
+		m.put("or", "oder");
 		m.put("or match another value", "oder mit einem anderen Wert übereinstimmen");
 		m.put("order more", "mehr bestellen");
 		m.put("outdated", "veraltet");
@@ -5462,6 +5540,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("value needs to be enclosed in parenthesis", "Wert muss in runden Klammern eingeschlossen werden");
 		m.put("value should be quoted", "Wert sollte in Anführungszeichen gesetzt werden");
 		m.put("w%02d", "w%02d");
+		m.put("wants access to your OneDev account.", "möchte auf Ihr OneDev-Konto zugreifen.");
 		m.put("week:Fri", "Fr");
 		m.put("week:Mon", "Mo");
 		m.put("week:Sat", "Sa");
@@ -5510,87 +5589,16 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Access", "Zugriff");
-		m.put("Access expires after 30 days. You can revoke access at any time under Authorized Applications.", 
-			"Zugriff läuft nach 30 Tagen ab. Sie können den Zugriff jederzeit unter Autorisierte Anwendungen widerrufen.");
-		m.put("Access token expires", "Zugriffstoken läuft ab");
-		m.put("All authorizations for this application have been revoked", "Alle Autorisierungen für diese Anwendung wurden widerrufen");
-		m.put("Application", "Anwendung");
-		m.put("Application Access", "Anwendungszugriff");
-		m.put("Application deleted", "Anwendung gelöscht");
-		m.put("Application registered", "Anwendung registriert");
-		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
-			"Anwendungen mit Zugriff auf Ihr Konto und ausgewählte Projekte. Öffnen Sie eine Anwendung, um deren Tokens und Berechtigungen zu überprüfen oder den Zugriff zu widerrufen.");
-		m.put("Authorization expires", "Autorisierung läuft ab");
-		m.put("Authorization revoked", "Autorisierung widerrufen");
-		m.put("Authorize", "Autorisieren");
-		m.put("Authorize Application", "Anwendung autorisieren");
-		m.put("Authorize these roles on selected projects and their children", "Diese Rollen für ausgewählte Projekte und deren Unterprojekte autorisieren");
-		m.put("Authorized", "Autorisiert");
-		m.put("Authorized Applications", "Autorisierte Anwendungen");
-		m.put("Authorized Tokens", "Autorisierte Tokens");
-		m.put("Check if the application can securely store a secret. Leave unchecked for desktop, mobile, and browser applications. S256 PKCE is required for all applications.", 
-			"Überprüfen Sie, ob die Anwendung ein Geheimnis sicher speichern kann. Lassen Sie dies für Desktop-, Mobil- und Browseranwendungen deaktiviert. S256 PKCE ist für alle Anwendungen erforderlich.");
-		m.put("Client ID", "Client-ID");
-		m.put("Client Type", "Client-Typ");
-		m.put("Commits generated by ${productName} previously will be shown as unverified if this key is regenerated. Type <code>yes</code> below if you want to continue.", 
-			"Von ${productName} zuvor generierte Commits werden als nicht verifiziert angezeigt, wenn dieser Schlüssel neu generiert wird. Geben Sie <code>yes</code> unten ein, wenn Sie fortfahren möchten.");
-		m.put("Confidential Client", "Vertraulicher Client");
-		m.put("Copy client ID", "Client-ID kopieren");
-		m.put("Copy client secret", "Client-Geheimnis kopieren");
-		m.put("Copy the client secret now. It will not be shown again.", "Kopieren Sie jetzt das Client-Geheimnis. Es wird nicht erneut angezeigt.");
-		m.put("Delete Application", "Anwendung löschen");
-		m.put("Delete application \"{0}\" and all its authorizations?", "Anwendung \"{0}\" und alle ihre Autorisierungen löschen?");
-		m.put("Deny", "Ablehnen");
-		m.put("Discover endpoints at", "Endpunkte entdecken unter");
-		m.put("Each token has its own permissions and expiration. Revoking a token also revokes its refresh token. Revoke all to remove this application's access to your account.", 
-			"Jedes Token hat eigene Berechtigungen und ein Ablaufdatum. Das Widerrufen eines Tokens widerruft auch dessen Refresh-Token. Widerrufen Sie alle, um den Zugriff dieser Anwendung auf Ihr Konto zu entfernen.");
-		m.put("Homepage", "Startseite");
-		m.put("Integration and supported scopes", "Integration und unterstützte Bereiche");
-		m.put("Keys", "Schlüssel");
-		m.put("Last Used", "Zuletzt verwendet");
-		m.put("Last token exchange", "Letzter Token-Austausch");
-		m.put("Let applications offer sign-in with OneDev. Follow the <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID Connect provider tutorial</a> to register an application and configure its OIDC client.", 
-			"Lassen Sie Anwendungen die Anmeldung mit OneDev anbieten. Folgen Sie dem <a href=\"${docsite}/tutorials/security/openid-connect-provider\" target=\"_blank\">OpenID-Connect-Provider-Tutorial</a>, um eine Anwendung zu registrieren und ihren OIDC-Client zu konfigurieren.");
-		m.put("No applications registered yet", "Noch keine Anwendungen registriert");
-		m.put("No authorized applications yet", "Noch keine autorisierten Anwendungen");
-		m.put("Not applicable", "Nicht zutreffend");
-		m.put("Not issued", "Nicht ausgestellt");
-		m.put("Not used", "Nicht verwendet");
-		m.put("O Auth Application Bean", "OAuth-Anwendungs-Bean");
-		m.put("OAuth Applications", "OAuth-Anwendungen");
-		m.put("OAuth Signing Key", "OAuth-Signaturschlüssel");
-		m.put("Oauth signing key", "OAuth-Signaturschlüssel");
-		m.put("Only projects you have permission to manage can be authorized. The application can only exercise permissions you have. Changes to these roles also affect this authorization.", 
-			"Nur Projekte, die Sie verwalten dürfen, können autorisiert werden. Die Anwendung kann nur Berechtigungen ausüben, die Sie haben. Änderungen an diesen Rollen wirken sich auch auf diese Autorisierung aus.");
-		m.put("Owner", "Eigentümer");
-		m.put("Projects and roles", "Projekte und Rollen");
-		m.put("Public", "Öffentlich");
-		m.put("Redirect URI", "Redirect-URI");
-		m.put("Redirect URIs", "Redirect-URIs");
-		m.put("Regenerating this key revokes all existing authorizations and replaces the public signing key. Applications need to sign in again and refresh their cached signing key. Type <code>yes</code> below to continue.", 
-			"Das Neugenerieren dieses Schlüssels widerruft alle bestehenden Autorisierungen und ersetzt den öffentlichen Signaturschlüssel. Anwendungen müssen sich erneut anmelden und ihren zwischengespeicherten Signaturschlüssel aktualisieren. Geben Sie <code>yes</code> unten ein, um fortzufahren.");
-		m.put("Register Application", "Anwendung registrieren");
-		m.put("Request role scopes to access projects. The user selects projects they have permission to manage during consent, and access is limited to their own permissions.", 
-			"Fordern Sie Rollenscopes an, um auf Projekte zuzugreifen. Der Benutzer wählt während der Zustimmung Projekte aus, die er verwalten darf, und der Zugriff ist auf seine eigenen Berechtigungen beschränkt.");
-		m.put("Requested Access", "Angeforderter Zugriff");
-		m.put("Revoke", "Widerrufen");
-		m.put("Revoke All", "Alle widerrufen");
-		m.put("Revoke All Authorizations", "Alle Autorisierungen widerrufen");
-		m.put("Revoke all tokens for \"{0}\"?", "Alle Tokens für \"{0}\" widerrufen?");
-		m.put("Revoke this token and its refresh token?", "Dieses Token und dessen Refresh-Token widerrufen?");
-		m.put("Rotate Secret", "Geheimnis rotieren");
-		m.put("Rotate the client secret and revoke all authorizations?", "Das Client-Geheimnis rotieren und alle Autorisierungen widerrufen?");
-		m.put("Scope", "Bereich");
-		m.put("Scopes", "Bereiche");
-		m.put("Signed in as", "Angemeldet als");
-		m.put("Specify one URI per line. Use HTTPS, loopback HTTP, or a native application scheme for public clients. URIs must match exactly, except public clients may choose any port for HTTP callbacks to 127.0.0.1 or [::1].", 
-			"Geben Sie eine URI pro Zeile an. Verwenden Sie HTTPS, Loopback-HTTP oder ein natives Anwendungsschema für öffentliche Clients. URIs müssen genau übereinstimmen, außer öffentliche Clients können jeden Port für HTTP-Callbacks zu 127.0.0.1 oder [::1] wählen.");
-		m.put("This key signs OpenID Connect ID tokens. OneDev generates it automatically. Applications use the public key to verify ID token signatures.", 
-			"Dieser Schlüssel signiert OpenID-Connect-ID-Tokens. OneDev generiert ihn automatisch. Anwendungen verwenden den öffentlichen Schlüssel, um ID-Token-Signaturen zu überprüfen.");
-		m.put("You will return to:", "Sie kehren zurück zu:");
-		m.put("or", "oder");
-		m.put("wants access to your OneDev account.", "möchte auf Ihr OneDev-Konto zugreifen.");
+		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
+			"Anwendungen rufen den öffentlichen Schlüssel von diesem JSON Web Key Set (JWKS)-Endpunkt ab. Die URL bleibt gleich, wenn der Schlüssel neu generiert wird.");
+		m.put("Copy public key URL", "Öffentliche Schlüssel-URL kopieren");
+		m.put("Key Size", "Schlüsselgröße");
+		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
+			"OneDev generiert diesen Schlüssel automatisch, um OpenID Connect ID-Tokens zu signieren. Anwendungen verwenden seinen öffentlichen Schlüssel, um zu überprüfen, dass sich Benutzer über diese OneDev-Instanz angemeldet haben.");
+		m.put("Public Key JSON", "Öffentlicher Schlüssel JSON");
+		m.put("Public Key URL", "Öffentliche Schlüssel-URL");
+		m.put("Signing Algorithm", "Signaturalgorithmus");
+		m.put("bits", "Bits");
 	}
 			
 	@Override
