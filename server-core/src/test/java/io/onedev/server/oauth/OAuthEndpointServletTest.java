@@ -34,7 +34,6 @@ class OAuthEndpointServletTest {
 	void setUp() throws Exception {
 		servlet = new OAuthEndpointServlet();
 		providerService = mock(OAuthProviderService.class);
-		when(providerService.isEnabled()).thenReturn(true);
 		var sessions = mock(SessionService.class);
 		when(sessions.call(any())).thenAnswer(it -> ((Callable<?>) it.getArgument(0)).call());
 		for (var name: Map.of("providerService", providerService, "sessionService", sessions).entrySet()) {
@@ -98,19 +97,4 @@ class OAuthEndpointServletTest {
 		verify(response, times(2)).setStatus(200);
 	}
 
-	@Test
-	void disabledProviderHidesAllEndpoints() throws Exception {
-		when(providerService.isEnabled()).thenReturn(false);
-		for (var path: new String[]{"/~oauth/token", "/~oauth/revoke", "/~oauth/userinfo", "/~oauth/jwks",
-				"/.well-known/openid-configuration", "/.well-known/oauth-authorization-server"}) {
-			when(request.getServletPath()).thenReturn(path);
-			servlet.service(request, response);
-		}
-		verify(response, times(6)).setStatus(404);
-		verify(providerService, never()).exchange(any());
-		verify(providerService, never()).revoke(any());
-		verify(providerService, never()).getMetadata();
-		verify(providerService, never()).getJwks();
-		verify(providerService, never()).getUserInfo(any());
-	}
 }

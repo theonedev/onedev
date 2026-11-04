@@ -49,8 +49,6 @@ public class OAuthAuthorizePage extends SimplePage {
 
 	public OAuthAuthorizePage(PageParameters parameters) {
 		super(parameters);
-		if (!providerService.isEnabled())
-			throw new ExplicitException("OAuth2/OIDC provider is disabled");
 		var http = (HttpServletRequest) getRequest().getContainerRequest();
 		authorizationQuery = http.getQueryString();
 		if (authorizationQuery == null || authorizationQuery.length() > 16000)

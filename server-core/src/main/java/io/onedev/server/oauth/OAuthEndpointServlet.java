@@ -59,8 +59,6 @@ public class OAuthEndpointServlet extends HttpServlet {
 	}
 
 	private HTTPResponse handle(HttpServletRequest request) throws IOException {
-		if (!providerService.isEnabled())
-			return new HTTPResponse(404);
 		String path = request.getServletPath();
 		try {
 			if (path.endsWith("/token") || path.endsWith("/revoke")) {

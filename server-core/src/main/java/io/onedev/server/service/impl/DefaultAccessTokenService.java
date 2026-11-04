@@ -26,7 +26,6 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.facade.AccessTokenCache;
 
@@ -44,9 +43,6 @@ public class DefaultAccessTokenService extends BaseEntityService<AccessToken> im
 
 	@Inject
 	private SessionService sessionService;
-
-	@Inject
-	private SettingService settingService;
 	
 	private volatile AccessTokenCache cache;
 
@@ -83,7 +79,7 @@ public class DefaultAccessTokenService extends BaseEntityService<AccessToken> im
 						throw new DisabledAccountException("Account is disabled");
                     if (!value.equals(token.getValue())
 							|| token.isExpired()
-							|| token.getOauthGrant() != null && (settingService.getOAuthSigningKey() == null || !token.getOauthGrant().isActive())) {
+							|| token.getOauthGrant() != null && !token.getOauthGrant().isActive()) {
 						return null;
 					}
 					return token;

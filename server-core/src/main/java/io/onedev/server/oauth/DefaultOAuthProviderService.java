@@ -102,23 +102,12 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	private volatile String cleanupTaskId;
 
 	@Override
-	public boolean isEnabled() {
-		return settingService.getOAuthSigningKey() != null;
-	}
-
-	private void checkEnabled() {
-		if (!isEnabled())
-			throw new ExplicitException("OAuth2/OIDC provider is disabled");
-	}
-
-	@Override
 	public RSAKey getPublicSigningKey() {
-		return isEnabled() ? signingKey().toPublicJWK() : null;
+		return signingKey().toPublicJWK();
 	}
 
 	private void lockSigningKey() {
-		// The provider setting may not exist yet. Serialize key changes using an existing singleton row.
-		dao.getSession().lock(settingService.findSetting(Setting.Key.SYSTEM), LockModeType.PESSIMISTIC_WRITE);
+		dao.getSession().lock(settingService.findSetting(Setting.Key.OAUTH_SIGNING_KEY), LockModeType.PESSIMISTIC_WRITE);
 	}
 
 	private void revokeAllGrants() {
@@ -132,22 +121,12 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 		lockSigningKey();
 		try {
 			var key = new RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyIDFromThumbprint(true).generate();
-			if (isEnabled())
-				revokeAllGrants();
+			revokeAllGrants();
 			settingService.saveOAuthSigningKey(key.toJSONString());
 			auditService.audit(null, "generated OAuth signing key", null, null);
 		} catch (com.nimbusds.jose.JOSEException e) {
 			throw new IllegalStateException("Unable to generate OAuth signing key", e);
 		}
-	}
-
-	@Transactional
-	@Override
-	public void deleteSigningKey() {
-		lockSigningKey();
-		revokeAllGrants();
-		settingService.saveOAuthSigningKey(null);
-		auditService.audit(null, "deleted OAuth signing key", null, null);
 	}
 
 	@Override
@@ -168,7 +147,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	@Transactional
 	@Override
 	public String saveApplication(OAuthApplication application) {
-		checkEnabled();
 		if (application.getOwner() == null)
 			throw new ExplicitException("Application owner is required");
 		if (application.getName() == null || application.getName().isBlank() || application.getName().length() > 255)
@@ -356,7 +334,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	@Transactional
 	@Override
 	public String authorize(Subject subject, AuthorizationRequest request, Collection<Long> projectIds) throws ParseException {
-		checkEnabled();
 		var owner = SecurityUtils.getAuthUser(subject);
 		var application = findApplication(request.getClientID().getValue());
 		if (application == null || !hasRegisteredRedirect(application, request)
@@ -438,8 +415,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	@Transactional
 	@Override
 	public TokenResponse exchange(TokenRequest request) {
-		if (!isEnabled())
-			return new TokenErrorResponse(OAuth2Error.TEMPORARILY_UNAVAILABLE);
 		var application = authenticate(request.getClientID(), request.getClientAuthentication());
 		if (application == null)
 			return new TokenErrorResponse(OAuth2Error.INVALID_CLIENT);
@@ -506,8 +481,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	@Transactional
 	@Override
 	public HTTPResponse revoke(TokenRevocationRequest request) {
-		if (!isEnabled())
-			return new TokenErrorResponse(OAuth2Error.TEMPORARILY_UNAVAILABLE).toHTTPResponse();
 		var application = authenticate(request.getClientID(), request.getClientAuthentication());
 		if (application == null)
 			return new TokenErrorResponse(OAuth2Error.INVALID_CLIENT).toHTTPResponse();
@@ -531,7 +504,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	@Transactional
 	@Override
 	public Map<String, Object> getMetadata() {
-		checkEnabled();
 		var metadata = new OIDCProviderMetadata(new Issuer(issuer()), List.of(SubjectType.PUBLIC), URI.create(issuer() + "/~oauth/jwks"));
 		metadata.setAuthorizationEndpointURI(URI.create(issuer() + "/~oauth/authorize"));
 		metadata.setTokenEndpointURI(URI.create(issuer() + "/~oauth/token"));
@@ -554,7 +526,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	}
 
 	private RSAKey signingKey() {
-		checkEnabled();
 		try {
 			return RSAKey.parse(settingService.getOAuthSigningKey());
 		} catch (java.text.ParseException e) {
@@ -587,8 +558,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	@Sessional
 	@Override
 	public Map<String, Object> getUserInfo(String value) {
-		if (!isEnabled())
-			return null;
 		var token = findAccessToken(value);
 		if (token == null || token.getOauthGrant() == null)
 			return null;

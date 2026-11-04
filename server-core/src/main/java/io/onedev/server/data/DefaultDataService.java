@@ -849,8 +849,8 @@ public class DefaultDataService implements DataService, Serializable {
 		}
 
 		setting = settingService.findSetting(Key.OAUTH_SIGNING_KEY);
-		// A setting with a null value means the administrator explicitly deleted the key.
-		if (setting == null) {
+		// Also restore keys deleted before the signing key became mandatory.
+		if (setting == null || setting.getValue() == null) {
 			try {
 				var key = new RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyIDFromThumbprint(true).generate();
 				settingService.saveOAuthSigningKey(key.toJSONString());

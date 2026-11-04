@@ -49,7 +49,7 @@ public abstract class OAuthApplicationPage extends LayoutPage {
 	}
 
 	@Override protected boolean isPermitted() {
-		return providerService.isEnabled() && SecurityUtils.getAuthUser() != null;
+		return SecurityUtils.getAuthUser() != null;
 	}
 
 	private OAuthApplication application() {

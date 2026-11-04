@@ -46,10 +46,6 @@ public class MyAuthorizedApplicationPage extends MyPage {
 
 	private final LoadableDetachableModel<List<OAuthGrant>> grants;
 
-	@Override protected boolean isPermitted() {
-		return super.isPermitted() && providerService.isEnabled();
-	}
-
 	public MyAuthorizedApplicationPage(PageParameters parameters) {
 		super(parameters);
 		applicationId = parameters.get(PARAM_APPLICATION).toOptionalLong();

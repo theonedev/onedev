@@ -1284,12 +1284,10 @@ public abstract class LayoutPage extends BasePage {
 							getPage() instanceof MyGpgKeysPage));
 					menuItems.add(newPageMenuItem(_T("Access Tokens"), "token", MyAccessTokensPage.class,
 							getPage() instanceof MyAccessTokensPage));
-					if (getSettingService().getOAuthSigningKey() != null) {
-						menuItems.add(newPageMenuItem(_T("OAuth Applications"), "application", MyOAuthApplicationsPage.class,
-								getPage() instanceof MyOAuthApplicationsPage || getPage() instanceof MyOAuthApplicationPage));
-						menuItems.add(newPageMenuItem(_T("Authorized Applications"), "application2", MyAuthorizedApplicationsPage.class,
-								getPage() instanceof MyAuthorizedApplicationsPage || getPage() instanceof MyAuthorizedApplicationPage));
-					}
+					menuItems.add(newPageMenuItem(_T("OAuth Applications"), "application", MyOAuthApplicationsPage.class,
+							getPage() instanceof MyOAuthApplicationsPage || getPage() instanceof MyOAuthApplicationPage));
+					menuItems.add(newPageMenuItem(_T("Authorized Applications"), "application2", MyAuthorizedApplicationsPage.class,
+							getPage() instanceof MyAuthorizedApplicationsPage || getPage() instanceof MyAuthorizedApplicationPage));
 				}
 				if (user.getType() == ORDINARY && !user.isDisabled() && user.isEnforce2FA()) {
 					menuItems.add(newPageMenuItem(_T("Two-factor Authentication"), "shield",

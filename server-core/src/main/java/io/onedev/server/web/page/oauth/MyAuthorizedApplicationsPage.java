@@ -36,10 +36,6 @@ public class MyAuthorizedApplicationsPage extends MyPage {
 		super(parameters);
 	}
 
-	@Override protected boolean isPermitted() {
-		return super.isPermitted() && providerService.isEnabled();
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

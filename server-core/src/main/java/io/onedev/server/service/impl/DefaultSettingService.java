@@ -131,7 +131,7 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 
 	@Transactional
 	@Override
-	public void saveOAuthSigningKey(@Nullable String signingKey) {
+	public void saveOAuthSigningKey(String signingKey) {
 		saveSetting(Key.OAUTH_SIGNING_KEY, signingKey);
 	}
 	

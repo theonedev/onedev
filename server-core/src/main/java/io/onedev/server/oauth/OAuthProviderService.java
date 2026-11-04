@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.shiro.subject.Subject;
-import org.jspecify.annotations.Nullable;
 
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
@@ -28,14 +27,9 @@ import io.onedev.server.model.User;
  */
 public interface OAuthProviderService {
 
-	boolean isEnabled();
-
-	@Nullable
 	RSAKey getPublicSigningKey();
 
 	void generateSigningKey();
-
-	void deleteSigningKey();
 
 	OAuthApplication getApplication(Long id);
 

@@ -241,10 +241,9 @@ and automates browser registration and consent with Playwright.
 npm test -- tests/oauth-provider.spec.js
 ```
 
-Use a dedicated test server with its OAuth signing key enabled and the default
-Project Owner, Code Reader, and Code Writer roles. The signing key is created
-on initialization; if it has been deleted, generate one under **Administration
-→ Keys → OAuth Signing Key** before running the suite. The server's advertised
+Use a dedicated test server with the default Project Owner, Code Reader, and
+Code Writer roles. The OAuth signing key is created automatically on
+initialization and cannot be deleted. The server's advertised
 URL must be reachable by both Chromium and the Node test runner. HTTP is allowed
 for explicitly configured development servers. Git must be installed for the
 Git HTTP case.

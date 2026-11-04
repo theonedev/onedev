@@ -84,9 +84,9 @@ class OAuthProviderServiceTest {
 		when(settings.getOAuthSigningKey()).thenAnswer(it -> signingKey.get());
 		doAnswer(it -> { signingKey.set(it.getArgument(0)); return null; })
 				.when(settings).saveOAuthSigningKey(any());
-		var systemSetting = new Setting();
-		systemSetting.setKey(Setting.Key.SYSTEM);
-		when(settings.findSetting(Setting.Key.SYSTEM)).thenReturn(systemSetting);
+		var signingKeySetting = new Setting();
+		signingKeySetting.setKey(Setting.Key.OAUTH_SIGNING_KEY);
+		when(settings.findSetting(Setting.Key.OAUTH_SIGNING_KEY)).thenReturn(signingKeySetting);
 		inject("settingService", settings);
 		application = new OAuthApplication();
 		application.setId(1L);
@@ -153,25 +153,8 @@ class OAuthProviderServiceTest {
 	}
 
 	@Test
-	void missingSigningKeyDisablesProviderWithoutGeneratingOne() {
-		signingKey.set(null);
-		assertFalse(provider.isEnabled());
-		assertNull(provider.getPublicSigningKey());
-		assertThrows(io.onedev.commons.utils.ExplicitException.class, provider::getJwks);
-		assertThrows(io.onedev.commons.utils.ExplicitException.class, provider::getMetadata);
-		assertThrows(io.onedev.commons.utils.ExplicitException.class, () -> provider.saveApplication(application));
-		assertError("temporarily_unavailable", provider.exchange(code(verifier, REDIRECT)));
-		assertNull(provider.getUserInfo("token"));
-		verify(settings, never()).saveOAuthSigningKey(any());
-		verify(dao, never()).persist(any());
-		verify(accessTokens, never()).findByValue(any());
-	}
-
-	@Test
-	void generatingRegeneratingAndDeletingSigningKey() throws Exception {
-		signingKey.set(null);
+	void regeneratingSigningKeyRevokesGrantsAndPreservesApplications() throws Exception {
 		provider.generateSigningKey();
-		assertTrue(provider.isEnabled());
 		var first = RSAKey.parse(signingKey.get());
 		assertTrue(first.isPrivate());
 		assertFalse(provider.getPublicSigningKey().isPrivate());
@@ -180,20 +163,6 @@ class OAuthProviderServiceTest {
 		when(dao.query(org.mockito.ArgumentMatchers.<EntityCriteria<OAuthGrant>>any())).thenReturn(List.of(grant));
 		provider.generateSigningKey();
 		assertNotEquals(first.getKeyID(), provider.getPublicSigningKey().getKeyID());
-		verify(accessTokens).delete(token);
-		verify(dao).remove(grant);
-		verify(dao, never()).remove(application);
-		when(dao.query(org.mockito.ArgumentMatchers.<EntityCriteria<OAuthGrant>>any())).thenReturn(List.of());
-		provider.deleteSigningKey();
-		assertFalse(provider.isEnabled());
-		assertNull(provider.getPublicSigningKey());
-	}
-
-	@Test
-	void deletingSigningKeyRevokesGrantsAndPreservesApplications() {
-		when(dao.query(org.mockito.ArgumentMatchers.<EntityCriteria<OAuthGrant>>any())).thenReturn(List.of(grant));
-		provider.deleteSigningKey();
-		assertFalse(provider.isEnabled());
 		verify(accessTokens).delete(token);
 		verify(dao).remove(grant);
 		verify(dao, never()).remove(application);
