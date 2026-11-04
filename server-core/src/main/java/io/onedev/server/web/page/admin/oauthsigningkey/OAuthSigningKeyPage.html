@@ -1,16 +1,26 @@
 <wicket:extend>
 	<div class="card">
 		<div class="card-body">
-			<div class="alert alert-light alert-notice mb-4">
-				<wicket:t>This key signs OpenID Connect ID tokens. OneDev generates it automatically. Applications use the public key to verify ID token signatures.</wicket:t>
-			</div>
-			<dl>
-				<dt><wicket:t>Key ID</wicket:t></dt>
-				<dd wicket:id="keyID" class="text-break"></dd>
-				<dt class="mb-2"><wicket:t>Public Key</wicket:t> <a wicket:id="copyPublicKey" t:data-tippy-content="Copy public key"><wicket:svg href="copy" class="icon"/></a></dt>
-				<dd><pre wicket:id="publicKey" class="font-size-sm bg-light p-3 rounded text-wrap text-break"></pre></dd>
+			<div class="alert alert-notice alert-light mb-4"><wicket:t>OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.</wicket:t></div>
+			<dl class="row mb-4">
+				<dt class="col-sm-3"><wicket:t>Signing Algorithm</wicket:t></dt>
+				<dd class="col-sm-9">RSA / SHA-256 (RS256)</dd>
+				<dt class="col-sm-3"><wicket:t>Key Size</wicket:t></dt>
+				<dd class="col-sm-9"><span wicket:id="keySize"></span> <wicket:t>bits</wicket:t></dd>
+				<dt class="col-sm-3"><wicket:t>Public Key URL</wicket:t></dt>
+				<dd class="col-sm-9">
+					<a wicket:id="jwksUrl" class="text-break" target="_blank" rel="noopener noreferrer"></a>
+					<a wicket:id="copyJwksUrl" class="ml-1" t:data-tippy-content="Copy public key URL"><wicket:svg href="copy" class="icon"/></a>
+					<div class="text-muted mt-1"><wicket:t>Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.</wicket:t></div>
+				</dd>
 			</dl>
-			<a wicket:id="regenerate" class="btn btn-light-primary"><wicket:t>Regenerate</wicket:t></a>
+			<details class="mb-4">
+				<summary class="font-weight-bold"><wicket:t>Public Key JSON</wicket:t></summary>
+				<div class="pre-outer mt-3">
+					<pre class="font-size-sm bg-light p-3 rounded whitespace-pre-wrap text-break mb-0"><code wicket:id="publicKey"></code><div class="actions"><a wicket:id="copyPublicKey" t:aria-label="Copy public key"><svg wicket:id="copyPublicKeyIcon" class="icon"/></a></div></pre>
+				</div>
+			</details>
+			<a wicket:id="regenerate" class="btn btn-light-danger"><wicket:t>Regenerate</wicket:t></a>
 		</div>
 	</div>
 </wicket:extend>
