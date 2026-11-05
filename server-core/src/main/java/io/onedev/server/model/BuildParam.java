@@ -15,6 +15,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
 
 /**
@@ -76,6 +78,14 @@ public class BuildParam extends AbstractEntity {
 	@Nullable
 	public String getValue() {
 		return value;
+	}
+
+	/**
+	 * Mask using the persisted type so historical secrets stay protected even if the job changes.
+	 */
+	@Nullable
+	public String getMaskedValue() {
+		return ParamSpec.SECRET.equals(getType()) ? SecretInput.MASK : getValue();
 	}
 
 	public void setValue(@Nullable String value) {

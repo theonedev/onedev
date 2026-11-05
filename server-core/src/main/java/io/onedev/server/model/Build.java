@@ -883,15 +883,9 @@ public class Build extends ProjectBelonging
 	public Map<String, List<String>> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
-			for (BuildParam param: getParams()) {
-				List<String> values = paramMap.get(param.getName());
-				if (values == null) {
-					values = new ArrayList<>();
-					paramMap.put(param.getName(), values);
-				}
-				values.add(param.getValue());
-			}
-			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) { 
+			for (BuildParam param: getParams())
+                paramMap.computeIfAbsent(param.getName(), k -> new ArrayList<>()).add(param.getValue());
+			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				List<String> values = entry.getValue();
 				Collections.sort(values);
 				entry.setValue(values);
@@ -899,7 +893,7 @@ public class Build extends ProjectBelonging
 		}
 		return paramMap;
 	}
-	
+
 	public ParamCombination getParamCombination() {
 		if (paramCombination == null) {
 			if (getJob() != null)

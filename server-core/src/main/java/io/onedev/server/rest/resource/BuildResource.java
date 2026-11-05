@@ -2,7 +2,6 @@ package io.onedev.server.rest.resource;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,7 +22,6 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AuditService;
@@ -85,11 +83,8 @@ public class BuildResource {
 			throw new UnauthorizedException();
     	
     	List<BuildParam> params = SerializationUtils.clone(new ArrayList<>(build.getParams()));
-    	for (Iterator<BuildParam> it = params.iterator(); it.hasNext();) {
-    		BuildParam param = it.next();
-    		if (param.getType().equals(ParamSpec.SECRET))
-    			param.setValue(SecretInput.MASK);
-    	}
+		for (var param: params)
+			param.setValue(param.getMaskedValue());
     	return params;
     }
 	

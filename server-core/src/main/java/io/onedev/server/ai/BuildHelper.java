@@ -1,7 +1,6 @@
 package io.onedev.server.ai;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -63,7 +62,14 @@ public class BuildHelper {
 
     public static Map<String, Object> getDetail(@Nullable Project currentProject, Build build) {
         var data = getSummary(currentProject, build);
-        data.put("params", build.getParamMap());
+
+        Map<String, List<String>> paramMap = new HashMap<>();
+        for (var param: build.getParams())
+            paramMap.computeIfAbsent(param.getName(), it -> new ArrayList<>()).add(param.getMaskedValue());
+        for (var values: paramMap.values())
+            Collections.sort(values);
+
+        data.put("params", paramMap);
         data.put("labels", build.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
         data.put("link", getUrlService().urlFor(build, true));
         return data;
