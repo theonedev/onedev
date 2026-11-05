@@ -343,8 +343,8 @@ public class DefaultGitService implements GitService, Serializable {
 				RevTree revTree = revWalk.parseCommit(revId).getTree();
 				String currentPath = path;
 				while (TreeWalk.forPath(repository, currentPath, revTree) == null) {
-					if (path.contains("/")) {
-						currentPath = StringUtils.substringBeforeLast(path, "/");
+					if (currentPath.contains("/")) {
+						currentPath = StringUtils.substringBeforeLast(currentPath, "/");
 					} else {
 						currentPath = null;
 						break;

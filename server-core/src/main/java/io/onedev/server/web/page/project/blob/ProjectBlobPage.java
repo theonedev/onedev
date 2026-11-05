@@ -1507,7 +1507,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		}
 		String branch = state.blobIdent.revision;
 		
-		getProject().cacheObjectId(branch, commitId);
+		project.cacheObjectId(branch, commitId);
 		
 		if (target != null) {
 			if (state.urlAfterEdit != null) {
@@ -1522,7 +1522,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				BlobIdent newBlobIdent;
 				if (state.mode == Mode.DELETE) {
 					String parentPath = gitService.getClosestPath(
-							getProject(), commitId, StringUtils.substringBeforeLast(state.blobIdent.path, "/"));
+							project, commitId, StringUtils.substringBeforeLast(state.blobIdent.path, "/"));
 					newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
 				} else if (state.mode == Mode.ADD) {
 					newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
