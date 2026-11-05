@@ -496,13 +496,6 @@ body.markdown-editor-expanded {
 	color: var(--primary);
 }
 
-#reference-tooltip {
-	z-index: 1000;
-	font-size: 12px; 
-	padding: 1rem; 
-	box-shadow: 0px 10px 30px 0px rgba(82, 63, 105, 0.08);
-}
-
 .markdown-image-loading {
 	position: absolute;
 	left: 0;

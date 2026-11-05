@@ -11,12 +11,12 @@ import io.onedev.server.web.asset.caret.CaretResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
-import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import io.onedev.server.web.asset.textareacaretposition.TextareaCaretPositionResourceReference;
 import io.onedev.server.web.asset.textdiff.TextDiffResourceReference;
 import io.onedev.server.web.component.commit.status.CommitStatusCssResourceReference;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardResourceReference;
+import io.onedev.server.web.component.referencetooltip.ReferenceTooltipResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -37,7 +37,7 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new ReferenceTooltipResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CopyToClipboardResourceReference()));
 		
 		dependencies.add(CssHeaderItem.forReference(new CommitStatusCssResourceReference()));

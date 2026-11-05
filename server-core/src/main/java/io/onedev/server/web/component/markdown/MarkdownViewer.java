@@ -47,6 +47,8 @@ import io.onedev.server.web.asset.lozad.LozadResourceReference;
 import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.referencetooltip.ReferenceTooltipBehavior;
+import io.onedev.server.web.component.referencetooltip.ReferenceTooltipTranslations;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -225,18 +227,18 @@ public class MarkdownViewer extends GenericPanel<String> {
 						String title = build.getJobName();
 						if (build.getVersion() != null)
 							title += " : " + build.getVersion();
-						String script = String.format("onedev.server.markdown.renderBuildTooltip('%s', '%s', '%s');", 
+						String script = String.format("onedev.server.referenceTooltip.renderBuildTooltip('%s', '%s', '%s');",
 								JavaScriptEscape.escapeJavaScript(title), iconHref, iconCss);
 						target.appendJavaScript(script);
 					} else {
-						target.appendJavaScript("onedev.server.markdown.renderBuildTooltip();");
+						target.appendJavaScript("onedev.server.referenceTooltip.renderBuildTooltip();");
 					}
 					break;
 				case "user":
 					User user = userService.findByName(referenceId);
 					if (user != null) {
 						String avatarUrl = avatarService.getUserAvatarUrl(user.getId());
-						String script = String.format("onedev.server.markdown.renderUserTooltip('%s', '%s')", 
+						String script = String.format("onedev.server.referenceTooltip.renderUserTooltip('%s', '%s')",
 								JavaScriptEscape.escapeJavaScript(avatarUrl), 
 								JavaScriptEscape.escapeJavaScript(user.getDisplayName()));
 						target.appendJavaScript(script);
@@ -255,14 +257,14 @@ public class MarkdownViewer extends GenericPanel<String> {
 					if (commitProject != null)
 						commit = commitProject.getRevCommit(ObjectId.fromString(commitHash), false);
 					if (commit != null && SecurityUtils.canReadCode(commitProject)) {
-						String script = String.format("onedev.server.markdown.renderCommitTooltip('%s', '%s', '%s', '%s');",
+						String script = String.format("onedev.server.referenceTooltip.renderCommitTooltip('%s', '%s', '%s', '%s');",
 								JavaScriptEscape.escapeJavaScript(commit.getAuthorIdent().getName()), 
 								JavaScriptEscape.escapeJavaScript(DateUtils.formatAge(Date.from(commit.getCommitterIdent().getWhenAsInstant()))),
 								JavaScriptEscape.escapeJavaScript(DateUtils.formatDateTime(Date.from(commit.getCommitterIdent().getWhenAsInstant()))),
 								JavaScriptEscape.escapeJavaScript(commit.getFullMessage()));
 						target.appendJavaScript(script);
 					} else {
-						target.appendJavaScript("onedev.server.markdown.renderCommitTooltip();");
+						target.appendJavaScript("onedev.server.referenceTooltip.renderCommitTooltip();");
 					}
 					break;
 				case "workspace":
@@ -270,11 +272,11 @@ public class MarkdownViewer extends GenericPanel<String> {
 					var workspace = workspaceService.find(workspaceRef.getProject(), workspaceRef.getNumber());
 					if (workspace != null && SecurityUtils.canReadCode(workspace.getProject())) {
 						String title = workspace.getUser().getDisplayName() + " on " + workspace.getOnDescription() + " for " + workspace.getSpecName() + " (" + workspace.getStatus().name() + ")";
-						String script = String.format("onedev.server.markdown.renderWorkspaceTooltip('%s');",
+						String script = String.format("onedev.server.referenceTooltip.renderWorkspaceTooltip('%s');",
 								JavaScriptEscape.escapeJavaScript(title));
 						target.appendJavaScript(script);
 					} else {
-						target.appendJavaScript("onedev.server.markdown.renderWorkspaceTooltip();");
+						target.appendJavaScript("onedev.server.referenceTooltip.renderWorkspaceTooltip();");
 					}
 					break;
 				default:
@@ -334,11 +336,11 @@ public class MarkdownViewer extends GenericPanel<String> {
 		CharSequence suggestionCallback = suggestionBehavior.getCallbackFunction(
 				explicit(SUGGESTION_ACTION), explicit(SUGGESTION_CONTENT));
 		
-		String script = String.format("onedev.server.markdown.onViewerDomReady('%s', %s, '%s', %s, %s, %s);", 
+		String script = String.format("onedev.server.markdown.onViewerDomReady('%s', %s, '%s', %s, %s, %s, %s);",
 				getMarkupId(), 
 				contentVersionSupport!=null?taskCallback:"undefined", 
 				SourcePositionTrackExtension.DATA_START_ATTRIBUTE, 
-				referenceCallback, suggestionCallback, JavascriptTranslations.get());
+				referenceCallback, suggestionCallback, JavascriptTranslations.get(), ReferenceTooltipTranslations.get());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

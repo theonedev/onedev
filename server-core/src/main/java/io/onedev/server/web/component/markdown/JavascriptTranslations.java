@@ -32,11 +32,6 @@ public class JavascriptTranslations {
               map.put("remove-from-batch", _T("Remove from batch"));
               map.put("add-to-batch", _T("Add to batch to commit with other suggestions later"));
               map.put("commit-suggestion", _T("Commit suggestion"));
-              map.put("issue-not-exist-or-access-denied", _T("Issue not exist or access denied"));
-              map.put("pull-request-not-exist-or-access-denied", _T("Pull request not exist or access denied"));
-              map.put("build-not-exist-or-access-denied", _T("Build not exist or access denied"));
-              map.put("commit-not-exist-or-access-denied", _T("Commit not exist or access denied"));
-              map.put("workspace-not-exist-or-access-denied", _T("Workspace not exist or access denied"));
               map.put("enter-description-here", _T("Enter description here"));
               map.put("discard-unsaved-change", _T("Discard unsaved change and revert to original content"));
 

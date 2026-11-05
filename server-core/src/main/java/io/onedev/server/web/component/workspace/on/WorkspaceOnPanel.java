@@ -10,7 +10,7 @@ import io.onedev.server.model.Workspace;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.commit.CommitLink;
-import io.onedev.server.web.component.markdown.ReferenceTooltipBehavior;
+import io.onedev.server.web.component.referencetooltip.ReferenceTooltipBehavior;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 

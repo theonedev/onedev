@@ -1418,7 +1418,7 @@ onedev.server.markdown = {
 		$(window).resize();
 	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback, 
-			suggestionCallback, translations) {
+			suggestionCallback, translations, referenceTooltipTranslations) {
 		onedev.server.markdown.translations = translations;
 		var $container = $("#" + containerId);
 		$container.data("suggestionCallback", suggestionCallback);
@@ -1439,7 +1439,7 @@ onedev.server.markdown = {
 			});	
 		}
 		
-		onedev.server.markdown.initReferenceTooltips($container.find(".reference"), function() {
+		onedev.server.referenceTooltip.init($container.find(".reference"), function() {
 			var $reference = $(this);
 			var referenceType;
 			var referenceId = $reference.data("reference");
@@ -1458,7 +1458,7 @@ onedev.server.markdown = {
 			}
 			if (referenceType)
 				referenceCallback(referenceType, referenceId);
-		}, translations);
+		}, referenceTooltipTranslations);
 		
 		onedev.server.markdown.initRendered(containerId);
 		
@@ -1471,101 +1471,6 @@ onedev.server.markdown = {
 		});
 		
 		lozad("#" + containerId + " .markdown-rendered img").observe();
-	},
-	initReferenceTooltips: function($references, callback, translations) {
-		onedev.server.markdown.translations = translations;
-		var alignment = {targetX: 0, targetY: 0, x: 0, y: 100};
-		$references.hover(function() {
-			var $tooltip = $("<div id='reference-tooltip' class='bg-white border rounded'>" + translations["loading"] + "</div>");
-			$tooltip.data("trigger", this);
-			$tooltip.data("alignment", alignment);
-			$("body").append($tooltip);
-			callback.call(this);
-			return $tooltip;
-		}, alignment);
-	},
-	renderIssueTooltip: function(title, state, stateFontColor, stateBackgroundColor) {
-		var $tooltip = $("#reference-tooltip");
-		if (title) {
-			$tooltip.empty().append("" +
-					"<div class='d-flex issue align-items-center'>" +
-					"  <span class='state badge mr-3'></span> <span class='title font-weight-bold'></span>" +
-					"</div>");
-			$tooltip.find(".state").css({
-				"color": stateFontColor,
-				"background": stateBackgroundColor
-			}).text(state);
-			$tooltip.find(".title").text(title);
-		} else {
-			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["issue-not-exist-or-access-denied"] + "</i>");			
-		}
-		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
-	},
-	renderPullRequestTooltip: function(title, status, statusCss) {
-		var $tooltip = $("#reference-tooltip");
-		if (title) {
-			$tooltip.empty().append("" +
-					"<div class='d-flex align-items-center'>" +
-					"  <span class='badge status mr-3'></span> <span class='title font-weight-bold'></span>" +
-					"</div>");
-			$tooltip.find(".status").addClass(statusCss).text(status);
-			$tooltip.find(".title").text(title);
-		} else {
-			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["pull-request-not-exist-or-access-denied"] + "</i>");			
-		}
-		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
-	},
-	renderBuildTooltip: function(title, iconHref, iconCss) {
-		var $tooltip = $("#reference-tooltip");
-		if (title) {
-			$tooltip.empty().append("" +
-					"<div class='d-flex align-items-center'>" +
-					"  <svg class='mr-2 " + iconCss + "'><use xlink:href='" + iconHref + "'/></svg> <span class='title font-weight-bold'></span>" +
-					"</div>");
-			$tooltip.find(".title").text(title);
-		} else {
-			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["build-not-exist-or-access-denied"] + "</i>");			
-		}
-		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
-	},
-	renderWorkspaceTooltip: function(title) {
-		var $tooltip = $("#reference-tooltip");
-		if (title) {
-			$tooltip.empty().append("<span class='title'></span>");
-			$tooltip.find(".title").text(title);
-		} else {
-			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["workspace-not-exist-or-access-denied"] + "</i>");
-		}
-		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
-	},
-	renderUserTooltip: function(avatarUrl, name) {
-		var $tooltip = $("#reference-tooltip");
-		$tooltip.empty().append("" +
-				"<div class='d-flex align-items-center'>" +
-				"  <img class='avatar mr-2'></img> <div class='name font-weight-bold'></div>" +
-				"</div>");
-		$tooltip.find(".avatar").attr("src", avatarUrl);
-		$tooltip.find(".name").text(name);
-		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
-	},
-	renderCommitTooltip: function(author, date, dateTitle, commitMessage) {
-		var $tooltip = $("#reference-tooltip");
-		if (commitMessage) {
-			$tooltip.empty().append("" +
-					"  <div class='font-weight-bolder mb-2'><span class='author'></span> <span class='date'></span></div>" +
-					"  <pre class='body mb-0'></pre>");
-			$tooltip.find(".author").text(author);
-			var $date = $tooltip.find(".date");
-			$date.text(date).attr("data-tippy-content", dateTitle);
-			tippy($date[0], {
-				delay: [500, 0],
-				placement: "auto"
-			});
-			$tooltip.find(".body").text(commitMessage);
-		} else {
-			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["commit-not-exist-or-access-denied"] + "</i>");			
-		}
-		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
 	onEmojisLoaded: function(containerId, emojis) {
 		var $container = $("#" + containerId);

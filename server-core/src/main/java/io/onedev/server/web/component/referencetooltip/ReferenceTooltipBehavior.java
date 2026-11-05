@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.markdown;
+package io.onedev.server.web.component.referencetooltip;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -32,19 +32,19 @@ public class ReferenceTooltipBehavior extends AbstractPostAjaxBehavior {
 		renderTooltip(target, reference);
 	}
 
-	static void renderTooltip(AjaxRequestTarget target, EntityReference reference) {
+	public static void renderTooltip(AjaxRequestTarget target, EntityReference reference) {
 		if (reference instanceof IssueReference) {
 			var issue = OneDev.getInstance(IssueService.class).find(reference.getProject(), reference.getNumber());
 			if (issue != null && SecurityUtils.canAccessIssue(issue)) {
 				String color = OneDev.getInstance(SettingService.class).getIssueSetting()
 						.getStateSpec(issue.getState()).getColor();
-				String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s');",
+				String script = String.format("onedev.server.referenceTooltip.renderIssueTooltip('%s', '%s', '%s', '%s');",
 						Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(issue.getTitle())),
 						JavaScriptEscape.escapeJavaScript(issue.getState()),
 						ColorUtils.isLight(color) ? "black" : "white", color);
 				target.appendJavaScript(script);
 			} else {
-				target.appendJavaScript("onedev.server.markdown.renderIssueTooltip();");
+				target.appendJavaScript("onedev.server.referenceTooltip.renderIssueTooltip();");
 			}
 		} else if (reference instanceof PullRequestReference) {
 			var request = OneDev.getInstance(PullRequestService.class).find(reference.getProject(), reference.getNumber());
@@ -61,12 +61,12 @@ public class ReferenceTooltipBehavior extends AbstractPostAjaxBehavior {
 				default:
 					statusCss = "badge-danger";
 				}
-				String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s');",
+				String script = String.format("onedev.server.referenceTooltip.renderPullRequestTooltip('%s', '%s', '%s');",
 						Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(request.getTitle())),
 						status, statusCss);
 				target.appendJavaScript(script);
 			} else {
-				target.appendJavaScript("onedev.server.markdown.renderPullRequestTooltip();");
+				target.appendJavaScript("onedev.server.referenceTooltip.renderPullRequestTooltip();");
 			}
 		} else {
 			throw new IllegalArgumentException("Unsupported tooltip reference: " + reference.getType());
@@ -76,9 +76,9 @@ public class ReferenceTooltipBehavior extends AbstractPostAjaxBehavior {
 	@Override
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
-		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
-		String script = String.format("onedev.server.markdown.initReferenceTooltips($('#%s'), %s, %s);",
-				component.getMarkupId(true), getCallbackFunction(), JavascriptTranslations.get());
+		response.render(JavaScriptHeaderItem.forReference(new ReferenceTooltipResourceReference()));
+		String script = String.format("onedev.server.referenceTooltip.init($('#%s'), %s, %s);",
+				component.getMarkupId(true), getCallbackFunction(), ReferenceTooltipTranslations.get());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
