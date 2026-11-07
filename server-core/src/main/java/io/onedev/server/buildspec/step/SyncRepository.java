@@ -18,6 +18,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Multiline;
@@ -34,6 +35,8 @@ public abstract class SyncRepository extends ServerSideStep {
 	private static final PercentEscaper CREDENTIAL_ESCAPER = new PercentEscaper("-._~", false);
 
 	private String remoteUrl;
+
+	private boolean withCredential;
 	
 	private String userName;
 	
@@ -62,8 +65,18 @@ public abstract class SyncRepository extends ServerSideStep {
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
+
+	@Editable(order=250, description="Whether or not to use credentials to access remote repository")
+	public boolean isWithCredential() {
+		return withCredential;
+	}
+
+	public void setWithCredential(boolean withCredential) {
+		this.withCredential = withCredential;
+	}
 	
-	@Editable(order=300, description="Optionally specify user name to access remote repository")
+	@Editable(order=300, description="Specify user name to access remote repository")
+	@DependsOn(property="withCredential")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getUserName() {
@@ -76,6 +89,8 @@ public abstract class SyncRepository extends ServerSideStep {
 
 	@Editable(order=400, name="Password or Access Token for Remote Repository", 
 			description="Specify a <a href='${docsite}/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as password or access token to access remote repository")
+	@DependsOn(property="withCredential")
+	@NotEmpty
 	@ChoiceProvider("getSecretChoices")
 	public String getPasswordSecret() {
 		return passwordSecret;
@@ -124,32 +139,20 @@ public abstract class SyncRepository extends ServerSideStep {
 	}
 	
 	public String getRemoteUrlWithCredential(Build build) {
-		String encodedUserName = getUserName() != null ? CREDENTIAL_ESCAPER.escape(getUserName()) : null;
-		String encodedPassword = null;
-		if (getPasswordSecret() != null) {
-			String password = build.getJobAuthorizationContext().getSecretValue(getPasswordSecret());
-			encodedPassword = CREDENTIAL_ESCAPER.escape(password);
-		}
-
 		String protocol = StringUtils.substringBefore(getRemoteUrl(), "//");
 
 		// Fix OD-2221 and OD-2224
 		Preconditions.checkState(protocol.equals("http:") || protocol.equals("https:"));
 
-		String hostAndPath = StringUtils.substringAfter(getRemoteUrl(), "//");
-		
-		String remoteUrlWithCredentials = protocol + "//";
-		
-		if (encodedUserName != null && encodedPassword != null)
-			remoteUrlWithCredentials += encodedUserName + ":" + encodedPassword + "@" + hostAndPath;
-		else if (encodedUserName != null)
-			remoteUrlWithCredentials += encodedUserName + "@" + hostAndPath;
-		else if (encodedPassword != null)
-			remoteUrlWithCredentials += encodedPassword + "@" + hostAndPath;
-		else
-			remoteUrlWithCredentials += hostAndPath;
-		
-		return remoteUrlWithCredentials;
+		if (isWithCredential()) {
+			String encodedUserName = CREDENTIAL_ESCAPER.escape(getUserName());
+			String password = build.getJobAuthorizationContext().getSecretValue(getPasswordSecret());
+			String encodedPassword = CREDENTIAL_ESCAPER.escape(password);
+			String hostAndPath = StringUtils.substringAfter(getRemoteUrl(), "//");
+			return protocol + "//" + encodedUserName + ":" + encodedPassword + "@" + hostAndPath;
+		} else {
+			return getRemoteUrl();
+		}
 	}
 	
 	/**

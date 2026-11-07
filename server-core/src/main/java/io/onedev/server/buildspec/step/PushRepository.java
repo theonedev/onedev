@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
+import jakarta.validation.constraints.NotEmpty;
+
 import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -16,7 +18,9 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
@@ -29,6 +33,12 @@ public class PushRepository extends SyncRepository {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+
+	@Editable
+	@Override
+	public boolean isWithCredential() {
+		return true;
+	}
 
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {

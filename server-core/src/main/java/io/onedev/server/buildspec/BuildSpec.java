@@ -2958,4 +2958,27 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	private void migrate58(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNodeItem : stepsNode.getValue()) {
+				var stepNode = (MappingNode) stepNodeItem;
+				if ("PullRepository".equals(getStepType(stepNode))
+						&& getScalarProperty(stepNode, "withCredential") == null) {
+					var userNameNode = getScalarProperty(stepNode, "userName");
+					var passwordSecretNode = getScalarProperty(stepNode, "passwordSecret");
+					var withCredential = userNameNode != null && !userNameNode.getTag().equals(Tag.NULL) && !userNameNode.getValue().isEmpty()
+							|| passwordSecretNode != null && !passwordSecretNode.getTag().equals(Tag.NULL) && !passwordSecretNode.getValue().isEmpty();
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "withCredential"),
+							new ScalarNode(Tag.BOOL, String.valueOf(withCredential))));
+				} else if ("PushRepository".equals(getStepType(stepNode))) {
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "withCredential"),
+							new ScalarNode(Tag.BOOL, String.valueOf(true))));
+				}
+			}
+		});
+	}
+
 }
