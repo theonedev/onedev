@@ -4104,7 +4104,7 @@
 
   function restoreSelection(snapshot) {
     if (!snapshot || !snapshot.activeElt || snapshot.activeElt == activeElt(rootNode(snapshot.activeElt))) { return }
-    snapshot.activeElt.focus();
+    snapshot.activeElt.focus({preventScroll: true});
     if (!/^(INPUT|TEXTAREA)$/.test(snapshot.activeElt.nodeName) &&
         snapshot.anchorNode && contains(document.body, snapshot.anchorNode) && contains(document.body, snapshot.focusNode)) {
       var doc = snapshot.activeElt.ownerDocument;

@@ -32,20 +32,20 @@
 		<div wicket:id="body" class="body">
 			<div wicket:id="feedback"></div>
 			<div wicket:id="tooManyFiles" class="alert alert-notice alert-light-warning"></div>
-			<div class="detail d-flex align-items-stretch">
-				<div wicket:id="comment" class="comment need-width border border-right-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky mr-3">
+			<div class="comment-home">
+				<div wicket:id="comment" class="comment code-comment-thread border rounded overflow-hidden">
 					<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
 						<div wicket:id="head" class="head d-flex align-items-center px-3 py-2 border-bottom">
 							<h6 class="mb-0 mr-2"><wicket:t>Code Comment</wicket:t></h6>
 							<span wicket:id="outdated" class="mr-2 badge badge-sm badge-warning"><wicket:t>outdated</wicket:t></span>
 							<span wicket:id="status" class="mr-2"></span>
-							<a wicket:id="locate" class="btn btn-xs btn-icon btn-hover-primary btn-light locate ml-2 mr-3" t:data-tippy-content="Show commented code snippet"><wicket:svg href="hand" class="icon"></wicket:svg></a>
 							<a wicket:id="close" class="ml-auto" t:data-tippy-content="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
 						</div>
 						<div wicket:id="body" class="body overflow-auto flex-grow-1 p-3"></div>
 					</div>
-					<div class="ui-resizable-handle ui-resizable-e flex-shrink-0"></div>
 				</div>
+			</div>
+			<div wicket:id="detail" class="detail d-flex align-items-stretch">
 				<ul class="diffs list-unstyled flex-grow-1 mb-0"><li wicket:id="diffs" class="diff mb-4"><div wicket:id="diff"></div></li></ul>
 				<div wicket:id="noDiffs" class="alert alert-notice alert-light-warning flex-grow-1 mb-0"><wicket:t>No diffs</wicket:t></div>
 				<div wicket:id="navigation" class="navigation need-width border border-left-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky ml-3">
@@ -56,7 +56,7 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="newCommentFrag">
-		<form wicket:id="form" class="new-comment leave-confirm">
+		<form wicket:id="form" class="new-comment code-comment-editor no-autofocus leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
 			<div class="form-group">
 				<div wicket:id="content"></div>

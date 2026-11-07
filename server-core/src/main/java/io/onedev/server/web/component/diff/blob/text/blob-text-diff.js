@@ -1,5 +1,39 @@
 onedev.server.blobTextDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
+	getTableBody: function($container) {
+		return $container.children("table.text-diff").children("tbody");
+	},
+	getCodeRows: function($container) {
+		return this.getTableBody($container).children("tr.code");
+	},
+	getSideCellSelector: function(side, line) {
+		// Both cells of an unchanged split row carry both line numbers.
+		const oppositeColumn = side === "old" ? "right" : "left";
+		const lineAttribute = line === undefined ? `data-${side}` : `data-${side}='${line}'`;
+		return `td.content:not(.${oppositeColumn})[${lineAttribute}]`;
+	},
+	getLineCell: function($container, leftSide, line) {
+		if (line == null)
+			return $();
+		const cellSelector = this.getSideCellSelector(leftSide ? "old" : "new", line);
+		return this.getTableBody($container).find(`>tr.code>${cellSelector}`).first();
+	},
+	getCodeHunks: function($container) {
+		const hunks = [];
+		let rows = [];
+		for (const row of this.getTableBody($container).children("tr.code, tr.expander")) {
+			if (row.classList.contains("expander")) {
+				if (rows.length)
+					hunks.push(rows);
+				rows = [];
+			} else {
+				rows.push(row);
+			}
+		}
+		if (rows.length)
+			hunks.push(rows);
+		return hunks;
+	},
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, oldPath, newPath, 
 						 callback, blameMessageCallback, markRange, openComment, 
 						 annotationInfo, commentContainerId, translations, symbolContext, docsite, canComment) {
@@ -30,27 +64,24 @@ onedev.server.blobTextDiff = {
 				symbolTooltip.onMouseOverSymbol(revision, this);
 		});
 		$container.data("onMouseOverContent", function() {
-			if (!onedev.server.mouseState.pressed) {
-				if ($(this).hasClass("left")) {
-					$container.find("td.content.right").addClass("noselect");
-					$container.find("td.content.left").removeClass("noselect");
-				} else if ($(this).hasClass("right")) {
-					$container.find("td.content.left").addClass("noselect");
-					$container.find("td.content.right").removeClass("noselect");
-				}
-			}
+			if (onedev.server.mouseState.pressed || !$(this).is(".left, .right"))
+				return;
+			const $rows = onedev.server.blobTextDiff.getCodeRows($container);
+			const leftSide = this.classList.contains("left");
+			$rows.children("td.content.right").toggleClass("noselect", leftSide);
+			$rows.children("td.content.left").toggleClass("noselect", !leftSide);
 		});
-		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
-		$container.find("td.content").click(function() {
-			$(".text-diff td.content").removeClass("active");
+		const $codeRows = this.getCodeRows($container);
+		$codeRows.children("td.content").mouseover($container.data("onMouseOverContent")).click(function() {
+			$(".blob-text-diff>table.text-diff>tbody>tr.code>td.content.active").removeClass("active");
 			$(this).addClass("active");
 			callback("setActive");
 		});
 
-		onedev.server.blobTextDiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
+		this.initBlameTooltip(containerId, $codeRows.children("td.blame").children("a.hash"));
 		
 		$container.selectionPopover("init", function(e) {
-	    	if ($(e.target).closest(".selection-popover").length != 0) {
+			if ($(e.target).closest(".selection-popover, .inline-comment-row").length != 0) {
 	    		return;
 			}
 			
@@ -65,6 +96,8 @@ onedev.server.blobTextDiff = {
 
     		var $start = $(firstRange.startContainer);
     		var $end = $(lastRange.endContainer);
+			if ($start.closest(".inline-comment-row").length || $end.closest(".inline-comment-row").length)
+				return "close";
 
     		/* 
     		 * offset represents offset within $start or $end node, for instance for below selection
@@ -109,12 +142,13 @@ onedev.server.blobTextDiff = {
 			function getTd($tr) {
 				var $td = $startTd.length != 0? $startTd: $endTd;
 				if ($td.hasClass("left"))
-					return $tr.find("td.content.left");
+					return $tr.children("td.content.left");
 				else if ($td.hasClass("right"))
-					return $tr.find("td.content.right");
+					return $tr.children("td.content.right");
 				else
-					return $tr.find("td.content");
+					return $tr.children("td.content");
 			}
+			const diffRows = "tr.code, tr.expander";
 
 			/*
 			 * sometimes the selection returns $start and $end as td instead of 
@@ -159,14 +193,14 @@ onedev.server.blobTextDiff = {
 					$td = getTd($start);
 					startOffset = startOffset<=$td.index()? 0: $td.contents().length;
 				} else if ($start.is("tr.expander") || $start.closest("tr.expander").length != 0) { // this may happen if we drag mouse over to expander line 
-					var $tr = $start.is("tr.expander")? $start.next(): $start.closest("tr.expander").next();
+					var $tr = $start.closest("tr.expander").nextAll(diffRows).first().filter("tr.code");
 					if ($tr.length == 0) {
 			    		return "close";
 					}
 					$td = getTd($tr);
 					startOffset = 0;
 				} else {
-					var $tr = $startDiff.find("tr.code").first();
+					var $tr = $startDiff.children("tbody").children("tr.code").first();
 					if ($tr.length == 0) {
 			    		return "close";
 					}
@@ -183,8 +217,9 @@ onedev.server.blobTextDiff = {
 			$startTd = $start.parent();
 			var $lastContent = $startTd.contents().last();
 			var noneSelected = $start.is($lastContent) && startOffset >= $lastContent.text().length;
-			if (noneSelected && $startTd.parent().next().is("tr.expander")) {
-				var $tr = $startTd.parent().next().next();
+			const $nextRow = $startTd.parent().nextAll(diffRows).first();
+			if (noneSelected && $nextRow.is("tr.expander")) {
+				var $tr = $nextRow.nextAll(diffRows).first().filter("tr.code");
 				if ($tr.length == 0) {
 		    		return "close";
 				}
@@ -204,14 +239,14 @@ onedev.server.blobTextDiff = {
 					$td = getTd($end);
 					endOffset = endOffset>$td.index()? $td.contents().length: 0;
 				} else if ($end.is("tr.expander") || $end.closest("tr.expander").length != 0) {
-					var $tr = $end.is("tr.expander")? $end.prev(): $end.closest("tr.expander").prev();
+					var $tr = $end.closest("tr.expander").prevAll(diffRows).first().filter("tr.code");
 					if ($tr.length == 0) {
 			    		return "close";
 					}
 					$td = getTd($tr);
 					endOffset = $td.contents().length;
 				} else {
-					var $tr = $endDiff.find("tr.code").last();
+					var $tr = $endDiff.children("tbody").children("tr.code").last();
 					if ($tr.length == 0) {
 			    		return "close";
 					}
@@ -228,8 +263,9 @@ onedev.server.blobTextDiff = {
 			$endTd = $end.parent();
 			var $firstContent = $endTd.contents().first();
 			var noneSelected = $end.is($firstContent) && endOffset == 0;
-			if (noneSelected && $endTd.parent().prev().is("tr.expander")) {
-				var $tr = $endTd.parent().prev().prev();
+			const $previousRow = $endTd.parent().prevAll(diffRows).first();
+			if (noneSelected && $previousRow.is("tr.expander")) {
+				var $tr = $previousRow.prevAll(diffRows).first().filter("tr.code");
 				if ($tr.length == 0) {
 		    		return "close";
 				}
@@ -258,10 +294,7 @@ onedev.server.blobTextDiff = {
 				var array = $td.contents().toArray();
 				var index = array.indexOf($content[0]);
 				if (index == array.length-1) {
-					var $nextTr = $td.parent().next();
-					if ($nextTr.hasClass("expander")) {
-						$nextTr = $nextTr.next();
-					}
+					var $nextTr = $td.parent().nextAll("tr.code").first();
 					if ($nextTr.length == 0)
 						return undefined;
 					return getTd($nextTr).contents().first();
@@ -275,10 +308,7 @@ onedev.server.blobTextDiff = {
 				var array = $td.contents().toArray();
 				var index = array.indexOf($content[0]);
 				if (index == 0) {
-					var $prevTr = $td.parent().prev();
-					if ($prevTr.hasClass("expander")) {
-						$prevTr = $prevTr.next();
-					}
+					var $prevTr = $td.parent().prevAll("tr.code").first();
 					if ($prevTr.length == 0)
 						return undefined;
 					return getTd($prevTr).contents().last();
@@ -486,7 +516,7 @@ onedev.server.blobTextDiff = {
 	},
 	onLoad: function(containerId, markRange) {
 		var $container = $("#" + containerId);
-		if (markRange && onedev.server.viewState.getFromHistory() === undefined)
+		if (markRange && !$container.data("openComment") && onedev.server.canUseCustomScrollOnLoad())
 			onedev.server.blobTextDiff.scrollTo($container, markRange);
 		
 		var $scrollParent = $container.scrollParent();
@@ -503,54 +533,27 @@ onedev.server.blobTextDiff = {
 		onedev.server.diffSymbolContext.update($container);
 	},
 	highlightSyntax($container) {
-		var oldBlobPath = $container.data("oldPath");
-		var newBlobPath = $container.data("newPath");
-		
-		$container.find("tbody, tr.expander").each(function() {
-			var $this = $(this);
-			var $firstCodeTr;
-			if ($this.is("tbody")) {
-				if ($this.children().first().is(".code, .diff-symbol-hunk"))
-					$firstCodeTr = $this.children(".code").first();
-				else
-					return;
-			} else if ($this.next().length != 0){
-				$firstCodeTr = $this.nextAll(".code").first();
-			} else {
-				return;
-			}
-			var $lastCodeTr;
-			var $nextExpanderTr = $firstCodeTr.nextAll(".expander").first();
-			if ($nextExpanderTr.length != 0)
-				$lastCodeTr = $nextExpanderTr.prev();
-			else
-				$lastCodeTr = $container.find("tbody>tr:last-child");
+		const oldBlobPath = $container.data("oldPath");
+		const newBlobPath = $container.data("newPath");
+		const textDiff = onedev.server.textDiff;
+		for (const hunk of this.getCodeHunks($container)) {
+			const $rows = $(hunk);
+			if (!$rows.not(".syntaxHighlighted").length)
+				continue;
+			const $scrollParent = $container.scrollParent();
+			const top = $scrollParent.offset().top;
+			const $lastRow = $rows.last();
+			if ($rows.first().offset().top > top + $scrollParent.height()
+					|| $lastRow.offset().top + $lastRow.outerHeight() < top)
+				continue;
 
-			var $codeTrs = $firstCodeTr.nextUntil($lastCodeTr).add($firstCodeTr).add($lastCodeTr).filter(".code");
-			if ($codeTrs.not(".syntaxHighlighted").length == 0)
-				return;
-			
-			var $scrollParent = $container.scrollParent();
-			if ($firstCodeTr.offset().top - $scrollParent.offset().top > $scrollParent.height()
-					|| $lastCodeTr.offset().top + $lastCodeTr.outerHeight() - $scrollParent.offset().top < 0) {
-				return;	
-			}
-
-			// Determine if this is split view (side-by-side) or unified view
-			var isSplitView = $codeTrs.first().children(".content").length == 2;
-			
-			if (isSplitView) {
-				onedev.server.textDiff.highlightSyntaxForSplitDiff($codeTrs, oldBlobPath, newBlobPath, function() {
-					$codeTrs.addClass("syntaxHighlighted");
-					$codeTrs.find(onedev.server.blobTextDiff.symbolClasses).mouseover($container.data("symbolHover"));
-				});
-			} else {
-				onedev.server.textDiff.highlightSyntaxForUnifiedDiff($codeTrs, oldBlobPath, newBlobPath, function() {
-					$codeTrs.addClass("syntaxHighlighted");
-					$codeTrs.find(onedev.server.blobTextDiff.symbolClasses).mouseover($container.data("symbolHover"));
-				});
-			}
-		});		
+			const highlight = $rows.first().children("td.content").length === 2
+				? textDiff.highlightSyntaxForSplitDiff : textDiff.highlightSyntaxForUnifiedDiff;
+			highlight.call(textDiff, $rows, oldBlobPath, newBlobPath, () => {
+				$rows.addClass("syntaxHighlighted");
+				$rows.find(this.symbolClasses).mouseover($container.data("symbolHover"));
+			});
+		}
 	},
 	initBlameTooltip: function(containerId, $hashLink) {
 		var $container = $("#" + containerId);
@@ -629,8 +632,9 @@ onedev.server.blobTextDiff = {
 	},
 	expand: function(containerId, blockIndex, expandedHtml) {
 		var $container = $("#" + containerId);
-		$container.find("tr.diff-symbol-hunk").remove();
-		var $expanderTr = $container.find(".expander" + blockIndex);
+		const $tbody = this.getTableBody($container);
+		$tbody.children("tr.diff-symbol-hunk").remove();
+		var $expanderTr = $tbody.children("tr.expander" + blockIndex);
 		var $prevTr = $expanderTr.prev();
 		var $nextTr = $expanderTr.next();
 		$expanderTr.replaceWith(expandedHtml); 
@@ -642,7 +646,8 @@ onedev.server.blobTextDiff = {
 		} else {
 			$expandedTrs = $nextTr.prevAll();
 		}
-		$expandedTrs.find("td.content").mouseover($container.data("onMouseOverContent"));
+		$expandedTrs = $expandedTrs.filter("tr.code");
+		$expandedTrs.children("td.content").mouseover($container.data("onMouseOverContent"));
 		var $firstExpandedTr = $expandedTrs.first();
 		
 		function processBlames(index) {
@@ -687,107 +692,62 @@ onedev.server.blobTextDiff = {
 		onedev.server.diffSymbolContext.refresh($container);
 		onedev.server.blobTextDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
 		onedev.server.blobTextDiff.highlightSyntax($container);
-		$container.find("td.expander a").each(function() {
+		$tbody.children("tr.expander").children("td.expander").find("a").each(function() {
 			tippy(this, {
 				delay: [500, 0],
 				placement: 'auto'
 			});
 		});
 	},
-	getMarkInfo: function($container, markRange) {
-		var oldOrNew = markRange.leftSide?"old":"new";
-		var startCursor = [markRange.fromRow+1, markRange.fromColumn];
-		var endCursor = [markRange.toRow+1, markRange.toColumn];
-		var $startTd = $container.find("td.content[data-" + oldOrNew + "='" + (startCursor[0]-1) + "']");
-		var $endTd = $container.find("td.content[data-" + oldOrNew + "='" + (endCursor[0]-1) + "']");
-		if ($startTd.length == 0) { 
-			$startTd = undefined;
-		} else if ($startTd.length == 2) {
-			if (oldOrNew == "old") {
-				$startTd = $startTd.first();
-			} else {
-				$startTd = $startTd.last();
-			}
-		}
-		if ($endTd.length == 0) {
-			$endTd = undefined;
-		} else if ($endTd.length == 2) {
-			if (oldOrNew == "old") {
-				$endTd = $endTd.first();
-			} else {
-				$endTd = $endTd.last();
-			}
-		}
-		return {
-			startTd: $startTd,
-			startCursor: startCursor,
-			endTd: $endTd,
-			endCursor: endCursor,
-			oldOrNew: oldOrNew
-		};
+	getMarkCells: function($container, {leftSide, fromRow, toRow}) {
+		return [this.getLineCell($container, leftSide, fromRow), this.getLineCell($container, leftSide, toRow)];
 	},
 	scrollTo: function($container, markRange) {
-		var markInfo = onedev.server.blobTextDiff.getMarkInfo($container, markRange);
-		var $startTd = markInfo.startTd;
-		var $endTd = markInfo.endTd;
-		if ($startTd && $endTd) {
+		const [$startTd, $endTd] = this.getMarkCells($container, markRange);
+		if ($startTd.length && $endTd.length) {
 			var $scrollParent = $startTd.scrollParent();
 			var marginTop = $startTd.closest(".text-diff").parent().prev().height() + 120;
 			$scrollParent.scrollTop($startTd.offset().top - $scrollParent.offset().top + $scrollParent.scrollTop()-marginTop);
 		}
 	},
 	scrollIntoView: function($container, markRange) {
-		var markInfo = onedev.server.blobTextDiff.getMarkInfo($container, markRange);
-		var $startTd = markInfo.startTd;
-		var $endTd = markInfo.endTd;
-		if ($startTd && $endTd) 
+		const [$startTd, $endTd] = this.getMarkCells($container, markRange);
+		if ($startTd.length && $endTd.length)
 			$startTd[0].scrollIntoViewIfNeeded();
 	},
 	mark: function($container, markRangeOrMarkRanges) {
-		onedev.server.blobTextDiff.clearMark($container);
+		this.clearMark($container);
+		const markRanges = Array.isArray(markRangeOrMarkRanges) ? markRangeOrMarkRanges : [markRangeOrMarkRanges];
 
-		var markRanges;		
-		if (Array.isArray(markRangeOrMarkRanges)) {
-			markRanges = markRangeOrMarkRanges;
-		} else {
-			markRanges = [];
-			markRanges.push(markRangeOrMarkRanges);
-		}
-
-		for (let i in markRanges) {
-			let markRange = markRanges[i];
-			var markInfo = onedev.server.blobTextDiff.getMarkInfo($container, markRange);
-			var $startTd = markInfo.startTd;
-			var $endTd = markInfo.endTd;
-			if ($startTd && $endTd) {
-				var startCursor = markInfo.startCursor;
-				var endCursor = markInfo.endCursor;
-				var oldOrNew = markInfo.oldOrNew;
+		for (const markRange of markRanges) {
+			const [$startTd, $endTd] = this.getMarkCells($container, markRange);
+			if ($startTd.length && $endTd.length) {
+				const {fromColumn, toColumn, leftSide} = markRange;
+				const column = $startTd.is(".left, .right") ? (leftSide ? ".left" : ".right") : "";
 				var $td = $startTd;
-				while (true) {
-					var ch = 0;
-					if (!$td.hasClass("content-mark")) {
-						$td.addClass("content-mark");
-					}
+				while ($td.length) {
+					const startsRange = $td.is($startTd);
+					const endsRange = $td.is($endTd);
+					let ch = 0;
+					$td.addClass("content-mark");
 					$td.contents().each(function() {
-						var $this = $(this);
-						var text = $this.text();
+						const $span = $(this);
+						const text = $span.text();
 						function markText(from, to) {
-							var text = $this.text();
 							var left = text.substring(0, from);
 							var middle = text.substring(from, to);
 							var right = text.substring(to);
 							
-							if (left.length == 0 && right.length == 0 && $this.is("span")) {
-								$this.addClass("content-mark");
+							if (left.length == 0 && right.length == 0 && $span.is("span")) {
+								$span.addClass("content-mark");
 							} else {
 								var classes;
-								if ($this.is("span"))
-									classes = $this.attr("class");
+								if ($span.is("span"))
+									classes = $span.attr("class");
 								else
 									classes = "";
 								
-								var $current = $this;
+								var $current = $span;
 								if (left.length != 0) {
 									$current.after("<span></span>");
 									$current = $current.next();
@@ -803,75 +763,33 @@ onedev.server.blobTextDiff = {
 									$current = $current.next();
 									$current.attr("class", classes).text(right);
 								}
-								$this.remove();
+								$span.remove();
 							}
 						}
-						if ($this.hasClass("insert") && oldOrNew == "old" 
-								|| $this.hasClass("delete") && oldOrNew == "new") {
-							if (!$td.is($startTd) && !$td.is($endTd)) {
+						if (leftSide ? $span.hasClass("insert") : $span.hasClass("delete")) {
+							// Text from the other revision occupies no columns in this range.
+							if ((!startsRange || fromColumn < ch) && (!endsRange || toColumn > ch))
 								markText(0, text.length);
-							} else if ($td.is($startTd) && $td.is($endTd)) {
-								if (endCursor[1]>ch && startCursor[1]<ch) {
-									markText(0, text.length);
-								}
-							} else if ($td.is($startTd)) {
-								if (startCursor[1]<ch) {
-									markText(0, text.length);
-								}
-							} else {
-								if (endCursor[1]>ch) {
-									markText(0, text.length);
-								}
-							}
-						} else {
-							var nextCh = ch + text.length;
-							if (!$td.is($startTd) && !$td.is($endTd)) {
-								markText(0, text.length);
-							} else if ($td.is($startTd) && $td.is($endTd)) {
-								if (endCursor[1]>ch && startCursor[1]<nextCh) {
-									if (ch>=startCursor[1] && nextCh<=endCursor[1]) {
-										markText(0, text.length);
-									} else if (ch<startCursor[1] && nextCh>endCursor[1]) {
-										markText(startCursor[1]-ch, endCursor[1]-ch);
-									} else if (ch<startCursor[1]) {
-										markText(startCursor[1]-ch, text.length);
-									} else {
-										markText(0, endCursor[1]-ch);
-									}
-								}
-							} else if ($td.is($startTd)) {
-								if (ch>=startCursor[1]) {
-									markText(0, text.length);
-								} else if (nextCh>startCursor[1]) {
-									markText(startCursor[1]-ch, text.length);
-								} 
-							} else {
-								if (nextCh<=endCursor[1]) {
-									markText(0, text.length);
-								} else if (ch<endCursor[1]) {
-									markText(0, endCursor[1]-ch);
-								} 
-							}
-							ch = nextCh;
+							return;
 						}
+						const from = startsRange ? Math.max(0, fromColumn - ch) : 0;
+						const to = endsRange ? Math.min(text.length, toColumn - ch) : text.length;
+						if (from < to)
+							markText(from, to);
+						ch += text.length;
 					});
-					if ($td.is($endTd) || $td.length == 0) {
+					if (endsRange)
 						break;
-					} else {
-						if ($startTd.hasClass("left")) {
-							$td = $td.parent().next().children("td.left");
-						} else if ($startTd.hasClass("right")) {
-							$td = $td.parent().next().children("td.right");
-						} else {
-							$td = $td.parent().next().children("td.content");
-						}
-					}
+					let nextRow = $td.parent()[0].nextElementSibling;
+					while (nextRow && !nextRow.matches("tr.code"))
+						nextRow = nextRow.nextElementSibling;
+					$td = $(nextRow).children("td.content" + column);
 				}			
 			}
 		}
 	}, 
 	clearMark: function($container) {
-		$container.find("td.content.content-mark").each(function() {
+		this.getCodeRows($container).children("td.content.content-mark").each(function() {
 			var $this = $(this);
 			$this.removeClass("content-mark");
 			$this.find("span").removeClass("content-mark");
@@ -1064,17 +982,8 @@ onedev.server.blobTextDiff = {
 		$lineNumTd.prepend($indicator);
 	},	
 	getLineNumTd: function($container, leftSide, line) {
-		if (leftSide) {
-			var $contentTd = $container.find("td.left.content[data-old='" + line + "']");
-			if ($contentTd.length == 0)
-				$contentTd = $container.find("td.content[data-old='" + line + "']");
-			return $contentTd.prevAll("td.number").last();
-		} else {
-			var $contentTd = $container.find("td.right.content[data-new='" + line + "']");
-			if ($contentTd.length == 0)
-				$contentTd = $container.find("td.content[data-new='" + line + "']");
-			return $contentTd.prevAll("td.number").first();
-		}
+		const $numbers = this.getLineCell($container, leftSide, line).prevAll("td.number");
+		return leftSide ? $numbers.last() : $numbers.first();
 	},
 	highlightCommentTrigger: function($container) {
 		$container.find(".comment-trigger").removeClass("active");
@@ -1148,7 +1057,7 @@ onedev.server.blobTextDiff = {
 		$container.data("markRange", comment.range);
 		onedev.server.blobTextDiff.highlightCommentTrigger($container);
 		onedev.server.blobTextDiff.mark($container, comment.range);
-		onedev.server.blobTextDiff.scrollIntoView($container, comment.range);
+		onedev.server.revisionDiff.scrollCommentIntoView();
 	},
 	onCommentClosed: function($container) {
 		$(".popover").popover("hide");
@@ -1168,7 +1077,6 @@ onedev.server.blobTextDiff = {
 		setTimeout(function() {
 			onedev.server.blobTextDiff.highlightCommentTrigger($container);
 			onedev.server.blobTextDiff.mark($container, markRange);
-			onedev.server.blobTextDiff.scrollIntoView($container, markRange);
 		}, 100);
 	}
 };

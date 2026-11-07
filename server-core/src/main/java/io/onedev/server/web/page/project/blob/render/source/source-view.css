@@ -7,19 +7,13 @@
 	font-family: inherit;
 	font-size: inherit;
 }
-.source-view>.comment>.ui-resizable-handle {
-	border-right: 1px solid var(--light-gray);
-	background: var(--light) url(/~icon/grip3.svg) no-repeat scroll center center;
-	background-size: 18px 18px;
-    cursor: e-resize;
-    width: 4px;
-	position: relative;
-	right: 0;
+.source-view .inline-comment-host {
+	padding: 0.75rem;
+	background: var(--light);
+	white-space: normal;
 }
-.dark-mode .source-view>.comment>.ui-resizable-handle {
-	border-right-color: var(--dark-mode-lighter-dark);
-	background: var(--dark-mode-light-dark) url(/~icon/dark-grip3.svg) no-repeat scroll center center;
-	background-size: 18px 18px;
+.dark-mode .source-view .inline-comment-host {
+	background: var(--dark-mode-light-dark);
 }
 .source-view>.outline {
 	left: 0 !important;

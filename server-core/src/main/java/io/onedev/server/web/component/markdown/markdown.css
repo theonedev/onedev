@@ -3,6 +3,18 @@
 	.markdown-editor.normal-mode .compact-mode {
 		display: none !important;
 	}
+	.code-comment-thread .markdown-editor>.head {
+		container: code-comment-toolbar / inline-size;
+	}
+	/* A split diff can leave the editor narrow even on a wide screen. */
+	@container code-comment-toolbar (min-width: 52rem) {
+		.markdown-editor>.head>.actions>.normal-mode {
+			display: flex !important;
+		}
+		.markdown-editor>.head>.actions>.compact-mode {
+			display: none;
+		}
+	}
 }
 .markdown-editor.fixed-width {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;	

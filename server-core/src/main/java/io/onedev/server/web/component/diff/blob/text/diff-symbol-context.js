@@ -62,30 +62,23 @@ onedev.server.diffSymbolContext = {
 		const context = $container.data("symbolContext");
 		if (!context)
 			return;
-		const $table = $container.children("table.text-diff");
-		$table.find("tr.diff-symbol-hunk").remove();
-		const $rows = $table.find("tr.code");
+		const blobTextDiff = onedev.server.blobTextDiff;
+		blobTextDiff.getTableBody($container).children("tr.diff-symbol-hunk").remove();
+		const $rows = blobTextDiff.getCodeRows($container);
 		const split = $rows.first().children("td.content").length === 2;
 		context.split = split;
 		$container.children(".diff-symbol-sticky").toggleClass("split", split);
 		context.cells = {};
 		context.hunkHeaders = new WeakMap();
-		for (const side of ["old", "new"]) {
-			// Split equal cells carry both line numbers; keep only the corresponding column.
-			context.cells[side] = $rows.children("td.content[data-" + side + "]")
-				.filter((index, cell) => !split || !$(cell).hasClass(side === "old" ? "right" : "left")).toArray();
-		}
-		let hunk = [];
-		const appendHunk = () => {
-			if (!hunk.length)
-				return;
+		for (const side of ["old", "new"])
+			context.cells[side] = $rows.children(blobTextDiff.getSideCellSelector(side)).toArray();
+		for (const hunk of blobTextDiff.getCodeHunks($container)) {
+			const $hunk = $(hunk);
 			const labels = {};
 			for (const side of ["old", "new"]) {
-				const cells = $(hunk).children("td.content[data-" + side + "]")
-					.filter((index, cell) => !split || !$(cell).hasClass(side === "old" ? "right" : "left"));
 				// Describe the code immediately below the header on each side, including
 				// after expansion reveals lines outside the changed symbol's scope.
-				const anchor = cells.first();
+				const anchor = $hunk.children(blobTextDiff.getSideCellSelector(side)).first();
 				labels[side] = anchor.length ? this.lookup(context.ranges[side], Number(anchor.attr("data-" + side))) : "";
 			}
 			if (labels.old || labels.new) {
@@ -105,15 +98,7 @@ onedev.server.diffSymbolContext = {
 				for (const row of hunk)
 					context.hunkHeaders.set(row, $header[0]);
 			}
-			hunk = [];
-		};
-		$table.find("tbody>tr").each((index, row) => {
-			if ($(row).hasClass("expander"))
-				appendHunk();
-			else if ($(row).hasClass("code"))
-				hunk.push(row);
-		});
-		appendHunk();
+		}
 		this.update($container);
 	},
 	update: function($container) {

@@ -1056,6 +1056,19 @@ onedev.server = {
 		onedev.server.perfectScrollbar.setup();
 	},
 	
+	getDefaultScrollAnchor: function() {
+		if (location.hash) {
+			const nameOrId = decodeURIComponent(location.hash.slice(1));
+			const anchor = document.getElementById(nameOrId) || document.getElementsByName(nameOrId)[0];
+			if (anchor && !anchor.hasAttribute("data-manual-anchor-scroll"))
+				return anchor;
+		}
+	},
+
+	canUseCustomScrollOnLoad: function() {
+		return onedev.server.viewState.getFromHistory() === undefined && !onedev.server.getDefaultScrollAnchor();
+	},
+
 	onWindowLoad: function() {
 		onedev.server.setupAutoSize();
 		onedev.server.focus.setupAutoFocus();
@@ -1079,15 +1092,8 @@ onedev.server = {
 		
 		$(window).resize();
 		
-		if (location.hash && !onedev.server.viewState.getFromHistory()) {
-			// Scroll anchors into view (for instance the markdown headline)
-			var nameOrId = decodeURIComponent(location.hash.slice(1));
-			var element = document.getElementById(nameOrId);
-			if (!element)
-				element = document.getElementsByName(nameOrId)[0];
-			if (element) 
-				element.scrollIntoView();
-		}
+		if (onedev.server.viewState.getFromHistory() === undefined)
+			onedev.server.getDefaultScrollAnchor()?.scrollIntoView();
 	}
 	
 };

@@ -157,8 +157,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private static final String COOKIE_OUTLINE_WIDTH = "sourceView.outline.width";
 	
-	private static final String COOKIE_COMMENT_WIDTH = "sourceView.comment.width";
-
 	@Inject
 	private ObjectMapper objectMapper;
 
@@ -324,21 +322,12 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		commentContainer = new WebMarkupContainer("comment", Model.of((PlanarRange)null)) {
 			
 			@Override
-			protected void onBeforeRender() {
-				WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-				Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
-				if (cookie != null) 
-					add(AttributeAppender.replace("style", "width:" + cookie.getValue() + "px"));
-				else 
-					add(AttributeAppender.replace("style", "width:360px"));
-
-				super.onBeforeRender();
-			}
-
-			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("onedev.server.sourceView.initComment();"));
+				PlanarRange range = (PlanarRange) getDefaultModelObject();
+				String script = String.format("onedev.server.sourceView.initComment('%s', %s);",
+						getMarkupId(), range != null ? range.getToRow() : "null");
+				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 
 		};
@@ -367,25 +356,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 			
 		});
-		
-		head.add(new AjaxLink<Void>("locate") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				PlanarRange range = (PlanarRange) commentContainer.getDefaultModelObject();
-				String position = BlobRenderer.getSourcePosition(range);
-				position(target, position);
-				context.onPosition(target, position);
-				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(commentContainer.getDefaultModelObject() != null);
-			}
-			
-		}.setOutputMarkupId(true));
 		
 		head.add(new Label("status", new LoadableDetachableModel<String>() {
 
@@ -603,10 +573,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							clearComment(target);
-							target.appendJavaScript("onedev.server.sourceView.clearMark();");
-							target.appendJavaScript("$(window).resize();");
-							context.onPosition(target, null);
+							closeComment(target);
 						}
 						
 					});
@@ -1097,7 +1064,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				convertToJson(translations), SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(context.getProject()));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
-		if (markRange != null) {
+		if (markRange != null || context.getOpenComment() != null) {
 			script = String.format("onedev.server.sourceView.onWindowLoad(%s);", convertToJson(markRange));
 			response.render(OnLoadHeaderItem.forScript(script));
 		}

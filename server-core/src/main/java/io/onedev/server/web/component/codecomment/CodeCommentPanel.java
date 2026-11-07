@@ -22,8 +22,8 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -501,7 +501,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CodeCommentCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new CodeCommentResourceReference()));
 	}
 	
 	@Nullable
@@ -651,14 +651,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 		
 		editFragment.setOutputMarkupId(true);
 		get("actions").replaceWith(editFragment);
-		handler.add(editFragment);	
-		
-		String script = String.format(""
-				+ "setTimeout(function() {"
-				+ "  document.getElementById('%s').scrollIntoViewIfNeeded(false);"
-				+ "}, 0);", 
-				saveButton.getMarkupId());
-		handler.appendJavaScript(script);
+		handler.add(editFragment);
 	}
 	
 	protected abstract void onDeleteComment(AjaxRequestTarget target, CodeComment comment);

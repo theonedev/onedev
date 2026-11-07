@@ -9,6 +9,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
+import io.onedev.server.web.component.codecomment.CodeCommentResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -26,6 +27,7 @@ public class RevisionDiffResourceReference extends BaseDependentResourceReferenc
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new CodeCommentResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(RevisionDiffResourceReference.class, "revision-diff.css")));
 		return dependencies;
 	}

@@ -17,6 +17,7 @@ import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.asset.selectionpopover.SelectionPopoverResourceReference;
+import io.onedev.server.web.component.codecomment.CodeCommentResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -40,6 +41,7 @@ public class SourceViewResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeProblemResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new CodeCommentResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(SourceViewResourceReference.class, "source-view.css")));
 		dependencies.add(CssHeaderItem.forReference(new CommentIndicatorCssResourceReference()));

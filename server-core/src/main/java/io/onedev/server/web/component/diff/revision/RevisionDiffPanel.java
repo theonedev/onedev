@@ -40,6 +40,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -146,8 +147,6 @@ public abstract class RevisionDiffPanel extends Panel {
 
 	private static final String COOKIE_VIEW_MODE = "onedev.server.diff.viewmode";
 	
-	private static final String COOKIE_COMMENT_WIDTH = "revisionDiff.comment.width";
-
 	private static final String COOKIE_NAVIGATION = "revisionDiff.navigation";
 	
 	private static final String COOKIE_NAVIGATION_WIDTH = "revisionDiff.navigation.width";
@@ -331,6 +330,8 @@ public abstract class RevisionDiffPanel extends Panel {
 	private ListView<BlobChange> diffsView;
 	
 	private WebMarkupContainer body;
+
+	private WebMarkupContainer diffDetail;
 	
 	public RevisionDiffPanel(String id, String oldRev, String newRev, 
 							 IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel, 
@@ -379,7 +380,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	private void doFilter(AjaxRequestTarget target) {
 		target.add(reviewProgress);
 		body.replace(commentContainer = newCommentContainer());
-		body.replace(navigationContainer = newNavigationContainer());
+		diffDetail.replace(navigationContainer = newNavigationContainer());
 		target.add(body);
 		target.appendJavaScript("" +
 				"var $diffs = $('.revision-diff>.body li.diff'); " +
@@ -592,13 +593,15 @@ public abstract class RevisionDiffPanel extends Panel {
 
 										@Override
 										public void onClick(AjaxRequestTarget target) {
-											viewMode = value;
-											WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-											Cookie cookie = new Cookie(COOKIE_VIEW_MODE, value.name());
-											cookie.setMaxAge(Integer.MAX_VALUE);
-											cookie.setPath("/");
-											response.addCookie(cookie);
-											target.add(body);
+											if (value != viewMode) {
+												viewMode = value;
+												WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+												Cookie cookie = new Cookie(COOKIE_VIEW_MODE, value.name());
+												cookie.setMaxAge(Integer.MAX_VALUE);
+												cookie.setPath("/");
+												response.addCookie(cookie);
+												target.add(diffDetail);
+											}
 											dropdown.close();
 										}
 									};
@@ -624,8 +627,17 @@ public abstract class RevisionDiffPanel extends Panel {
 
 										@Override
 										public void onClick(AjaxRequestTarget target) {
-											whitespaceOptionModel.setObject(value);
-											target.add(body);
+											if (value != whitespaceOptionModel.getObject()) {
+												whitespaceOptionModel.setObject(value);
+												totalChangesModel.detach();
+												displayChangesModel.detach();
+												target.add(diffDetail, body.get("tooManyFiles"), reviewProgress);
+												CodeComment openComment = annotationSupport != null ? annotationSupport.getOpenComment() : null;
+												if (openComment != null) {
+													commentContainer.setDefaultModelObject(getCommentMark(openComment));
+													target.add(commentContainer.get("head"));
+												}
+											}
 											dropdown.close();
 										}
 									};
@@ -762,19 +774,23 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 		})));
 		
-		body = new WebMarkupContainer("body") {
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.onBodyDomReady();"));
-			}
-		};
+		body = new WebMarkupContainer("body");
 		body.setOutputMarkupId(true);
 		add(body);
 
+		diffDetail = new WebMarkupContainer("detail") {
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.onDiffDetailReady();"));
+			}
+		};
+		diffDetail.setOutputMarkupId(true);
+		body.add(diffDetail);
+
 		body.add(new FencedFeedbackPanel("feedback", this));
 		body.add(commentContainer = newCommentContainer());
-		body.add(navigationContainer = newNavigationContainer());
+		diffDetail.add(navigationContainer = newNavigationContainer());
 
 		body.add(new Label("tooManyFiles", new IModel<String>() {
 
@@ -791,9 +807,9 @@ public abstract class RevisionDiffPanel extends Panel {
 				setVisible(getDisplayChanges().size() < getTotalChanges().size());
 			}
 			
-		});		
+		}.setOutputMarkupPlaceholderTag(true));
 		
-		body.add(diffsView = new ListView<BlobChange>("diffs", new IModel<>() {
+		diffDetail.add(diffsView = new ListView<BlobChange>("diffs", new IModel<>() {
 
 			@Override
 			public List<BlobChange> getObject() {
@@ -1050,14 +1066,7 @@ public abstract class RevisionDiffPanel extends Panel {
 										blobDiffPanel.onCommentClosed(target);
 								}
 								annotationSupport.onAddComment(target, mark);
-								String script = String.format(""
-												+ "setTimeout(function() {"
-												+ "  var $textarea = $('#%s textarea');"
-												+ "  $textarea.caret($textarea.val().length);"
-												+ "}, 100);"
-												+ "$(window).resize();",
-										commentContainer.getMarkupId());
-								target.appendJavaScript(script);
+								target.appendJavaScript("$(window).resize();");
 							}
 
 							@Override
@@ -1224,7 +1233,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 
 		});
-		body.add(new WebMarkupContainer("noDiffs") {
+		diffDetail.add(new WebMarkupContainer("noDiffs") {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -1357,13 +1366,6 @@ public abstract class RevisionDiffPanel extends Panel {
 				blobDiffPanel.unmark(target);
 		}
 		annotationSupport.onCommentOpened(target, comment);
-	}
-	
-	private DiffPlanarRange getMarkRange(@Nullable Mark mark) {
-		if (mark != null)
-			return new DiffPlanarRange(mark.getCommitHash().equals(getOldCommitId().name()), mark.getRange());
-		else
-			return null;
 	}
 	
 	private String encodePath(String path) {
@@ -1579,32 +1581,36 @@ public abstract class RevisionDiffPanel extends Panel {
 		return children.stream().map(it->currentPath+it).collect(toList());
 	}
 
+	@Nullable
+	private Mark getCommentMark(CodeComment comment) {
+		BlobChange change = getBlobChange(comment.getMark().getPath());
+		if (change == null)
+			return null;
+		DiffPlanarRange range = getBlobAnnotationSupport(change).getCommentRange(comment);
+		return range != null ? change.getMark(range) : null;
+	}
+
 	private WebMarkupContainer newCommentContainer() {
-		WebMarkupContainer commentContainer = new WebMarkupContainer("comment", Model.of((Mark)null)) {
+		WebMarkupContainer commentContainer = new WebMarkupContainer("comment", Model.of((Mark)null));
+		commentContainer.setOutputMarkupPlaceholderTag(true);
 
-			@Override
-			protected void onBeforeRender() {
-				WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-				Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
-				// cookie will not be sent for websocket request
-				if (cookie != null)
-					add(AttributeAppender.replace("style", "width:" + cookie.getValue() + "px"));
-				else
-					add(AttributeAppender.replace("style", "width:360px"));
-				
-				super.onBeforeRender();
-			}
-
+		WebMarkupContainer head = new WebMarkupContainer("head") {
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.initComment();"));
+				Mark mark = (Mark) commentContainer.getDefaultModelObject();
+				BlobChange change = mark != null ? getBlobChange(mark.getPath()) : null;
+				String diffId = change != null ? "'diff-" + encodePath(change.getPath()) + "'" : "null";
+				String script = String.format("onedev.server.revisionDiff.initComment('%s', %s, %s, %s, %s);",
+						commentContainer.getMarkupId(), diffId,
+						mark != null && mark.getCommitHash().equals(getOldCommitId().name()),
+						mark != null ? mark.getRange().getFromRow() : "null",
+						mark != null ? mark.getRange().getToRow() : "null");
+				response.render(OnDomReadyHeaderItem.forScript(script));
+				if (RequestCycle.get().find(AjaxRequestTarget.class).isEmpty())
+					response.render(OnLoadHeaderItem.forScript("onedev.server.revisionDiff.onWindowLoad();"));
 			}
-
 		};
-		commentContainer.setOutputMarkupPlaceholderTag(true);
-
-		WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 
@@ -1673,26 +1679,6 @@ public abstract class RevisionDiffPanel extends Panel {
 
 		}.setOutputMarkupId(true));
 
-		head.add(new AjaxLink<Void>("locate") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				Mark mark = (Mark) commentContainer.getDefaultModelObject();
-				BlobDiffPanel blobDiffPanel = getBlobDiffPanel(mark.getPath());
-				if (blobDiffPanel != null)
-					blobDiffPanel.mark(target, getMarkRange(mark));
-				annotationSupport.onMark(target, mark);
-				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(commentContainer.getDefaultModelObject() != null);
-			}
-
-		}.setOutputMarkupId(true));
-
 		head.add(new AjaxLink<Void>("close") {
 
 			@Override
@@ -1726,12 +1712,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		if (annotationSupport != null) {
 			CodeComment openComment = annotationSupport.getOpenComment();
 			if (openComment != null) {
-				BlobChange change = getBlobChange(openComment.getMark().getPath());
-				if (change != null) {
-					DiffPlanarRange commentRange = getBlobAnnotationSupport(change).getCommentRange(openComment);
-					if (commentRange != null)
-						commentContainer.setDefaultModelObject(change.getMark(commentRange));
-				}
+				commentContainer.setDefaultModelObject(getCommentMark(openComment));
 				CodeCommentPanel commentPanel = new CodeCommentPanel("body", openComment.getId()) {
 
 					@Override
@@ -1850,6 +1831,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onDetach() {
 		diffEntriesModel.detach();
 		totalChangesModel.detach();
+		displayChangesModel.detach();
 		if (blameFileModel != null)
 			blameFileModel.detach();
 		pathFilterModel.detach();
@@ -2278,14 +2260,7 @@ public abstract class RevisionDiffPanel extends Panel {
 								blobDiffPanel.onCommentClosed(target);
 						}
 						annotationSupport.onAddComment(target, mark);
-						String script = String.format(""
-										+ "setTimeout(function() {"
-										+ "  var $textarea = $('#%s textarea');"
-										+ "  $textarea.caret($textarea.val().length);"
-										+ "}, 100);"
-										+ "$(window).resize();",
-								commentContainer.getMarkupId());
-						target.appendJavaScript(script);
+						target.appendJavaScript("$(window).resize();");
 					}
 
 					@Override

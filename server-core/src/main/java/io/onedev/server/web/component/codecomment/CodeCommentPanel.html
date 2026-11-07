@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="code-comment">
 		<div wicket:id="comment" class="comment d-flex pl-2 py-3 flex-nowrap"></div>
-		<div wicket:id="activities" class="activity d-flex pl-2 py-3 flex-nowrap"/>
+		<div wicket:id="activities" class="activity d-flex pl-2 py-3 flex-nowrap" data-manual-anchor-scroll="true"/>
 		<div wicket:id="actions" class="actions d-flex pl-2 py-3 flex-nowrap"></div>
 	</div>
 	<wicket:fragment wicket:id="commentOrReplyViewFrag">
@@ -21,7 +21,7 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="commentOrReplyEditFrag">
-		<form wicket:id="form" class="leave-confirm flex-grow-1">
+		<form wicket:id="form" class="code-comment-editor no-autofocus leave-confirm flex-grow-1">
 			<div wicket:id="feedback" class="feedback"></div>
 			<div wicket:id="content" class="mb-3"></div>
 			<button wicket:id="save" class="btn btn-sm btn-primary mr-1"><span wicket:id="label"/></button>

@@ -55,7 +55,7 @@ onedev.server.sourceView = {
 	    
 		var lastFrom, lastTo;
 	    $(".source-view").selectionPopover("init", function(e) {
-	    	if ($(e.target).closest(".selection-popover").length != 0) {
+			if ($(e.target).closest(".selection-popover, .inline-comment-host").length != 0) {
 	    		return;
 			}
 	    	var from = cm.getCursor("from");
@@ -82,6 +82,8 @@ onedev.server.sourceView = {
 	    $code.find("textarea").addClass("readonly").addClass("no-autosize");
 	    
 	    $code.mouseover(function(e) {
+			if ($(e.target).closest(".inline-comment-host").length)
+				return;
 			var node = e.target || e.srcElement, $node = $(node);
 			if ($node.hasClass("cm-property") || $node.hasClass("cm-variable") 
 					|| $node.hasClass("cm-variable-2") || $node.hasClass("cm-variable-3") 
@@ -143,7 +145,8 @@ onedev.server.sourceView = {
 				onedev.server.sourceView.addCoverageGutter(line, annotationInfo.coverages[line]);
 		}
 		
-		onedev.server.sourceView.highlightCommentTrigger();	
+		onedev.server.sourceView.highlightCommentTrigger();
+		onedev.server.sourceView.mountCommentWidget($sourceView);
 	},
 	checkShortcutsBinding() {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
@@ -164,31 +167,124 @@ onedev.server.sourceView = {
 		}
 	},
 	onWindowLoad: function(markRange) {
-		if (onedev.server.viewState.getFromHistory() === undefined
-				&& onedev.server.viewState.carryOver === undefined) {
-			var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-			onedev.server.codemirror.scrollTo(cm, markRange);
-		}
-	},
-	initComment: function() {
-		var $sourceView = $(".source-view");
-		var $code = $sourceView.children(".code");
-		var $comment = $sourceView.children(".comment");
-		var $commentResizeHandle = $comment.children(".ui-resizable-handle");
-		$comment.resizable({
-			autoHide: false,
-			handles: {"e": $commentResizeHandle},
-			minWidth: 200,
-			resize: function(e, ui) {
-				var codeWidth = $code.outerWidth();
-			    if(codeWidth < 300)
-			    	$(this).resizable({maxWidth: ui.size.width});
-			},
-			stop: function(e, ui) {
-				$(this).resizable({maxWidth: undefined});
-				Cookies.set("sourceView.comment.width", ui.size.width, {expires: Infinity});
+		requestAnimationFrame(function() {
+			if (onedev.server.canUseCustomScrollOnLoad()
+					&& onedev.server.viewState.carryOver === undefined) {
+				if ($(".source-view").data("inlineComment")) {
+					onedev.server.sourceView.scrollCommentIntoView({activity: onedev.server.codeComment.getLinkedActivity()});
+				} else if (markRange) {
+					var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
+					onedev.server.codemirror.scrollTo(cm, markRange);
+				}
 			}
 		});
+	},
+	initComment: function(commentId, endLine) {
+		const $sourceView = $(".source-view");
+		this.clearCommentWidget($sourceView);
+		$sourceView.data("inlineComment", {commentId, endLine});
+		this.mountCommentWidget($sourceView);
+	},
+	clearCommentWidget: function($sourceView) {
+		const state = $sourceView.data("inlineComment");
+		$sourceView.removeData("inlineComment");
+		if (!state?.widget)
+			return;
+
+		const {cm, widget, observer, sync} = state;
+		observer.disconnect();
+		cm.off("viewportChange", sync);
+		$(widget.node).children().appendTo($sourceView.children(".comment-home"));
+		widget.clear();
+	},
+	mountCommentWidget: function($sourceView) {
+		const state = $sourceView.data("inlineComment");
+		const cm = $sourceView.find(">.code>.CodeMirror")[0]?.CodeMirror;
+		if (!state || !cm || state.widget)
+			return;
+		const $comment = $(document.getElementById(state.commentId));
+		if (!$comment.hasClass("code-comment-thread"))
+			return;
+
+		const $home = $sourceView.children(".comment-home");
+		const $host = $("<div class='inline-comment-host'></div>").append($comment);
+		const host = $host[0];
+		// Outdated comments without a matching range remain accessible above the source.
+		const outdated = state.endLine == null;
+		const line = outdated ? 0 : Math.min(state.endLine, cm.lastLine());
+		const widget = cm.addLineWidget(line, host, {
+			coverGutter: true,
+			noHScroll: true,
+			above: outdated
+		});
+		const isRendered = () => host.isConnected && host.closest(".CodeMirror-code");
+		const sync = () => {
+			// Wicket must still be able to find the thread while CodeMirror virtualizes the line.
+			if (!isRendered()) {
+				$host.children().appendTo($home);
+				return;
+			}
+			const $parked = $home.children();
+			if ($parked.length) {
+				$parked.appendTo($host);
+				widget.changed();
+			}
+		};
+		const observer = new ResizeObserver(() => {
+			if (!isRendered() || !host.contains($comment[0]))
+				return;
+			const previousHeight = widget.height;
+			const previousBottom = host.getBoundingClientRect().top + previousHeight;
+			const viewportTop = cm.getScrollerElement().getBoundingClientRect().top;
+			if (previousBottom <= viewportTop) {
+				widget.changed();
+				return;
+			}
+			// CodeMirror compensates for height changes above the viewport. A partly
+			// visible widget should stay put so its resize handle follows the pointer.
+			const scrollTop = cm.getScrollInfo().top;
+			cm.operation(() => {
+				widget.changed();
+				if (widget.height !== previousHeight)
+					cm.scrollTo(null, scrollTop);
+			});
+		});
+		Object.assign(state, {cm, widget, observer, sync});
+		observer.observe($comment[0]);
+		cm.on("viewportChange", sync);
+		sync();
+	},
+	scrollCommentIntoView: function({activity, editor} = {}) {
+		const $sourceView = $(".source-view");
+		const state = $sourceView.data("inlineComment");
+		if (!state?.widget)
+			return;
+
+		const {cm, widget, sync} = state;
+		// The resize handler may still be queued when the permalink opens.
+		cm.setSize("100%", $sourceView.children(".code").height());
+		sync();
+		if (!widget.node.firstElementChild) {
+			// Render the line widget before measuring the opened message.
+			const line = cm.getLineNumber(widget.line);
+			cm.scrollTo(null, cm.charCoords({line, ch: 0}, "local").top);
+			sync();
+		}
+		const thread = widget.node.firstElementChild;
+		if (!thread?.classList.contains("code-comment-thread"))
+			return;
+
+		if (editor)
+			widget.changed();
+		const range = $sourceView.data("openComment")?.range ?? $sourceView.data("markRange");
+		const codeTop = state.endLine != null && range
+			? cm.charCoords({line: range.fromRow, ch: range.fromColumn}, "window").top : undefined;
+		const viewportTop = cm.getScrollerElement().getBoundingClientRect().top;
+		const scroll = cm.getScrollInfo();
+		const offset = onedev.server.codeComment.getScrollOffset(thread, {
+			codeTop, viewportTop, viewportBottom: viewportTop + scroll.clientHeight, activity, editor
+		});
+		cm.scrollTo(null, scroll.top + offset);
 	},
 	exitFullScreen: function() {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
@@ -489,6 +585,7 @@ onedev.server.sourceView = {
 	},
 	onCommentDeleted: function() {
 		var $sourceView = $(".source-view");
+		onedev.server.sourceView.clearCommentWidget($sourceView);
 		var openComment = $sourceView.data("openComment");
 		if (openComment) {
 			$sourceView.removeData("openComment");
@@ -526,11 +623,7 @@ onedev.server.sourceView = {
 		$(window).resize();
 
 		onedev.server.sourceView.mark(commentRange, false);
-		onedev.server.codemirror.scrollIntoView(cm, commentRange);
-		
-		onedev.server.sourceView.highlightCommentTrigger();		
-		var $textarea = $sourceView.find(".comment textarea");
-		$textarea.caret($textarea.val().length);		
+		onedev.server.sourceView.highlightCommentTrigger();
 	},
 	onCommentOpened: function(comment) {
 		$(".popover").popover("hide");
@@ -538,15 +631,16 @@ onedev.server.sourceView = {
 		var $sourceView = $(".source-view");
 		$sourceView.data("openComment", comment);
 		$sourceView.data("markRange", comment.range);
+		onedev.server.sourceView.restoreMark();
 		onedev.server.sourceView.highlightCommentTrigger();
 
 		$(window).resize();
-		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		onedev.server.codemirror.scrollIntoView(cm, comment.range);
+		onedev.server.sourceView.scrollCommentIntoView();
 	},
 	onCloseComment: function() {
-		$(".popover").popover("hide");
 		var $sourceView = $(".source-view");
+		onedev.server.sourceView.clearCommentWidget($sourceView);
+		$(".popover").popover("hide");
 		$sourceView.removeData("openComment");
 		onedev.server.sourceView.highlightCommentTrigger();
 		$(window).resize();
@@ -690,4 +784,10 @@ $(function() {
 		if ($(e.target).closest(".problem-trigger, .problem-popover").length == 0)
 			$(".problem-popover").popover("hide");
 	});
+});
+
+$(document).on('/dom/node/removing', function(event, node) {
+	var $sourceView = $(".source-view");
+	if ($sourceView.length && node.contains($sourceView[0]))
+		onedev.server.sourceView.clearCommentWidget($sourceView);
 });

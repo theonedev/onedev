@@ -8,6 +8,16 @@
 .code-comment-list table>thead {
 	display: none;
 }
+.code-comment-thread {
+	font-family: var(--font-family-sans-serif);
+	font-size: 1rem;
+	line-height: 1.5;
+	background: white;
+	min-width: 0;
+}
+.dark-mode .code-comment-thread {
+	background: var(--dark-mode-dark);
+}
 .code-comment>div {
 	border-left: 4px solid white;
 	border-bottom: 1px solid var(--light);
