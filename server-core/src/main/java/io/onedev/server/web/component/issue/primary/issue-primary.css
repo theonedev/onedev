@@ -5,10 +5,10 @@
 .issue-primary:has(>.links, >.issue-pull-requests)>.related-info-separator {
 	display: block;
 }
-.issue-primary>.links>li>.body>li>.action {
+.issue-primary>.links>li>.body>li>.linked-issue-title>.action {
 	display: none;
 }
-.issue-primary>.links>li>.body>li:hover>.action {
+.issue-primary>.links>li>.body>li:hover>.linked-issue-title>.action {
 	display: inline-block;
 }
 .issue-primary>.links .issue-state>.icon {
