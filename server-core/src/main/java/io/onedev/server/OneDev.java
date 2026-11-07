@@ -2,10 +2,7 @@ package io.onedev.server;
 
 import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -163,9 +160,9 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		var manualConfigs = checkData();
 		if (!manualConfigs.isEmpty()) {
 			if (getIngressUrl() != null)
-				logger.warn("Please set up the server at " + getIngressUrl());
+                logger.warn("Please set up the server at {}", getIngressUrl());
 			else
-				logger.warn("Please set up the server at " + guessServerUrl());
+                logger.warn("Please set up the server at {}", guessServerUrl());
 			initStage = new InitStage("Server Setup", manualConfigs);
 			var localServer = clusterService.getLocalServerAddress();
 			while (true) {
@@ -223,7 +220,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		thread.start();
 
 		SystemSetting systemSetting = settingService.getSystemSetting();
-		logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
+        logger.info("Server is ready at {}.", systemSetting.getServerUrl());
 	}
 
 	@Override
@@ -363,7 +360,8 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		return bootDate;
 	}
 
-	public Object writeReplace() throws ObjectStreamException {
+	@Serial
+    public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(OneDev.class);
 	}
 

@@ -15,6 +15,8 @@ import com.hazelcast.core.HazelcastInstance;
 import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.replica.ProjectReplica;
 
+import static java.util.Objects.requireNonNull;
+
 public interface ClusterService {
 
 	void start();
@@ -33,11 +35,11 @@ public interface ClusterService {
 	HazelcastInstance getHazelcastInstance();
 	
     default ClusterAtomicLong getAtomicLong(String name) {
-        return new ClusterAtomicLong(getHazelcastInstance(), name);
+        return new ClusterAtomicLong(requireNonNull(getHazelcastInstance()), name);
     }
 
     default ClusterLock getLock(String name) {
-        return new ClusterLock(getHazelcastInstance(), name);
+        return new ClusterLock(requireNonNull(getHazelcastInstance()), name);
     }
 
 	void initWithLead(ClusterAtomicLong data, Callable<Long> initializer);

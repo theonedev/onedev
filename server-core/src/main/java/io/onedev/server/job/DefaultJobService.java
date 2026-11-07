@@ -109,6 +109,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.onedev.commons.utils.ExceptionUtils.find;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 @Singleton
@@ -290,7 +291,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 		ProjectScopedCommit.push(new ProjectScopedCommit(project, commitId));
 		try {
-			ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
+			ParamUtils.validateParamMap(requireNonNull(build.getJob()).getParamSpecs(), paramMap);
 		} finally {
 			ProjectScopedCommit.pop();
 		}
@@ -442,7 +443,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	}
 
 	private boolean isApplicable(Build build, JobExecutor executor) {
-		var job = build.getJob();
+		var job = requireNonNull(build.getJob());
 		if (job.isExecuteInSandbox() != (executor instanceof SandboxAware))
 			return false;
 		if (!job.getRequiredServices().isEmpty()
@@ -535,7 +536,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		Long buildSequence = build.getSubmitSequence();
 		String refName = build.getRefName();
 		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-		BuildSpec buildSpec = build.getSpec();
+		BuildSpec buildSpec = requireNonNull(build.getSpec());
 
 		List<ServiceFacade> services = new ArrayList<>();
 		List<Action> actions = new ArrayList<>();
@@ -548,7 +549,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		JobAuthorizationContext.push(build.getJobAuthorizationContext());
 		Build.push(build);
 		try {
-			job = build.getJob();
+			job = requireNonNull(build.getJob());
 			String jobExecutorName = interpolator.interpolate(job.getJobExecutor());
 			jobExecutor = interpolator.interpolateProperties(getJobExecutor(build, jobExecutorName, jobLogger));
 			sandboxTemplate = job.isExecuteInSandbox() ? interpolator.interpolate(job.getSandboxTemplate()) : null;
@@ -821,7 +822,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		if (!doResubmit(user, build, reason))
 			return;
 
-		var job = build.getJob();
+		var job = requireNonNull(build.getJob());
 		var systemUser = userService.getSystem();
 		if (job.isIncludeUpstreamWhenRebuild()) {
 			for (var dependence : build.getDependencies()) {
@@ -1052,7 +1053,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	@Listen
 	public void on(SystemStarting event) {
-		var hazelcastInstance = clusterService.getHazelcastInstance();
+		var hazelcastInstance = requireNonNull(clusterService.getHazelcastInstance());
 		jobServers = hazelcastInstance.getMap("jobServers");
 		sequentialKeys = hazelcastInstance.getMap("seqentialKeys");
 		branchSchedules = hazelcastInstance.getReplicatedMap("branchSchedules");
@@ -1518,8 +1519,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					targetDir = tempDir;
 				}
 
-				String dependencyActiveServer = projectService.getActiveServer(
-						dependency.getProject().getId(), true);
+				String dependencyActiveServer = requireNonNull(projectService.getActiveServer(dependency.getProject().getId(), true));
 				if (dependencyActiveServer.equals(clusterService.getLocalServerAddress())) {
 					LockUtils.read(dependency.getArtifactsLockName(), () -> {
 						File artifactsDir = dependency.getArtifactsDir();
@@ -1563,7 +1563,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	public ServerStepResult runServerStep(JobContext jobContext, List<Integer> stepPosition,
 											 File inputDir, Map<String, String> placeholderValues,
 											 boolean callByAgent, TaskLogger logger) {
-		String activeServer = projectService.getActiveServer(jobContext.getProjectId(), true);
+		String activeServer = requireNonNull(projectService.getActiveServer(jobContext.getProjectId(), true));
 		if (activeServer.equals(clusterService.getLocalServerAddress())) {
 			Thread thread = Thread.currentThread();
 			Collection<Thread> threads = serverStepThreads.get(jobContext.getJobToken());
