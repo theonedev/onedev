@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
 
@@ -33,10 +34,12 @@ public class StrikeThroughProcessor implements HtmlProcessor {
 			
 			@Override
 			protected boolean isApplicable(TextNode node) {
+				if (!node.getWholeText().contains("~~"))
+					return false;
 				if (HtmlUtils.hasAncestor(node, IGNORED_TAGS))
 					return false;
-				
-				return node.getWholeText().contains("~~"); // fast scan here, do pattern match later
+				return !(node.parentNode() instanceof Element parent
+						&& parent.closest(".mermaid, .plantuml") != null);
 			}
 		};
 		
