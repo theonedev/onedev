@@ -1,4 +1,4 @@
-<wicket:panel>
+<wicket:panel xmlns:wicket="http://www.w3.org/1999/xhtml">
 	<div class="revision-diff">
 		<div wicket:id="revisionsIndexing" class="alert alert-notice alert-light-warning revision-indexing">
 			<wicket:svg href="loading" class="icon spin mr-1"/>
@@ -7,7 +7,7 @@
 		<!-- disable auto focus here as otherwise we have problems jumping to marked code blocks -->
 		<div class="head no-autofocus d-flex align-items-center flex-nowrap">
 			<span wicket:id="operations" class="btn-group mr-3">
-				<a wicket:id="toggleNavigation" class="btn btn-light btn-icon btn-lg btn-active-primary flex-shrink-0" t:data-tippy-content="Toggle navigation"><wicket:svg href="sidebar" class="icon"/></a>
+				<a wicket:id="toggleTree" class="btn btn-light btn-icon btn-lg btn-active-primary flex-shrink-0" t:data-tippy-content="Toggle file tree"><wicket:svg href="sidebar" class="icon"/></a>
 				<a wicket:id="batchedSuggestions" class="batched-suggestions btn btn-light flex-shrink-0" t:data-tippy-content="Batched suggestions"><wicket:svg href="diff" class="icon icon-lg mr-2"/> <span wicket:id="count" class="mr-1">3</span><wicket:svg href="arrow" class="icon rotate-90"/></a>
 				<a wicket:id="option" class="btn btn-light btn-icon btn-lg flex-shrink-0" t:data-tippy-content="Diff options"><wicket:svg href="gear" class="icon"/></a>
 				<a wicket:id="downloadPatch" class="btn btn-light btn-icon btn-lg flex-shrink-0" t:data-tippy-content="Download patch"><wicket:svg href="download" class="icon"/></a>
@@ -24,6 +24,10 @@
 					</div>
 				</form>
 			</div>
+			<div wicket:id="navigation" class="btn-group flex-shrink-0 ml-3">
+				<button wicket:id="previousFile" type="button" class="btn btn-light btn-icon btn-lg" t:aria-label="Previous changed file" t:data-tippy-content="Previous changed file"><wicket:svg href="arrow" class="icon rotate-270"/></button>
+				<button wicket:id="nextFile" type="button" class="btn btn-light btn-icon btn-lg" t:aria-label="Next changed file" t:data-tippy-content="Next changed file"><wicket:svg href="arrow" class="icon rotate-90"/></button>
+			</div>
 			<div wicket:id="reviewProgress" class="position-relative review-progress rounded d-flex align-items-center px-2 ml-3">
 				<div wicket:id="bar" class="position-absolute rounded"></div>
 				<div wicket:id="label" class="font-size-sm ml-auto mr-auto"></div>
@@ -31,7 +35,6 @@
 		</div>
 		<div wicket:id="body" class="body">
 			<div wicket:id="feedback"></div>
-			<div wicket:id="tooManyFiles" class="alert alert-notice alert-light-warning"></div>
 			<div class="comment-home">
 				<div wicket:id="comment" class="comment code-comment-thread border rounded overflow-hidden">
 					<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
@@ -45,13 +48,12 @@
 					</div>
 				</div>
 			</div>
-			<div wicket:id="detail" class="detail d-flex align-items-stretch">
-				<div wicket:id="navigation" class="navigation need-width border border-right-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky mr-3">
+			<div wicket:id="content" class="detail d-flex align-items-stretch">
+				<div wicket:id="tree" class="file-tree need-width border border-right-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky mr-3">
 					<div wicket:id="content" class="content flex-grow-1 overflow-auto p-3"></div>
 					<div class="ui-resizable-handle ui-resizable-e flex-shrink-0"></div>
 				</div>
-				<ul class="diffs list-unstyled flex-grow-1 mb-0"><li wicket:id="diffs" class="diff mb-4"><div wicket:id="diff"></div></li></ul>
-				<div wicket:id="noDiffs" class="alert alert-notice alert-light-warning flex-grow-1 mb-0"><wicket:t>No diffs</wicket:t></div>
+				<div wicket:id="diff" class="file-diff flex-grow-1"></div>
 			</div>
 		</div>
 	</div>

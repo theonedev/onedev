@@ -1,11 +1,29 @@
 onedev.server.revisionDiff = {
-	onDiffDetailReady: function() {
-		$(".revision-diff>.body li.diff, .revision-diff>.body li.diff>div")
-			.css("scroll-margin-top", $(".revision-diff>.head").outerHeight() + "px");
+	onFileDiffReady: function() {
+		const $detail = $(".revision-diff>.body>.detail");
+		$detail.find(".file-tree .tree-content>a.active").removeClass("active");
+		const path = $detail.children(".file-diff").attr("data-selected-file");
+		const link = path && document.getElementById("diff-link-" + path);
+		if (link) {
+			link.classList.add("active");
+			this.scrollTreeSelectionIntoView();
+		}
 	},
-	setDiffLinkActive: function(linkId) {
-		$(".revision-diff>.body>.detail>.navigation .tree-content>a").removeClass("active");
-		$("#" + linkId).addClass('active');
+	scrollFileDiffIntoView: function() {
+		const diff = document.querySelector(".revision-diff>.body>.detail>.file-diff");
+		diff?.scrollIntoView({block: "start", inline: "nearest"});
+	},
+	scrollTreeSelectionIntoView: function() {
+		const content = document.querySelector(".revision-diff>.body>.detail>.file-tree>.content");
+		const link = content?.querySelector(".tree-content>a.active");
+		if (link) {
+			const bounds = content.getBoundingClientRect();
+			const linkBounds = link.getBoundingClientRect();
+			if (linkBounds.top < bounds.top)
+				content.scrollTop += linkBounds.top - bounds.top;
+			else if (linkBounds.bottom > bounds.bottom)
+				content.scrollTop += linkBounds.bottom - bounds.bottom;
+		}
 	},
 	initComment: function(commentId, diffId, leftSide, startLine, endLine) {
 		const $revisionDiff = $(".revision-diff");
@@ -85,23 +103,20 @@ onedev.server.revisionDiff = {
 				scroll(updatedHeight);
 		}
 	},
-	initNavigation: function() {
-		var $navigation = $(".revision-diff>.body>.detail>.navigation");
-		if ($navigation.is(":visible")) {
-			var $navigationResizeHandle = $navigation.children(".ui-resizable-handle");
-			$navigation.resizable({
+	initTree: function() {
+		var $tree = $(".revision-diff>.body>.detail>.file-tree");
+		if ($tree.is(":visible")) {
+			var $treeResizeHandle = $tree.children(".ui-resizable-handle");
+			$tree.resizable({
 				autoHide: false,
-				handles: {"e": $navigationResizeHandle},
+				handles: {"e": $treeResizeHandle},
 				minWidth: 200,
 				stop: function(e, ui) {
 					Cookies.set("revisionDiff.navigation.width", ui.size.width, {expires: Infinity});
 				}
 			});
+			this.scrollTreeSelectionIntoView();
 		}
-	},
-	onToggleNavigation: function() {
-		$(".navigation-toggle").prop("checked", $(".revision-diff>.body>.detail>.navigation").is(":visible"));
-		$(window).resize();
 	},
 	onSuggestionBatchChanged: function() {
 		var $batch = $(".revision-diff .batched-suggestions");

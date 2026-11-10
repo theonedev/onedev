@@ -2,6 +2,7 @@ package io.onedev.server.web.component.diff.blob;
 
 import static io.onedev.server.util.diff.DiffUtils.MAX_LINE_LEN;
 import static io.onedev.server.web.translation.Translation._T;
+import static java.util.Objects.requireNonNull;
 
 import java.text.MessageFormat;
 import java.util.Set;
@@ -35,7 +36,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.diff.blob.text.BlobTextDiffPanel;
 import io.onedev.server.web.component.diff.blob.title.BlobDiffTitle;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
@@ -59,8 +59,6 @@ public class BlobDiffPanel extends Panel {
 
 	private boolean reviewed;
 
-	private boolean collapsed;
-
 	@Inject
 	private Set<DiffRenderer> diffRenderers;
 
@@ -70,13 +68,6 @@ public class BlobDiffPanel extends Panel {
 		this.change = change;
 		this.blameModel = blameModel;
 		this.diffMode = diffMode;
-
-		var reviewSupport = getReviewSupport();
-		if (reviewSupport != null)
-			reviewed = reviewSupport.isReviewed();
-		var annotationSupport = getAnnotationSupport();
-		if (annotationSupport == null || annotationSupport.getMarkRange() == null)
-			collapsed = reviewed;
 	}
 
 	private Fragment newMessageFragment(String message, boolean warning) {
@@ -115,8 +106,6 @@ public class BlobDiffPanel extends Panel {
 		} else if (blob.getText() != null) {
 			if (blob.getText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 				add(newMessageFragment(_T("Unable to diff as the file is too large."), true));
-			} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
-				add(newMessageFragment(_T("Diff is too large to be displayed."), true));
 			} else if (change.getDiffBlocks().isEmpty()) {
 				if (change.getNewBlobIdent().path != null)
 					add(newMessageFragment(_T("Empty file added."), false));
@@ -134,11 +123,6 @@ public class BlobDiffPanel extends Panel {
 					public BlobAnnotationSupport getAnnotationSupport() {
 						return BlobDiffPanel.this.getAnnotationSupport();
 					}
-
-					@Override
-					protected void onActive(AjaxRequestTarget target) {
-						BlobDiffPanel.this.onActive(target);
-					}
 				});
 			}
 		} else {
@@ -149,15 +133,6 @@ public class BlobDiffPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		add(new AjaxLink<Void>("toggleBody") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				toggleBody(target);
-			}
-
-		});
 
 		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions()) {
 			@Override
@@ -170,35 +145,19 @@ public class BlobDiffPanel extends Panel {
 
 		var reviewSupport = getReviewSupport();
 		if (reviewSupport != null) {
+			reviewed = reviewSupport.isReviewed();
 			var toggleReviewedLink = new AjaxLink<Void>("toggleReviewed") {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					reviewed = !reviewed;
 					reviewSupport.setReviewed(target, reviewed);
-					if (reviewed && !collapsed)
-						toggleBody(target);
 					target.add(this);
 				}
 
 			};
-			toggleReviewedLink.add(new SpriteImage("icon", new IModel<>() {
-				@Override
-				public String getObject() {
-					return reviewed ? "tick-box" : "square";
-				}
-			}));
-			toggleReviewedLink.add(AttributeAppender.append("data-tippy-content", new IModel<String>() {
-				@Override
-				public String getObject() {
-					return reviewed ? _T("Set unreviewed") : _T("Set reviewed");
-				}
-			}));
-			toggleReviewedLink.add(AttributeAppender.append("class", new IModel<String>() {
-				@Override
-				public String getObject() {
-					return reviewed ? "link-primary" : "";
-				}
-			}));
+			toggleReviewedLink.add(new SpriteImage("icon", (IModel<String>) () -> reviewed ? "tick-box" : "square"));
+			toggleReviewedLink.add(AttributeAppender.append("data-tippy-content", (IModel<String>) () -> reviewed ? _T("Set unreviewed") : _T("Set reviewed")));
+			toggleReviewedLink.add(AttributeAppender.append("class", (IModel<String>) () -> reviewed ? "link-primary" : ""));
 			add(toggleReviewedLink);
 		} else {
 			var toggleReviewedLink = new WebMarkupContainer("toggleReviewed");
@@ -223,14 +182,7 @@ public class BlobDiffPanel extends Panel {
 				target.add(this);
 			}
 
-		}.add(AttributeAppender.append("class", new IModel<String>() {
-
-			@Override
-			public String getObject() {
-				return ((BlobTextDiffPanel) getDiffBody()).isBlame() ? "link-primary" : "";
-			}
-
-		})).setOutputMarkupId(true));
+		}.add(AttributeAppender.append("class", (IModel<String>) () -> ((BlobTextDiffPanel) getDiffBody()).isBlame() ? "link-primary" : "")).setOutputMarkupId(true));
 
 		ProjectBlobPage.State viewState = new ProjectBlobPage.State(change.getBlobIdent());
 
@@ -239,48 +191,48 @@ public class BlobDiffPanel extends Panel {
 		add(new ViewStateAwarePageLink<Void>("viewFile", ProjectBlobPage.class, params));
 
 		if (change.getType() != ChangeType.DELETE && change.getNewBlob().getLfsPointer() == null) {
-			if (getPullRequest() != null
-					&& getPullRequest().getSource() != null
-					&& getPullRequest().getSource().getObjectName(false) != null
-					&& SecurityUtils.canModifyFile(getPullRequest().getSourceProject(),
-							getPullRequest().getSourceBranch(), change.getPath())) {
+			var pullRequest = getPullRequest();
+			if (pullRequest != null
+					&& pullRequest.getSource() != null
+					&& pullRequest.getSource().getObjectName(false) != null
+					&& SecurityUtils.canModifyFile(pullRequest.getSourceProject(), pullRequest.getSourceBranch(), change.getPath())) {
 				// we are in context of a pull request and pull request source branch exists, so
 				// we edit in source branch instead
-				Link<Void> editLink = new Link<Void>("editFile") {
+				Link<Void> editLink = new Link<>("editFile") {
 
-					@Override
-					public void onClick() {
-						BlobIdent blobIdent = new BlobIdent(getPullRequest().getSourceBranch(), change.getPath(),
-								FileMode.REGULAR_FILE.getBits());
-						ProjectBlobPage.State editState = new ProjectBlobPage.State(blobIdent);
-						editState.requestId = getPullRequest().getId();
-						editState.mode = BlobRenderContext.Mode.EDIT;
-						editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
-						editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
-						PageParameters params = ProjectBlobPage.paramsOf(getPullRequest().getSourceProject(),
-								editState);
-						setResponsePage(ProjectBlobPage.class, params);
-					}
+                    @Override
+                    public void onClick() {
+						var pullRequest = requireNonNull(getPullRequest());
+                        BlobIdent blobIdent = new BlobIdent(pullRequest.getSourceBranch(), change.getPath(),
+                                FileMode.REGULAR_FILE.getBits());
+                        ProjectBlobPage.State editState = new ProjectBlobPage.State(blobIdent);
+                        editState.requestId = pullRequest.getId();
+                        editState.mode = BlobRenderContext.Mode.EDIT;
+                        editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
+                        editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
+                        PageParameters params = ProjectBlobPage.paramsOf(pullRequest.getSourceProject(), editState);
+                        setResponsePage(ProjectBlobPage.class, params);
+                    }
 
-				};
+                };
 				add(editLink);
 			} else if (SecurityUtils.canModifyFile(change.getProject(), change.getBlobIdent().revision,
 					change.getPath())
 					&& change.getProject().getBranchRef(change.getBlobIdent().revision) != null) {
 				// we are on a branch
-				Link<Void> editLink = new Link<Void>("editFile") {
+				Link<Void> editLink = new Link<>("editFile") {
 
-					@Override
-					public void onClick() {
-						ProjectBlobPage.State editState = new ProjectBlobPage.State(change.getBlobIdent());
-						editState.mode = BlobRenderContext.Mode.EDIT;
-						editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
-						editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
-						PageParameters params = ProjectBlobPage.paramsOf(change.getProject(), editState);
-						setResponsePage(ProjectBlobPage.class, params);
-					}
+                    @Override
+                    public void onClick() {
+                        ProjectBlobPage.State editState = new ProjectBlobPage.State(change.getBlobIdent());
+                        editState.mode = BlobRenderContext.Mode.EDIT;
+                        editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
+                        editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
+                        PageParameters params = ProjectBlobPage.paramsOf(change.getProject(), editState);
+                        setResponsePage(ProjectBlobPage.class, params);
+                    }
 
-				};
+                };
 				editLink.add(AttributeAppender.replace("data-tippy-content",
 						MessageFormat.format(_T("Edit on branch {0}"), change.getBlobIdent().revision)));
 				add(editLink);
@@ -326,8 +278,6 @@ public class BlobDiffPanel extends Panel {
 					} else if (change.getOldText().getLines().stream().anyMatch(it -> it.length() > MAX_LINE_LEN)
 							|| change.getOldText().getLines().stream().anyMatch(it -> it.length() > MAX_LINE_LEN)) {
 						add(newMessageFragment(_T("Unable to diff as some line is too long."), true));
-					} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
-						add(newMessageFragment(_T("Diff is too large to be displayed."), true));
 					} else if (change.getAdditions() + change.getDeletions() == 0) {
 						add(newMessageFragment(_T("Content is identical"), false));
 					} else {
@@ -342,12 +292,6 @@ public class BlobDiffPanel extends Panel {
 							public BlobAnnotationSupport getAnnotationSupport() {
 								return BlobDiffPanel.this.getAnnotationSupport();
 							}
-
-							@Override
-							protected void onActive(AjaxRequestTarget target) {
-								BlobDiffPanel.this.onActive(target);
-							}
-
 						});
 					}
 				} else {
@@ -355,12 +299,7 @@ public class BlobDiffPanel extends Panel {
 				}
 			}
 		}
-		add(AttributeAppender.append("class", new IModel<String>() {
-			@Override
-			public String getObject() {
-				return collapsed ? "blob-diff collapsed" : "blob-diff";
-			}
-		}));
+		add(AttributeAppender.append("class", "blob-diff"));
 
 		setOutputMarkupId(true);
 	}
@@ -397,38 +336,14 @@ public class BlobDiffPanel extends Panel {
 			((BlobTextDiffPanel) body).onCommentAdded(target, comment, range);
 	}
 
-	public void mark(AjaxRequestTarget target, DiffPlanarRange markRange) {
-		if (collapsed)
-			toggleBody(target);
-		Component body = getDiffBody();
-		if (body instanceof BlobTextDiffPanel)
-			((BlobTextDiffPanel) body).mark(target, markRange);
-	}
-
 	public void unmark(AjaxRequestTarget target) {
 		Component body = getDiffBody();
 		if (body instanceof BlobTextDiffPanel)
 			((BlobTextDiffPanel) body).unmark(target);
 	}
 
-	public void onUnblame(AjaxRequestTarget target) {
-		Component body = getDiffBody();
-		if (body instanceof BlobTextDiffPanel)
-			((BlobTextDiffPanel) body).onUnblame(target);
-	}
-
 	private Component getDiffBody() {
 		return get(BODY_ID);
-	}
-
-	private void toggleBody(AjaxRequestTarget target) {
-		collapsed = !collapsed;
-		String script;
-		if (collapsed)
-			script = "$('#%s').addClass('collapsed');";
-		else
-			script = "$('#%s').removeClass('collapsed');";
-		target.appendJavaScript(String.format(script, getMarkupId()));
 	}
 
 	@Nullable
@@ -439,9 +354,6 @@ public class BlobDiffPanel extends Panel {
 	@Nullable
 	protected BlobAnnotationSupport getAnnotationSupport() {
 		return null;
-	}
-
-	protected void onActive(AjaxRequestTarget target) {
 	}
 
 }

@@ -383,9 +383,6 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 								getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));
 						target.appendJavaScript(script);
 						break;
-					case "setActive": 
-						onActive(target);
-						break;
 					case "explainSelection":
 						var range = getRange(params, "param1", "param2", "param3", "param4", "param5");
 						getAnnotationSupport().onMark(target, range);
@@ -508,10 +505,6 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
 		return new DiffPlanarRange(leftSide, beginLine, beginChar, endLine, endChar);
-	}
-	
-	protected void onActive(AjaxRequestTarget target) {
-		
 	}
 	
 	@Override
@@ -1104,16 +1097,6 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		target.appendJavaScript(script);
 	}
 	
-	public void mark(AjaxRequestTarget target, DiffPlanarRange markRange) {
-		String script = String.format(""
-			+ "var $container = $('#%s');"
-			+ "var markRange = %s;"
-			+ "onedev.server.blobTextDiff.scrollTo($container, markRange);"
-			+ "onedev.server.blobTextDiff.mark($container, markRange);", 
-			getMarkupId(), convertToJson(markRange));
-		target.appendJavaScript(script);
-	}
-	
 	public void unmark(AjaxRequestTarget target) {
 		String script = String.format(""
 			+ "var $container = $('#%s');"
@@ -1121,11 +1104,6 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 			+ "$container.removeData('markRange');", 
 			getMarkupId());
 		target.appendJavaScript(script);
-	}
-	
-	public void onUnblame(AjaxRequestTarget target) {
-		blameInfo = null;
-		target.add(this);
 	}
 	
 	@Nullable

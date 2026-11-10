@@ -72,11 +72,7 @@ onedev.server.blobTextDiff = {
 			$rows.children("td.content.left").toggleClass("noselect", !leftSide);
 		});
 		const $codeRows = this.getCodeRows($container);
-		$codeRows.children("td.content").mouseover($container.data("onMouseOverContent")).click(function() {
-			$(".blob-text-diff>table.text-diff>tbody>tr.code>td.content.active").removeClass("active");
-			$(this).addClass("active");
-			callback("setActive");
-		});
+		$codeRows.children("td.content").mouseover($container.data("onMouseOverContent"));
 
 		this.initBlameTooltip(containerId, $codeRows.children("td.blame").children("a.hash"));
 		
