@@ -19,7 +19,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +56,7 @@ import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.k8shelper.SetupCacheFacade;
+import io.onedev.k8shelper.VolumeMountFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
@@ -108,6 +108,8 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	
 	private boolean mountDockerSock;
 
+	private List<VolumeMount> volumeMounts = new ArrayList<>();
+
 	private boolean buildxImageBuildEnabled;
 
 	private boolean builderCachePruneEnabled;
@@ -139,6 +141,19 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
 		this.registryLogins = registryLogins;
+	}
+
+	@Editable(order=410, group="More Settings")
+	public List<@Valid VolumeMount> getVolumeMounts() {
+		return volumeMounts;
+	}
+
+	public void setVolumeMounts(List<VolumeMount> volumeMounts) {
+		this.volumeMounts = volumeMounts;
+	}
+
+	protected List<VolumeMountFacade> getVolumeMountFacades() {
+		return getVolumeMounts().stream().map(VolumeMount::getFacade).collect(toList());
 	}
 
 	@Editable(order=450, placeholder = "Number of CPU Cores", description = "" +
@@ -407,7 +422,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 					CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 
 					var dockerSettings = new DockerSettings(isMountDockerSock(), getDockerSockPath(), getCpuLimit(),
-							getMemoryLimit(), getRunOptions(), List.of(), isAlwaysPullImage());
+							getMemoryLimit(), getRunOptions(), List.of(), isAlwaysPullImage(), getVolumeMountFacades());
 					var stepContainerContext = new JobUtils.StepContainerContext(dockerSettings, network, buildDir,
 							cacheProvisioners, new HashSet<>(), ServerDockerExecutor.this::getHostPath,
 							ServerDockerExecutor.this::newDocker, jobLogger);
@@ -417,7 +432,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 						private int runStepContainer(Commandline docker, String image, String runAs,
 														@Nullable String entrypoint, List<String> arguments,
 														Map<String, String> environments, @Nullable String workingDir,
-														Map<String, String> volumeMounts, List<Integer> position, boolean useTTY) {
+														List<VolumeMountFacade> volumeMounts, List<Integer> position, boolean useTTY) {
 							containerName = network + "-step-" + stringifyStepPosition(position);
 							try {
 								return JobUtils.runStepContainer(stepContainerContext, docker, containerName, image, runAs,
@@ -461,7 +476,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 									int exitCode = callWithRegistryLogins(docker, registryLogins, () -> {
 										return runStepContainer(docker, commandFacade.getImage(), runAs,
 												"sh", entrypointArgs, commandFacade.getEnvMap(),
-												null, new HashMap<>(), position, commandFacade.isUseTTY());
+												null, List.of(), position, commandFacade.isUseTTY());
 									});
 
 									if (exitCode != 0) {
@@ -685,7 +700,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		var docker = newDocker();
 		RuntimeTestUtils.testDocker(docker, getRegistryLogins(UUID.randomUUID().toString()),
 				testData.getDockerImage(), getCpuLimit(), getMemoryLimit(), getRunOptions(), 
-				false, this::getHostPath, jobLogger);
+				false, this::getHostPath, getVolumeMountFacades(), jobLogger);
 	}
 	
 	@Editable(name="Specify a Docker Image to Test Against")

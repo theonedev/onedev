@@ -9647,4 +9647,26 @@ public class DataMigrator {
 		// OAuth applications and grants add new tables and an optional AccessToken.oauthGrant association.
 	}
 
+	private void migrate256(File dataDir, Stack<Integer> versions) {
+		for (File file : Objects.requireNonNull(dataDir.listFiles())) {
+			if (file.getName().startsWith("Settings.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if ("JOB_EXECUTORS".equals(element.elementTextTrim("key"))) {
+						var valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement : valueElement.elements()) {
+								if (executorElement.getName().endsWith(".ServerDockerExecutor")
+										|| executorElement.getName().endsWith(".RemoteDockerExecutor")) {
+									executorElement.addElement("volumeMounts");
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

@@ -114,7 +114,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					var dockerSettings = new JobDockerSettings(isMountDockerSock(), getDockerSockPath(),
 							getCpuLimit(), getMemoryLimit(), getRunOptions(), registryLogins,
 							isAlwaysPullImage(), getDockerBuilder(), getNetworkOptions(),
-							isBuildxImageBuildEnabled(), isBuilderCachePruneEnabled(), isImagetoolsEnabled());
+							isBuildxImageBuildEnabled(), isBuilderCachePruneEnabled(), isImagetoolsEnabled(), getVolumeMountFacades());
 					var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 					DockerJobData jobData = new DockerJobData(serverUrl, jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
@@ -170,11 +170,10 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		var jobToken = UUID.randomUUID().toString();
+		var data = new TestDockerJobData(getName(), jobToken, testData.getDockerImage(), getDockerSockPath(),
+				getRegistryLogins(jobToken), getRunOptions(), getCpuLimit(), getMemoryLimit(), getVolumeMountFacades());
 		AgentHelper.test(agentQuery, getName(), getConcurrencyNumber(),
-				new TestDockerJobData(
-						getName(), jobToken, testData.getDockerImage(), getDockerSockPath(), 
-						getRegistryLogins(jobToken), getRunOptions(), getCpuLimit(), getMemoryLimit()),
-				jobLogger);
+				data, jobLogger);
 	}
 
 }

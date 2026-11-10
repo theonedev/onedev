@@ -149,16 +149,10 @@ public class RunContainerStep extends Step {
 		Map<String, String> envMap = new HashMap<>();
 		for (EnvVar var: getEnvVars())
 			envMap.put(var.getName(), var.getValue());
-		Map<String, String> mountMap = new HashMap<>();
-		for (VolumeMount mount: getVolumeMounts()) {
-			var sourcePath = mount.getSourcePath();
-			if (sourcePath == null)
-				sourcePath = ".";
-			mountMap.put(sourcePath, mount.getTargetPath());
-		}
+		var volumeMounts = getVolumeMounts().stream().map(VolumeMount::getFacade).collect(toList());
 		
 		var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
-		return new RunContainerFacade(getImage(), getRunAs(), getArgs(), envMap, getWorkingDir(), mountMap, 
+		return new RunContainerFacade(getImage(), getRunAs(), getArgs(), envMap, getWorkingDir(), volumeMounts,
 				registryLogins, isUseTTY());
 	}
 	

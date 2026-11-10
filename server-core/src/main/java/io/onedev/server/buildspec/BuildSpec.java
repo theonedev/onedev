@@ -2981,4 +2981,28 @@ public class BuildSpec implements Serializable, Validatable {
 		});
 	}
 
+	@SuppressWarnings("unused")
+	private void migrate59(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNodeItem : stepsNode.getValue()) {
+				var stepNode = (MappingNode) stepNodeItem;
+				if (!"RunContainerStep".equals(getStepType(stepNode)))
+					continue;
+				for (var stepTuple : stepNode.getValue()) {
+					if (((ScalarNode) stepTuple.getKeyNode()).getValue().equals("volumeMounts")
+							&& stepTuple.getValueNode() instanceof SequenceNode mountsNode) {
+						for (var mountNodeItem : mountsNode.getValue()) {
+							var mountNode = (MappingNode) mountNodeItem;
+							if (getScalarProperty(mountNode, "readOnly") == null) {
+								mountNode.getValue().add(new NodeTuple(
+										new ScalarNode(Tag.STR, "readOnly"),
+										new ScalarNode(Tag.BOOL, "false")));
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+
 }
