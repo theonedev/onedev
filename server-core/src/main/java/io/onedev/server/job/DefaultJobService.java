@@ -1595,7 +1595,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	
 	private Collection<String> getActiveJobTokens() {
 		var activeJobTokens = new HashSet<String>();
-		for (var value: clusterService.runOnAllServers(jobContexts::keySet).values()) {
+		for (var value: clusterService.runOnAllServers(() -> new HashSet<>(jobContexts.keySet())).values()) {
 			activeJobTokens.addAll(value);
 		}
 		return activeJobTokens;
