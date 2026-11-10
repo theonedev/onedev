@@ -74,8 +74,10 @@ import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.service.SshKeyService;
 import io.onedev.server.service.UserService;
+import io.onedev.server.web.editable.EditableUtils;
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -101,8 +103,10 @@ public class UserResource {
 	@Inject
 	private AuditService auditService;
 
-	private UserData getData(User user) {
-		var data = new UserData();
+	@Inject
+	private SettingService settingService;
+
+	private <T extends UserData> T getData(User user, T data) {
 		data.setId(user.getId());
 		data.setDisabled(user.isDisabled());
 		data.setType(user.getType());
@@ -115,24 +119,44 @@ public class UserResource {
 		return data;
 	}
 
+	private UserDetailData getDetailData(User user) {
+		var data = getData(user, new UserDetailData());
+		if (user.getType() == ORDINARY && !user.isDisabled()) {
+			var sources = data.getAuthenticationSources();
+			if (user.getPassword() != null) {
+				sources.add("INTERNAL");
+			} else {
+				var authenticator = settingService.getAuthenticator();
+				if (authenticator != null)
+					sources.add("EXTERNAL:" + EditableUtils.getDisplayName(authenticator.getClass()));
+			}
+			user.getSsoAccounts().stream()
+					.map(account -> account.getProvider().getName())
+					.distinct()
+					.sorted()
+					.forEach(name -> sources.add("SSO:" + name));
+		}
+		return data;
+	}
+
 	@Api(order=100)
 	@Path("/{userId}")
     @GET
-    public UserData getUser(@PathParam("userId") Long userId) {
+    public UserDetailData getUser(@PathParam("userId") Long userId) {
     	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
-		return getData(user);
+		return getDetailData(user);
     }
 
 	@Api(order=200)
 	@Path("/me")
     @GET
-    public UserData getMe() {
+    public UserDetailData getMe() {
 		User user = getAuthUser();
 		if (user == null)
 			throw new UnauthorizedException();
-		return getData(user);
+		return getDetailData(user);
     }
 	
 	@Api(order=250)
@@ -330,7 +354,9 @@ public class UserResource {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 
-    	return userService.query(term, offset, count).stream().map(this::getData).collect(toList());
+		return userService.query(term, offset, count).stream()
+				.map(user -> getData(user, new UserData()))
+				.collect(toList());
     }
 	
 	@Api(order=1850)
@@ -628,7 +654,7 @@ public class UserResource {
     	else
     		userService.delete(user);
 
-		var oldAuditContent = VersionedXmlDoc.fromBean(getData(user)).toXML();
+		var oldAuditContent = VersionedXmlDoc.fromBean(getData(user, new UserData())).toXML();
 		auditService.audit(null, "deleted account \"" + user.getName() + "\" via RESTful API", oldAuditContent, null);
 
     	return Response.ok().build();
@@ -714,6 +740,29 @@ public class UserResource {
 
 		public void setAiSetting(AiSetting aiSetting) {
 			this.aiSetting = aiSetting;
+		}
+
+	}
+
+	public static class UserDetailData extends UserData {
+
+		@Serial
+		private static final long serialVersionUID = 1L;
+
+		@Api(order=500, exampleProvider="getAuthenticationSourcesExample",
+				description="Configured sign-in sources for an enabled ordinary user. "
+						+ "INTERNAL indicates a local password. EXTERNAL:<name> identifies the configured "
+						+ "external password authenticator when there is no local password. "
+						+ "SSO:<name> identifies a linked SSO provider. Empty when no source applies.")
+		private List<String> authenticationSources = new ArrayList<>();
+
+		@SuppressWarnings("unused")
+		private static List<String> getAuthenticationSourcesExample() {
+			return List.of("INTERNAL", "SSO:Company SSO");
+		}
+
+		public List<String> getAuthenticationSources() {
+			return authenticationSources;
 		}
 
 	}
