@@ -132,6 +132,7 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.resource.PatchResource;
 import io.onedev.server.web.resource.PatchResourceReference;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.TextUtils;
@@ -452,6 +453,21 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 
+				add(new AjaxLink<Void>("toggleNavigation") {
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						toggleNavigation(target);
+						target.add(this);
+					}
+
+				}.add(AttributeAppender.append("class", new IModel<String>() {
+					@Override
+					public String getObject() {
+						navigationContainer.configure();
+						return navigationContainer.isVisible()? "active": "";
+					}
+				})));
+
 				add(new MenuLink("batchedSuggestions") {
 
 					@Override
@@ -650,7 +666,8 @@ public abstract class RevisionDiffPanel extends Panel {
 				});
 
 				var params = PatchResource.paramsOf(getProject().getId(), getOldCommitId(), getNewCommitId());
-				add(new ResourceLink<Void>("downloadPatch", new PatchResourceReference(), params));
+				add(new ResourceLink<Void>("downloadPatch", new PatchResourceReference(), params)
+						.add(new ConfirmClickModifier(_T("Download this patch?"))));
 			}			
 			
 		}.setOutputMarkupId(true));		
@@ -758,21 +775,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		}));
 		reviewProgress.setOutputMarkupPlaceholderTag(true);
 		add(reviewProgress);
-		
-		add(new AjaxLink<Void>("toggleNavigation") {
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				toggleNavigation(target);
-				target.add(this);
-			}
-
-		}.add(AttributeAppender.append("class", new IModel<String>() {
-			@Override
-			public String getObject() {
-				navigationContainer.configure();
-				return navigationContainer.isVisible()? "active": "";
-			}
-		})));
 		
 		body = new WebMarkupContainer("body");
 		body.setOutputMarkupId(true);

@@ -56,7 +56,7 @@
 }
 
 .revision-diff>.body>.detail>.navigation>.ui-resizable-handle {
-	border-right: 1px solid var(--light-gray);
+	border-left: 1px solid var(--light-gray);
 	background: var(--light) url(/~icon/grip3.svg) no-repeat scroll center center;
 	background-size: 18px 18px;
     cursor: e-resize;
@@ -65,12 +65,9 @@
 	right: 0;
 }
 .dark-mode .revision-diff>.body>.detail>.navigation>.ui-resizable-handle {
-	border-right-color: var(--dark-mode-lighter-dark);
+	border-left-color: var(--dark-mode-lighter-dark);
 	background: var(--dark-mode-light-dark) url(/~icon/dark-grip3.svg) no-repeat scroll center center;
 	background-size: 18px 18px;
-}
-.revision-diff>.body>.detail>.navigation>.ui-resizable-handle {
-	left: 0;
 }
 .revision-diff>.body>.detail>.diffs:empty {
 	display: none;
