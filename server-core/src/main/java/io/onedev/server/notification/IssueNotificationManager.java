@@ -509,8 +509,14 @@ public class IssueNotificationManager implements Serializable {
 	}
 
 	private TaskFailedCallback newTaskFailedCallback(Long aiId, Long issueId) {
-		return workspaceReference -> createComment(userService.load(aiId), issueService.load(issueId),
-                "Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
+		return new TaskFailedCallback() {
+
+			public void onTaskFailed(String workspaceReference) {
+				createComment(userService.load(aiId), issueService.load(issueId),
+						"Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
+			}
+
+		};
 	}
 
 	@Transactional
