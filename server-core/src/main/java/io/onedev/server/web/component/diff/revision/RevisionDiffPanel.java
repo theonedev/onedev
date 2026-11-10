@@ -724,6 +724,8 @@ public abstract class RevisionDiffPanel extends Panel {
 					public void setReviewed(AjaxRequestTarget target, boolean reviewed) {
 						reviewSupport.setReviewed(change.getPath(), reviewed);
 						target.add(reviewProgress);
+						if (fileTree != null && treeContainer.isVisible())
+							fileTree.updateNode(change.getPath(), target);
 					}
 
 					@Override
@@ -1171,6 +1173,14 @@ public abstract class RevisionDiffPanel extends Panel {
 							return StringUtils.stripEnd(label, "/");
 						}
 					}));
+					link.add(new SpriteImage("reviewed", "tick") {
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							var reviewSupport = getReviewSupport();
+							setVisible(!path.endsWith("/") && reviewSupport != null && reviewSupport.isReviewed(path));
+						}
+					});
 					fragment.add(link);
 
 					return fragment;
