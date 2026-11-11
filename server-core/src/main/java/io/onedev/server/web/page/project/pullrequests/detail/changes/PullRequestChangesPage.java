@@ -278,14 +278,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				getComparisonBase());
 	}
 	
-	private boolean isOutdated() {
-		for (PullRequestUpdate update: getPullRequest().getUpdates()) {
-			if (update.getHeadCommitHash().equals(state.newCommitHash))
-				return false;
-		}
-		return true;
-	}
-
 	private PullRequestService getPullRequestService() {
 		return OneDev.getInstance(PullRequestService.class);
 	}
@@ -571,7 +563,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	
 	private void newContent(@Nullable IPartialPageRequestHandler handler) {
 		Component content;
-		if (isOutdated()) {
+		if (getCommitIndex(state.newCommitHash) == -1) {
 			content = new Fragment("content", "waitingFrag", this);
 			content.add(new ChangeObserver() {
 
