@@ -378,7 +378,7 @@ public class ContainerServlet extends HttpServlet {
 							}
 						}
 						
-						response.setStatus(SC_OK);
+						response.setStatus(SC_CREATED);
 						response.setHeader("Docker-Content-Digest",
 								"sha256:" + hash);
 						response.setHeader("Location", getManifestUrl(projectPath, repository, reference));
