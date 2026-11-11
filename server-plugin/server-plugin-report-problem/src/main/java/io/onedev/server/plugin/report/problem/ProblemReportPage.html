@@ -24,7 +24,9 @@
 					</div>
 					<wicket:enclosure child="problems">
 						<div class="problems mt-2">
-							<div wicket:id="tooManyProblems" class="alert alert-notice alert-light-warning"></div>
+							<div wicket:id="tooManyProblems" class="text-warning mx-3 mb-2">
+								<wicket:svg href="warning-o" class="icon" aria-hidden="true"/> <span wicket:id="message"></span>
+							</div>
 							<div wicket:id="problems" class="problem px-3 py-2 rounded bg-hover-light">
 								<div class="d-flex mb-1">
 									<div class="mr-auto">

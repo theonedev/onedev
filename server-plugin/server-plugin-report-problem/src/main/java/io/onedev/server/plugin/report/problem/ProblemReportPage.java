@@ -254,8 +254,7 @@ public class ProblemReportPage extends BuildReportPage {
 					item.add(new BookmarkablePageLink<Void>("view", ProjectBlobPage.class, params)
 							.setVisible(groupKey instanceof BlobTarget.GroupKey));
 
-					item.add(new Label("tooManyProblems",
-							MessageFormat.format(_T("Too many problems, displaying first {0}"), String.valueOf(MAX_PROBLEMS_TO_DISPLAY))) {
+					var tooManyProblems = new WebMarkupContainer("tooManyProblems") {
 
 						@Override
 						protected void onConfigure() {
@@ -264,7 +263,10 @@ public class ProblemReportPage extends BuildReportPage {
 									&& item.getModelObject().getProblems().size() > MAX_PROBLEMS_TO_DISPLAY);
 						}
 
-					});
+					};
+					tooManyProblems.add(new Label("message",
+							MessageFormat.format(_T("Too many problems, displaying first {0}"), String.valueOf(MAX_PROBLEMS_TO_DISPLAY))));
+					item.add(tooManyProblems);
 
 					item.add(new ListView<>("problems", new LoadableDetachableModel<List<CodeProblem>>() {
 
