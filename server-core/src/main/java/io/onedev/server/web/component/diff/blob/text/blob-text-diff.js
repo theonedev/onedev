@@ -982,16 +982,15 @@ onedev.server.blobTextDiff = {
 		return leftSide ? $numbers.last() : $numbers.first();
 	},
 	highlightCommentTrigger: function($container) {
-		$container.find(".comment-trigger").removeClass("active");
+		$container.find(".comment-indicator, .comment-trigger").removeClass("active");
 		var openComment = $container.data("openComment");
 		if (openComment) {
 			var line = parseInt(openComment.range.fromRow);
 			var $indicator = onedev.server.blobTextDiff.getLineNumTd($container, openComment.range.leftSide, line).children(".comment-indicator");
 			if ($indicator.length != 0) {
 				var comments = $indicator.data("comments");
-				if (comments.length == 1) {
-					$indicator.addClass("active");
-				} else {
+				$indicator.addClass("active");
+				if (comments.length != 1) {
 					var oldOrNew = openComment.range.leftSide?"old":"new";
 					$container.find("." + oldOrNew + ".comment-popover[data-line='" + line + "'] a").each(function() {
 						var comment = comments[$(this).index()];			        						
