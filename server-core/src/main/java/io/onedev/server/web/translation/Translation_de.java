@@ -423,6 +423,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Application Access", "Anwendungszugriff");
 		m.put("Application deleted", "Anwendung gelöscht");
 		m.put("Application registered", "Anwendung registriert");
+		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
+			"Anwendungen rufen den öffentlichen Schlüssel von diesem JSON Web Key Set (JWKS)-Endpunkt ab. Die URL bleibt gleich, wenn der Schlüssel neu generiert wird.");
 		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
 			"Anwendungen mit Zugriff auf Ihr Konto und ausgewählte Projekte. Öffnen Sie eine Anwendung, um deren Tokens und Berechtigungen zu überprüfen oder den Zugriff zu widerrufen.");
 		m.put("Apply suggested change from code comment", "Vorgeschlagene Änderung aus Code-Kommentar übernehmen");
@@ -1026,6 +1028,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Copy dashboard", "Dashboard kopieren");
 		m.put("Copy permanent link", "Permanenter Link kopieren");
 		m.put("Copy public key", "Öffentlichen Schlüssel kopieren");
+		m.put("Copy public key URL", "Öffentliche Schlüssel-URL kopieren");
 		m.put("Copy selected text to clipboard", "Ausgewählten Text in die Zwischenablage kopieren");
 		m.put("Copy the client secret now. It will not be shown again.", "Kopieren Sie jetzt das Client-Geheimnis. Es wird nicht erneut angezeigt.");
 		m.put("Copy this executor", "Diesen Executor kopieren");
@@ -1262,7 +1265,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Description too long", "Beschreibung zu lang");
 		m.put("Destination Path", "Zielpfad");
 		m.put("Destinations", "Ziele");
-		m.put("Diff is too large to be displayed.", "Diff ist zu groß, um angezeigt zu werden.");
 		m.put("Diff options", "Diff-Optionen");
 		m.put("Digest", "Digest");
 		m.put("Digest invalid", "Digest ungültig");
@@ -2228,6 +2230,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Key Fingerprint", "Schlüssel-Fingerabdruck");
 		m.put("Key ID", "Schlüssel-ID");
 		m.put("Key Secret", "Schlüssel-Geheimnis");
+		m.put("Key Size", "Schlüsselgröße");
 		m.put("Key Type", "Schlüsseltyp");
 		m.put("Keys", "Schlüssel");
 		m.put("Kubectl Config File", "Kubectl-Konfigurationsdatei");
@@ -2728,6 +2731,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("On Behalf Of", "Im Namen von");
 		m.put("On Branches", "Auf Branches");
 		m.put("One year", "Ein Jahr");
+		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
+			"OneDev generiert diesen Schlüssel automatisch, um OpenID Connect ID-Tokens zu signieren. Anwendungen verwenden seinen öffentlichen Schlüssel, um zu überprüfen, dass sich Benutzer über diese OneDev-Instanz angemeldet haben.");
 		m.put("Online", "Online");
 		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"Erstelle nur einen Merge-Commit, wenn der Zielbranch nicht auf den Quellbranch vorwärtsgeführt werden kann");
@@ -3052,7 +3057,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Optionally specify the minimum value allowed.", "Optional geben Sie den minimal zulässigen Wert an.");
 		m.put("Optionally specify the project to publish site files to. Leave empty to publish to current project", 
 			"Optional geben Sie das Projekt an, in dem die Website-Dateien veröffentlicht werden sollen. Leer lassen, um im aktuellen Projekt zu veröffentlichen");
-		m.put("Optionally specify user name to access remote repository", "Optional geben Sie den Benutzernamen für den Zugriff auf das Remote-Repository an");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"Optional geben Sie gültige Bereiche für konventionelle Commits an (drücken Sie ENTER, um einen Wert hinzuzufügen). Leer lassen, um beliebige Bereiche zuzulassen");
 		m.put("Optionally specify valid types of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary type", 
@@ -3388,6 +3392,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Bild-Cache des Docker-Buildx-Builders bereinigen. Dieser Schritt ruft den Befehl docker buildx prune auf, um den Cache des Builders zu entfernen, der vom Docker- oder Sandbox-Executor verwendet wird.");
 		m.put("Public", "Öffentlich");
 		m.put("Public Key", "Öffentlicher Schlüssel");
+		m.put("Public Key JSON", "Öffentlicher Schlüssel JSON");
+		m.put("Public Key URL", "Öffentliche Schlüssel-URL");
 		m.put("Public Roles", "Öffentliche Rollen");
 		m.put("Public site", "Öffentliche Seite");
 		m.put("Publish", "Veröffentlichen");
@@ -3939,7 +3945,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Show previous match", "Vorherige Übereinstimmung anzeigen");
 		m.put("Show test cases of this test suite", "Testfälle dieser Test-Suite anzeigen");
 		m.put("Show total estimated/spent time", "Gesamte geschätzte/aufgewendete Zeit anzeigen");
-		m.put("Showing first {0} files as there are too many", "Zeige die ersten {0} Dateien, da es zu viele gibt");
 		m.put("Showing the latest {0} entries. Download the log for all entries.", "Die neuesten {0} Einträge werden angezeigt. Laden Sie das Protokoll herunter, um alle Einträge zu sehen.");
 		m.put("Sign In", "Anmelden");
 		m.put("Sign In To", "Anmelden bei");
@@ -3960,6 +3965,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Signed with an unknown GPG key ", "Mit einem unbekannten GPG-Schlüssel signiert");
 		m.put("Signed with an unknown ssh key", "Mit einem unbekannten SSH-Schlüssel signiert");
 		m.put("Signer Email Addresses", "Signer-E-Mail-Adressen");
+		m.put("Signing Algorithm", "Signaturalgorithmus");
 		m.put("Signing Key ID", "Signierschlüssel-ID");
 		m.put("Similar Issues", "Ähnliche Probleme");
 		m.put("Single Sign On", "Single Sign-On");
@@ -5359,6 +5365,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("backlog ", "Rückstand");
 		m.put("base", "Basis");
 		m.put("before specified date", "vor dem angegebenen Datum");
+		m.put("bits", "Bits");
 		m.put("branch \"{0}\" is created", "Branch \"{0}\" wurde erstellt");
 		m.put("branch is created", "Branch wurde erstellt");
 		m.put("branch the build commit is merged into", "Zweig, in den der Build-Commit integriert wird");
@@ -5589,16 +5596,21 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
-			"Anwendungen rufen den öffentlichen Schlüssel von diesem JSON Web Key Set (JWKS)-Endpunkt ab. Die URL bleibt gleich, wenn der Schlüssel neu generiert wird.");
-		m.put("Copy public key URL", "Öffentliche Schlüssel-URL kopieren");
-		m.put("Key Size", "Schlüsselgröße");
-		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
-			"OneDev generiert diesen Schlüssel automatisch, um OpenID Connect ID-Tokens zu signieren. Anwendungen verwenden seinen öffentlichen Schlüssel, um zu überprüfen, dass sich Benutzer über diese OneDev-Instanz angemeldet haben.");
-		m.put("Public Key JSON", "Öffentlicher Schlüssel JSON");
-		m.put("Public Key URL", "Öffentliche Schlüssel-URL");
-		m.put("Signing Algorithm", "Signaturalgorithmus");
-		m.put("bits", "Bits");
+		m.put("Absolute path in job containers", "Absoluter Pfad in Job-Containern");
+		m.put("Download this patch?", "Diesen Patch herunterladen?");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"Datei oder Verzeichnis im Server-/Agent-Dateisystem. Halten Sie die Quelle, alle Symlink-Ziele und deren übergeordnete Verzeichnisse unter Administratorenkontrolle. Wenn der Server/Agent in Docker läuft, binden Sie ihn zuerst in den Server/Agent ein und geben Sie den darin sichtbaren Pfad an");
+		m.put("Mount this path read-only at the specified container target", "Diesen Pfad schreibgeschützt am angegebenen Containerziel einbinden");
+		m.put("Next changed file", "Nächste geänderte Datei");
+		m.put("No file to show diff", "Keine Datei zum Anzeigen des Diffs");
+		m.put("Prevent jobs from modifying the mounted file or directory", "Verhindern, dass Jobs die eingebundene Datei oder das Verzeichnis ändern");
+		m.put("Previous changed file", "Vorherige geänderte Datei");
+		m.put("Read Only", "Schreibgeschützt");
+		m.put("Reviewed", "Überprüft");
+		m.put("Specify user name to access remote repository", "Benutzernamen angeben, um auf das Remote-Repository zuzugreifen");
+		m.put("Toggle file tree", "Dateibaum umschalten");
+		m.put("Whether or not to use credentials to access remote repository", "Ob Anmeldeinformationen verwendet werden sollen, um auf das Remote-Repository zuzugreifen");
+		m.put("With Credential", "Mit Anmeldeinformationen");
 	}
 			
 	@Override

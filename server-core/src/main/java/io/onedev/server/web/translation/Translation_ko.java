@@ -423,6 +423,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Application Access", "애플리케이션 접근");
 		m.put("Application deleted", "애플리케이션 삭제됨");
 		m.put("Application registered", "애플리케이션 등록됨");
+		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
+			"애플리케이션은 이 JSON Web Key Set (JWKS) 엔드포인트에서 공개 키를 가져옵니다. 키가 재생성되어도 URL은 동일하게 유지됩니다.");
 		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
 			"계정 및 선택된 프로젝트에 접근할 수 있는 애플리케이션입니다. 애플리케이션을 열어 토큰 및 권한을 검토하거나 접근 권한을 취소하세요.");
 		m.put("Apply suggested change from code comment", "코드 댓글에서 제안된 변경 사항 적용");
@@ -1026,6 +1028,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy dashboard", "대시보드 복사");
 		m.put("Copy permanent link", "영구 링크 복사");
 		m.put("Copy public key", "공개 키 복사");
+		m.put("Copy public key URL", "공개 키 URL 복사");
 		m.put("Copy selected text to clipboard", "선택된 텍스트를 클립보드에 복사");
 		m.put("Copy the client secret now. It will not be shown again.", "지금 클라이언트 비밀을 복사하세요. 다시 표시되지 않습니다.");
 		m.put("Copy this executor", "이 실행기를 복사");
@@ -1262,7 +1265,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Description too long", "설명이 너무 깁니다");
 		m.put("Destination Path", "대상 경로");
 		m.put("Destinations", "대상");
-		m.put("Diff is too large to be displayed.", "차이가 너무 커서 표시할 수 없습니다.");
 		m.put("Diff options", "차이 옵션");
 		m.put("Digest", "다이제스트");
 		m.put("Digest invalid", "다이제스트가 유효하지 않음");
@@ -2228,6 +2230,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Key Fingerprint", "키 지문");
 		m.put("Key ID", "키 ID");
 		m.put("Key Secret", "키 비밀");
+		m.put("Key Size", "키 크기");
 		m.put("Key Type", "키 유형");
 		m.put("Keys", "키");
 		m.put("Kubectl Config File", "Kubectl 구성 파일");
@@ -2728,6 +2731,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("On Behalf Of", "대신하여");
 		m.put("On Branches", "브랜치에서");
 		m.put("One year", "1년");
+		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
+			"OneDev는 OpenID Connect ID 토큰에 서명하기 위해 이 키를 자동으로 생성합니다. 애플리케이션은 이 OneDev 인스턴스를 통해 사용자가 로그인했는지 확인하기 위해 공개 키를 사용합니다.");
 		m.put("Online", "온라인");
 		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"대상 브랜치를 소스 브랜치로 빠르게 병합할 수 없는 경우에만 병합 커밋 생성");
@@ -3052,7 +3057,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify the minimum value allowed.", "선택적으로 허용되는 최소 값을 지정하십시오.");
 		m.put("Optionally specify the project to publish site files to. Leave empty to publish to current project", 
 			"선택적으로 사이트 파일을 게시할 프로젝트를 지정하십시오. 현재 프로젝트에 게시하려면 비워두십시오.");
-		m.put("Optionally specify user name to access remote repository", "선택적으로 원격 저장소에 접근할 사용자 이름을 지정하십시오.");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"선택적으로 유효한 컨벤션 커밋 범위를 지정하십시오 (값을 추가하려면 ENTER를 누르십시오). 비워두면 임의의 범위를 허용합니다.");
 		m.put("Optionally specify valid types of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary type", 
@@ -3388,6 +3392,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"도커 buildx 빌더의 이미지 캐시를 정리합니다. 이 단계는 Docker 또는 샌드박스 실행기가 사용하는 빌더의 캐시를 제거하기 위해 docker buildx prune 명령을 호출합니다.");
 		m.put("Public", "공개");
 		m.put("Public Key", "공개 키");
+		m.put("Public Key JSON", "공개 키 JSON");
+		m.put("Public Key URL", "공개 키 URL");
 		m.put("Public Roles", "공개 역할");
 		m.put("Public site", "공용 사이트");
 		m.put("Publish", "게시");
@@ -3939,7 +3945,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Show previous match", "이전 일치 항목 보기");
 		m.put("Show test cases of this test suite", "이 테스트 스위트의 테스트 케이스 보기");
 		m.put("Show total estimated/spent time", "총 예상/소요 시간 보기");
-		m.put("Showing first {0} files as there are too many", "파일이 너무 많아 처음 {0}개 파일만 표시합니다");
 		m.put("Showing the latest {0} entries. Download the log for all entries.", "최신 {0}개의 항목을 표시 중입니다. 모든 항목을 보려면 로그를 다운로드하세요.");
 		m.put("Sign In", "로그인");
 		m.put("Sign In To", "로그인하기");
@@ -3960,6 +3965,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Signed with an unknown GPG key ", "알 수 없는 GPG 키로 서명됨");
 		m.put("Signed with an unknown ssh key", "알 수 없는 ssh 키로 서명됨");
 		m.put("Signer Email Addresses", "서명자 이메일 주소");
+		m.put("Signing Algorithm", "서명 알고리즘");
 		m.put("Signing Key ID", "서명 키 ID");
 		m.put("Similar Issues", "유사한 이슈");
 		m.put("Single Sign On", "싱글 사인온");
@@ -5359,6 +5365,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("backlog ", "백로그");
 		m.put("base", "기본");
 		m.put("before specified date", "지정된 날짜 이전");
+		m.put("bits", "비트");
 		m.put("branch \"{0}\" is created", "브랜치 \"{0}\"가 생성되었습니다.");
 		m.put("branch is created", "브랜치가 생성되었습니다.");
 		m.put("branch the build commit is merged into", "빌드 커밋이 병합된 브랜치");
@@ -5589,16 +5596,21 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
-			"애플리케이션은 이 JSON Web Key Set (JWKS) 엔드포인트에서 공개 키를 가져옵니다. 키가 재생성되어도 URL은 동일하게 유지됩니다.");
-		m.put("Copy public key URL", "공개 키 URL 복사");
-		m.put("Key Size", "키 크기");
-		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
-			"OneDev는 OpenID Connect ID 토큰에 서명하기 위해 이 키를 자동으로 생성합니다. 애플리케이션은 이 OneDev 인스턴스를 통해 사용자가 로그인했는지 확인하기 위해 공개 키를 사용합니다.");
-		m.put("Public Key JSON", "공개 키 JSON");
-		m.put("Public Key URL", "공개 키 URL");
-		m.put("Signing Algorithm", "서명 알고리즘");
-		m.put("bits", "비트");
+		m.put("Absolute path in job containers", "작업 컨테이너에서의 절대 경로");
+		m.put("Download this patch?", "이 패치를 다운로드하시겠습니까?");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"서버/에이전트 파일 시스템의 파일 또는 디렉터리. 소스, 심볼릭 링크 대상 및 상위 디렉터리를 관리자 제어 하에 유지하십시오. 서버/에이전트가 Docker에서 실행되는 경우, 먼저 서버/에이전트에 바인드 마운트하고 내부에서 보이는 경로를 지정하십시오");
+		m.put("Mount this path read-only at the specified container target", "이 경로를 지정된 컨테이너 대상에 읽기 전용으로 마운트합니다");
+		m.put("Next changed file", "다음 변경된 파일");
+		m.put("No file to show diff", "비교할 파일이 없습니다");
+		m.put("Prevent jobs from modifying the mounted file or directory", "작업이 마운트된 파일 또는 디렉터리를 수정하지 못하도록 방지합니다");
+		m.put("Previous changed file", "이전 변경된 파일");
+		m.put("Read Only", "읽기 전용");
+		m.put("Reviewed", "검토 완료");
+		m.put("Specify user name to access remote repository", "원격 저장소에 접근하기 위한 사용자 이름을 지정하십시오");
+		m.put("Toggle file tree", "파일 트리 전환");
+		m.put("Whether or not to use credentials to access remote repository", "원격 저장소에 접근하기 위해 자격 증명을 사용할지 여부");
+		m.put("With Credential", "자격 증명 사용");
 	}
 		
 	@Override

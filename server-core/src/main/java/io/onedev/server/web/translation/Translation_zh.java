@@ -449,6 +449,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Application Access", "应用程序访问");
 		m.put("Application deleted", "应用程序已删除");
 		m.put("Application registered", "应用程序已注册");
+		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
+			"应用程序从此 JSON Web Key Set (JWKS) 端点检索公钥。密钥重新生成时，URL 保持不变。");
 		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
 			"可以访问您账户和选定项目的应用程序。打开一个应用程序以查看其令牌和权限，或撤销其访问权限。");
 		m.put("Apply suggested change from code comment", "从代码评论应用建议的更改");
@@ -1052,6 +1054,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy dashboard", "复制仪表板");
 		m.put("Copy permanent link", "复制永久链接");
 		m.put("Copy public key", "复制公钥");
+		m.put("Copy public key URL", "复制公钥 URL");
 		m.put("Copy selected text to clipboard", "复制选中的文本到剪贴板");
 		m.put("Copy the client secret now. It will not be shown again.", "立即复制客户端密钥。它将不会再次显示。");
 		m.put("Copy this executor", "复制此执行器");
@@ -1288,7 +1291,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Description too long", "描述过长");
 		m.put("Destination Path", "目标路径");
 		m.put("Destinations", "目标");
-		m.put("Diff is too large to be displayed.", "差异太大，无法显示");
 		m.put("Diff options", "比较选项");
 		m.put("Digest", "摘要");
 		m.put("Digest invalid", "摘要无效");
@@ -2254,6 +2256,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Key Fingerprint", "密钥指纹");
 		m.put("Key ID", "密钥 ID");
 		m.put("Key Secret", "密钥密钥");
+		m.put("Key Size", "密钥大小");
 		m.put("Key Type", "密钥类型");
 		m.put("Keys", "密钥");
 		m.put("Kubectl Config File", "Kubectl 配置文件");
@@ -2754,6 +2757,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("On Behalf Of", "发起");
 		m.put("On Branches", "在分支上");
 		m.put("One year", "一年");
+		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
+			"OneDev 自动生成此密钥以签署 OpenID Connect ID 令牌。应用程序使用其公钥验证用户是否通过此 OneDev 实例登录。");
 		m.put("Online", "在线");
 		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"仅当目标分支不能 fast-forward 到源分支时才创建合并提交");
@@ -3078,7 +3083,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify the minimum value allowed.", "可选择指定允许的最小值");
 		m.put("Optionally specify the project to publish site files to. Leave empty to publish to current project", 
 			"可选择指定要发布站点文件的项目。留空则发布到当前项目");
-		m.put("Optionally specify user name to access remote repository", "可选择指定用于访问远程仓库的用户名");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"可选择指定有效的常规提交范围（按 ENTER 添加值）。留空则允许任意范围");
 		m.put("Optionally specify valid types of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary type", 
@@ -3414,6 +3418,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"清理 docker buildx 构建器的镜像缓存。此步骤调用 docker buildx prune 命令以删除 Docker 或沙箱执行器使用的构建器缓存");
 		m.put("Public", "公开");
 		m.put("Public Key", "公钥");
+		m.put("Public Key JSON", "公钥 JSON");
+		m.put("Public Key URL", "公钥 URL");
 		m.put("Public Roles", "公共角色");
 		m.put("Public site", "公共站点");
 		m.put("Publish", "发布");
@@ -3965,7 +3971,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Show previous match", "显示上一个匹配");
 		m.put("Show test cases of this test suite", "显示此测试套件的测试用例");
 		m.put("Show total estimated/spent time", "显示总预计/已用时间");
-		m.put("Showing first {0} files as there are too many", "显示前 {0} 个文件，因为文件太多");
 		m.put("Showing the latest {0} entries. Download the log for all entries.", "显示最新的 {0} 条条目。下载日志以获取所有条目。");
 		m.put("Sign In", "登录");
 		m.put("Sign In To", "登录到");
@@ -3986,6 +3991,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Signed with an unknown GPG key ", "使用未知的 GPG 密钥签名");
 		m.put("Signed with an unknown ssh key", "使用未知的 ssh 密钥签名");
 		m.put("Signer Email Addresses", "签署者邮箱地址");
+		m.put("Signing Algorithm", "签名算法");
 		m.put("Signing Key ID", "签署密钥 ID");
 		m.put("Similar Issues", "相似工单");
 		m.put("Single Sign On", "单点登录");
@@ -5385,6 +5391,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("backlog ", "待办");
 		m.put("base", "基准");
 		m.put("before specified date", "在指定日期之前");
+		m.put("bits", "位");
 		m.put("branch \"{0}\" is created", "分支 \"{0}\" 已创建");
 		m.put("branch is created", "分支已创建");
 		m.put("branch the build commit is merged into", "构建提交合并到的分支");
@@ -5615,16 +5622,21 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
-			"应用程序从此 JSON Web Key Set (JWKS) 端点检索公钥。密钥重新生成时，URL 保持不变。");
-		m.put("Copy public key URL", "复制公钥 URL");
-		m.put("Key Size", "密钥大小");
-		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
-			"OneDev 自动生成此密钥以签署 OpenID Connect ID 令牌。应用程序使用其公钥验证用户是否通过此 OneDev 实例登录。");
-		m.put("Public Key JSON", "公钥 JSON");
-		m.put("Public Key URL", "公钥 URL");
-		m.put("Signing Algorithm", "签名算法");
-		m.put("bits", "位");
+		m.put("Absolute path in job containers", "任务 容器中的绝对路径");
+		m.put("Download this patch?", "下载此补丁？");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"服务器/代理文件系统上的文件或目录。保持源文件、任何符号链接目标及其父目录在管理员控制下。如果服务器/代理运行在 Docker 中，先将其绑定挂载到服务器/代理中，并指定其内部可见的路径");
+		m.put("Mount this path read-only at the specified container target", "将此路径以只读方式挂载到指定的容器目标");
+		m.put("Next changed file", "下一个更改的文件");
+		m.put("No file to show diff", "没有文件显示差异");
+		m.put("Prevent jobs from modifying the mounted file or directory", "防止任务 修改已挂载的文件或目录");
+		m.put("Previous changed file", "上一个更改的文件");
+		m.put("Read Only", "只读");
+		m.put("Reviewed", "已审阅");
+		m.put("Specify user name to access remote repository", "指定用户名以访问远程存储库");
+		m.put("Toggle file tree", "切换文件树");
+		m.put("Whether or not to use credentials to access remote repository", "是否使用凭据访问远程存储库");
+		m.put("With Credential", "使用凭据");
 	}
 		
 	@Override

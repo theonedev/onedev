@@ -423,6 +423,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Application Access", "アプリケーションアクセス");
 		m.put("Application deleted", "アプリケーションが削除されました");
 		m.put("Application registered", "アプリケーションが登録されました");
+		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
+			"アプリケーションは、このJSON Web Key Set (JWKS) エンドポイントから公開鍵を取得します。鍵が再生成されてもURLは変わりません。");
 		m.put("Applications with access to your account and selected projects. Open an application to review its tokens and permissions, or revoke its access.", 
 			"アカウントおよび選択されたプロジェクトにアクセスできるアプリケーション。トークンと権限を確認するか、アクセスを取り消すにはアプリケーションを開いてください。");
 		m.put("Apply suggested change from code comment", "コードコメントから提案された変更を適用");
@@ -1026,6 +1028,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy dashboard", "ダッシュボードをコピー");
 		m.put("Copy permanent link", "永久リンクをコピー");
 		m.put("Copy public key", "公開鍵をコピー");
+		m.put("Copy public key URL", "公開鍵URLをコピー");
 		m.put("Copy selected text to clipboard", "選択されたテキストをクリップボードにコピー");
 		m.put("Copy the client secret now. It will not be shown again.", "今すぐクライアントシークレットをコピーしてください。再表示されることはありません。");
 		m.put("Copy this executor", "このエグゼキューターをコピー");
@@ -1262,7 +1265,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Description too long", "説明が長すぎます");
 		m.put("Destination Path", "宛先パス");
 		m.put("Destinations", "宛先");
-		m.put("Diff is too large to be displayed.", "差分が大きすぎて表示できません。");
 		m.put("Diff options", "差分オプション");
 		m.put("Digest", "ダイジェスト");
 		m.put("Digest invalid", "ダイジェストが無効");
@@ -2228,6 +2230,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Key Fingerprint", "キーのフィンガープリント");
 		m.put("Key ID", "キーID");
 		m.put("Key Secret", "キーシークレット");
+		m.put("Key Size", "鍵サイズ");
 		m.put("Key Type", "キーの種類");
 		m.put("Keys", "キー");
 		m.put("Kubectl Config File", "Kubectl設定ファイル");
@@ -2728,6 +2731,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("On Behalf Of", "代理として");
 		m.put("On Branches", "ブランチ上");
 		m.put("One year", "1年");
+		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
+			"OneDevは、この鍵を自動的に生成してOpenID Connect IDトークンに署名します。アプリケーションは、その公開鍵を使用して、このOneDevインスタンスを通じてサインインしたユーザーを検証します。");
 		m.put("Online", "オンライン");
 		m.put("Only create merge commit if target branch cannot be fast-forwarded to source branch", 
 			"ターゲットブランチがソースブランチに対して高速フォワードできない場合のみマージコミットを作成");
@@ -3052,7 +3057,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify the minimum value allowed.", "必要に応じて許容される最小値を指定します");
 		m.put("Optionally specify the project to publish site files to. Leave empty to publish to current project", 
 			"必要に応じてサイトファイルを公開するプロジェクトを指定します。空欄の場合は現在のプロジェクトに公開されます");
-		m.put("Optionally specify user name to access remote repository", "必要に応じてリモートリポジトリにアクセスするためのユーザー名を指定します");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"必要に応じて従来のコミットの有効なスコープを指定します（ENTERキーを押して値を追加）。空欄の場合は任意のスコープを許可します");
 		m.put("Optionally specify valid types of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary type", 
@@ -3388,6 +3392,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"Docker buildxビルダーのイメージキャッシュを削除します。このステップはDockerまたはサンドボックスエグゼキューターが使用するビルダーのキャッシュを削除するためにdocker buildx pruneコマンドを呼び出します");
 		m.put("Public", "公開");
 		m.put("Public Key", "公開鍵");
+		m.put("Public Key JSON", "公開鍵JSON");
+		m.put("Public Key URL", "公開鍵URL");
 		m.put("Public Roles", "公開の役割");
 		m.put("Public site", "公開サイト");
 		m.put("Publish", "公開");
@@ -3939,7 +3945,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Show previous match", "前の一致を表示");
 		m.put("Show test cases of this test suite", "このテストスイートのテストケースを表示");
 		m.put("Show total estimated/spent time", "推定/使用時間の合計を表示");
-		m.put("Showing first {0} files as there are too many", "ファイルが多すぎるため、最初の{0}ファイルを表示しています");
 		m.put("Showing the latest {0} entries. Download the log for all entries.", "最新の {0} 件のエントリを表示しています。すべてのエントリをダウンロードするにはログをダウンロードしてください。");
 		m.put("Sign In", "サインイン");
 		m.put("Sign In To", "サインイン先");
@@ -3960,6 +3965,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Signed with an unknown GPG key ", "不明なGPGキーで署名されています");
 		m.put("Signed with an unknown ssh key", "未知のsshキーで署名されました");
 		m.put("Signer Email Addresses", "署名者のメールアドレス");
+		m.put("Signing Algorithm", "署名アルゴリズム");
 		m.put("Signing Key ID", "署名キーID");
 		m.put("Similar Issues", "類似の課題");
 		m.put("Single Sign On", "シングルサインオン");
@@ -5359,6 +5365,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("backlog ", "バックログ");
 		m.put("base", "ベース");
 		m.put("before specified date", "指定された日付以前");
+		m.put("bits", "ビット");
 		m.put("branch \"{0}\" is created", "ブランチ \"{0}\" が作成されました");
 		m.put("branch is created", "ブランチが作成されました");
 		m.put("branch the build commit is merged into", "ビルドコミットがマージされるブランチ");
@@ -5589,16 +5596,21 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Applications retrieve the public key from this JSON Web Key Set (JWKS) endpoint. The URL stays the same when the key is regenerated.", 
-			"アプリケーションは、このJSON Web Key Set (JWKS) エンドポイントから公開鍵を取得します。鍵が再生成されてもURLは変わりません。");
-		m.put("Copy public key URL", "公開鍵URLをコピー");
-		m.put("Key Size", "鍵サイズ");
-		m.put("OneDev generates this key automatically to sign OpenID Connect ID tokens. Applications use its public key to verify that users signed in through this OneDev instance.", 
-			"OneDevは、この鍵を自動的に生成してOpenID Connect IDトークンに署名します。アプリケーションは、その公開鍵を使用して、このOneDevインスタンスを通じてサインインしたユーザーを検証します。");
-		m.put("Public Key JSON", "公開鍵JSON");
-		m.put("Public Key URL", "公開鍵URL");
-		m.put("Signing Algorithm", "署名アルゴリズム");
-		m.put("bits", "ビット");
+		m.put("Absolute path in job containers", "ジョブコンテナ内の絶対パス");
+		m.put("Download this patch?", "このパッチをダウンロードしますか？");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"サーバー/エージェントのファイルシステム上のファイルまたはディレクトリ。ソース、シンボリックリンクのターゲット、およびその親ディレクトリを管理者の管理下に置いてください。サーバー/エージェントがDockerで実行されている場合、最初にそれをサーバー/エージェントにバインドマウントし、その中で見えるパスを指定してください");
+		m.put("Mount this path read-only at the specified container target", "このパスを指定されたコンテナターゲットに読み取り専用でマウント");
+		m.put("Next changed file", "次の変更されたファイル");
+		m.put("No file to show diff", "差分を表示するファイルがありません");
+		m.put("Prevent jobs from modifying the mounted file or directory", "ジョブがマウントされたファイルまたはディレクトリを変更するのを防ぐ");
+		m.put("Previous changed file", "前の変更されたファイル");
+		m.put("Read Only", "読み取り専用");
+		m.put("Reviewed", "レビュー済み");
+		m.put("Specify user name to access remote repository", "リモートリポジトリにアクセスするためのユーザー名を指定");
+		m.put("Toggle file tree", "ファイルツリーを切り替え");
+		m.put("Whether or not to use credentials to access remote repository", "リモートリポジトリにアクセスするために資格情報を使用するかどうか");
+		m.put("With Credential", "資格情報あり");
 	}
 		
 	@Override
