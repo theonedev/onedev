@@ -110,7 +110,7 @@ public class SsoProcessPage extends SimplePage {
 
 		if (getLoginUser() != null) {
 			String redirectUrlAfterLogin = (String) getSession().getAttribute(SESSION_ATTR_REDIRECT_URL);
-			if (StringUtils.isBlank(redirectUrlAfterLogin))		
+			if (StringUtils.isNotBlank(redirectUrlAfterLogin))
 				throw new RedirectToUrlException(redirectUrlAfterLogin);		
 			else
 				throw new RestartResponseException(HomePage.class);
