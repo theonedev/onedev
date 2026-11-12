@@ -359,6 +359,7 @@ public class PullRequestNotificationManager implements Serializable {
 				}
 			}
 				
+			boolean codeCommentEvent = event instanceof PullRequestCodeCommentEvent;
 			if (event.getCommentText() instanceof MarkdownText) {
 				MarkdownText markdown = (MarkdownText) event.getCommentText();
 				for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
@@ -366,7 +367,7 @@ public class PullRequestNotificationManager implements Serializable {
 					if (mentionedUser != null) {
 						mentionService.mention(request, mentionedUser);
 						watchService.watch(request, mentionedUser, true);
-						if (notifiedUsers.add(mentionedUser)) {
+						if (!codeCommentEvent && notifiedUsers.add(mentionedUser)) {
 							if (mentionedUser.getType() != AI) {
 								String subject = String.format(
 										"[Pull Request %s] (Mentioned You) %s", 
@@ -382,8 +383,7 @@ public class PullRequestNotificationManager implements Serializable {
 											getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
 											replyAddress, senderName, threadingReferences);
 								}
-							} else if (!(event instanceof PullRequestCodeCommentEvent)
-									&& user != null
+							} else if (user != null
 									&& !user.isSystem()
 									&& !user.equals(mentionedUser)
 									&& isAiEligible(user, request, mentionedUser, true)
@@ -395,7 +395,7 @@ public class PullRequestNotificationManager implements Serializable {
 				}
 			}
 		
-			if (!event.isMinor()) {
+			if (!codeCommentEvent && !event.isMinor()) {
 				Collection<String> bccEmailAddresses = new HashSet<>();
 				if (user != null && !notifiedUsers.contains(user) 
 						&& user.getPrimaryEmailAddress() != null 
