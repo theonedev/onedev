@@ -194,6 +194,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Absolute", "絶対");
 		m.put("Absolute or relative url of the image", "画像の絶対または相対 URL");
 		m.put("Absolute or relative url of the link", "リンクの絶対または相対 URL");
+		m.put("Absolute path in job containers", "ジョブコンテナ内の絶対パス");
 		m.put("Access", "アクセス");
 		m.put("Access Anonymously", "匿名でアクセス");
 		m.put("Access Build Log", "ビルドログにアクセス");
@@ -1388,6 +1389,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Download log", "ログをダウンロード");
 		m.put("Download patch", "パッチをダウンロード");
 		m.put("Download tag archive", "タグアーカイブをダウンロード");
+		m.put("Download this patch?", "このパッチをダウンロードしますか？");
 		m.put("Drop files here or click to upload", "ファイルをここにドロップするか、クリックしてアップロードしてください");
 		m.put("Dry Run", "ドライラン");
 		m.put("Due Date", "期限日");
@@ -1661,6 +1663,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("File name", "ファイル名");
 		m.put("File name patterns such as *.java, *.c", "ファイル名パターン（例: *.java, *.c）");
 		m.put("File not found", "ファイルが見つかりません");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"サーバー/エージェントのファイルシステム上のファイルまたはディレクトリ。ソース、シンボリックリンクのターゲット、およびその親ディレクトリを管理者の管理下に置いてください。サーバー/エージェントがDockerで実行されている場合、最初にそれをサーバー/エージェントにバインドマウントし、その中で見えるパスを指定してください");
 		m.put("Files", "ファイル一覧");
 		m.put("Files to Be Indexed", "インデックス対象のファイル");
 		m.put("Filter", "フィルター");
@@ -2446,6 +2450,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"<a wicket:id=\"buildSpec\">ビルド仕様</a>にインポートエラーがある可能性が高いです");
 		m.put("Mount Docker Sock", "Dockerソケットをマウント");
+		m.put("Mount this path read-only at the specified container target", "このパスを指定されたコンテナターゲットに読み取り専用でマウント");
 		m.put("Move", "移動");
 		m.put("Move All Queried Issues To...", "すべてのクエリ済み課題を移動...");
 		m.put("Move All Queried Projects To...", "すべてのクエリ済みプロジェクトを移動...");
@@ -2524,6 +2529,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"新しいバージョンが利用可能です。セキュリティ/重要な更新は赤、バグ修正は黄色、機能更新は青です。変更を表示するにはクリックしてください。システム設定で無効化できます。");
 		m.put("Next", "次へ");
 		m.put("Next Iteration ({0})", "次のイテレーション ({0})");
+		m.put("Next changed file", "次の変更されたファイル");
 		m.put("Next commit", "次のコミット");
 		m.put("Next year", "来年");
 		m.put("Next {0}", "次の{0}");
@@ -2589,6 +2595,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No fields to prompt", "プロンプトするフィールドなし");
 		m.put("No fields to remove", "削除するフィールドなし");
 		m.put("No file attachments", "ファイル添付なし");
+		m.put("No file to show diff", "差分を表示するファイルがありません");
 		m.put("No group by", "グループ化なし");
 		m.put("No groups claim returned", "返されたグループクレームなし");
 		m.put("No groups to remove from", "削除するグループがありません");
@@ -3303,9 +3310,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Prevent Deletion", "削除を防止");
 		m.put("Prevent Forced Push", "強制プッシュを防止");
 		m.put("Prevent Update", "更新を防止");
+		m.put("Prevent jobs from modifying the mounted file or directory", "ジョブがマウントされたファイルまたはディレクトリを変更するのを防ぐ");
 		m.put("Preview", "プレビュー");
 		m.put("Previous", "前へ");
 		m.put("Previous Value", "以前の値");
+		m.put("Previous changed file", "前の変更されたファイル");
 		m.put("Previous commit", "以前のコミット");
 		m.put("Previous year", "前年");
 		m.put("Previous {0}", "以前の{0}");
@@ -3514,6 +3523,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Re-run request submitted", "再実行リクエストが送信されました");
 		m.put("Re-run this build", "このビルドを再実行");
 		m.put("Read", "読み取り");
+		m.put("Read Only", "読み取り専用");
 		m.put("Read body", "本文を読み取る");
 		m.put("Readiness Check Command", "準備チェックコマンド");
 		m.put("Really want to delete this code comment?", "本当にこのコードコメントを削除しますか？");
@@ -3668,6 +3678,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Review required for deletion. Submit pull request instead", "削除にはレビューが必要です。代わりにプルリクエストを送信してください");
 		m.put("Review required for this change. Please submit pull request instead", "この変更にはレビューが必要です。代わりにプルリクエストを提出してください。");
 		m.put("Review required for this change. Submit pull request instead", "この変更にはレビューが必要です。代わりにプルリクエストを送信してください");
+		m.put("Reviewed", "レビュー済み");
 		m.put("Reviewers", "レビュアー");
 		m.put("Revision", "リビジョン");
 		m.put("Revision indexing in progress...", "リビジョンのインデックス作成中...");
@@ -4425,6 +4436,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify user name of above machine for SSH authentication", "SSH認証のための上記マシンのユーザー名を指定してください。");
 		m.put("Specify user name of specified registry", "指定されたレジストリのユーザー名を指定してください。");
 		m.put("Specify user name of the registry", "レジストリのユーザー名を指定してください。");
+		m.put("Specify user name to access remote repository", "リモートリポジトリにアクセスするためのユーザー名を指定");
 		m.put("Specify user name to authenticate with", "認証に使用するユーザー名を指定してください。");
 		m.put("Specify value of the environment variable", "環境変数の値を指定してください。");
 		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
@@ -4842,6 +4854,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Toggle comments", "コメントを切り替える");
 		m.put("Toggle commits", "コミットを切り替える");
 		m.put("Toggle detail message", "詳細メッセージを切り替える");
+		m.put("Toggle file tree", "ファイルツリーを切り替え");
 		m.put("Toggle fixed width font", "固定幅フォントを切り替える");
 		m.put("Toggle full screen", "全画面表示を切り替える");
 		m.put("Toggle half screen", "ハーフスクリーンを切り替え");
@@ -5249,6 +5262,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to send notifications to issue watchers for this change", "この変更について課題ウォッチャーに通知を送信するかどうか");
 		m.put("Whether or not to show branch/tag column", "ブランチ/タグ列を表示するかどうか");
 		m.put("Whether or not to show duration column", "期間列を表示するかどうか");
+		m.put("Whether or not to use credentials to access remote repository", "リモートリポジトリにアクセスするために資格情報を使用するかどうか");
 		m.put("Whether or not to use user avatar from a public service", "公開サービスからユーザーアバターを使用するかどうか");
 		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"参照の更新が高速フォワードできない場合に変更を上書きするために強制オプションを使用するかどうか");
@@ -5275,6 +5289,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Window", "ウィンドウ");
 		m.put("Window Memory", "ウィンドウメモリ");
 		m.put("Windows Batch", "Windowsバッチ");
+		m.put("With Credential", "資格情報あり");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"現在のユーザー数（{0}）で、サブスクリプションは<b>{1}</b>まで有効です");
 		m.put("Work In Progress", "作業中");
@@ -5596,21 +5611,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Absolute path in job containers", "ジョブコンテナ内の絶対パス");
-		m.put("Download this patch?", "このパッチをダウンロードしますか？");
-		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
-			"サーバー/エージェントのファイルシステム上のファイルまたはディレクトリ。ソース、シンボリックリンクのターゲット、およびその親ディレクトリを管理者の管理下に置いてください。サーバー/エージェントがDockerで実行されている場合、最初にそれをサーバー/エージェントにバインドマウントし、その中で見えるパスを指定してください");
-		m.put("Mount this path read-only at the specified container target", "このパスを指定されたコンテナターゲットに読み取り専用でマウント");
-		m.put("Next changed file", "次の変更されたファイル");
-		m.put("No file to show diff", "差分を表示するファイルがありません");
-		m.put("Prevent jobs from modifying the mounted file or directory", "ジョブがマウントされたファイルまたはディレクトリを変更するのを防ぐ");
-		m.put("Previous changed file", "前の変更されたファイル");
-		m.put("Read Only", "読み取り専用");
-		m.put("Reviewed", "レビュー済み");
-		m.put("Specify user name to access remote repository", "リモートリポジトリにアクセスするためのユーザー名を指定");
-		m.put("Toggle file tree", "ファイルツリーを切り替え");
-		m.put("Whether or not to use credentials to access remote repository", "リモートリポジトリにアクセスするために資格情報を使用するかどうか");
-		m.put("With Credential", "資格情報あり");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"インラインコメントやスレッドの更新ではウォッチャーにメール通知されません。通知するには、プルリクエストにコメントを投稿する、承認する、変更をリクエストする、またはコミットを追加してください。レビューリクエストも選択されたレビュアーに通知します。");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"ワークスペースをセットアップするために実行するシェルコマンドを任意で指定できます。これらのコマンドは\nクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます。キャッシュと\nユーザーデータが復元され、設定ファイルが生成された後に実行されます。");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"ワークスペースを終了するために実行するシェルコマンドを任意で指定できます。これらのコマンドは\nワークスペースが停止される際に、クローンされたリポジトリファイルを保持する作業ディレクトリから\n実行され、キャッシュとユーザーデータがアップロードされる前に実行されます。これらのコマンドの失敗は\nアップロードに影響を与えることなくログに記録されます。");
 	}
 		
 	@Override

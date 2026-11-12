@@ -111,11 +111,11 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 		return OneDev.getInstance(CodeCommentService.class).load(commentId);
 	}
 
-	public static String getNotificationWarning() {
+	public static String getPullRequestNotificationWarning() {
 		return _T("""
 			Inline comments and thread updates don't email watchers. To notify them, \
 			post a comment on the pull request, approve it, request changes, or add commits. \
-			A review request notifies the selected reviewer.""");
+			A review request also notifies the selected reviewer.""");
 	}
 	
 	private WebMarkupContainer newCommentOrReplyContainer() {
@@ -542,7 +542,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 		Fragment editFragment = new Fragment("actions", "commentOrReplyEditFrag", CodeCommentPanel.this);
 		
 		Form<?> form = new Form<Void>("form");
-		form.add(new Label("notificationWarning", getNotificationWarning())
+		form.add(new Label("notificationWarning", getPullRequestNotificationWarning())
 				.setVisible(showNotificationWarning));
 
 		CommentInput contentInput = new CommentInput("content", Model.of(""), true) {

@@ -60,6 +60,21 @@ public class TranslateTest {
         }
 
         @Test
+        public void testScanJavaTextBlocks() {
+                var content = "_T(\"\"\"\r\n"
+                                + "    Inline comments don't email watchers. \\\r\n"
+                                + "    Post a comment on the pull request.\"\"\")\r\n"
+                                + "translateHtml(\"<p>\" + \"\"\"\n"
+                                + "    Heading\\s\n"
+                                + "      \\\"\"\"\\u0021\n"
+                                + "    \"\"\" + \"</p>\")";
+
+                assertArrayEquals(new String[] {
+                                "Inline comments don't email watchers. Post a comment on the pull request.",
+                                "<p>Heading \n  \"\"\"!\n</p>" }, Translate.scanJavaMethods(content).toArray());
+        }
+
+        @Test
         public void testOemKeysPreservePlaceholders() {
                 var content = "OemUtils.translateHtml(\"${productName}: ${website}, ${docsite}\") + "
                                 + "_T(\"${productName}: ${website}, ${docsite}\")";

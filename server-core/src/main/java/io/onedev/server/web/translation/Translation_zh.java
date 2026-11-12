@@ -220,6 +220,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Absolute", "绝对");
 		m.put("Absolute or relative url of the image", "图片的绝对或相对 URL");
 		m.put("Absolute or relative url of the link", "链接的绝对或相对 URL");
+		m.put("Absolute path in job containers", "任务 容器中的绝对路径");
 		m.put("Access", "访问");
 		m.put("Access Anonymously", "匿名访问");
 		m.put("Access Build Log", "访问构建日志");
@@ -1414,6 +1415,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Download log", "下载日志");
 		m.put("Download patch", "下载补丁");
 		m.put("Download tag archive", "下载标签归档");
+		m.put("Download this patch?", "下载此补丁？");
 		m.put("Drop files here or click to upload", "将文件拖到此处或点击上传");
 		m.put("Dry Run", "试运行");
 		m.put("Due Date", "截止日期");
@@ -1687,6 +1689,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("File name", "文件名");
 		m.put("File name patterns such as *.java, *.c", "文件名模式，如 *.java, *.c");
 		m.put("File not found", "文件未找到");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"服务器/代理文件系统上的文件或目录。保持源文件、任何符号链接目标及其父目录在管理员控制下。如果服务器/代理运行在 Docker 中，先将其绑定挂载到服务器/代理中，并指定其内部可见的路径");
 		m.put("Files", "文件");
 		m.put("Files to Be Indexed", "待索引的文件");
 		m.put("Filter", "过滤");
@@ -2472,6 +2476,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"最有可能的是<a wicket:id=\"buildSpec\">构建规范</a>中存在导入错误");
 		m.put("Mount Docker Sock", "挂载 Docker Sock");
+		m.put("Mount this path read-only at the specified container target", "将此路径以只读方式挂载到指定的容器目标");
 		m.put("Move", "移动");
 		m.put("Move All Queried Issues To...", "移动所有查询的工单到...");
 		m.put("Move All Queried Projects To...", "移动所有查询的项目到...");
@@ -2550,6 +2555,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"新版本可用。红色表示安全/关键更新，黄色表示错误修复，蓝色表示功能更新。点击查看更改。可在系统设置中禁用");
 		m.put("Next", "下一步");
 		m.put("Next Iteration ({0})", "下一次迭代 ({0})");
+		m.put("Next changed file", "下一个更改的文件");
 		m.put("Next commit", "下一个提交");
 		m.put("Next year", "明年");
 		m.put("Next {0}", "后一个{0}");
@@ -2615,6 +2621,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No fields to prompt", "无要提示的字段");
 		m.put("No fields to remove", "无要删除的字段");
 		m.put("No file attachments", "没有文件附件");
+		m.put("No file to show diff", "没有文件显示差异");
 		m.put("No group by", "无分组");
 		m.put("No groups claim returned", "没有返回组声明");
 		m.put("No groups to remove from", "没有可移除的组");
@@ -3329,9 +3336,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Prevent Deletion", "防止删除");
 		m.put("Prevent Forced Push", "防止强制推送");
 		m.put("Prevent Update", "防止更新");
+		m.put("Prevent jobs from modifying the mounted file or directory", "防止任务 修改已挂载的文件或目录");
 		m.put("Preview", "预览");
 		m.put("Previous", "上一步");
 		m.put("Previous Value", "前值");
+		m.put("Previous changed file", "上一个更改的文件");
 		m.put("Previous commit", "上一个提交");
 		m.put("Previous year", "去年");
 		m.put("Previous {0}", "前一个{0}");
@@ -3540,6 +3549,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Re-run request submitted", "重新运行请求已提交");
 		m.put("Re-run this build", "重新运行此构建");
 		m.put("Read", "读取");
+		m.put("Read Only", "只读");
 		m.put("Read body", "读取正文");
 		m.put("Readiness Check Command", "准备检查命令");
 		m.put("Really want to delete this code comment?", "您确定要删除此代码评论吗？");
@@ -3694,6 +3704,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Review required for deletion. Submit pull request instead", "需要审查才能删除。请提交合并请求");
 		m.put("Review required for this change. Please submit pull request instead", "此更改需要审核。请提交拉取请求。");
 		m.put("Review required for this change. Submit pull request instead", "需要审查才能更改。请提交合并请求");
+		m.put("Reviewed", "已审阅");
 		m.put("Reviewers", "审查者");
 		m.put("Revision", "修订");
 		m.put("Revision indexing in progress...", "正在索引当前版本...");
@@ -4451,6 +4462,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify user name of above machine for SSH authentication", "指定上述机器的用户名用于 SSH 身份验证");
 		m.put("Specify user name of specified registry", "指定指定注册表的用户名");
 		m.put("Specify user name of the registry", "指定注册表的用户名");
+		m.put("Specify user name to access remote repository", "指定用户名以访问远程存储库");
 		m.put("Specify user name to authenticate with", "指定用于身份验证的用户名");
 		m.put("Specify value of the environment variable", "指定环境变量的值");
 		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
@@ -4868,6 +4880,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Toggle comments", "切换评论");
 		m.put("Toggle commits", "切换提交");
 		m.put("Toggle detail message", "切换详细信息");
+		m.put("Toggle file tree", "切换文件树");
 		m.put("Toggle fixed width font", "切换固定宽度字体");
 		m.put("Toggle full screen", "切换全屏");
 		m.put("Toggle half screen", "切换半屏");
@@ -5275,6 +5288,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to send notifications to issue watchers for this change", "是否为此更改向工单观察者发送通知");
 		m.put("Whether or not to show branch/tag column", "是否显示分支/标签列");
 		m.put("Whether or not to show duration column", "是否显示持续时间列");
+		m.put("Whether or not to use credentials to access remote repository", "是否使用凭据访问远程存储库");
 		m.put("Whether or not to use user avatar from a public service", "是否使用公共服务提供的用户头像");
 		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"在引用更新无法快进的情况下，是否使用强制选项覆盖更改");
@@ -5301,6 +5315,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Window", "窗口");
 		m.put("Window Memory", "窗口内存");
 		m.put("Windows Batch", "Windows 批处理");
+		m.put("With Credential", "使用凭据");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"根据当前用户数（{0}），订阅将有效至<b>{1}</b>");
 		m.put("Work In Progress", "进行中");
@@ -5622,21 +5637,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Absolute path in job containers", "任务 容器中的绝对路径");
-		m.put("Download this patch?", "下载此补丁？");
-		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
-			"服务器/代理文件系统上的文件或目录。保持源文件、任何符号链接目标及其父目录在管理员控制下。如果服务器/代理运行在 Docker 中，先将其绑定挂载到服务器/代理中，并指定其内部可见的路径");
-		m.put("Mount this path read-only at the specified container target", "将此路径以只读方式挂载到指定的容器目标");
-		m.put("Next changed file", "下一个更改的文件");
-		m.put("No file to show diff", "没有文件显示差异");
-		m.put("Prevent jobs from modifying the mounted file or directory", "防止任务 修改已挂载的文件或目录");
-		m.put("Previous changed file", "上一个更改的文件");
-		m.put("Read Only", "只读");
-		m.put("Reviewed", "已审阅");
-		m.put("Specify user name to access remote repository", "指定用户名以访问远程存储库");
-		m.put("Toggle file tree", "切换文件树");
-		m.put("Whether or not to use credentials to access remote repository", "是否使用凭据访问远程存储库");
-		m.put("With Credential", "使用凭据");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"内联评论和线程更新不会通过邮件通知观察者。要通知他们，请在合并请求上发表评论、批准、更改请求或添加提交。审查请求也会通知选定的审查者。");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"可选地指定要运行的 shell 命令以设置工作区。这些命令将\n从包含克隆的存储库文件的工作目录运行。它在缓存和\n用户数据恢复以及配置文件生成之后运行。");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"可选地指定要运行的 shell 命令以拆解工作区。这些命令将\n从包含克隆的存储库文件的工作目录运行，当工作区被\n停止时，在缓存和用户数据上传之前运行。这些命令的失败将被\n记录，但不会影响上传。");
 	}
 		
 	@Override

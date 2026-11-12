@@ -194,6 +194,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Absolute", "Absolu");
 		m.put("Absolute or relative url of the image", "URL absolue ou relative de l'image");
 		m.put("Absolute or relative url of the link", "URL absolue ou relative du lien");
+		m.put("Absolute path in job containers", "Chemin absolu dans les conteneurs de tâches");
 		m.put("Access", "Accès");
 		m.put("Access Anonymously", "Accéder anonymement");
 		m.put("Access Build Log", "Accéder au journal de build");
@@ -1388,6 +1389,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Download log", "Télécharger le journal");
 		m.put("Download patch", "Télécharger le correctif");
 		m.put("Download tag archive", "Télécharger l'archive du tag");
+		m.put("Download this patch?", "Télécharger ce correctif ?");
 		m.put("Drop files here or click to upload", "Déposez les fichiers ici ou cliquez pour les télécharger");
 		m.put("Dry Run", "Exécution à blanc");
 		m.put("Due Date", "Date d'échéance");
@@ -1661,6 +1663,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("File name", "Nom du fichier");
 		m.put("File name patterns such as *.java, *.c", "Modèles de noms de fichiers tels que *.java, *.c");
 		m.put("File not found", "Fichier non trouvé");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"Fichier ou répertoire sur le système de fichiers du serveur/agent. Gardez la source, les cibles des liens symboliques et leurs répertoires parents sous le contrôle de l'administrateur. Si le serveur/agent s'exécute dans Docker, montez-le dans le serveur/agent en premier et spécifiez le chemin visible à l'intérieur");
 		m.put("Files", "Fichiers");
 		m.put("Files to Be Indexed", "Fichiers à Indexer");
 		m.put("Filter", "Filtre");
@@ -2446,6 +2450,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"Il y a probablement des erreurs d'importation dans le <a wicket:id=\"buildSpec\">build spec</a>");
 		m.put("Mount Docker Sock", "Monter Docker Sock");
+		m.put("Mount this path read-only at the specified container target", "Montez ce chemin en lecture seule à la cible spécifiée du conteneur");
 		m.put("Move", "Déplacer");
 		m.put("Move All Queried Issues To...", "Déplacer toutes les issues interrogées vers...");
 		m.put("Move All Queried Projects To...", "Déplacer tous les projets interrogés vers...");
@@ -2524,6 +2529,7 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Nouvelle version disponible. Rouge pour mise à jour de sécurité/critique, jaune pour correction de bug, bleu pour mise à jour de fonctionnalité. Cliquez pour afficher les changements. Désactiver dans les paramètres système");
 		m.put("Next", "Suivant");
 		m.put("Next Iteration ({0})", "Prochaine Itération ({0})");
+		m.put("Next changed file", "Fichier modifié suivant");
 		m.put("Next commit", "Prochain commit");
 		m.put("Next year", "L'année prochaine");
 		m.put("Next {0}", "Prochain {0}");
@@ -2589,6 +2595,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("No fields to prompt", "Aucun champ à demander");
 		m.put("No fields to remove", "Aucun champ à supprimer");
 		m.put("No file attachments", "Aucune pièce jointe de fichier");
+		m.put("No file to show diff", "Aucun fichier à afficher pour la différence");
 		m.put("No group by", "Aucun regroupement");
 		m.put("No groups claim returned", "Aucune revendication de groupe retournée");
 		m.put("No groups to remove from", "Aucun groupe à retirer");
@@ -3303,9 +3310,11 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Prevent Deletion", "Empêcher la suppression");
 		m.put("Prevent Forced Push", "Empêcher le push forcé");
 		m.put("Prevent Update", "Empêcher la mise à jour");
+		m.put("Prevent jobs from modifying the mounted file or directory", "Empêcher les tâches de modifier le fichier ou répertoire monté");
 		m.put("Preview", "Aperçu");
 		m.put("Previous", "Précédent");
 		m.put("Previous Value", "Valeur précédente");
+		m.put("Previous changed file", "Fichier modifié précédent");
 		m.put("Previous commit", "Commit précédent");
 		m.put("Previous year", "L'année précédente");
 		m.put("Previous {0}", "Précédent {0}");
@@ -3514,6 +3523,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Re-run request submitted", "Demande de relance soumise");
 		m.put("Re-run this build", "Relancer ce build");
 		m.put("Read", "Lire");
+		m.put("Read Only", "Lecture seule");
 		m.put("Read body", "Lire le corps");
 		m.put("Readiness Check Command", "Commande de vérification de disponibilité");
 		m.put("Really want to delete this code comment?", "Voulez-vous vraiment supprimer ce commentaire de code ?");
@@ -3668,6 +3678,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Review required for deletion. Submit pull request instead", "Révision requise pour la suppression. Soumettez une requête de fusion à la place");
 		m.put("Review required for this change. Please submit pull request instead", "Une révision est requise pour ce changement. Veuillez soumettre une demande de tirage à la place.");
 		m.put("Review required for this change. Submit pull request instead", "Révision requise pour ce changement. Soumettez une requête de fusion à la place");
+		m.put("Reviewed", "Révisé");
 		m.put("Reviewers", "Examinateurs");
 		m.put("Revision", "Révision");
 		m.put("Revision indexing in progress...", "Indexation de la révision en cours...");
@@ -4425,6 +4436,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Specify user name of above machine for SSH authentication", "Spécifiez le nom d'utilisateur de la machine ci-dessus pour l'authentification SSH");
 		m.put("Specify user name of specified registry", "Spécifiez le nom d'utilisateur du registre spécifié");
 		m.put("Specify user name of the registry", "Spécifiez le nom d'utilisateur du registre");
+		m.put("Specify user name to access remote repository", "Spécifiez le nom d'utilisateur pour accéder au dépôt distant");
 		m.put("Specify user name to authenticate with", "Spécifiez le nom d'utilisateur pour l'authentification");
 		m.put("Specify value of the environment variable", "Spécifiez la valeur de la variable d'environnement");
 		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
@@ -4842,6 +4854,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Toggle comments", "Basculer les commentaires");
 		m.put("Toggle commits", "Basculer les commits");
 		m.put("Toggle detail message", "Basculer le message détaillé");
+		m.put("Toggle file tree", "Basculer l'arborescence des fichiers");
 		m.put("Toggle fixed width font", "Basculer la police à largeur fixe");
 		m.put("Toggle full screen", "Basculer en plein écran");
 		m.put("Toggle half screen", "Basculer en demi-écran");
@@ -5249,6 +5262,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Whether or not to send notifications to issue watchers for this change", "Si des notifications doivent être envoyées aux surveillants de l'issue pour ce changement ou non");
 		m.put("Whether or not to show branch/tag column", "Si la colonne branche/tag doit être affichée ou non");
 		m.put("Whether or not to show duration column", "Si la colonne durée doit être affichée ou non");
+		m.put("Whether or not to use credentials to access remote repository", "Utiliser ou non des identifiants pour accéder au dépôt distant");
 		m.put("Whether or not to use user avatar from a public service", "Si l'avatar utilisateur doit être utilisé à partir d'un service public ou non");
 		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"Si l'option de force doit être utilisée pour écraser les modifications en cas de mise à jour de la référence qui ne peut pas être avancée rapidement ou non");
@@ -5275,6 +5289,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Window", "Fenêtre");
 		m.put("Window Memory", "Mémoire de fenêtre");
 		m.put("Windows Batch", "Batch Windows");
+		m.put("With Credential", "Avec identifiant");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"Avec le nombre actuel d'utilisateurs ({0}), l'abonnement sera actif jusqu'au <b>{1}</b>");
 		m.put("Work In Progress", "Travail en cours");
@@ -5596,21 +5611,12 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Absolute path in job containers", "Chemin absolu dans les conteneurs de tâches");
-		m.put("Download this patch?", "Télécharger ce correctif ?");
-		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
-			"Fichier ou répertoire sur le système de fichiers du serveur/agent. Gardez la source, les cibles des liens symboliques et leurs répertoires parents sous le contrôle de l'administrateur. Si le serveur/agent s'exécute dans Docker, montez-le dans le serveur/agent en premier et spécifiez le chemin visible à l'intérieur");
-		m.put("Mount this path read-only at the specified container target", "Montez ce chemin en lecture seule à la cible spécifiée du conteneur");
-		m.put("Next changed file", "Fichier modifié suivant");
-		m.put("No file to show diff", "Aucun fichier à afficher pour la différence");
-		m.put("Prevent jobs from modifying the mounted file or directory", "Empêcher les tâches de modifier le fichier ou répertoire monté");
-		m.put("Previous changed file", "Fichier modifié précédent");
-		m.put("Read Only", "Lecture seule");
-		m.put("Reviewed", "Révisé");
-		m.put("Specify user name to access remote repository", "Spécifiez le nom d'utilisateur pour accéder au dépôt distant");
-		m.put("Toggle file tree", "Basculer l'arborescence des fichiers");
-		m.put("Whether or not to use credentials to access remote repository", "Utiliser ou non des identifiants pour accéder au dépôt distant");
-		m.put("With Credential", "Avec identifiant");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"Les commentaires en ligne et les mises à jour de fil ne notifient pas les observateurs par email. Pour les notifier, publiez un commentaire sur la pull request, approuvez-la, demandez des modifications ou ajoutez des commits. Une demande de révision notifie également le réviseur sélectionné.");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"Spécifiez éventuellement des commandes shell à exécuter pour configurer l'espace de travail. Ces commandes seront\nexécutées depuis le répertoire de travail contenant les fichiers du dépôt cloné. Elles s'exécutent après la restauration du cache et\ndes données utilisateur, ainsi que la génération des fichiers de configuration.");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"Spécifiez éventuellement des commandes shell à exécuter pour démonter l'espace de travail. Ces commandes seront\nexécutées depuis le répertoire de travail contenant les fichiers du dépôt cloné lorsque l'espace de travail est\narrêté, avant que le cache et les données utilisateur ne soient téléchargés. L'échec de ces commandes sera\nenregistré sans affecter le téléchargement.");
 	}
 		
 	@Override

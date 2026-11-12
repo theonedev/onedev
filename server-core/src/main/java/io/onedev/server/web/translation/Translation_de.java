@@ -194,6 +194,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Absolute", "Absolut");
 		m.put("Absolute or relative url of the image", "Absolute oder relative URL des Bildes");
 		m.put("Absolute or relative url of the link", "Absolute oder relative URL des Links");
+		m.put("Absolute path in job containers", "Absoluter Pfad in Job-Containern");
 		m.put("Access", "Zugriff");
 		m.put("Access Anonymously", "Anonym zugreifen");
 		m.put("Access Build Log", "Build-Log zugreifen");
@@ -1388,6 +1389,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Download log", "Protokoll herunterladen");
 		m.put("Download patch", "Patch herunterladen");
 		m.put("Download tag archive", "Tag-Archiv herunterladen");
+		m.put("Download this patch?", "Diesen Patch herunterladen?");
 		m.put("Drop files here or click to upload", "Dateien hierher ziehen oder klicken, um hochzuladen");
 		m.put("Dry Run", "Trockener Lauf");
 		m.put("Due Date", "Fälligkeitsdatum");
@@ -1661,6 +1663,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("File name", "Dateiname");
 		m.put("File name patterns such as *.java, *.c", "Dateinamenmuster wie *.java, *.c");
 		m.put("File not found", "Datei nicht gefunden");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"Datei oder Verzeichnis im Server-/Agent-Dateisystem. Halten Sie die Quelle, alle Symlink-Ziele und deren übergeordnete Verzeichnisse unter Administratorenkontrolle. Wenn der Server/Agent in Docker läuft, binden Sie ihn zuerst in den Server/Agent ein und geben Sie den darin sichtbaren Pfad an");
 		m.put("Files", "Dateien");
 		m.put("Files to Be Indexed", "Dateien, die indexiert werden sollen");
 		m.put("Filter", "Filter");
@@ -2446,6 +2450,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"Wahrscheinlich gibt es Importfehler in der <a wicket:id=\"buildSpec\">Build-Spezifikation</a>");
 		m.put("Mount Docker Sock", "Docker-Sock mounten");
+		m.put("Mount this path read-only at the specified container target", "Diesen Pfad schreibgeschützt am angegebenen Containerziel einbinden");
 		m.put("Move", "Verschieben");
 		m.put("Move All Queried Issues To...", "Alle abgefragten Issues verschieben nach...");
 		m.put("Move All Queried Projects To...", "Alle abgefragten Projekte verschieben nach...");
@@ -2524,6 +2529,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Neue Version verfügbar. Rot für Sicherheits-/kritisches Update, Gelb für Fehlerbehebung, Blau für Funktionsupdate. Klicken, um Änderungen anzuzeigen. Deaktivieren in den Systemeinstellungen");
 		m.put("Next", "Weiter");
 		m.put("Next Iteration ({0})", "Nächste Iteration ({0})");
+		m.put("Next changed file", "Nächste geänderte Datei");
 		m.put("Next commit", "Nächster Commit");
 		m.put("Next year", "Nächstes Jahr");
 		m.put("Next {0}", "Nächster {0}");
@@ -2589,6 +2595,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No fields to prompt", "Keine Felder zum Abfragen");
 		m.put("No fields to remove", "Keine Felder zum Entfernen");
 		m.put("No file attachments", "Keine Dateianhänge");
+		m.put("No file to show diff", "Keine Datei zum Anzeigen des Diffs");
 		m.put("No group by", "Keine Gruppierung");
 		m.put("No groups claim returned", "Keine Gruppenansprüche zurückgegeben");
 		m.put("No groups to remove from", "Keine Gruppen zum Entfernen");
@@ -3303,9 +3310,11 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Prevent Deletion", "Löschung verhindern");
 		m.put("Prevent Forced Push", "Erzwungenes Pushen verhindern");
 		m.put("Prevent Update", "Aktualisierung verhindern");
+		m.put("Prevent jobs from modifying the mounted file or directory", "Verhindern, dass Jobs die eingebundene Datei oder das Verzeichnis ändern");
 		m.put("Preview", "Vorschau");
 		m.put("Previous", "Vorherige");
 		m.put("Previous Value", "Vorheriger Wert");
+		m.put("Previous changed file", "Vorherige geänderte Datei");
 		m.put("Previous commit", "Vorheriger Commit");
 		m.put("Previous year", "Vorheriges Jahr");
 		m.put("Previous {0}", "Vorherige {0}");
@@ -3514,6 +3523,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Re-run request submitted", "Anfrage zur erneuten Ausführung eingereicht");
 		m.put("Re-run this build", "Diesen Build erneut ausführen");
 		m.put("Read", "Lesen");
+		m.put("Read Only", "Schreibgeschützt");
 		m.put("Read body", "Body lesen");
 		m.put("Readiness Check Command", "Befehl zur Bereitschaftsprüfung");
 		m.put("Really want to delete this code comment?", "Möchten Sie diesen Code-Kommentar wirklich löschen?");
@@ -3668,6 +3678,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Review required for deletion. Submit pull request instead", "Überprüfung erforderlich für Löschung. Reichen Sie stattdessen einen Pull-Request ein");
 		m.put("Review required for this change. Please submit pull request instead", "Überprüfung erforderlich für diese Änderung. Bitte Pull-Request einreichen.");
 		m.put("Review required for this change. Submit pull request instead", "Überprüfung erforderlich für diese Änderung. Reichen Sie stattdessen einen Pull-Request ein");
+		m.put("Reviewed", "Überprüft");
 		m.put("Reviewers", "Prüfer");
 		m.put("Revision", "Revision");
 		m.put("Revision indexing in progress...", "Revisionsindizierung läuft...");
@@ -4425,6 +4436,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Specify user name of above machine for SSH authentication", "Geben Sie den Benutzernamen der oben genannten Maschine für die SSH-Authentifizierung an");
 		m.put("Specify user name of specified registry", "Geben Sie den Benutzernamen des angegebenen Registrierungsdienstes an");
 		m.put("Specify user name of the registry", "Geben Sie den Benutzernamen der Registrierung an");
+		m.put("Specify user name to access remote repository", "Benutzernamen angeben, um auf das Remote-Repository zuzugreifen");
 		m.put("Specify user name to authenticate with", "Geben Sie den Benutzernamen zur Authentifizierung an");
 		m.put("Specify value of the environment variable", "Geben Sie den Wert der Umgebungsvariablen an");
 		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
@@ -4842,6 +4854,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Toggle comments", "Kommentare umschalten");
 		m.put("Toggle commits", "Commits umschalten");
 		m.put("Toggle detail message", "Detailnachricht umschalten");
+		m.put("Toggle file tree", "Dateibaum umschalten");
 		m.put("Toggle fixed width font", "Festbreitenschrift umschalten");
 		m.put("Toggle full screen", "Vollbild umschalten");
 		m.put("Toggle half screen", "Halbbildschirm umschalten");
@@ -5249,6 +5262,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Whether or not to send notifications to issue watchers for this change", "Ob Benachrichtigungen an Problembeobachter für diese Änderung gesendet werden sollen oder nicht");
 		m.put("Whether or not to show branch/tag column", "Ob die Spalte für Branch/Tag angezeigt werden soll oder nicht");
 		m.put("Whether or not to show duration column", "Ob die Spalte für Dauer angezeigt werden soll oder nicht");
+		m.put("Whether or not to use credentials to access remote repository", "Ob Anmeldeinformationen verwendet werden sollen, um auf das Remote-Repository zuzugreifen");
 		m.put("Whether or not to use user avatar from a public service", "Ob Benutzer-Avatare von einem öffentlichen Dienst verwendet werden sollen oder nicht");
 		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"Ob die Option \"Force\" verwendet werden soll, um Änderungen zu überschreiben, falls die Ref-Aktualisierung nicht vorwärtsgeführt werden kann");
@@ -5275,6 +5289,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Window", "Fenster");
 		m.put("Window Memory", "Fensterspeicher");
 		m.put("Windows Batch", "Windows-Batch");
+		m.put("With Credential", "Mit Anmeldeinformationen");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"Mit der aktuellen Anzahl von Benutzern ({0}) bleibt das Abonnement bis <b>{1}</b> aktiv");
 		m.put("Work In Progress", "In Arbeit");
@@ -5596,21 +5611,12 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Absolute path in job containers", "Absoluter Pfad in Job-Containern");
-		m.put("Download this patch?", "Diesen Patch herunterladen?");
-		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
-			"Datei oder Verzeichnis im Server-/Agent-Dateisystem. Halten Sie die Quelle, alle Symlink-Ziele und deren übergeordnete Verzeichnisse unter Administratorenkontrolle. Wenn der Server/Agent in Docker läuft, binden Sie ihn zuerst in den Server/Agent ein und geben Sie den darin sichtbaren Pfad an");
-		m.put("Mount this path read-only at the specified container target", "Diesen Pfad schreibgeschützt am angegebenen Containerziel einbinden");
-		m.put("Next changed file", "Nächste geänderte Datei");
-		m.put("No file to show diff", "Keine Datei zum Anzeigen des Diffs");
-		m.put("Prevent jobs from modifying the mounted file or directory", "Verhindern, dass Jobs die eingebundene Datei oder das Verzeichnis ändern");
-		m.put("Previous changed file", "Vorherige geänderte Datei");
-		m.put("Read Only", "Schreibgeschützt");
-		m.put("Reviewed", "Überprüft");
-		m.put("Specify user name to access remote repository", "Benutzernamen angeben, um auf das Remote-Repository zuzugreifen");
-		m.put("Toggle file tree", "Dateibaum umschalten");
-		m.put("Whether or not to use credentials to access remote repository", "Ob Anmeldeinformationen verwendet werden sollen, um auf das Remote-Repository zuzugreifen");
-		m.put("With Credential", "Mit Anmeldeinformationen");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"Inline-Kommentare und Thread-Updates senden keine E-Mails an Beobachter. Um sie zu benachrichtigen, posten Sie einen Kommentar zur Pull-Anfrage, genehmigen Sie sie, fordern Sie Änderungen an oder fügen Sie Commits hinzu. Eine Überprüfungsanfrage benachrichtigt auch den ausgewählten Prüfer.");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"Optional können Sie Shell-Befehle angeben, die ausgeführt werden sollen, um den Arbeitsbereich einzurichten. Diese Befehle werden\naus dem Arbeitsverzeichnis ausgeführt, das die geklonten Repository-Dateien enthält. Sie werden nach der Wiederherstellung von Cache und\nBenutzerdaten sowie der Generierung von Konfigurationsdateien ausgeführt.");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"Optional können Sie Shell-Befehle angeben, die ausgeführt werden sollen, um den Arbeitsbereich abzubauen. Diese Befehle werden\naus dem Arbeitsverzeichnis ausgeführt, das die geklonten Repository-Dateien enthält, wenn der Arbeitsbereich\ngestoppt wird, bevor Cache und Benutzerdaten hochgeladen werden. Fehler dieser Befehle werden\nprotokolliert, ohne den Upload zu beeinflussen.");
 	}
 			
 	@Override

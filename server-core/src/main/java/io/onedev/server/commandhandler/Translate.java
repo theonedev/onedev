@@ -59,8 +59,15 @@ public class Translate extends CommandHandler {
 
 	public static final String COMMAND = "translate";
 
-	private static final Pattern METHOD_PATTERN = Pattern
-			.compile("(?:_T|translateHtml)\\s*\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"(?:\\s*\\+\\s*\"((?:[^\"\\\\]|\\\\.)*)\")*\\s*\\)");
+	private static final String STRING_LITERAL = "\"((?:[^\"\\\\]++|\\\\.)*+)\"";
+
+	private static final String TEXT_BLOCK = "\"\"\"[ \t\f]*(?:\r\n|\r|\n)"
+			+ "((?:[^\"\\\\]++|\\\\[\\s\\S]|\"(?!\"\"))*+)\"\"\"";
+
+	private static final String JAVA_LITERAL = "(?:" + TEXT_BLOCK + "|" + STRING_LITERAL + ")";
+
+	private static final Pattern METHOD_PATTERN = Pattern.compile("(?:_T|translateHtml)\\s*\\(\\s*"
+			+ JAVA_LITERAL + "(?:\\s*\\+\\s*" + JAVA_LITERAL + ")*\\s*\\)");
 
 	private static final Pattern TAG_PATTERN = Pattern.compile("<wicket:t>(.+?)</wicket:t>",
 			Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -68,7 +75,9 @@ public class Translate extends CommandHandler {
 	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile("\\Wt:[a-zA-Z0-9\\-_]+\\s*=\\s*(\"[^\"]*?\"|'[^']*?')",
 			Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern STRING_LITERAL_PATTERN = Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\"");
+	private static final Pattern JAVA_LITERAL_PATTERN = Pattern.compile(JAVA_LITERAL);
+
+	private static final Pattern UNICODE_ESCAPE_PATTERN = Pattern.compile("\\\\(?:\\\\|u+([0-9a-fA-F]{4}))");
 
 	private static final Pattern MAP_CLEAR_PATTERN = Pattern.compile("\n\\s*m\\s*\\.\\s*clear\\s*\\(\\s*\\)\\s*;", Pattern.DOTALL);
 
@@ -388,15 +397,28 @@ public class Translate extends CommandHandler {
 		Matcher matcher = METHOD_PATTERN.matcher(content);
 		while (matcher.find()) {
 			StringBuilder key = new StringBuilder();
-			String match = matcher.group(0);
-			Matcher literalMatcher = STRING_LITERAL_PATTERN.matcher(match);
+			Matcher literalMatcher = JAVA_LITERAL_PATTERN.matcher(matcher.group());
 			while (literalMatcher.find()) {
-				key.append(unescapeJava(literalMatcher.group(1)));
+				var textBlock = literalMatcher.group(1);
+				if (textBlock != null)
+					key.append(decodeTextBlock(textBlock));
+				else
+					key.append(unescapeJava(literalMatcher.group(2)));
 			}
 			if (key.length() != 0)
 				extracted.add(key.toString());
 		}
 		return extracted;
+	}
+
+	private static String decodeTextBlock(String content) {
+		// Java decodes Unicode escapes before removing incidental whitespace and decoding other escapes.
+		var decoded = UNICODE_ESCAPE_PATTERN.matcher(content).replaceAll(match -> {
+			var hex = match.group(1);
+			var replacement = hex != null ? String.valueOf((char) Integer.parseInt(hex, 16)) : match.group();
+			return Matcher.quoteReplacement(replacement);
+		});
+		return decoded.stripIndent().translateEscapes();
 	}
 
 	public static Collection<String> scanHtmlTags(String content) {

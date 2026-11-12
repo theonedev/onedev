@@ -194,6 +194,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Absolute", "절대");
 		m.put("Absolute or relative url of the image", "이미지의 절대 또는 상대 URL");
 		m.put("Absolute or relative url of the link", "링크의 절대 또는 상대 URL");
+		m.put("Absolute path in job containers", "작업 컨테이너에서의 절대 경로");
 		m.put("Access", "접근");
 		m.put("Access Anonymously", "익명으로 접근");
 		m.put("Access Build Log", "빌드 로그 접근");
@@ -1388,6 +1389,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Download log", "로그를 다운로드하세요.");
 		m.put("Download patch", "패치 다운로드");
 		m.put("Download tag archive", "태그 아카이브를 다운로드하세요.");
+		m.put("Download this patch?", "이 패치를 다운로드하시겠습니까?");
 		m.put("Drop files here or click to upload", "파일을 이곳에 드롭하거나 클릭하여 업로드하세요");
 		m.put("Dry Run", "드라이 런");
 		m.put("Due Date", "마감일");
@@ -1661,6 +1663,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("File name", "파일 이름");
 		m.put("File name patterns such as *.java, *.c", "파일 이름 패턴 예: *.java, *.c");
 		m.put("File not found", "파일을 찾을 수 없음");
+		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
+			"서버/에이전트 파일 시스템의 파일 또는 디렉터리. 소스, 심볼릭 링크 대상 및 상위 디렉터리를 관리자 제어 하에 유지하십시오. 서버/에이전트가 Docker에서 실행되는 경우, 먼저 서버/에이전트에 바인드 마운트하고 내부에서 보이는 경로를 지정하십시오");
 		m.put("Files", "파일들");
 		m.put("Files to Be Indexed", "인덱싱할 파일들");
 		m.put("Filter", "필터");
@@ -2446,6 +2450,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
 			"<a wicket:id=\"buildSpec\">빌드 스펙</a>에 가져오기 오류가 있을 가능성이 높습니다");
 		m.put("Mount Docker Sock", "Docker Sock 마운트");
+		m.put("Mount this path read-only at the specified container target", "이 경로를 지정된 컨테이너 대상에 읽기 전용으로 마운트합니다");
 		m.put("Move", "이동");
 		m.put("Move All Queried Issues To...", "모든 조회된 이슈를 이동...");
 		m.put("Move All Queried Projects To...", "모든 조회된 프로젝트를 이동...");
@@ -2524,6 +2529,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"새 버전이 사용 가능합니다. 보안/중요 업데이트는 빨간색, 버그 수정은 노란색, 기능 업데이트는 파란색으로 표시됩니다. 변경 사항을 보려면 클릭하세요. 시스템 설정에서 비활성화할 수 있습니다.");
 		m.put("Next", "다음");
 		m.put("Next Iteration ({0})", "다음 반복 ({0})");
+		m.put("Next changed file", "다음 변경된 파일");
 		m.put("Next commit", "다음 커밋");
 		m.put("Next year", "내년");
 		m.put("Next {0}", "다음 {0}");
@@ -2589,6 +2595,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No fields to prompt", "프롬프트할 필드 없음");
 		m.put("No fields to remove", "제거할 필드 없음");
 		m.put("No file attachments", "파일 첨부 없음");
+		m.put("No file to show diff", "비교할 파일이 없습니다");
 		m.put("No group by", "그룹화 없음");
 		m.put("No groups claim returned", "반환된 그룹 클레임 없음");
 		m.put("No groups to remove from", "제거할 그룹이 없습니다");
@@ -3303,9 +3310,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Prevent Deletion", "삭제를 방지");
 		m.put("Prevent Forced Push", "강제 푸시를 방지");
 		m.put("Prevent Update", "업데이트를 방지");
+		m.put("Prevent jobs from modifying the mounted file or directory", "작업이 마운트된 파일 또는 디렉터리를 수정하지 못하도록 방지합니다");
 		m.put("Preview", "미리보기");
 		m.put("Previous", "이전");
 		m.put("Previous Value", "이전 값");
+		m.put("Previous changed file", "이전 변경된 파일");
 		m.put("Previous commit", "이전 커밋");
 		m.put("Previous year", "작년");
 		m.put("Previous {0}", "이전 {0}");
@@ -3514,6 +3523,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Re-run request submitted", "다시 실행 요청 제출됨");
 		m.put("Re-run this build", "이 빌드 다시 실행");
 		m.put("Read", "읽기");
+		m.put("Read Only", "읽기 전용");
 		m.put("Read body", "본문 읽기");
 		m.put("Readiness Check Command", "준비 상태 확인 명령");
 		m.put("Really want to delete this code comment?", "정말로 이 코드 댓글을 삭제하시겠습니까?");
@@ -3668,6 +3678,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Review required for deletion. Submit pull request instead", "삭제를 위해 리뷰가 필요합니다. 대신 풀 리퀘스트를 제출하십시오");
 		m.put("Review required for this change. Please submit pull request instead", "이 변경 사항에는 검토가 필요합니다. 대신 풀 리퀘스트를 제출하세요.");
 		m.put("Review required for this change. Submit pull request instead", "이 변경을 위해 리뷰가 필요합니다. 대신 풀 리퀘스트를 제출하십시오");
+		m.put("Reviewed", "검토 완료");
 		m.put("Reviewers", "리뷰어");
 		m.put("Revision", "개정");
 		m.put("Revision indexing in progress...", "개정 색인 생성 중...");
@@ -4425,6 +4436,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify user name of above machine for SSH authentication", "SSH 인증을 위한 위 머신의 사용자 이름을 지정하십시오.");
 		m.put("Specify user name of specified registry", "지정된 레지스트리의 사용자 이름을 지정하십시오.");
 		m.put("Specify user name of the registry", "레지스트리의 사용자 이름을 지정하십시오.");
+		m.put("Specify user name to access remote repository", "원격 저장소에 접근하기 위한 사용자 이름을 지정하십시오");
 		m.put("Specify user name to authenticate with", "인증에 사용할 사용자 이름을 지정하십시오.");
 		m.put("Specify value of the environment variable", "환경 변수의 값을 지정하십시오.");
 		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
@@ -4842,6 +4854,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Toggle comments", "댓글 토글");
 		m.put("Toggle commits", "커밋 토글");
 		m.put("Toggle detail message", "상세 메시지 토글");
+		m.put("Toggle file tree", "파일 트리 전환");
 		m.put("Toggle fixed width font", "고정 폭 글꼴 토글");
 		m.put("Toggle full screen", "전체 화면 토글");
 		m.put("Toggle half screen", "반 화면 전환");
@@ -5249,6 +5262,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to send notifications to issue watchers for this change", "이 변경 사항에 대해 문제 관찰자에게 알림을 보낼지 여부");
 		m.put("Whether or not to show branch/tag column", "브랜치/태그 열을 표시할지 여부");
 		m.put("Whether or not to show duration column", "지속 시간 열을 표시할지 여부");
+		m.put("Whether or not to use credentials to access remote repository", "원격 저장소에 접근하기 위해 자격 증명을 사용할지 여부");
 		m.put("Whether or not to use user avatar from a public service", "공개 서비스에서 사용자 아바타를 사용할지 여부");
 		m.put("Whether or not use force option to overwrite changes in case ref updating cannot be fast-forwarded", 
 			"참조 업데이트가 빠르게 진행될 수 없는 경우 변경 사항을 덮어쓰도록 강제 옵션을 사용할지 여부");
@@ -5275,6 +5289,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Window", "창");
 		m.put("Window Memory", "창 메모리");
 		m.put("Windows Batch", "Windows 배치");
+		m.put("With Credential", "자격 증명 사용");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"현재 사용자 수 ({0})로 구독은 <b>{1}</b>까지 활성화됩니다");
 		m.put("Work In Progress", "작업 진행 중");
@@ -5596,21 +5611,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Absolute path in job containers", "작업 컨테이너에서의 절대 경로");
-		m.put("Download this patch?", "이 패치를 다운로드하시겠습니까?");
-		m.put("File or directory on the server/agent filesystem. Keep the source, any symlink targets, and their parent directories under administrator control. If the server/agent runs in Docker, bind mount it into the server/agent first and specify the path visible inside it", 
-			"서버/에이전트 파일 시스템의 파일 또는 디렉터리. 소스, 심볼릭 링크 대상 및 상위 디렉터리를 관리자 제어 하에 유지하십시오. 서버/에이전트가 Docker에서 실행되는 경우, 먼저 서버/에이전트에 바인드 마운트하고 내부에서 보이는 경로를 지정하십시오");
-		m.put("Mount this path read-only at the specified container target", "이 경로를 지정된 컨테이너 대상에 읽기 전용으로 마운트합니다");
-		m.put("Next changed file", "다음 변경된 파일");
-		m.put("No file to show diff", "비교할 파일이 없습니다");
-		m.put("Prevent jobs from modifying the mounted file or directory", "작업이 마운트된 파일 또는 디렉터리를 수정하지 못하도록 방지합니다");
-		m.put("Previous changed file", "이전 변경된 파일");
-		m.put("Read Only", "읽기 전용");
-		m.put("Reviewed", "검토 완료");
-		m.put("Specify user name to access remote repository", "원격 저장소에 접근하기 위한 사용자 이름을 지정하십시오");
-		m.put("Toggle file tree", "파일 트리 전환");
-		m.put("Whether or not to use credentials to access remote repository", "원격 저장소에 접근하기 위해 자격 증명을 사용할지 여부");
-		m.put("With Credential", "자격 증명 사용");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"인라인 댓글과 스레드 업데이트는 관찰자에게 이메일을 보내지 않습니다. 알림을 보내려면 풀 리퀘스트에 댓글을 게시하거나, 승인하거나, 변경 요청을 하거나, 커밋을 추가하세요. 리뷰 요청은 선택된 리뷰어에게도 알림을 보냅니다.");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"워크스페이스를 설정하기 위해 실행할 셸 명령을 선택적으로 지정할 수 있습니다. 이러한 명령은\n클론된 저장소 파일을 보유한 작업 디렉토리에서 실행됩니다. 이는 캐시와\n사용자 데이터가 복원되고 구성 파일이 생성된 후에 실행됩니다.");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"워크스페이스를 종료하기 위해 실행할 셸 명령을 선택적으로 지정할 수 있습니다. 이러한 명령은\n워크스페이스가 중지될 때 클론된 저장소 파일을 보유한 작업 디렉토리에서 실행되며,\n캐시와 사용자 데이터가 업로드되기 전에 실행됩니다. 이러한 명령의 실패는\n업로드에 영향을 주지 않고 기록됩니다.");
 	}
 		
 	@Override

@@ -1734,7 +1734,7 @@ public abstract class RevisionDiffPanel extends Panel {
 						fragment.setOutputMarkupId(true);
 
 						Form<?> form = new Form<Void>("form");
-						form.add(new Label("notificationWarning", CodeCommentPanel.getNotificationWarning())
+						form.add(new Label("notificationWarning", CodeCommentPanel.getPullRequestNotificationWarning())
 								.setVisible(getPullRequest() != null));
 
 						String uuid = UUID.randomUUID().toString();

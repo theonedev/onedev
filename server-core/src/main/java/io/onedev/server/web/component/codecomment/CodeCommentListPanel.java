@@ -221,7 +221,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					@Override
 					@Nullable
 					protected String getWarning() {
-						return getPullRequest() != null ? CodeCommentPanel.getNotificationWarning() : null;
+						return getPullRequest() != null ? CodeCommentPanel.getPullRequestNotificationWarning() : null;
 					}
 
 					@Override
