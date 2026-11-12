@@ -82,6 +82,8 @@ import io.onedev.server.xodus.VisitInfoService;
 public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 
 	private final Long commentId;
+
+	private final boolean showNotificationWarning;
 	
 	private RepeatingView activitiesView;
 	
@@ -96,12 +98,24 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 	 * @param commentId
 	 */
 	public CodeCommentPanel(String id, Long commentId) {
+		this(id, commentId, false);
+	}
+
+	public CodeCommentPanel(String id, Long commentId, boolean showNotificationWarning) {
 		super(id);
 		this.commentId = commentId;
+		this.showNotificationWarning = showNotificationWarning;
 	}
 
 	public CodeComment getComment() {
 		return OneDev.getInstance(CodeCommentService.class).load(commentId);
+	}
+
+	public static String getNotificationWarning() {
+		return _T("""
+			Inline comments and thread updates don't email watchers. To notify them, \
+			post a comment on the pull request, approve it, request changes, or add commits. \
+			A review request notifies the selected reviewer.""");
 	}
 	
 	private WebMarkupContainer newCommentOrReplyContainer() {
@@ -177,6 +191,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 				
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
+				form.add(new WebMarkupContainer("notificationWarning").setVisible(false));
 				
 				CommentInput contentInput = new CommentInput("content", Model.of(getComment().getContent()), true) {
 
@@ -527,6 +542,8 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 		Fragment editFragment = new Fragment("actions", "commentOrReplyEditFrag", CodeCommentPanel.this);
 		
 		Form<?> form = new Form<Void>("form");
+		form.add(new Label("notificationWarning", getNotificationWarning())
+				.setVisible(showNotificationWarning));
 
 		CommentInput contentInput = new CommentInput("content", Model.of(""), true) {
 
@@ -821,6 +838,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 							Model.of(replyId));
 					
 					Form<?> form = new Form<Void>("form");
+					form.add(new WebMarkupContainer("notificationWarning").setVisible(false));
 					CommentInput contentInput = new CommentInput("content", Model.of(getReply().getContent()), true) {
 
 						@Override

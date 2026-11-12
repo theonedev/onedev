@@ -26,8 +26,11 @@ import java.util.Collection;
 
 abstract class BeanEditContentPanel extends Panel {
 
-	public BeanEditContentPanel(String id) {
+	private final @Nullable String warning;
+
+	public BeanEditContentPanel(String id, @Nullable String warning) {
 		super(id);
+		this.warning = warning;
 	}
 
 	@Override
@@ -63,6 +66,7 @@ abstract class BeanEditContentPanel extends Panel {
 		
 		BeanEditor editor = BeanContext.edit("editor", getBean(), getPropertyNames(), isExclude());
 		form.add(editor);
+		form.add(new Label("warning", warning).setVisible(warning != null));
 		
 		form.add(new AjaxButton("ok") {
 

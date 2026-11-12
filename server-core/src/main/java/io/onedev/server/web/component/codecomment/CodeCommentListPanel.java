@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
@@ -68,7 +67,6 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.FuzzyCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Provider;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
@@ -152,7 +150,7 @@ public abstract class CodeCommentListPanel extends Panel {
 		if (SecurityUtils.getAuthUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -212,20 +210,28 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 		add(new MenuLink("operations") {
 
-			private void changeStatus(AjaxRequestTarget target, 
-					Provider<Collection<CodeComment>> commentsProvider, boolean resolved) {
+			private void changeStatus(AjaxRequestTarget target, boolean allQueried, boolean resolved) {
 				new BeanEditModalPanel<StatusChangeOptionBean>(target, new StatusChangeOptionBean()) {
 					
 					@Override
 					protected String getCssClass() {
-						return "code-comment-status-change-option";
+						return super.getCssClass() + " code-comment-status-change-option";
+					}
+
+					@Override
+					@Nullable
+					protected String getWarning() {
+						return getPullRequest() != null ? CodeCommentPanel.getNotificationWarning() : null;
 					}
 
 					@Override
 					protected String onSave(AjaxRequestTarget target, StatusChangeOptionBean bean) {
 						Collection<CodeCommentStatusChange> changes = new ArrayList<>();
-						
-						for (CodeComment comment: commentsProvider.get()) {
+						var comments = allQueried
+								? dataProvider.iterator(0, commentsTable.getItemCount())
+								: selectionColumn.getSelections().stream().map(IModel::getObject).iterator();
+						while (comments.hasNext()) {
+							var comment = comments.next();
 							CodeCommentStatusChange change = new CodeCommentStatusChange();
 							change.setComment(comment);
 							change.setCompareContext(comment.getCompareContext());
@@ -269,16 +275,7 @@ public abstract class CodeCommentListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								
-								changeStatus(target, new Provider<Collection<CodeComment>>() {
-
-									@Override
-									public Collection<CodeComment> get() {
-										return selectionColumn.getSelections().stream()
-												.map(it->it.getObject())
-												.collect(Collectors.toList());
-									}
-									
-								}, true);
+								changeStatus(target, false, true);
 							}
 							
 							@Override
@@ -317,16 +314,7 @@ public abstract class CodeCommentListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								
-								changeStatus(target, new Provider<Collection<CodeComment>>() {
-
-									@Override
-									public Collection<CodeComment> get() {
-										return selectionColumn.getSelections().stream()
-												.map(it->it.getObject())
-												.collect(Collectors.toList());
-									}
-									
-								}, false);
+								changeStatus(target, false, false);
 							}
 							
 							@Override
@@ -428,13 +416,7 @@ public abstract class CodeCommentListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								
-								changeStatus(target, (Provider<Collection<CodeComment>>) () -> {
-									Collection<CodeComment> comments = new ArrayList<>();
-									for (@SuppressWarnings("unchecked")
-									Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
-										comments.add(it.next());
-									return comments;
-								}, true);
+								changeStatus(target, true, true);
 							}
 							
 							@Override
@@ -473,13 +455,7 @@ public abstract class CodeCommentListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								
-								changeStatus(target, (Provider<Collection<CodeComment>>) () -> {
-									Collection<CodeComment> comments = new ArrayList<>();
-									for (@SuppressWarnings("unchecked")
-									Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
-										comments.add(it.next());
-									return comments;
-								}, false);
+								changeStatus(target, true, false);
 							}
 							
 							@Override

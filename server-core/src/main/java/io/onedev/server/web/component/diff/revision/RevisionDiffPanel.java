@@ -942,9 +942,14 @@ public abstract class RevisionDiffPanel extends Panel {
 		compareContext.setWhitespaceOption(whitespaceOptionModel.getObject());
 		return compareContext;
 	}
+
+	private boolean isCommentOnCurrentPullRequest(CodeComment comment) {
+		var request = getPullRequest();
+		return request != null && request.equals(comment.getCompareContext().getPullRequest());
+	}
 	
 	private void onOpenComment(AjaxRequestTarget target, CodeComment comment, Mark mark) {
-		CodeCommentPanel commentPanel = new CodeCommentPanel("body", comment.getId()) {
+		CodeCommentPanel commentPanel = new CodeCommentPanel("body", comment.getId(), isCommentOnCurrentPullRequest(comment)) {
 
 			@Override
 			protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
@@ -1359,7 +1364,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			CodeComment openComment = annotationSupport.getOpenComment();
 			if (openComment != null) {
 				commentContainer.setDefaultModelObject(getCommentMark(openComment));
-				CodeCommentPanel commentPanel = new CodeCommentPanel("body", openComment.getId()) {
+				CodeCommentPanel commentPanel = new CodeCommentPanel("body", openComment.getId(), isCommentOnCurrentPullRequest(openComment)) {
 
 					@Override
 					protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
@@ -1729,6 +1734,8 @@ public abstract class RevisionDiffPanel extends Panel {
 						fragment.setOutputMarkupId(true);
 
 						Form<?> form = new Form<Void>("form");
+						form.add(new Label("notificationWarning", CodeCommentPanel.getNotificationWarning())
+								.setVisible(getPullRequest() != null));
 
 						String uuid = UUID.randomUUID().toString();
 
@@ -1830,7 +1837,8 @@ public abstract class RevisionDiffPanel extends Panel {
 
 									 annotationSupport.onSaveComment(comment);
 
-									 CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
+									 CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId(),
+											 isCommentOnCurrentPullRequest(comment)) {
 
 										 @Override
 										 protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {

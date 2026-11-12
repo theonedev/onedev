@@ -41,7 +41,7 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 	
 	@Override
 	protected Component newContent(String id) {
-		return new BeanEditContentPanel(id) {
+		return new BeanEditContentPanel(id, getWarning()) {
 			
 			@Override
 			protected boolean isDirtyAware() {
@@ -93,6 +93,11 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 
 	protected boolean isLeaveConfirm() {
 		return true;
+	}
+
+	@Nullable
+	protected String getWarning() {
+		return null;
 	}
 
 	protected abstract String onSave(AjaxRequestTarget target, T bean);
