@@ -21,6 +21,7 @@ import static io.onedev.server.model.PullRequest.PROP_THUMBS_UP_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_TICK_COUNT;
 import static io.onedev.server.model.PullRequest.PROP_TITLE;
 import static io.onedev.server.model.PullRequest.PROP_UUID;
+import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.model.support.TimeGroups.PROP_DAY;
 import static io.onedev.server.model.support.TimeGroups.PROP_MONTH;
 import static io.onedev.server.model.support.TimeGroups.PROP_WEEK;
@@ -48,6 +49,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.AttributeOverride;
@@ -1495,6 +1497,22 @@ public class PullRequest extends ProjectBelonging
 		if (description.length() == 0)
 			description = null;
 		return description;
+	}
+
+	@Nullable
+	public User getResponsibilityAi(Predicate<User> hasResponsibility) {
+		return getAssignees().stream()
+				.filter(it -> it.getType() == AI && hasResponsibility.test(it))
+				.min(Comparator.comparing(User::getId))
+				.orElse(getSubmitter().getType() == AI ? getSubmitter() : null);
+	}
+
+	@Nullable
+	public User getMergeAssigneeAi() {
+		return getAssignees().stream()
+				.filter(it -> it.getType() == AI && it.getAiSetting().shouldMergeIfAcceptable())
+				.min(Comparator.comparing(User::getId))
+				.orElse(null);
 	}
 
 	private static PullRequestService getPullRequestService() {

@@ -85,4 +85,16 @@ public class AiSetting implements Serializable {
         this.maxLoopCount = maxLoopCount;
     }
 
+    public boolean shouldMergeIfAcceptable() {
+        return pullRequestAssigneeResponsibilities.contains(PullRequestAssigneeResponsibility.MERGE_IF_ACCEPTABLE);
+    }
+
+    public boolean shouldFixFailedBuilds() {
+        return pullRequestAssigneeResponsibilities.contains(PullRequestAssigneeResponsibility.FIX_FAILED_BUILDS);
+    }
+
+    public boolean shouldResolveMergeConflicts() {
+        return pullRequestAssigneeResponsibilities.contains(PullRequestAssigneeResponsibility.RESOLVE_MERGE_CONFLICTS);
+    }
+
 }

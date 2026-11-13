@@ -61,23 +61,31 @@ public class PowerShell extends WorkspaceShell {
 	}
 
 	@Override
-	public String decorateRunPromptCommand(String command, String systemPrompt, String userPrompt,
-										   String successMarker, String failureMarker) {
+	public String createTaskCommands(String command, String systemPrompt, String userPrompt,
+									 String successMarker, String failureMarker) {
 		return "$env:TASK_SYSTEM_PROMPT = " + quote(systemPrompt) + "\n"
 				+ "$env:TASK_USER_PROMPT = " + quote(userPrompt) + "\n"
 				+ "$env:TASK_PROMPT = " + quote(getCombinedTaskPrompt(systemPrompt, userPrompt)) + "\n"
-				+ "$taskSucceeded = $false\n"
 				+ CHECK_TOD_VERSION_COMMAND + "\n"
-				+ "if ($?) { " + command + "; $taskSucceeded = $? }\n"
-				+ "if ($taskSucceeded) { " + printMarker(successMarker)
+				+ "if (!$?) { throw 'tod version check failed' }\n"
+				+ command + "\n"
+				+ "if ($?) { " + printMarker(successMarker)
 				+ " } else { " + printMarker(failureMarker) + " }";
 	}
 
-	private String quote(String value) {
+	@Override
+	public String getRunPromptLauncher(String failureMarker) {
+		return "& { $script = Join-Path $env:ONEDEV_WORKDIR " + quote("../" + getTaskScriptName())
+				+ "; try { & ([scriptblock]::Create([IO.File]::ReadAllText($script))) } catch { "
+				+ "[Console]::Error.WriteLine($_.Exception.Message); " + printMarker(failureMarker)
+				+ " } }";
+	}
+
+	private static String quote(String value) {
 		return "'" + value.replace("'", "''") + "'";
 	}
 
-	private String printMarker(String marker) {
+	private static String printMarker(String marker) {
 		var splitIndex = marker.lastIndexOf('_', marker.length() - 3) + 1;
 		return "Write-Output (" + quote(marker.substring(0, splitIndex))
 				+ " + " + quote(marker.substring(splitIndex)) + ")";

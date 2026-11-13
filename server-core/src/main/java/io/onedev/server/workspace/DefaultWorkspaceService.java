@@ -1,5 +1,6 @@
 package io.onedev.server.workspace;
 
+import static io.onedev.server.model.support.AiSetting.PullRequestAssigneeResponsibility.*;
 import static io.onedev.server.oem.OemUtils.interpolate;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -8,20 +9,7 @@ import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.model.support.AiSetting;
+import io.onedev.server.service.*;
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.eclipse.jgit.lib.ObjectId;
@@ -100,9 +91,6 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateWorkspaces;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UrlService;
 import io.onedev.server.service.impl.BaseEntityService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
@@ -178,6 +166,18 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Inject
 	private DataService dataService;
 
+	@Inject
+	private IssueCommentService issueCommentService;
+
+	@Inject
+	private PullRequestCommentService pullRequestCommentService;
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private GroupService groupService;
+
 	private SequenceGenerator numberGenerator;
 
 	private final Map<String, WorkspaceContext> workspaceContexts = new ConcurrentHashMap<>();
@@ -227,7 +227,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Transactional
 	@Override
 	public Workspace create(User user, Project project, Issue issue, PullRequest request,
-			ObjectId commitId, String branch, String specName, boolean forTaskAutomation) {
+							ObjectId commitId, String branch, String specName,
+							String taskUserPrompt, List<Long> participatingUserIds) {
 		var workspace = new Workspace();
 		workspace.setUser(user);
 		workspace.setProject(project);
@@ -236,7 +237,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		workspace.setCommitHash(commitId.name());
 		workspace.setBranch(branch);
 		workspace.setSpecName(specName);
-		workspace.setForTaskAutomation(forTaskAutomation);
+		workspace.setTaskUserPrompt(taskUserPrompt);
+		workspace.setParticipatingUserIds((ArrayList<Long>) participatingUserIds);
 		workspace.setToken(UUID.randomUUID().toString());
 		workspace.setNumberScope(workspace.getProject().getForkRoot());
 		workspace.setNumber(getNumberGenerator().getNextSequence(workspace.getNumberScope()));
@@ -792,6 +794,25 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		}
 	}
 
+	@Nullable
+	private String createTaskCommands(Workspace workspace, WorkspaceSpec spec) {
+		var userPrompt = workspace.getTaskUserPrompt();
+		if (userPrompt == null)
+			return null;
+
+		var taskAutomation = spec.getTaskAutomation();
+		if (taskAutomation == null)
+			throw new ExplicitException("Task automation is no longer configured for this workspace spec");
+
+		var systemPrompt = "You are talking to an AI user.\n"
+				+ "When you use sub-agents, do not pause or output 'waiting' messages after they complete. Immediately process their results, write any required changes, and continue the work in this session.";
+		var configuredSystemPrompt = workspace.getUser().getAiSetting().getSystemPrompt();
+		if (configuredSystemPrompt != null)
+			systemPrompt += "\n" + configuredSystemPrompt.trim();
+		return spec.getShell().createTaskCommands(taskAutomation.getRunTaskCmd(),
+				systemPrompt, userPrompt, RUN_PROMPT_SUCCESS_MARKER, RUN_PROMPT_FAILURE_MARKER);
+	}
+
 	private Future<Void> run(Workspace workspace) {
 		Workspace.push(workspace);
 		try {
@@ -832,7 +853,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var context = new WorkspaceContext(spec, provisioner, token, projectId, projectPath, projectGitDir, 
 					workspaceId, workspaceNumber, workspace.getUser().getId(), workspace.getUser().getDisplayName(), 
 					gitEmail.getValue(), cloneInfo, workspace.getCommitHash(), workspace.getBranch(), 
-					settingService.getSystemSetting().getServerUrl());
+					settingService.getSystemSetting().getServerUrl(), createTaskCommands(workspace, spec));
 
 			var pinnedServerAddress = workspace.getServerAddress();
 			var pinnedAgentId = workspace.getAgent() != null ? workspace.getAgent().getId() : null;
@@ -863,6 +884,9 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		update(workspace);
 		logService.flush(workspace.getLoggingSupport());
 		listenerRegistry.post(new WorkspaceInactive(workspace));
+		if (workspace.getTaskUserPrompt() != null && workspace.getActiveDate() == null) {
+			postTaskFailureComment(workspace);
+		}
 	}
 
 	@Override
@@ -1159,95 +1183,146 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		return activeWorkspaceIds;
 	}
 
+	private Set<String> getAssignedFields(User ai, Issue issue) {
+		var assignedFieldNames = new TreeSet<String>();
+		for (var field: issue.getFields()) {
+			if (field.getType().equals(InputSpec.USER) && ai.getName().equals(field.getValue()))
+				assignedFieldNames.add(field.getName());
+			if (field.getType().equals(InputSpec.GROUP) && field.getValue() != null) {
+				var group = groupService.find(field.getValue());
+				if (group != null && group.getMembers().contains(ai))
+					assignedFieldNames.add(field.getName());
+			}
+		}
+		return assignedFieldNames;
+	}
+
+	private String buildPrompt(User ai, Issue issue, Date eventDate) {
+		var roles = getAssignedFields(ai, issue);
+		return """
+					Work on issue %s as an AI user with assigned roles %s. \
+					Use the work-on-issue skill to inspect the current issue and its activity around and since %s, \
+					and decide what work is needed. \
+					Submit the work afterwards using the submit-issue-work skill without confirmation."""
+				.formatted(issue.getReference(), roles, eventDate.toInstant());
+	}
+
 	@Transactional
 	@Override
-	public void runPrompt(User ai, Project project, @Nullable Issue issue, @Nullable PullRequest request,
-			@Nullable ObjectId commitId, @Nullable String branch, String prompt,
-			boolean mergeIfReady, List<Long> participatingUserIds, TaskFailedCallback taskFailedCallback) {
-		WorkspaceSpec applicableSpec = null;
-		for (var spec : project.getHierarchyWorkspaceSpecs()) {
+	public void workOnIssue(User ai, Issue issue, ObjectId commitId, String branch,
+							Date eventDate, List<Long> participatingUserIds) {
+		for (var spec : issue.getProject().getHierarchyWorkspaceSpecs()) {
 			if (spec.getTaskAutomation() != null) {
 				var applicableUsers = spec.getTaskAutomation().getApplicableAis();
 				if (applicableUsers.isEmpty() || applicableUsers.contains(ai.getName())) {
-					applicableSpec = spec;
-					break;
+					create(ai, issue.getProject(), issue, null, commitId, branch,
+							spec.getName(), buildPrompt(ai, issue, eventDate), participatingUserIds);
+					return;
 				}
 			}
 		}
-		if (applicableSpec != null) {
-			final WorkspaceSpec finalApplicableSpec = applicableSpec;
-			var createdWorkspace = create(ai, project, issue, request, commitId, branch, applicableSpec.getName(), true);
-			createdWorkspace.setParticipatingUserIds((ArrayList<Long>)participatingUserIds);
-			createdWorkspace.setMergeIfAcceptable(mergeIfReady);
-			var workspaceId = createdWorkspace.getId();
-			
-			transactionService.runAfterCommit(() -> {
-				executorService.execute(() -> {
-					while (true) {					
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {							
-						}
-						if (sessionService.call(() -> {
-							var workspace = get(workspaceId);
-							if (workspace == null) {								
-								logger.warn("AI task ignored as task workspace no longer exists");
-								return true;
-							}
+		throw new ExplicitException("I need to create workspace to do the job, but no applicable workspace spec found");
+	}
 
-							var workspaceReference = workspace.getReference().toString(project);
-							if (workspace.getStatus() == Workspace.Status.ACTIVE) {
-								String systemPrompt = "You are talking to an AI user.\n"
-										+ "When you use sub-agents, do not pause or output 'waiting' messages after they complete. Immediately process their results, write any required changes, and continue the work in this session.\n";
-								if (ai.getAiSetting().getSystemPrompt() != null)
-									systemPrompt += ai.getAiSetting().getSystemPrompt().trim() + "\n";
-								
-								var command = finalApplicableSpec.getShell().decorateRunPromptCommand(
-										finalApplicableSpec.getTaskAutomation().getRunTaskCmd(),
-										systemPrompt.trim(), prompt,
-										RUN_PROMPT_SUCCESS_MARKER, RUN_PROMPT_FAILURE_MARKER);
-								var buffer = new StringBuilder();
-								var commandCompleted = new AtomicBoolean(false);
-								openShell(workspace, "Terminal", command, base64Data -> {
-									if (!commandCompleted.get()) synchronized (buffer) {
-										try {
-											buffer.append(new String(Base64.getDecoder().decode(base64Data), UTF_8));
-										} catch (IllegalArgumentException e) {
-											logger.warn("Unable to decode shell output", e);
-											return;
-										}
-										if (buffer.indexOf(RUN_PROMPT_SUCCESS_MARKER) != -1) {											
-											commandCompleted.set(true);
-											if (finalApplicableSpec.getTaskAutomation().isDeleteWorkspaceIfSucceeded()) 
-												delete(load(workspaceId));
-										} else if (buffer.indexOf(RUN_PROMPT_FAILURE_MARKER) != -1) {
-											commandCompleted.set(true);
-											sessionService.run(() -> {
-												taskFailedCallback.onTaskFailed(workspaceReference);
-											});
-										} else if (buffer.length() > 1024) {
-											buffer.delete(0, buffer.length() - 1024);
-										}
-									}
-								});		
-								return true;
-							} else if (workspace.getStatus() == Workspace.Status.INACTIVE) {
-								sessionService.run(() -> {
-									taskFailedCallback.onTaskFailed(workspaceReference);
-								});
-								return true;
-							} else {
-								return false;
-							}
-						})) {
-							break;
-						}
-					}
-				});
-			});
-		} else {
-			throw new ExplicitException("I need to create workspace to do the job, but no applicable workspace spec found");
+	private String buildPrompt(User ai, PullRequest request, Date eventDate) {
+		var assigned = request.getAssignees().contains(ai);
+		var reviewForMerge = ai.equals(request.getMergeAssigneeAi())
+				&& request.checkMergeCondition() == null
+				&& SecurityUtils.canWriteCode(ai.asSubject(), request.getTargetProject());
+
+		var roles = new ArrayList<String>();
+		if (request.getSubmitter().equals(ai))
+			roles.add("submitter");
+		if (request.isReviewer(ai))
+			roles.add("reviewer");
+		if (assigned)
+			roles.add("assignee");
+
+		var responsibilities = new ArrayList<AiSetting.PullRequestAssigneeResponsibility>();
+		if (ai.equals(request.getResponsibilityAi(it->it.getAiSetting().shouldFixFailedBuilds())))
+			responsibilities.add(FIX_FAILED_BUILDS);
+		if (ai.equals(request.getResponsibilityAi(it -> ai.getAiSetting().shouldResolveMergeConflicts())))
+			responsibilities.add(RESOLVE_MERGE_CONFLICTS);
+		if (reviewForMerge)
+			responsibilities.add(MERGE_IF_ACCEPTABLE);
+
+		return """
+					Work on pull request %s as an AI user with roles %s and automated responsibilities %s. \
+					Use the work-on-pull-request skill to inspect the current pull request and its activity around and since %s, \
+					and decide what work is needed. \
+					Submit the work afterwards using the submit-pull-request-work skill without confirmation."""
+				.formatted(request.getReference(), roles, responsibilities, eventDate.toInstant());
+	}
+
+	@Transactional
+	@Override
+	public void workOnPullRequest(User ai, PullRequest request, ObjectId commitId, String branch,
+								  Date eventDate, List<Long> participatingUserIds) {
+		for (var spec : request.getProject().getHierarchyWorkspaceSpecs()) {
+			if (spec.getTaskAutomation() != null) {
+				var applicableUsers = spec.getTaskAutomation().getApplicableAis();
+				if (applicableUsers.isEmpty() || applicableUsers.contains(ai.getName())) {
+					create(ai, request.getProject(), null, request, commitId, branch,
+							spec.getName(), buildPrompt(ai, request, eventDate), participatingUserIds);
+					return;
+				}
+			}
 		}
+		throw new ExplicitException("I need to create workspace to do the job, but no applicable workspace spec found");
+	}
+
+	private void openPromptShell(Workspace workspace, WorkspaceSpec spec) {
+		var workspaceId = workspace.getId();
+		var deleteWorkspaceIfSucceeded = spec.getTaskAutomation().isDeleteWorkspaceIfSucceeded();
+		var buffer = new StringBuilder();
+		var commandCompleted = new AtomicBoolean(false);
+		ShellOutputCallback outputCallback = base64Data -> {
+			synchronized (buffer) {
+				if (commandCompleted.get())
+					return;
+				try {
+					buffer.append(new String(Base64.getDecoder().decode(base64Data), UTF_8));
+				} catch (IllegalArgumentException e) {
+					logger.warn("Unable to decode shell output", e);
+					return;
+				}
+				if (buffer.indexOf(RUN_PROMPT_SUCCESS_MARKER) != -1) {
+					commandCompleted.set(true);
+					if (deleteWorkspaceIfSucceeded) {
+						transactionService.run(() -> delete(load(workspaceId)));
+					}
+				} else if (buffer.indexOf(RUN_PROMPT_FAILURE_MARKER) != -1) {
+					commandCompleted.set(true);
+					sessionService.run(() -> {
+						postTaskFailureComment(load(workspaceId));
+					});
+				} else if (buffer.length() > 1024) {
+					buffer.delete(0, buffer.length() - 1024);
+				}
+			}
+		};
+		try {
+			var launcher = spec.getShell().getRunPromptLauncher(RUN_PROMPT_FAILURE_MARKER);
+			openShell(workspace, "Terminal", launcher, outputCallback);
+		} catch (Exception e) {
+			var workspaceReference = workspace.getReference().toString(workspace.getProject());
+			logger.error("Error starting AI task in workspace {}", workspaceReference, e);
+			postTaskFailureComment(workspace);
+		}
+	}
+
+	private void postTaskFailureComment(Workspace workspace) {
+		if (workspace.getIssue() == null && workspace.getRequest() == null)
+			return;
+
+		var workspaceReference = workspace.getReference().toString(workspace.getProject());
+		var comment = "On behalf of AI user \"%s\": Failed to do the job, please open workspace %s for details"
+				.formatted(workspace.getUser().getDisplayName(), workspaceReference);
+		var systemUser = userService.getSystem();
+		if (workspace.getIssue() != null)
+			issueCommentService.create(systemUser, workspace.getIssue(), comment);
+		else
+			pullRequestCommentService.create(systemUser, workspace.getRequest(), comment);
 	}
 
 	private ClusterTask<Void> newRunWorkspaceTask(WorkspaceContext context) {
@@ -1266,22 +1341,25 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				var runtime = context.getProvisioner().provision(context, workspaceLogger);
 				workspaceRuntimes.put(workspaceId, runtime);
 				try {
+					var spec = context.getSpec();
 					transactionService.run(() -> {
 						var workspace = load(workspaceId);
 						workspace.setStatus(Workspace.Status.ACTIVE);
 						workspace.setActiveDate(new Date());
-						if (!workspace.isForTaskAutomation()) {
-							var firstShortcut = context.getSpec().getShortcutConfigs().stream().findFirst().orElse(null);
-							if (firstShortcut != null) 
+						if (workspace.getTaskUserPrompt() != null) {
+							openPromptShell(workspace, spec);
+						} else {
+							var firstShortcut = spec.getShortcutConfigs().stream().findFirst().orElse(null);
+							if (firstShortcut != null)
 								openShell(workspace, firstShortcut.getName(), firstShortcut.getCommand(), null);
-							else 
+							else
 								openShell(workspace, "Terminal", null, null);
 						}
 						update(workspace);
 						listenerRegistry.post(new WorkspaceActive(workspace));
 					});
 					workspaceLogger.success("Workspace provisioned and is active now");
-	
+
 					runtime.await();
 				} finally {
 					workspaceRuntimes.remove(workspaceId);

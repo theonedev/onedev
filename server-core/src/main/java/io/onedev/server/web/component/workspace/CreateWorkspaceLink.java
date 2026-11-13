@@ -15,6 +15,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDefaultPage;
 import io.onedev.server.workspace.WorkspaceService;
 
+import java.util.ArrayList;
+
 public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 
 	@Inject
@@ -45,8 +47,9 @@ public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(), getIssue(),
-				getPullRequest(), getCommitId(), getBranch(), getSpec().getName(), false);
+		var workspace = workspaceService.create(SecurityUtils.getUser(), getProject(),
+				getIssue(), getPullRequest(), getCommitId(), getBranch(), getSpec().getName(),
+				null, new ArrayList<>());
 		setResponsePage(WorkspaceDefaultPage.class, WorkspaceDefaultPage.paramsOf(workspace));
 	}
 

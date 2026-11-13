@@ -2,6 +2,7 @@ package io.onedev.server.rest.resource;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -138,7 +139,7 @@ public class WorkspaceResource {
 		}
 
 		Workspace workspace = workspaceService.create(user, project, issue, request, commitId,
-				data.getBranch(), data.getSpecName(), false);
+				data.getBranch(), data.getSpecName(), null, new ArrayList<>());
 		return workspace.getId();
 	}
 

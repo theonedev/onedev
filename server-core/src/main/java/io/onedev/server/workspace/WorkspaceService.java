@@ -1,9 +1,7 @@
 package io.onedev.server.workspace;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
@@ -26,13 +24,17 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	@Nullable Workspace find(Project project, long number);
 
-	default Workspace create(User user, Project project, ObjectId commitId, @Nullable String branch,
-			String specName, boolean forTaskAutomation) {
-		return create(user, project, null, null, commitId, branch, specName, forTaskAutomation);
+	default Workspace create(User user, Project project, ObjectId commitId,
+							 @Nullable String branch, String specName) {
+		return create(user, project, null, null, commitId,
+				branch, specName, null, new ArrayList<>());
 	}
 
-	Workspace create(User user, Project project, @Nullable Issue issue, @Nullable PullRequest pullRequest,
-			ObjectId commitId, @Nullable String branch, String specName, boolean forTaskAutomation);
+	Workspace create(User user, Project project, @Nullable Issue issue,
+					 @Nullable PullRequest pullRequest, ObjectId commitId,
+					 @Nullable String branch, String specName,
+					 @Nullable String taskUserPrompt,
+					 List<Long> participatingUserIds);
 
 	void update(Workspace workspace);
 
@@ -85,10 +87,11 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	@Nullable
 	FileData readFileData(Workspace workspace, String path);
-	
-	void runPrompt(User ai, Project project, @Nullable Issue issue, @Nullable PullRequest request,
-			@Nullable ObjectId commitId, @Nullable String branch, String prompt,
-			boolean mergeIfReady, List<Long> participatingUserIds, 
-			TaskFailedCallback taskFailedCallback);
-	
+
+	void workOnIssue(User ai, Issue issue, ObjectId commitId, @Nullable String branch,
+					 Date eventDate, List<Long> participatingUserIds);
+
+	void workOnPullRequest(User ai, PullRequest request, ObjectId commitId, @Nullable String branch,
+						   Date eventDate, List<Long> participatingUserIds);
+
 }

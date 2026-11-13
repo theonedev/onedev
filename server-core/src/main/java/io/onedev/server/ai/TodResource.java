@@ -207,7 +207,7 @@ public class TodResource {
 	public VersionInfo checkVersion() {
         var versionInfo = new VersionInfo();
         versionInfo.serverVersion = OneDev.getInstance().getVersion();
-        versionInfo.minRequiredTodVersion = "4.4.0";
+        versionInfo.minRequiredTodVersion = "4.5.0";
         return versionInfo;
 	}
 
@@ -837,7 +837,7 @@ public class TodResource {
 
         var summaries = new ArrayList<Map<String, Object>>();
         for (var pullRequest : pullRequestService.query(subject, project, parsedQuery, false, offset, count)) {
-            var summary = PullRequestHelper.getSummary(currentProject, pullRequest, false);
+            var summary = PullRequestHelper.getSummary(currentProject, pullRequest);
             summary.put("link", urlService.urlFor(pullRequest, true));
             summaries.add(summary);
         }

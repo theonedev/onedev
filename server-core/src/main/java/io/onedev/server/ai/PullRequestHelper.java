@@ -56,18 +56,10 @@ public class PullRequestHelper {
             "link", getUrlService().urlFor(pullRequest, true));
     }
 
-    public static Map<String, Object> getSummary(@Nullable Project currentProject,
-            PullRequest pullRequest, boolean checkMergeConditionIfOpen) {        
+    public static Map<String, Object> getSummary(@Nullable Project currentProject, PullRequest pullRequest) {
         var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
         var summary = getObjectMapper().convertValue(pullRequest, typeReference);
         summary.remove("id");
-        if (pullRequest.isOpen() && checkMergeConditionIfOpen) {
-            var errorMessage = pullRequest.checkMergeCondition();
-            if (errorMessage != null) 
-                summary.put("status", PullRequest.Status.OPEN.name() + " (" + errorMessage + ")");
-            else
-                summary.put("status", PullRequest.Status.OPEN.name() + " (ready to merge)");
-        } 
         summary.remove("uuid");
         summary.remove("buildCommitHash");
         summary.remove("submitTimeGroups");
@@ -88,7 +80,15 @@ public class PullRequestHelper {
     }
 
     public static Map<String, Object> getDetail(@Nullable Project currentProject, PullRequest pullRequest) {
-        var data = getSummary(currentProject, pullRequest, true);        
+        var data = getSummary(currentProject, pullRequest);
+        var open = pullRequest.isOpen();
+        if (open) {
+            var mergeError = pullRequest.checkMergeCondition();
+            var mergeStatus = mergeError != null ? mergeError : "ready to merge";
+            data.put("status", PullRequest.Status.OPEN.name() + " (" + mergeStatus + ")");
+        }
+        var preview = open ? pullRequest.checkMergePreview() : null;
+        data.put("hasMergeConflicts", preview != null && preview.getMergeCommitHash() == null);
         data.put("headCommitHash", pullRequest.getLatestUpdate().getHeadCommitHash());
         data.put("assignees", pullRequest.getAssignees().stream().map(User::getName).collect(Collectors.toList()));
         var reviews = new ArrayList<Map<String, Object>>();
@@ -98,6 +98,7 @@ public class PullRequestHelper {
             var reviewMap = new HashMap<String, Object>();
             reviewMap.put("reviewer", review.getUser().getName());
             reviewMap.put("status", review.getStatus());
+            reviewMap.put("statusDate", review.getStatusDate());
             reviews.add(reviewMap);
         }        
         data.put("reviews", reviews);

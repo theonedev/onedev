@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.workspace.spec.shell;
 
+import static io.onedev.k8shelper.WorkspaceHelper.TASK_SCRIPT_NAME;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serial;
@@ -18,6 +19,7 @@ public abstract class WorkspaceShell implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	protected static final String CHECK_TOD_VERSION_COMMAND = "tod check-version";
+
 	
 	private String setupCommands;
 
@@ -41,8 +43,14 @@ public abstract class WorkspaceShell implements Serializable {
 
 	public abstract ShellFacility getFacility();
 
-	public abstract String decorateRunPromptCommand(String command, String systemPrompt, String userPrompt,
-													String successMarker, String failureMarker);
+	protected String getTaskScriptName() {
+		return TASK_SCRIPT_NAME + getFacility().getScriptExtension();
+	}
+
+	public abstract String createTaskCommands(String command, String systemPrompt, String userPrompt,
+											  String successMarker, String failureMarker);
+
+	public abstract String getRunPromptLauncher(String failureMarker);
 
 	protected String getCombinedTaskPrompt(String systemPrompt, String userPrompt) {
 		return ("### Rules\n" + systemPrompt + "\n\n### User\n" + userPrompt).trim();

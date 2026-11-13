@@ -9669,4 +9669,30 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate257(File dataDir, Stack<Integer> versions) {
+		var windowsBatchShellClass = "io.onedev.server.model.support.workspace.spec.shell.WindowsBatchShell";
+		var powerShellClass = "io.onedev.server.model.support.workspace.spec.shell.PowerShell";
+		for (File file : Objects.requireNonNull(dataDir.listFiles())) {
+			if (file.getName().startsWith("Projects.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				boolean changed = false;
+				for (Element projectElement : dom.getRootElement().elements()) {
+					var workspaceSpecsElement = projectElement.element("workspaceSpecs");
+					if (workspaceSpecsElement == null)
+						continue;
+					for (Element workspaceSpecElement : workspaceSpecsElement.elements()) {
+						var shellElement = workspaceSpecElement.element("shell");
+						if (isClass(shellElement, windowsBatchShellClass)) {
+							setClass(shellElement, powerShellClass);
+							shellElement.addElement("powershell").setText("powershell.exe");
+							changed = true;
+						}
+					}
+				}
+				if (changed)
+					dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

@@ -32,6 +32,7 @@ import org.jspecify.annotations.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.entityreference.WorkspaceReference;
@@ -67,6 +68,8 @@ public class Workspace extends AbstractEntity {
 	private static ThreadLocal<Stack<Workspace>> stack = ThreadLocal.withInitial(Stack::new);
 
 	public static final int MAX_ERROR_MESSAGE_LEN = 2048;
+
+	public static final int MAX_TASK_USER_PROMPT_LEN = 10000;
 
 	public static final String PROP_USER = "user";
 
@@ -192,9 +195,9 @@ public class Workspace extends AbstractEntity {
 	@Column(length=255)
 	private String serverAddress;
 
-	private boolean forTaskAutomation;
-
-	private boolean mergeIfAcceptable;
+	@JsonIgnore
+	@Column(length= MAX_TASK_USER_PROMPT_LEN)
+	private String taskUserPrompt;
 
 	@JsonIgnore
 	@Lob
@@ -434,20 +437,17 @@ public class Workspace extends AbstractEntity {
 			return null;
 	}
 
-	public boolean isForTaskAutomation() {
-		return forTaskAutomation;
+	@Nullable
+	public String getTaskUserPrompt() {
+		return taskUserPrompt;
 	}
 
-	public void setForTaskAutomation(boolean forTaskAutomation) {
-		this.forTaskAutomation = forTaskAutomation;
-	}
-
-	public boolean isMergeIfAcceptable() {
-		return mergeIfAcceptable;
-	}
-
-	public void setMergeIfAcceptable(boolean mergeIfAcceptable) {
-		this.mergeIfAcceptable = mergeIfAcceptable;
+	public void setTaskUserPrompt(@Nullable String taskUserPrompt) {
+		if (taskUserPrompt != null && taskUserPrompt.length() > MAX_TASK_USER_PROMPT_LEN) {
+			throw new ExplicitException("Workspace task user prompt exceeds the maximum length of %d characters"
+					.formatted(MAX_TASK_USER_PROMPT_LEN));
+		}
+		this.taskUserPrompt = taskUserPrompt;
 	}
 
 	public ArrayList<Long> getParticipatingUserIds() {

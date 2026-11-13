@@ -9,13 +9,12 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -49,7 +48,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueWatch;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
@@ -72,7 +70,6 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.commenttext.MarkdownText;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.workspace.TaskFailedCallback;
 import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.VisitInfoService;
 
@@ -256,7 +253,7 @@ public class IssueNotificationManager implements Serializable {
 									replyAddress, senderName, threadingReferences);
 						}
 					} else if (isAiEligible(null, issue, member, true) && canCreateWorkspace(member, issue, true)) { 
-						onFieldSet(member, issue, entry.getKey(), event.getParticipatingUserIds());
+						workOnIssue(member, issue, event);
 					}
 				}
 			}
@@ -286,7 +283,7 @@ public class IssueNotificationManager implements Serializable {
 									replyAddress, senderName, threadingReferences);
 						}
 					} else if (isAiEligible(null, issue, assignedUser, true) && canCreateWorkspace(assignedUser, issue, true)) { 
-						onFieldSet(assignedUser, issue, entry.getKey(), event.getParticipatingUserIds());
+						workOnIssue(assignedUser, issue, event);
 					}
 				} 
 			}
@@ -327,7 +324,7 @@ public class IssueNotificationManager implements Serializable {
 								&& !user.equals(mentionedUser) 
 								&& isAiEligible(user, issue, mentionedUser, true)
 								&& canCreateWorkspace(mentionedUser, issue, true)) {
-							onAiMentioned(mentionedUser, user, issue, event.getParticipatingUserIds());
+							workOnIssue(mentionedUser, issue, event);
 						}
 					}
 				}
@@ -360,7 +357,7 @@ public class IssueNotificationManager implements Serializable {
 						&& watch.getUser().getAiSetting().isProactive()
 						&& isAiEligible(user, issue, watch.getUser(), false) 
 						&& canCreateWorkspace(watch.getUser(), issue, false)) {
-					onAiNotified(watch.getUser(), user, issue, event.getParticipatingUserIds());
+					workOnIssue(watch.getUser(), issue, event);
 				}
 			}
 		}
@@ -410,59 +407,20 @@ public class IssueNotificationManager implements Serializable {
 		return Pair.of(commitId, branch);
 	}
 
-	private void onAiMentioned(User ai, User user, Issue issue, List<Long> participatingUserIds) {
-		var branchAndCommitId = getWorkspaceCommitIdAndBranch(issue);
-		String rolesInfo;		
-		var assignedFields = getAssignedFields(ai, issue);
-		if (!assignedFields.isEmpty()) {
-			rolesInfo = "as roles [%s] ".formatted(StringUtils.join(assignedFields, ", "));
-		} else {
-			rolesInfo = "";
-		}
-		String prompt = """
-			Work on issue %d %sto address %s's latest concern. \
-			Do not switch checkout if the concern does not require you to write code. \
-			Mention the user in your comment if you expect a response. \
-			Make sure to submit work afterwards without confirmation.""".
-			formatted(issue.getNumber(), rolesInfo, user.getName());
-		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(),
-				branchAndCommitId.getRight(), prompt, participatingUserIds);
-	}
-
-	private void onAiNotified(User ai, User user, Issue issue, List<Long> participatingUserIds) {
-		var branchAndCommitId = getWorkspaceCommitIdAndBranch(issue);
-		String rolesInfo;		
-		var assignedFields = getAssignedFields(ai, issue);
-		if (!assignedFields.isEmpty()) {
-			rolesInfo = "as roles [%s] ".formatted(StringUtils.join(assignedFields, ", "));
-		} else {
-			rolesInfo = "";
-		}
-		String prompt = """
-				Work on issue %d %sto check whether you are relevant to %s's latest concern. \
-				Do not switch checkout if the concern does not require you to write code. \
-				Respond only if you are relevant and a response is necessary. \
-				Make sure to submit work afterwards without confirmation."""
-				.formatted(issue.getNumber(), rolesInfo, user.getName());
-		runPrompt(ai, issue, issue.getProject(), branchAndCommitId.getLeft(),
-				branchAndCommitId.getRight(), prompt, participatingUserIds);
-	}
-
-	private void runPrompt(User ai, Issue issue, Project project, 
-				ObjectId commitId, @Nullable String branch, String prompt,
-				List<Long> eventParticipatingUserIds) {
-		var participatingUserIds = new ArrayList<>(eventParticipatingUserIds);
+	private void workOnIssue(User ai, Issue issue, IssueEvent event) {
+		var participatingUserIds = event.getParticipatingUserIds();
+		var maxLoopCount = ai.getAiSetting().getMaxLoopCount();
 		var awakenCount = participatingUserIds.stream().filter(ai.getId()::equals).count();
-		if (awakenCount >= ai.getAiSetting().getMaxLoopCount()) {
-			var message = "I reached the maximum awaken count of %d in the current event chain"
-							.formatted(ai.getAiSetting().getMaxLoopCount());
-			createComment(ai, issue, message);
+		if (awakenCount >= maxLoopCount) {
+			createComment(ai, issue, "I reached the maximum awaken count of %d in the current event chain"
+					.formatted(maxLoopCount));
 			return;
 		}
+
 		try {
-			var taskFailedCallback = newTaskFailedCallback(ai.getId(), issue.getId());
-			workspaceService.runPrompt(ai, project, issue, null, commitId, branch, prompt,
-					false, participatingUserIds, taskFailedCallback);
+			var commitAndBranch = getWorkspaceCommitIdAndBranch(issue);
+			workspaceService.workOnIssue(ai, issue, commitAndBranch.getLeft(), commitAndBranch.getRight(),
+					event.getDate(), participatingUserIds);
 		} catch (Throwable t) {
 			var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 			if (explicitException != null) {
@@ -471,52 +429,12 @@ public class IssueNotificationManager implements Serializable {
 				logger.error("Error doing job via AI user", t);
 				createComment(ai, issue, "Failed to do the job, check server log for details");
 			}
-		}		
+		}
 	}
 
 	private void createComment(User ai, Issue issue, String comment) {
 		issueCommentService.create(userService.getSystem(), issue,
 				"On behalf of AI user \"%s\": %s".formatted(ai.getDisplayName(), comment));
-	}
-
-	private Set<String> getAssignedFields(User ai, Issue issue) {
-		var assignedFieldNames = new HashSet<String>();
-		for (var field: issue.getFields()) {
-			if (field.getType().equals(InputSpec.USER) && ai.getName().equals(field.getValue())) 
-				assignedFieldNames.add(field.getName());
-			if (field.getType().equals(InputSpec.GROUP) && field.getValue() != null) {
-				var group = groupService.find(field.getValue());
-				if (group != null) {
-					for (var member: group.getMembers()) {
-						if (member.equals(ai))
-							assignedFieldNames.add(field.getName());
-					}
-				}
-			}
-		}
-		return assignedFieldNames;
-	}
-
-	private void onFieldSet(User ai, Issue issue, String field, List<Long> participatingUserIds) {
-		var commitIdAndBranch = getWorkspaceCommitIdAndBranch(issue);
-		var prompt = """
-				Work on issue %d as role '%s'. \
-				Do not switch checkout if your role does not need to write code. \
-				Make sure to submit work afterwards without confirmation."""
-				.formatted(issue.getNumber(), field);
-		runPrompt(ai, issue, issue.getProject(), commitIdAndBranch.getLeft(),
-				commitIdAndBranch.getRight(), prompt, participatingUserIds);
-	}
-
-	private TaskFailedCallback newTaskFailedCallback(Long aiId, Long issueId) {
-		return new TaskFailedCallback() {
-
-			public void onTaskFailed(String workspaceReference) {
-				createComment(userService.load(aiId), issueService.load(issueId),
-						"Failed to do the job, please open workspace %s for details".formatted(workspaceReference));
-			}
-
-		};
 	}
 
 	@Transactional

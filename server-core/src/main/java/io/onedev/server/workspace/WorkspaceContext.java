@@ -58,10 +58,14 @@ public class WorkspaceContext implements Serializable {
 
 	private final String serverUrl;
 
+	@Nullable
+	private final String taskCommands;
+
 	public WorkspaceContext(WorkspaceSpec spec, WorkspaceProvisioner provisioner, String token, 
 				Long projectId, String projectPath, String projectGitDir, Long workspaceId, 
 				Long workspaceNumber, Long userId, String userName, String userEmail, 
-				CloneInfo cloneInfo, String commitHash, @Nullable String branch, String serverUrl) {
+				CloneInfo cloneInfo, String commitHash, @Nullable String branch, String serverUrl,
+				@Nullable String taskCommands) {
 		this.spec = spec;
 		this.provisioner = provisioner;
 		this.token = token;
@@ -77,6 +81,7 @@ public class WorkspaceContext implements Serializable {
 		this.commitHash = commitHash;
 		this.branch = branch;
 		this.serverUrl = serverUrl;
+		this.taskCommands = taskCommands;
 	}
 	
 	public WorkspaceSpec getSpec() {
@@ -174,6 +179,7 @@ public class WorkspaceContext implements Serializable {
 		var shell = spec.getShell();
 		var facility = shell.getFacility();
 		return new ScriptConfig(
+				taskCommands,
 				normalizeCommands(shell.getSetupCommands()),
 				normalizeCommands(shell.getTeardownCommands()),
 				facility.getScriptExtension(),
