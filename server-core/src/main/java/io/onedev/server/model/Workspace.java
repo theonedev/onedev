@@ -27,6 +27,7 @@ import jakarta.persistence.UniqueConstraint;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -60,6 +61,7 @@ import io.onedev.server.web.util.TextUtils;
 		uniqueConstraints={@UniqueConstraint(columnNames={"numberScope_id", AbstractEntity.PROP_NUMBER})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@DynamicUpdate
 public class Workspace extends AbstractEntity {
 
 	@Serial

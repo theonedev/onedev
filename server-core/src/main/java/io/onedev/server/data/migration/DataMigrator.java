@@ -9678,8 +9678,6 @@ public class DataMigrator {
 				boolean changed = false;
 				for (Element projectElement : dom.getRootElement().elements()) {
 					var workspaceSpecsElement = projectElement.element("workspaceSpecs");
-					if (workspaceSpecsElement == null)
-						continue;
 					for (Element workspaceSpecElement : workspaceSpecsElement.elements()) {
 						var shellElement = workspaceSpecElement.element("shell");
 						if (isClass(shellElement, windowsBatchShellClass)) {
@@ -9691,6 +9689,13 @@ public class DataMigrator {
 				}
 				if (changed)
 					dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Workspaces.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (Element workspaceElement : dom.getRootElement().elements()) {
+					workspaceElement.element("forTaskAutomation").detach();
+					workspaceElement.element("mergeIfAcceptable").detach();
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

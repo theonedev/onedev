@@ -15,6 +15,12 @@ for them.
 
 Do not run Maven after changing files unless the user explicitly asks for it.
 
+Avoid defensive coding. Rely on established contracts and invariants within the
+codebase. Skip redundant null checks, guards, and fallback paths for states those
+contracts rule out. Validate untrusted input at the boundary, handle expected
+failures, and let unexpected failures surface. In migrations, access properties
+directly when the source format guarantees their presence.
+
 Prefer field injection over constructor injection wherever possible for
 `@Singleton` services and Wicket components/pages.
 

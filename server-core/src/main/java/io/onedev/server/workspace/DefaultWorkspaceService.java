@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.AiSetting;
 import io.onedev.server.service.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.eclipse.jgit.lib.ObjectId;
@@ -103,6 +104,7 @@ import io.onedev.server.web.component.terminal.ShellExit;
 import io.onedev.server.web.editable.EditableUtils;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.From;
@@ -226,9 +228,14 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public Workspace create(User user, Project project, Issue issue, PullRequest request,
-							ObjectId commitId, String branch, String specName,
-							String taskUserPrompt, List<Long> participatingUserIds) {
+	public Workspace create(User user, Project project, @Nullable Issue issue, @Nullable PullRequest request,
+							ObjectId commitId, @Nullable String branch, String specName) {
+		return create(user, project, issue, request, commitId, branch, specName, null, List.of());
+	}
+
+	private Workspace create(User user, Project project, @Nullable Issue issue, @Nullable PullRequest request,
+							 ObjectId commitId, @Nullable String branch, String specName,
+							 @Nullable String taskUserPrompt, List<Long> participatingUserIds) {
 		var workspace = new Workspace();
 		workspace.setUser(user);
 		workspace.setProject(project);
@@ -238,7 +245,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		workspace.setBranch(branch);
 		workspace.setSpecName(specName);
 		workspace.setTaskUserPrompt(taskUserPrompt);
-		workspace.setParticipatingUserIds((ArrayList<Long>) participatingUserIds);
+		workspace.setParticipatingUserIds(new ArrayList<>(participatingUserIds));
 		workspace.setToken(UUID.randomUUID().toString());
 		workspace.setNumberScope(workspace.getProject().getForkRoot());
 		workspace.setNumber(getNumberGenerator().getNextSequence(workspace.getNumberScope()));
@@ -551,18 +558,59 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				});
 	}
 
-	@SuppressWarnings("unchecked")
 	@Sessional
 	protected Map<Long, Long> queryPendingOrActive() {
-		Query<?> query = getSession().createQuery("select id, project.id from Workspace where "
-				+ "status=:pending or status=:active", Object[].class);
-		query.setParameter("pending", Workspace.Status.PENDING);
-		query.setParameter("active", Workspace.Status.ACTIVE);
-		
+		var query = getSession().createQuery("select id, project.id from Workspace where status in :statuses", Object[].class);
+		query.setParameterList("statuses", List.of(Status.PENDING, Status.ACTIVE));
+
 		Map<Long, Long> result = new HashMap<>();
-		for (Object[] fields: (List<Object[]>)query.list()) 
+		for (var fields : query.list())
 			result.put((Long)fields[0], (Long)fields[1]);
 		return result;
+	}
+
+	private void scheduleWorkspaces(Collection<Long> workspaceIds) {
+		var workspaces = getSession().createQuery("from Workspace where id in :ids order by id", Workspace.class)
+				.setParameterList("ids", workspaceIds)
+				.list();
+		var occupiedKeys = new HashSet<SerialKey>();
+		for (var workspace : workspaces) {
+			if (workspace.getStatus() == Status.ACTIVE || workspaceFutures.containsKey(workspace.getId())) {
+				var key = SerialKey.of(workspace);
+				if (key != null)
+					occupiedKeys.add(key);
+			}
+		}
+		for (var workspace : workspaces) {
+			var workspaceId = workspace.getId();
+			if (workspaceFutures.containsKey(workspaceId))
+				continue;
+			if (workspace.getStatus() == Status.PENDING && thread != null) {
+				var key = SerialKey.of(workspace);
+				if (key != null && !occupiedKeys.add(key))
+					continue;
+				try {
+					if (workspace.getTaskUserPrompt() != null) {
+						lockTaskTarget(workspace.getIssue(), workspace.getRequest());
+						// A submission may have updated the checkout after the scheduler loaded the row.
+						getSession().refresh(workspace);
+					}
+					workspaceFutures.put(workspaceId, run(workspace));
+				} catch (Throwable t) {
+					var workspaceLogger = logService.newLogger(workspace.getLoggingSupport());
+					var explicitException = ExceptionUtils.find(t, ExplicitException.class);
+					if (explicitException != null)
+						workspaceLogger.error("Error provisioning workspace: " + explicitException.getMessage());
+					else
+						workspaceLogger.error("Error provisioning workspace", t);
+					markWorkspaceInactive(workspace);
+				}
+			} else if (workspace.getStatus() == Status.ACTIVE) {
+				workspace.setActiveDate(null);
+				workspace.setStatus(Status.PENDING);
+				listenerRegistry.post(new WorkspacePending(workspace));
+			}
+		}
 	}
 
 	@Override
@@ -594,33 +642,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 										return null;
 									Thread.sleep(1000);	
 								}
-								transactionService.run(() -> {
-									for (var workspaceId : workspaceIdsOfServer) {
-										var workspace = load(workspaceId);
-										if (workspace.getStatus() == Status.PENDING) {
-											var future = workspaceFutures.get(workspace.getId());
-											if (future == null && thread != null) {
-												try {
-													workspaceFutures.put(workspace.getId(), run(workspace));
-												} catch (Throwable t) {
-													var workspaceLogger = logService.newLogger(workspace.getLoggingSupport());
-													var explicitException = ExceptionUtils.find(t, ExplicitException.class);
-													if (explicitException != null)
-														workspaceLogger.error("Error provisioning workspace: " + explicitException.getMessage());
-													else
-														workspaceLogger.error("Error provisioning workspace", t);
-													markWorkspaceInactive(workspace);
-												}
-											}
-										} else if (workspace.getStatus() == Status.ACTIVE) {
-											if (workspaceFutures.get(workspace.getId()) == null) {
-												workspace.setActiveDate(null);
-												workspace.setStatus(Status.PENDING);
-												listenerRegistry.post(new WorkspacePending(workspace));
-											}
-										}
-									}
-								});
+								transactionService.run(() -> scheduleWorkspaces(workspaceIdsOfServer));
 							} catch (Throwable t) {
 								logger.error("Error checking pending/active workspaces", t);
 							}
@@ -1211,17 +1233,11 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Override
 	public void workOnIssue(User ai, Issue issue, ObjectId commitId, String branch,
 							Date eventDate, List<Long> participatingUserIds) {
-		for (var spec : issue.getProject().getHierarchyWorkspaceSpecs()) {
-			if (spec.getTaskAutomation() != null) {
-				var applicableUsers = spec.getTaskAutomation().getApplicableAis();
-				if (applicableUsers.isEmpty() || applicableUsers.contains(ai.getName())) {
-					create(ai, issue.getProject(), issue, null, commitId, branch,
-							spec.getName(), buildPrompt(ai, issue, eventDate), participatingUserIds);
-					return;
-				}
-			}
+		if (!updatePendingTaskWorkspace(ai, issue, null, commitId, branch, participatingUserIds)) {
+			var project = issue.getProject();
+			create(ai, project, issue, null, commitId, branch, getTaskSpecName(ai, project),
+					buildPrompt(ai, issue, eventDate), participatingUserIds);
 		}
-		throw new ExplicitException("I need to create workspace to do the job, but no applicable workspace spec found");
 	}
 
 	private String buildPrompt(User ai, PullRequest request, Date eventDate) {
@@ -1258,17 +1274,55 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Override
 	public void workOnPullRequest(User ai, PullRequest request, ObjectId commitId, String branch,
 								  Date eventDate, List<Long> participatingUserIds) {
-		for (var spec : request.getProject().getHierarchyWorkspaceSpecs()) {
+		if (!updatePendingTaskWorkspace(ai, null, request, commitId, branch, participatingUserIds)) {
+			var project = request.getProject();
+			create(ai, project, null, request, commitId, branch, getTaskSpecName(ai, project),
+					buildPrompt(ai, request, eventDate), participatingUserIds);
+		}
+	}
+
+	private String getTaskSpecName(User ai, Project project) {
+		for (var spec : project.getHierarchyWorkspaceSpecs()) {
 			if (spec.getTaskAutomation() != null) {
 				var applicableUsers = spec.getTaskAutomation().getApplicableAis();
-				if (applicableUsers.isEmpty() || applicableUsers.contains(ai.getName())) {
-					create(ai, request.getProject(), null, request, commitId, branch,
-							spec.getName(), buildPrompt(ai, request, eventDate), participatingUserIds);
-					return;
-				}
+				if (applicableUsers.isEmpty() || applicableUsers.contains(ai.getName()))
+					return spec.getName();
 			}
 		}
 		throw new ExplicitException("I need to create workspace to do the job, but no applicable workspace spec found");
+	}
+
+	private void lockTaskTarget(@Nullable Issue issue, @Nullable PullRequest request) {
+		getSession().lock(issue != null ? issue : request, LockModeType.PESSIMISTIC_WRITE);
+	}
+
+	private boolean updatePendingTaskWorkspace(User ai, @Nullable Issue issue, @Nullable PullRequest request,
+											   ObjectId commitId, @Nullable String branch, List<Long> participatingUserIds) {
+		// Submissions and scheduling both run on the project's active server.
+		lockTaskTarget(issue, request);
+		var workspace = getSession().createQuery("""
+				from Workspace where user = :ai and issue is not distinct from :issue
+				and request is not distinct from :request and status = :pending and taskUserPrompt is not null
+				order by id
+				""", Workspace.class)
+				.setParameter("ai", ai)
+				.setParameter("issue", issue)
+				.setParameter("request", request)
+				.setParameter("pending", Status.PENDING)
+				.list().stream()
+				// Provisioning captures the checkout before the workspace becomes active.
+				.filter(it -> !workspaceFutures.containsKey(it.getId()))
+				.findFirst().orElse(null);
+		if (workspace == null)
+			return false;
+
+		workspace.setCommitHash(commitId.name());
+		workspace.setBranch(branch);
+		// Keep the highest occurrence count of each user across the combined event chains.
+		workspace.setParticipatingUserIds(new ArrayList<>(
+				CollectionUtils.union(workspace.getParticipatingUserIds(), participatingUserIds)));
+		update(workspace);
+		return true;
 	}
 
 	private void openPromptShell(Workspace workspace, WorkspaceSpec spec) {
@@ -1327,7 +1381,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private ClusterTask<Void> newRunWorkspaceTask(WorkspaceContext context) {
 		return new ClusterTask<Void>() {
-		
+
 			private void run(WorkspaceContext context, TaskLogger workspaceLogger) {
 				var workspaceId = context.getWorkspaceId();
 				transactionService.run(() -> {
@@ -1342,10 +1396,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				workspaceRuntimes.put(workspaceId, runtime);
 				try {
 					var spec = context.getSpec();
-					transactionService.run(() -> {
-						var workspace = load(workspaceId);
-						workspace.setStatus(Workspace.Status.ACTIVE);
-						workspace.setActiveDate(new Date());
+					sessionService.run(() -> {
+						var workspace = transactionService.call(() -> activateWorkspace(workspaceId));
 						if (workspace.getTaskUserPrompt() != null) {
 							openPromptShell(workspace, spec);
 						} else {
@@ -1355,8 +1407,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							else
 								openShell(workspace, "Terminal", null, null);
 						}
-						update(workspace);
-						listenerRegistry.post(new WorkspaceActive(workspace));
 					});
 					workspaceLogger.success("Workspace provisioned and is active now");
 
@@ -1403,6 +1453,17 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			}
 	
 		};
+	}
+
+	private Workspace activateWorkspace(Long workspaceId) {
+		var workspace = load(workspaceId);
+		if (workspace.getTaskUserPrompt() != null)
+			lockTaskTarget(workspace.getIssue(), workspace.getRequest());
+		workspace.setStatus(Status.ACTIVE);
+		workspace.setActiveDate(new Date());
+		update(workspace);
+		listenerRegistry.post(new WorkspaceActive(workspace));
+		return workspace;
 	}
 
 	private ClusterTask<Void> newHandleShellOutputTask(Long workspaceId, String shellId, String base64Data) {
@@ -1510,6 +1571,19 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			return new ArrayList<>(chunks);
 		}
 
+	}
+
+	private record SerialKey(Long userId, @Nullable Long issueId, @Nullable Long requestId) {
+
+		@Nullable
+		static SerialKey of(Workspace workspace) {
+			if (workspace.getUser().getType() == User.Type.AI
+					&& (workspace.getIssue() != null || workspace.getRequest() != null)) {
+				return new SerialKey(workspace.getUser().getId(), Issue.idOf(workspace.getIssue()),
+						PullRequest.idOf(workspace.getRequest()));
+			}
+			return null;
+		}
 	}
 
 }

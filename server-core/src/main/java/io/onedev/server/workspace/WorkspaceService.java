@@ -26,15 +26,12 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	default Workspace create(User user, Project project, ObjectId commitId,
 							 @Nullable String branch, String specName) {
-		return create(user, project, null, null, commitId,
-				branch, specName, null, new ArrayList<>());
+		return create(user, project, null, null, commitId, branch, specName);
 	}
 
 	Workspace create(User user, Project project, @Nullable Issue issue,
 					 @Nullable PullRequest pullRequest, ObjectId commitId,
-					 @Nullable String branch, String specName,
-					 @Nullable String taskUserPrompt,
-					 List<Long> participatingUserIds);
+					 @Nullable String branch, String specName);
 
 	void update(Workspace workspace);
 
