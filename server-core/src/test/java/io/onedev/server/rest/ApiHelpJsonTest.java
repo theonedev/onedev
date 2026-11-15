@@ -12,7 +12,6 @@ import java.util.Set;
 
 import jakarta.persistence.ManyToOne;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
@@ -127,8 +126,7 @@ public class ApiHelpJsonTest extends AppLoaderMocker {
 		assertFalse(read.has("value"));
 		assertFalse(read.has("valueHash"));
 
-		var createMethod = AccessTokenResource.class.getMethod("createToken", AccessToken.class,
-				HttpServletResponse.class);
+		var createMethod = AccessTokenResource.class.getMethod("createToken", AccessToken.class);
 		var help = mapper.valueToTree(new ApiHelpJson().getMethod(AccessTokenResource.class, createMethod));
 		assertTrue(help.at("/response/success/body/example").has("value"));
 	}
