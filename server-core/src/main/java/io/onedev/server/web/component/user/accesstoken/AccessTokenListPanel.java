@@ -13,9 +13,9 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.model.AccessToken;
@@ -25,6 +25,11 @@ import io.onedev.server.web.page.user.UserPage;
 public abstract class AccessTokenListPanel extends Panel {
 
 	private WebMarkupContainer container;
+
+	private transient RevealedToken revealedToken;
+
+	private record RevealedToken(Long id, String value) {
+	}
 	
 	public AccessTokenListPanel(String id) {
 		super(id);
@@ -57,8 +62,8 @@ public abstract class AccessTokenListPanel extends Panel {
 						var token = getToken();
 						getAccessTokenService().delete(token);
 						if (getPage() instanceof UserPage) {
-							var oldAuditContent = VersionedXmlDoc.fromBean(token).toXML();
-							getAuditService().audit(null, "deleted access token \"" + token.getName() + "\" from account \"" + token.getOwner().getName() + "\"", oldAuditContent, null);
+							var oldAuditContent = token.toAuditXml();
+							getAuditService().audit(null, "deleted access token from account \"" + token.getOwner().getName() + "\"", oldAuditContent, null);
 						}
 						target.add(container);
 					}
@@ -79,7 +84,7 @@ public abstract class AccessTokenListPanel extends Panel {
 							}
 
 							@Override
-							protected void onSaved(AjaxRequestTarget target) {
+							protected void onSaved(AjaxRequestTarget target, Long savedTokenId, @Nullable String newValue) {
 								view(target);
 							}
 
@@ -91,6 +96,19 @@ public abstract class AccessTokenListPanel extends Panel {
 						};
 						replaceWith(editor);
 						target.add(editor);
+					}
+
+					@Override
+					protected void onRegenerated(AjaxRequestTarget target, String value) {
+						showRevealedToken(target, this, tokenId, value);
+					}
+
+					@Override
+					protected String getRevealedValue() {
+						if (revealedToken != null && tokenId.equals(revealedToken.id()))
+							return revealedToken.value();
+						else
+							return null;
 					}
 
 					@Override
@@ -127,9 +145,9 @@ public abstract class AccessTokenListPanel extends Panel {
 					}
 
 					@Override
-					protected void onSaved(AjaxRequestTarget target) {
+					protected void onSaved(AjaxRequestTarget target, Long tokenId, @Nullable String newValue) {
 						container.replace(newAddNewFrag());
-						target.add(container);
+						showRevealedToken(target, container, tokenId, newValue);
 					}
 
 					@Override
@@ -147,6 +165,20 @@ public abstract class AccessTokenListPanel extends Panel {
 		});
 		fragment.setOutputMarkupId(true);
 		return fragment;
+	}
+
+	private void showRevealedToken(AjaxRequestTarget target, Component component, Long tokenId, String value) {
+		revealedToken = new RevealedToken(tokenId, value);
+		target.add(component);
+		target.appendJavaScript(String.format(
+				"document.getElementById('%s').querySelector('.access-token-notice')?.closest('.access-token-value').scrollIntoView({block: 'nearest'});",
+				component.getMarkupId()));
+	}
+
+	@Override
+	protected void onDetach() {
+		revealedToken = null;
+		super.onDetach();
 	}
 	
 	protected abstract User getUser();

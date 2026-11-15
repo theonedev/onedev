@@ -3,6 +3,8 @@ package io.onedev.server.rest.resource;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
 import static io.onedev.server.security.SecurityUtils.isAdministrator;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -17,7 +19,7 @@ import jakarta.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.model.AccessToken;
@@ -35,6 +37,9 @@ public class AccessTokenResource {
 
 	@Inject
 	private AuditService auditService;
+
+	@Inject
+	private TransactionService transactionService;
 
 	@Api(order=100)
 	@Path("/{accessTokenId}")
@@ -60,9 +65,9 @@ public class AccessTokenResource {
 		return accessToken.getAuthorizations();
 	}
 	
-	@Api(order=200, description="Create access token")
+	@Api(order=200, description="Create an access token and return its ID and secret value. Save the value from this response because it cannot be retrieved later.")
 	@POST
-	public Long createToken(@NotNull @Valid AccessToken accessToken) {
+	public CreatedAccessToken createToken(@NotNull @Valid AccessToken accessToken) {
 		// REST creation deserializes a new token, and @JsonIgnore keeps oauthGrant null.
 		var owner = accessToken.getOwner();
 		if (!isAdministrator() && !owner.equals(getAuthUser()))
@@ -70,18 +75,16 @@ public class AccessTokenResource {
 		else if (owner.isDisabled())
 			throw new ExplicitException("Cannot create access token for disabled user");
 		
-		if (accessTokenService.findByOwnerAndName(owner, accessToken.getName()) != null)
-			throw new ExplicitException("Name already used by another access token of the owner");
-			
+		var value = accessToken.generate();
 		accessTokenService.createOrUpdate(accessToken);
 
 		if (!Objects.equals(getAuthUser(), owner)) {
-			var newAuditContent = VersionedXmlDoc.fromBean(accessToken.getFacade()).toXML();
-			auditService.audit(null, "created access token \"" + accessToken.getName() + "\" in account \"" + owner.getName() + "\" via RESTful API", 
+			var newAuditContent = accessToken.toAuditXml();
+			auditService.audit(null, "created access token in account \"" + owner.getName() + "\" via RESTful API",
 					null, newAuditContent);
 		}
 
-		return accessToken.getId();
+		return new CreatedAccessToken(accessToken.getId(), value);
 	}
 
 	@Api(order=250, description="Update access token")
@@ -94,16 +97,12 @@ public class AccessTokenResource {
 		if (!isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 
-		var accessTokenWithSameName = accessTokenService.findByOwnerAndName(owner, accessToken.getName());
-		if (accessTokenWithSameName != null && !accessTokenWithSameName.equals(accessToken))
-			throw new BadRequestException("Name already used by another access token of the owner");
-		
 		accessTokenService.createOrUpdate(accessToken);
 
 		if (!Objects.equals(getAuthUser(), owner)) {
-			var oldAuditContent = accessToken.getOldVersion().toXML();
-			var newAuditContent = VersionedXmlDoc.fromBean(accessToken).toXML();
-			auditService.audit(null, "changed access token \"" + accessToken.getName() + "\" in account \"" + owner.getName() + "\" via RESTful API", 
+			var oldAuditContent = AccessToken.toAuditXml(accessToken.getOldVersion());
+			var newAuditContent = accessToken.toAuditXml();
+			auditService.audit(null, "changed access token in account \"" + owner.getName() + "\" via RESTful API",
 					oldAuditContent, newAuditContent);
 		}
 		return Response.ok().build();
@@ -121,11 +120,28 @@ public class AccessTokenResource {
 		accessTokenService.delete(accessToken);
 
 		if (!Objects.equals(getAuthUser(), accessToken.getOwner())) {
-			var oldAuditContent = VersionedXmlDoc.fromBean(accessToken.getFacade()).toXML();
-			auditService.audit(null, "deleted access token \"" + accessToken.getName() + "\" from account \"" + accessToken.getOwner().getName() + "\" via RESTful API", 
+			var oldAuditContent = accessToken.toAuditXml();
+			auditService.audit(null, "deleted access token from account \"" + accessToken.getOwner().getName() + "\" via RESTful API",
 					oldAuditContent, null);
 		}
 		return Response.ok().build();
+	}
+
+	public static class CreatedAccessToken implements Serializable {
+
+		@Serial
+		private static final long serialVersionUID = 1L;
+
+		@Api(order=100)
+		private final Long id;
+
+		@Api(order=200, description="The secret value, returned only at creation")
+		private final String value;
+
+		public CreatedAccessToken(Long id, String value) {
+			this.id = id;
+			this.value = value;
+		}
 	}
 
 }

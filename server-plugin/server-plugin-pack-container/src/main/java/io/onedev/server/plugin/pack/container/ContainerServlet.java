@@ -111,7 +111,7 @@ public class ContainerServlet extends HttpServlet {
 		
 		try {
 			Matcher matcher;
-			if (pathInfo.equals("")) {
+			if (pathInfo.isEmpty()) {
 				if (SecurityUtils.isAnonymous()) {
 					response.setStatus(SC_UNAUTHORIZED);
 					response.setHeader("WWW-Authenticate", getChallenge());
@@ -121,7 +121,7 @@ public class ContainerServlet extends HttpServlet {
 			} else if (pathInfo.equals("token")) {
 				if (method.equals("GET")) {
 					var jsonObj = new HashMap<String, String>();
-					String accessTokenValue = SecurityUtils.createTemporalAccessTokenIfUserPrincipal(3600);
+					String accessTokenValue = SecurityUtils.getOrCreateAccessToken(request, 3600);
 					if (accessTokenValue == null)
 						accessTokenValue = RandomStringUtils.secure().nextAlphanumeric(40);
 					var jobToken = HttpUtils.getAuthBasicUser(request);

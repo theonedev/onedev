@@ -241,7 +241,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	}
 
 	private void removeGrant(OAuthGrant grant) {
-		// Delete tokens explicitly so their removal also invalidates the access-token cache.
 		for (var token: new ArrayList<>(grant.getAccessTokens()))
 			accessTokenService.delete(token);
 		grant.getAccessTokens().clear();
@@ -366,10 +365,11 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 		grant.setCodeHash(hash(code));
 		var token = new AccessToken();
 		token.setOwner(owner);
-		token.setName("OAuth grant " + grant.getId() + " (" + new ClientID().getValue() + ")");
+		token.setDescription("OAuth grant " + grant.getId());
 		token.setOauthGrant(grant);
 		// Not usable until the code is exchanged.
 		token.setExpireDate(new Date(0));
+		token.generate();
 		accessTokenService.createOrUpdate(token);
 		grant.getAccessTokens().add(token);
 		for (var project: projects) {
@@ -465,14 +465,14 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 			}
 		}
 		long lifetime = Math.min(ACCESS_TOKEN_SECONDS, (grant.getExpireDate().getTime() - System.currentTimeMillis()) / 1000);
-		token.setValue(new BearerAccessToken(32).getValue());
+		var value = token.generate();
 		token.setExpireDate(new Date(System.currentTimeMillis() + lifetime * 1000));
 		accessTokenService.createOrUpdate(token);
 		RefreshToken refresh = new RefreshToken(grant.getId() + "." + new RefreshToken(32).getValue());
 		grant.setRefreshTokenHash(hash(refresh.getValue()));
 		grant.setLastUsedDate(new Date());
 		dao.persist(grant);
-		var bearer = new BearerAccessToken(token.getValue(), lifetime, scope);
+		var bearer = new BearerAccessToken(value, lifetime, scope);
 		if (scope.contains("openid"))
 			return new OIDCTokenResponse(new OIDCTokens(idToken(grant), bearer, refresh));
 		return new AccessTokenResponse(new Tokens(bearer, refresh));

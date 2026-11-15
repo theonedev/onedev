@@ -14,7 +14,6 @@ import jakarta.validation.constraints.Size;
 
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Secret;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.AccessTokenAuthorization;
 import io.onedev.server.model.Project;
@@ -27,9 +26,7 @@ public class AccessTokenEditBean implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private String name;
-	
-	private String value;
+	private String description;
 	
 	private boolean hasOwnerPermissions;
 
@@ -39,23 +36,12 @@ public class AccessTokenEditBean implements Serializable {
 
 	@Editable(order=100)
 	@NotEmpty
-	public String getName() {
-		return name;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	@Editable(order=200)
-	@Secret(displayChars=4)
-	@NotEmpty
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Editable(order=250, description = "Enable this if the access token has same permissions as the owner")
@@ -89,8 +75,7 @@ public class AccessTokenEditBean implements Serializable {
 	
 	public static AccessTokenEditBean of(AccessToken token) {
 		var bean = new AccessTokenEditBean();
-		bean.setName(token.getName());
-		bean.setValue(token.getValue());
+		bean.setDescription(token.getDescription());
 		bean.setHasOwnerPermissions(token.isHasOwnerPermissions());
 		bean.setExpireDate(token.getExpireDate());
 

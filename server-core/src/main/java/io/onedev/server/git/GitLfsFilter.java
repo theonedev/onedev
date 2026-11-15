@@ -312,7 +312,7 @@ public class GitLfsFilter implements Filter {
 					} else {
 						httpResponse.setContentType(CONTENT_TYPE);
 						if (pathInfo.endsWith("/batch")) {
-							String accessToken = SecurityUtils.createTemporalAccessTokenIfUserPrincipal(300);
+							String accessToken = SecurityUtils.getOrCreateAccessToken(httpRequest, 300);
 							processBatch(httpRequest, httpResponse, project.getFacade(), 
 									() -> canReadCode(httpRequest, project), 
 									() -> SecurityUtils.canWriteCode(project), 

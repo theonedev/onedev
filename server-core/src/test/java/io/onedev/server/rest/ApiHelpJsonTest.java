@@ -12,6 +12,7 @@ import java.util.Set;
 
 import jakarta.persistence.ManyToOne;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
@@ -38,9 +39,11 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.AppLoaderMocker;
 import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.Immutable;
+import io.onedev.server.rest.resource.AccessTokenResource;
 import io.onedev.server.rest.resource.ApiHelpResource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.SettingService;
@@ -107,6 +110,27 @@ public class ApiHelpJsonTest extends AppLoaderMocker {
 		var read = method("read");
 		assertTrue(read.at("/response/success/body/example").has("id"));
 		assertTrue(read.at("/response/success/body/example").has("readOnly"));
+	}
+
+	@Test
+	public void exposesTheAccessTokenSecretOnlyInTheCreationResponse() throws Exception {
+		var token = new AccessToken();
+		token.setId(12L);
+		var value = token.generate();
+		var secretResponse = new AccessTokenResource.CreatedAccessToken(token.getId(), value);
+		var created = mapper.valueToTree(secretResponse);
+		assertEquals(12L, created.path("id").asLong());
+		assertEquals(value, created.path("value").asText());
+
+		var read = mapper.valueToTree(token);
+		assertEquals(12L, read.path("id").asLong());
+		assertFalse(read.has("value"));
+		assertFalse(read.has("valueHash"));
+
+		var createMethod = AccessTokenResource.class.getMethod("createToken", AccessToken.class,
+				HttpServletResponse.class);
+		var help = mapper.valueToTree(new ApiHelpJson().getMethod(AccessTokenResource.class, createMethod));
+		assertTrue(help.at("/response/success/body/example").has("value"));
 	}
 
 	@Test

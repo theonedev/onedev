@@ -5,11 +5,11 @@ import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.job.JobService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.ExceptionHandleFilter;
+import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.lang.codec.Base64;
-import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.util.WebUtils;
 
 import jakarta.inject.Inject;
@@ -49,10 +49,10 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 				String decodedAuthValue = Base64.decodeToString(authValue);
 				String userName = StringUtils.substringBefore(decodedAuthValue, ":").trim();
 				String password = StringUtils.substringAfter(decodedAuthValue, ":").trim();
-				if (userName.length() != 0 && password.length() != 0) {
+				if (!userName.isEmpty() && !password.isEmpty()) {
 					var accessToken = accessTokenService.findByValue(password);
 					if (accessToken != null) {
-						ThreadContext.bind(accessToken.asSubject());
+						SecurityUtils.bindAccessToken(httpRequest, accessToken, password);
 					} else {
 						try {
 							getSubject().login(new UsernamePasswordToken(userName, password));
@@ -77,7 +77,7 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 				// Do not throw IncorrectCredentialException if no access token found 
 				// as the bearer token can be a faked token for anonymous access
 				if (accessToken != null) 
-					ThreadContext.bind(accessToken.asSubject());
+					SecurityUtils.bindAccessToken(httpRequest, accessToken, bearerToken);
 			} else {
 				throw new ClientException(SC_UNAUTHORIZED, ErrorCode.UNAUTHORIZED, 
 						"Unsupported authorization: " + substringBefore(authHeader, " "));

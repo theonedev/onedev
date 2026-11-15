@@ -15,7 +15,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.proxy.HibernateProxy;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -24,7 +23,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.persistence.annotation.EntityId;
 
 @MappedSuperclass
-@JsonIgnoreProperties("handler")
 public abstract class AbstractEntity implements Serializable, Comparable<AbstractEntity> {
 
 	@Serial
@@ -142,9 +140,8 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	public static Long idOf(@Nullable AbstractEntity entity) {
 		if (entity == null) {
 			return null;
-		} else if (entity instanceof HibernateProxy) {
-			HibernateProxy proxy = (HibernateProxy) entity;
-			return (Long) proxy.getHibernateLazyInitializer().getIdentifier();
+		} else if (entity instanceof HibernateProxy proxy) {
+            return (Long) proxy.getHibernateLazyInitializer().getIdentifier();
 		} else {
 			return entity.getId();
 		}

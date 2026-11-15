@@ -47,14 +47,15 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) {
     	Subject subject = SecurityUtils.getSubject();
 		if (!subject.isAuthenticated()) {
-			String bearerToken = SecurityUtils.getBearerToken((HttpServletRequest)request);
+			var httpRequest = (HttpServletRequest) request;
+			String bearerToken = SecurityUtils.getBearerToken(httpRequest);
 			if (bearerToken != null) {
 				if (clusterService.getCredential().equals(bearerToken)) {
 					ThreadContext.bind(userService.getSystem().asSubject());
 				} else {
 					var accessToken = accessTokenService.findByValue(bearerToken);
 					if (accessToken != null) {
-						ThreadContext.bind(accessToken.asSubject());
+						SecurityUtils.bindAccessToken(httpRequest, accessToken, bearerToken);
 					} else {
 						var workspaceContext = workspaceService.getWorkspaceContext(bearerToken, false);
 						if (workspaceContext != null) {

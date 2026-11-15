@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 
 import jakarta.inject.Singleton;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.Strings;
@@ -9672,6 +9673,7 @@ public class DataMigrator {
 	private void migrate257(File dataDir, Stack<Integer> versions) {
 		var windowsBatchShellClass = "io.onedev.server.model.support.workspace.spec.shell.WindowsBatchShell";
 		var powerShellClass = "io.onedev.server.model.support.workspace.spec.shell.PowerShell";
+		var tokenAuditAction = Pattern.compile("^(created|changed|regenerated|deleted) access token \"");
 		for (File file : Objects.requireNonNull(dataDir.listFiles())) {
 			if (file.getName().startsWith("Projects.xml")) {
 				var dom = VersionedXmlDoc.fromFile(file);
@@ -9694,6 +9696,16 @@ public class DataMigrator {
 				for (Element workspaceElement : dom.getRootElement().elements()) {
 					workspaceElement.element("forTaskAutomation").detach();
 					workspaceElement.element("mergeIfAcceptable").detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("AccessTokens.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (var token : dom.getRootElement().elements()) {
+					var description = token.element("name");
+					description.setName("description");
+					var value = token.element("value");
+					value.setName("valueHash");
+					value.setText(DigestUtils.sha256Hex(value.getText()));
 				}
 				dom.writeToFile(file, false);
 			}

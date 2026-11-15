@@ -10,7 +10,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.lang.codec.Base64;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.util.WebUtils;
 
 import io.onedev.commons.utils.StringUtils;
@@ -43,21 +42,21 @@ public class BasicAuthenticationFilter extends ExceptionHandleFilter {
                 String decoded = Base64.decodeToString(authValue);
                 String userName = StringUtils.substringBefore(decoded, ":").trim();
                 String password = StringUtils.substringAfter(decoded, ":").trim();
-				if (userName.length() != 0) {
+				if (!userName.isEmpty()) {
 					var accessToken = accessTokenService.findByValue(userName);
 					if (accessToken != null) {
-						ThreadContext.bind(accessToken.asSubject());
+						SecurityUtils.bindAccessToken(httpRequest, accessToken, userName);
 						return true;
 					}
 				}
-				if (password.length() != 0) {
+				if (!password.isEmpty()) {
 					var accessToken = accessTokenService.findByValue(password);
 					if (accessToken != null) {
-						ThreadContext.bind(accessToken.asSubject());
+						SecurityUtils.bindAccessToken(httpRequest, accessToken, password);
 						return true;
 					}
 				}
-				if (userName.length() != 0 && password.length() != 0) {
+				if (!userName.isEmpty() && !password.isEmpty()) {
 					subject.login(new UsernamePasswordToken(userName, password));
 					return true;
 				}

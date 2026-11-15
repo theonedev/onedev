@@ -12,7 +12,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import com.google.common.collect.Sets;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.SubscriptionService;
@@ -52,7 +52,7 @@ abstract class AccessTokenEditPanel extends Panel {
 		if (!OneDev.getInstance(SubscriptionService.class).isSubscriptionActive())
 			bean.getAuthorizations().removeIf(it -> Project.DEFAULT_NAME.equals(it.getProjectPath()));
 		
-		var editor = BeanContext.edit("editor", bean, Sets.newHashSet("value"), true);
+		var editor = BeanContext.edit("editor", bean);
 		form.add(editor);
 			
 		form.add(new AjaxButton("save") {
@@ -61,56 +61,41 @@ abstract class AccessTokenEditPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target) {
 				super.onSubmit(target);
 				var token = getToken();
-				
-				var nameConflict = false;
-				var tokenWithSameName = getAccessTokenService().findByOwnerAndName(token.getOwner(), bean.getName());
-				if (token.isNew()) {
-					if (tokenWithSameName != null)
-						nameConflict = true;
-				} else {
-					if (tokenWithSameName != null && !tokenWithSameName.equals(token))
-						nameConflict = true;						
-				}
-				if (nameConflict) {
-					editor.error(new Path(new PathNode.Named("name")), _T("Name already used by another access token of the owner"));
-					target.add(AccessTokenEditPanel.this);
-				} else {
-					var projectPaths = new HashSet<String>();
-					var authorizations = new ArrayList<AccessTokenAuthorization>();
-					for (var authorizationBean : bean.getAuthorizations()) {
-						if (!projectPaths.add(authorizationBean.getProjectPath())) {
-							editor.error(new Path(new PathNode.Named("authorizations")), MessageFormat.format(_T("Duplicate authorizations found: {0}"), authorizationBean.getProjectPath()));
-							target.add(AccessTokenEditPanel.this);
-							return;
-						} else {
-							var project = authorizationBean.resolveProject(token.getOwner());
-							authorizationBean.getRoleNames().forEach(it -> {
-								var authorization = new AccessTokenAuthorization();
-								authorization.setProject(project);
-								authorization.setRole(getRoleService().find(it));
-								authorization.setToken(token);
-								authorizations.add(authorization);
-							});
-						}	
-					}
-					token.setName(bean.getName());
-					token.setValue(bean.getValue());
-					token.setHasOwnerPermissions(bean.isHasOwnerPermissions());
-					token.setExpireDate(bean.getExpireDate());
 
-					getTransactionService().run(() -> {
-						if (token.isNew())						
-						getAccessTokenService().createOrUpdate(token);
-						getAccessTokenAuthorizationService().syncAuthorizations(token, authorizations);
-						if (getPage() instanceof UserPage) {
-							var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
-							var verb = oldAuditContent != null ? "changed" : "created";
-							getAuditService().audit(null, verb + " access token \"" + token.getName() + "\" in account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
-							oldAuditContent = newAuditContent;
-						}
+				var projectPaths = new HashSet<String>();
+				var authorizations = new ArrayList<AccessTokenAuthorization>();
+				for (var authorizationBean : bean.getAuthorizations()) {
+					if (!projectPaths.add(authorizationBean.getProjectPath())) {
+						editor.error(new Path(new PathNode.Named("authorizations")), MessageFormat.format(_T("Duplicate authorizations found: {0}"), authorizationBean.getProjectPath()));
+						target.add(AccessTokenEditPanel.this);
+						return;
+					}
+					var project = authorizationBean.resolveProject(token.getOwner());
+					authorizationBean.getRoleNames().forEach(it -> {
+						var authorization = new AccessTokenAuthorization();
+						authorization.setProject(project);
+						authorization.setRole(getRoleService().find(it));
+						authorization.setToken(token);
+						authorizations.add(authorization);
 					});
-					onSaved(target);
 				}
+				token.setDescription(bean.getDescription());
+				token.setHasOwnerPermissions(bean.isHasOwnerPermissions());
+				token.setExpireDate(bean.getExpireDate());
+
+				var value = getTransactionService().call(() -> {
+					var newValue = token.isNew() ? token.generate() : null;
+					getAccessTokenService().createOrUpdate(token);
+					getAccessTokenAuthorizationService().syncAuthorizations(token, authorizations);
+					if (getPage() instanceof UserPage) {
+						var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
+						var verb = oldAuditContent != null ? "changed" : "created";
+						getAuditService().audit(null, verb + " access token in account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
+						oldAuditContent = newAuditContent;
+					}
+					return newValue;
+				});
+				onSaved(target, token.getId(), value);
 			}
 
 			@Override
@@ -156,7 +141,7 @@ abstract class AccessTokenEditPanel extends Panel {
 	
 	protected abstract AccessToken getToken();
 	
-	protected abstract void onSaved(AjaxRequestTarget target);
+	protected abstract void onSaved(AjaxRequestTarget target, Long tokenId, @Nullable String newValue);
 	
 	protected abstract void onCancelled(AjaxRequestTarget target);
 }

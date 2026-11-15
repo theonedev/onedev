@@ -1,33 +1,28 @@
 package io.onedev.server.service.impl;
 
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.DisabledAccountException;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionService;
-import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.Restrictions;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.util.facade.AccessTokenCache;
 
 @Singleton
 public class DefaultAccessTokenService extends BaseEntityService<AccessToken> implements AccessTokenService {
@@ -39,106 +34,56 @@ public class DefaultAccessTokenService extends BaseEntityService<AccessToken> im
 	private ClusterService clusterService;
 
 	@Inject
-	private TransactionService transactionService;
-
-	@Inject
 	private SessionService sessionService;
 	
-	private volatile AccessTokenCache cache;
-
 	private volatile IMap<String, Long> temporalAccessTokens;
 
 	@Transactional
-    @Override
-    public void createOrUpdate(AccessToken projectToken) {
-		dao.persist(projectToken);
-    }
-
-	@Sessional
 	@Override
-	public AccessToken findByOwnerAndName(User owner, String name) {
-		if (cache != null) {
-			var facade = cache.findByOwnerAndName(owner.getId(), name);
-			if (facade != null) 
-				return load(facade.getId());
-			else 
-				return null;
-		} else {
-			throw new ServerNotReadyException();
-		}
+	public void createOrUpdate(AccessToken token) {
+		dao.persist(token);
 	}
 
-    @Override
-    public final AccessToken findByValue(String value) {
+	@Override
+	public final AccessToken findByValue(String value) {
 		return sessionService.call(() -> {
-            if (cache != null) {
-                var facade = cache.findByValue(value);
-                if (facade != null) {
-                    var token = load(facade.getId());
-					if (token.getOwner().isDisabled())
-						throw new DisabledAccountException("Account is disabled");
-                    if (!value.equals(token.getValue())
-							|| token.isExpired()
-							|| token.getOauthGrant() != null && !token.getOauthGrant().isActive()) {
-						return null;
-					}
-					return token;
-                } else {
-                    Long userId = temporalAccessTokens.get(value);
-                    if (userId != null) {
-                        var token = new AccessToken();
-						var user = userService.load(userId);
-						if (user.isDisabled())
-							throw new DisabledAccountException("Account is disabled");
-                        token.setOwner(user);
-                        token.setHasOwnerPermissions(true);
-                        token.setValue(value);
-						return token;
-                    } else {
-                        return null;
-                    }
-                }
-            } else {
-                throw new ServerNotReadyException();
-            }
-        });
-    }
+			if (temporalAccessTokens == null)
+				throw new ServerNotReadyException();
 
-    @Sessional
-    @Listen
-    public void on(SystemStarting event) {
-		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
+			var valueHash = DigestUtils.sha256Hex(value);
+			var token = find(newCriteria().add(Restrictions.eq(AccessToken.PROP_VALUE_HASH, valueHash)));
+			if (token != null) {
+				if (token.isExpired())
+					return null;
+				if (token.getOwner().isDisabled())
+					throw new DisabledAccountException("Account is disabled");
+				if (token.getOauthGrant() != null && !token.getOauthGrant().isActive())
+					return null;
+				return token;
+			}
+			var userId = temporalAccessTokens.get(valueHash);
+			if (userId == null)
+				return null;
+			var user = userService.load(userId);
+			if (user.isDisabled())
+				throw new DisabledAccountException("Account is disabled");
+			token = new AccessToken();
+			token.setOwner(user);
+			token.setHasOwnerPermissions(true);
+			return token;
+		});
+	}
 
-		temporalAccessTokens = Objects.requireNonNull(hazelcastInstance).getMap("temporalAccessTokens");
-		
-        cache = new AccessTokenCache(hazelcastInstance.getReplicatedMap("accessTokenCache"));
-		for (var token: query())
-			cache.put(token.getId(), token.getFacade());
-    }
+	@Listen
+	public void on(SystemStarting event) {
+		temporalAccessTokens = Objects.requireNonNull(clusterService.getHazelcastInstance()).getMap("temporalAccessTokens");
+	}
 
 	@Override
 	public String createTemporal(Long userId, long secondsToExpire) {
 		var value = RandomStringUtils.secure().nextAlphanumeric(40);
-		temporalAccessTokens.put(value, userId, secondsToExpire, TimeUnit.SECONDS);
+		temporalAccessTokens.put(DigestUtils.sha256Hex(value), userId, secondsToExpire, TimeUnit.SECONDS);
 		return value;
-	}
-	
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof AccessToken) {
-			var facade = ((AccessToken) event.getEntity()).getFacade();
-			transactionService.runAfterCommit(() -> cache.put(facade.getId(), facade));
-		}
-	}
-
-	@Transactional
-	@Listen
-	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof AccessToken) {
-			var id = event.getEntity().getId();
-			transactionService.runAfterCommit(() -> cache.remove(id));
-		}
 	}
 	
 }

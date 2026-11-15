@@ -64,7 +64,7 @@ public class JobAuthorizationContext {
 			String secretValue = getSecretValue(accessTokenSecret);
 			var accessToken = OneDev.getInstance(AccessTokenService.class).findByValue(secretValue);
 			if (accessToken == null)
-				throw new ExplicitException(MessageFormat.format(_T("Invalid access token: {0}"), secretValue));
+				throw new ExplicitException(_T("Invalid access token"));
 			return accessToken.asSubject();
 		} else {
 			return SecurityUtils.asAnonymous();

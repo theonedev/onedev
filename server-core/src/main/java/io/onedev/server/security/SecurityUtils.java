@@ -99,6 +99,8 @@ import io.onedev.server.util.facade.UserFacade;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
+	private static final String AUTHENTICATED_ACCESS_TOKEN = SecurityUtils.class.getName() + ".accessToken";
+
 	public static final String AUTHENTICATION_FAILED_MESSAGE = "Invalid account or incorrect credentials";
 
 	public static final String PRINCIPAL_ANONYMOUS = "anonymous";
@@ -241,19 +243,23 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return null;
 	}
 	
+	public static void bindAccessToken(HttpServletRequest request, AccessToken token, String value) {
+		var subject = token.asSubject();
+		// Git LFS and the container registry can forward a scoped credential from the same request.
+		if (getAccessTokenId((String) subject.getPrincipal()) != null)
+			request.setAttribute(AUTHENTICATED_ACCESS_TOKEN, value);
+		ThreadContext.bind(subject);
+	}
+
 	@Nullable
-	public static String createTemporalAccessTokenIfUserPrincipal(long temporalAccessTokenExpireSeconds) {
+	public static String getOrCreateAccessToken(HttpServletRequest request, long temporalAccessTokenExpireSeconds) {
 		String principal = (String) getSubject().getPrincipal();
-		var accessToken = getAccessToken(principal);
-		if (accessToken != null) {
-			return accessToken.getValue();
-		} else {
-			var userId = getAuthUserId(principal);			
-			if (userId != null)
-				return OneDev.getInstance(AccessTokenService.class).createTemporal(userId, temporalAccessTokenExpireSeconds);
-			else
-				return null;
-		}
+		if (getAccessTokenId(principal) != null)
+			return (String) request.getAttribute(AUTHENTICATED_ACCESS_TOKEN);
+		var userId = getAuthUserId(principal);
+		if (userId != null)
+			return OneDev.getInstance(AccessTokenService.class).createTemporal(userId, temporalAccessTokenExpireSeconds);
+		return null;
 	}
 	
 	public static boolean canCreateRootProjects() {

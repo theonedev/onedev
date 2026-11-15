@@ -13,6 +13,12 @@ files are generated automatically.
 Do not add tests for trivial or minor changes unless the user explicitly asks
 for them.
 
+Do not add migration logic for database data or build spec changes unless the
+user explicitly asks for it.
+
+Do not add automated tests for data or build spec migrations unless the user
+explicitly asks for them.
+
 Do not run Maven after changing files unless the user explicitly asks for it.
 
 Avoid defensive coding. Rely on established contracts and invariants within the
