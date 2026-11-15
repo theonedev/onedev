@@ -102,6 +102,10 @@ public class OAuthApplication extends AbstractEntity {
 	}
 
 	public List<String> getRedirectUriList() {
+		return parseRedirectUris(redirectUris);
+	}
+
+	public static List<String> parseRedirectUris(String redirectUris) {
 		return redirectUris.lines().map(String::trim).filter(it -> !it.isEmpty()).toList();
 	}
 

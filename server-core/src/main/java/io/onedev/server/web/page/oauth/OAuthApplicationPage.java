@@ -19,12 +19,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.OAuthApplication;
 import io.onedev.server.oauth.OAuthProviderService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.security.LoginPage;
 
@@ -78,22 +78,28 @@ public abstract class OAuthApplicationPage extends LayoutPage {
 				app.setName(bean.getName());
 				app.setHomepage(bean.getHomepage());
 				app.setRedirectUris(bean.getRedirectUris());
-				try {
-					var newSecret = providerService.saveApplication(app);
-					var parameters = paramsOf(app);
-					OAuthApplicationPage page = new MyOAuthApplicationPage(parameters);
-					page.secret = newSecret;
-					Session.get().success(applicationId == null ? _T("Application registered") : _T("Basic settings updated"));
-					setResponsePage(page);
-				} catch (ExplicitException e) {
-					error(e.getMessage());
-				}
+				var newSecret = providerService.saveApplication(app);
+				var parameters = paramsOf(app);
+				OAuthApplicationPage page = new MyOAuthApplicationPage(parameters);
+				page.secret = newSecret;
+				Session.get().success(applicationId == null ? _T("Application registered") : _T("Basic settings updated"));
+				setResponsePage(page);
 			}
 		};
 		add(form);
 		form.add(new FencedFeedbackPanel("feedback", form));
 		add(new Label("heading", applicationId != null ? _T("Basic Settings") : _T("Register Application")));
-		form.add(BeanContext.edit("editor", bean, applicationId != null ? List.of("confidential") : List.of(), true));
+		var descriptor = new BeanDescriptor(OAuthApplicationBean.class,
+				applicationId != null ? List.of("confidential") : List.of(), true) {
+			@Override
+			public OAuthApplicationBean newBeanInstance() {
+				var input = new OAuthApplicationBean();
+				input.setConfidential(bean.isConfidential());
+				return input;
+			}
+		};
+		var context = new BeanContext(descriptor);
+		form.add(context.renderForEdit("editor", context.wrapAsSelfUpdating(Model.of(bean))));
 		form.add(new Button("save"));
 		form.add(new BookmarkablePageLink<>("cancel", getApplicationsPageClass()));
 		var manage = new OAuthForm("manage");

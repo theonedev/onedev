@@ -147,23 +147,6 @@ public class DefaultOAuthProviderService implements OAuthProviderService, Schedu
 	@Transactional
 	@Override
 	public String saveApplication(OAuthApplication application) {
-		if (application.getOwner() == null)
-			throw new ExplicitException("Application owner is required");
-		if (application.getName() == null || application.getName().isBlank() || application.getName().length() > 255)
-			throw new ExplicitException("Application name is required (up to 255 characters)");
-		try {
-			var homepage = URI.create(application.getHomepage());
-			if (!List.of("http", "https").contains(homepage.getScheme()) || homepage.getHost() == null
-					|| homepage.getUserInfo() != null || application.getHomepage().length() > 2048)
-				throw new IllegalArgumentException();
-		} catch (IllegalArgumentException | NullPointerException e) {
-			throw new ExplicitException("Specify a valid HTTP or HTTPS homepage");
-		}
-		if (application.getRedirectUris() == null || application.getRedirectUris().length() > 16000
-				|| application.getRedirectUriList().isEmpty() || application.getRedirectUriList().size() > 20
-				|| application.getRedirectUriList().stream().anyMatch(it -> it.length() > 2048
-						|| !isValidRedirectUri(it, application.isConfidential())))
-			throw new ExplicitException("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme");
 		boolean creating = application.isNew();
 		String secret = null;
 		if (creating) {
