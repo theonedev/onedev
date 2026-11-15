@@ -188,6 +188,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private final Map<Long, Future<Void>> workspaceFutures = new ConcurrentHashMap<>();
 
+	private volatile Set<Long> workspaceIdsWithLoggedWaitReason = Set.of();
+
 	private final Map<Long, WorkspaceRuntime> workspaceRuntimes = new ConcurrentHashMap<>();
 
 	private final Map<Long, Future<Void>> workspaceTaskFutures = new ConcurrentHashMap<>();
@@ -581,14 +583,22 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 					occupiedKeys.add(key);
 			}
 		}
+		var blockedWorkspaceIds = new HashSet<Long>();
 		for (var workspace : workspaces) {
 			var workspaceId = workspace.getId();
 			if (workspaceFutures.containsKey(workspaceId))
 				continue;
 			if (workspace.getStatus() == Status.PENDING && thread != null) {
 				var key = SerialKey.of(workspace);
-				if (key != null && !occupiedKeys.add(key))
+				if (key != null && !occupiedKeys.add(key)) {
+					blockedWorkspaceIds.add(workspaceId);
+					if (!workspaceIdsWithLoggedWaitReason.contains(workspaceId)) {
+						logService.newLogger(workspace.getLoggingSupport()).log(
+								"Waiting for another workspace to finish (same AI user, %s)"
+										.formatted(workspace.getOnDescription()));
+					}
 					continue;
+				}
 				try {
 					if (workspace.getTaskUserPrompt() != null) {
 						lockTaskTarget(workspace.getIssue(), workspace.getRequest());
@@ -611,6 +621,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 				listenerRegistry.post(new WorkspacePending(workspace));
 			}
 		}
+		workspaceIdsWithLoggedWaitReason = blockedWorkspaceIds;
 	}
 
 	@Override
