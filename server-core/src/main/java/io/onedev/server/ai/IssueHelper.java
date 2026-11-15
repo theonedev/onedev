@@ -19,13 +19,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import dev.langchain4j.model.chat.request.json.JsonArraySchema;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.chat.request.json.JsonStringSchema;
+import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.SubscriptionService;
+import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
+import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsNotAnyOf;
+import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
@@ -33,6 +35,7 @@ import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
+import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.DateTimeField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -46,6 +49,8 @@ import io.onedev.server.service.IssueService;
 import io.onedev.server.service.IterationService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UrlService;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.editable.EditableUtils;
 import org.jspecify.annotations.Nullable;
 
 public class IssueHelper {
@@ -165,15 +170,22 @@ public class IssueHelper {
 
     public static Map<String, Object> getFieldProperties(FieldSpec field) {
         var description = field.getDescription() != null ? field.getDescription().replace('\n', ' ') : "";
+        var valueProperties = new LinkedHashMap<String, Object>();
+        valueProperties.put("type", "string");
         if (field instanceof ChoiceField choiceField) {
-            if (field.isAllowMultiple())
-                description = appendDescription(description, "Expects one or more of: " + String.join(", ", choiceField.getPossibleValues()));
-            else
-                description = appendDescription(description, "Expects one of: " + String.join(", ", choiceField.getPossibleValues()));
+            var choices = choiceField.getPossibleValues();
+            if (!choices.isEmpty()) {
+                valueProperties.put("enum", choices);
+                var expectation = field.isAllowMultiple() ? "Expects one or more of: " : "Expects one of: ";
+                description = appendDescription(description, expectation + String.join(", ", choices));
+            }
         } else if (field instanceof UserChoiceField) {
             description = appendDescription(description, field.isAllowMultiple() ? "Expects user login names" : "Expects user login name");
         } else if (field instanceof GroupChoiceField) {
             description = appendDescription(description, field.isAllowMultiple() ? "Expects group names" : "Expects group name");
+        } else if (field instanceof BuildChoiceField) {
+            description = appendDescription(description, field.isAllowMultiple()
+                    ? "Expects build numbers in the current project" : "Expects a build number in the current project");
         } else if (field instanceof BooleanField) {
             description = appendDescription(description, "Expects boolean value, true or false");
         } else if (field instanceof IntegerField) {
@@ -186,44 +198,81 @@ public class IssueHelper {
                     : "Expects unix timestamp in milliseconds since epoch");
         }
 
-        var fieldProperties = new HashMap<String, Object>();
         if (field.isAllowMultiple()) {
+            var fieldProperties = new LinkedHashMap<String, Object>();
             fieldProperties.put("type", "array");
-            fieldProperties.put("items", Map.of("type", "string"));
+            fieldProperties.put("items", valueProperties);
             fieldProperties.put("uniqueItems", true);
             fieldProperties.put("description", description);
+            return fieldProperties;
         } else {
-            fieldProperties.put("type", "string");
-            fieldProperties.put("description", description);
+            valueProperties.put("description", description);
+            return valueProperties;
         }
-        return fieldProperties;
     }
 
-    public static Map<String, Object> getValidFields() {
-        var issueFields = new HashMap<String, Object>();
-        for (var field : OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpecs())
-            issueFields.put(getParamName(field.getName()), getFieldProperties(field));
-        return issueFields;
+    private static boolean hasDefaultValueProvider(FieldSpec field) {
+        // Check the configured provider without evaluating defaults that may depend on other issue fields.
+        var methodName = field.isAllowMultiple() ? "getDefaultMultiValueProvider" : "getDefaultValueProvider";
+        return ReflectionUtils.findMethod(field.getClass(), methodName) != null
+                && ReflectionUtils.invokeMethod(field, methodName) != null;
     }
 
-    public static JsonObjectSchema getFieldsSchema() {
-        var builder = JsonObjectSchema.builder()
-                .description("Issue custom fields as a map of field name to value. "
-                        + "Must be a JSON object, not an array");
-        for (Entry<String, Object> entry : getValidFields().entrySet()) {
-            @SuppressWarnings("unchecked")
-            var fieldProps = (Map<String, Object>) entry.getValue();
-            var description = (String) fieldProps.get("description");
-            if ("array".equals(fieldProps.get("type"))) {
-                builder.addProperty(entry.getKey(), JsonArraySchema.builder()
-                        .description(description)
-                        .items(new JsonStringSchema())
-                        .build());
-            } else {
-                builder.addStringProperty(entry.getKey()).description(description);
+    private static String describeShowCondition(ShowCondition condition) {
+        var matcher = condition.getValueMatcher();
+        var description = "'" + getParamName(condition.getInputName()) + "' is visible and "
+                + EditableUtils.getDisplayName(matcher.getClass());
+        if (matcher instanceof ValueIsOneOf oneOf)
+            return description + " " + getObjectMapper().valueToTree(oneOf.getValues());
+        else if (matcher instanceof ValueIsNotAnyOf notAnyOf)
+            return description + " " + getObjectMapper().valueToTree(notAnyOf.getValues());
+        else
+            return description;
+    }
+
+    public record IssueFieldProperties(String name, Map<String, Object> properties, boolean requiredOnCreate) {
+    }
+
+    public static List<IssueFieldProperties> getIssueFieldProperties(Subject subject, Project project) {
+        var fields = new ArrayList<IssueFieldProperties>();
+        var issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
+        Project.push(project);
+        try {
+            for (var field : issueSetting.getFieldSpecs()) {
+                if (!field.isApplicable(project) || !SecurityUtils.canEditIssueField(subject, project, field.getName()))
+                    continue;
+
+                var requiresValueWhenShown = field.isPromptUponIssueOpen() && !field.isAllowEmpty()
+                        && !hasDefaultValueProvider(field);
+                var showCondition = field.getShowCondition();
+                var properties = getFieldProperties(field);
+                if (showCondition != null) {
+                    var guidance = (requiresValueWhenShown ? "Required when " : "Shown when ")
+                            + describeShowCondition(showCondition);
+                    properties.put("description", appendDescription((String) properties.get("description"), guidance));
+                }
+                fields.add(new IssueFieldProperties(getParamName(field.getName()), properties,
+                        requiresValueWhenShown && showCondition == null));
             }
+        } finally {
+            Project.pop();
         }
-        return builder.build();
+        return fields;
+    }
+
+    public static JsonObjectSchema getFieldsSchema(Subject subject, Project project) {
+        var builder = JsonObjectSchema.builder().description("Issue custom fields keyed by field name");
+        var required = new ArrayList<String>();
+        var objectMapper = getObjectMapper();
+        for (var field : getIssueFieldProperties(subject, project)) {
+            var properties = field.properties();
+            if (field.requiredOnCreate()) {
+                required.add(field.name());
+                properties.put("array".equals(properties.get("type")) ? "minItems" : "minLength", 1);
+            }
+            builder.addProperty(field.name(), JsonRawSchema.from(objectMapper.valueToTree(properties).toString()));
+        }
+        return builder.required(required).build();
     }
 
     public static void setFieldValues(Map<String, Serializable> data, JsonNode fieldsNode) {

@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -81,7 +83,6 @@ import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.code.ConventionalCommitChecker;
 import io.onedev.server.model.support.code.RegexpCommitChecker;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -218,8 +219,7 @@ public class TodResource {
         return project;
     }
 
-    private Map<String, Object> getFieldProperties(FieldSpec field) {
-        var fieldProperties = new HashMap<>(IssueHelper.getFieldProperties(field));
+    private Map<String, Object> escapeFieldDescription(Map<String, Object> fieldProperties) {
         fieldProperties.put("description", escapeHtml5((String) fieldProperties.get("description")));
         return fieldProperties;
     }
@@ -328,14 +328,22 @@ public class TodResource {
 
     @Path("/get-valid-issue-fields")
     @GET
-    public Map<String, Object> getValidIssueFields() {
-        if (SecurityUtils.getUser() == null)
+    public Map<String, Object> getValidIssueFields(@QueryParam("project") String projectPath) {
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
-        var issueFields = new HashMap<String, Object>();
-        for (var field: settingService.getIssueSetting().getFieldSpecs()) {
-            var paramName = IssueHelper.getParamName(field.getName());
-            var fieldProperties = getFieldProperties(field);
-            issueFields.put(paramName, fieldProperties);
+        var issueFields = new LinkedHashMap<String, Object>();
+        if (projectPath != null) {
+            for (var field : IssueHelper.getIssueFieldProperties(subject, getProject(projectPath))) {
+                var properties = escapeFieldDescription(field.properties());
+                properties.put("requiredOnCreate", field.requiredOnCreate());
+                issueFields.put(field.name(), properties);
+            }
+        } else {
+            for (var field : settingService.getIssueSetting().getFieldSpecs()) {
+                var paramName = IssueHelper.getParamName(field.getName());
+                issueFields.put(paramName, escapeFieldDescription(IssueHelper.getFieldProperties(field)));
+            }
         }
         return issueFields;
     }

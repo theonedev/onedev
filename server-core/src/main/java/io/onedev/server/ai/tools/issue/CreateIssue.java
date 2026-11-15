@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.trimToNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.shiro.authz.UnauthorizedException;
@@ -34,19 +35,22 @@ public final class CreateIssue implements TaskTool {
 
 	@Override
 	public ToolSpecification getSpecification() {
+		var project = OneDev.getInstance(ProjectService.class).load(projectId);
+		var fieldsSchema = IssueHelper.getFieldsSchema(SecurityUtils.getSubject(), project);
 		return ToolSpecification.builder()
 				.name("createIssue")
 				.description("Create an issue in current project and return created issue in json format")
 				.parameters(JsonObjectSchema.builder()
-						.addStringProperty("title").description("Title of the issue")
-						.addStringProperty("description").description("Description of the issue")
-						.addBooleanProperty("confidential").description("Whether the issue is confidential")
+						.addStringProperty("title", "Title of the issue")
+						.addStringProperty("description", "Description of the issue")
+						.addBooleanProperty("confidential", "Whether the issue is confidential")
 						.addProperty("iterations", JsonArraySchema.builder()
 								.description("Names of iterations to schedule the issue into")
 								.items(new JsonStringSchema()).build())
-						.addIntegerProperty("ownEstimatedTime").description("Estimated time in hours for this issue only (requires active subscription and time tracking enabled)")
-						.addProperty("fields", IssueHelper.getFieldsSchema())
-						.required("title").build())
+						.addIntegerProperty("ownEstimatedTime", "Estimated time in hours for this issue only (requires active subscription and time tracking enabled)")
+						.addProperty("fields", fieldsSchema)
+						.required(fieldsSchema.required().isEmpty() ? List.of("title") : List.of("title", "fields"))
+						.build())
 				.build();
 	}
 
