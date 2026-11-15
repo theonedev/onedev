@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -128,6 +129,7 @@ public class PropertyDescriptor implements Serializable {
 		return getPropertyGetter().getReturnType().isPrimitive()
 				|| (!List.class.isAssignableFrom(getPropertyClass()) && findAnnotation(NotNull.class) != null)
 				|| findAnnotation(NotEmpty.class) != null
+				|| findAnnotation(NotBlank.class) != null
 				|| (size = findAnnotation(Size.class)) != null && size.min()>=1;
 	}
 
