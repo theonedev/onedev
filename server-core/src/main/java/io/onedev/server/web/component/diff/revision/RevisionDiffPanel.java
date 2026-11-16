@@ -226,7 +226,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		this.oldRev = oldRev;
 		this.newRev = newRev;
 		this.initialFile = initialFile;
-		this.selectedFile = initialFile;
 		this.pathFilterModel = pathFilterModel;
 		this.blameModel = blameModel;
 		this.whitespaceOptionModel = whitespaceOptionModel;
@@ -265,7 +264,10 @@ public abstract class RevisionDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (selectedFile == null || getBlobChange(selectedFile) == null)
+		var initialChange = initialFile != null ? getBlobChange(initialFile) : null;
+		if (initialChange != null)
+			selectedFile = initialChange.getPath();
+		else
 			selectFirstFile();
 
 		add(new WebMarkupContainer("revisionsIndexing") {
