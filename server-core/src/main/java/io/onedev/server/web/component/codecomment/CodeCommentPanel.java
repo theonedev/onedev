@@ -147,7 +147,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
-					tag.put("data-tippy-content", _T("Current context is different from the context when this comment is added, click to show the comment context"));
+					tag.put("data-tippy-content", _T("Current context is different from context of the comment, click to show comment context"));
 				}
 				
 			});
@@ -718,7 +718,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						tag.put("data-tippy-content", _T("Current context is different from this action, click to show the comment context"));
+						tag.put("data-tippy-content", _T("Current context is different from context of the action, click to show action context"));
 					}
 					
 				});
@@ -790,7 +790,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						tag.put("data-tippy-content", _T("Current context is different from the context when this reply is added, click to show the reply context"));
+						tag.put("data-tippy-content", _T("Current context is different from context of the reply, click to show reply context"));
 					}
 					
 				});

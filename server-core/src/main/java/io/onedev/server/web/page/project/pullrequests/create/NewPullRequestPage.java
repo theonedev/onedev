@@ -88,7 +88,6 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.Dao;
@@ -130,6 +129,7 @@ import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.editbean.LabelsBean;
 
@@ -140,6 +140,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	private static final String TABS_ID = "tabs";
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
+
+	private static final String PARAM_BLAME = "blame";
 	
 	@Inject
 	private SettingService settingService;
@@ -187,11 +189,13 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	
 	private Long commentId;
 	
-	private Mark mark;
+	private DiffPlanarRange mark;
+
+	private String file;
+
+	private boolean blame;
 	
 	private String pathFilter;
-	
-	private String blameFile;
 	
 	private WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 	
@@ -209,6 +213,13 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			params.set("source", source.toString());
 		else
 			params.set("source", source.getProjectId());
+		return params;
+	}
+
+	private PageParameters paramsForComparison(ProjectAndBranch target, ProjectAndBranch source) {
+		PageParameters params = paramsOf(getProject(), target, source);
+		if (blame)
+			params.set(PARAM_BLAME, true);
 		return params;
 	}
 
@@ -236,6 +247,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 
+		blame = params.get(PARAM_BLAME).toBoolean(false);
 		String targetParam = params.get("target").toString();
 		String sourceParam = params.get("source").toString();
 		String suggestedSourceBranch = null;
@@ -361,7 +373,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Project project, String branch) {
-				PageParameters params = paramsOf(getProject(), new ProjectAndBranch(project, branch), source); 
+				PageParameters params = paramsForComparison(new ProjectAndBranch(project, branch), source);
 				
 				/*
 				 * Use below code instead of calling setResponsePage() to make sure the dropdown is 
@@ -391,7 +403,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Project project, String branch) {
-				PageParameters params = paramsOf(getProject(), NewPullRequestPage.this.target,
+				PageParameters params = paramsForComparison(NewPullRequestPage.this.target,
 						new ProjectAndBranch(project, branch)); 
 				
 				// Refer to comments in target branch picker for not using setResponsePage 
@@ -417,8 +429,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 			@Override
 			public void onClick() {
-				PageParameters params = paramsOf(getProject(), source, target); 
-				setResponsePage(NewPullRequestPage.class, params);
+				setResponsePage(NewPullRequestPage.class, paramsForComparison(source, target));
 			}
 			
 		}.add(AttributeAppender.append("data-tippy-content", Model.of(_T("Swap")))));
@@ -511,6 +522,10 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		}.setOutputMarkupId(true);
 	}
 	
+	private RevisionDiffPanel getRevisionDiff() {
+		return (RevisionDiffPanel) get(TAB_PANEL_ID);
+	}
+
 	private RevisionDiffPanel newRevisionDiffPanel() {
 		PullRequest request = getPullRequest();
 		
@@ -526,20 +541,20 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			
 		};
 		
-		IModel<String> blameModel = new IModel<String>() {
+		IModel<Boolean> blameModel = new IModel<>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public String getObject() {
-				return blameFile;
+			public Boolean getObject() {
+				return blame;
 			}
 
 			@Override
-			public void setObject(String object) {
-				blameFile = object;
+			public void setObject(Boolean blame) {
+				NewPullRequestPage.this.blame = blame;
 			}
 			
 		};
@@ -585,7 +600,14 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		 * it above when loading the project  
 		 */
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, request.getBaseCommitHash(), 
-				source.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this) {
+				source.getRevision(), file, pathFilterModel, whitespaceOptionModel, blameModel, this) {
+
+			@Override
+			protected void onFileSelected(AjaxRequestTarget target) {
+				file = getSelectedFile();
+				commentId = null;
+				mark = null;
+			}
 
 			@Override
 			protected Project getProject() {
@@ -673,7 +695,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			public void onClick() {
 				setResponsePage(
 						NewPullRequestPage.class, 
-						paramsOf(getProject(), getPullRequest().getSource(), getPullRequest().getTarget()));
+						paramsForComparison(getPullRequest().getSource(), getPullRequest().getTarget()));
 			}
 			
 		});
@@ -767,7 +789,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				if (!target.getObjectName().equals(getPullRequest().getTarget().getObjectName()) 
 						|| !source.getObjectName().equals(getPullRequest().getSource().getObjectName())) {
 					getSession().warn(_T("Either target branch or source branch has new commits just now, please re-check."));
-					setResponsePage(NewPullRequestPage.class, paramsOf(getProject(), target, source));
+					setResponsePage(NewPullRequestPage.class, paramsForComparison(target, source));
 				} else {
 					getPullRequest().setSource(source);
 					getPullRequest().setTarget(target);
@@ -1073,14 +1095,16 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	}
 
 	@Override
-	public Mark getMark() {
+	public DiffPlanarRange getMark() {
 		return mark;
 	}
 
 	@Override
-	public String getMarkUrl(Mark mark) {
+	public String getMarkUrl(String blobPath, DiffPlanarRange mark) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
+		state.file = blobPath;
 		state.mark = mark;
+		state.blame = blame;
 		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
@@ -1091,13 +1115,14 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, Mark mark) {
+	public void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
+		this.file = blobPath;
 		this.mark = mark;
 	}
 
 	@Override
 	public void onUnmark(AjaxRequestTarget target) {
-		this.mark = null;
+		mark = null;
 	}
 	
 	@Override
@@ -1175,21 +1200,22 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	}
 	
 	@Override
-	public void onAddComment(AjaxRequestTarget target, Mark mark) {
+	public void onAddComment(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
 		this.commentId = null;
-		this.mark = mark;
+		onMark(target, blobPath, mark);
 	}
 
 	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, String blobPath) {
 		commentId = comment.getId();
-		mark = comment.getMark();
+		this.file = blobPath;
+		onUnmark(target);
 	}
 
 	@Override
 	public void onCommentClosed(AjaxRequestTarget target) {
 		commentId = null;
-		mark = null;
+		onUnmark(target);
 	}
 	
 	@Override

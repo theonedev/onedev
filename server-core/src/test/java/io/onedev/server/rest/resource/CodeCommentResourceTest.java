@@ -180,7 +180,6 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 			assertSame(project, comment.getProject());
 			assertSame(user, comment.getUser());
 			assertSame(request, comment.getCompareContext().getPullRequest());
-			assertNull(comment.getCompareContext().getPathFilter());
 			assertEquals(WhitespaceOption.IGNORE_TRAILING, comment.getCompareContext().getWhitespaceOption());
 			assertEquals(new PlanarRange(0, 0, 0, 5), comment.getMark().getRange());
 			assertEquals("Review this", comment.getContent());

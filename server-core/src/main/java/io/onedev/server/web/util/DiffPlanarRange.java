@@ -4,6 +4,7 @@ import java.io.Serial;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.PlanarRange;
 
@@ -20,7 +21,8 @@ public class DiffPlanarRange extends PlanarRange {
 	}
 	
 	public DiffPlanarRange(boolean leftSide, PlanarRange range) {
-		this(leftSide, range.getFromRow(), range.getFromColumn(), range.getToRow(), range.getToColumn());
+		super(range);
+		this.leftSide = leftSide;
 	}
 
 	public boolean isLeftSide() {
@@ -28,13 +30,32 @@ public class DiffPlanarRange extends PlanarRange {
 	}
 
 	@Override
+	public String toString() {
+		return (leftSide ? "left~" : "right~") + super.toString();
+	}
+
+	@Nullable
+	public static DiffPlanarRange of(@Nullable String value) {
+		if (value == null)
+			return null;
+		int separator = value.indexOf('~');
+		if (separator == -1)
+			return null;
+		Boolean leftSide = switch (value.substring(0, separator)) {
+			case "left" -> true;
+			case "right" -> false;
+			default -> null;
+		};
+		return leftSide != null ? new DiffPlanarRange(leftSide, new PlanarRange(value.substring(separator + 1))) : null;
+	}
+
+	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof DiffPlanarRange))
+		if (!(other instanceof DiffPlanarRange otherRange))
 			return false;
 		if (this == other)
 			return true;
-		DiffPlanarRange otherRange = (DiffPlanarRange) other;
-		return new EqualsBuilder()
+        return new EqualsBuilder()
 				.append(getFromRow(), otherRange.getFromRow())
 				.append(getFromColumn(), otherRange.getFromColumn())
 				.append(getToRow(), otherRange.getToRow())

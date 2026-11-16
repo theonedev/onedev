@@ -36,9 +36,7 @@ public class CompareContext implements Serializable {
 	
 	@Column(nullable=false)
 	private String newCommitHash;
-	
-	private String pathFilter;
-	
+
 	@Column(nullable=false)
 	private WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 
@@ -56,15 +54,6 @@ public class CompareContext implements Serializable {
 
 	public void setNewCommitHash(String newCommitHash) {
 		this.newCommitHash = newCommitHash;
-	}
-
-	@Nullable
-	public String getPathFilter() {
-		return pathFilter;
-	}
-
-	public void setPathFilter(@Nullable String pathFilter) {
-		this.pathFilter = pathFilter;
 	}
 
 	public WhitespaceOption getWhitespaceOption() {
@@ -86,7 +75,6 @@ public class CompareContext implements Serializable {
 				.append(pullRequest, otherContext.pullRequest)
 				.append(oldCommitHash, otherContext.oldCommitHash)
 				.append(newCommitHash, otherContext.newCommitHash)
-				.append(pathFilter, otherContext.pathFilter)
 				.append(whitespaceOption, otherContext.whitespaceOption)
 				.isEquals();
 	}
@@ -97,7 +85,6 @@ public class CompareContext implements Serializable {
 				.append(pullRequest)
 				.append(oldCommitHash)
 				.append(newCommitHash)
-				.append(pathFilter)
 				.append(whitespaceOption)
 				.toHashCode();
 	}

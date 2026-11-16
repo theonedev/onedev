@@ -9708,6 +9708,16 @@ public class DataMigrator {
 					value.setText(DigestUtils.sha256Hex(value.getText()));
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeComments.xml")
+					|| file.getName().startsWith("CodeCommentReplys.xml")
+					|| file.getName().startsWith("CodeCommentStatusChanges.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				var pathFilterNodes = dom.selectNodes("/list/*/compareContext/pathFilter");
+				if (!pathFilterNodes.isEmpty()) {
+					for (var pathFilterNode : pathFilterNodes)
+						pathFilterNode.detach();
+					dom.writeToFile(file, false);
+				}
 			}
 		}
 	}

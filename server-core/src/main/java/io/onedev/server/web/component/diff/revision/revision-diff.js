@@ -12,17 +12,28 @@ onedev.server.revisionDiff = {
 	scrollFileDiffIntoView: function() {
 		const diff = document.querySelector(".revision-diff>.body>.detail>.file-diff");
 		diff?.scrollIntoView({block: "start", inline: "nearest"});
+		this.scrollTreeSelectionIntoView();
 	},
 	scrollTreeSelectionIntoView: function() {
 		const content = document.querySelector(".revision-diff>.body>.detail>.file-tree>.content");
 		const link = content?.querySelector(".tree-content>a.active");
 		if (link) {
-			const bounds = content.getBoundingClientRect();
+			const scroller = $(content).scrollParent()[0];
+			const viewportTop = scroller === document ? 0 : scroller.getBoundingClientRect().top + scroller.clientTop;
+			const viewportBottom = viewportTop + (scroller === document ? document.documentElement.clientHeight : scroller.clientHeight);
+			const contentTop = content.getBoundingClientRect().top + content.clientTop;
+			const contentBottom = contentTop + content.clientHeight;
+			const visibleTop = Math.max(contentTop, viewportTop);
+			const visibleBottom = Math.min(contentBottom, viewportBottom);
 			const linkBounds = link.getBoundingClientRect();
-			if (linkBounds.top < bounds.top)
-				content.scrollTop += linkBounds.top - bounds.top;
-			else if (linkBounds.bottom > bounds.bottom)
-				content.scrollTop += linkBounds.bottom - bounds.bottom;
+			// The page can clip the tree before it reaches its sticky position.
+			const fitsInView = visibleBottom - visibleTop >= linkBounds.height;
+			const top = fitsInView ? visibleTop : contentTop;
+			const bottom = fitsInView ? visibleBottom : contentBottom;
+			if (linkBounds.top < top)
+				content.scrollTop += linkBounds.top - top;
+			else if (linkBounds.bottom > bottom)
+				content.scrollTop += linkBounds.bottom - bottom;
 		}
 	},
 	initComment: function(commentId, diffId, leftSide, startLine, endLine) {
@@ -57,10 +68,19 @@ onedev.server.revisionDiff = {
 		$inlineRows.remove();
 		$codeRow.after($inlineRow);
 	},
-	onWindowLoad: function() {
-		requestAnimationFrame(function() {
-			if (onedev.server.canUseCustomScrollOnLoad())
-				onedev.server.revisionDiff.scrollCommentIntoView({activity: onedev.server.codeComment.getLinkedActivity()});
+	onWindowLoad: function(fileSelected) {
+		requestAnimationFrame(() => {
+			if (!onedev.server.canUseCustomScrollOnLoad())
+				return;
+			const $revisionDiff = $(".revision-diff");
+			if ($revisionDiff.data("inlineComment"))
+				this.scrollCommentIntoView({activity: onedev.server.codeComment.getLinkedActivity()});
+			else if (fileSelected) {
+				if ($revisionDiff.find(".blob-text-diff").data("markRange"))
+					this.scrollTreeSelectionIntoView();
+				else
+					this.scrollFileDiffIntoView();
+			}
 		});
 	},
 	scrollCommentIntoView: function({activity, editor} = {}) {
@@ -102,6 +122,7 @@ onedev.server.revisionDiff = {
 			if (updatedHeight !== stickyHeight)
 				scroll(updatedHeight);
 		}
+		this.scrollTreeSelectionIntoView();
 	},
 	initTree: function() {
 		var $tree = $(".revision-diff>.body>.detail>.file-tree");

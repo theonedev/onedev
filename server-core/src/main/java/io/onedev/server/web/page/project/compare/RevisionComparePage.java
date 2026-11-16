@@ -54,7 +54,6 @@ import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
@@ -79,6 +78,7 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.overview.ProjectOverviewPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.EditParamsAware;
 
 public class RevisionComparePage extends ProjectPage implements RevisionAnnotationSupport, EditParamsAware {
@@ -102,7 +102,11 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	private static final String PARAM_RIGHT = "right";
 	
 	private static final String PARAM_COMPARE_WITH_MERGE_BASE = "compare-with-merge-base";
-	
+
+	private static final String PARAM_FILE = "file";
+
+	private static final String PARAM_BLAME = "blame";
+
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
 	private static final String PARAM_COMMENT = "comment";
@@ -112,8 +116,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
 	private static final String PARAM_COMMIT_QUERY = "commit-query";
-	
-	private static final String PARAM_BLAME_FILE = "blame-file";
 	
 	private static final String PARAM_TAB = "tab";
 	
@@ -162,14 +164,13 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	public static RevisionComparePage.State getState(CodeComment comment, CompareContext compareContext) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.commentId = comment.getId();
-		state.mark = comment.getMark();
+		state.file = comment.getMark().getPath();
 		state.compareWithMergeBase = false;
 		Project project = comment.getProject();
 		state.leftSide = new ProjectAndRevision(project, compareContext.getOldCommitHash());
 		state.rightSide = new ProjectAndRevision(project, compareContext.getNewCommitHash());
 		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = compareContext.getWhitespaceOption();
-		state.pathFilter = compareContext.getPathFilter();
 		return state;
 	}
 	
@@ -183,14 +184,16 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		else
 			params.add(PARAM_RIGHT, state.rightSide.getProjectId());
 		params.add(PARAM_COMPARE_WITH_MERGE_BASE, state.compareWithMergeBase);
+		if (state.file != null)
+			params.add(PARAM_FILE, state.file);
+		if (state.blame)
+			params.add(PARAM_BLAME, true);
 		if (state.whitespaceOption != WhitespaceOption.IGNORE_TRAILING)
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.add(PARAM_PATH_FILTER, state.pathFilter);
 		if (state.commitQuery != null)
 			params.add(PARAM_COMMIT_QUERY, state.commitQuery);
-		if (state.blameFile != null)
-			params.add(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
 			params.add(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
@@ -247,16 +250,16 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 			throw new IllegalArgumentException(_T("Can only compare with common ancestor when different projects are involved"));
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
-		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
+		state.file = params.get(PARAM_FILE).toString();
+		if (state.file != null)
+			state.mark = DiffPlanarRange.of(params.get(PARAM_MARK).toString());
+		state.blame = params.get(PARAM_BLAME).toBoolean(false);
 		state.whitespaceOption = WhitespaceOption.ofName(
 				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.IGNORE_TRAILING.name()));
 		
 		state.commitQuery = params.get(PARAM_COMMIT_QUERY).toString();
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
-		
-		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
 		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -278,6 +281,9 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 					state.rightSide.getProject(), rightCommitId,
 					state.leftSide.getProject(), leftCommitId);
 		}
+		String tab = params.get(PARAM_TAB).toString();
+		state.tabPanel = tab == null && (state.file != null || state.commentId != null)
+				? TabPanel.FILE_CHANGES : TabPanel.of(tab);
 	}
 		
 	@Override
@@ -291,12 +297,15 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				State newState = new State();
 				newState.leftSide = new ProjectAndRevision(project, revision);
 				newState.rightSide = state.rightSide;
+				newState.file = state.file;
+				newState.blame = state.blame;
 				newState.pathFilter = state.pathFilter;
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.commentId = state.commentId;
-				newState.mark = state.mark;
+				if (state.mark != null && !state.mark.isLeftSide())
+					newState.mark = state.mark;
 				newState.tabPanel = state.tabPanel;
 
 				PageParameters params = paramsOf(project, newState);
@@ -329,10 +338,13 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				State newState = new State();
 				newState.leftSide = state.leftSide;
 				newState.rightSide = state.rightSide;
+				newState.file = state.file;
+				newState.blame = state.blame;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = !state.compareWithMergeBase;
 				newState.commentId = state.commentId;
-				newState.mark = state.mark;
+				if (state.mark != null && !state.mark.isLeftSide())
+					newState.mark = state.mark;
 				newState.tabPanel = state.tabPanel;
 				
 				PageParameters params = RevisionComparePage.paramsOf(projectModel.getObject(), newState);
@@ -385,12 +397,15 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				State newState = new State();
 				newState.leftSide = state.leftSide;
 				newState.rightSide = new ProjectAndRevision(project, revision);
+				newState.file = state.file;
+				newState.blame = state.blame;
 				newState.pathFilter = state.pathFilter;
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.commentId = state.commentId;
-				newState.mark = state.mark;
+				if (state.mark != null && state.mark.isLeftSide() && !state.compareWithMergeBase)
+					newState.mark = state.mark;
 				newState.tabPanel = state.tabPanel;
 				
 				PageParameters params = paramsOf(getProject(), newState);
@@ -406,12 +421,19 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				State newState = new State();
 				newState.leftSide = state.rightSide;
 				newState.rightSide = state.leftSide;
+				newState.file = state.file;
+				newState.blame = state.blame;
 				newState.pathFilter = state.pathFilter;
 				newState.tabPanel = state.tabPanel;
 				newState.whitespaceOption = state.whitespaceOption;
 				newState.compareWithMergeBase = state.compareWithMergeBase;
 				newState.commentId = state.commentId;
-				newState.mark = state.mark;
+				if (state.mark != null) {
+					if (!state.compareWithMergeBase)
+						newState.mark = new DiffPlanarRange(!state.mark.isLeftSide(), state.mark);
+					else if (state.mark.isLeftSide())
+						newState.mark = state.mark;
+				}
 				
 				setResponsePage(RevisionComparePage.class,paramsOf(newState.leftSide.getProject(), newState));
 			}
@@ -551,6 +573,10 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		response.render(CssHeaderItem.forReference(new RevisionCompareCssResourceReference()));
 	}
 
+	private RevisionDiffPanel getRevisionDiff() {
+		return (RevisionDiffPanel) get(TAB_PANEL_ID);
+	}
+
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {
 		IModel<Project> projectModel = new LoadableDetachableModel<Project>() {
 
@@ -567,20 +593,20 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		WebMarkupContainer tabPanel;
 		switch (state.tabPanel) {
 		case FILE_CHANGES:
-			IModel<String> blameModel = new IModel<String>() {
+			IModel<Boolean> blameModel = new IModel<>() {
 
 				@Override
 				public void detach() {
 				}
 
 				@Override
-				public String getObject() {
-					return state.blameFile;
+				public Boolean getObject() {
+					return state.blame;
 				}
 
 				@Override
-				public void setObject(String object) {
-					state.blameFile = object;
+				public void setObject(Boolean blame) {
+					state.blame = blame;
 					pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 				}
 				
@@ -625,9 +651,17 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 			
 			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, 
 					state.compareWithMergeBase?mergeBase.name():state.leftSide.getRevision(), 
-					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel,
+					state.rightSide.getRevision(), state.file, pathFilterModel, whitespaceOptionModel,
 					blameModel, this) {
 				
+				@Override
+				protected void onFileSelected(AjaxRequestTarget target) {
+					state.file = getSelectedFile();
+					state.commentId = null;
+					state.mark = null;
+					pushState(target);
+				}
+
 				@Override
 				protected Project getProject() {
 					return projectModel.getObject();
@@ -703,7 +737,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		CharSequence url = RequestCycle.get().urlFor(RevisionComparePage.class, params);
 		pushState(target, url.toString(), state);
 	}
-	
+
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
@@ -746,16 +780,18 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		public String commitQuery;
 
 		@Nullable
-		public String pathFilter;
-		
+		public String file;
+
+		public boolean blame;
+
 		@Nullable
-		public String blameFile;
+		public String pathFilter;
 		
 		@Nullable
 		public Long commentId;
 		
 		@Nullable
-		public Mark mark;
+		public DiffPlanarRange mark;
 		
 		public State() {
 		}
@@ -765,8 +801,9 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 			rightSide = state.rightSide;
 			compareWithMergeBase = state.compareWithMergeBase;
 			whitespaceOption = state.whitespaceOption;
+			file = state.file;
+			blame = state.blame;
 			pathFilter = state.pathFilter;
-			blameFile = state.blameFile;
 			commentId = state.commentId;
 			mark = state.mark;
 			tabPanel = state.tabPanel;
@@ -775,7 +812,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	}
 
 	@Override
-	public Mark getMark() {
+	public DiffPlanarRange getMark() {
 		return state.mark;
 	}
 	
@@ -788,8 +825,9 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	}
 
 	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		state.mark = comment.getMark();
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, String blobPath) {
+		state.file = blobPath;
+		state.mark = null;
 		state.commentId = comment.getId();
 		pushState(target);
 	}
@@ -807,7 +845,8 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	}
 	
 	@Override
-	public void onMark(AjaxRequestTarget target, Mark mark) {
+	public void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
+		state.file = blobPath;
 		state.mark = mark;
 		pushState(target);
 	}
@@ -819,10 +858,9 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	}
 	
 	@Override
-	public void onAddComment(AjaxRequestTarget target, Mark mark) {
+	public void onAddComment(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
 		state.commentId = null;
-		state.mark = mark;
-		pushState(target);
+		onMark(target, blobPath, mark);
 	}
 
 	@Override
@@ -847,12 +885,14 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	}
 	
 	@Override
-	public String getMarkUrl(Mark mark) {
+	public String getMarkUrl(String blobPath, DiffPlanarRange mark) {
 		State markState = new State();
-		markState.leftSide = new ProjectAndRevision(state.rightSide.getProject(), 
-				state.compareWithMergeBase?mergeBase.name():leftCommitId.name());
+		markState.leftSide = new ProjectAndRevision(state.rightSide.getProject(),
+				(state.compareWithMergeBase ? mergeBase : leftCommitId).name());
 		markState.rightSide = new ProjectAndRevision(state.rightSide.getProject(), rightCommitId.name());
+		markState.file = blobPath;
 		markState.mark = mark;
+		markState.blame = state.blame;
 		markState.pathFilter = state.pathFilter;
 		markState.tabPanel = TabPanel.FILE_CHANGES;
 		markState.whitespaceOption = state.whitespaceOption;
@@ -867,7 +907,10 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 
 	@Override
 	public PageParameters getParamsAfterEdit() {
-		return paramsOf(getProject(), state);
+		// A branch may advance when the edit is committed, so keep the comparison and file without the old range.
+		PageParameters params = getParamsBeforeEdit();
+		params.remove(PARAM_MARK);
+		return params;
 	}
 
 	@Override

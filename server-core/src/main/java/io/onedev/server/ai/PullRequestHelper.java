@@ -204,7 +204,6 @@ public class PullRequestHelper {
         compareContext.setPullRequest(pullRequest);
         compareContext.setOldCommitHash(oldCommitId.name());
         compareContext.setNewCommitHash(newCommitId.name());
-        compareContext.setPathFilter(filePath);
         comment.setCompareContext(compareContext);
 
         codeCommentService.create(comment);

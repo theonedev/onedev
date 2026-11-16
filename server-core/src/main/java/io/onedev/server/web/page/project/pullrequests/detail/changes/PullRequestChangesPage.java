@@ -88,6 +88,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.EditParamsAware;
 
 public class PullRequestChangesPage extends PullRequestDetailPage implements RevisionAnnotationSupport, EditParamsAware {
@@ -95,12 +96,14 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public static final String PARAM_OLD_COMMIT = "old-commit";
 	
 	public static final String PARAM_NEW_COMMIT = "new-commit";
-	
+
+	private static final String PARAM_FILE = "file";
+
+	private static final String PARAM_BLAME = "blame";
+
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
-	
-	private static final String PARAM_BLAME_FILE = "blame-file";
 	
 	public static final String PARAM_COMMENT = "comment";
 	
@@ -185,13 +188,15 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		super(params);
 
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
 		
 		state.oldCommitHash = params.get(PARAM_OLD_COMMIT).toString();
 		state.newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
+		state.file = params.get(PARAM_FILE).toString();
+		if (state.file != null)
+			state.mark = DiffPlanarRange.of(params.get(PARAM_MARK).toString());
+		state.blame = params.get(PARAM_BLAME).toBoolean(false);
 		state.createdCommitHash = params.get(ProjectBlobPage.PARAM_CREATED_COMMIT).toString();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
-		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		     
 		PullRequest request = getPullRequest();
@@ -225,18 +230,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		return "noindex,nofollow";
 	}
 	
-	@Nullable
-	private Mark getDiffMark(Mark mark) {
-		if (mark.getCommitHash().equals(state.oldCommitHash)) {
-			return mark.mapTo(getProject(), getComparisonBase());
-		} else if (mark.getCommitHash().equals(state.newCommitHash) 
-				|| mark.getCommitHash().equals(getComparisonBase().name())) {
-			return mark;
-		} else {
-			return null;
-		}
-	}
-
 	@Nullable
 	private PlanarRange mapRange(CodeComment comment, ObjectId commitId) {
 		Map<Integer, Integer> lineMapping = getLineMapping( 
@@ -330,6 +323,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					} else {
 						state.oldCommitHash = commitsModel.getObject().get(index).name();
 					}
+					state.mark = null;
 					newRevisionDiff(target, fragment);
 				}
 				target.add(head);
@@ -376,6 +370,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					}
 					index++;
 					state.newCommitHash = commitsModel.getObject().get(index).name();
+					state.mark = null;
 					newRevisionDiff(target, fragment);
 				} 
 				target.add(head);
@@ -401,6 +396,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 						state.oldCommitHash = params.getParameterValue("oldCommit").toString();
 						state.newCommitHash = params.getParameterValue("newCommit").toString();
+						state.mark = null;
 						target.add(head);
 						newRevisionDiff(target, fragment);
 						pushState(target);
@@ -435,13 +431,14 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 					@Override
 					public void onClick() {
-						PullRequestChangesPage.State state = new PullRequestChangesPage.State();
+						State newState = new State();
+						newState.blame = state.blame;
 						
 						PullRequest request = getPullRequest();
-						state.oldCommitHash = request.getBaseCommitHash();
-						state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+						newState.oldCommitHash = request.getBaseCommitHash();
+						newState.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 						setResponsePage(PullRequestChangesPage.class, 
-								PullRequestChangesPage.paramsOf(request, state));
+								PullRequestChangesPage.paramsOf(request, newState));
 					}
 					
 				});
@@ -471,18 +468,19 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 					@Override
 					public void onClick() {
-						PullRequestChangesPage.State state = new PullRequestChangesPage.State();
+						State newState = new State();
+						newState.blame = state.blame;
 						
 						PullRequest request = getPullRequest();
-						state.oldCommitHash = request.getBaseCommitHash();
+						newState.oldCommitHash = request.getBaseCommitHash();
 						for (PullRequestUpdate update: request.getSortedUpdates()) {
 							if (update.getDate().before(getModelObject()))
-								state.oldCommitHash = update.getHeadCommitHash();
+								newState.oldCommitHash = update.getHeadCommitHash();
 						}
 						
-						state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+						newState.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 						setResponsePage(PullRequestChangesPage.class, 
-								PullRequestChangesPage.paramsOf(request, state));
+								PullRequestChangesPage.paramsOf(request, newState));
 					}
 
 					@Override
@@ -542,6 +540,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			public void onClick(AjaxRequestTarget target) {
 				state.oldCommitHash = getPullRequest().getBaseCommitHash();
 				state.newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
+				state.mark = null;
 				target.add(head);
 				newRevisionDiff(target, fragment);
 				pushState(target);
@@ -616,8 +615,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public static State getState(CodeComment comment, CompareContext compareContext) {
 		PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 		state.commentId = comment.getId();
-		state.mark = comment.getMark();
-		state.pathFilter = comment.getCompareContext().getPathFilter();
+		state.file = comment.getMark().getPath();
 		state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
 		state.oldCommitHash = compareContext.getOldCommitHash();
 		state.newCommitHash = compareContext.getNewCommitHash();
@@ -635,12 +633,14 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			params.add(PARAM_OLD_COMMIT, state.oldCommitHash);
 		if (state.newCommitHash != null)
 			params.add(PARAM_NEW_COMMIT, state.newCommitHash);
+		if (state.file != null)
+			params.add(PARAM_FILE, state.file);
+		if (state.blame)
+			params.add(PARAM_BLAME, true);
 		if (state.whitespaceOption != WhitespaceOption.IGNORE_TRAILING)
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.add(PARAM_PATH_FILTER, state.pathFilter);
-		if (state.blameFile != null)
-			params.add(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
 			params.add(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
@@ -661,21 +661,25 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
 		
+	private RevisionDiffPanel getRevisionDiff() {
+		return (RevisionDiffPanel) get("content:revisionDiff");
+	}
+
 	private void newRevisionDiff(@Nullable AjaxRequestTarget target, WebMarkupContainer container) {
-		IModel<String> blameModel = new IModel<String>() {
+		IModel<Boolean> blameModel = new IModel<>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public String getObject() {
-				return state.blameFile;
+			public Boolean getObject() {
+				return state.blame;
 			}
 
 			@Override
-			public void setObject(String object) {
-				state.blameFile = object;
+			public void setObject(Boolean blame) {
+				state.blame = blame;
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 			}
 			
@@ -719,8 +723,16 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		};
 		
 		Component revisionDiff = new RevisionDiffPanel("revisionDiff", getComparisonBase().name(), 
-				state.newCommitHash, pathFilterModel, whitespaceOptionModel, blameModel, this) {
+				state.newCommitHash, state.file, pathFilterModel, whitespaceOptionModel, blameModel, this) {
 			
+			@Override
+			protected void onFileSelected(AjaxRequestTarget target) {
+				state.file = getSelectedFile();
+				state.commentId = null;
+				state.mark = null;
+				pushState(target);
+			}
+
 			@Override
 			protected Project getProject() {
 				return projectModel.getObject();
@@ -793,11 +805,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public Mark getMark() {
-		if (state.mark != null)
-			return getDiffMark(state.mark);
-		else
-			return null;
+	public DiffPlanarRange getMark() {
+		return state.mark;
 	}
 
 	@Override
@@ -808,18 +817,19 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public String getMarkUrl(Mark mark) {
-		State markState = new State();
-		markState.mark = getPermanentMark(mark);
-		if (markState.mark != null) {
-			markState.oldCommitHash = state.oldCommitHash;
-			markState.newCommitHash = state.newCommitHash;
-			markState.pathFilter = state.pathFilter;
-			markState.whitespaceOption = state.whitespaceOption;
-			return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
-		} else {
+	public String getMarkUrl(String blobPath, DiffPlanarRange mark) {
+		if (mark.isLeftSide() && getPermanentMark(new Mark(getComparisonBase().name(), blobPath, mark)) == null)
 			return null;
-		}
+
+		State markState = new State();
+		markState.file = blobPath;
+		markState.mark = mark;
+		markState.blame = state.blame;
+		markState.oldCommitHash = state.oldCommitHash;
+		markState.newCommitHash = state.newCommitHash;
+		markState.pathFilter = state.pathFilter;
+		markState.whitespaceOption = state.whitespaceOption;
+		return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
 	}
 	
 	@Override
@@ -835,9 +845,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 	
 	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, String blobPath) {
 		state.commentId = comment.getId();
-		state.mark = getPermanentMark(comment.getMark());
+		state.file = blobPath;
+		state.mark = null;
 		pushState(target);
 	}
 
@@ -849,8 +860,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 	
 	@Override
-	public void onMark(AjaxRequestTarget target, Mark mark) {
-		state.mark = getPermanentMark(mark);
+	public void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
+		state.file = blobPath;
+		state.mark = mark;
 		pushState(target);
 	}
 	
@@ -865,10 +877,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, Mark mark) {
+	public void onAddComment(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
 		state.commentId = null;
-		state.mark = getPermanentMark(mark);
-		pushState(target);
+		onMark(target, blobPath, mark);
 	}
 
 	@Override
@@ -915,11 +926,11 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public PageParameters getParamsAfterEdit() {
 		PageParameters params = getParamsBeforeEdit();
-		if (getOpenComment() != null) 
-			params.set(PARAM_OLD_COMMIT, getOpenComment().getMark().getCommitHash());
-		else
-			params.set(PARAM_OLD_COMMIT, state.newCommitHash);
+		CodeComment comment = getOpenComment();
+		String oldCommit = comment != null ? comment.getMark().getCommitHash() : state.newCommitHash;
+		params.set(PARAM_OLD_COMMIT, oldCommit);
 		params.remove(PARAM_NEW_COMMIT);
+		params.remove(PARAM_MARK);
 		return params;
 	}
 	
@@ -932,6 +943,11 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		
 		public String newCommitHash;
 		
+		@Nullable
+		public String file;
+
+		public boolean blame;
+
 		public String createdCommitHash;
 		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
@@ -940,13 +956,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		public String pathFilter;
 		
 		@Nullable
-		public String blameFile;
-		
-		@Nullable
 		public Long commentId;
 		
 		@Nullable
-		public Mark mark;
+		public DiffPlanarRange mark;
 		
 	}
 

@@ -53,7 +53,7 @@ public class BlobDiffPanel extends Panel {
 
 	private final BlobChange change;
 
-	private final IModel<Boolean> blameModel;
+	private final boolean blame;
 
 	private final DiffViewMode diffMode;
 
@@ -62,11 +62,11 @@ public class BlobDiffPanel extends Panel {
 	@Inject
 	private Set<DiffRenderer> diffRenderers;
 
-	public BlobDiffPanel(String id, BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel) {
+	public BlobDiffPanel(String id, BlobChange change, DiffViewMode diffMode, boolean blame) {
 		super(id);
 
 		this.change = change;
-		this.blameModel = blameModel;
+		this.blame = blame;
 		this.diffMode = diffMode;
 	}
 
@@ -112,7 +112,7 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newMessageFragment(_T("Empty file removed."), false));
 			} else {
-				add(new BlobTextDiffPanel(BODY_ID, change, diffMode, blameModel) {
+				add(new BlobTextDiffPanel(BODY_ID, change, diffMode, blame) {
 
 					@Override
 					protected PullRequest getPullRequest() {
@@ -165,25 +165,6 @@ public class BlobDiffPanel extends Panel {
 			toggleReviewedLink.setVisible(false);
 			add(toggleReviewedLink);
 		}
-		add(new AjaxLink<Void>("blameFile") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(blameModel != null
-						&& !change.getOldBlobIdent().isGitLink()
-						&& !change.getNewBlobIdent().isGitLink()
-						&& getDiffBody() instanceof BlobTextDiffPanel);
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				((BlobTextDiffPanel) getDiffBody()).toggleBlame(target);
-				target.add(this);
-			}
-
-		}.add(AttributeAppender.append("class", (IModel<String>) () -> ((BlobTextDiffPanel) getDiffBody()).isBlame() ? "link-primary" : "")).setOutputMarkupId(true));
-
 		ProjectBlobPage.State viewState = new ProjectBlobPage.State(change.getBlobIdent());
 
 		viewState.requestId = PullRequest.idOf(getPullRequest());
@@ -281,7 +262,7 @@ public class BlobDiffPanel extends Panel {
 					} else if (change.getAdditions() + change.getDeletions() == 0) {
 						add(newMessageFragment(_T("Content is identical"), false));
 					} else {
-						add(new BlobTextDiffPanel(BODY_ID, change, diffMode, blameModel) {
+						add(new BlobTextDiffPanel(BODY_ID, change, diffMode, blame) {
 
 							@Override
 							protected PullRequest getPullRequest() {
@@ -310,12 +291,9 @@ public class BlobDiffPanel extends Panel {
 		response.render(CssHeaderItem.forReference(new BlobDiffCssResourceReference()));
 	}
 
-	@Override
-	protected void onDetach() {
-		if (blameModel != null)
-			blameModel.detach();
-
-		super.onDetach();
+	public void toggleBlame(AjaxRequestTarget target, boolean blame) {
+		if (getDiffBody() instanceof BlobTextDiffPanel textDiff)
+			textDiff.toggleBlame(target, blame);
 	}
 
 	public void onCommentDeleted(AjaxRequestTarget target) {

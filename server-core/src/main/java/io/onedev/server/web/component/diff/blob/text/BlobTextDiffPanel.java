@@ -153,8 +153,6 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 	
 	private final DiffViewMode diffMode;
 
-	private final IModel<Boolean> blameModel;
-	
 	private final IModel<DiffAnnotationInfo> annotationInfoModel = new LoadableDetachableModel<DiffAnnotationInfo>() {
 
 		@Override
@@ -197,16 +195,13 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 	
 	private BlameInfo blameInfo;
 	
-	public BlobTextDiffPanel(String id, BlobChange change, DiffViewMode diffMode, 
-			@Nullable IModel<Boolean> blameModel) {
+	public BlobTextDiffPanel(String id, BlobChange change, DiffViewMode diffMode, boolean blame) {
 		super(id);
 		
 		this.change = change;
 		this.diffMode = diffMode;
-		this.blameModel = blameModel;
-		
-		if (blameModel != null && blameModel.getObject()) 
-			blameInfo = getBlameInfo();
+		if (blame && supportsBlame())
+			blameInfo = loadBlameInfo();
 	}
 
 	private String convertToJson(Object obj) {
@@ -217,18 +212,16 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		}
 	}
 	
-	public void toggleBlame(AjaxRequestTarget target) {
-		if (blameInfo != null) 
-			blameInfo = null;
-		else 
-			blameInfo = getBlameInfo();
-		target.add(this);
-		blameModel.setObject(blameInfo != null);
-		((BasePage)getPage()).resizeWindow(target);
+	public void toggleBlame(AjaxRequestTarget target, boolean blame) {
+		if (supportsBlame()) {
+			blameInfo = blame ? loadBlameInfo() : null;
+			target.add(this);
+			((BasePage)getPage()).resizeWindow(target);
+		}
 	}
 	
- 	public boolean isBlame() {
-		return blameInfo != null;
+	private boolean supportsBlame() {
+		return !change.getOldBlobIdent().isGitLink() && !change.getNewBlobIdent().isGitLink();
 	}
 	
 	@Nullable
@@ -236,8 +229,8 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		return null;
 	}
 		
-	private BlameInfo getBlameInfo() {
-		blameInfo = new BlameInfo();
+	private BlameInfo loadBlameInfo() {
+		var blameInfo = new BlameInfo();
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
 			for (BlameBlock blame: gitService.blame(change.getProject(), change.getOldCommitId(), oldPath, null)) {
@@ -1072,9 +1065,6 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 	@Override
 	protected void onDetach() {
 		annotationInfoModel.detach();
-		
-		if (blameModel != null)
-			blameModel.detach();
 		
 		super.onDetach();
 	}
