@@ -215,7 +215,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"액세스 토큰은 API 접근 및 저장소 풀/푸시를 위한 것입니다. 웹 UI에 로그인하는 데 사용할 수 없습니다");
 		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
 			"액세스 토큰은 API 접근 또는 저장소 풀/푸시를 위한 것입니다. 웹 UI에 로그인하는 데 사용할 수 없습니다");
-		m.put("Access token regenerated successfully", "액세스 토큰이 성공적으로 재생성되었습니다");
 		m.put("Access token regenerated, make sure to update the token at agent side", "액세스 토큰이 재생성되었습니다. 에이전트 측에서 토큰을 업데이트해야 합니다");
 		m.put("Accessible Sites", "접근 가능한 사이트");
 		m.put("Account Email", "계정 이메일");
@@ -1121,11 +1120,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Current Iteration", "현재 반복");
 		m.put("Current Value", "현재 값");
 		m.put("Current avatar", "현재 아바타");
-		m.put("Current context is different from the context when this comment is added, click to show the comment context", 
-			"현재 컨텍스트가 이 댓글이 추가된 컨텍스트와 다릅니다. 댓글 컨텍스트를 보려면 클릭하세요");
-		m.put("Current context is different from the context when this reply is added, click to show the reply context", 
-			"현재 컨텍스트가 이 답글이 추가된 컨텍스트와 다릅니다. 답글 컨텍스트를 보려면 클릭하세요");
-		m.put("Current context is different from this action, click to show the comment context", "현재 컨텍스트가 이 작업과 다릅니다. 댓글 컨텍스트를 보려면 클릭하세요");
 		m.put("Current platform", "현재 플랫폼");
 		m.put("Current project", "현재 프로젝트");
 		m.put("Current step index / total number of steps", "현재 단계 인덱스 / 총 단계 수");
@@ -2020,6 +2014,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Inherit from parent", "상위에서 상속");
 		m.put("Inherited", "상속됨");
 		m.put("Initialization", "초기화");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"인라인 댓글과 스레드 업데이트는 관찰자에게 이메일을 보내지 않습니다. 알림을 보내려면 풀 리퀘스트에 댓글을 게시하거나, 승인하거나, 변경 요청을 하거나, 커밋을 추가하세요. 리뷰 요청은 선택된 리뷰어에게도 알림을 보냅니다.");
 		m.put("Input Spec", "입력 사양");
 		m.put("Input URL", "입력 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "허용된 CORS 원본 입력, ENTER를 눌러 추가");
@@ -2042,7 +2038,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Interpreter", "인터프리터");
 		m.put("Invalid GPG signature", "유효하지 않은 GPG 서명");
 		m.put("Invalid PCRE syntax", "잘못된 PCRE 구문");
-		m.put("Invalid access token: {0}", "잘못된 액세스 토큰: {0}");
 		m.put("Invalid build number: {0}", "잘못된 빌드 번호: {0}");
 		m.put("Invalid credentials", "잘못된 자격 증명");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "잘못된 날짜 범위, \"yyyy-MM-dd to yyyy-MM-dd\" 형식이어야 합니다");
@@ -2475,7 +2470,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Name Of Empty Value", "빈 값의 이름");
 		m.put("Name On the Other Side", "다른 쪽의 이름");
 		m.put("Name Prefix", "이름 접두사");
-		m.put("Name already used by another access token of the owner", "소유자의 다른 액세스 토큰에서 이미 사용된 이름");
 		m.put("Name already used by another link", "다른 링크에서 이미 사용된 이름");
 		m.put("Name and name on the other side should be different", "이름과 다른 쪽의 이름은 달라야 합니다");
 		m.put("Name containing spaces or starting with dash needs to be quoted", "공백이 포함되거나 대시로 시작하는 이름은 인용이 필요합니다");
@@ -3030,6 +3024,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 패키지 파일을 저장할 별도의 디렉터리를 지정하세요. 절대 디렉터리가 아닌 경우 사이트 디렉터리에 상대적으로 간주됩니다.");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
 			"이 작업에 필요한 서비스를 선택적으로 지정합니다. <b class='text-warning'>참고:</b> 서비스는 Docker, Kubernetes 및 샌드박스 실행기에서 지원됩니다.");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"워크스페이스를 설정하기 위해 실행할 셸 명령을 선택적으로 지정할 수 있습니다. 이러한 명령은\n클론된 저장소 파일을 보유한 작업 디렉토리에서 실행됩니다. 이는 캐시와\n사용자 데이터가 복원되고 구성 파일이 생성된 후에 실행됩니다.");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"워크스페이스를 종료하기 위해 실행할 셸 명령을 선택적으로 지정할 수 있습니다. 이러한 명령은\n워크스페이스가 중지될 때 클론된 저장소 파일을 보유한 작업 디렉토리에서 실행되며,\n캐시와 사용자 데이터가 업로드되기 전에 실행됩니다. 이러한 명령의 실패는\n업로드에 영향을 주지 않고 기록됩니다.");
 		m.put("Optionally specify space-separated accessible site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. The public site is always accessible", 
 			"선택적으로 공백으로 구분된 접근 가능한 사이트 이름을 지정합니다. '*' 또는 '?'를 사용하여 와일드카드 매칭을 할 수 있습니다. '-'로 시작하면 제외됩니다. 공용 사이트는 항상 접근 가능합니다");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
@@ -5611,12 +5609,21 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
-			"인라인 댓글과 스레드 업데이트는 관찰자에게 이메일을 보내지 않습니다. 알림을 보내려면 풀 리퀘스트에 댓글을 게시하거나, 승인하거나, 변경 요청을 하거나, 커밋을 추가하세요. 리뷰 요청은 선택된 리뷰어에게도 알림을 보냅니다.");
-		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
-			"워크스페이스를 설정하기 위해 실행할 셸 명령을 선택적으로 지정할 수 있습니다. 이러한 명령은\n클론된 저장소 파일을 보유한 작업 디렉토리에서 실행됩니다. 이는 캐시와\n사용자 데이터가 복원되고 구성 파일이 생성된 후에 실행됩니다.");
-		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
-			"워크스페이스를 종료하기 위해 실행할 셸 명령을 선택적으로 지정할 수 있습니다. 이러한 명령은\n워크스페이스가 중지될 때 클론된 저장소 파일을 보유한 작업 디렉토리에서 실행되며,\n캐시와 사용자 데이터가 업로드되기 전에 실행됩니다. 이러한 명령의 실패는\n업로드에 영향을 주지 않고 기록됩니다.");
+		m.put("Copy access token", "액세스 토큰 복사");
+		m.put("Copy your access token now. It will not be shown again.", "지금 액세스 토큰을 복사하세요. 다시는 표시되지 않습니다.");
+		m.put("Current context is different from context of the action, click to show action context", 
+			"현재 컨텍스트가 작업의 컨텍스트와 다릅니다. 작업 컨텍스트를 보려면 클릭하세요.");
+		m.put("Current context is different from context of the comment, click to show comment context", 
+			"현재 컨텍스트가 댓글의 컨텍스트와 다릅니다. 댓글 컨텍스트를 보려면 클릭하세요.");
+		m.put("Current context is different from context of the reply, click to show reply context", 
+			"현재 컨텍스트가 답글의 컨텍스트와 다릅니다. 답글 컨텍스트를 보려면 클릭하세요.");
+		m.put("Invalid access token", "유효하지 않은 액세스 토큰");
+		m.put("Rotate Access Token", "액세스 토큰 회전");
+		m.put("Rotate this access token and invalidate its current value?", "이 액세스 토큰을 회전하고 현재 값을 무효화하시겠습니까?");
+		m.put("Show Blame", "Blame 보기");
+		m.put("Specify a valid HTTP or HTTPS homepage", "유효한 HTTP 또는 HTTPS 홈페이지를 지정하세요.");
+		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
+			"HTTPS, 루프백 HTTP, 또는 네이티브 앱 스키마를 사용하여 최대 20개의 정확한 리디렉션 URI를 지정하세요.");
 	}
 		
 	@Override

@@ -215,7 +215,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"アクセストークンは API アクセスおよびリポジトリのプル/プッシュを目的としています。Web UI にサインインするためには使用できません");
 		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
 			"アクセストークンは API アクセスまたはリポジトリのプル/プッシュを目的としています。Web UI にサインインするためには使用できません");
-		m.put("Access token regenerated successfully", "アクセストークンが正常に再生成されました");
 		m.put("Access token regenerated, make sure to update the token at agent side", "アクセストークンが再生成されました。エージェント側でトークンを更新することを確認してください");
 		m.put("Accessible Sites", "アクセス可能なサイト");
 		m.put("Account Email", "アカウントメール");
@@ -1121,11 +1120,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Current Iteration", "現在のイテレーション");
 		m.put("Current Value", "現在の値");
 		m.put("Current avatar", "現在のアバター");
-		m.put("Current context is different from the context when this comment is added, click to show the comment context", 
-			"このコメントが追加された時のコンテキストと現在のコンテキストが異なります。コメントのコンテキストを表示するにはクリックしてください");
-		m.put("Current context is different from the context when this reply is added, click to show the reply context", 
-			"この返信が追加された時のコンテキストと現在のコンテキストが異なります。返信のコンテキストを表示するにはクリックしてください");
-		m.put("Current context is different from this action, click to show the comment context", "このアクションと現在のコンテキストが異なります。コメントのコンテキストを表示するにはクリックしてください");
 		m.put("Current platform", "現在のプラットフォーム");
 		m.put("Current project", "現在のプロジェクト");
 		m.put("Current step index / total number of steps", "現在のステップインデックス / 総ステップ数");
@@ -2020,6 +2014,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Inherit from parent", "親から継承");
 		m.put("Inherited", "継承済み");
 		m.put("Initialization", "初期化");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"インラインコメントやスレッドの更新ではウォッチャーにメール通知されません。通知するには、プルリクエストにコメントを投稿する、承認する、変更をリクエストする、またはコミットを追加してください。レビューリクエストも選択されたレビュアーに通知します。");
 		m.put("Input Spec", "入力仕様");
 		m.put("Input URL", "入力URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "許可されたCORSオリジンを入力し、ENTERを押して追加");
@@ -2042,7 +2038,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Interpreter", "インタープリター");
 		m.put("Invalid GPG signature", "無効なGPG署名");
 		m.put("Invalid PCRE syntax", "無効なPCRE構文");
-		m.put("Invalid access token: {0}", "無効なアクセス トークン: {0}");
 		m.put("Invalid build number: {0}", "無効なビルド番号: {0}");
 		m.put("Invalid credentials", "無効な資格情報");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "無効な日付範囲、\"yyyy-MM-dd to yyyy-MM-dd\"を期待しています");
@@ -2475,7 +2470,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Name Of Empty Value", "空の値の名前");
 		m.put("Name On the Other Side", "反対側の名前");
 		m.put("Name Prefix", "名前の接頭辞");
-		m.put("Name already used by another access token of the owner", "所有者の別のアクセストークンで既に使用されている名前");
 		m.put("Name already used by another link", "別のリンクで既に使用されている名前");
 		m.put("Name and name on the other side should be different", "名前と反対側の名前は異なる必要があります");
 		m.put("Name containing spaces or starting with dash needs to be quoted", "スペースを含む名前やダッシュで始まる名前は引用符で囲む必要があります");
@@ -3030,6 +3024,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、パッケージファイルを保存するための別のディレクトリを指定してください。絶対ディレクトリでない場合、サイトディレクトリに対する相対ディレクトリと見なされます。");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
 			"このジョブに必要なサービスを任意で指定します。<b class='text-warning'>注意:</b> サービスはDocker、Kubernetes、およびサンドボックスエグゼキューターでサポートされています");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"ワークスペースをセットアップするために実行するシェルコマンドを任意で指定できます。これらのコマンドは\nクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます。キャッシュと\nユーザーデータが復元され、設定ファイルが生成された後に実行されます。");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"ワークスペースを終了するために実行するシェルコマンドを任意で指定できます。これらのコマンドは\nワークスペースが停止される際に、クローンされたリポジトリファイルを保持する作業ディレクトリから\n実行され、キャッシュとユーザーデータがアップロードされる前に実行されます。これらのコマンドの失敗は\nアップロードに影響を与えることなくログに記録されます。");
 		m.put("Optionally specify space-separated accessible site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. The public site is always accessible", 
 			"オプションで、スペース区切りでアクセス可能なサイト名を指定します。ワイルドカードマッチには '*' または '?' を使用します。'-' を先頭に付けると除外されます。公開サイトは常にアクセス可能です");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
@@ -5611,12 +5609,21 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
-			"インラインコメントやスレッドの更新ではウォッチャーにメール通知されません。通知するには、プルリクエストにコメントを投稿する、承認する、変更をリクエストする、またはコミットを追加してください。レビューリクエストも選択されたレビュアーに通知します。");
-		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
-			"ワークスペースをセットアップするために実行するシェルコマンドを任意で指定できます。これらのコマンドは\nクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます。キャッシュと\nユーザーデータが復元され、設定ファイルが生成された後に実行されます。");
-		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
-			"ワークスペースを終了するために実行するシェルコマンドを任意で指定できます。これらのコマンドは\nワークスペースが停止される際に、クローンされたリポジトリファイルを保持する作業ディレクトリから\n実行され、キャッシュとユーザーデータがアップロードされる前に実行されます。これらのコマンドの失敗は\nアップロードに影響を与えることなくログに記録されます。");
+		m.put("Copy access token", "アクセス トークンをコピー");
+		m.put("Copy your access token now. It will not be shown again.", "今すぐアクセス トークンをコピーしてください。再表示はされません。");
+		m.put("Current context is different from context of the action, click to show action context", 
+			"現在のコンテキストはアクションのコンテキストと異なります。クリックしてアクションのコンテキストを表示してください。");
+		m.put("Current context is different from context of the comment, click to show comment context", 
+			"現在のコンテキストはコメントのコンテキストと異なります。クリックしてコメントのコンテキストを表示してください。");
+		m.put("Current context is different from context of the reply, click to show reply context", 
+			"現在のコンテキストは返信のコンテキストと異なります。クリックして返信のコンテキストを表示してください。");
+		m.put("Invalid access token", "無効なアクセス トークン");
+		m.put("Rotate Access Token", "アクセス トークンをローテーション");
+		m.put("Rotate this access token and invalidate its current value?", "このアクセス トークンをローテーションし、現在の値を無効にしますか？");
+		m.put("Show Blame", "責任追跡を表示");
+		m.put("Specify a valid HTTP or HTTPS homepage", "有効な HTTP または HTTPS ホームページを指定してください");
+		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
+			"HTTPS、ループバック HTTP、またはネイティブアプリスキームを使用して、最大20個の正確なリダイレクトURIを指定してください");
 	}
 		
 	@Override

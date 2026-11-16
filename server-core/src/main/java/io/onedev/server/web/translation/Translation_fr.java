@@ -215,7 +215,6 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Le jeton d'accès est destiné à l'accès API et au pull/push de dépôt. Il ne peut pas être utilisé pour se connecter à l'interface web");
 		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
 			"Le jeton d'accès est destiné à l'accès API ou au pull/push de dépôt. Il ne peut pas être utilisé pour se connecter à l'interface web");
-		m.put("Access token regenerated successfully", "Le jeton d'accès a été régénéré avec succès");
 		m.put("Access token regenerated, make sure to update the token at agent side", "Le jeton d'accès a été régénéré, assurez-vous de mettre à jour le jeton côté agent");
 		m.put("Accessible Sites", "Sites accessibles");
 		m.put("Account Email", "Email du compte");
@@ -1121,11 +1120,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Current Iteration", "Itération actuelle");
 		m.put("Current Value", "Valeur actuelle");
 		m.put("Current avatar", "Avatar actuel");
-		m.put("Current context is different from the context when this comment is added, click to show the comment context", 
-			"Le contexte actuel est différent du contexte lorsque ce commentaire a été ajouté, cliquez pour afficher le contexte du commentaire");
-		m.put("Current context is different from the context when this reply is added, click to show the reply context", 
-			"Le contexte actuel est différent du contexte lorsque cette réponse a été ajoutée, cliquez pour afficher le contexte de la réponse");
-		m.put("Current context is different from this action, click to show the comment context", "Le contexte actuel est différent de cette action, cliquez pour afficher le contexte du commentaire");
 		m.put("Current platform", "Plateforme actuelle");
 		m.put("Current project", "Projet actuel");
 		m.put("Current step index / total number of steps", "Index de l'étape actuelle / nombre total d'étapes");
@@ -2020,6 +2014,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Inherit from parent", "Hériter du parent");
 		m.put("Inherited", "Hérité");
 		m.put("Initialization", "Initialisation");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"Les commentaires en ligne et les mises à jour de fil ne notifient pas les observateurs par email. Pour les notifier, publiez un commentaire sur la pull request, approuvez-la, demandez des modifications ou ajoutez des commits. Une demande de révision notifie également le réviseur sélectionné.");
 		m.put("Input Spec", "Spécification d'entrée");
 		m.put("Input URL", "URL d'entrée");
 		m.put("Input allowed CORS origin, hit ENTER to add", "Saisissez l'origine CORS autorisée, appuyez sur ENTRÉE pour ajouter");
@@ -2042,7 +2038,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Interpreter", "Interpréteur");
 		m.put("Invalid GPG signature", "Signature GPG invalide");
 		m.put("Invalid PCRE syntax", "Syntaxe PCRE invalide");
-		m.put("Invalid access token: {0}", "Jeton d'accès invalide : {0}");
 		m.put("Invalid build number: {0}", "Numéro de build invalide : {0}");
 		m.put("Invalid credentials", "Identifiants invalides");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "Plage de dates invalide, attendu \"yyyy-MM-dd à yyyy-MM-dd\"");
@@ -2475,7 +2470,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Name Of Empty Value", "Nom de la valeur vide");
 		m.put("Name On the Other Side", "Nom de l'autre côté");
 		m.put("Name Prefix", "Préfixe du nom");
-		m.put("Name already used by another access token of the owner", "Nom déjà utilisé par un autre jeton d'accès du propriétaire");
 		m.put("Name already used by another link", "Nom déjà utilisé par un autre lien");
 		m.put("Name and name on the other side should be different", "Le nom et le nom de l'autre côté doivent être différents");
 		m.put("Name containing spaces or starting with dash needs to be quoted", "Un nom contenant des espaces ou commençant par un tiret doit être entre guillemets");
@@ -3030,6 +3024,10 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Spécifiez éventuellement un répertoire séparé pour stocker les fichiers de package. Un répertoire non absolu est considéré comme relatif au répertoire du site.");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
 			"Spécifiez éventuellement les services requis par ce travail. <b class='text-warning'>REMARQUE :</b> Les services sont pris en charge par les exécuteurs Docker, Kubernetes et de bac à sable");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"Spécifiez éventuellement des commandes shell à exécuter pour configurer l'espace de travail. Ces commandes seront\nexécutées depuis le répertoire de travail contenant les fichiers du dépôt cloné. Elles s'exécutent après la restauration du cache et\ndes données utilisateur, ainsi que la génération des fichiers de configuration.");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"Spécifiez éventuellement des commandes shell à exécuter pour démonter l'espace de travail. Ces commandes seront\nexécutées depuis le répertoire de travail contenant les fichiers du dépôt cloné lorsque l'espace de travail est\narrêté, avant que le cache et les données utilisateur ne soient téléchargés. L'échec de ces commandes sera\nenregistré sans affecter le téléchargement.");
 		m.put("Optionally specify space-separated accessible site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. The public site is always accessible", 
 			"Optionnellement, spécifiez des noms de sites accessibles séparés par des espaces. Utilisez '*' ou '?' pour une correspondance avec des jokers. Préfixez avec '-' pour exclure. Le site public est toujours accessible");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
@@ -5611,12 +5609,21 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
-			"Les commentaires en ligne et les mises à jour de fil ne notifient pas les observateurs par email. Pour les notifier, publiez un commentaire sur la pull request, approuvez-la, demandez des modifications ou ajoutez des commits. Une demande de révision notifie également le réviseur sélectionné.");
-		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
-			"Spécifiez éventuellement des commandes shell à exécuter pour configurer l'espace de travail. Ces commandes seront\nexécutées depuis le répertoire de travail contenant les fichiers du dépôt cloné. Elles s'exécutent après la restauration du cache et\ndes données utilisateur, ainsi que la génération des fichiers de configuration.");
-		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
-			"Spécifiez éventuellement des commandes shell à exécuter pour démonter l'espace de travail. Ces commandes seront\nexécutées depuis le répertoire de travail contenant les fichiers du dépôt cloné lorsque l'espace de travail est\narrêté, avant que le cache et les données utilisateur ne soient téléchargés. L'échec de ces commandes sera\nenregistré sans affecter le téléchargement.");
+		m.put("Copy access token", "Copier le jeton d'accès");
+		m.put("Copy your access token now. It will not be shown again.", "Copiez votre jeton d'accès maintenant. Il ne sera plus affiché.");
+		m.put("Current context is different from context of the action, click to show action context", 
+			"Le contexte actuel est différent du contexte de l'action, cliquez pour afficher le contexte de l'action");
+		m.put("Current context is different from context of the comment, click to show comment context", 
+			"Le contexte actuel est différent du contexte du commentaire, cliquez pour afficher le contexte du commentaire");
+		m.put("Current context is different from context of the reply, click to show reply context", 
+			"Le contexte actuel est différent du contexte de la réponse, cliquez pour afficher le contexte de la réponse");
+		m.put("Invalid access token", "Jeton d'accès invalide");
+		m.put("Rotate Access Token", "Faire tourner le jeton d'accès");
+		m.put("Rotate this access token and invalidate its current value?", "Faire tourner ce jeton d'accès et invalider sa valeur actuelle ?");
+		m.put("Show Blame", "Afficher le Blame");
+		m.put("Specify a valid HTTP or HTTPS homepage", "Spécifiez une page d'accueil HTTP ou HTTPS valide");
+		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
+			"Spécifiez jusqu'à 20 URI de redirection exacts, en utilisant HTTPS, HTTP loopback ou un schéma d'application native");
 	}
 		
 	@Override

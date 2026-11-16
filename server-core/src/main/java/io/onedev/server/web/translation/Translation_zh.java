@@ -241,7 +241,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"访问令牌用于 API 访问和仓库拉取/推送。它不能用于登录 Web 界面");
 		m.put("Access token is intended for api access or repository pull/push. It cannot be used to sign in to web ui", 
 			"访问令牌用于 API 访问或仓库拉取/推送。它不能用于登录 Web 界面");
-		m.put("Access token regenerated successfully", "访问令牌重新生成成功");
 		m.put("Access token regenerated, make sure to update the token at agent side", "访问令牌已重新生成，请确保在代理端更新令牌");
 		m.put("Accessible Sites", "可访问站点");
 		m.put("Account Email", "账户邮箱");
@@ -1147,11 +1146,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Current Iteration", "当前迭代");
 		m.put("Current Value", "现值");
 		m.put("Current avatar", "当前头像");
-		m.put("Current context is different from the context when this comment is added, click to show the comment context", 
-			"当前上下文与添加此评论时的上下文不同，点击显示评论上下文");
-		m.put("Current context is different from the context when this reply is added, click to show the reply context", 
-			"当前上下文与添加此回复时的上下文不同，点击显示回复上下文");
-		m.put("Current context is different from this action, click to show the comment context", "当前上下文与此操作不同，点击显示评论上下文");
 		m.put("Current platform", "当前平台");
 		m.put("Current project", "当前项目");
 		m.put("Current step index / total number of steps", "当前步骤索引 / 总步骤数");
@@ -2046,6 +2040,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Inherit from parent", "从父级继承");
 		m.put("Inherited", "继承");
 		m.put("Initialization", "初始化");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
+			"内联评论和线程更新不会通过邮件通知观察者。要通知他们，请在合并请求上发表评论、批准、更改请求或添加提交。审查请求也会通知选定的审查者。");
 		m.put("Input Spec", "输入规范");
 		m.put("Input URL", "输入 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "输入允许的 CORS 来源，按回车键添加");
@@ -2068,7 +2064,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Interpreter", "解释器");
 		m.put("Invalid GPG signature", "无效的 GPG 签名");
 		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
-		m.put("Invalid access token: {0}", "无效的访问令牌：{0}");
 		m.put("Invalid build number: {0}", "无效的构建编号: {0}");
 		m.put("Invalid credentials", "无效的凭据");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "无效的日期范围，期望 \"yyyy-MM-dd to yyyy-MM-dd\"");
@@ -2501,7 +2496,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Name Of Empty Value", "空值的名称");
 		m.put("Name On the Other Side", "另一侧的名称");
 		m.put("Name Prefix", "名称前缀");
-		m.put("Name already used by another access token of the owner", "此名称已被其他访问令牌的所有者使用");
 		m.put("Name already used by another link", "名称已被另一个链接使用");
 		m.put("Name and name on the other side should be different", "名称和另一侧的名称应该不同");
 		m.put("Name containing spaces or starting with dash needs to be quoted", "名称包含空格或以破折号开头需要用引号包围");
@@ -3056,6 +3050,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定单独的目录来存储包文件。非绝对目录被视为相对于站点目录");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are supported by Docker, Kubernetes, and sandbox executors", 
 			"可选地指定此任务所需的服务。<b class='text-warning'>注意：</b>服务由 Docker、Kubernetes 和沙箱执行器支持");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
+			"可选地指定要运行的 shell 命令以设置工作区。这些命令将\n从包含克隆的存储库文件的工作目录运行。它在缓存和\n用户数据恢复以及配置文件生成之后运行。");
+		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
+			"可选地指定要运行的 shell 命令以拆解工作区。这些命令将\n从包含克隆的存储库文件的工作目录运行，当工作区被\n停止时，在缓存和用户数据上传之前运行。这些命令的失败将被\n记录，但不会影响上传。");
 		m.put("Optionally specify space-separated accessible site names. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. The public site is always accessible", 
 			"可选地指定以空格分隔的可访问站点名称。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀以排除。公共站点始终可访问");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='${docsite}/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
@@ -5637,12 +5635,21 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
-			"内联评论和线程更新不会通过邮件通知观察者。要通知他们，请在合并请求上发表评论、批准、更改请求或添加提交。审查请求也会通知选定的审查者。");
-		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files. It runs after cache and\nuser data restored and config files generated", 
-			"可选地指定要运行的 shell 命令以设置工作区。这些命令将\n从包含克隆的存储库文件的工作目录运行。它在缓存和\n用户数据恢复以及配置文件生成之后运行。");
-		m.put("Optionally specify shell commands to run to tear down the workspace. These commands will\nrun from working directory holding cloned repository files when the workspace is being\nstopped, before cache and user data are uploaded. Failure of these commands will be\nlogged without affecting the upload", 
-			"可选地指定要运行的 shell 命令以拆解工作区。这些命令将\n从包含克隆的存储库文件的工作目录运行，当工作区被\n停止时，在缓存和用户数据上传之前运行。这些命令的失败将被\n记录，但不会影响上传。");
+		m.put("Copy access token", "复制访问令牌");
+		m.put("Copy your access token now. It will not be shown again.", "现在复制您的访问令牌。它将不会再次显示。");
+		m.put("Current context is different from context of the action, click to show action context", 
+			"当前上下文与操作的上下文不同，点击以显示操作上下文");
+		m.put("Current context is different from context of the comment, click to show comment context", 
+			"当前上下文与评论的上下文不同，点击以显示评论上下文");
+		m.put("Current context is different from context of the reply, click to show reply context", 
+			"当前上下文与回复的上下文不同，点击以显示回复上下文");
+		m.put("Invalid access token", "无效的访问令牌");
+		m.put("Rotate Access Token", "旋转访问令牌");
+		m.put("Rotate this access token and invalidate its current value?", "旋转此访问令牌并使其当前值失效？");
+		m.put("Show Blame", "显示责任归属");
+		m.put("Specify a valid HTTP or HTTPS homepage", "指定一个有效的 HTTP 或 HTTPS 主页");
+		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
+			"最多指定 20 个精确的重定向 URI，使用 HTTPS、回环 HTTP 或本地应用程序方案");
 	}
 		
 	@Override
