@@ -1,5 +1,9 @@
 <wicket:panel>
 	<div class="terminal d-flex flex-column flex-grow-1 h-100 resize-aware bg-black"></div>
+	<div class="terminal-clipboard d-none flex-shrink-0 px-2 py-1">
+		<button type="button" class="btn btn-sm btn-light"><wicket:t>Copy terminal text</wicket:t></button>
+		<span class="terminal-clipboard-error d-none ml-2 text-warning" role="status"><wicket:t>Could not copy to clipboard</wicket:t></span>
+	</div>
 	<div wicket:id="mobileKeys" class="terminal-mobile-keys" role="toolbar" aria-label="Terminal keys">
 		<div class="terminal-mobile-key-scroll">
 			<button type="button" tabindex="-1" class="terminal-mobile-key" data-terminal-key="escape" aria-label="Escape">Esc</button>

@@ -27,6 +27,89 @@ onedev.server.terminal = {
 
 		xterm.open($terminal[0]);
 
+		var decodeBase64 = function(base64) {
+			return Uint8Array.from(atob(base64), function(c) { return c.charCodeAt(0); });
+		};
+		var parsingReplay = false;
+		if (tmuxTerminal) {
+			var mac = onedev.server.util.isMac();
+			xterm.attachCustomKeyEventHandler(function(e) {
+				var paste = e.key.toLowerCase() == "v" && !e.altKey && !e.shiftKey
+						&& (mac ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey);
+				// Let the browser deliver the clipboard text in a native paste event.
+				return !paste;
+			});
+
+			var $clipboard = $container.children(".terminal-clipboard");
+			var $copyButton = $clipboard.children("button");
+			var $clipboardError = $clipboard.children(".terminal-clipboard-error");
+			var clipboardRequest;
+			var showClipboard = function(visible) {
+				$clipboard.toggleClass("d-none", !visible);
+				$terminal.trigger("resized");
+			};
+			var writeClipboard = function(request, fromButton) {
+				var finish = function(copied) {
+					if (request != clipboardRequest)
+						return;
+					if (copied) {
+						clipboardRequest = null;
+						if (document.activeElement == $copyButton[0])
+							xterm.focus();
+					}
+					$clipboardError.toggleClass("d-none", copied || !fromButton);
+					showClipboard(!copied);
+				};
+				if (navigator.clipboard) {
+					navigator.clipboard.writeText(request.text).then(function() {
+						finish(true);
+					}, function() {
+						finish(false);
+					});
+				} else {
+					// The Copy button can also work on HTTP, where the Clipboard API is unavailable.
+					var copy = function(e) {
+						e.clipboardData.setData("text/plain", request.text);
+						e.preventDefault();
+					};
+					document.addEventListener("copy", copy);
+					try {
+						finish(document.execCommand("copy"));
+					} finally {
+						document.removeEventListener("copy", copy);
+					}
+				}
+			};
+			$copyButton.on("click", function() {
+				writeClipboard(clipboardRequest, true);
+			});
+
+			var utf8 = new TextDecoder("utf-8", {fatal: true});
+			xterm.parser.registerOscHandler(52, function(data) {
+				if (parsingReplay)
+					return true;
+				// Accept writes to the default selection or clipboard. Read requests use '?'.
+				var match = /^([cpqs0-7]*);([A-Za-z0-9+/=]*)$/.exec(data);
+				if (!match || (match[1] && !match[1].includes("c")))
+					return true;
+				var text;
+				try {
+					text = utf8.decode(decodeBase64(match[2]));
+				} catch (e) {
+					return true;
+				}
+
+				var request = {text: text};
+				clipboardRequest = request;
+				$clipboardError.addClass("d-none");
+				if (navigator.clipboard && document.hasFocus() && document.activeElement == xterm.textarea)
+					writeClipboard(request, false);
+				else
+					showClipboard(true);
+				return true;
+			});
+		}
+
 		var tmuxCopyMode = false;
 		var updateTmuxCopyMode = function() {
 			var buffer = xterm.buffer.active;
@@ -265,9 +348,12 @@ onedev.server.terminal = {
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message == "TERMINAL_REPLAY_START") {
 				replaying = true;
+				// Track replay in parser order since xterm processes writes asynchronously.
+				xterm.write("", function() { parsingReplay = true; });
 			} else if (message == "TERMINAL_REPLAY_END") {
 				replaying = false;
 				suppressInputUntil = new Date().getTime() + 300;
+				xterm.write("", function() { parsingReplay = false; });
 			} else if (message.startsWith("SHELL_OUTPUT:")) {
 				if (!replaying && firstLiveOutput) {
 					sendResize(xterm.rows-1, xterm.cols-1);
@@ -275,8 +361,7 @@ onedev.server.terminal = {
 					firstLiveOutput = false;
 				}
 				var base64 = message.substring("SHELL_OUTPUT:".length);
-				var bytes = Uint8Array.from(atob(base64), function(c) { return c.charCodeAt(0); });
-				xterm.write(bytes);
+				xterm.write(decodeBase64(base64));
 			}
 		});
 	}
