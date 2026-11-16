@@ -1,9 +1,10 @@
-version: 54
+version: 59
 imports:
 - projectPath: onedev/template
   revision: main
 jobs:
 - name: Release
+  executeInSandbox: false
   steps:
   - type: CheckoutStep
     name: checkout
@@ -146,6 +147,17 @@ jobs:
   - jobName: Scan Vulnerabilities
     requireSuccessful: true
     artifacts: '**'
+  projectDependencies:
+  - projectPath: onedev/commons
+    buildProvider:
+      type: LatestBuild
+      jobName: Release
+    requireSuccessful: true
+  - projectPath: onedev/agent
+    buildProvider:
+      type: LatestBuild
+      jobName: Release
+    requireSuccessful: true
   retryCondition: never
   maxAttempts: 4
   retryDelay: 30
@@ -153,6 +165,7 @@ jobs:
   includeDownstreamWhenRebuild: false
   timeout: 3600
 - name: Publish Site
+  executeInSandbox: false
   steps:
   - type: CommandStep
     name: build
@@ -173,7 +186,7 @@ jobs:
     optional: false
   - type: PublishSiteStep
     name: publish
-    artifacts: onedev-latest*
+    siteFiles: onedev-latest*
     condition: SUCCESSFUL
     optional: false
   jobDependencies:
@@ -187,6 +200,7 @@ jobs:
   includeDownstreamWhenRebuild: false
   timeout: 3600
 - name: Publish Test Images
+  executeInSandbox: false
   steps:
   - type: CheckoutStep
     name: checkout
@@ -258,6 +272,7 @@ jobs:
   includeDownstreamWhenRebuild: false
   timeout: 3600
 - name: Scan Vulnerabilities
+  executeInSandbox: false
   steps:
   - type: CheckoutStep
     name: checkout
@@ -290,12 +305,12 @@ jobs:
     name: scan
     templateName: scan vulnerabilities
     paramMatrix:
-    - valuesProvider:
+    - name: Scan Path
+      valuesProvider:
         type: SpecifiedValues
         values:
         - - server-product/target/sandbox
       secret: false
-      name: Scan Path
     condition: SUCCESSFUL
     optional: false
   triggers:
@@ -313,6 +328,7 @@ jobs:
     condition: failed
     receivers: user(robin)
 - name: CI
+  executeInSandbox: false
   steps:
   - type: CheckoutStep
     name: checkout
@@ -373,6 +389,17 @@ jobs:
     branches: main
     userMatch: anyone
     projects: onedev/server
+  projectDependencies:
+  - projectPath: onedev/commons
+    buildProvider:
+      type: LatestBuild
+      jobName: Release
+    requireSuccessful: true
+  - projectPath: onedev/agent
+    buildProvider:
+      type: LatestBuild
+      jobName: Release
+    requireSuccessful: true
   retryCondition: never
   maxAttempts: 4
   retryDelay: 30
@@ -380,6 +407,7 @@ jobs:
   includeDownstreamWhenRebuild: false
   timeout: 3600
 - name: Sync Main (GitHub)
+  executeInSandbox: false
   steps:
   - type: CheckoutStep
     name: checkout
