@@ -46,6 +46,7 @@
 	color: #f4f4f4;
 	font: 600 0.8125rem/1 monospace;
 	touch-action: manipulation;
+	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	user-select: none;
 }
@@ -61,10 +62,15 @@
 	font-size: 1.125rem;
 }
 
+.terminal-mobile-key[data-terminal-key="backspace"] {
+	font-size: 1.25rem;
+}
+
 .terminal-mobile-keyboard {
 	flex: 0 0 44px;
+	padding-inline: 0;
 	border-color: #626262;
-	font-size: 1.125rem;
+	font-size: 1.5rem;
 }
 
 .terminal-scroll-help-mobile {

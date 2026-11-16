@@ -195,7 +195,7 @@ onedev.server.terminal = {
 					"shift-tab": "\x1b[Z",
 					"ctrl-c": "\x03",
 					"enter": "\r",
-					"delete": "\x1b[3~",
+					"backspace": "\x7f",
 					"tmux-prefix": "\x02",
 					"tmux-copy": tmuxCopyMode ? "q" : "\x02[",
 					"page-up": "\x1b[5~",
@@ -250,6 +250,56 @@ onedev.server.terminal = {
 			}
 		};
 
+		var repeatableKeySelector = "[data-terminal-key]:not([data-terminal-key^='tmux-'])";
+		var keyHold;
+		var suppressedClickButton;
+		var stopKeyRepeat = function() {
+			if (keyHold) {
+				clearTimeout(keyHold.timer);
+				keyHold = null;
+			}
+		};
+		var cancelKeyHold = function() {
+			if (keyHold) {
+				suppressedClickButton = keyHold.button;
+				stopKeyRepeat();
+			}
+		};
+
+		$mobileKeys.on("pointerdown", repeatableKeySelector, function(e) {
+			var pointer = e.originalEvent;
+			if (!pointer.isPrimary || pointer.button != 0)
+				return;
+			stopKeyRepeat();
+			suppressedClickButton = null;
+			var hold = {button: this, pointerId: pointer.pointerId, startX: pointer.clientX};
+			keyHold = hold;
+			var key = $(this).data("terminal-key");
+			var repeat = function() {
+				if (!hold.button.isConnected || document.hidden) {
+					stopKeyRepeat();
+					return;
+				}
+				suppressedClickButton = hold.button;
+				hold.timer = setTimeout(repeat, 80);
+				sendMobileKey(key);
+			};
+			hold.timer = setTimeout(repeat, 600);
+		}).on("pointermove pointerup pointercancel pointerleave lostpointercapture", repeatableKeySelector, function(e) {
+			var pointer = e.originalEvent;
+			if (!keyHold || pointer.pointerId != keyHold.pointerId)
+				return;
+			if (e.type == "pointerup")
+				stopKeyRepeat();
+			// A horizontal drag can reach this threshold even when the bar cannot scroll further.
+			else if (e.type != "pointermove" || Math.abs(pointer.clientX - keyHold.startX) >= 8)
+				cancelKeyHold();
+		}).on("contextmenu", repeatableKeySelector, function(e) {
+			if (keyHold || e.originalEvent.pointerType == "touch")
+				e.preventDefault();
+		});
+		$mobileKeys.children(".terminal-mobile-key-scroll").on("scroll", cancelKeyHold);
+
 		$mobileKeys.on("mousedown", ".terminal-mobile-key", function(e) {
 			// Preserve focus until click so the keyboard button can toggle the current state.
 			e.preventDefault();
@@ -257,6 +307,11 @@ onedev.server.terminal = {
 
 		$mobileKeys.on("click", ".terminal-mobile-key", function(e) {
 			e.preventDefault();
+			// The release can generate a click after a drag or a hold that has sent the key.
+			if (e.detail && suppressedClickButton == this) {
+				suppressedClickButton = null;
+				return;
+			}
 			activateMobileKey($(this));
 		});
 
@@ -328,10 +383,12 @@ onedev.server.terminal = {
 
 			removeViewportListeners();
 			$(window).on("resize" + eventNamespace + " orientationchange" + eventNamespace, fitTerminal);
+			$(window).on("blur" + eventNamespace + " pagehide" + eventNamespace, stopKeyRepeat);
 			if (window.visualViewport) {
 				$(window.visualViewport).on(
 						"resize" + eventNamespace + " scroll" + eventNamespace, fitTerminal);
 			}
+			Wicket.Event.subscribe("/websocket/closed", stopKeyRepeat);
 			fitTerminal();
 		} else {
 			$terminal.on("resized", function() {
