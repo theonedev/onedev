@@ -114,8 +114,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 	public static String getPullRequestNotificationWarning() {
 		return _T("""
 			Inline comments and thread updates don't email watchers. To notify them, \
-			post a comment on the pull request, approve it, request changes, or add commits. \
-			A review request also notifies the selected reviewer.""");
+			post a comment on the pull request, approve it, or request changes""");
 	}
 	
 	private WebMarkupContainer newCommentOrReplyContainer() {
