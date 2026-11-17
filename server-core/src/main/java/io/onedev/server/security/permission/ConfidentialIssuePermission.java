@@ -29,7 +29,7 @@ public class ConfidentialIssuePermission implements BasePermission {
 
 	@Override
 	public boolean isApplicable(@Nullable UserFacade user) {
-		return user != null;
+		return true;
 	}
 	
 }
