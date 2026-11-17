@@ -1,10 +1,8 @@
 package io.onedev.server.security.permission;
 
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.shiro.authz.Permission;
-import org.jetbrains.annotations.Nullable;
 
 public class AccessSites implements BasePermission {
 
@@ -29,10 +27,5 @@ public class AccessSites implements BasePermission {
 		} else {
 			return new AccessProject().implies(p);
 		}
-	}
-
-	@Override
-	public boolean isApplicable(@Nullable UserFacade user) {
-		return true;
 	}
 }

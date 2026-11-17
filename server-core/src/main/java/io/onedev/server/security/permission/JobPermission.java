@@ -1,10 +1,8 @@
 package io.onedev.server.security.permission;
 
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.shiro.authz.Permission;
-import org.jetbrains.annotations.Nullable;
 
 public class JobPermission implements BasePermission {
 
@@ -17,6 +15,10 @@ public class JobPermission implements BasePermission {
 	public JobPermission(String jobNames, BasePermission privilege) {
 		this.jobNames = jobNames;
 		this.privilege = privilege;
+	}
+
+	public Permission getPrivilege() {
+		return privilege;
 	}
 	
 	private PatternSet getJobNamesPatternSet() {
@@ -39,10 +41,4 @@ public class JobPermission implements BasePermission {
 	public boolean isWrite() {
 		return privilege.isWrite();
 	}
-
-	@Override
-	public boolean isApplicable(@Nullable UserFacade user) {
-		return privilege.isApplicable(user);
-	}
-	
 }

@@ -29,7 +29,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.SessionService;
-import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.MaintainProject;
 import io.onedev.server.security.permission.ConfidentialIssuesPermission;
 import io.onedev.server.security.permission.ProjectPermission;
@@ -38,7 +37,6 @@ import io.onedev.server.security.permission.UserAdministration;
 import io.onedev.server.service.IssueAuthorizationService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.Pair;
-import io.onedev.server.util.facade.UserFacade;
 
 @Singleton
 public class DefaultAuthorizingService extends AuthorizingRealm implements AuthorizingService, Serializable {
@@ -116,8 +114,10 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 					return false;
 				});
 			}
-			return new Pair<>(UserFacade.of(getUser(user, accessToken)), permissions);
+			return new Pair<>(getUser(user, accessToken) != null, permissions);
 		});
+		boolean hasUser = requireNonNull(result.getLeft());
+		var grants = requireNonNull(result.getRight());
 		
 		return new AuthorizationInfo() {
 			
@@ -137,19 +137,17 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 			@Override
 			public Collection<Permission> getObjectPermissions() {
 				return Lists.newArrayList(permission -> {
-					if (permission instanceof BasePermission basePermission) {
-                        if (!basePermission.isApplicable(result.getLeft()))
-							return false;
-					} 
+					if (!hasUser && SecurityUtils.requiresUser(permission))
+						return false;
 					if (permission instanceof ProjectPermission projectPermission
 							&& projectPermission.getProject().isMaintenance()
 							&& subscriptionService.isSubscriptionActive()
 							&& projectPermission.isWrite()) {
 						var maintenance = new ProjectPermission(projectPermission.getProject(), new MaintainProject());
-						if (requireNonNull(result.getRight()).stream().noneMatch(it -> it.implies(maintenance)))
+						if (grants.stream().noneMatch(it -> it.implies(maintenance)))
 							return false;
 					}
-					return requireNonNull(result.getRight()).stream().anyMatch(it -> it.implies(permission));
+					return grants.stream().anyMatch(it -> it.implies(permission));
 				});
 			}
 			

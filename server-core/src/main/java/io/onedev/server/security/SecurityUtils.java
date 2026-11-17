@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toSet;
 import io.onedev.server.SubscriptionService;
 import io.onedev.server.web.util.WikiUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,6 +64,7 @@ import io.onedev.server.security.permission.AccessSites;
 import io.onedev.server.security.permission.AccessTimeTracking;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
+import io.onedev.server.security.permission.ConfidentialIssuesPermission;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.CreateWorkspaces;
@@ -85,6 +87,7 @@ import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UploadCache;
+import io.onedev.server.security.permission.UserAdministration;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.security.permission.WritePack;
 import io.onedev.server.service.AccessTokenService;
@@ -220,6 +223,23 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	@Nullable
 	public static User getUser() {
 		return getUser(getSubject());
+	}
+
+	static boolean requiresUser(Permission permission) {
+		if (permission instanceof ProjectPermission projectPermission)
+			return requiresUser(projectPermission.getPrivilege());
+		if (permission instanceof JobPermission jobPermission)
+			return requiresUser(jobPermission.getPrivilege());
+		if (permission instanceof Group group)
+			return group.isAdministrator() || group.isCreateRootProjects() || !group.getAuthorizations().isEmpty();
+		// Every role contains the issue field editing permission.
+		return permission instanceof BasePermission basePermission && basePermission.isWrite()
+				|| permission instanceof Role
+				|| permission instanceof MaintainProject
+				|| permission instanceof SystemAdministration
+				|| permission instanceof UserAdministration
+				|| permission instanceof CreateRootProjects
+				|| permission instanceof ConfidentialIssuesPermission;
 	}
 	
 	public static String asAccessTokenPrincipal(Long accessTokenId) {
@@ -920,7 +940,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		String principal = (String) subject.getPrincipal();
 		var user = getAuthUser(principal);
 		var accessToken = getAccessToken(principal);
-		if (permission.isApplicable(UserFacade.of(getUser(user, accessToken)))) {
+		if (!requiresUser(permission) || getUser(user, accessToken) != null) {
 			Collection<Long> authorizedProjectIds = new HashSet<>();
 			if (user != null) {
 				if (user.isRoot() || user.isSystem()) {
@@ -958,19 +978,19 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 	
-	private static Collection<User> filterApplicableUsers(UserCache cache, Collection<User> users,
+	private static Collection<User> filterUsersForMaintenance(UserCache cache, Collection<User> users,
 			Project project, BasePermission permission) {
-		var applicableUsers = users.stream().filter(it -> permission.isApplicable(getUserFacade(cache, it))).collect(toList());
+		var filteredUsers = new ArrayList<>(users);
 		if (permission.isWrite() && project.isMaintenance()
 				&& OneDev.getInstance(SubscriptionService.class).isSubscriptionActive()) {
 			var maintainerIds = getAuthorizedUsers(project, cache, new MaintainProject()).stream()
 					.map(User::getId).collect(toSet());
-			applicableUsers.removeIf(it -> {
+			filteredUsers.removeIf(it -> {
 				var facade = getUserFacade(cache, it);
 				return facade.isDisabled() || !facade.isSystem() && !maintainerIds.contains(it.getId());
 			});
 		}
-		return applicableUsers;
+		return filteredUsers;
 	}
 
 	private static UserFacade getUserFacade(UserCache cache, User user) {
@@ -996,7 +1016,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		Project current = project;
 		do {
 			if (current.isPermittedByLoginUser(permission))
-				return filterApplicableUsers(cache, cache.getUsers(), project, permission);
+				return filterUsersForMaintenance(cache, cache.getUsers(), project, permission);
 
 			for (UserAuthorization authorization: current.getUserAuthorizations()) {
 				if (authorization.getRole().implies(permission))
@@ -1017,7 +1037,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				authorizedUsers.add(authorization.getUser());
 		}
 
-		return filterApplicableUsers(cache, authorizedUsers, project, permission);
+		return filterUsersForMaintenance(cache, authorizedUsers, project, permission);
 	}
 
 	private static void populateAccessibleReportNames(Map<String, Collection<String>> accessibleReportNames,

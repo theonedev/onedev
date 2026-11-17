@@ -14,7 +14,6 @@ import jakarta.validation.constraints.NotEmpty;
 import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.jetbrains.annotations.Nullable;
 
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
@@ -24,7 +23,6 @@ import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.util.facade.GroupFacade;
-import io.onedev.server.util.facade.UserFacade;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -182,10 +180,4 @@ public class Group extends AbstractEntity implements BasePermission {
 			permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 		return permissions;
 	}
-
-	@Override
-	public boolean isApplicable(@Nullable UserFacade user) {
-		return getPermissions().stream().allMatch(it -> it.isApplicable(user));
-	}
-	
 }

@@ -21,7 +21,6 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 
@@ -72,7 +71,6 @@ import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.RoleFacade;
-import io.onedev.server.util.facade.UserFacade;
 
 /**
  * @author robin
@@ -525,11 +523,6 @@ public class Role extends AbstractEntity implements BasePermission {
 	@SuppressWarnings("unused")
 	private static boolean isSubscriptionActive() {
 		return OneDev.getInstance(SubscriptionService.class).isSubscriptionActive();
-	}
-
-	@Override
-	public boolean isApplicable(@Nullable UserFacade user) {
-		return getPermissions().stream().allMatch(it -> it.isApplicable(user));
 	}
 	
 }

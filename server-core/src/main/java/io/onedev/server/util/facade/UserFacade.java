@@ -64,13 +64,6 @@ public class UserFacade extends EntityFacade {
 		return User.UNKNOWN_ID.equals(getId());
 	}
 	
-	public static UserFacade of(@Nullable User user) {
-		if (user != null)
-			return user.getFacade();
-		else 
-			return null;
-	}
-
 	public User.Type getType() {
 		return type;
 	}

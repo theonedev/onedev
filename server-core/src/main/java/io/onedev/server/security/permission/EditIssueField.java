@@ -1,6 +1,5 @@
 package io.onedev.server.security.permission;
 
-import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 
 import org.jspecify.annotations.Nullable;
@@ -28,10 +27,4 @@ public class EditIssueField implements WritePermission {
 			return new AccessProject().implies(p);
 		}
 	}
-
-	@Override
-	public boolean isApplicable(@Nullable UserFacade user) {
-		return user != null;
-	}
-	
 }

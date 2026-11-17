@@ -3,9 +3,6 @@ package io.onedev.server.security.permission;
 import java.util.Set;
 
 import org.apache.shiro.authz.Permission;
-import org.jetbrains.annotations.Nullable;
-
-import io.onedev.server.util.facade.UserFacade;
 
 public class ConfidentialIssuesPermission implements BasePermission {
 
@@ -39,10 +36,4 @@ public class ConfidentialIssuesPermission implements BasePermission {
 	public Set<Long> getIssueIds() {
 		return issueIds;
 	}
-
-	@Override
-	public boolean isApplicable(@Nullable UserFacade user) {
-		return user != null;
-	}
-	
 }
