@@ -106,8 +106,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	 * @param model
 	 * 			markdown model of the editor
 	 * @param compactMode
-	 * 			editor in compact mode occupies horizontal space and is suitable 
-	 * 			to be used in places such as comment aside the code
+	 * 			use a compact toolbar in narrow spaces such as comments beside the code
 	 */
 	public MarkdownEditor(String id, IModel<String> model, boolean compactMode, 
 			@Nullable BlobRenderContext blobRenderContext) {

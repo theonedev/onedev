@@ -453,37 +453,16 @@ onedev.server.markdown = {
 			onedev.server.markdown.fireInputEvent($input);
 		});
 		
-		var minHeight = 75;
 		$body.resizable({
 			autoHide: false,
 			handles: {"s": $body.children(".ui-resizable-handle")},
-			minHeight: minHeight,
+			minHeight: 75,
 			stop: function() {
 				Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".bodyHeight", 
 						$body.height(), {expires: Infinity});
 			}
 		});
 		
-		$edit.resizable({
-			autoHide: false,
-			handles: {"s": $edit.children(".ui-resizable-handle")},
-			minHeight: minHeight,
-			stop: function() {
-				Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".editHeight", 
-						$edit.height(), {expires: Infinity});
-			}
-		});
-		
-		$preview.resizable({
-			autoHide: false,
-			handles: {"s": $preview.children(".ui-resizable-handle")},
-			minHeight: minHeight,
-			stop: function() {
-				Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".previewHeight", 
-						$preview.height(), {expires: Infinity});
-			}
-		});
-
 		var $doFixedWidth = $head.find(".do-fixedwidth");
 		if ($container.hasClass("fixed-width"))
 			$doFixedWidth.addClass("active");
@@ -1147,26 +1126,11 @@ onedev.server.markdown = {
 			onedev.server.form.markClean($form);
 		});
 		if ($body.find(".ui-resizable-handle:visible").length != 0) {
-			var defaultHeight = 200;
-			if ($container.hasClass("normal-mode")) {
-				var bodyHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".bodyHeight");
-				if (bodyHeight) 
-					$body.height(parseInt(bodyHeight));
-				else 
-					$body.height(defaultHeight);
-			} else {
-				var editHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".editHeight");
-				if (editHeight) 
-					$edit.height(parseInt(editHeight));
-				else
-					$edit.height(defaultHeight);
-					
-				var previewHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".previewHeight");
-				if (previewHeight) 
-					$preview.height(parseInt(previewHeight));
-				else
-					$preview.height(defaultHeight);
-			}
+			var bodyHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".bodyHeight");
+			if (bodyHeight)
+				$body.height(parseInt(bodyHeight));
+			else
+				$body.height(200);
 		}
 		var autosaveKey = $container.data("autosaveKey");
 		if (autosaveKey) {

@@ -102,10 +102,6 @@ body.markdown-editor-expanded {
 	color: var(--dark-mode-gray);
 	border-color: var(--dark-mode-dark);
 }
-.markdown-editor.compact-mode>.head .split>.icon {
-	transform: rotate(-90deg);
-}
-
 .markdown-editor>.head>.actions .separator {
 	display: block;
 	border-left: 1px solid var(--light-gray);
@@ -201,14 +197,8 @@ body.markdown-editor-expanded {
 	display: none;
 }
 
-.markdown-editor.normal-mode>.body>div {
+.markdown-editor>.body>.edit, .markdown-editor>.body>.preview {
 	flex: 1;
-}
-.markdown-editor.compact-mode>.body {
-	flex-direction: column;
-}
-.markdown-editor.compact-mode.split-mode>.body>.preview {
-	margin-top: 0.5rem;
 }
 
 .markdown-editor>.body>.edit>textarea {
@@ -228,11 +218,6 @@ body.markdown-editor-expanded {
 
 .compact-mode.dropdown a {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-}
-
-.markdown-editor.compact-mode>.body>.ui-resizable-handle, 
-.markdown-editor.normal-mode>.body>div>.ui-resizable-handle {
-	display: none;
 }
 
 .atwho-view .emoji {
