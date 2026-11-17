@@ -476,10 +476,13 @@ public class PullRequestNotificationManager implements Serializable {
 	}
 
 	private boolean canWriteCode(User ai, PullRequest request) {
-		if (SecurityUtils.canWriteCode(ai.asSubject(), request.getTargetProject())) {
+		if (SecurityUtils.canWriteCode(ai.asSubject(), request.getProject())) {
 			return true;
 		} else {
-			createComment(ai, request, "I need write code permission in target project to do the job");				
+			if (request.getProject().isMaintenance())
+				createComment(ai, request, "No permission to write code while project is in maintenance");
+			else
+				createComment(ai, request, "No permission to write code");
 			return false;
 		}
 	}
@@ -540,8 +543,12 @@ public class PullRequestNotificationManager implements Serializable {
 
 	private boolean canCreateWorkspace(User ai, PullRequest request, boolean commentOnError) {
 		if (!SecurityUtils.canCreateWorkspaces(ai.asSubject(), request.getProject())) {			
-			if (commentOnError)
-				createComment(ai, request, "I need create workspace permission in this project to do the job");				
+			if (commentOnError) {
+				if (request.getProject().isMaintenance())
+					createComment(ai, request, "No permission to create workspace while project is in maintenance");
+				else
+					createComment(ai, request, "No permission to create workspace");
+			}
 			return false;
 		}
 		if (request.getProject().getDefaultBranch() == null) {

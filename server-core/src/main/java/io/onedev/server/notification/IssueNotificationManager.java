@@ -505,8 +505,12 @@ public class IssueNotificationManager implements Serializable {
 	
 	private boolean canCreateWorkspace(User ai, Issue issue, boolean commentOnError) {
 		if (!SecurityUtils.canCreateWorkspaces(ai.asSubject(), issue.getProject())) {			
-			if (commentOnError) 
-				createComment(ai, issue, "I need create workspace permission in this project to do the job");				
+			if (commentOnError) {
+				if (issue.getProject().isMaintenance())
+					createComment(ai, issue, "No permission to create workspace while project is in maintenance");
+				else
+					createComment(ai, issue, "No permission to create workspace");
+			}
 			return false;
 		}
 		if (issue.getProject().getDefaultBranch() == null) {
