@@ -1,4 +1,4 @@
-<wicket:panel>
+<wicket:panel xmlns:wicket="http://www.w3.org/1999/xhtml">
 	<div class="access-token border rounded">
 		<div class="p-4">
 			<div wicket:id="description"></div>
@@ -13,6 +13,7 @@
 					<a wicket:id="rotate" class="flex-shrink-0" t:data-tippy-content="Rotate Access Token" t:aria-label="Rotate Access Token"><wicket:svg href="refresh2" class="icon"></wicket:svg></a>
 				</div>
 				<div wicket:id="notice" class="access-token-notice text-warning mt-1 font-size-sm" role="alert">
+					<wicket:svg href="warning-o" class="icon icon-sm"></wicket:svg>
 					<wicket:t>Copy your access token now. It will not be shown again.</wicket:t>
 				</div>
 			</div>
