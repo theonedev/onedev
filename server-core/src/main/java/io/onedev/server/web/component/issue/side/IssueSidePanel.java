@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -59,6 +60,7 @@ import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -206,7 +208,9 @@ public abstract class IssueSidePanel extends Panel {
 			
 			@Override
 			public Collection<String> findObservables() {
-				return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
+				var issueId = getIssue().getId();
+				return Set.of(Issue.getDetailChangeObservable(issueId),
+						Workspace.getIssueWorkspacesChangeObservable(issueId));
 			}
 			
 		});
@@ -226,8 +230,8 @@ public abstract class IssueSidePanel extends Panel {
 				}
 				return fields;
 			}
-			
-		};		
+
+		};
 		return new ListView<Input>("fields", fieldsModel) {
 
 			@Override
@@ -250,16 +254,16 @@ public abstract class IssueSidePanel extends Panel {
 					protected Input getField() {
 						return item.getModelObject();
 					}
-					
+
 				}.setRenderBodyOnly(true));
 			}
-			
+
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!fieldsModel.getObject().isEmpty());
 			}
-			
+
 		};
 	}
 	
@@ -309,37 +313,37 @@ public abstract class IssueSidePanel extends Panel {
 			public List<Iteration> getObject() {
 				return getIssue().getIterations().stream()
 						.sorted(new Iteration.DatesAndStatusComparator())
-						.collect(Collectors.toList()); 
+						.collect(Collectors.toList());
 			}
-			
+
 		}) {
 
 			@Override
 			protected void populateItem(ListItem<Iteration> item) {
 				Iteration iteration = item.getModelObject();
 
-				Link<Void> link = new BookmarkablePageLink<Void>("link", IterationIssuesPage.class, 
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IterationIssuesPage.class,
 						IterationIssuesPage.paramsOf(getIssue().getProject(), iteration, null));
 				link.add(new Label("label", iteration.getName()));
 				item.add(link);
-				
+
 				item.add(new StateStatsBar("progress", new IModel<Map<String, Integer>>() {
 
 					@Override
 					public Map<String, Integer> getObject() {
 						return item.getModelObject().getStateStats(getIssue().getProject());
 					}
-					
+
 				}) {
 
 					@Override
 					protected Link<Void> newStateLink(String componentId, String state) {
 						String query = new IssueQuery(new StateCriteria(state, IssueQueryLexer.Is)).toString();
-						PageParameters params = IterationIssuesPage.paramsOf(getIssue().getProject(), 
+						PageParameters params = IterationIssuesPage.paramsOf(getIssue().getProject(),
 								item.getModelObject(), query);
 						return new ViewStateAwarePageLink<Void>(componentId, IterationIssuesPage.class, params);
 					}
-					
+
 				});
 				item.add(new IterationStatusLabel("status", new IModel<Iteration>() {
 
@@ -347,9 +351,9 @@ public abstract class IssueSidePanel extends Panel {
 					public Iteration getObject() {
 						return item.getModelObject();
 					}
-					
+
 				}).add(AttributeAppender.append("class", "badge-sm")));
-				
+
 				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -359,55 +363,55 @@ public abstract class IssueSidePanel extends Panel {
 							attributes.getAjaxCallListeners().add(new ConfirmClickListener(MessageFormat.format(_T("Do you really want to remove the issue from iteration \"{0}\"?"), item.getModelObject().getName())));
 						}
 					}
-					
+
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						var user = SecurityUtils.getUser();
 						getIssueChangeService().removeSchedule(user, getIssue(), item.getModelObject());
 						notifyIssueChange(target, getIssue());
 					}
-					
+
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
 					}
-					
+
 				});
 			}
-			
+
 		});
 		
 		container.add(new SelectToActChoice<Iteration>("add", new AbstractIterationChoiceProvider() {
-			
+
 			@Override
 			public void query(String term, int page, Response<Iteration> response) {
 				List<Iteration> iterations = getProject().getSortedHierarchyIterations();
 				iterations.removeAll(getIssue().getIterations());
-				
+
 				iterations = new Similarities<Iteration>(iterations) {
 
 					@Override
 					public double getSimilarScore(Iteration object) {
 						return Similarities.getSimilarScore(object.getName(), term);
 					}
-					
+
 				};
 				new ResponseFiller<>(response).fill(iterations, page, WebConstants.PAGE_SIZE);
 			}
-			
+
 		}) {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				
+
 				getSettings().setPlaceholder(_T("Add to iteration..."));
 				getSettings().setTemplateResult("onedev.server.iterationChoiceFormatter.formatResult");
 				getSettings().setTemplateSelection("onedev.server.iterationChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.iterationChoiceFormatter.escapeMarkup");
 			}
-			
+
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -419,14 +423,14 @@ public abstract class IssueSidePanel extends Panel {
 				super.renderHead(response);
 				response.render(JavaScriptHeaderItem.forReference(new IterationChoiceResourceReference()));
 			}
-			
+
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Iteration iteration) {
 				getIssueChangeService().addSchedule(SecurityUtils.getUser(), getIssue(), iteration);
 				notifyIssueChange(target, getIssue());
 			}
 
-		});		
+		});
 		
 		return container;
 	}
@@ -496,7 +500,7 @@ public abstract class IssueSidePanel extends Panel {
 			public int compare(IssueVote o1, IssueVote o2) {
 				return o2.getId().compareTo(o1.getId());
 			}
-			
+
 		});
 		return votes;
 	}
@@ -511,7 +515,7 @@ public abstract class IssueSidePanel extends Panel {
 			public String getObject() {
 				return String.valueOf(getIssue().getVoteCount());
 			}
-			
+
 		}));
 
 		container.add(new ListView<>("voters", new LoadableDetachableModel<List<IssueVote>>() {

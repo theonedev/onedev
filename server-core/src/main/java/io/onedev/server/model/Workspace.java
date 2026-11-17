@@ -468,6 +468,14 @@ public class Workspace extends AbstractEntity {
 		return "workspace-log:" + workspaceId;
 	}
 
+	public static String getIssueWorkspacesChangeObservable(Long issueId) {
+		return "issue-workspaces:" + issueId;
+	}
+
+	public static String getPullRequestWorkspacesChangeObservable(Long requestId) {
+		return "pull-request-workspaces:" + requestId;
+	}
+
 	public String getStatusChangeObservable() {
 		return "workspace-status:" + getId();
 	}

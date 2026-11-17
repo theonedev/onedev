@@ -46,7 +46,7 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	List<ProjectWorkspaceStatusStat> queryStatusStats(Collection<Project> projects);
 
-	void delete(Collection<Workspace> workspaces);
+	void delete(Collection<Workspace> workspaces, Project project);
 
 	void reset(Workspace workspace);
 

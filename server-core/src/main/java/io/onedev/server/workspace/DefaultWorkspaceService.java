@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.event.project.pullrequest.PullRequestDeleted;
+import io.onedev.server.event.project.workspace.*;
 import io.onedev.server.model.support.AiSetting;
 import io.onedev.server.service.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -57,12 +59,6 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.NodeStopping;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.project.workspace.WorkspaceActive;
-import io.onedev.server.event.project.workspace.WorkspaceCreated;
-import io.onedev.server.event.project.workspace.WorkspaceEvent;
-import io.onedev.server.event.project.workspace.WorkspaceInactive;
-import io.onedev.server.event.project.workspace.WorkspacePending;
-import io.onedev.server.event.project.workspace.WorkspaceTerminalOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
@@ -465,9 +461,17 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public void delete(Collection<Workspace> workspaces) {
+	public void delete(Collection<Workspace> workspaces, Project project) {
 		for (var workspace : workspaces) 
-			delete(workspace);
+			dao.remove(workspace);
+		listenerRegistry.post(new WorkspacesDeleted(project, workspaces));
+	}
+
+	@Transactional
+	@Override
+	public void delete(Workspace workspace) {
+		dao.remove(workspace);
+		listenerRegistry.post(new WorkspaceDeleted(workspace));
 	}
 
 	@Transactional

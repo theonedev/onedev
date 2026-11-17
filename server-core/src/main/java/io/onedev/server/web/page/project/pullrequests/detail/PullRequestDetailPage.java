@@ -88,6 +88,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.model.support.EntityWatch;
@@ -1339,14 +1340,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					actions.add(new Link<Void>("delete") {
 
 						@Override
-						protected void onInitialize() {
-							super.onInitialize();
-							if (getPullRequest().getWorkspaces().size() == 0) {
-								add(new ConfirmClickModifier(_T("Do you really want to delete this pull request?")));
-							}
-						}
-
-						@Override
 						public void onClick() {
 							PullRequest request = getPullRequest();
 							pullRequestService.delete(request);
@@ -1378,7 +1371,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							}
 						}
 
-					});
+					}.add(new ConfirmClickModifier(_T("Do you really want to delete this pull request?")) {
+
+						@Override
+						public boolean isEnabled(Component component) {
+							return component.isEnabledInHierarchy();
+						}
+
+					}));
 				} else {
 					actions.add(new WebMarkupContainer("synchronize"));
 					actions.add(new WebMarkupContainer("delete"));
@@ -1390,7 +1390,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					public Collection<String> findObservables() {
-						return Sets.newHashSet(PullRequest.getChangeObservable(getPullRequest().getId()));
+						var requestId = getPullRequest().getId();
+						return Set.of(PullRequest.getChangeObservable(requestId),
+								Workspace.getPullRequestWorkspacesChangeObservable(requestId));
 					}
 
 				});

@@ -263,7 +263,7 @@ public abstract class WorkspaceListPanel extends Panel {
 										Collection<Workspace> workspaces = new ArrayList<>();
 										for (IModel<Workspace> each : selectionColumn.getSelections())
 											workspaces.add(each.getObject());
-										getWorkspaceService().delete(workspaces);
+										getWorkspaceService().delete(workspaces, getProject());
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -325,7 +325,7 @@ public abstract class WorkspaceListPanel extends Panel {
 										Collection<Workspace> workspaces = new ArrayList<>();
 										for (Iterator<Workspace> it = (Iterator<Workspace>) dataProvider.iterator(0, workspacesTable.getItemCount()); it.hasNext(); )
 											workspaces.add(it.next());
-										getWorkspaceService().delete(workspaces);
+										getWorkspaceService().delete(workspaces, getProject());
 										dataProvider.detach();
 										target.add(body);
 										selectionColumn.getSelections().clear();
