@@ -150,6 +150,27 @@ onedev.server.revisionDiff = {
 	}
 };
 
+document.addEventListener("keydown", function(event) {
+	if (event.defaultPrevented || event.isComposing || event.repeat
+			|| event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+		return;
+
+	const key = event.key.toUpperCase();
+	if (key !== "J" && key !== "K")
+		return;
+
+	const target = event.target;
+	if (onedev.server.util.isEditable(target) || $(target).closest(".CodeMirror").length
+			|| $(".modal:visible").length)
+		return;
+
+	const button = document.querySelector(`.revision-diff>.head button[aria-keyshortcuts="${key}"]:enabled`);
+	if (button) {
+		event.preventDefault();
+		button.click();
+	}
+});
+
 // Keep the thread available when its surrounding diff is refreshed.
 $(document).on('/dom/node/removing', function(event, node) {
 	const $revisionDiff = $(node).closest(".revision-diff");
