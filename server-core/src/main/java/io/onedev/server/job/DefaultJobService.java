@@ -1382,14 +1382,19 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		Build.push(build);
 		try {
 			JobVariableInterpolator interpolator = new JobVariableInterpolator(build, build.getParamCombination());
-			if (build.getJob() != null) {
-				for (PostBuildAction action : build.getJob().getPostBuildActions()) {
-					action = interpolator.interpolateProperties(action);
-					if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
-						action.execute(build);
-				}
-			} else {
+			var job = build.getJob();
+			if (job == null)
 				throw new ExplicitException("Job not found");
+			for (PostBuildAction action : job.getPostBuildActions()) {
+				try {
+					var interpolatedAction = interpolator.interpolateProperties(action);
+					if (ActionCondition.parse(job, interpolatedAction.getCondition()).matches(build))
+						interpolatedAction.execute(build);
+				} catch (Throwable e) {
+					String message = String.format("Error processing post build action (project: %s, commit: %s, job: %s, action: %s)",
+							build.getProject().getPath(), build.getCommitHash(), build.getJobName(), action.getDescription());
+					logException(message, e);
+				}
 			}
 		} catch (Throwable e) {
 			String message = String.format("Error processing post build actions (project: %s, commit: %s, job: %s)",
