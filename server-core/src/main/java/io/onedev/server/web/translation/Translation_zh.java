@@ -1048,6 +1048,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy Files with SCP", "使用 SCP 复制文件");
 		m.put("Copy Markdown", "复制 Markdown");
 		m.put("Copy Selected Issues To...", "复制选定的工单到...");
+		m.put("Copy access token", "复制访问令牌");
 		m.put("Copy as Markdown", "复制为 Markdown");
 		m.put("Copy client ID", "复制客户端 ID");
 		m.put("Copy client secret", "复制客户端密钥");
@@ -1062,6 +1063,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy this rule", "复制此规则");
 		m.put("Copy this spec", "复制此规范");
 		m.put("Copy to clipboard", "复制到剪贴板");
+		m.put("Copy your access token now. It will not be shown again.", "现在复制您的访问令牌。它将不会再次显示。");
 		m.put("Count", "数量");
 		m.put("Coverage Statistics", "代码覆盖率统计");
 		m.put("Covered", "覆盖");
@@ -1146,6 +1148,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Current Iteration", "当前迭代");
 		m.put("Current Value", "现值");
 		m.put("Current avatar", "当前头像");
+		m.put("Current context is different from context of the action, click to show action context", 
+			"当前上下文与操作的上下文不同，点击以显示操作上下文");
+		m.put("Current context is different from context of the comment, click to show comment context", 
+			"当前上下文与评论的上下文不同，点击以显示评论上下文");
+		m.put("Current context is different from context of the reply, click to show reply context", 
+			"当前上下文与回复的上下文不同，点击以显示回复上下文");
 		m.put("Current platform", "当前平台");
 		m.put("Current project", "当前项目");
 		m.put("Current step index / total number of steps", "当前步骤索引 / 总步骤数");
@@ -2040,8 +2048,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Inherit from parent", "从父级继承");
 		m.put("Inherited", "继承");
 		m.put("Initialization", "初始化");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
-			"内联评论和线程更新不会通过邮件通知观察者。要通知他们，请在合并请求上发表评论、批准、更改请求或添加提交。审查请求也会通知选定的审查者。");
 		m.put("Input Spec", "输入规范");
 		m.put("Input URL", "输入 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "输入允许的 CORS 来源，按回车键添加");
@@ -2064,6 +2070,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Interpreter", "解释器");
 		m.put("Invalid GPG signature", "无效的 GPG 签名");
 		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
+		m.put("Invalid access token", "无效的访问令牌");
 		m.put("Invalid build number: {0}", "无效的构建编号: {0}");
 		m.put("Invalid credentials", "无效的凭据");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "无效的日期范围，期望 \"yyyy-MM-dd to yyyy-MM-dd\"");
@@ -3722,8 +3729,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Roles", "角色");
 		m.put("Root Projects", "根项目");
 		m.put("Roslynator Report", "Roslynator 报告");
+		m.put("Rotate Access Token", "旋转访问令牌");
 		m.put("Rotate Secret", "旋转密钥");
 		m.put("Rotate the client secret and revoke all authorizations?", "旋转客户端密钥并撤销所有授权？");
+		m.put("Rotate this access token and invalidate its current value?", "旋转此访问令牌并使其当前值失效？");
 		m.put("RubyGems(s)", "RubyGems");
 		m.put("Ruff Report", "Ruff 报告");
 		m.put("Rule will apply if user operating the tag matches criteria specified here", "规则将在用户操作标签时应用此处指定的条件");
@@ -3945,6 +3954,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Shortcuts", "快捷方式");
 		m.put("Show / Create", "显示 / 创建");
 		m.put("Show Archived", "显示已归档");
+		m.put("Show Blame", "显示责任归属");
 		m.put("Show Branch/Tag", "显示分支/标签");
 		m.put("Show Build Status", "显示构建状态");
 		m.put("Show Closed", "显示已关闭");
@@ -4172,6 +4182,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify a secret to be used as access token to trigger job in above project", "指定一个秘密作为访问令牌以触发上述项目中的任务");
 		m.put("Specify a secret whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
 			"指定一个密钥，其值是具有上述项目上传缓存权限的访问令牌。注意，如果上传缓存到当前或子项目且构建提交可从默认分支访问，则不需要此属性");
+		m.put("Specify a valid HTTP or HTTPS homepage", "指定一个有效的 HTTP 或 HTTPS 主页");
 		m.put("Specify absolute path to the config file used by kubectl to access the cluster. Leave empty to have kubectl determining cluster access information automatically", 
 			"指定 kubectl 用于访问集群的配置文件的绝对路径。留空让 kubectl 自动确定集群访问信息");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, ${productName} will try to find the utility from system path", 
@@ -4456,6 +4467,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds. It counts from the time when job starts running", "指定超时时间（以秒为单位）。从任务开始运行时开始计时");
 		m.put("Specify title of the issue", "指定工单的标题");
 		m.put("Specify uid:gid to run container as", "指定 uid:gid 以容器身份运行");
+		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
+			"最多指定 20 个精确的重定向 URI，使用 HTTPS、回环 HTTP 或本地应用程序方案");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "指定 YouTrack API 的 URL。例如 <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "指定上述机器的用户名用于 SSH 身份验证");
 		m.put("Specify user name of specified registry", "指定指定注册表的用户名");
@@ -5635,21 +5648,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy access token", "复制访问令牌");
-		m.put("Copy your access token now. It will not be shown again.", "现在复制您的访问令牌。它将不会再次显示。");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"当前上下文与操作的上下文不同，点击以显示操作上下文");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"当前上下文与评论的上下文不同，点击以显示评论上下文");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"当前上下文与回复的上下文不同，点击以显示回复上下文");
-		m.put("Invalid access token", "无效的访问令牌");
-		m.put("Rotate Access Token", "旋转访问令牌");
-		m.put("Rotate this access token and invalidate its current value?", "旋转此访问令牌并使其当前值失效？");
-		m.put("Show Blame", "显示责任归属");
-		m.put("Specify a valid HTTP or HTTPS homepage", "指定一个有效的 HTTP 或 HTTPS 主页");
-		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
-			"最多指定 20 个精确的重定向 URI，使用 HTTPS、回环 HTTP 或本地应用程序方案");
+		m.put("Copy terminal text", "复制终端文本");
+		m.put("Could not copy to clipboard", "无法复制到剪贴板");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"内联评论和线程更新不会通过电子邮件通知观察者。要通知他们，请在合并请求上发表评论、批准或请求更改");
+		m.put("Next changed file (J)", "下一个更改的文件 (J)");
+		m.put("Previous changed file (K)", "上一个更改的文件 (K)");
 	}
 		
 	@Override

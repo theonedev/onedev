@@ -1022,6 +1022,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Copy Files with SCP", "Copiar Arquivos com SCP");
 		m.put("Copy Markdown", "Copiar Markdown");
 		m.put("Copy Selected Issues To...", "Copiar Issues Selecionadas Para...");
+		m.put("Copy access token", "Copiar token de acesso");
 		m.put("Copy as Markdown", "Copiar como Markdown");
 		m.put("Copy client ID", "Copiar ID do cliente");
 		m.put("Copy client secret", "Copiar segredo do cliente");
@@ -1036,6 +1037,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Copy this rule", "Copiar esta regra");
 		m.put("Copy this spec", "Copiar esta especificação");
 		m.put("Copy to clipboard", "Copiar para a área de transferência");
+		m.put("Copy your access token now. It will not be shown again.", "Copie seu token de acesso agora. Ele não será exibido novamente.");
 		m.put("Count", "Contar");
 		m.put("Coverage Statistics", "Estatísticas de Cobertura");
 		m.put("Covered", "Coberto");
@@ -1120,6 +1122,12 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Current Iteration", "Iteração Atual");
 		m.put("Current Value", "Valor Atual");
 		m.put("Current avatar", "Avatar atual");
+		m.put("Current context is different from context of the action, click to show action context", 
+			"O contexto atual é diferente do contexto da ação, clique para mostrar o contexto da ação");
+		m.put("Current context is different from context of the comment, click to show comment context", 
+			"O contexto atual é diferente do contexto do comentário, clique para mostrar o contexto do comentário");
+		m.put("Current context is different from context of the reply, click to show reply context", 
+			"O contexto atual é diferente do contexto da resposta, clique para mostrar o contexto da resposta");
 		m.put("Current platform", "Plataforma Atual");
 		m.put("Current project", "Projeto Atual");
 		m.put("Current step index / total number of steps", "Índice do passo atual / número total de passos");
@@ -2014,8 +2022,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Inherit from parent", "Herdar do pai");
 		m.put("Inherited", "Herdado");
 		m.put("Initialization", "Inicialização");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
-			"Comentários inline e atualizações de threads não enviam e-mails para os observadores. Para notificá-los, publique um comentário no pull request, aprove-o, solicite alterações ou adicione commits. Uma solicitação de revisão também notifica o revisor selecionado.");
 		m.put("Input Spec", "Especificação de Entrada");
 		m.put("Input URL", "URL de Entrada");
 		m.put("Input allowed CORS origin, hit ENTER to add", "Insira a origem CORS permitida, pressione ENTER para adicionar");
@@ -2038,6 +2044,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Interpreter", "Interpretador");
 		m.put("Invalid GPG signature", "Assinatura GPG inválida");
 		m.put("Invalid PCRE syntax", "Sintaxe PCRE inválida");
+		m.put("Invalid access token", "Token de acesso inválido");
 		m.put("Invalid build number: {0}", "Número de build inválido: {0}");
 		m.put("Invalid credentials", "Credenciais inválidas");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "Intervalo de datas inválido, esperado \"yyyy-MM-dd a yyyy-MM-dd\"");
@@ -3696,8 +3703,10 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Roles", "Funções");
 		m.put("Root Projects", "Projetos raiz");
 		m.put("Roslynator Report", "Relatório Roslynator");
+		m.put("Rotate Access Token", "Girar Token de Acesso");
 		m.put("Rotate Secret", "Girar Segredo");
 		m.put("Rotate the client secret and revoke all authorizations?", "Girar o segredo do cliente e revogar todas as autorizações?");
+		m.put("Rotate this access token and invalidate its current value?", "Girar este token de acesso e invalidar seu valor atual?");
 		m.put("RubyGems(s)", "RubyGems(s)");
 		m.put("Ruff Report", "Relatório Ruff");
 		m.put("Rule will apply if user operating the tag matches criteria specified here", "A regra será aplicada se o usuário que opera a tag corresponder aos critérios especificados aqui");
@@ -3919,6 +3928,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Shortcuts", "Atalhos");
 		m.put("Show / Create", "Mostrar / Criar");
 		m.put("Show Archived", "Mostrar Arquivados");
+		m.put("Show Blame", "Mostrar Blame");
 		m.put("Show Branch/Tag", "Mostrar Ramificação/Tag");
 		m.put("Show Build Status", "Mostrar Status da Build");
 		m.put("Show Closed", "Mostrar Fechados");
@@ -4146,6 +4156,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Specify a secret to be used as access token to trigger job in above project", "Especifique um segredo para ser usado como token de acesso para acionar o trabalho no projeto acima");
 		m.put("Specify a secret whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
 			"Especifique um segredo cujo valor é um token de acesso com permissão de upload de cache para o projeto acima. Note que esta propriedade não é necessária se o upload de cache for para o projeto atual ou filho e o commit de build for alcançável a partir do branch padrão");
+		m.put("Specify a valid HTTP or HTTPS homepage", "Especifique uma página inicial HTTP ou HTTPS válida");
 		m.put("Specify absolute path to the config file used by kubectl to access the cluster. Leave empty to have kubectl determining cluster access information automatically", 
 			"Especifique o caminho absoluto para o arquivo de configuração usado pelo kubectl para acessar o cluster. Deixe vazio para que o kubectl determine automaticamente as informações de acesso ao cluster");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, ${productName} will try to find the utility from system path", 
@@ -4430,6 +4441,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds. It counts from the time when job starts running", "Especifique o tempo limite em segundos. Ele conta a partir do momento em que o trabalho começa a ser executado");
 		m.put("Specify title of the issue", "Especifique o título do problema");
 		m.put("Specify uid:gid to run container as", "Especifique uid:gid para executar o contêiner como");
+		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
+			"Especifique até 20 URIs de redirecionamento exatos, usando HTTPS, HTTP loopback ou um esquema de aplicativo nativo");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "Especifique a URL da API do YouTrack. Por exemplo <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "Especifique o nome de usuário da máquina acima para autenticação SSH");
 		m.put("Specify user name of specified registry", "Especifique o nome de usuário do registro especificado");
@@ -5609,21 +5622,12 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy access token", "Copiar token de acesso");
-		m.put("Copy your access token now. It will not be shown again.", "Copie seu token de acesso agora. Ele não será exibido novamente.");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"O contexto atual é diferente do contexto da ação, clique para mostrar o contexto da ação");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"O contexto atual é diferente do contexto do comentário, clique para mostrar o contexto do comentário");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"O contexto atual é diferente do contexto da resposta, clique para mostrar o contexto da resposta");
-		m.put("Invalid access token", "Token de acesso inválido");
-		m.put("Rotate Access Token", "Girar Token de Acesso");
-		m.put("Rotate this access token and invalidate its current value?", "Girar este token de acesso e invalidar seu valor atual?");
-		m.put("Show Blame", "Mostrar Blame");
-		m.put("Specify a valid HTTP or HTTPS homepage", "Especifique uma página inicial HTTP ou HTTPS válida");
-		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
-			"Especifique até 20 URIs de redirecionamento exatos, usando HTTPS, HTTP loopback ou um esquema de aplicativo nativo");
+		m.put("Copy terminal text", "Copiar texto do terminal");
+		m.put("Could not copy to clipboard", "Não foi possível copiar para a área de transferência");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"Comentários inline e atualizações de threads não enviam e-mails para os observadores. Para notificá-los, publique um comentário na pull request, aprove ou solicite alterações");
+		m.put("Next changed file (J)", "Próximo arquivo alterado (J)");
+		m.put("Previous changed file (K)", "Arquivo alterado anterior (K)");
 	}
 		
 	@Override

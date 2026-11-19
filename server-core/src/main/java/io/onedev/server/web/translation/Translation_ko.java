@@ -1022,6 +1022,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy Files with SCP", "SCP로 파일 복사");
 		m.put("Copy Markdown", "마크다운 복사");
 		m.put("Copy Selected Issues To...", "선택된 이슈를 복사하여...");
+		m.put("Copy access token", "액세스 토큰 복사");
 		m.put("Copy as Markdown", "Markdown으로 복사");
 		m.put("Copy client ID", "클라이언트 ID 복사");
 		m.put("Copy client secret", "클라이언트 비밀 복사");
@@ -1036,6 +1037,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy this rule", "이 규칙을 복사");
 		m.put("Copy this spec", "이 사양을 복사");
 		m.put("Copy to clipboard", "클립보드에 복사");
+		m.put("Copy your access token now. It will not be shown again.", "지금 액세스 토큰을 복사하세요. 다시는 표시되지 않습니다.");
 		m.put("Count", "개수");
 		m.put("Coverage Statistics", "커버리지 통계");
 		m.put("Covered", "커버됨");
@@ -1120,6 +1122,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Current Iteration", "현재 반복");
 		m.put("Current Value", "현재 값");
 		m.put("Current avatar", "현재 아바타");
+		m.put("Current context is different from context of the action, click to show action context", 
+			"현재 컨텍스트가 작업의 컨텍스트와 다릅니다. 작업 컨텍스트를 보려면 클릭하세요.");
+		m.put("Current context is different from context of the comment, click to show comment context", 
+			"현재 컨텍스트가 댓글의 컨텍스트와 다릅니다. 댓글 컨텍스트를 보려면 클릭하세요.");
+		m.put("Current context is different from context of the reply, click to show reply context", 
+			"현재 컨텍스트가 답글의 컨텍스트와 다릅니다. 답글 컨텍스트를 보려면 클릭하세요.");
 		m.put("Current platform", "현재 플랫폼");
 		m.put("Current project", "현재 프로젝트");
 		m.put("Current step index / total number of steps", "현재 단계 인덱스 / 총 단계 수");
@@ -2014,8 +2022,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Inherit from parent", "상위에서 상속");
 		m.put("Inherited", "상속됨");
 		m.put("Initialization", "초기화");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
-			"인라인 댓글과 스레드 업데이트는 관찰자에게 이메일을 보내지 않습니다. 알림을 보내려면 풀 리퀘스트에 댓글을 게시하거나, 승인하거나, 변경 요청을 하거나, 커밋을 추가하세요. 리뷰 요청은 선택된 리뷰어에게도 알림을 보냅니다.");
 		m.put("Input Spec", "입력 사양");
 		m.put("Input URL", "입력 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "허용된 CORS 원본 입력, ENTER를 눌러 추가");
@@ -2038,6 +2044,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Interpreter", "인터프리터");
 		m.put("Invalid GPG signature", "유효하지 않은 GPG 서명");
 		m.put("Invalid PCRE syntax", "잘못된 PCRE 구문");
+		m.put("Invalid access token", "유효하지 않은 액세스 토큰");
 		m.put("Invalid build number: {0}", "잘못된 빌드 번호: {0}");
 		m.put("Invalid credentials", "잘못된 자격 증명");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "잘못된 날짜 범위, \"yyyy-MM-dd to yyyy-MM-dd\" 형식이어야 합니다");
@@ -3696,8 +3703,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Roles", "역할");
 		m.put("Root Projects", "루트 프로젝트");
 		m.put("Roslynator Report", "Roslynator 보고서");
+		m.put("Rotate Access Token", "액세스 토큰 회전");
 		m.put("Rotate Secret", "비밀 교체");
 		m.put("Rotate the client secret and revoke all authorizations?", "클라이언트 비밀을 교체하고 모든 권한을 취소하시겠습니까?");
+		m.put("Rotate this access token and invalidate its current value?", "이 액세스 토큰을 회전하고 현재 값을 무효화하시겠습니까?");
 		m.put("RubyGems(s)", "RubyGems(s)");
 		m.put("Ruff Report", "Ruff 보고서");
 		m.put("Rule will apply if user operating the tag matches criteria specified here", "태그를 운영하는 사용자가 여기에서 지정된 기준과 일치하는 경우 규칙이 적용됩니다");
@@ -3919,6 +3928,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Shortcuts", "바로가기");
 		m.put("Show / Create", "보기 / 생성");
 		m.put("Show Archived", "보관된 항목 보기");
+		m.put("Show Blame", "Blame 보기");
 		m.put("Show Branch/Tag", "브랜치/태그 보기");
 		m.put("Show Build Status", "빌드 상태 보기");
 		m.put("Show Closed", "닫힌 항목 보기");
@@ -4146,6 +4156,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify a secret to be used as access token to trigger job in above project", "위 프로젝트에서 작업을 트리거하기 위한 액세스 토큰으로 사용할 비밀을 지정하세요.");
 		m.put("Specify a secret whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
 			"위 프로젝트에 대한 캐시 업로드 권한이 있는 액세스 토큰 값을 가진 비밀을 지정합니다. 현재 또는 하위 프로젝트로 캐시를 업로드하고 기본 브랜치에서 빌드 커밋에 접근할 수 있는 경우 이 속성이 필요하지 않습니다");
+		m.put("Specify a valid HTTP or HTTPS homepage", "유효한 HTTP 또는 HTTPS 홈페이지를 지정하세요.");
 		m.put("Specify absolute path to the config file used by kubectl to access the cluster. Leave empty to have kubectl determining cluster access information automatically", 
 			"클러스터에 접근하기 위해 kubectl이 사용하는 구성 파일의 절대 경로를 지정합니다. 비워두면 kubectl이 클러스터 접근 정보를 자동으로 결정합니다");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, ${productName} will try to find the utility from system path", 
@@ -4430,6 +4441,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds. It counts from the time when job starts running", "초 단위로 타임아웃을 지정하세요. 작업이 실행되기 시작한 시점부터 계산됩니다");
 		m.put("Specify title of the issue", "이슈 제목을 지정하십시오.");
 		m.put("Specify uid:gid to run container as", "컨테이너를 실행할 uid:gid 지정");
+		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
+			"HTTPS, 루프백 HTTP, 또는 네이티브 앱 스키마를 사용하여 최대 20개의 정확한 리디렉션 URI를 지정하세요.");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack API의 URL을 지정하십시오. 예를 들어 <tt>http://localhost:8080/api</tt>.");
 		m.put("Specify user name of above machine for SSH authentication", "SSH 인증을 위한 위 머신의 사용자 이름을 지정하십시오.");
 		m.put("Specify user name of specified registry", "지정된 레지스트리의 사용자 이름을 지정하십시오.");
@@ -5609,21 +5622,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy access token", "액세스 토큰 복사");
-		m.put("Copy your access token now. It will not be shown again.", "지금 액세스 토큰을 복사하세요. 다시는 표시되지 않습니다.");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"현재 컨텍스트가 작업의 컨텍스트와 다릅니다. 작업 컨텍스트를 보려면 클릭하세요.");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"현재 컨텍스트가 댓글의 컨텍스트와 다릅니다. 댓글 컨텍스트를 보려면 클릭하세요.");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"현재 컨텍스트가 답글의 컨텍스트와 다릅니다. 답글 컨텍스트를 보려면 클릭하세요.");
-		m.put("Invalid access token", "유효하지 않은 액세스 토큰");
-		m.put("Rotate Access Token", "액세스 토큰 회전");
-		m.put("Rotate this access token and invalidate its current value?", "이 액세스 토큰을 회전하고 현재 값을 무효화하시겠습니까?");
-		m.put("Show Blame", "Blame 보기");
-		m.put("Specify a valid HTTP or HTTPS homepage", "유효한 HTTP 또는 HTTPS 홈페이지를 지정하세요.");
-		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
-			"HTTPS, 루프백 HTTP, 또는 네이티브 앱 스키마를 사용하여 최대 20개의 정확한 리디렉션 URI를 지정하세요.");
+		m.put("Copy terminal text", "터미널 텍스트 복사");
+		m.put("Could not copy to clipboard", "클립보드에 복사할 수 없습니다");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"인라인 댓글과 스레드 업데이트는 관찰자에게 이메일을 보내지 않습니다. 그들에게 알리려면 풀 리퀘스트에 댓글을 게시하거나, 승인하거나, 변경을 요청하세요");
+		m.put("Next changed file (J)", "다음 변경된 파일 (J)");
+		m.put("Previous changed file (K)", "이전 변경된 파일 (K)");
 	}
 		
 	@Override

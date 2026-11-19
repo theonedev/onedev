@@ -1022,6 +1022,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy Files with SCP", "SCPでファイルをコピー");
 		m.put("Copy Markdown", "Markdownをコピー");
 		m.put("Copy Selected Issues To...", "選択された課題を...にコピー");
+		m.put("Copy access token", "アクセス トークンをコピー");
 		m.put("Copy as Markdown", "Markdownとしてコピー");
 		m.put("Copy client ID", "クライアントIDをコピー");
 		m.put("Copy client secret", "クライアントシークレットをコピー");
@@ -1036,6 +1037,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy this rule", "このルールをコピー");
 		m.put("Copy this spec", "このスペックをコピー");
 		m.put("Copy to clipboard", "クリップボードにコピー");
+		m.put("Copy your access token now. It will not be shown again.", "今すぐアクセス トークンをコピーしてください。再表示はされません。");
 		m.put("Count", "カウント");
 		m.put("Coverage Statistics", "カバレッジ統計");
 		m.put("Covered", "カバー済み");
@@ -1120,6 +1122,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Current Iteration", "現在のイテレーション");
 		m.put("Current Value", "現在の値");
 		m.put("Current avatar", "現在のアバター");
+		m.put("Current context is different from context of the action, click to show action context", 
+			"現在のコンテキストはアクションのコンテキストと異なります。クリックしてアクションのコンテキストを表示してください。");
+		m.put("Current context is different from context of the comment, click to show comment context", 
+			"現在のコンテキストはコメントのコンテキストと異なります。クリックしてコメントのコンテキストを表示してください。");
+		m.put("Current context is different from context of the reply, click to show reply context", 
+			"現在のコンテキストは返信のコンテキストと異なります。クリックして返信のコンテキストを表示してください。");
 		m.put("Current platform", "現在のプラットフォーム");
 		m.put("Current project", "現在のプロジェクト");
 		m.put("Current step index / total number of steps", "現在のステップインデックス / 総ステップ数");
@@ -2014,8 +2022,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Inherit from parent", "親から継承");
 		m.put("Inherited", "継承済み");
 		m.put("Initialization", "初期化");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, request changes, or add commits. A review request also notifies the selected reviewer.", 
-			"インラインコメントやスレッドの更新ではウォッチャーにメール通知されません。通知するには、プルリクエストにコメントを投稿する、承認する、変更をリクエストする、またはコミットを追加してください。レビューリクエストも選択されたレビュアーに通知します。");
 		m.put("Input Spec", "入力仕様");
 		m.put("Input URL", "入力URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "許可されたCORSオリジンを入力し、ENTERを押して追加");
@@ -2038,6 +2044,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Interpreter", "インタープリター");
 		m.put("Invalid GPG signature", "無効なGPG署名");
 		m.put("Invalid PCRE syntax", "無効なPCRE構文");
+		m.put("Invalid access token", "無効なアクセス トークン");
 		m.put("Invalid build number: {0}", "無効なビルド番号: {0}");
 		m.put("Invalid credentials", "無効な資格情報");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "無効な日付範囲、\"yyyy-MM-dd to yyyy-MM-dd\"を期待しています");
@@ -3696,8 +3703,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Roles", "役割");
 		m.put("Root Projects", "ルートプロジェクト");
 		m.put("Roslynator Report", "Roslynator レポート");
+		m.put("Rotate Access Token", "アクセス トークンをローテーション");
 		m.put("Rotate Secret", "シークレットをローテーション");
 		m.put("Rotate the client secret and revoke all authorizations?", "クライアントシークレットをローテーションし、すべての認可を取り消しますか？");
+		m.put("Rotate this access token and invalidate its current value?", "このアクセス トークンをローテーションし、現在の値を無効にしますか？");
 		m.put("RubyGems(s)", "RubyGems(s)");
 		m.put("Ruff Report", "Ruff レポート");
 		m.put("Rule will apply if user operating the tag matches criteria specified here", "タグを操作するユーザーがここで指定された条件に一致する場合にルールが適用されます");
@@ -3919,6 +3928,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Shortcuts", "ショートカット");
 		m.put("Show / Create", "表示 / 作成");
 		m.put("Show Archived", "アーカイブを表示");
+		m.put("Show Blame", "責任追跡を表示");
 		m.put("Show Branch/Tag", "ブランチ/タグを表示");
 		m.put("Show Build Status", "ビルドステータスを表示");
 		m.put("Show Closed", "閉じたものを表示");
@@ -4146,6 +4156,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify a secret to be used as access token to trigger job in above project", "上記のプロジェクトでジョブをトリガーするためのアクセストークンとして使用するシークレットを指定します。");
 		m.put("Specify a secret whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
 			"上記プロジェクトのキャッシュアップロード権限を持つアクセス トークンとして使用するシークレットを指定します。現在または子プロジェクトにキャッシュをアップロードし、ビルドコミットがデフォルトブランチから到達可能な場合、このプロパティは不要です");
+		m.put("Specify a valid HTTP or HTTPS homepage", "有効な HTTP または HTTPS ホームページを指定してください");
 		m.put("Specify absolute path to the config file used by kubectl to access the cluster. Leave empty to have kubectl determining cluster access information automatically", 
 			"クラスターにアクセスするために kubectl が使用する設定ファイルの絶対パスを指定します。空欄の場合、kubectl はクラスターアクセス情報を自動的に決定します");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, ${productName} will try to find the utility from system path", 
@@ -4430,6 +4441,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds. It counts from the time when job starts running", "タイムアウトを秒単位で指定してください。ジョブが実行を開始した時点からカウントされます");
 		m.put("Specify title of the issue", "問題のタイトルを指定してください。");
 		m.put("Specify uid:gid to run container as", "コンテナを実行するためのuid:gidを指定してください");
+		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
+			"HTTPS、ループバック HTTP、またはネイティブアプリスキームを使用して、最大20個の正確なリダイレクトURIを指定してください");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack APIのURLを指定してください。例: <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "SSH認証のための上記マシンのユーザー名を指定してください。");
 		m.put("Specify user name of specified registry", "指定されたレジストリのユーザー名を指定してください。");
@@ -5609,21 +5622,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy access token", "アクセス トークンをコピー");
-		m.put("Copy your access token now. It will not be shown again.", "今すぐアクセス トークンをコピーしてください。再表示はされません。");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"現在のコンテキストはアクションのコンテキストと異なります。クリックしてアクションのコンテキストを表示してください。");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"現在のコンテキストはコメントのコンテキストと異なります。クリックしてコメントのコンテキストを表示してください。");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"現在のコンテキストは返信のコンテキストと異なります。クリックして返信のコンテキストを表示してください。");
-		m.put("Invalid access token", "無効なアクセス トークン");
-		m.put("Rotate Access Token", "アクセス トークンをローテーション");
-		m.put("Rotate this access token and invalidate its current value?", "このアクセス トークンをローテーションし、現在の値を無効にしますか？");
-		m.put("Show Blame", "責任追跡を表示");
-		m.put("Specify a valid HTTP or HTTPS homepage", "有効な HTTP または HTTPS ホームページを指定してください");
-		m.put("Specify up to 20 exact redirect URIs, using HTTPS, loopback HTTP, or a native app scheme", 
-			"HTTPS、ループバック HTTP、またはネイティブアプリスキームを使用して、最大20個の正確なリダイレクトURIを指定してください");
+		m.put("Copy terminal text", "ターミナルテキストをコピー");
+		m.put("Could not copy to clipboard", "クリップボードにコピーできませんでした");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"インラインコメントやスレッドの更新はウォッチャーにメール通知されません。通知するには、プルリクエストにコメントを投稿するか、承認するか、変更をリクエストしてください");
+		m.put("Next changed file (J)", "次の変更されたファイル (J)");
+		m.put("Previous changed file (K)", "前の変更されたファイル (K)");
 	}
 		
 	@Override
