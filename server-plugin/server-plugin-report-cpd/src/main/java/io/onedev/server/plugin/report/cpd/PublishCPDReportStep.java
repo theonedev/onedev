@@ -121,8 +121,8 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 							String url  = "/" + build.getProject().getPath() + "/~files/" + paramsEncoder.encodePageParameters(params);
 							String message = String.format(""
 									+ "Duplicated with '%s' at <a href='%s'>line %s - %s</a>", 
-									HtmlEscape.escapeHtml5(duplicateWith.blobPath), url, duplicateWith.location.getFromRow()+1, 
-									duplicateWith.location.getToRow()+1);
+									HtmlEscape.escapeHtml5(duplicateWith.blobPath), HtmlEscape.escapeHtml5(url),
+									duplicateWith.location.getFromRow()+1, duplicateWith.location.getToRow()+1);
 							CodeProblem problem = new CodeProblem(
 									Severity.LOW, 
 									new BlobTarget(duplication.blobPath, duplication.location), 
