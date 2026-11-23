@@ -1115,14 +1115,10 @@ public class TodResource {
 
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
-        var oldCommitId = ObjectId.fromString(pullRequest.getBaseCommitHash());
-        var newCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
-        var comparisonBase = pullRequestService.getComparisonBase(pullRequest, oldCommitId, newCommitId);
-
         var patchInfo = new HashMap<String, String>();
         patchInfo.put("projectId", pullRequest.getProject().getId().toString());
-        patchInfo.put("oldCommitHash", comparisonBase.name());
-        patchInfo.put("newCommitHash", newCommitId.name());        
+        patchInfo.put("oldCommitHash", pullRequest.getMergeBase().name());
+        patchInfo.put("newCommitHash", pullRequest.getLatestUpdate().getHeadCommitHash());
         return patchInfo;
     }
 
@@ -1183,12 +1179,10 @@ public class TodResource {
                 source.getProject(), source.getObjectId());
         if (baseCommitId == null)
             throw new NotAcceptableException("No common base for source and target branches");
-        request.setBaseCommitHash(baseCommitId.name());
 
         PullRequestUpdate update = new PullRequestUpdate();
         update.setRequest(request);
         update.setHeadCommitHash(source.getObjectName());
-        update.setTargetHeadCommitHash(target.getObjectName());
         request.getUpdates().add(update);
 
         var title = (String) data.remove("title");

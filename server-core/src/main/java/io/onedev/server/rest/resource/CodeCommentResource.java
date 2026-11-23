@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import io.onedev.server.model.*;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.validation.Valid;
@@ -25,25 +26,19 @@ import jakarta.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.ai.PullRequestHelper;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.PullRequestService;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.rest.RestProjectUtils;
@@ -64,29 +59,23 @@ import io.onedev.server.web.util.DiffPlanarRange;
 @Singleton
 public class CodeCommentResource {
 
-	private final CodeCommentService commentService;
-
-	private final AuditService auditService;
-
-	private final ProjectService projectService;
-
-	private final CodeCommentStatusChangeService statusChangeService;
-
-	private final GitService gitService;
-
-	private final PullRequestService pullRequestService;
+	@Inject
+	private CodeCommentService commentService;
 
 	@Inject
-	public CodeCommentResource(CodeCommentService commentService, AuditService auditService,
-			ProjectService projectService, CodeCommentStatusChangeService statusChangeService, GitService gitService,
-			PullRequestService pullRequestService) {
-		this.commentService = commentService;
-		this.auditService = auditService;
-		this.projectService = projectService;
-		this.statusChangeService = statusChangeService;
-		this.gitService = gitService;
-		this.pullRequestService = pullRequestService;
-	}
+	private AuditService auditService;
+
+	@Inject
+	private ProjectService projectService;
+
+	@Inject
+	private CodeCommentStatusChangeService statusChangeService;
+
+	@Inject
+	private GitService gitService;
+
+	@Inject
+	private PullRequestService pullRequestService;
 
 	@Api(order=100)
 	@Path("/{commentId}")
@@ -104,24 +93,26 @@ public class CodeCommentResource {
 	@GET
 	@Nullable
 	public Mark getMark(@PathParam("commentId") Long commentId,
-			@QueryParam("commitHash") @NotBlank @Api(description="Full hash of the commit to map the position to") String commitHash) {
+			@QueryParam("commitHash") @Api(description="Optionally specify full hash of the commit to map the position to") String commitHash) {
 		var comment = commentService.load(commentId);
 		var project = comment.getProject();
 		if (!SecurityUtils.canReadCode(project))
 			throw new UnauthorizedException();
-		validateCommit(project, commitHash, false);
 		var mark = comment.getMark();
-		var targetCommitHash = ObjectId.fromString(commitHash).name();
-		var newBlobIdent = new BlobIdent(targetCommitHash, mark.getPath(), FileMode.REGULAR_FILE.getBits());
-		var newLines = project.readLines(newBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
-		if (newLines == null)
-			return null;
-		var oldBlobIdent = new BlobIdent(mark.getCommitHash(), mark.getPath(), FileMode.REGULAR_FILE.getBits());
-		var oldLines = project.readLines(oldBlobIdent, WhitespaceOption.IGNORE_TRAILING, true);
-		if (oldLines == null)
-			return null;
-		var range = DiffUtils.mapRange(DiffUtils.mapLines(oldLines, newLines), mark.getRange());
-		return range != null ? new Mark(targetCommitHash, mark.getPath(), range) : null;
+		if (commitHash != null) {
+			var newBlobIdent = new BlobIdent(commitHash, mark.getPath(), FileMode.REGULAR_FILE.getBits());
+			var newLines = project.readLines(newBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
+			if (newLines == null)
+				return null;
+			var oldBlobIdent = new BlobIdent(mark.getCommitHash(), mark.getPath(), FileMode.REGULAR_FILE.getBits());
+			var oldLines = project.readLines(oldBlobIdent, WhitespaceOption.IGNORE_TRAILING, true);
+			if (oldLines == null)
+				return null;
+			var range = DiffUtils.mapRange(DiffUtils.mapLines(oldLines, newLines), mark.getRange());
+			return range != null ? new Mark(commitHash, mark.getPath(), range) : null;
+		} else {
+			return mark;
+		}
 	}
 
 	@Api(order=150, description="Get all replies of a code comment")
@@ -172,9 +163,9 @@ public class CodeCommentResource {
 		var request = context.getPullRequest();
 		if (request != null && !request.getProject().equals(project))
 			throw new NotAcceptableException("Pull request must belong to the comment project");
-		validateCommit(project, mark.getCommitHash(), false);
-		validateCommit(project, context.getOldCommitHash(), true);
-		validateCommit(project, context.getNewCommitHash(), false);
+		validateCommit(project, request, mark.getCommitHash());
+		validateCommit(project, request, context.getOldCommitHash());
+		validateCommit(project, request, context.getNewCommitHash());
 		if (!mark.getCommitHash().equals(context.getOldCommitHash())
 				&& !mark.getCommitHash().equals(context.getNewCommitHash())) {
 			throw new NotAcceptableException("Comment commit must be one of the comparison commits");
@@ -207,43 +198,22 @@ public class CodeCommentResource {
 	}
 
 	private void validateDiffRange(Project project, Mark mark, CompareContext context) {
-		var oldCommitId = ObjectId.fromString(context.getOldCommitHash());
-		var newCommitId = ObjectId.fromString(context.getNewCommitHash());
 		var leftSide = mark.getCommitHash().equals(context.getOldCommitHash());
-		for (var entry : gitService.diff(project, oldCommitId, newCommitId)) {
-			var path = leftSide ? entry.getOldPath() : entry.getNewPath();
-			if (mark.getPath().equals(path)
-					&& entry.getChangeType() != (leftSide ? ChangeType.ADD : ChangeType.DELETE)) {
-				var changeType = entry.getChangeType();
-				if (changeType == ChangeType.RENAME && entry.getOldPath().equals(entry.getNewPath()))
-					changeType = ChangeType.MODIFY;
-				var oldBlobIdent = GitUtils.getOldBlobIdent(entry, oldCommitId.name());
-				var newBlobIdent = GitUtils.getNewBlobIdent(entry, newCommitId.name());
-				var blobChange = new BlobChange(changeType, oldBlobIdent, newBlobIdent, context.getWhitespaceOption()) {
-
-					@Serial
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Project getProject() {
-						return project;
-					}
-
-				};
-				if (blobChange.isVisible(new DiffPlanarRange(leftSide, mark.getRange())))
-					return;
-			}
-		}
-		throw new NotAcceptableException("Comment range must be within a diff hunk");
+		var range = new DiffPlanarRange(leftSide, mark.getRange());
+		var changes = PullRequestHelper.findDiffChanges(project, context.getOldCommitId(), context.getNewCommitId(),
+				mark.getPath(), leftSide, context.getWhitespaceOption());
+		if (changes.noneMatch(it -> it.isVisible(range)))
+			throw new NotAcceptableException("Comment range must be within a diff hunk");
 	}
 
-	private void validateCommit(Project project, String commitHash, boolean allowZero) {
+	private void validateCommit(Project project, @Nullable PullRequest request, String commitHash) {
 		if (!ObjectId.isId(commitHash))
 			throw new NotAcceptableException("A full commit hash is required");
-		if (allowZero && commitHash.equals(ObjectId.zeroId().name()))
-			return;
-		if (project.getRevCommit(commitHash, false) == null)
+		var commitId = ObjectId.fromString(commitHash);
+		if (!gitService.hasObjects(project, commitId))
 			throw new NotAcceptableException("Commit does not exist in the comment project: " + commitHash);
+		if (request != null && !request.isRelatedCommit(commitId))
+			throw new NotAcceptableException("Commit does not belong to pull request: " + commitId);
 	}
 
 	@Api(order=250, description="Update the content of an existing code comment")
@@ -287,7 +257,6 @@ public class CodeCommentResource {
 			change.setComment(comment);
 			change.setUser(SecurityUtils.getUser(subject));
 			change.setResolved(resolved);
-			change.setCompareContext(comment.getCompareContext());
 			statusChangeService.create(change, note);
 		}
 		return Response.ok().build();

@@ -2,6 +2,7 @@ package io.onedev.server.model.support.pullrequest;
 
 import io.onedev.server.model.PullRequest;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -71,6 +72,19 @@ public class MergePreview implements Serializable {
 
 	public void setMergeCommitHash(String mergeCommitHash) {
 		this.mergeCommitHash = mergeCommitHash;
+	}
+
+	public ObjectId getTargetHeadCommitId() {
+		return ObjectId.fromString(targetHeadCommitHash);
+	}
+
+	public ObjectId getHeadCommitId() {
+		return ObjectId.fromString(headCommitHash);
+	}
+
+	@Nullable
+	public ObjectId getMergeCommitId() {
+		return mergeCommitHash != null? ObjectId.fromString(mergeCommitHash):  null;
 	}
 
 	public boolean isUpToDate(PullRequest request) {

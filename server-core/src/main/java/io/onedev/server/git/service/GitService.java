@@ -98,6 +98,7 @@ public interface GitService {
 	
 	void deleteRefs(Project project, Collection<String> refs);
 	
+	/** With {@code useOursOnConflict}, use the source version of each conflicting path. */
 	@Nullable
 	ObjectId merge(Project project, ObjectId targetCommitId, ObjectId sourceCommitId,
 			boolean squash, PersonIdent committer, PersonIdent author, String commitMessage,
@@ -120,6 +121,10 @@ public interface GitService {
 	
 	Collection<String> getChangedFiles(Project project, ObjectId oldCommitId, ObjectId newCommitId, 
 			@Nullable Map<String, String> gitEnvs);
+
+	/** Compare the two merge results, taking the target version of each conflicting path. */
+	Collection<String> getChangedFilesAfterMerge(Project project, ObjectId oldCommitId,
+												 ObjectId newCommitId, ObjectId targetCommitId);
 
 	@Nullable
 	ObjectId getMergeBase(Project project1, ObjectId commitId1, Project project2, ObjectId commitId2);

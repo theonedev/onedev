@@ -153,15 +153,12 @@ public class CreatePullRequestStep extends ServerSideStep {
 					if (baseCommitId.name().equals(source.getObjectName())) {
 						logger.warning("Pull request will not be created as target branch is already up to date with source branch");
 					} else {
-						pullRequest.setBaseCommitHash(baseCommitId.name());
-	
 						var update = new PullRequestUpdate();
 						pullRequest.getUpdates().add(update);
 						pullRequest.setUpdates(pullRequest.getUpdates());
 						update.setRequest(pullRequest);
 						update.setHeadCommitHash(source.getObjectName());
-						update.setTargetHeadCommitHash(pullRequest.getTarget().getObjectName());						
-							
+
 						var titleAndDescription = titleAndDescritpionProvider.getTitleAndDescription(pullRequest);
 						
 						pullRequest.setTitle(titleAndDescription.getLeft());

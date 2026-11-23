@@ -16,11 +16,6 @@ import java.util.Map;
 
 public interface BlobAnnotationSupport extends Serializable {
 
-	@Nullable
-	DiffPlanarRange getMarkRange();
-
-	String getMarkUrl(DiffPlanarRange markRange);
-
 	Map<CodeComment, PlanarRange> getOldComments();
 
 	Map<CodeComment, PlanarRange> getNewComments();
@@ -33,17 +28,11 @@ public interface BlobAnnotationSupport extends Serializable {
 
 	Map<Integer, CoverageStatus> getNewCoverages();
 
-	DiffPlanarRange getCommentRange(CodeComment comment);
-
 	@Nullable
 	Pair<CodeComment, DiffPlanarRange> getOpenComment();
 
-	void onOpenComment(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange commentRange);
+	void onOpenComment(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange range);
 
-	void onAddComment(AjaxRequestTarget target, DiffPlanarRange commentRange);
-
-	void onMark(AjaxRequestTarget target, DiffPlanarRange markRange);
-
-	Component getCommentContainer();
+	void onAddComment(AjaxRequestTarget target, DiffPlanarRange range);
 
 }

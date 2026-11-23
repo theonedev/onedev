@@ -70,7 +70,7 @@ public abstract class PullRequestTrigger extends JobTrigger {
 			Repository repository = OneDev.getInstance(ProjectService.class)
 					.getRepository(request.getTargetProject().getId());
 			Collection<String> changedFiles = GitUtils.getChangedFiles(repository, 
-					request.getBaseCommit(), request.getLatestUpdate().getHeadCommit());
+					request.getMergeBase(), request.getLatestUpdate().getHeadCommit());
 			PatternSet patternSet = PatternSet.parse(getPaths());
 			Matcher matcher = new PathMatcher();
 			for (String changedFile: changedFiles) {

@@ -9,6 +9,13 @@
 .blob-text-diff>.text-diff {
 	border-spacing: 0;
 }
+.blob-text-diff>.selection-popover>.content>.invalid {
+	box-sizing: border-box;
+	width: max-content;
+	max-width: calc(100vw - 2rem);
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
 .blob-text-diff>.text-diff>tbody>tr>td.number>.coverage {
 	display: block;
 	position: absolute;

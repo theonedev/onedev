@@ -608,7 +608,7 @@ onedev.server.sourceView = {
 			onedev.server.sourceView.highlightCommentTrigger();				
 		}
 		$(window).resize();
-		onedev.server.sourceView.restoreMark();
+		onedev.server.sourceView.clearMark();
 	},
 	onAddComment: function(commentRange) {
 		$(".popover").popover("hide");
@@ -709,7 +709,7 @@ onedev.server.sourceView = {
 			onedev.server.codemirror.clearMark(cm);
 	},
 	clearMark: function() {
-		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
 		onedev.server.codemirror.clearMark(cm);
 	},
 	blame: function(blameInfos) {

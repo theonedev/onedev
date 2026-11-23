@@ -11,9 +11,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
+import io.onedev.server.model.support.CompareContext;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -30,12 +30,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.ProjectBelonging;
@@ -47,9 +45,9 @@ import io.onedev.server.xodus.VisitInfoService;
 @Entity
 @Table(indexes={
 		@Index(columnList="project_id"), @Index(columnList="user_id"),
-		@Index(columnList="pullRequest_id"),
-		@Index(columnList=Mark.PROP_COMMIT_HASH), @Index(columnList=Mark.PROP_PATH), 
-		@Index(columnList=PROP_CREATE_DATE), @Index(columnList= LastActivity.COLUMN_DATE)})
+		@Index(columnList="pullRequest_id"), @Index(columnList=Mark.PROP_COMMIT_HASH),
+		@Index(columnList=Mark.PROP_PATH), @Index(columnList=PROP_CREATE_DATE),
+		@Index(columnList= LastActivity.COLUMN_DATE)})
 public class CodeComment extends ProjectBelonging implements AttachmentStorageSupport {
 	
 	@Serial
@@ -269,25 +267,11 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 		}
 	}
 	
-	public boolean isValid() {
-		return getMissingCommits().isEmpty();
-	}
-
-	public Collection<ObjectId> getMissingCommits() {
+	public boolean isCommitMissing() {
 		GitService gitService = OneDev.getInstance(GitService.class);
-		Set<ObjectId> objIds = Sets.newHashSet(ObjectId.fromString(mark.getCommitHash()));
-
-		ObjectId oldCommitId= ObjectId.fromString(compareContext.getOldCommitHash());
-		if (!oldCommitId.equals(ObjectId.zeroId()))
-			objIds.add(oldCommitId);
-
-		ObjectId newCommitId= ObjectId.fromString(compareContext.getNewCommitHash());
-		if (!newCommitId.equals(ObjectId.zeroId()))
-			objIds.add(newCommitId);
-
-		return gitService.filterNonExistants(project, objIds);
+		return !gitService.hasObjects(project, mark.getCommitId());
 	}
-	
+
 	public static String getChangeObservable(Long commentId) {
 		return CodeComment.class.getName() + ":" + commentId;
 	}

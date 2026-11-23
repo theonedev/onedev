@@ -11,7 +11,6 @@
 				<span wicket:id="userName" class="user-name"></span>
 				<span wicket:id="action" class="action"></span>
 				<span wicket:id="date" class="date"></span>
-				<a wicket:id="context" class="link-gray"><wicket:svg href="warning" class="icon icon-sm"/></a>					
 				<a wicket:id="anchor" class="reply-anchor ml-2"><wicket:svg href="link" class="icon rotate-45"/></a>
 			</div>
 			<div class="body">
@@ -22,9 +21,15 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="commentOrReplyEditFrag">
 		<form wicket:id="form" class="code-comment-editor no-autofocus leave-confirm flex-grow-1">
-			<div wicket:id="notificationWarning" class="alert alert-notice alert-light-warning mb-3"></div>
 			<div wicket:id="feedback" class="feedback"></div>
-			<div wicket:id="content" class="mb-3"></div>
+			<div class="mb-3">
+				<div wicket:id="content"></div>
+				<wicket:enclosure child="notificationWarning">
+					<div class="text-muted font-size-sm mt-2">
+						<wicket:svg href="bulb" class="icon icon-sm mr-1" aria-hidden="true"/> <span wicket:id="notificationWarning"></span>
+					</div>
+				</wicket:enclosure>
+			</div>
 			<button wicket:id="save" class="btn btn-sm btn-primary mr-1"><span wicket:id="label"/></button>
 			<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
 		</form>
@@ -41,7 +46,6 @@
 			<span wicket:id="userName" class="user-name"></span>
 			<span wicket:id="action" class="action"></span>
 			<span wicket:id="date" class="date"></span>
-			<a wicket:id="context" class="link-gray"><wicket:svg href="warning" class="icon icon-sm"/></a>					
 		</div>
 	</wicket:fragment>
 </wicket:panel>

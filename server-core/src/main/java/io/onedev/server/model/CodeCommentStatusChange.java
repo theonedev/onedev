@@ -1,23 +1,13 @@
 package io.onedev.server.model;
 
+import jakarta.persistence.*;
+
 import java.io.Serial;
 import java.util.Date;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
-import io.onedev.server.model.support.CompareContext;
-
 @Entity
 @Table(indexes={
-		@Index(columnList="comment_id"), @Index(columnList="user_id"),
-		@Index(columnList="pullRequest_id")})
+		@Index(columnList="comment_id"), @Index(columnList="user_id")})
 public class CodeCommentStatusChange extends AbstractEntity {
 
 	@Serial
@@ -29,8 +19,6 @@ public class CodeCommentStatusChange extends AbstractEntity {
 
 	public static final String PROP_DATE = "date";
 
-	public static final String PROP_COMPARE_CONTEXT = "compareContext";
-	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private CodeComment comment;
@@ -43,10 +31,7 @@ public class CodeCommentStatusChange extends AbstractEntity {
 	private Date date = new Date();
 	
 	private boolean resolved;
-	
-	@Embedded
-	private CompareContext compareContext;
-	
+
 	public CodeComment getComment() {
 		return comment;
 	}
@@ -77,14 +62,6 @@ public class CodeCommentStatusChange extends AbstractEntity {
 
 	public void setResolved(boolean resolved) {
 		this.resolved = resolved;
-	}
-
-	public CompareContext getCompareContext() {
-		return compareContext;
-	}
-
-	public void setCompareContext(CompareContext compareContext) {
-		this.compareContext = compareContext;
 	}
 
 	public String getAnchor() {

@@ -8,8 +8,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.onedev.server.model.*;
+import io.onedev.server.model.support.CompareContext;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -26,12 +28,9 @@ import io.onedev.server.exception.NotFoundException;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.DiffEntryFacade;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -143,47 +142,21 @@ public class PullRequestHelper {
             throw new NotAcceptableException("'fromLineNumber' must be less than or equal to 'toLineNumber'");
 
         var project = pullRequest.getProject();
-        var pullRequestService = OneDev.getInstance(PullRequestService.class);
-        var gitService = OneDev.getInstance(GitService.class);
         var codeCommentService = OneDev.getInstance(CodeCommentService.class);
 
-        var oldCommitId = ObjectId.fromString(pullRequest.getBaseCommitHash());
-        var newCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
-        var comparisonBase = pullRequestService.getComparisonBase(pullRequest, oldCommitId, newCommitId);
+        var oldCommitId = pullRequest.getMergeBase();
+        var newCommitId = pullRequest.getLatestUpdate().getHeadCommitId();
 
         var newBlobIdent = new BlobIdent(newCommitId.name(), filePath, FileMode.REGULAR_FILE.getBits());
-        var lines = project.readLines(newBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
+        var lines = project.readLines(newBlobIdent, WhitespaceOption.DO_NOT_IGNORE, false);
         if (lines == null)
             throw new NotFoundException("File not found or not a text file in head commit: " + filePath);
         if (toLineNumber > lines.size())
             throw new NotAcceptableException("'toLineNumber' must not exceed number of lines in the file");
 
-        DiffEntryFacade matchingEntry = null;
-        for (var entry : gitService.diff(project, comparisonBase, newCommitId)) {
-            if (filePath.equals(entry.getNewPath()) && entry.getChangeType() != ChangeType.DELETE) {
-                matchingEntry = entry;
-                break;
-            }
-        }
-        if (matchingEntry == null)
-            throw new NotAcceptableException("Cannot add code comment outside of diff: '" + filePath + "' is not changed");
-
-        var changeType = matchingEntry.getChangeType();
-        if (changeType == ChangeType.RENAME && matchingEntry.getOldPath().equals(matchingEntry.getNewPath()))
-            changeType = ChangeType.MODIFY;
-        var oldDiffBlobIdent = GitUtils.getOldBlobIdent(matchingEntry, comparisonBase.name());
-        var newDiffBlobIdent = GitUtils.getNewBlobIdent(matchingEntry, newCommitId.name());
-        var blobChange = new BlobChange(changeType, oldDiffBlobIdent, newDiffBlobIdent, WhitespaceOption.IGNORE_TRAILING) {
-
-            @Serial
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Project getProject() {
-                return project;
-            }
-
-        };
+        var blobChange = findDiffChanges(project, oldCommitId, newCommitId, filePath, false,
+                WhitespaceOption.DO_NOT_IGNORE).findFirst().orElseThrow(() ->
+                new NotAcceptableException("Cannot add code comment outside of diff: '" + filePath + "' is not changed"));
 
         var range = new PlanarRange(fromLineNumber - 1, 0, toLineNumber - 1, lines.get(toLineNumber - 1).length());
         if (!blobChange.isVisible(new DiffPlanarRange(false, range)))
@@ -210,6 +183,33 @@ public class PullRequestHelper {
         return comment;
     }
 
+    public static Stream<BlobChange> findDiffChanges(Project project, ObjectId oldCommitId, ObjectId newCommitId,
+            String filePath, boolean leftSide, WhitespaceOption whitespaceOption) {
+        var gitService = OneDev.getInstance(GitService.class);
+        var excludedType = leftSide ? ChangeType.ADD : ChangeType.DELETE;
+        return gitService.diff(project, oldCommitId, newCommitId).stream()
+                .filter(it -> it.getChangeType() != excludedType
+                        && filePath.equals(leftSide ? it.getOldPath() : it.getNewPath()))
+                .map(it -> {
+                    var changeType = it.getChangeType();
+                    if (changeType == ChangeType.RENAME && it.getOldPath().equals(it.getNewPath()))
+                        changeType = ChangeType.MODIFY;
+                    var oldBlobIdent = GitUtils.getOldBlobIdent(it, oldCommitId.name());
+                    var newBlobIdent = GitUtils.getNewBlobIdent(it, newCommitId.name());
+                    return new BlobChange(changeType, oldBlobIdent, newBlobIdent, whitespaceOption) {
+
+                        @Serial
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public Project getProject() {
+                            return project;
+                        }
+
+                    };
+                });
+    }
+
     public static List<Map<String, Object>> getCodeComments(PullRequest pullRequest) {
         var project = pullRequest.getProject();
         var headCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
@@ -230,10 +230,10 @@ public class PullRequestHelper {
                         var key = new ImmutablePair<>(commentCommitHash, path);
                         var lineMapping = lineMappingCache.computeIfAbsent(key, k -> {
                             BlobIdent newBlobIdent = new BlobIdent(headCommitId.name(), path, FileMode.REGULAR_FILE.getBits());
-                            List<String> newLines = project.readLines(newBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
+                            List<String> newLines = project.readLines(newBlobIdent, WhitespaceOption.DO_NOT_IGNORE, false);
                             if (newLines != null) {
                                 BlobIdent oldBlobIdent = new BlobIdent(commentCommitHash, path, FileMode.REGULAR_FILE.getBits());
-                                List<String> oldLines = project.readLines(oldBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
+                                List<String> oldLines = project.readLines(oldBlobIdent, WhitespaceOption.DO_NOT_IGNORE, false);
                                 if (oldLines != null)
                                     return DiffUtils.mapLines(oldLines, newLines);
                             }

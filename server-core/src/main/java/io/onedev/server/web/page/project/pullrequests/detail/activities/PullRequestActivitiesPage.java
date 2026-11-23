@@ -38,9 +38,12 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -85,6 +88,9 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 	@Inject
 	private PullRequestCommentService pullRequestCommentService;
+
+	@Inject
+	private ObjectMapper objectMapper;
 
 	private boolean showComments = true;
 	
@@ -139,8 +145,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		}
 
 		if (showCommits) {
-			for (PullRequestUpdate update: request.getUpdates())
-				otherActivities.add(new PullRequestUpdateActivity(update));
+			for (PullRequestUpdate update: request.getUpdates()) {
+				if (!update.getCommits().isEmpty())
+					otherActivities.add(new PullRequestUpdateActivity(update));
+			}
 		}
 
 		if (showChangeHistory) {
@@ -405,6 +413,17 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				PullRequest request = getPullRequest();
 				Project project = request.getTargetProject();
 				project.cacheCommitStatuses(buildService.queryStatus(project, commitIds));
+
+				if (showCommits) {
+					var commitHashes = request.getCommits().stream().map(RevCommit::name).toList();
+					try {
+						handler.appendJavaScript(String.format("onedev.server.pullRequestDetail.markRebasedCommits('%s', %s, %s);",
+								container.getMarkupId(), objectMapper.writeValueAsString(commitHashes),
+								objectMapper.writeValueAsString(_T("This commit is rebased"))));
+					} catch (JsonProcessingException e) {
+						throw new RuntimeException(e);
+					}
+				}
 			}
 			
 		});

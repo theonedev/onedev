@@ -1,10 +1,10 @@
 package io.onedev.server.web.page.project.codecomments;
 
 import static io.onedev.server.web.translation.Translation._T;
-import static java.util.stream.Collectors.toList;
 
 import java.text.MessageFormat;
 
+import jakarta.inject.Inject;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -18,11 +18,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.model.CodeComment;
@@ -38,7 +36,10 @@ import io.onedev.server.web.util.ConfirmClickModifier;
 public class InvalidCodeCommentPage extends ProjectPage {
 
 	public static final String PARAM_COEDE_COMMENT = "code-comment";
-	
+
+	@Inject
+	private CodeCommentService codeCommentService;
+
 	private IModel<CodeComment> codeCommentModel;
 	
 	public InvalidCodeCommentPage(PageParameters params) {
@@ -49,8 +50,8 @@ public class InvalidCodeCommentPage extends ProjectPage {
 			@Override
 			protected CodeComment load() {
 				Long codeCommentId = params.get(PARAM_COEDE_COMMENT).toLong();
-				CodeComment codeComment = OneDev.getInstance(CodeCommentService.class).load(codeCommentId);
-				Preconditions.checkState(!codeComment.isValid());
+				CodeComment codeComment = codeCommentService.load(codeCommentId);
+				Preconditions.checkState(codeComment.isCommitMissing());
 				return codeComment;
 			}
 
@@ -66,7 +67,6 @@ public class InvalidCodeCommentPage extends ProjectPage {
 		super.onInitialize();
 		
 		var comment = getCodeComment();
-		add(new Label("missingCommits", StringUtils.join(comment.getMissingCommits().stream().map(ObjectId::getName).collect(toList()), " ")));
 		add(new Label("commentFile", comment.getMark().getPath()));
 		add(new MarkdownViewer("commentContent", Model.of(comment.getContent()), null));
 		

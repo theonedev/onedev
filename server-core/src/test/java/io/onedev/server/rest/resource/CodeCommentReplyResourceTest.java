@@ -17,7 +17,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.rest.resource.CodeCommentReplyResource.CodeCommentReplyCreateData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.CodeCommentReplyService;
@@ -41,7 +40,6 @@ class CodeCommentReplyResourceTest extends HibernateValidationTestSupport {
 		comment = new CodeComment();
 		comment.setId(1L);
 		comment.setProject(new Project());
-		comment.setCompareContext(new CompareContext());
 		user = new User();
 		user.setId(2L);
 		when(comments.load(1L)).thenReturn(comment);
@@ -59,7 +57,7 @@ class CodeCommentReplyResourceTest extends HibernateValidationTestSupport {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	void createsReplyWithAuthenticatedAuthorAndParentContext(boolean scopedToken) {
+	void createsReplyWithAuthenticatedAuthorAndParentComment(boolean scopedToken) {
 		if (scopedToken)
 			security.when(SecurityUtils::getAuthUser).thenReturn(null);
 		var data = createData();
@@ -67,7 +65,6 @@ class CodeCommentReplyResourceTest extends HibernateValidationTestSupport {
 			CodeCommentReply reply = invocation.getArgument(0);
 			assertSame(comment, reply.getComment());
 			assertSame(user, reply.getUser());
-			assertSame(comment.getCompareContext(), reply.getCompareContext());
 			assertEquals(data.getContent(), reply.getContent());
 			assertNotNull(reply.getDate());
 			reply.setId(3L);
@@ -89,7 +86,7 @@ class CodeCommentReplyResourceTest extends HibernateValidationTestSupport {
 	}
 
 	@Test
-	void readsAndUpdatesReplyWithoutChangingAuthorOrContext() {
+	void readsAndUpdatesReplyWithoutChangingAuthorOrParentComment() {
 		var reply = existingReply();
 		assertSame(reply, resource.getReply(3L));
 		security.when(() -> SecurityUtils.canModifyOrDelete(reply)).thenReturn(true);
@@ -100,7 +97,6 @@ class CodeCommentReplyResourceTest extends HibernateValidationTestSupport {
 		assertEquals("Updated", reply.getContent());
 		assertSame(comment, reply.getComment());
 		assertSame(user, reply.getUser());
-		assertSame(comment.getCompareContext(), reply.getCompareContext());
 		assertEquals(date, reply.getDate());
 		try (var response = resource.updateReply(3L, "Updated")) {
 			assertEquals(200, response.getStatus());
@@ -160,7 +156,6 @@ class CodeCommentReplyResourceTest extends HibernateValidationTestSupport {
 		reply.setComment(comment);
 		reply.setUser(user);
 		reply.setContent("Original");
-		reply.setCompareContext(comment.getCompareContext());
 		when(replies.load(3L)).thenReturn(reply);
 		return reply;
 	}

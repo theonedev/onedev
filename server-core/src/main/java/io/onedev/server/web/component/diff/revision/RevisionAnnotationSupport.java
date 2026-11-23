@@ -17,16 +17,6 @@ import java.util.Map;
 public interface RevisionAnnotationSupport extends Serializable {
 
     @Nullable
-    DiffPlanarRange getMark();
-
-    @Nullable
-    String getMarkUrl(String blobPath, DiffPlanarRange mark);
-
-    void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark);
-
-    void onUnmark(AjaxRequestTarget target);
-
-    @Nullable
     CodeComment getOpenComment();
 
     Map<CodeComment, PlanarRange> getOldComments(String blobPath);
@@ -41,16 +31,24 @@ public interface RevisionAnnotationSupport extends Serializable {
 
     Map<Integer, CoverageStatus> getNewCoverages(String blobPath);
 
-    void onCommentOpened(AjaxRequestTarget target, CodeComment comment, String blobPath);
+    /**
+     * Caller should clear file and mark from url while add comment id to url to
+     * make file and mark only determined by current comment
+     *
+     * @param target
+     * @param comment
+     */
+    void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
 
-    void onCommentClosed(AjaxRequestTarget target);
+    /**
+     * @param target
+     * @param blobPath current file when comment is open. We should add this file
+     *                 to url when remove comment id from url to make sure that
+     *                 current file is still selected when refresh the page after
+     *                 comment is closed
+     */
+    void onCommentClosed(AjaxRequestTarget target, String blobPath);
 
-    void onAddComment(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark);
-
-    void onSaveComment(CodeComment comment);
-
-    void onSaveCommentReply(CodeCommentReply reply);
-
-    void onSaveCommentStatusChange(CodeCommentStatusChange change, @Nullable String note);
+    void onAddComment(AjaxRequestTarget target);
 
 }

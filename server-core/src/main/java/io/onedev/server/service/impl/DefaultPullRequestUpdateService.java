@@ -61,21 +61,15 @@ public class DefaultPullRequestUpdateService extends BaseEntityService<PullReque
 	public void checkUpdate(PullRequest request) {
 		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			request.getAutoMerge().setEnabled(false);
-			ObjectId mergeBase = gitService.getMergeBase(
-					request.getTargetProject(), request.getTarget().getObjectId(), 
-					request.getSourceProject(), request.getSource().getObjectId());
-			if (mergeBase != null) {
-				PullRequestUpdate update = new PullRequestUpdate();
-				update.setRequest(request);
-				update.setHeadCommitHash(request.getSource().getObjectName());
-				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
-				request.getUpdates().add(update);
-				create(update);
+			PullRequestUpdate update = new PullRequestUpdate();
+			update.setRequest(request);
+			update.setHeadCommitHash(request.getSource().getObjectName());
+			request.getUpdates().add(update);
+			create(update);
 
-				gitService.updateRef(request.getTargetProject(), request.getHeadRef(), 
-						ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()), null);
-				listenerRegistry.post(new PullRequestUpdated(update));
-			}
+			gitService.updateRef(request.getTargetProject(), request.getHeadRef(),
+					ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()), null);
+			listenerRegistry.post(new PullRequestUpdated(update));
 		}
 	}
 	

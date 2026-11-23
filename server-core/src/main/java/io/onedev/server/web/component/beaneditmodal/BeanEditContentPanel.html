@@ -5,10 +5,14 @@
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
-			<div wicket:id="warning" class="alert alert-notice alert-light-warning mb-3"></div>
 			<div wicket:id="description" class="alert alert-light alert-notice editable-description"></div>
 			<div wicket:id="feedback"></div>
-            <div wicket:id="editor"></div>
+			<div wicket:id="editor"></div>
+			<wicket:enclosure child="warning">
+				<div class="text-muted font-size-sm mt-2">
+					<wicket:svg href="bulb" class="icon icon-sm mr-1" aria-hidden="true"/> <span wicket:id="warning"></span>
+				</div>
+			</wicket:enclosure>
 		</div>
 		<div class="modal-footer">
 			<button wicket:id="ok" class="btn btn-primary"><wicket:t>Ok</wicket:t></button>

@@ -77,8 +77,6 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequest.Status;
@@ -87,7 +85,6 @@ import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.Dao;
@@ -182,7 +179,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		@Override
 		protected Collection<CodeComment> load() {
 			return codeCommentService.query(projectModel.getObject(), 
-					getPullRequest().getBaseCommit(), source.getObjectId());
+					getPullRequest().getMergeBase(), source.getObjectId());
 		}
 		
 	};
@@ -191,13 +188,13 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	
 	private DiffPlanarRange mark;
 
-	private String file;
+	private String blobPath;
 
 	private boolean blame;
 	
 	private String pathFilter;
 	
-	private WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
+	private WhitespaceOption whitespaceOption;
 	
 	private Component assignToMeLink;
 	
@@ -285,32 +282,31 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			pullRequestRef.set(pullRequestService.findEffective(target, source));
 		
 		if (pullRequestRef.get() == null) {
-			ObjectId baseCommitId;
+			ObjectId mergeBase;
 			if (target.getBranch() != null && source.getBranch() != null) {
-				baseCommitId = gitService.getMergeBase(
-						target.getProject(), target.getObjectId(), 
+				mergeBase = gitService.getMergeBase(
+						target.getProject(), target.getObjectId(),
 						source.getProject(), source.getObjectId());
 			} else {
-				baseCommitId = null;
+				mergeBase = null;
 			}
-			if (baseCommitId != null) {
+
+			if (mergeBase != null) {
 				PullRequest request = new PullRequest();
 				pullRequestRef.set(request);
 				request.setTarget(target);
 				request.setSource(source);
 				request.setSubmitter(currentUser);
 				request.setWorkInProgress(request.getSourceBranchSemantic().isWorkInProgress());
-				
-				request.setBaseCommitHash(baseCommitId.name());
-				if (request.getBaseCommitHash().equals(source.getObjectName())) 
+
+				if (mergeBase.equals(source.getObjectId()))
 					request.setStatus(Status.MERGED);
-	
+
 				PullRequestUpdate update = new PullRequestUpdate();
 				request.getUpdates().add(update);
 				request.setUpdates(request.getUpdates());
 				update.setRequest(request);
 				update.setHeadCommitHash(source.getObjectName());
-				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
 				var commits = update.getCommits();
 				if (commits.size() == 1) {
@@ -329,10 +325,9 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 					assignment.setUser(assignee);
 					request.getAssignments().add(assignment);
 				}
-				
+
 				request.setMergeStrategy(target.getProject().findDefaultPullRequestMergeStrategy());
 			}
-			
 			requestModel = new LoadableDetachableModel<>() {
 
 				@Override
@@ -358,7 +353,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			};
 		}
 		requestModel.setObject(pullRequestRef.get());
-		
 	}
 	
 	private PullRequest getPullRequest() {
@@ -509,7 +503,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			protected CommitQuery getBaseQuery() {
 				PullRequest request = NewPullRequestPage.this.getPullRequest();
 				List<Revision> revisions = new ArrayList<>();
-				revisions.add(new Revision(COMMIT, request.getBaseCommitHash(), true));
+				revisions.add(new Revision(COMMIT, request.getMergeBase().name(), true));
 				revisions.add(new Revision(COMMIT, request.getLatestUpdate().getHeadCommitHash(), false));
 				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
 			}
@@ -572,6 +566,9 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			@Override
 			public void setObject(String object) {
 				pathFilter = object;
+				commentId = null;
+				blobPath = null;
+				mark = null;
 			}
 			
 		};
@@ -583,7 +580,13 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 			@Override
 			public WhitespaceOption getObject() {
-				return whitespaceOption;
+				if (whitespaceOption != null) {
+					return whitespaceOption;
+				} else if (getOpenComment() != null) {
+					return getOpenComment().getCompareContext().getWhitespaceOption();
+				} else {
+					return null;
+				}
 			}
 
 			@Override
@@ -599,14 +602,35 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		 * later. Also it is guaranteed to be resolved to the same commit has as we've cached
 		 * it above when loading the project  
 		 */
-		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, request.getBaseCommitHash(), 
-				source.getRevision(), file, pathFilterModel, whitespaceOptionModel, blameModel, this) {
+		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, request.getMergeBase().name(),
+				source.getRevision(), blobPath, mark, pathFilterModel, whitespaceOptionModel, blameModel, this) {
 
 			@Override
-			protected void onFileSelected(AjaxRequestTarget target) {
-				file = getSelectedFile();
+			protected void onChangeSelected(AjaxRequestTarget target, String blobPath) {
+				NewPullRequestPage.this.blobPath = blobPath;
 				commentId = null;
 				mark = null;
+			}
+
+			@Override
+			protected void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
+				NewPullRequestPage.this.blobPath = blobPath;
+				NewPullRequestPage.this.mark = mark;
+			}
+
+			@Override
+			protected String getMarkUrl(String blobPath, DiffPlanarRange mark) {
+				RevisionComparePage.State state = new RevisionComparePage.State();
+				state.blobPath = blobPath;
+				state.mark = mark;
+				state.blame = blame;
+				state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getMergeBase().name());
+				state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getLatestUpdate().getHeadCommitHash());
+				state.pathFilter = pathFilter;
+				state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
+				state.whitespaceOption = whitespaceOption;
+				state.compareWithMergeBase = false;
+				return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getProject(), state)).toString();
 			}
 
 			@Override
@@ -620,13 +644,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				setVisible(!NewPullRequestPage.this.getPullRequest().isMerged());
 			}
 
-			@Override
-			protected boolean isContextDifferent(CompareContext compareContext) {
-				var request = NewPullRequestPage.this.getPullRequest();
-				return !compareContext.getOldCommitHash().equals(request.getBaseCommitHash())
-						|| !compareContext.getNewCommitHash().equals(request.getLatestUpdate().getHeadCommitHash());
-			}
-			
 		};
 		diffPanel.setOutputMarkupId(true);
 		return diffPanel;
@@ -1095,37 +1112,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	}
 
 	@Override
-	public DiffPlanarRange getMark() {
-		return mark;
-	}
-
-	@Override
-	public String getMarkUrl(String blobPath, DiffPlanarRange mark) {
-		RevisionComparePage.State state = new RevisionComparePage.State();
-		state.file = blobPath;
-		state.mark = mark;
-		state.blame = blame;
-		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
-		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getLatestUpdate().getHeadCommitHash());
-		state.pathFilter = pathFilter;
-		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
-		state.whitespaceOption = whitespaceOption;
-		state.compareWithMergeBase = false;
-		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getProject(), state)).toString();
-	}
-
-	@Override
-	public void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
-		this.file = blobPath;
-		this.mark = mark;
-	}
-
-	@Override
-	public void onUnmark(AjaxRequestTarget target) {
-		mark = null;
-	}
-	
-	@Override
 	public CodeComment getOpenComment() {
 		if (commentId != null)
 			return codeCommentService.load(commentId);
@@ -1137,7 +1123,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	public Map<CodeComment, PlanarRange> getOldComments(String blobPath) {
 		Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
 		for (CodeComment comment: commentsModel.getObject()) {
-			if (comment.getMark().getCommitHash().equals(getPullRequest().getBaseCommitHash())
+			if (comment.getMark().getCommitId().equals(getPullRequest().getMergeBase())
 					&& comment.getMark().getPath().equals(blobPath)) {
 				oldComments.put(comment, comment.getMark().getRange());
 			}
@@ -1149,7 +1135,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	public Map<CodeComment, PlanarRange> getNewComments(String blobPath) {
 		Map<CodeComment, PlanarRange> newComments = new HashMap<>();
 		for (CodeComment comment: commentsModel.getObject()) {
-			if (comment.getMark().getCommitHash().equals(source.getObjectName())
+			if (comment.getMark().getCommitId().equals(source.getObjectId())
 					&& comment.getMark().getPath().equals(blobPath)) {
 				newComments.put(comment, comment.getMark().getRange());
 			}
@@ -1160,8 +1146,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	@Override
 	public Collection<CodeProblem> getOldProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
-		ObjectId baseCommitId = ObjectId.fromString(getPullRequest().getBaseCommitHash());
-		for (Build build: target.getProject().getBuilds(baseCommitId)) {
+		ObjectId mergeBase = getPullRequest().getMergeBase();
+		for (Build build: target.getProject().getBuilds(mergeBase)) {
 			problems.addAll(ProblemReport.getCodeProblems(build, blobPath, null));
 		}
 		return problems;
@@ -1179,8 +1165,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	@Override
 	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
-		ObjectId baseCommitId = ObjectId.fromString(getPullRequest().getBaseCommitHash());
-		for (Build build: target.getProject().getBuilds(baseCommitId)) {
+		ObjectId mergeBase = getPullRequest().getMergeBase();
+		for (Build build: target.getProject().getBuilds(mergeBase)) {
 			CoverageStats.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
 				coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
 			});
@@ -1200,45 +1186,24 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	}
 	
 	@Override
-	public void onAddComment(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
+	public void onAddComment(AjaxRequestTarget target) {
 		this.commentId = null;
-		onMark(target, blobPath, mark);
+		this.mark = null;
 	}
 
 	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, String blobPath) {
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		commentId = comment.getId();
-		this.file = blobPath;
-		onUnmark(target);
+		blobPath = null;
+		mark = null;
 	}
 
 	@Override
-	public void onCommentClosed(AjaxRequestTarget target) {
+	public void onCommentClosed(AjaxRequestTarget target, String blobPath) {
+		this.blobPath = blobPath;
 		commentId = null;
-		onUnmark(target);
 	}
-	
-	@Override
-	public void onSaveComment(CodeComment comment) {
-		if (comment.isNew())
-			codeCommentService.create(comment);
-		else
-			codeCommentService.update(comment);
-	}
-	
-	@Override
-	public void onSaveCommentReply(CodeCommentReply reply) {
-		if (reply.isNew())
-			codeCommentReplyService.create(reply);
-		else
-			codeCommentReplyService.update(reply);
-	}
-	
-	@Override
-	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		codeCommentStatusChangeService.create(change, note);
-	}
-	
+
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canWorkOnProject(target.getProject())
@@ -1264,7 +1229,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		var tools = super.getChatTools();
 		if (!getPullRequest().isMerged()) {
 			var projectId = getProject().getId();
-			var oldCommitId = ObjectId.fromString(getPullRequest().getBaseCommitHash());
+			var oldCommitId = getPullRequest().getMergeBase();
 			var newCommitId = ObjectId.fromString(getPullRequest().getLatestUpdate().getHeadCommitHash());
 			tools.addAll(wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null)));
 		}

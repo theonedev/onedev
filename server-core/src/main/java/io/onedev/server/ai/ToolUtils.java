@@ -1,25 +1,8 @@
 package io.onedev.server.ai;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.subject.Subject;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.eclipse.jgit.lib.ObjectId;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.commons.utils.ExplicitException;
@@ -36,9 +19,19 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
-import io.onedev.server.service.PullRequestService;
 import io.onedev.server.util.IgnoreLinearRangeMixin;
 import io.onedev.server.util.IgnorePlanarRangeMixin;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.subject.Subject;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class ToolUtils {
 
@@ -135,14 +128,6 @@ public class ToolUtils {
 	}
 
 	public static List<TaskTool> getDiffTools(Long projectId, ObjectId oldCommitId, ObjectId newCommitId, @Nullable Long pullRequestId) {
-		ObjectId comparisonBase;
-		if (pullRequestId != null) {
-			var pullRequestService = OneDev.getInstance(PullRequestService.class);
-			var request = pullRequestService.load(pullRequestId);
-			comparisonBase = pullRequestService.getComparisonBase(request, oldCommitId, newCommitId);
-		} else {
-			comparisonBase = oldCommitId;
-		}
 		return List.of(
 			new GetFileContent(true) {
 				@Override
@@ -152,7 +137,7 @@ public class ToolUtils {
 				
 				@Override
 				protected ObjectId getCommitId(boolean oldRevision) {
-					return oldRevision ? comparisonBase : newCommitId;
+					return oldRevision ? oldCommitId : newCommitId;
 				}
 			},
 			new QuerySymbolDefinitions(true) {
@@ -164,7 +149,7 @@ public class ToolUtils {
 				
 				@Override
 				protected ObjectId getCommitId(boolean oldRevision) {
-					return oldRevision ? comparisonBase : newCommitId;
+					return oldRevision ? oldCommitId : newCommitId;
 				}
 			},
 			new QueryCodeSnippets(true) {
@@ -176,7 +161,7 @@ public class ToolUtils {
 				
 				@Override
 				protected ObjectId getCommitId(boolean oldRevision) {
-					return oldRevision ? comparisonBase : newCommitId;
+					return oldRevision ? oldCommitId : newCommitId;
 				}
 			},
 			new GetDiffPatch() {
@@ -188,7 +173,7 @@ public class ToolUtils {
 				
 				@Override
 				protected ObjectId getOldCommitId() {
-					return comparisonBase;
+					return oldCommitId;
 				}
 				
 				@Override

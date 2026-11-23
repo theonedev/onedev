@@ -5,8 +5,6 @@ import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.onedev.server.model.support.CompareContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -25,7 +24,6 @@ import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.Session;
 import io.onedev.server.persistence.dao.Criterion;
@@ -35,7 +33,6 @@ import org.hibernate.query.sqm.tree.domain.SqmPath;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
@@ -54,7 +51,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -147,96 +143,71 @@ public class DefaultCodeCommentService extends BaseEntityService<CodeComment> im
 	@Override
 	public Map<CodeComment, PlanarRange> queryInHistory(Project project, ObjectId commitId, String path) {
 		Map<CodeComment, PlanarRange> comments = new HashMap<>();
-		
-		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();
-		
+		Map<String, List<CodeComment>> commentsByCommit = new HashMap<>();
+		String commitHash = commitId.name();
+
 		EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
 		criteria.add(Restrictions.eq(CodeComment.PROP_PROJECT, project));
 		criteria.add(Restrictions.eq(CodeComment.PROP_MARK + "." + Mark.PROP_PATH, path));
-		
+
 		for (CodeComment comment: query(criteria)) {
-			String possiblePath = comment.getMark().getPath();
-			if (comment.getMark().getCommitHash().equals(commitId.name()) && possiblePath.equals(path)) {
-				comments.put(comment, comment.getMark().getRange());
-			} else {
-				Map<String, List<CodeComment>> commentsOnCommit = 
-						possibleComments.get(comment.getMark().getCommitHash());
-				if (commentsOnCommit == null) {
-					commentsOnCommit = new HashMap<>();
-					possibleComments.put(comment.getMark().getCommitHash(), commentsOnCommit);
-				}
-				List<CodeComment> commentsOnPath = commentsOnCommit.get(possiblePath);
-				if (commentsOnPath == null) {
-					commentsOnPath = new ArrayList<>();
-					commentsOnCommit.put(possiblePath, commentsOnPath);
-				}
-				commentsOnPath.add(comment);
-			}
+			var mark = comment.getMark();
+			String markedCommitHash = mark.getCommitHash();
+			if (markedCommitHash.equals(commitHash))
+				comments.put(comment, mark.getRange());
+			else
+				commentsByCommit.computeIfAbsent(markedCommitHash, ignored -> new ArrayList<>()).add(comment);
 		}
 
-		var possibleCommitIds = possibleComments.keySet().stream()
-				.map(it->ObjectId.fromString(it)).collect(Collectors.toSet());
-		List<RevCommit> historyCommits = getGitService().sortValidCommits(
-				project, possibleCommitIds);
+		var commentedCommitIds = commentsByCommit.keySet().stream()
+				.map(ObjectId::fromString).collect(Collectors.toSet());
+		List<RevCommit> historyCommits = getGitService().sortValidCommits(project, commentedCommitIds);
 
 		Date oldestDate = null;
 		for (RevCommit commit: historyCommits) {
-			PersonIdent committer = commit.getCommitterIdent();
-			if (committer != null
-					&& (oldestDate == null || Date.from(committer.getWhenAsInstant()).before(oldestDate))) {
-				oldestDate = Date.from(committer.getWhenAsInstant());
-			}
+			var committer = commit.getCommitterIdent();
+			if (committer == null)
+				continue;
+			var date = Date.from(committer.getWhenAsInstant());
+			if (oldestDate == null || date.before(oldestDate))
+				oldestDate = date;
 		}
-		
-		if (oldestDate != null) {
-			RevListOptions options = new RevListOptions();
-			options.revisions(Lists.newArrayList(commitId.name()))
-					.after(DateUtils.addDays(oldestDate, -1))
-					.ignoreCase(false).skip(0).count(MAX_HISTORY_COMMITS_TO_CHECK);
-			
-			var revisions = new HashSet<>(getGitService().revList(project, options));
-			
-			List<String> newLines = Preconditions.checkNotNull(project.readLines(
-					new BlobIdent(commitId.name(), path, FileMode.REGULAR_FILE.getBits()), 
-					WhitespaceOption.IGNORE_TRAILING, true));
+		if (oldestDate == null)
+			return comments;
 
-			Collections.sort(historyCommits, new Comparator<RevCommit>() {
+		var options = new RevListOptions()
+				.revisions(List.of(commitHash))
+				.after(DateUtils.addDays(oldestDate, -1))
+				.count(MAX_HISTORY_COMMITS_TO_CHECK);
+		var revisions = new HashSet<>(getGitService().revList(project, options));
+		List<String> newLines = Preconditions.checkNotNull(project.readLines(
+				new BlobIdent(commitHash, path, FileMode.REGULAR_FILE.getBits()),
+				WhitespaceOption.IGNORE_TRAILING, true));
 
-				@Override
-				public int compare(RevCommit o1, RevCommit o2) {
-					return o2.getCommitTime() - o1.getCommitTime();
-				}
-				
-			});
-			int checkedHistoryFiles = 0;
-			for (RevCommit historyCommit: historyCommits) {
-				if (revisions.contains(historyCommit.name())) {
-					Map<String, List<CodeComment>> commentsOnCommit = 
-							Preconditions.checkNotNull(possibleComments.get(historyCommit.name()));
-					for (Map.Entry<String, List<CodeComment>> pathEntry: commentsOnCommit.entrySet()) {
-						List<String> oldLines = project.readLines( 
-								new BlobIdent(historyCommit.name(), pathEntry.getKey(), FileMode.REGULAR_FILE.getBits()), 
-								WhitespaceOption.IGNORE_TRAILING, false);
-						if (oldLines != null) {
-							Map<Integer, Integer> lineMapping;
-							if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE)
-								lineMapping = DiffUtils.mapLines(oldLines, newLines);
-							else
-								lineMapping = new HashMap<>();
-							for (CodeComment comment: pathEntry.getValue()) {
-								PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
-								if (newRange != null) 
-									comments.put(comment, newRange);
-							}
-							if (++checkedHistoryFiles == MAX_HISTORY_FILES_TO_CHECK) {
-								return comments;
-							}
-						}
-					}
-				}
+		historyCommits.sort((first, second) -> second.getCommitTime() - first.getCommitTime());
+		int checkedHistoryFiles = 0;
+		for (RevCommit historyCommit: historyCommits) {
+			String historyHash = historyCommit.name();
+			if (!revisions.contains(historyHash))
+				continue;
+			var commentsOnCommit = Preconditions.checkNotNull(commentsByCommit.get(historyHash));
+			List<String> oldLines = project.readLines(
+					new BlobIdent(historyHash, path, FileMode.REGULAR_FILE.getBits()),
+					WhitespaceOption.IGNORE_TRAILING, false);
+			if (oldLines == null)
+				continue;
+
+			Map<Integer, Integer> lineMapping = oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE
+					? DiffUtils.mapLines(oldLines, newLines)
+					: Map.of();
+			for (CodeComment comment: commentsOnCommit) {
+				PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
+				if (newRange != null)
+					comments.put(comment, newRange);
 			}
-		} 
-		
+			if (++checkedHistoryFiles == MAX_HISTORY_FILES_TO_CHECK)
+				break;
+		}
 		return comments;
 	}
 

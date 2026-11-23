@@ -51,6 +51,10 @@ public class Mark implements Serializable {
 		this.commitHash = commitHash;
 	}
 
+	public ObjectId getCommitId() {
+		return ObjectId.fromString(commitHash);
+	}
+
 	public String getPath() {
 		return path;
 	}
@@ -109,47 +113,6 @@ public class Mark implements Serializable {
 		return new BlobIdent(commitHash, path);
 	}
 
-	@Nullable
-	public Mark permanentize(Project project, ObjectId oldCommitId, ObjectId newCommitId, ObjectId comparisonBase) {
-		if (getCommitHash().equals(comparisonBase.name())) {
-			return mapTo(project, oldCommitId);
-		} else if (getCommitHash().equals(oldCommitId.name()) 
-					|| getCommitHash().equals(newCommitId.name())) {
-			return this;
-		} else {
-			return null;
-		}
-	}
-	
-	@Nullable
-	public Mark mapTo(Project project, ObjectId commitId) {
-		GitService gitService = OneDev.getInstance(GitService.class);
-		
-		List<String> newLines = new ArrayList<>();
-		Blob newBlob = gitService.getBlob(project, commitId, path);
-		if (newBlob == null || newBlob.getText() == null)
-			return null;
-		for (String line: newBlob.getText().getLines())
-			newLines.add(WhitespaceOption.IGNORE_TRAILING.apply(line));
-		
-		List<String> oldLines = new ArrayList<>();
-		Blob oldBlob = gitService.getBlob(project, ObjectId.fromString(commitHash), path);
-		for (String line: oldBlob.getText().getLines())
-			oldLines.add(WhitespaceOption.IGNORE_TRAILING.apply(line));
-
-		Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
-		
-		Integer newBeginLine = lineMapping.get(range.getFromRow());
-		Integer newEndLine = lineMapping.get(range.getToRow());
-		if (newBeginLine != null && newEndLine != null && newBeginLine <= newEndLine) {
-			PlanarRange newRange = new PlanarRange(newBeginLine, range.getFromColumn(), 
-					newEndLine, range.getToColumn());
-			return new Mark(commitId.name(), path, newRange);
-		} else {
-			return null;
-		}
-	}
-	
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof Mark))

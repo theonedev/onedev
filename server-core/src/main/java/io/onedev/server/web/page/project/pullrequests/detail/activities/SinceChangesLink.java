@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.pullrequests.detail.activities;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
@@ -19,20 +18,14 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 	
 	private final Date sinceDate;
 	
-	private final IModel<String> oldCommitModel = new LoadableDetachableModel<String>() {
+	private final IModel<String> oldCommitModel = new LoadableDetachableModel<>() {
 
-		@Override
-		protected String load() {
-			PullRequest request = getPullRequest();
-			String commit = request.getBaseCommitHash();
-			for (PullRequestUpdate update: request.getSortedUpdates()) {
-				if (update.getDate().before(sinceDate))
-					commit = update.getHeadCommitHash();
-			}
-			return commit;
-		}
-		
-	};
+        @Override
+        protected String load() {
+            return getPullRequest().getSinceCommitId(sinceDate).name();
+        }
+
+    };
 	
 	public SinceChangesLink(String id, IModel<PullRequest> requestModel, Date sinceDate) {
 		super(id, PullRequestChangesPage.class);

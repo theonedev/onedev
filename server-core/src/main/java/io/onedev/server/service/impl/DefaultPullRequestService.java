@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.onedev.server.model.support.CompareContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -109,7 +110,6 @@ import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.FileProtection;
@@ -245,30 +245,18 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 	private void doDelete(PullRequest request) {
 		Collection<String> refs = Lists.newArrayList(
-				request.getHeadRef(), request.getMergeRef(), request.getBaseRef(), request.getBuildRef());
+				request.getHeadRef(), request.getMergeRef(), request.getBuildRef());
 		for (PullRequestUpdate update: request.getUpdates())
 			refs.add(update.getHeadRef());
 
 		gitService.deleteRefs(request.getTargetProject(), refs);
 
 		var query = getSession().createMutationQuery(String.format(
-    			"update CodeComment set %s=null where %s=:request",
-    			CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
-    			CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
-    	query.setParameter("request", request);
-    	query.executeUpdate();
-
-		query = getSession().createMutationQuery(String.format("update CodeCommentReply set %s=null where %s=:request",
-    			CodeCommentReply.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
-    			CodeCommentReply.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
-    	query.setParameter("request", request);
-    	query.executeUpdate();
-
-		query = getSession().createMutationQuery(String.format("update CodeCommentStatusChange set %s=null where %s=:request",
-    			CodeCommentStatusChange.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
-    			CodeCommentStatusChange.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
-    	query.setParameter("request", request);
-    	query.executeUpdate();
+				"update CodeComment set %s=null where %s=:request",
+				CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
+				CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
+		query.setParameter("request", request);
+		query.executeUpdate();
 
 		dao.remove(request);
 	}
@@ -440,7 +428,13 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 				"Pull request submitter must be set before calling open");
 
 		if (target.equals(source))
-			throw new NotAcceptableException("Source and target are the same");
+			throw new NotAcceptableException("Source branch and target branch are the same");
+
+		if (request.getMergeBase(false) == null)
+			throw new NotAcceptableException("History of target branch and source branch are unrelated");
+
+		if (request.getMergeBase().equals(source.getObjectId()))
+			throw new NotAcceptableException("Target branch is already up to date with source branch");
 
 		PullRequest existing = findOpen(target, source);
 		if (existing != null)
@@ -454,25 +448,12 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 				throw new NotAcceptableException("Another pull request already merged the change");
 		}
 
-		if (request.getBaseCommitHash() == null) {
-			ObjectId baseCommitId = gitService.getMergeBase(
-					target.getProject(), target.getObjectId(),
-					source.getProject(), source.getObjectId());
-			if (baseCommitId == null)
-				throw new NotAcceptableException("No common base for target and source");
-			request.setBaseCommitHash(baseCommitId.name());
-		}
-
-		if (request.getBaseCommitHash().equals(source.getObjectName()))
-			throw new NotAcceptableException("Target already up to date with source");
-
 		if (request.getUpdates().isEmpty()) {
 			PullRequestUpdate update = new PullRequestUpdate();
 			request.getUpdates().add(update);
 			request.setUpdates(request.getUpdates());
 			update.setRequest(request);
 			update.setHeadCommitHash(source.getObjectName());
-			update.setTargetHeadCommitHash(target.getObjectName());
 		}
 
 		if (request.getAssignments().isEmpty()) {
@@ -501,10 +482,8 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 		dao.persist(request);
 
-		gitService.updateRef(request.getTargetProject(), request.getBaseRef(),
-				ObjectId.fromString(request.getBaseCommitHash()), null);
 		gitService.updateRef(request.getTargetProject(), request.getHeadRef(),
-				ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()), null);
+				request.getLatestUpdate().getHeadCommitId(), null);
 
 		for (PullRequestUpdate update: request.getUpdates())
 			updateService.create(update);
@@ -614,7 +593,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	private void check(PullRequest request, boolean sourceUpdated, boolean updateBuildCommit) {
 		try {
 			request.setCheckError(null);
-			if (request.isOpen() && request.isValid()) {
+			if (request.isOpen() && !request.isCommitsMissing() && request.getMergeBase(false) != null) {
 				var systemUser = userService.getSystem();
 				if (request.getSourceProject() == null) {
 					discard(systemUser, request, "Source project no longer exists");
@@ -866,8 +845,6 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		if (request.isOpen()) {
 			BranchProtection branchProtection = request.getTargetProject()
 					.getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-			if (sourceUpdated && isTargetBranchMergeOrRebase(request))
-				sourceUpdated = false;
 			Collection<String> changedFiles;
 			if (sourceUpdated) {
 				changedFiles = request.getLatestUpdate().getChangedFiles();
@@ -902,48 +879,6 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 				}
 			}
 		}
-	}
-
-	private boolean isTargetBranchMergeOrRebase(PullRequest request) {
-		if (request.getUpdates().size() < 2)
-			return false;
-		var update = request.getLatestUpdate();
-		var head = update.getHeadCommit();
-		var previousHead = ObjectId.fromString(update.getBaseCommitHash());
-		var targetHead = ObjectId.fromString(update.getTargetHeadCommitHash());
-		var project = request.getTargetProject();
-		if (head.getParentCount() == 1) {
-			// Use the incorporated target revision, which may predate the current target head.
-			var rebaseTarget = gitService.getMergeBase(project, head, project, targetHead);
-			if (rebaseTarget == null)
-				return false;
-			var previousBase = gitService.getMergeBase(project, previousHead, project, rebaseTarget);
-			// A rebase must incorporate new target history. Ordinary edits and squash merges do not.
-			if (previousBase == null || previousBase.equals(rebaseTarget))
-				return false;
-
-			var rebased = gitService.rebase(project, previousHead, rebaseTarget, head.getCommitterIdent());
-			return rebased != null && gitService.getCommit(project, rebased).getTree().equals(head.getTree());
-		}
-		if (head.getParentCount() != 2)
-			return false;
-
-		ObjectId mergedTarget;
-		// The UI merge and a normal git merge use opposite parent orders.
-		if (head.getParent(0).equals(previousHead))
-			mergedTarget = head.getParent(1);
-		else if (head.getParent(1).equals(previousHead))
-			mergedTarget = head.getParent(0);
-		else
-			return false;
-
-		if (!gitService.isMergedInto(project, null, mergedTarget, targetHead))
-			return false;
-
-		// Recreate the merge to reject extra edits and manually resolved conflicts.
-		var merged = gitService.merge(project, head.getParent(0), head.getParent(1), false,
-				head.getCommitterIdent(), head.getAuthorIdent(), "Check target branch merge", false);
-		return merged != null && gitService.getCommit(project, merged).getTree().equals(head.getTree());
 	}
 
 	private void checkReviews(ReviewRequirement reviewRequirement, PullRequest request,
@@ -1300,49 +1235,6 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		return Restrictions.and(
 				Restrictions.eq(PullRequest.PROP_SOURCE_PROJECT, source.getProject()),
 				Restrictions.eq(PullRequest.PROP_SOURCE_BRANCH, source.getBranch()));
-	}
-
-	@Sessional
-	@Override
-	public ObjectId getComparisonBase(PullRequest request, ObjectId oldCommitId, ObjectId newCommitId) {
-		if (request.isNew() || oldCommitId.equals(newCommitId))
-			return oldCommitId;
-
-		Project targetProject = request.getTargetProject();
-		ObjectId comparisonBase = pullRequestInfoService.getComparisonBase(request, oldCommitId, newCommitId);
-		if (comparisonBase != null && !getGitService().hasObjects(targetProject, comparisonBase))
-			comparisonBase = null;
-		if (comparisonBase == null) {
-			for (PullRequestUpdate update: request.getSortedUpdates()) {
-				if (update.getCommits().contains(newCommitId)) {
-					ObjectId targetHead = ObjectId.fromString(update.getTargetHeadCommitHash());
-
-					ObjectId mergeBase1 = getGitService().getMergeBase(targetProject, targetHead, targetProject, newCommitId);
-					if (mergeBase1 != null) {
-						ObjectId mergeBase2 = getGitService().getMergeBase(targetProject, mergeBase1, targetProject, oldCommitId);
-						if (mergeBase2.equals(mergeBase1)) {
-							comparisonBase = oldCommitId;
-							break;
-						} else if (mergeBase2.equals(oldCommitId)) {
-							comparisonBase = mergeBase1;
-							break;
-						} else {
-							PersonIdent person = new PersonIdent(User.SYSTEM_NAME, User.getSystemNoreplyEmailAddress());
-							comparisonBase = getGitService().merge(targetProject, oldCommitId, mergeBase1,
-									false, person, person, "helper commit", true);
-							break;
-						}
-					} else {
-						return oldCommitId;
-					}
-				}
-			}
-			if (comparisonBase != null)
-				pullRequestInfoService.cacheComparisonBase(request, oldCommitId, newCommitId, comparisonBase);
-			else
-				throw new IllegalStateException();
-		}
-		return comparisonBase;
 	}
 
 	@Sessional

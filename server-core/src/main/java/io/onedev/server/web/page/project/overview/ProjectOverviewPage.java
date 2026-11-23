@@ -399,7 +399,7 @@ public class ProjectOverviewPage extends ProjectPage {
 					}
 
 					@Override
-					public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, PlanarRange range) {
+					public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 						throw new UnsupportedOperationException();
 					}
 
@@ -409,7 +409,7 @@ public class ProjectOverviewPage extends ProjectPage {
 					}
 
 					@Override
-					public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
+					public void onAddComment(AjaxRequestTarget target) {
 						throw new UnsupportedOperationException();
 					}
 

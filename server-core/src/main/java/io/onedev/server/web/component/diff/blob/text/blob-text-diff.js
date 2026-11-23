@@ -36,10 +36,9 @@ onedev.server.blobTextDiff = {
 	},
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, oldPath, newPath, 
 						 callback, blameMessageCallback, markRange, openComment, 
-						 annotationInfo, commentContainerId, translations, symbolContext, docsite, canComment) {
+						 annotationInfo, translations, symbolContext, canComment) {
 		onedev.server.blobTextDiff.translations = translations;
 		var $container = $("#" + containerId);
-		$container.data("commentContainerId", commentContainerId);
 		$container.data("callback", callback);
 		$container.data("canComment", canComment);
 		$container.data("oldPath", oldPath);
@@ -356,23 +355,21 @@ onedev.server.blobTextDiff = {
 	    		return "close";
 			}
 
-			position = onedev.server.mouseState.position;			
+			const position = onedev.server.mouseState.position;
 
-			function showInvalidSelection() {
-				var $content = $("<div></div>");
-				$content.append(`<a class='invalid'><svg class='icon'><use xlink:href='${onedev.server.icons}#warning'/></svg> ${onedev.server.blobTextDiff.translations["invalid-selection"]}</a>`);
-				$content.children("a").attr("href", docsite + "/appendix/diff-selection").attr("target", "_blank");
+			function showInvalidSelection(reason) {
 				return {
-					position: position, 
-					content: $content
-				}
+					position,
+					content: onedev.server.blobTextDiff.renderSelectionWarning(reason)
+				};
 			}
 
-			if ($startTr.hasClass("expanded") || $endTr.hasClass("expanded") 
-					|| $startTr.nextAll("tr.expander, tr.expanded").filter($endTr.prevAll("tr.expander, tr.expanded")).length != 0
-					|| $startTr.prevAll("tr.expander, tr.expanded").filter($endTr.nextAll("tr.expander, tr.expanded")).length != 0) {  
-				return showInvalidSelection();
-			}
+			const contextRows = "tr.expander, tr.expanded";
+			const $contextRowsBetween = $startTr.nextAll(contextRows).filter($endTr.prevAll(contextRows));
+			if ($contextRowsBetween.hasClass("expander"))
+				return showInvalidSelection("selection-crosses-hidden-lines");
+			if ($startTr.hasClass("expanded") || $endTr.hasClass("expanded") || $contextRowsBetween.hasClass("expanded"))
+				return showInvalidSelection("selection-includes-expanded-lines");
 			
 			/*
 			 * cursor.line represents line number of selection and cursor.ch represents 
@@ -421,11 +418,11 @@ onedev.server.blobTextDiff = {
     					}
     				}
     			}
-    			if ($nodeTd.hasClass("left")) {
-    				newLine = newCh = undefined;
-    			} else if ($nodeTd.hasClass("right")) {
-    				oldLine = oldCh = undefined;
-    			}
+				if ($nodeTd.hasClass("left")) {
+					newLine = newCh = undefined;
+				} else if ($nodeTd.hasClass("right")) {
+					oldLine = oldCh = undefined;
+				}
 				return {
 					oldLine: oldLine,
 					oldCh: oldCh,
@@ -437,15 +434,15 @@ onedev.server.blobTextDiff = {
     		var startCursor = getCursor($start, startOffset);
     		var endCursor = getCursor($end, endOffset);
 
-    		if (startCursor.newLine && endCursor.newLine) {
-	    		callback("openSelectionPopover", Math.round(position.left), Math.round(position.top), false, 
-	    				startCursor.newLine-1, startCursor.newCh, endCursor.newLine-1, endCursor.newCh);
-    		} else if (startCursor.oldLine && endCursor.oldLine) {
-	    		callback("openSelectionPopover", Math.round(position.left), Math.round(position.top), true, 
-	    				startCursor.oldLine-1, startCursor.oldCh, endCursor.oldLine-1, endCursor.oldCh);
-    		} else {
-				return showInvalidSelection();
-    		}			
+			if (startCursor.newLine && endCursor.newLine) {
+				callback("openSelectionPopover", Math.round(position.left), Math.round(position.top), false,
+					startCursor.newLine - 1, startCursor.newCh, endCursor.newLine - 1, endCursor.newCh);
+			} else if (startCursor.oldLine && endCursor.oldLine) {
+				callback("openSelectionPopover", Math.round(position.left), Math.round(position.top), true,
+					startCursor.oldLine - 1, startCursor.oldCh, endCursor.oldLine - 1, endCursor.oldCh);
+			} else {
+				return showInvalidSelection("selection-spans-revisions");
+			}
 		});
 		
 		let oldCoverages = annotationInfo.oldAnnotations.coverages;
@@ -574,13 +571,17 @@ onedev.server.blobTextDiff = {
 			return $tooltip;
 		}, alignment);
 	},
-	openSelectionPopover: function(containerId, position, markRange, markUrl, markedText, loggedIn) {
+	renderSelectionWarning: function(reason) {
+		const $warning = $(`<span class='invalid'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg></span>`);
+		return $warning.append(document.createTextNode(` ${this.translations["invalid-selection"]} ${this.translations[reason]}`));
+	},
+	openSelectionPopover: function(containerId, position, markRange, markUrl, markedText, whitespaceMismatch, loggedIn) {
 		var $container = $("#" + containerId);
-		
-		if (!markUrl) {
-			$content = $(`<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> ${onedev.server.blobTextDiff.translations["unable-to-comment"]}</span></div>`);
+		var $content;
+		if (whitespaceMismatch) {
+			$content = this.renderSelectionWarning("whitespace-selection-hint");
 		} else {
-			var $content = $(`<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg> ${onedev.server.blobTextDiff.translations["perma-link"]}</a>`);
+			$content = $(`<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg> ${onedev.server.blobTextDiff.translations["perma-link"]}</a>`);
 			$content.children("a.permanent").attr("href", markUrl);
 			$content.append(`<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#copy'/></svg> ${onedev.server.blobTextDiff.translations["copy-to-clipboard"]}</a>`);
 			var clipboard = new ClipboardJS(".copy-marked", {
@@ -623,8 +624,8 @@ onedev.server.blobTextDiff = {
 		});
 	},
 	confirmUnsavedChanges: function($container) {
-		return $("#"+$container.data("commentContainerId")).find("form.dirty").length == 0 
-				|| confirm(onedev.server.blobTextDiff.translations["unsaved-changes-prompt"]); 
+		return $container.find("form.dirty").length == 0
+			|| confirm(onedev.server.blobTextDiff.translations["unsaved-changes-prompt"]);
 	},
 	expand: function(containerId, blockIndex, expandedHtml) {
 		var $container = $("#" + containerId);

@@ -265,7 +265,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		};
 
-		if (!getPullRequest().isValid()) {
+		if (getPullRequest().isCommitsMissing() || getPullRequest().getMergeBase(false) == null) {
 			throw new RestartResponseException(InvalidPullRequestPage.class,
 					InvalidPullRequestPage.paramsOf(getPullRequest()));
 		}
@@ -921,7 +921,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			public Component render(String componentId) {
 				return new PageTabHead(componentId, this) {
-					
+
 					@Override
 					protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
 						return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
@@ -2484,7 +2484,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				commitMessage = MessageFormat.format(_T("Merge branch \"{0}\" into branch \"{1}\""), 
 						request.getTargetBranch(), request.getSourceBranch());
 			}
-			mergeCommitId = gitService.merge(project, targetHead, sourceHead,
+			mergeCommitId = gitService.merge(project, sourceHead, targetHead,
 					false, user.asPerson(), user.asPerson(), commitMessage, false);
 		} else {
 			mergeCommitId = gitService.rebase(project, sourceHead, targetHead, user.asPerson());
@@ -2589,7 +2589,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		tools.add(wrapForChat(new GetPullRequestComments(requestId)));
 
 		var projectId = pullRequest.getProject().getId();
-		var oldCommitId = ObjectId.fromString(pullRequest.getBaseCommitHash());
+		var oldCommitId = pullRequest.getMergeBase();
 		var newCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
 		tools.addAll(wrapForChat(ToolUtils.getDiffTools(projectId, oldCommitId, newCommitId, requestId)));
 		return tools;

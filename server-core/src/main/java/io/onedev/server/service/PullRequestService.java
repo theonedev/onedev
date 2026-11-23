@@ -1,15 +1,5 @@
 package io.onedev.server.service;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.shiro.subject.Subject;
-import org.eclipse.jgit.lib.ObjectId;
-import org.jspecify.annotations.Nullable;
-
 import dev.langchain4j.model.chat.ChatModel;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -19,6 +9,14 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.util.StatsGroup;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.shiro.subject.Subject;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public interface PullRequestService extends EntityService<PullRequest> {
 
@@ -77,21 +75,6 @@ public interface PullRequestService extends EntityService<PullRequest> {
 	Map<Integer, Pair<Integer, Integer>> queryFrequencyStats(Subject subject, Project project,
             @Nullable Criteria<PullRequest> criteria, @Nullable Date startDate, @Nullable Date endDate, 
             StatsGroup statsGroup);
-
-    /**
-     * When compare oldCommitId and newCommitId in context of pull request, assume below scenario:
-     * 1. Pull request is created
-     * 2. Add some commits to target branch
-     * 3. Merge target branch into source branch
-     * When show pull request changes in this case, we compare newCommitId with the comparison base 
-     * instead of oldCommitId to exclude commits added in step 2
-     * 
-     * @param request
-     * @param oldCommitId
-     * @param newCommitId
-     * @return
-     */
-	ObjectId getComparisonBase(PullRequest request, ObjectId oldCommitId, ObjectId newCommitId);
 
 	List<PullRequest> query(User submitter, Date fromDate, Date toDate);
 

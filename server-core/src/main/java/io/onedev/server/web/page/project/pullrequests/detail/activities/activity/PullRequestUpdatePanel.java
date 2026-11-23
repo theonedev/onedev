@@ -5,9 +5,9 @@ import java.util.Date;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
-import java.util.Collection;
 import java.util.List;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -19,15 +19,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 
-import com.google.common.collect.Sets;
-
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -72,11 +68,7 @@ class PullRequestUpdatePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
-				if (!getUpdate().getRequest().getPendingCommits().contains(commit)) {
-					item.add(AttributeAppender.append("class", "rebased"));
-					item.add(AttributeAppender.append("data-tippy-content", _T("This commit is rebased")));
-				}
-				
+				item.add(AttributeModifier.replace("data-commit-hash", commit.name()));
 				item.add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));
 
 				Project project = getUpdate().getRequest().getTarget().getProject();
@@ -116,17 +108,6 @@ class PullRequestUpdatePanel extends Panel {
 			}
 			
 		});
-		
-		add(new ChangeObserver() {
-
-			@Override
-			public Collection<String> findObservables() {
-				return Sets.newHashSet(PullRequest.getChangeObservable(getUpdate().getRequest().getId()));
-			}
-			
-		});
-		
-		setOutputMarkupId(true);
 	}
 
 	private PullRequestUpdate getUpdate() {

@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import io.onedev.server.model.support.CompareContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
@@ -73,16 +74,11 @@ import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -122,7 +118,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	// https://issues.apache.org/jira/browse/WICKET-6069
 	private static final String PARAM_COMPARE_WITH = "compare-with";
 
-	private static final String PARAM_FILE = "file";
+	private static final String PARAM_PATH = "path";
 	
 	private static final String PARAM_BLAME = "blame";
 
@@ -198,12 +194,10 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		state.revision = Joiner.on("/").join(revisionSegments);
 		
 		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();
-		state.file = params.get(PARAM_FILE).toString();
-		if (state.file != null)
-			state.mark = DiffPlanarRange.of(params.get(PARAM_MARK).toString());
+		state.blobPath = params.get(PARAM_PATH).toString();
+		state.mark = DiffPlanarRange.of(params.get(PARAM_MARK).toString());
 		state.blame = params.get(PARAM_BLAME).toBoolean(false);
-		state.whitespaceOption = WhitespaceOption.ofName(
-				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.IGNORE_TRAILING.name()));
+		state.whitespaceOption = WhitespaceOption.ofName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.requestId = params.get(PARAM_PULL_REQUEST).toOptionalLong();
@@ -673,6 +667,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			@Override
 			public void setObject(String object) {
 				state.pathFilter = object;
+				state.commentId = null;
+				state.blobPath = null;
+				state.mark = null;
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 			}
 
@@ -685,7 +682,13 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 
 			@Override
 			public WhitespaceOption getObject() {
-				return state.whitespaceOption;
+				if (state.whitespaceOption != null) {
+					return state.whitespaceOption;
+				} else if (getOpenComment() != null) {
+					return getOpenComment().getCompareContext().getWhitespaceOption();
+				} else {
+					return null;
+				}
 			}
 
 			@Override
@@ -698,15 +701,37 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 
 		};
 		revisionDiff = new RevisionDiffPanel("revisionDiff", getCompareWith().name(), 
-				state.revision, state.file, pathFilterModel, whitespaceOptionModel,
+				state.revision, state.blobPath, state.mark, pathFilterModel, whitespaceOptionModel,
 				blameModel, this) {
 			
 			@Override
-			protected void onFileSelected(AjaxRequestTarget target) {
-				state.file = getSelectedFile();
+			protected void onChangeSelected(AjaxRequestTarget target, String blobPath) {
+				state.blobPath = blobPath;
 				state.commentId = null;
 				state.mark = null;
 				pushState(target);
+			}
+
+			@Override
+			protected void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
+				state.blobPath = blobPath;
+				state.mark = mark;
+				pushState(target);
+			}
+
+			@Override
+			protected String getMarkUrl(String blobPath, DiffPlanarRange mark) {
+				State markState = new State();
+				markState.blobPath = blobPath;
+				markState.mark = mark;
+				markState.blame = state.blame;
+				markState.whitespaceOption = state.whitespaceOption;
+				ObjectId compareWith = getCompareWith();
+				if (!compareWith.equals(ObjectId.zeroId()))
+					markState.compareWith = compareWith.name();
+				markState.pathFilter = state.pathFilter;
+				markState.revision = resolvedRevision.name();
+				return urlFor(CommitDetailPage.class, paramsOf(getProject(), markState)).toString();
 			}
 
 			@Override
@@ -722,12 +747,6 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					return null;
 			}
 
-			@Override
-			protected boolean isContextDifferent(CompareContext compareContext) {
-				return !compareContext.getOldCommitHash().equals(getCompareWith().name()) 
-						|| !compareContext.getNewCommitHash().equals(resolvedRevision.name());
-			}
-			
 		};
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
@@ -747,11 +766,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	public static State getState(CodeComment comment, CompareContext compareContext) {
 		State state = new State();
 		state.commentId = comment.getId();
-		state.file = comment.getMark().getPath();
 		state.revision = compareContext.getNewCommitHash();
-		if (!compareContext.getOldCommitHash().equals(ObjectId.zeroId().name()))
+		if (!compareContext.getOldCommitId().equals(ObjectId.zeroId()))
 			state.compareWith = compareContext.getOldCommitHash();
-		state.whitespaceOption = compareContext.getWhitespaceOption();
 		return state;
 	}
 	
@@ -766,11 +783,11 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			params.set(PARAM_COMMIT, state.revision);
 		if (state.compareWith != null)
 			params.set(PARAM_COMPARE_WITH, state.compareWith);
-		if (state.file != null)
-			params.set(PARAM_FILE, state.file);
+		if (state.blobPath != null)
+			params.set(PARAM_PATH, state.blobPath);
 		if (state.blame)
 			params.set(PARAM_BLAME, true);
-		if (state.whitespaceOption != WhitespaceOption.IGNORE_TRAILING)
+		if (state.whitespaceOption != null)
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
@@ -818,14 +835,15 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		public String compareWith;
 
 		@Nullable
-		public String file;
+		public String blobPath;
 
 		public boolean blame;
 		
 		@Nullable
 		public Long commentId;
-		
-		public WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
+
+		@Nullable
+		public WhitespaceOption whitespaceOption;
 		
 		@Nullable
 		public String pathFilter;
@@ -835,26 +853,6 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		
 		@Nullable
 		public Long requestId;
-	}
-
-	@Override
-	public DiffPlanarRange getMark() {
-		return state.mark;
-	}
-
-	@Override
-	public String getMarkUrl(String blobPath, DiffPlanarRange mark) {
-		State markState = new State();
-		markState.file = blobPath;
-		markState.mark = mark;
-		markState.blame = state.blame;
-		markState.whitespaceOption = state.whitespaceOption;
-		ObjectId compareWith = getCompareWith();
-		if (!compareWith.equals(ObjectId.zeroId()))
-			markState.compareWith = compareWith.name();
-		markState.pathFilter = state.pathFilter;
-		markState.revision = resolvedRevision.name();
-		return urlFor(CommitDetailPage.class, paramsOf(getProject(), markState)).toString();
 	}
 
 	private Collection<ObjectId> getDescendants() {
@@ -873,37 +871,25 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	}
 
 	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, String blobPath) {
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		state.commentId = comment.getId();
-		state.file = blobPath;
+		state.blobPath = null;
 		state.mark = null;
 		pushState(target);
 	}
 	
 	@Override
-	public void onCommentClosed(AjaxRequestTarget target) {
+	public void onCommentClosed(AjaxRequestTarget target, String blobPath) {
+		state.blobPath = blobPath;
+		state.commentId = null;
+		pushState(target);
+	}
+	
+	@Override
+	public void onAddComment(AjaxRequestTarget target) {
 		state.commentId = null;
 		state.mark = null;
 		pushState(target);
-	}
-	
-	@Override
-	public void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
-		state.file = blobPath;
-		state.mark = mark;
-		pushState(target);
-	}
-
-	@Override
-	public void onUnmark(AjaxRequestTarget target) {
-		state.mark = null;
-		pushState(target);
-	}
-	
-	@Override
-	public void onAddComment(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
-		state.commentId = null;
-		onMark(target, blobPath, mark);
 	}
 	
 	@Override
@@ -928,27 +914,6 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	}
 
 	@Override
-	public void onSaveComment(CodeComment comment) {
-		if (comment.isNew())
-			OneDev.getInstance(CodeCommentService.class).create(comment);
-		else
-			OneDev.getInstance(CodeCommentService.class).update(comment);
-	}
-	
-	@Override
-	public void onSaveCommentReply(CodeCommentReply reply) {
-		if (reply.isNew())
-			OneDev.getInstance(CodeCommentReplyService.class).create(reply);
-		else
-			OneDev.getInstance(CodeCommentReplyService.class).update(reply);
-	}
-
-	@Override
-	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, note);
-	}
-	
-	@Override
 	protected Component newProjectTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("commits", ProjectCommitsPage.class, 
@@ -962,7 +927,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
 		for (CodeComment comment: commentsModel.getObject()) {
 			if (comment.getMark().getPath().equals(blobPath) 
-					&& comment.getMark().getCommitHash().equals(getCompareWith().name())) {
+					&& comment.getMark().getCommitId().equals(getCompareWith())) {
 				oldComments.put(comment, comment.getMark().getRange());
 			}
 		}
@@ -974,7 +939,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		Map<CodeComment, PlanarRange> newComments = new HashMap<>();
 		for (CodeComment comment: commentsModel.getObject()) {
 			if (comment.getMark().getPath().equals(blobPath) 
-					&& comment.getMark().getCommitHash().equals(getCommit().name())) {
+					&& comment.getMark().getCommitId().equals(getCommit())) {
 				newComments.put(comment, comment.getMark().getRange());
 			}
 		}

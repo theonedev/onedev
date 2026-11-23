@@ -48,7 +48,6 @@ import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.oem.OemService;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.ai.tools.code.GetHighlightedText;
@@ -88,7 +87,7 @@ import io.onedev.server.web.util.AnnotationInfo;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
 
-public class BlobTextDiffPanel extends Panel implements ChatToolAware {
+public abstract class BlobTextDiffPanel extends Panel implements ChatToolAware {
 
 	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(BlobTextDiffPanel.class);
 
@@ -139,15 +138,14 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 	private ObjectMapper objectMapper;
 
 	@Inject
-	private OemService oemService;
-
-	@Inject
 	private GitService gitService;
 
 	@Inject
 	private CodeCommentService codeCommentService;
 
 	private final BlobChange change;
+
+	private DiffPlanarRange mark;
 	
 	private final DiffExpandSupport expandSupport = new DiffExpandSupport();
 	
@@ -195,16 +193,22 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 	
 	private BlameInfo blameInfo;
 	
-	public BlobTextDiffPanel(String id, BlobChange change, DiffViewMode diffMode, boolean blame) {
+	public BlobTextDiffPanel(String id, BlobChange change, @Nullable DiffPlanarRange mark,
+							 DiffViewMode diffMode, boolean blame) {
 		super(id);
 		
 		this.change = change;
+		if (mark != null)
+			this.mark = mark;
+		else if (getAnnotationSupport() != null && getAnnotationSupport().getOpenComment() != null)
+			this.mark = getAnnotationSupport().getOpenComment().getRight();
+
 		this.diffMode = diffMode;
 		if (blame && supportsBlame())
 			blameInfo = loadBlameInfo();
 	}
 
-	private String convertToJson(Object obj) {
+	private String convertToJson(@Nullable Object obj) {
 		try {
 			return objectMapper.writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
@@ -251,6 +255,10 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		}
 		return blameInfo;
 	}
+
+	protected abstract void onMark(AjaxRequestTarget target, DiffPlanarRange mark);
+
+	protected abstract String getMarkUrl(DiffPlanarRange mark);
 	
 	@Override
 	protected void onInitialize() {
@@ -339,21 +347,13 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 						String jsonOfPosition = String.format("{left: %d, top: %d}", 
 								params.getParameterValue("param1").toInt(), 
 								params.getParameterValue("param2").toInt());
-						DiffPlanarRange commentRange = getRange(params, "param3", "param4", "param5", "param6", "param7");
-						
-						String markUrl;
-						if (getAnnotationSupport() != null) {
-							markUrl = getAnnotationSupport().getMarkUrl(commentRange);
-							if (markUrl != null) 
-								markUrl = "'" + escapeJavaScript(markUrl) + "'";
-							else 
-								markUrl = "undefined";
-						} else {
-							markUrl = "undefined";
-						}
-						script = String.format("onedev.server.blobTextDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
-								getMarkupId(), jsonOfPosition, convertToJson(commentRange), markUrl, 
-								escapeJavaScript(getMarkedText(commentRange)),
+						DiffPlanarRange markRange = getRange(params, "param3", "param4", "param5", "param6", "param7");
+						boolean whitespaceMismatch = markRange.isLeftSide() && !change.displaysOriginalTextForOldRange(markRange);
+						String markUrl = whitespaceMismatch ? "null" : "'" + escapeJavaScript(getMarkUrl(markRange)) + "'";
+						String markedText = whitespaceMismatch ? "" : escapeJavaScript(getMarkedText(markRange));
+
+						script = String.format("onedev.server.blobTextDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s, %s);",
+								getMarkupId(), jsonOfPosition, convertToJson(markRange), markUrl, markedText, whitespaceMismatch,
 								SecurityUtils.getAuthUser()!=null && SecurityUtils.canWorkOnProject(change.getProject()));
 						target.appendJavaScript(script);
 						break;
@@ -361,30 +361,30 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 						Preconditions.checkNotNull(SecurityUtils.getAuthUser());
 						SecurityUtils.checkWorkOnProject(change.getProject());
 						
-						commentRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
-						getAnnotationSupport().onAddComment(target, commentRange);
+						markRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
+						getAnnotationSupport().onAddComment(target, markRange);
 						script = String.format("onedev.server.blobTextDiff.onAddComment($('#%s'), %s);", 
-								getMarkupId(), convertToJson(commentRange));
+								getMarkupId(), convertToJson(markRange));
 						target.appendJavaScript(script);
 						break;
 					case "openComment": 
 						Long commentId = params.getParameterValue("param1").toLong();
-						commentRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
+						markRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
 						CodeComment comment = codeCommentService.load(commentId);
-						getAnnotationSupport().onOpenComment(target, comment, commentRange);
+						getAnnotationSupport().onOpenComment(target, comment, markRange);
 						script = String.format("onedev.server.blobTextDiff.onCommentOpened($('#%s'), %s);", 
-								getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));
+								getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, markRange)));
 						target.appendJavaScript(script);
 						break;
 					case "explainSelection":
-						var range = getRange(params, "param1", "param2", "param3", "param4", "param5");
-						getAnnotationSupport().onMark(target, range);
+						mark = getRange(params, "param1", "param2", "param3", "param4", "param5");
+						onMark(target, mark);
 						var page = (LayoutPage) getPage();
 						var prompt = settingService.getAiSetting().getCodeExplanationPrompt();
 						page.getAssistant().show(target,
 								prompt + " Display in " + getSession().getLocale().getDisplayLanguage());
 						script = String.format("onedev.server.blobTextDiff.mark($('#%s'), %s);", 
-								getMarkupId(), convertToJson(range));
+								getMarkupId(), convertToJson(mark));
 						target.appendJavaScript(script);
 						break;
 				}
@@ -507,20 +507,14 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		response.render(JavaScriptHeaderItem.forReference(new BlobTextDiffResourceReference()));
 		
 		DiffCodeCommentInfo openCommentInfo;
-		DiffPlanarRange markRange;
-		String commentContainerId;
 		if (getAnnotationSupport() != null) {
-			markRange = getAnnotationSupport().getMarkRange();
 			Pair<CodeComment, DiffPlanarRange> openCommentPair = getAnnotationSupport().getOpenComment();
 			if (openCommentPair != null) 
 				openCommentInfo = new DiffCodeCommentInfo(openCommentPair.getLeft(), openCommentPair.getRight());
 			else 
 				openCommentInfo = null;
-			commentContainerId = "'" + getAnnotationSupport().getCommentContainer().getMarkupId() + "'";
 		} else {
-			markRange = null;
 			openCommentInfo = null;
-			commentContainerId = null;
 		}
 		
 		CharSequence callback = callbackBehavior.getCallbackFunction(
@@ -531,7 +525,12 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		var translations = new HashMap<String, String>();
 		translations.put("old-context", _T("Old"));
 		translations.put("new-context", _T("New"));
-		translations.put("unable-to-comment", _T("Unable to comment"));
+		translations.put("invalid-selection", _T("Invalid selection."));
+		translations.put("whitespace-selection-hint", MessageFormat.format(
+				_T("Switch to “{0}” and select the lines again."), _T("Do not ignore whitespace")));
+		translations.put("selection-crosses-hidden-lines", _T("The selection crosses hidden lines."));
+		translations.put("selection-includes-expanded-lines", _T("The selection includes expanded lines."));
+		translations.put("selection-spans-revisions", _T("The selection starts and ends in different revisions."));
 		translations.put("perma-link", _T("Permanent link of this selection")); 
 		translations.put("copy-to-clipboard", _T("Copy selected text to clipboard")); 
 		translations.put("add-selection-comment", _T("Add comment on this selection")); 
@@ -542,7 +541,6 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		translations.put("unsaved-changes-prompt", _T("There are unsaved changes, discard and continue?"));
 		translations.put("show-comment", _T("Click to show comment of marked text"));
 		translations.put("loading", _T("Loading..."));
-		translations.put("invalid-selection", _T("Invalid selection, click for details"));
 		var page = (LayoutPage) getPage();
 		if (getAnnotationSupport() != null && !page.getAssistant().getEntitledAis().isEmpty()) 
 			translations.put("explain-selection", _T("Explain selected text with AI"));
@@ -550,25 +548,24 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 			translations.put(severity.name(), _T("severity:" + severity.name()));
 		translations.put("add-problem-comment", _T("Add comment"));
 
-		var jsonOfMarkRange = convertToJson(markRange);
-		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
+		var jsonOfMark = convertToJson(mark);
+		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s);",
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, 
 				change.getNewBlobIdent().revision,
 				change.getOldBlobIdent().path!=null? escapeJavaScript(change.getOldBlobIdent().path):"",
 				change.getNewBlobIdent().path!=null? escapeJavaScript(change.getNewBlobIdent().path):"",
 				callback, blameMessageBehavior.getCallback(),
-				jsonOfMarkRange, convertToJson(openCommentInfo), 
+				jsonOfMark, convertToJson(openCommentInfo),
 				convertToJson(annotationInfoModel.getObject()), 
-				commentContainerId, convertToJson(translations),
-				getSymbolContextJson(), convertToJson(oemService.getDocsite()),
+				convertToJson(translations), getSymbolContextJson(),
 				getAnnotationSupport() != null && SecurityUtils.getAuthUser() != null && SecurityUtils.canWorkOnProject(change.getProject()));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 
 		script = String.format("onedev.server.blobTextDiff.onLoad('%s', %s);", 
 				getMarkupId(), 
-				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null) == null? jsonOfMarkRange: "null");
+				RequestCycle.get().find(AjaxRequestTarget.class).orElse(null) == null? jsonOfMark: "null");
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 	
@@ -1141,20 +1138,17 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 	@Override
 	public List<ChatTool> getChatTools() {
 		var tools = new ArrayList<ChatTool>();
-		if (getAnnotationSupport() != null) {
-			var markRange = getAnnotationSupport().getMarkRange();
-			if (markRange != null) {
-				String filePath;
-				List<String> fileLines;
-				if (markRange.isLeftSide()) {
-					filePath = change.getOldBlobIdent().path;
-					fileLines = change.getOldText().getLines();
-				} else {
-					filePath = change.getNewBlobIdent().path;
-					fileLines = change.getNewText().getLines();
-				}
-				tools.add(ToolUtils.wrapForChat(new GetHighlightedText(filePath, fileLines, markRange)));				
+		if (mark != null) {
+			String filePath;
+			List<String> fileLines;
+			if (mark.isLeftSide()) {
+				filePath = change.getOldBlobIdent().path;
+				fileLines = change.getOldText().getLines();
+			} else {
+				filePath = change.getNewBlobIdent().path;
+				fileLines = change.getNewText().getLines();
 			}
+			tools.add(ToolUtils.wrapForChat(new GetHighlightedText(filePath, fileLines, mark)));
 		}
 		return tools;
 	}

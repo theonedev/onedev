@@ -69,11 +69,13 @@ public class ProjectNumberCounterMigrationTest {
     }
 
     private void writeEntity(String file, long project, long scope, long number) throws Exception {
-        var workspaceFields = file.startsWith("Workspaces.xml")
-                ? "<forTaskAutomation>false</forTaskAutomation><mergeIfAcceptable>false</mergeIfAcceptable>"
-                : "";
+        var additionalFields = "";
+        if (file.startsWith("Workspaces.xml"))
+            additionalFields = "<forTaskAutomation>false</forTaskAutomation><mergeIfAcceptable>false</mergeIfAcceptable>";
+        else if (file.startsWith("PullRequests.xml"))
+            additionalFields = "<baseCommitHash>0123456789abcdef0123456789abcdef01234567</baseCommitHash>";
         Files.writeString(directory.resolve(file), "<list><entity><id>" + project + "</id><project>" + project
                 + "</project><title>Example title</title><numberScope>" + scope + "</numberScope><number>" + number
-                + "</number>" + workspaceFields + "</entity></list>");
+                + "</number>" + additionalFields + "</entity></list>");
     }
 }

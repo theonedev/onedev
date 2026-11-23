@@ -1,18 +1,5 @@
 package io.onedev.server.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Root;
-
-import org.eclipse.jgit.lib.ObjectId;
-
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewerRemoved;
@@ -28,6 +15,15 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.PullRequestChangeService;
 import io.onedev.server.service.PullRequestReviewService;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Singleton
 public class DefaultPullRequestReviewService extends BaseEntityService<PullRequestReview>
@@ -96,33 +92,6 @@ public class DefaultPullRequestReviewService extends BaseEntityService<PullReque
 			change.setData(new PullRequestRequestedForChangesData());
 		
 		changeService.create(change, note);
-	}
-
-	@Sessional
-	@Override
-	public ObjectId getLastReviewedCommit(PullRequest request, User user) {
-        var oldCommitHash = request.getBaseCommitHash();
-		Date sinceDate = null;
-		for (var change: request.getChanges()) {
-			if ((sinceDate == null || change.getDate().after(sinceDate)) 
-					&& change.getUser().equals(user)
-					&& (change.getData() instanceof PullRequestApproveData || change.getData() instanceof PullRequestRequestedForChangesData)) {
-				sinceDate = change.getDate();
-			}
-		}
-		for (var comment: request.getComments()) {
-			if ((sinceDate == null || comment.getDate().after(sinceDate)) 
-					&& comment.getUser().equals(user)) {
-				sinceDate = comment.getDate();
-			}
-		}
-		if (sinceDate != null) {
-			for (var update: request.getSortedUpdates()) {
-				if (update.getDate().before(sinceDate))
-					oldCommitHash = update.getHeadCommitHash();
-			}
-		}
-		return ObjectId.fromString(oldCommitHash);
 	}
 
 }

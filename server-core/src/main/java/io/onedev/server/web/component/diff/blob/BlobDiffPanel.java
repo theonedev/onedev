@@ -47,11 +47,13 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.EditParamsAware;
 
-public class BlobDiffPanel extends Panel {
+public abstract class BlobDiffPanel extends Panel {
 
 	private static final String BODY_ID = "body";
 
 	private final BlobChange change;
+
+	private final DiffPlanarRange mark;
 
 	private final boolean blame;
 
@@ -62,10 +64,12 @@ public class BlobDiffPanel extends Panel {
 	@Inject
 	private Set<DiffRenderer> diffRenderers;
 
-	public BlobDiffPanel(String id, BlobChange change, DiffViewMode diffMode, boolean blame) {
+	public BlobDiffPanel(String id, BlobChange change, @Nullable DiffPlanarRange mark,
+						 DiffViewMode diffMode, boolean blame) {
 		super(id);
 
 		this.change = change;
+		this.mark = mark;
 		this.blame = blame;
 		this.diffMode = diffMode;
 	}
@@ -80,6 +84,30 @@ public class BlobDiffPanel extends Panel {
 		fragment.add(AttributeAppender.append("class",
 				"message p-3 d-flex align-items-center border border-top-0 rounded-bottom"));
 		return fragment;
+	}
+
+	private Fragment newEmptyTextDiffMessage(Blob oldBlob, Blob newBlob, Blob.Text oldText, Blob.Text newText) {
+		if (oldBlob.getBlobId().equals(newBlob.getBlobId()))
+			return newMessageFragment(_T("Content is identical"), false);
+		if (oldBlob.isPartial() || newBlob.isPartial())
+			return newMessageFragment(_T("Unable to diff as the file is too large."), true);
+		if (oldText.getContent().equals(newText.getContent())) {
+			if (!oldText.getCharset().equals(newText.getCharset())) {
+				return newMessageFragment(MessageFormat.format(
+						_T("Detected encoding changed from {0} to {1}. The decoded text is identical."),
+						oldText.getCharset().name(), newText.getCharset().name()), false);
+			}
+			return newMessageFragment(_T("File bytes changed. The decoded text is identical."), false);
+		}
+
+		var message = switch (change.getWhitespaceOption()) {
+			case IGNORE_TRAILING -> _T("Content is identical with trailing whitespaces ignored");
+			case IGNORE_LEADING -> _T("Content is identical with leading whitespaces ignored");
+			case IGNORE_CHANGE -> _T("Content is identical with whitespace changes ignored");
+			case IGNORE_ALL -> _T("Content is identical with all whitespaces ignored");
+			case DO_NOT_IGNORE -> _T("Content is identical");
+		};
+		return newMessageFragment(message, false);
 	}
 
 	@Nullable
@@ -112,11 +140,21 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newMessageFragment(_T("Empty file removed."), false));
 			} else {
-				add(new BlobTextDiffPanel(BODY_ID, change, diffMode, blame) {
+				add(new BlobTextDiffPanel(BODY_ID, change, mark, diffMode, blame) {
 
 					@Override
 					protected PullRequest getPullRequest() {
 						return BlobDiffPanel.this.getPullRequest();
+					}
+
+					@Override
+					protected void onMark(AjaxRequestTarget target, DiffPlanarRange mark) {
+						BlobDiffPanel.this.onMark(target, mark);
+					}
+
+					@Override
+					protected String getMarkUrl(DiffPlanarRange mark) {
+						return BlobDiffPanel.this.getMarkUrl(mark);
 					}
 
 					@Override
@@ -229,8 +267,10 @@ public class BlobDiffPanel extends Panel {
 		} else if (change.getType() == ChangeType.DELETE) {
 			showBlob(change.getOldBlob());
 		} else {
-			LfsPointer oldLfsPointer = change.getOldBlob().getLfsPointer();
-			LfsPointer newLfsPointer = change.getNewBlob().getLfsPointer();
+			var oldBlob = change.getOldBlob();
+			var newBlob = change.getNewBlob();
+			LfsPointer oldLfsPointer = oldBlob.getLfsPointer();
+			LfsPointer newLfsPointer = newBlob.getLfsPointer();
 			if (oldLfsPointer != null
 					&& !new LfsObject(change.getProject().getId(), oldLfsPointer.getObjectId()).exists()
 					|| newLfsPointer != null
@@ -250,23 +290,37 @@ public class BlobDiffPanel extends Panel {
 					}
 				}
 
+				var oldText = oldBlob.getText();
+				var newText = newBlob.getText();
 				if (diffPanel != null) {
 					add(diffPanel);
-				} else if (change.getOldText() != null && change.getNewText() != null) {
-					if (change.getOldText().getLines().size()
-							+ change.getNewText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
+				} else if (oldBlob.getBlobId().equals(newBlob.getBlobId())
+						&& !change.getOldBlobIdent().mode.equals(change.getNewBlobIdent().mode)) {
+					add(newMessageFragment(_T("File mode changed. Content is identical."), false));
+				} else if (oldText != null && newText != null) {
+					if (oldText.getLines().size() + newText.getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 						add(newMessageFragment(_T("Unable to diff as the file is too large."), true));
-					} else if (change.getOldText().getLines().stream().anyMatch(it -> it.length() > MAX_LINE_LEN)
-							|| change.getOldText().getLines().stream().anyMatch(it -> it.length() > MAX_LINE_LEN)) {
+					} else if (oldText.getLines().stream().anyMatch(it -> it.length() > MAX_LINE_LEN)
+							|| newText.getLines().stream().anyMatch(it -> it.length() > MAX_LINE_LEN)) {
 						add(newMessageFragment(_T("Unable to diff as some line is too long."), true));
 					} else if (change.getAdditions() + change.getDeletions() == 0) {
-						add(newMessageFragment(_T("Content is identical"), false));
+						add(newEmptyTextDiffMessage(oldBlob, newBlob, oldText, newText));
 					} else {
-						add(new BlobTextDiffPanel(BODY_ID, change, diffMode, blame) {
+						add(new BlobTextDiffPanel(BODY_ID, change, mark, diffMode, blame) {
 
 							@Override
 							protected PullRequest getPullRequest() {
 								return BlobDiffPanel.this.getPullRequest();
+							}
+
+							@Override
+							protected void onMark(AjaxRequestTarget target, DiffPlanarRange mark) {
+								BlobDiffPanel.this.onMark(target, mark);
+							}
+
+							@Override
+							protected String getMarkUrl(DiffPlanarRange mark) {
+								return BlobDiffPanel.this.getMarkUrl(mark);
 							}
 
 							@Override
@@ -334,4 +388,7 @@ public class BlobDiffPanel extends Panel {
 		return null;
 	}
 
+	protected abstract String getMarkUrl(DiffPlanarRange mark);
+
+	protected abstract void onMark(AjaxRequestTarget target, DiffPlanarRange mark);
 }

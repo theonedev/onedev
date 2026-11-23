@@ -41,7 +41,6 @@ public class CodeCommentHelper {
         reply.setContent(content);
         reply.setUser(user);
         reply.setDate(new Date());
-        reply.setCompareContext(comment.getCompareContext());
         getCodeCommentReplyService().create(reply);
 
         return Map.of("id", reply.getId(), "link", getUrlService().urlFor(reply, true));
@@ -57,8 +56,7 @@ public class CodeCommentHelper {
             statusChange.setComment(comment);
             statusChange.setUser(SecurityUtils.getUser(subject));
             statusChange.setResolved(resolved);
-            statusChange.setCompareContext(comment.getCompareContext());
-            getCodeCommentStatusChangeService().create(statusChange, note);    
+            getCodeCommentStatusChangeService().create(statusChange, note);
         }
 
         return getIdentity(comment);

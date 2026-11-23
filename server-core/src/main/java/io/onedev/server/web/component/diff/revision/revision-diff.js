@@ -1,8 +1,8 @@
 onedev.server.revisionDiff = {
 	onFileDiffReady: function() {
 		const $detail = $(".revision-diff>.body>.detail");
-		$detail.find(".file-tree .tree-content>a.active").removeClass("active");
-		const path = $detail.children(".file-diff").attr("data-selected-file");
+		$detail.find(".change-tree .tree-content>a.active").removeClass("active");
+		const path = $detail.children(".file-diff").attr("data-selected-path");
 		const link = path && document.getElementById("diff-link-" + path);
 		if (link) {
 			link.classList.add("active");
@@ -15,7 +15,7 @@ onedev.server.revisionDiff = {
 		this.scrollTreeSelectionIntoView();
 	},
 	scrollTreeSelectionIntoView: function() {
-		const content = document.querySelector(".revision-diff>.body>.detail>.file-tree>.content");
+		const content = document.querySelector(".revision-diff>.body>.detail>.change-tree>.content");
 		const link = content?.querySelector(".tree-content>a.active");
 		if (link) {
 			const scroller = $(content).scrollParent()[0];
@@ -125,7 +125,7 @@ onedev.server.revisionDiff = {
 		this.scrollTreeSelectionIntoView();
 	},
 	initTree: function() {
-		var $tree = $(".revision-diff>.body>.detail>.file-tree");
+		var $tree = $(".revision-diff>.body>.detail>.change-tree");
 		if ($tree.is(":visible")) {
 			var $treeResizeHandle = $tree.children(".ui-resizable-handle");
 			$tree.resizable({

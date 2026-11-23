@@ -62,14 +62,14 @@
 	margin-right: 0.3rem;
 }
 
-.revision-diff>.body>.detail>.file-tree {
-	--file-tree-height: calc(100cqh - 64px - var(--revision-diff-bottom-spacing));
+.revision-diff>.body>.detail>.change-tree {
+	--change-tree-height: calc(100cqh - 64px - var(--revision-diff-bottom-spacing));
 	top: 64px;
-	min-height: var(--file-tree-height);
-	max-height: var(--file-tree-height);
+	min-height: var(--change-tree-height);
+	max-height: var(--change-tree-height);
 }
 
-.revision-diff>.body>.detail>.file-tree>.ui-resizable-handle {
+.revision-diff>.body>.detail>.change-tree>.ui-resizable-handle {
 	border-left: 1px solid var(--light-gray);
 	background: var(--light) url(/~icon/grip3.svg) no-repeat scroll center center;
 	background-size: 18px 18px;
@@ -78,7 +78,7 @@
 	position: relative;
 	right: 0;
 }
-.dark-mode .revision-diff>.body>.detail>.file-tree>.ui-resizable-handle {
+.dark-mode .revision-diff>.body>.detail>.change-tree>.ui-resizable-handle {
 	border-left-color: var(--dark-mode-lighter-dark);
 	background: var(--dark-mode-light-dark) url(/~icon/dark-grip3.svg) no-repeat scroll center center;
 	background-size: 18px 18px;
@@ -87,15 +87,15 @@
 	min-width: 0;
 	scroll-margin-top: 64px;
 }
-.revision-diff>.body>.detail>.file-tree>.content .tree-content>a {
+.revision-diff>.body>.detail>.change-tree>.content .tree-content>a {
 	display: inline-block;
 	border-radius: 4px;
 	padding: 1px 4px 1px 3px;
 }
-.revision-diff>.body>.detail>.file-tree>.content .tree-content>a.active {
+.revision-diff>.body>.detail>.change-tree>.content .tree-content>a.active {
 	background: #FCF5DA;
 }
-.dark-mode .revision-diff>.body>.detail>.file-tree>.content .tree-content>a.active {
+.dark-mode .revision-diff>.body>.detail>.change-tree>.content .tree-content>a.active {
 	background: var(--dark-mode-light-warning);
 }
 .revision-diff>.head>.review-progress {

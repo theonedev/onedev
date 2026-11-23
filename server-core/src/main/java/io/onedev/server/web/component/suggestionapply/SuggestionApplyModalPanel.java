@@ -1,17 +1,6 @@
 package io.onedev.server.web.component.suggestionapply;
 
-import java.util.List;
-
-import org.jspecify.annotations.Nullable;
-
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.eclipse.jgit.lib.ObjectId;
-
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.ObsoleteCommitException;
@@ -20,19 +9,37 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import jakarta.inject.Inject;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<SuggestionApplyBean> {
 
-	public SuggestionApplyModalPanel(IPartialPageRequestHandler handler, SuggestionApplyBean bean) {
+	@Inject
+	private GitService gitService;
+
+	@Inject
+	private CodeCommentStatusChangeService codeCommentStatusChangeService;
+
+	private final String comparisonBaseHash;
+
+	public SuggestionApplyModalPanel(IPartialPageRequestHandler handler, SuggestionApplyBean bean,
+									 String comparisonBaseHash) {
 		super(handler, bean);
+		this.comparisonBaseHash = comparisonBaseHash;
 	}
 
 	@Override
@@ -60,7 +67,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 				blobEdits.applySuggestion(project, mark, getSuggestion(), commitId);
 				String commitMessage = bean.getCommitMessage();
 				
-				ObjectId newCommitId = OneDev.getInstance(GitService.class).commit(
+				ObjectId newCommitId = gitService.commit(
 						project, blobEdits, GitUtils.branch2ref(branch), 
 						commitId, commitId, SecurityUtils.getAuthUser().asPerson(), 
 						commitMessage, false);
@@ -71,19 +78,17 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 					change.setComment(comment);
 					change.setResolved(true);
 					change.setUser(SecurityUtils.getAuthUser());
-					CompareContext compareContext = new CompareContext();
-					compareContext.setPullRequest(request);
-					compareContext.setOldCommitHash(mark.getCommitHash());
-					compareContext.setNewCommitHash(newCommitId.name());
-					change.setCompareContext(compareContext);
-					OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, "Suggestion applied");
+					codeCommentStatusChangeService.create(change, "Suggestion applied");
 				}
 
 				if (request != null) {
 					PullRequestChangesPage.State state = new PullRequestChangesPage.State();
-					state.oldCommitHash = mark.getCommitHash();
-					state.newCommitHash = newCommitId.name();
-					state.commentId = getComment().getId();
+					if (request.isRelatedCommit(ObjectId.fromString(comparisonBaseHash)))
+						state.oldCommitHash = comparisonBaseHash;
+					else
+						state.oldCommitHash = request.getMergeBase().name();
+					state.createdCommitHash = newCommitId.name();
+					state.commentId = comment.getId();
 					setResponsePage(
 							PullRequestChangesPage.class, 
 							PullRequestChangesPage.paramsOf(request, state));

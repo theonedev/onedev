@@ -276,8 +276,10 @@ public class GitUtilsTest extends AbstractGitTest {
 			TreeWalk treeWalk = TreeWalk.forPath(git.getRepository(), "conflict", mergeCommit.getTree());
 			BlobIdent blobIdent = new BlobIdent(mergeCommit.name(), "conflict", FileMode.REGULAR_FILE.getBits());
 			Blob blob = new Blob(blobIdent, treeWalk.getObjectId(0), treeWalk.getObjectReader());
-			assertEquals("2", blob.getText().getContent());
+			assertEquals("1", blob.getText().getContent());
 		}
+		assertEquals(Set.of("conflict", "dev1"), GitUtils.getChangedFiles(
+				git.getRepository(), git.getRepository().resolve("main"), mergeCommitId));
 		
 	}
 	
@@ -298,10 +300,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevCommit mergeCommit = revWalk.parseCommit(mergeCommitId);
-			TreeWalk treeWalk = TreeWalk.forPath(git.getRepository(), "file", mergeCommit.getTree());
-			BlobIdent blobIdent = new BlobIdent(mergeCommit.name(), "file", FileMode.REGULAR_FILE.getBits());
-			Blob blob = new Blob(blobIdent, treeWalk.getObjectId(0), treeWalk.getObjectReader());
-			assertEquals("1", blob.getText().getContent());
+			assertNull(TreeWalk.forPath(git.getRepository(), "file", mergeCommit.getTree()));
 		}
 	}
 	
@@ -337,8 +336,8 @@ public class GitUtilsTest extends AbstractGitTest {
 		assertNull(GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", false));
 		
-		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
-				git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
+		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"),
+				git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
 		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
@@ -354,8 +353,8 @@ public class GitUtilsTest extends AbstractGitTest {
 			assertEquals("111\n222\n333\n444\n555\naaa\n", blob.getText().getContent());
 		}
 		
-		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-				git.getRepository().resolve("main"), false, user, user, "merge commit", true);
+		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"),
+				git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
 		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
@@ -391,8 +390,8 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		assertNull(mergeCommitId);
 		
-		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
-				git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
+		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"),
+				git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
 		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
@@ -406,8 +405,8 @@ public class GitUtilsTest extends AbstractGitTest {
 			assertEquals("1", blob.getText().getContent());
 		}
 		
-		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-				git.getRepository().resolve("main"), false, user, user, "merge commit", true);
+		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"),
+				git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
 		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
@@ -434,8 +433,8 @@ public class GitUtilsTest extends AbstractGitTest {
 				
 				assertNull(mergeCommitId);
 
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
-						git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"),
+						git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
 				
@@ -469,8 +468,8 @@ public class GitUtilsTest extends AbstractGitTest {
 				
 				assertNull(mergeCommitId);
 				
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
-						git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"),
+						git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
 				
@@ -484,8 +483,8 @@ public class GitUtilsTest extends AbstractGitTest {
 					assertTrue(blob.getText().getContent().trim().endsWith("/home/robin/temp/lib"));
 				}
 				
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-						git.getRepository().resolve("main"), false, user, user, "merge commit", true);
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"),
+						git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
 				
@@ -518,8 +517,8 @@ public class GitUtilsTest extends AbstractGitTest {
 				
 				assertNull(mergeCommitId);
 				
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
-						git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"),
+						git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
 				
@@ -533,8 +532,8 @@ public class GitUtilsTest extends AbstractGitTest {
 					assertTrue(blob.getText().getContent().trim().endsWith("/home/robin/temp/lib/"));
 				}
 				
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-						git.getRepository().resolve("main"), false, user, user, "merge commit", true);
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"),
+						git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
 				

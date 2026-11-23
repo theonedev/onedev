@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,6 +42,8 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.dircache.DirCache;
+import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -56,7 +60,6 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
-import org.eclipse.jgit.merge.Merger;
 import org.eclipse.jgit.merge.ResolveMerger;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
@@ -612,34 +615,39 @@ public class GitUtils {
 		}
 	}
 
+	/**
+	 * The first commit becomes the first parent. With {@code useOursOnConflict},
+	 * use the second commit for conflicting paths.
+	 */
 	@Nullable
-	public static ObjectId merge(Repository repository, ObjectId targetCommitId, ObjectId sourceCommitId,
-								 boolean squash, PersonIdent committer, PersonIdent author, String commitMessage,
-								 boolean useOursOnConflict) {
-		try (RevWalk revWalk = new RevWalk(repository); ObjectInserter inserter = repository.newObjectInserter();) {
-			RevCommit sourceCommit = revWalk.parseCommit(sourceCommitId);
-			RevCommit targetCommit = revWalk.parseCommit(targetCommitId);
-			Merger merger;
-			if (useOursOnConflict)
-				merger = MergeStrategy.OURS.newMerger(repository, true);
-			else
-				merger = MergeStrategy.RECURSIVE.newMerger(repository, true);
-			if (merger.merge(targetCommit, sourceCommit)) {
-				CommitBuilder mergedCommit = new CommitBuilder();
-				mergedCommit.setAuthor(author);
-				mergedCommit.setCommitter(committer);
-				if (squash)
-					mergedCommit.setParentId(targetCommit);
-				else
-					mergedCommit.setParentIds(targetCommit, sourceCommit);
-				mergedCommit.setMessage(commitMessage);
-				mergedCommit.setTreeId(merger.getResultTreeId());
-				ObjectId mergedCommitId = inserter.insert(mergedCommit);
-				inserter.flush();
-				return mergedCommitId;
+	public static ObjectId merge(Repository repository, ObjectId theirCommitId, ObjectId ourCommitId,
+								 boolean squash, PersonIdent committer, PersonIdent author,
+								 String commitMessage, boolean useOursOnConflict) {
+		try (RevWalk revWalk = new RevWalk(repository); ObjectInserter inserter = repository.newObjectInserter()) {
+			RevCommit theirCommit = revWalk.parseCommit(theirCommitId);
+			RevCommit ourCommit = revWalk.parseCommit(ourCommitId);
+			ObjectId mergedTree;
+			if (useOursOnConflict) {
+				mergedTree = mergePreferringOurs(repository, inserter, theirCommit, ourCommit);
 			} else {
-				return null;
+				var merger = MergeStrategy.RECURSIVE.newMerger(repository, true);
+				if (!merger.merge(theirCommit, ourCommit))
+					return null;
+				mergedTree = merger.getResultTreeId();
 			}
+
+			CommitBuilder mergedCommit = new CommitBuilder();
+			mergedCommit.setAuthor(author);
+			mergedCommit.setCommitter(committer);
+			if (squash)
+				mergedCommit.setParentId(theirCommit);
+			else
+				mergedCommit.setParentIds(theirCommit, ourCommit);
+			mergedCommit.setMessage(commitMessage);
+			mergedCommit.setTreeId(mergedTree);
+			ObjectId mergedCommitId = inserter.insert(mergedCommit);
+			inserter.flush();
+			return mergedCommitId;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -647,19 +655,81 @@ public class GitUtils {
 
 	public static Collection<String> getChangedFiles(Repository repository, ObjectId oldCommitId,
 													 ObjectId newCommitId) {
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			return getChangedFilesBetweenTrees(repository, revWalk.parseCommit(oldCommitId).getTree(),
+					revWalk.parseCommit(newCommitId).getTree());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static Collection<String> getChangedFilesAfterMerging(Repository repository, ObjectId oldCommitId,
+			ObjectId newCommitId, ObjectId targetCommitId) {
+		try (var inserter = repository.newObjectInserter(); var revWalk = new RevWalk(repository)) {
+			var targetCommit = revWalk.parseCommit(targetCommitId);
+			var oldTree = mergePreferringOurs(repository, inserter, oldCommitId, targetCommit);
+			var newTree = mergePreferringOurs(repository, inserter, newCommitId, targetCommit);
+			inserter.flush();
+			return getChangedFilesBetweenTrees(repository, oldTree, newTree);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static ObjectId mergePreferringOurs(Repository repository, ObjectInserter inserter,
+			ObjectId theirCommitId, RevCommit ourCommit) throws IOException {
+		var merger = (ResolveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
+		merger.setObjectInserter(inserter);
+		var index = DirCache.newInCore();
+		merger.setDirCache(index);
+		if (merger.merge(false, ourCommit, theirCommitId))
+			return merger.getResultTreeId();
+		if (merger.failed())
+			throw new IllegalStateException("Unable to merge " + theirCommitId.name() + ": " + merger.getFailingPaths());
+
+		var builder = index.builder();
+		Set<ByteBuffer> conflictPaths = new HashSet<>();
+		for (int i = 0; i < index.getEntryCount(); i = index.nextEntry(i)) {
+			var entry = index.getEntry(i);
+			if (entry.getStage() == DirCacheEntry.STAGE_0)
+				builder.add(entry);
+			else
+				conflictPaths.add(ByteBuffer.wrap(entry.getRawPath()));
+		}
+		// A conflict can resolve to an entire subtree or a deletion on our side.
+		try (var treeWalk = new TreeWalk(repository)) {
+			treeWalk.addTree(ourCommit.getTree());
+			while (!conflictPaths.isEmpty() && treeWalk.next()) {
+				var path = treeWalk.getRawPath();
+				if (conflictPaths.remove(ByteBuffer.wrap(path))) {
+					if (treeWalk.isSubtree()) {
+						builder.addTree(path, DirCacheEntry.STAGE_0, treeWalk.getObjectReader(), treeWalk.getObjectId(0));
+					} else {
+						var entry = new DirCacheEntry(path);
+						entry.setFileMode(treeWalk.getFileMode(0));
+						entry.setObjectId(treeWalk.getObjectId(0));
+						builder.add(entry);
+					}
+				} else if (treeWalk.isSubtree()) {
+					treeWalk.enterSubtree();
+				}
+			}
+		}
+		builder.finish();
+		return index.writeTree(inserter);
+	}
+
+	private static Collection<String> getChangedFilesBetweenTrees(Repository repository, ObjectId oldTreeId,
+			ObjectId newTreeId) throws IOException {
 		Collection<String> changedFiles = new HashSet<>();
-		try (RevWalk revWalk = new RevWalk(repository); TreeWalk treeWalk = new TreeWalk(repository)) {
+		try (TreeWalk treeWalk = new TreeWalk(repository)) {
 			treeWalk.setFilter(TreeFilter.ANY_DIFF);
 			treeWalk.setRecursive(true);
-			RevCommit oldCommit = revWalk.parseCommit(oldCommitId);
-			RevCommit newCommit = revWalk.parseCommit(newCommitId);
-			treeWalk.addTree(oldCommit.getTree());
-			treeWalk.addTree(newCommit.getTree());
+			treeWalk.addTree(oldTreeId);
+			treeWalk.addTree(newTreeId);
 			while (treeWalk.next()) {
 				changedFiles.add(treeWalk.getPathString());
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 		return changedFiles;
 	}

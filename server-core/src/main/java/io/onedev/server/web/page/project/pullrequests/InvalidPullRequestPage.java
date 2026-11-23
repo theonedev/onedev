@@ -56,7 +56,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 				PullRequest request = OneDev.getInstance(PullRequestService.class).find(getProject(), requestNumber);
 				if (request == null)
 					throw new EntityNotFoundException("Unable to find pull request #" + requestNumber + " in project " + getProject());
-				Preconditions.checkState(!request.isValid());
+				Preconditions.checkState(request.isCommitsMissing() || request.getMergeBase(false) == null);
 				return request;
 			}
 
@@ -68,7 +68,12 @@ public class InvalidPullRequestPage extends ProjectPage {
 		super.onInitialize();
 		
 		var request = getPullRequest();
-		add(new Label("missingCommits", StringUtils.join(request.getMissingCommits().stream().map(ObjectId::getName).collect(toList()), " ")));
+		if (request.isCommitsMissing()) {
+			add(new Label("reason", _T("Commits missing in repository")));
+		} else {
+			add(new Label("reason", _T("History of target branch and source branch are unrelated")));
+		}
+
 		add(new Label("requestBranches", escapeHtml5(request.getTargetBranch()) + " &larr; " + escapeHtml5(request.getSourceBranch())).setEscapeModelStrings(false));
 		if (request.getDescription() != null) {
 			add(new Label("requestTitle", request.getTitle()).add(AttributeAppender.append("class", "mb-4")));

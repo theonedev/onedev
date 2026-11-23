@@ -79,9 +79,14 @@ public class ProjectAndRevision implements Serializable {
 	public ObjectId getObjectId() {
 		return getObjectId(true);
 	}
-	
+
+	@Nullable
 	public RevCommit getCommit(boolean mustExist) {
-		return getProject().getRevCommit(getObjectId(mustExist), mustExist);
+		var objectId = getObjectId(mustExist);
+		if (objectId == null)
+			return null;
+		else
+			return getProject().getRevCommit(objectId, mustExist);
 	}
 	
 	public RevCommit getCommit() {

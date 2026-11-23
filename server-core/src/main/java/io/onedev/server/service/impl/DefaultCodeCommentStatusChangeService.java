@@ -50,7 +50,6 @@ public class DefaultCodeCommentStatusChangeService extends BaseEntityService<Cod
 		if (note != null) {
 			CodeCommentReply reply = new CodeCommentReply();
 			reply.setComment(comment);
-			reply.setCompareContext(change.getCompareContext());
 			reply.setContent(note);
 			reply.setDate(new Date(change.getDate().getTime() - 100));
 			reply.setUser(change.getUser());

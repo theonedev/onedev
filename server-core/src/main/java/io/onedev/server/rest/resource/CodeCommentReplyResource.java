@@ -1,33 +1,25 @@
 package io.onedev.server.rest.resource;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthenticatedException;
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.service.CodeCommentService;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 @Path("/code-comment-replies")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -69,7 +61,6 @@ public class CodeCommentReplyResource {
 		reply.setComment(comment);
 		reply.setUser(user);
 		reply.setContent(data.getContent());
-		reply.setCompareContext(comment.getCompareContext());
 		replyService.create(reply);
 		return reply.getId();
 	}

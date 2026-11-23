@@ -25,8 +25,8 @@
 				</form>
 			</div>
 			<div wicket:id="navigation" class="btn-group flex-shrink-0 ml-3">
-				<button wicket:id="previousFile" type="button" class="btn btn-light btn-icon btn-lg" aria-keyshortcuts="K" t:aria-label="Previous changed file" t:data-tippy-content="Previous changed file (K)"><wicket:svg href="arrow" class="icon rotate-270"/></button>
-				<button wicket:id="nextFile" type="button" class="btn btn-light btn-icon btn-lg" aria-keyshortcuts="J" t:aria-label="Next changed file" t:data-tippy-content="Next changed file (J)"><wicket:svg href="arrow" class="icon rotate-90"/></button>
+				<button wicket:id="previousChange" type="button" class="btn btn-light btn-icon btn-lg" aria-keyshortcuts="K" t:aria-label="Previous changed file" t:data-tippy-content="Previous changed file (K)"><wicket:svg href="arrow" class="icon rotate-270"/></button>
+				<button wicket:id="nextChange" type="button" class="btn btn-light btn-icon btn-lg" aria-keyshortcuts="J" t:aria-label="Next changed file" t:data-tippy-content="Next changed file (J)"><wicket:svg href="arrow" class="icon rotate-90"/></button>
 			</div>
 			<div wicket:id="reviewProgress" class="position-relative review-progress rounded d-flex align-items-center px-2 ml-3">
 				<div wicket:id="bar" class="position-absolute rounded"></div>
@@ -49,7 +49,7 @@
 				</div>
 			</div>
 			<div wicket:id="content" class="detail d-flex align-items-stretch">
-				<div wicket:id="tree" class="file-tree need-width border border-right-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky mr-3">
+				<div wicket:id="tree" class="change-tree need-width border border-right-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky mr-3">
 					<div wicket:id="content" class="content flex-grow-1 overflow-auto p-3"></div>
 					<div class="ui-resizable-handle ui-resizable-e flex-shrink-0"></div>
 				</div>
@@ -59,10 +59,14 @@
 	</div>
 	<wicket:fragment wicket:id="newCommentFrag">
 		<form wicket:id="form" class="new-comment code-comment-editor no-autofocus leave-confirm">
-			<div wicket:id="notificationWarning" class="alert alert-notice alert-light-warning mb-3"></div>
 			<div wicket:id="feedback" class="feedback"></div>
 			<div class="form-group">
 				<div wicket:id="content"></div>
+				<wicket:enclosure child="notificationWarning">
+					<div class="text-muted font-size-sm mt-2">
+						<wicket:svg href="bulb" class="icon icon-sm mr-1" aria-hidden="true"/> <span wicket:id="notificationWarning"></span>
+					</div>
+				</wicket:enclosure>
 			</div>
 			<div class="actions">
 				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware"><wicket:t>Save</wicket:t></button>

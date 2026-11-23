@@ -62,7 +62,7 @@ public class PullRequestChanged extends PullRequestEvent implements ProjectScope
 			else
 				commitId = ObjectId.zeroId(); // Merged outside
 		} else if (getChange().getData() instanceof PullRequestDiscardData) {
-			commitId = ObjectId.fromString(getRequest().getLatestUpdate().getTargetHeadCommitHash());
+			commitId = getRequest().getTarget().getObjectId();
 		} else {
 			commitId = ObjectId.zeroId();
 		}

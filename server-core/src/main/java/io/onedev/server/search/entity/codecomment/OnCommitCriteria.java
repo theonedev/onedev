@@ -44,7 +44,7 @@ public class OnCommitCriteria extends Criteria<CodeComment>  {
 	@Override
 	public boolean matches(CodeComment comment) {
 		return comment.getProject().equals(project) 
-				&& comment.getMark().getCommitHash().equals(commitId.name());
+				&& comment.getMark().getCommitId().equals(commitId);
 	}
 
 	@Override

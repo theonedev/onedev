@@ -67,12 +67,12 @@ public class DefaultUrlService implements UrlService {
 
 	@Override
 	public String urlFor(CodeCommentReply reply, boolean withRootUrl) {
-		return urlFor(reply.getComment(), reply.getCompareContext(), withRootUrl) + "#" + reply.getAnchor();
+		return urlFor(reply.getComment(), withRootUrl) + "#" + reply.getAnchor();
 	}
 
 	@Override
 	public String urlFor(CodeCommentStatusChange change, boolean withRootUrl) {
-		return urlFor(change.getComment(), change.getCompareContext(), withRootUrl) + "#" + change.getAnchor();
+		return urlFor(change.getComment(), withRootUrl) + "#" + change.getAnchor();
 	}
 
 	@Override
@@ -87,13 +87,13 @@ public class DefaultUrlService implements UrlService {
 
 	private String urlFor(CodeComment comment, CompareContext compareContext, boolean withRootUrl) {
 		Project project = comment.getProject();
-		if (comment.isValid()) {
+		if (!comment.isCommitMissing()) {
 			PullRequest request = compareContext.getPullRequest();
 			PageParametersEncoder paramsEncoder = new PageParametersEncoder();
 			if (!compareContext.getOldCommitHash().equals(compareContext.getNewCommitHash())) {
 				if (request != null) {
 					PageParameters params = new PageParameters();
-					PullRequestChangesPage.fillParams(params, PullRequestChangesPage.getState(comment, compareContext));
+					PullRequestChangesPage.fillParams(params, PullRequestChangesPage.getState(comment));
 					return urlFor(request, withRootUrl) + "/changes" + paramsEncoder.encodePageParameters(params);
 				} else {
 					RevCommit oldCommit;

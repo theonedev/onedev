@@ -1121,8 +1121,8 @@ public class Build extends ProjectBelonging
 				|| accessTokenSecret != null && SecurityUtils.canManageIssues(getAccessToken(accessTokenSecret).asSubject(), project);
 	}
 	
-	public boolean isValid() {
-		return getGitService().hasObjects(getProject(), ObjectId.fromString(getCommitHash()));
+	public boolean isCommitMissing() {
+		return !getGitService().hasObjects(getProject(), ObjectId.fromString(getCommitHash()));
 	}
 	
 	@Nullable

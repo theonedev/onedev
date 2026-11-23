@@ -9722,4 +9722,26 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate258(File dataDir, Stack<Integer> versions) {
+		for (File file : Objects.requireNonNull(dataDir.listFiles())) {
+			var fileName = file.getName();
+			String property;
+			if (fileName.startsWith("PullRequests.xml")) {
+				property = "baseCommitHash";
+			} else if (fileName.startsWith("PullRequestUpdates.xml")) {
+				property = "targetHeadCommitHash";
+			} else if (fileName.startsWith("CodeCommentReplys.xml")
+					|| fileName.startsWith("CodeCommentStatusChanges.xml")) {
+				property = "compareContext";
+			} else {
+				continue;
+			}
+
+			var dom = VersionedXmlDoc.fromFile(file);
+			for (var element : dom.getRootElement().elements())
+				element.element(property).detach();
+			dom.writeToFile(file, false);
+		}
+	}
+
 }

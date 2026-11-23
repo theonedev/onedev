@@ -48,7 +48,7 @@ public class InvalidBuildPage extends ProjectPage {
 				Build build = OneDev.getInstance(BuildService.class).find(getProject(), buildNumber);
 				if (build == null)
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), String.valueOf(buildNumber), getProject()));
-				Preconditions.checkState(!build.isValid());
+				Preconditions.checkState(build.isCommitMissing());
 				return build;
 			}
 

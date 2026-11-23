@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import io.onedev.server.model.support.CompareContext;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.Cookie;
 
@@ -96,7 +97,6 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.hit.QueryHit;
@@ -442,21 +442,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				}
 
 				@Override
-				protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-					SourceViewPanel.this.onSaveCommentReply(target, reply);
-				}
-
-				@Override
-				protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
-					SourceViewPanel.this.onSaveCommentStatusChange(target, change, note);
-				}
-				
-				@Override
-				protected boolean isContextDifferent(CompareContext compareContext) {
-					return SourceViewPanel.this.isContextDifferent(compareContext);
-				}
-
-				@Override
 				protected SuggestionSupport getSuggestionSupport() {
 					return SourceViewPanel.this.getSuggestionSupport(context.getOpenComment().getMark());
 				}
@@ -603,8 +588,12 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								comment.setContent(content);
 								comment.setUser(SecurityUtils.getAuthUser());
 								comment.setProject(context.getProject());
-								comment.setCompareContext(getCompareContext());
-								
+
+								CompareContext compareContext = new CompareContext();
+								compareContext.setOldCommitHash(context.getCommit().name());
+								compareContext.setNewCommitHash(context.getCommit().name());
+								comment.setCompareContext(compareContext);
+
 								codeCommentService.create(comment);
 								
 								CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
@@ -621,21 +610,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 									}
 
 									@Override
-									protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-										SourceViewPanel.this.onSaveCommentReply(target, reply);
-									}
-
-									@Override
-									protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
-										SourceViewPanel.this.onSaveCommentStatusChange(target, change, note);
-									}
-									
-									@Override
-									protected boolean isContextDifferent(CompareContext compareContext) {
-										return SourceViewPanel.this.isContextDifferent(compareContext);
-									}
-
-									@Override
 									protected SuggestionSupport getSuggestionSupport() {
 										return SourceViewPanel.this.getSuggestionSupport(mark);
 									}
@@ -648,7 +622,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 										convertToJson(new CodeCommentInfo(comment, range)));
 								target.appendJavaScript(script);
 								
-								context.onCommentOpened(target, comment, range);
+								context.onCommentOpened(target, comment);
 							}
 						}
 
@@ -657,7 +631,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					commentContainer.replace(fragment);
 					commentContainer.setVisible(true);
 					target.add(commentContainer);
-					context.onAddComment(target, range);
+					context.onAddComment(target);
 					target.appendJavaScript(String.format("onedev.server.sourceView.onAddComment(%s);", convertToJson(range)));
 					break;
 				case "openComment":
@@ -679,21 +653,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						}
 
 						@Override
-						protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-							SourceViewPanel.this.onSaveCommentReply(target, reply);
-						}
-
-						@Override
-						protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
-							SourceViewPanel.this.onSaveCommentStatusChange(target, change, note);
-						}
-						
-						@Override
-						protected boolean isContextDifferent(CompareContext compareContext) {
-							return SourceViewPanel.this.isContextDifferent(compareContext);
-						}
-
-						@Override
 						protected SuggestionSupport getSuggestionSupport() {
 							return SourceViewPanel.this.getSuggestionSupport(getComment().getMark());
 						}
@@ -707,7 +666,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					script = String.format("onedev.server.sourceView.onCommentOpened(%s);", 
 							convertToJson(new CodeCommentInfo(comment, range)));
 					target.appendJavaScript(script);
-					context.onCommentOpened(target, comment, range);
+					context.onCommentOpened(target, comment);
 					break;
 				case "outlineSearch":
 					new ModalPanel(target) {
@@ -919,14 +878,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		int toCh = scope.getToColumn();
 		return (fromLine < line || fromLine == line && fromCh<=ch) && (toLine > line || toLine == line && toCh >= ch);
 	}
-	
-	private CompareContext getCompareContext() {
-		CompareContext compareContext = new CompareContext();
-		compareContext.setOldCommitHash(context.getCommit().name());
-		compareContext.setNewCommitHash(context.getCommit().name());
-		return compareContext;
-	}
-	
+
 	private PlanarRange getRange(IRequestParameters params, String beginLineParam, String beginCharParam, 
 			String endLineParam, String endCharParam) {
 		int beginLine = params.getParameterValue(beginLineParam).toInt();
@@ -1312,30 +1264,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		return menuItems;
 	}
 
-	private boolean isContextDifferent(CompareContext compareContext) {
-		String commitHash = context.getCommit().name();
-		return !compareContext.getOldCommitHash().equals(commitHash) 
-				|| !compareContext.getNewCommitHash().equals(commitHash);
-	}
-	
 	@Override
 	protected String getPlainName() {
 		return plainName;
 	}
-	
-	private void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-		reply.setCompareContext(getCompareContext());
-		if (reply.isNew())
-			codeCommentReplyService.create(reply);
-		else
-			codeCommentReplyService.update(reply);
-	}
-	
-	private void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
-		change.setCompareContext(getCompareContext());
-		codeCommentStatusChangeService.create(change, note);
-	}
-	
+
 	private SuggestionSupport getSuggestionSupport(Mark mark) {
 		return new SuggestionSupport() {
 			
@@ -1359,7 +1292,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								if (branch != null)
 									bean.setBranch(branch);
 							}
-							new SuggestionApplyModalPanel(target, bean) {
+							new SuggestionApplyModalPanel(target, bean, context.getCommit().name()) {
 
 								@Override
 								protected CodeComment getComment() {

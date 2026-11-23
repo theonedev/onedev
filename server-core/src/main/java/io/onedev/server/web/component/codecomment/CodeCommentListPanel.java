@@ -116,8 +116,7 @@ public abstract class CodeCommentListPanel extends Panel {
 		}
 		
 	};
-	
-	
+
 	private DataTable<CodeComment, Void> commentsTable;
 	
 	private SortableDataProvider<CodeComment, Void> dataProvider;
@@ -234,7 +233,6 @@ public abstract class CodeCommentListPanel extends Panel {
 							var comment = comments.next();
 							CodeCommentStatusChange change = new CodeCommentStatusChange();
 							change.setComment(comment);
-							change.setCompareContext(comment.getCompareContext());
 							change.setDate(new Date());
 							change.setResolved(resolved);
 							change.setUser(SecurityUtils.getAuthUser());

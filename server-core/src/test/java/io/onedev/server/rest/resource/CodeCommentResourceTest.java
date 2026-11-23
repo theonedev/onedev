@@ -9,11 +9,12 @@ import java.util.Set;
 
 import jakarta.ws.rs.NotAcceptableException;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,12 +54,14 @@ import io.onedev.server.validation.HibernateValidationTestSupport;
 class CodeCommentResourceTest extends HibernateValidationTestSupport {
 
 	private static final String COMMIT = "1234567890123456789012345678901234567890";
+	private static final ObjectId COMMIT_ID = ObjectId.fromString(COMMIT);
 
 	private CodeCommentService comments;
 	private CodeCommentStatusChangeService statusChanges;
 	private AuditService audit;
 	private ProjectService projects;
 	private PullRequestService pullRequests;
+	private GitService gitService;
 	private CodeCommentResource resource;
 	private Project project;
 	private User user;
@@ -67,18 +70,25 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 	private MockedStatic<VersionedXmlDoc> xml;
 
 	@BeforeEach
-	void setUp() {
+	void setUp() throws IllegalAccessException {
 		comments = mock(CodeCommentService.class);
 		statusChanges = mock(CodeCommentStatusChangeService.class);
 		audit = mock(AuditService.class);
 		projects = mock(ProjectService.class);
 		pullRequests = mock(PullRequestService.class);
-		resource = new CodeCommentResource(comments, audit, projects, statusChanges, mock(GitService.class), pullRequests);
+		gitService = mock(GitService.class);
+		resource = new CodeCommentResource();
+		FieldUtils.writeField(resource, "commentService", comments, true);
+		FieldUtils.writeField(resource, "statusChangeService", statusChanges, true);
+		FieldUtils.writeField(resource, "auditService", audit, true);
+		FieldUtils.writeField(resource, "projectService", projects, true);
+		FieldUtils.writeField(resource, "pullRequestService", pullRequests, true);
+		FieldUtils.writeField(resource, "gitService", gitService, true);
 		project = mock(Project.class);
 		user = new User();
 		user.setId(2L);
 		when(projects.load(1L)).thenReturn(project);
-		when(project.getRevCommit(COMMIT, false)).thenReturn(mock(RevCommit.class));
+		when(gitService.hasObjects(project, COMMIT_ID)).thenReturn(true);
 		var blob = mock(Blob.class);
 		when(blob.getText()).thenReturn(new Blob.Text(StandardCharsets.UTF_8, "hello\nworld"));
 		when(project.getBlob(any(BlobIdent.class), eq(false))).thenReturn(blob);
@@ -111,7 +121,6 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 		comment.setMark(new Mark(COMMIT, "file.txt", new PlanarRange(0, 1, 2, 3)));
 		var originalMark = comment.getMark();
 		var targetCommit = "abcdefabcdefabcdefabcdefabcdefabcdefabcd";
-		when(project.getRevCommit(targetCommit, false)).thenReturn(mock(RevCommit.class));
 		when(project.readLines(any(BlobIdent.class), any(WhitespaceOption.class), anyBoolean())).thenCallRealMethod();
 		var oldBlob = mock(Blob.class);
 		when(oldBlob.getText()).thenReturn(new Blob.Text(StandardCharsets.UTF_8, "first  \nmiddle\nlast"));
@@ -134,12 +143,11 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 	}
 
 	@Test
-	void checksPermissionAndTargetCommitBeforeMappingComment() throws Exception {
-		existingComment();
+	void returnsOriginalMarkWithoutTargetCommitAndChecksPermission() throws Exception {
+		var comment = existingComment();
 		var method = CodeCommentResource.class.getMethod("getMark", Long.class, String.class);
-		assertFalse(validator.forExecutables().validateParameters(resource, method, new Object[] {4L, null}).isEmpty());
-		assertThrows(NotAcceptableException.class, () -> resource.getMark(4L, "invalid"));
-		assertThrows(NotAcceptableException.class, () -> resource.getMark(4L, "abcdefabcdefabcdefabcdefabcdefabcdefabcd"));
+		assertTrue(validator.forExecutables().validateParameters(resource, method, new Object[] {4L, null}).isEmpty());
+		assertSame(comment.getMark(), resource.getMark(4L, null));
 		security.when(() -> SecurityUtils.canReadCode(project)).thenReturn(false);
 		assertThrows(UnauthorizedException.class, () -> resource.getMark(4L, COMMIT));
 		verify(project, never()).readLines(any(), any(), anyBoolean());
@@ -162,9 +170,9 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 	void createsCommentFromJsonWithPullRequestContext(boolean scopedToken) throws Exception {
 		if (scopedToken)
 			security.when(SecurityUtils::getAuthUser).thenReturn(null);
-		var request = new PullRequest();
-		request.setId(3L);
-		request.setTargetProject(project);
+		var request = mock(PullRequest.class);
+		when(request.getProject()).thenReturn(project);
+		when(request.isRelatedCommit(COMMIT_ID)).thenReturn(true);
 		when(pullRequests.load(3L)).thenReturn(request);
 		var mapper = new ObjectMapperProvider(Set.of(), Set.of(), mock(ImplementationRegistry.class), Set.of()).get();
 		var data = mapper.readValue("{\"projectId\":1,\"content\":\"Review this\","
@@ -217,7 +225,7 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 		data.getMark().setRange(rangeData(0, 0, 2, 0));
 		assertThrows(NotAcceptableException.class, () -> resource.createComment(data));
 		data.getMark().setRange(rangeData(0, 0, 0, 5));
-		when(project.getRevCommit(COMMIT, false)).thenReturn(null);
+		when(gitService.hasObjects(project, COMMIT_ID)).thenReturn(false);
 		assertThrows(NotAcceptableException.class, () -> resource.createComment(data));
 		verifyNoInteractions(comments, audit);
 	}
@@ -267,7 +275,7 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	void changesStatusWithOptionalNoteAndPreservesContext(boolean resolved) {
+	void changesStatusWithOptionalNote(boolean resolved) {
 		var comment = existingComment();
 		comment.setResolved(!resolved);
 		security.when(() -> SecurityUtils.canChangeStatus(subject, comment)).thenReturn(true);
@@ -280,7 +288,6 @@ class CodeCommentResourceTest extends HibernateValidationTestSupport {
 		assertSame(comment, change.getValue().getComment());
 		assertSame(user, change.getValue().getUser());
 		assertEquals(resolved, change.getValue().isResolved());
-		assertSame(comment.getCompareContext(), change.getValue().getCompareContext());
 		verify(comments, never()).update(any());
 		verifyNoInteractions(audit);
 	}

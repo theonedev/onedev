@@ -8,7 +8,18 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.PlanarRange;
+
 public class DiffUtilsTest extends DiffUtils {
+
+	@Test
+	public void testMapRangeReturnsNullWhenLastLineChanges() {
+		var oldLines = List.of("package com.mycompany.app;", "", "public record Util", "{");
+		var newLines = List.of("package com.mycompany.app;", "", "private record Util", "{");
+		var range = new PlanarRange(0, 8, 2, 6);
+
+		assertNull(DiffUtils.mapRange(DiffUtils.mapLines(oldLines, newLines), range));
+	}
 
 	@Test
 	public void testIsVisible() {

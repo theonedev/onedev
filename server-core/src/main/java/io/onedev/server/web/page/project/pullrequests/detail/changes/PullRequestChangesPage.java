@@ -7,15 +7,9 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import io.onedev.commons.utils.ExplicitException;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -43,7 +37,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.jspecify.annotations.Nullable;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.PlanarRange;
@@ -58,21 +51,14 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.ReviewedDiff;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
-import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.ReviewedDiffService;
 import io.onedev.server.util.diff.DiffUtils;
@@ -97,7 +83,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	
 	public static final String PARAM_NEW_COMMIT = "new-commit";
 
-	private static final String PARAM_FILE = "file";
+	private static final String PARAM_PATH = "path";
 
 	private static final String PARAM_BLAME = "blame";
 
@@ -110,31 +96,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	private static final String PARAM_MARK = "mark";
 	
 	private State state = new State();
-	
-	private final IModel<List<RevCommit>> commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
-		@Override
-		protected List<RevCommit> load() {
-			List<RevCommit> commits = new ArrayList<>();
-			for (PullRequestUpdate update: getPullRequest().getSortedUpdates()) {
-				commits.addAll(update.getCommits());
-			}
-			return commits;
-		}
-		
-	};
-	
-	private final IModel<ObjectId> comparisonBaseModel = new LoadableDetachableModel<ObjectId>() {
-		
-		@Override
-		protected ObjectId load() {
-			ObjectId oldCommitId = ObjectId.fromString(state.oldCommitHash);
-			ObjectId newCommitId = ObjectId.fromString(state.newCommitHash);
-			return getPullRequestService().getComparisonBase(getPullRequest(), oldCommitId, newCommitId);
-		}
-		
-	};
-	
 	private final IModel<Map<CodeComment, PlanarRange>> oldCommentsModel = 
 			new LoadableDetachableModel<Map<CodeComment, PlanarRange>>() {
 
@@ -142,8 +104,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		protected Map<CodeComment, PlanarRange> load() {
 			Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
 			for (CodeComment comment: getPullRequest().getCodeComments()) {
-				if (getCommitIndex(comment.getMark().getCommitHash()) <= getCommitIndex(state.oldCommitHash)) {
-					PlanarRange mappedRange = mapRange(comment, getComparisonBase());
+				if (!newCommentsModel.getObject().containsKey(comment)) {
+					PlanarRange mappedRange = mapRange(comment, ObjectId.fromString(state.oldCommitHash));
 					if (mappedRange != null)
 						oldComments.put(comment, mappedRange);
 				}
@@ -160,13 +122,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		protected Map<CodeComment, PlanarRange> load() {
 			Map<CodeComment, PlanarRange> newComments = new HashMap<>();
 			for (CodeComment comment: getPullRequest().getCodeComments()) {
-				int commentCommitIndex = getCommitIndex(comment.getMark().getCommitHash());
-				if (commentCommitIndex > getCommitIndex(state.oldCommitHash)
-						&& commentCommitIndex <= getCommitIndex(state.newCommitHash)) {
-					PlanarRange mappedRange = mapRange(comment, ObjectId.fromString(state.newCommitHash));
-					if (mappedRange != null)
-						newComments.put(comment, mappedRange);
-				}
+				PlanarRange mappedRange = mapRange(comment, ObjectId.fromString(state.newCommitHash));
+				if (mappedRange != null)
+					newComments.put(comment, mappedRange);
 			}
 			return newComments;
 		}
@@ -188,35 +146,52 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		super(params);
 
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		
+		var request = getPullRequest();
+		var comment = getOpenComment();
+
 		state.oldCommitHash = params.get(PARAM_OLD_COMMIT).toString();
 		state.newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
-		state.file = params.get(PARAM_FILE).toString();
-		if (state.file != null)
-			state.mark = DiffPlanarRange.of(params.get(PARAM_MARK).toString());
+		state.blobPath = params.get(PARAM_PATH).toString();
+		state.mark = DiffPlanarRange.of(params.get(PARAM_MARK).toString());
+
 		state.blame = params.get(PARAM_BLAME).toBoolean(false);
 		state.createdCommitHash = params.get(ProjectBlobPage.PARAM_CREATED_COMMIT).toString();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.whitespaceOption = WhitespaceOption.ofName(params.get(PARAM_WHITESPACE_OPTION).toString());
-		     
-		PullRequest request = getPullRequest();
-		if (state.oldCommitHash == null) 
-			state.oldCommitHash = request.getBaseCommitHash();
+
+		if (state.oldCommitHash == null) {
+			if (comment != null) {
+				if (request.isRelatedCommit(comment.getCompareContext().getOldCommitId()))
+					state.oldCommitHash = comment.getCompareContext().getOldCommitHash();
+				else
+					state.oldCommitHash = request.getMergeBase().name();
+			} else {
+				state.oldCommitHash = request.getMergeBase().name();
+			}
+		} else if (!request.isRelatedCommit(ObjectId.fromString(state.oldCommitHash))) {
+			throw new ExplicitException("Old commit hash does not relate to pull request");
+		}
 		
 		if (state.newCommitHash == null) {
-			if (state.createdCommitHash != null)
+			if (state.createdCommitHash != null) {
 				state.newCommitHash = state.createdCommitHash;
-			else
+			} else if (comment != null) {
+				if (request.isRelatedCommit(comment.getCompareContext().getNewCommitId()))
+					state.newCommitHash = comment.getCompareContext().getNewCommitHash();
+				else
+					state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+			} else {
 				state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+			}
+		} else if (!request.isRelatedCommit(ObjectId.fromString(state.newCommitHash))) {
+			throw new ExplicitException("New commit hash does not relate to pull request");
 		}
-		if (state.whitespaceOption == null)
-			state.whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
 	}
 	
 	private int getCommitIndex(String commitHash) {
 		int index = -1;
-		for (int i=0; i<commitsModel.getObject().size(); i++) {
-			RevCommit commit = commitsModel.getObject().get(i);
+		for (int i=0; i<getPullRequest().getCommits().size(); i++) {
+			RevCommit commit = getPullRequest().getCommits().get(i);
 			if (commit.name().equals(commitHash)) {
 				index = i;
 				break;
@@ -232,8 +207,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	
 	@Nullable
 	private PlanarRange mapRange(CodeComment comment, ObjectId commitId) {
-		Map<Integer, Integer> lineMapping = getLineMapping( 
-				ObjectId.fromString(comment.getMark().getCommitHash()), 
+		Map<Integer, Integer> lineMapping = getLineMapping(
+				comment.getMark().getCommitId(),
 				commitId, comment.getMark().getPath());
 		return DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
 	}
@@ -246,10 +221,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		Map<Integer, Integer> lineMapping = lineMappingCache.get(key);
 		if (lineMapping == null) {
 			BlobIdent newBlobIdent = new BlobIdent(newCommitId.name(), blobPath, FileMode.REGULAR_FILE.getBits());
-			List<String> newLines = getProject().readLines(newBlobIdent, WhitespaceOption.IGNORE_TRAILING, false);
+			List<String> newLines = getProject().readLines(newBlobIdent, WhitespaceOption.DO_NOT_IGNORE, false);
 			if (newLines != null) {
 				BlobIdent oldBlobIdent = new BlobIdent(oldCommitId.name(), blobPath, FileMode.REGULAR_FILE.getBits());
-				List<String> oldLines = getProject().readLines(oldBlobIdent, WhitespaceOption.IGNORE_TRAILING, true);
+				List<String> oldLines = getProject().readLines(oldBlobIdent, WhitespaceOption.DO_NOT_IGNORE, true);
 				if (oldLines != null) 
 					lineMapping = DiffUtils.mapLines(oldLines, newLines);
 				else 
@@ -261,16 +236,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		}
 		return lineMapping;
 	}
-	
-	@Nullable
-	private Mark getPermanentMark(Mark mark) {
-		return mark.permanentize(
-				getProject(), 
-				ObjectId.fromString(state.oldCommitHash), 
-				ObjectId.fromString(state.newCommitHash), 
-				getComparisonBase());
-	}
-	
+
 	private PullRequestService getPullRequestService() {
 		return OneDev.getInstance(PullRequestService.class);
 	}
@@ -309,20 +275,20 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(getCommitIndex(state.oldCommitHash) != -1 && getCommitIndex(state.newCommitHash) != -1);
+				setEnabled(getCommitIndex(state.newCommitHash) > 0);
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				int index = getCommitIndex(state.oldCommitHash);
-				if (index != -1) {
-					state.newCommitHash = commitsModel.getObject().get(index).name();
+				int index = getCommitIndex(state.newCommitHash);
+				if (index > 0) {
 					index--;
-					if (index == -1) {
-						state.oldCommitHash = getPullRequest().getBaseCommitHash();
-					} else {
-						state.oldCommitHash = commitsModel.getObject().get(index).name();
-					}
+					state.newCommitHash = getPullRequest().getCommits().get(index).name();
+					if (index > 0)
+						state.oldCommitHash = getPullRequest().getCommits().get(index-1).name();
+					else
+						state.oldCommitHash = getPullRequest().getMergeBase().name();
+					state.blobPath = null;
 					state.mark = null;
 					newRevisionDiff(target, fragment);
 				}
@@ -336,16 +302,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-
-				int oldIndex = getCommitIndex(state.oldCommitHash);
-				int newIndex = getCommitIndex(state.newCommitHash);
-				if (!state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()) && oldIndex == -1 
-						|| newIndex == -1 || newIndex == commitsModel.getObject().size()-1) {
-					setEnabled(false);
-				} else {
-					setEnabled(true);
-				}
-				
+				setEnabled(getCommitIndex(state.newCommitHash) < getPullRequest().getCommits().size()-1);
 			}
 
 			@Override
@@ -361,18 +318,14 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				int index = getCommitIndex(state.newCommitHash);
-				if (index != -1 && index != commitsModel.getObject().size()-1) {
-					CodeComment comment = getOpenComment();
-					
-					// we will not move old commit if an opened comment points to it
-					if (comment == null || comment.getMark().getCommitHash().equals(state.newCommitHash)) {
-						state.oldCommitHash = state.newCommitHash;
-					}
+				if (index < getPullRequest().getCommits().size()-1) {
 					index++;
-					state.newCommitHash = commitsModel.getObject().get(index).name();
+					state.newCommitHash = getPullRequest().getCommits().get(index).name();
+					state.oldCommitHash = getPullRequest().getCommits().get(index-1).name();
+					state.blobPath = null;
 					state.mark = null;
 					newRevisionDiff(target, fragment);
-				} 
+				}
 				target.add(head);
 				pushState(target);
 			}
@@ -396,6 +349,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 						state.oldCommitHash = params.getParameterValue("oldCommit").toString();
 						state.newCommitHash = params.getParameterValue("newCommit").toString();
+						state.blobPath = null;
 						state.mark = null;
 						target.add(head);
 						newRevisionDiff(target, fragment);
@@ -414,13 +368,13 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						String script;
 						int oldIndex = getCommitIndex(state.oldCommitHash);
 						int newIndex = getCommitIndex(state.newCommitHash);
-						if ((state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()) || oldIndex != -1) 
+						if ((state.oldCommitHash.equals(getPullRequest().getMergeBase().name()) || oldIndex != -1)
 								&& newIndex != -1) {
 							script = String.format("onedev.server.requestChanges.initCommitSelector(%s, '%s', %d, %d);", 
-									callback, getPullRequest().getBaseCommitHash(), oldIndex+1, newIndex);
+									callback, getPullRequest().getMergeBase().name(), oldIndex+1, newIndex);
 						} else {
 							script = String.format("onedev.server.requestChanges.initCommitSelector(%s, '%s');", 
-									callback, getPullRequest().getBaseCommitHash());
+									callback, getPullRequest().getMergeBase().name());
 						}
 						response.render(OnDomReadyHeaderItem.forScript(script));
 					}
@@ -435,7 +389,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						newState.blame = state.blame;
 						
 						PullRequest request = getPullRequest();
-						newState.oldCommitHash = request.getBaseCommitHash();
+						newState.oldCommitHash = request.getMergeBase().name();
 						newState.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 						setResponsePage(PullRequestChangesPage.class, 
 								PullRequestChangesPage.paramsOf(request, newState));
@@ -472,12 +426,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						newState.blame = state.blame;
 						
 						PullRequest request = getPullRequest();
-						newState.oldCommitHash = request.getBaseCommitHash();
-						for (PullRequestUpdate update: request.getSortedUpdates()) {
-							if (update.getDate().before(getModelObject()))
-								newState.oldCommitHash = update.getHeadCommitHash();
-						}
-						
+						newState.oldCommitHash = request.getSinceCommitId(getModelObject()).name();
 						newState.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 						setResponsePage(PullRequestChangesPage.class, 
 								PullRequestChangesPage.paramsOf(request, newState));
@@ -492,15 +441,17 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					}
 					
 				});
-				fragment.add(new ListView<RevCommit>("commits", commitsModel) {
+				fragment.add(new ListView<RevCommit>("commits", new IModel<List<RevCommit>>() {
+					@Override
+					public List<RevCommit> getObject() {
+						return getPullRequest().getCommits();
+					}
+
+				}) {
 
 					@Override
 					protected void populateItem(ListItem<RevCommit> item) {
 						RevCommit commit = item.getModelObject();
-						if (!getPullRequest().getPendingCommits().contains(commit)) {
-							item.add(AttributeAppender.append("class", "rebased"));
-							item.add(AttributeAppender.append("title", _T("This commit is rebased")));
-						}
 						item.add(AttributeAppender.append("data-hash", commit.name()));
 						item.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 						item.add(new Label("subject", commit.getShortMessage()));
@@ -515,7 +466,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			public String getObject() {
 				String oldName;
-				if (state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()))
+				if (state.oldCommitHash.equals(getPullRequest().getMergeBase().name()))
 					oldName = _T("base");
 				else
 					oldName = GitUtils.abbreviateSHA(state.oldCommitHash);
@@ -538,7 +489,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				state.oldCommitHash = getPullRequest().getBaseCommitHash();
+				state.oldCommitHash = getPullRequest().getMergeBase().name();
 				state.newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
 				state.mark = null;
 				target.add(head);
@@ -549,7 +500,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()) 
+				setVisible(!state.oldCommitHash.equals(getPullRequest().getMergeBase().name())
 						|| !state.newCommitHash.equals(getPullRequest().getLatestUpdate().getHeadCommitHash()));
 			}
 			
@@ -562,7 +513,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	
 	private void newContent(@Nullable IPartialPageRequestHandler handler) {
 		Component content;
-		if (getCommitIndex(state.newCommitHash) == -1) {
+		if (state.createdCommitHash != null && getCommitIndex(state.newCommitHash) == -1) {
 			content = new Fragment("content", "waitingFrag", this);
 			content.add(new ChangeObserver() {
 
@@ -573,7 +524,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 				@Override
 				public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-					newContent(handler);
+					// Render the diff over HTTP so it can read the browser's display preferences including split mode.
+					if (getCommitIndex(state.newCommitHash) != -1)
+						handler.appendJavaScript("window.location.reload();");
 				}
 				
 			});
@@ -597,8 +550,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 	@Override
 	public void onDetach() {
-		commitsModel.detach();
-		comparisonBaseModel.detach();
 		oldCommentsModel.detach();
 		newCommentsModel.detach();
 		reviewedDiffsModel.detach();
@@ -612,13 +563,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		return paramsOf(request, state);
 	}
 
-	public static State getState(CodeComment comment, CompareContext compareContext) {
+	public static State getState(CodeComment comment) {
 		PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 		state.commentId = comment.getId();
-		state.file = comment.getMark().getPath();
-		state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
-		state.oldCommitHash = compareContext.getOldCommitHash();
-		state.newCommitHash = compareContext.getNewCommitHash();
 		return state;
 	}
 	
@@ -633,11 +580,13 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			params.add(PARAM_OLD_COMMIT, state.oldCommitHash);
 		if (state.newCommitHash != null)
 			params.add(PARAM_NEW_COMMIT, state.newCommitHash);
-		if (state.file != null)
-			params.add(PARAM_FILE, state.file);
+		else if (state.createdCommitHash != null)
+			params.add(ProjectBlobPage.PARAM_CREATED_COMMIT, state.createdCommitHash);
+		if (state.blobPath != null)
+			params.add(PARAM_PATH, state.blobPath);
 		if (state.blame)
 			params.add(PARAM_BLAME, true);
-		if (state.whitespaceOption != WhitespaceOption.IGNORE_TRAILING)
+		if (state.whitespaceOption != null)
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.add(PARAM_PATH_FILTER, state.pathFilter);
@@ -698,6 +647,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			@Override
 			public void setObject(String object) {
 				state.pathFilter = object;
+				state.commentId = null;
+				state.blobPath = null;
+				state.mark = null;
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null));
 			}
 			
@@ -711,7 +663,13 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 			@Override
 			public WhitespaceOption getObject() {
-				return state.whitespaceOption;
+				if (state.whitespaceOption != null) {
+					return state.whitespaceOption;
+				} else if (getOpenComment() != null) {
+					return getOpenComment().getCompareContext().getWhitespaceOption();
+				} else {
+					return null;
+				}
 			}
 
 			@Override
@@ -722,15 +680,36 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 		};
 		
-		Component revisionDiff = new RevisionDiffPanel("revisionDiff", getComparisonBase().name(), 
-				state.newCommitHash, state.file, pathFilterModel, whitespaceOptionModel, blameModel, this) {
+		Component revisionDiff = new RevisionDiffPanel("revisionDiff", state.oldCommitHash,
+				state.newCommitHash, state.blobPath, state.mark, pathFilterModel, whitespaceOptionModel,
+				blameModel, this) {
 			
 			@Override
-			protected void onFileSelected(AjaxRequestTarget target) {
-				state.file = getSelectedFile();
+			protected void onChangeSelected(AjaxRequestTarget target, String blobPath) {
+				state.blobPath = blobPath;
 				state.commentId = null;
 				state.mark = null;
 				pushState(target);
+			}
+
+			@Override
+			protected void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
+				state.blobPath = blobPath;
+				state.mark = mark;
+				pushState(target);
+			}
+
+			@Override
+			protected String getMarkUrl(String blobPath, DiffPlanarRange mark) {
+				State markState = new State();
+				markState.blobPath = blobPath;
+				markState.mark = mark;
+				markState.blame = state.blame;
+				markState.oldCommitHash = state.oldCommitHash;
+				markState.newCommitHash = state.newCommitHash;
+				markState.pathFilter = state.pathFilter;
+				markState.whitespaceOption = state.whitespaceOption;
+				return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
 			}
 
 			@Override
@@ -780,12 +759,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				}
 			}
 
-			@Override
-			protected boolean isContextDifferent(CompareContext compareContext) {
-				return !compareContext.getOldCommitHash().equals(state.oldCommitHash) 
-						|| !compareContext.getNewCommitHash().equals(state.newCommitHash);
-			}
-			
 		};
 		
 		revisionDiff.setOutputMarkupId(true);
@@ -805,33 +778,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public DiffPlanarRange getMark() {
-		return state.mark;
-	}
-
-	@Override
 	protected Collection<String> getCssClasses() {
 		var cssClasses = super.getCssClasses();
 		cssClasses.add("hide-side-info");
 		return cssClasses;
 	}
 
-	@Override
-	public String getMarkUrl(String blobPath, DiffPlanarRange mark) {
-		if (mark.isLeftSide() && getPermanentMark(new Mark(getComparisonBase().name(), blobPath, mark)) == null)
-			return null;
-
-		State markState = new State();
-		markState.file = blobPath;
-		markState.mark = mark;
-		markState.blame = state.blame;
-		markState.oldCommitHash = state.oldCommitHash;
-		markState.newCommitHash = state.newCommitHash;
-		markState.pathFilter = state.pathFilter;
-		markState.whitespaceOption = state.whitespaceOption;
-		return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
-	}
-	
 	@Override
 	public CodeComment getOpenComment() {
 		if (state.commentId != null) 
@@ -840,35 +792,18 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			return null;
 	}
 
-	private ObjectId getComparisonBase() {
-		return comparisonBaseModel.getObject();
-	}
-	
 	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, String blobPath) {
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		state.commentId = comment.getId();
-		state.file = blobPath;
+		state.blobPath = null;
 		state.mark = null;
 		pushState(target);
 	}
 
 	@Override
-	public void onCommentClosed(AjaxRequestTarget target) {
+	public void onCommentClosed(AjaxRequestTarget target, String blobPath) {
+		state.blobPath = blobPath;
 		state.commentId = null;
-		state.mark = null;
-		pushState(target);
-	}
-	
-	@Override
-	public void onMark(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
-		state.file = blobPath;
-		state.mark = mark;
-		pushState(target);
-	}
-	
-	@Override
-	public void onUnmark(AjaxRequestTarget target) {
-		state.mark = null;
 		pushState(target);
 	}
 	
@@ -877,47 +812,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, String blobPath, DiffPlanarRange mark) {
+	public void onAddComment(AjaxRequestTarget target) {
 		state.commentId = null;
-		onMark(target, blobPath, mark);
+		state.mark = null;
+		pushState(target);
 	}
 
-	@Override
-	public void onSaveComment(CodeComment comment) {
-		if (comment.isNew()) {
-			Mark mark = comment.getMark();
-			comment.setMark(Preconditions.checkNotNull(getPermanentMark(mark)));
-			CompareContext compareContext = comment.getCompareContext();
-			compareContext.setOldCommitHash(state.oldCommitHash);
-			compareContext.setNewCommitHash(state.newCommitHash);
-			OneDev.getInstance(CodeCommentService.class).create(comment);
-		} else {
-			OneDev.getInstance(CodeCommentService.class).update(comment);
-		}
-	}
-	
-	@Override
-	public void onSaveCommentReply(CodeCommentReply reply) {
-		if (reply.isNew()) {
-			CompareContext compareContext = reply.getCompareContext();
-			compareContext.setOldCommitHash(state.oldCommitHash);
-			compareContext.setNewCommitHash(state.newCommitHash);
-			OneDev.getInstance(CodeCommentReplyService.class).create(reply);
-		} else {
-			OneDev.getInstance(CodeCommentReplyService.class).update(reply);
-		}
-	}
-	
-	@Override
-	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		if (change.isNew()) {
-			CompareContext compareContext = change.getCompareContext();
-			compareContext.setOldCommitHash(state.oldCommitHash);
-			compareContext.setNewCommitHash(state.newCommitHash);
-		} 
-		OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, note);
-	}
-	
 	@Override
 	public PageParameters getParamsBeforeEdit() {
 		return paramsOf(getPullRequest(), state);
@@ -926,10 +826,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public PageParameters getParamsAfterEdit() {
 		PageParameters params = getParamsBeforeEdit();
-		CodeComment comment = getOpenComment();
-		String oldCommit = comment != null ? comment.getMark().getCommitHash() : state.newCommitHash;
+		String oldCommit = state.newCommitHash;
 		params.set(PARAM_OLD_COMMIT, oldCommit);
 		params.remove(PARAM_NEW_COMMIT);
+		params.remove(PARAM_PATH);
 		params.remove(PARAM_MARK);
 		return params;
 	}
@@ -944,13 +844,15 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		public String newCommitHash;
 		
 		@Nullable
-		public String file;
+		public String blobPath;
 
 		public boolean blame;
 
+		@Nullable
 		public String createdCommitHash;
-		
-		public WhitespaceOption whitespaceOption = WhitespaceOption.IGNORE_TRAILING;
+
+		@Nullable
+		public WhitespaceOption whitespaceOption;
 		
 		@Nullable
 		public String pathFilter;
@@ -960,7 +862,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		
 		@Nullable
 		public DiffPlanarRange mark;
-		
 	}
 
 	@Override
@@ -987,56 +888,36 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public Collection<CodeProblem> getOldProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
 		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
-		for (Build build: getProject().getBuilds(buildCommitId)) {
-			for (CodeProblem problem: ProblemReport.getCodeProblems(build, blobPath, null)) {
-				if (!buildCommitId.equals(getComparisonBase())) {
-					Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
-					if (problem.getTarget() instanceof BlobTarget) {
-						BlobTarget repoTarget = (BlobTarget) problem.getTarget();
-						if (repoTarget.getLocation() != null) {
-							PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
-							if (location != null) {
-								repoTarget = new BlobTarget(repoTarget.getGroupKey().getName(), location);
-								problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
-							}
-						}
-					}
-				} else {
-					problems.add(problem);
-				}
-			}
-		}
+		for (Build build: getProject().getBuilds(buildCommitId))
+			problems.addAll(ProblemReport.getCodeProblems(build, blobPath, null));
 		return problems;
 	}
 
 	@Override
 	public Collection<CodeProblem> getNewProblems(String blobPath) {
-		PullRequest request = getPullRequest();
-		ObjectId buildCommitId;
-		if (request.getBuildCommitHash() != null)
-			buildCommitId = ObjectId.fromString(request.getBuildCommitHash());
-		else 
-			buildCommitId = ObjectId.zeroId();
-		
 		Set<CodeProblem> problems = new HashSet<>();
-		for (Build build: getProject().getBuilds(buildCommitId)) {
-			if (request.equals(build.getRequest())) {
-				for (CodeProblem problem: ProblemReport.getCodeProblems(build, blobPath, null)) {
-					if (!state.newCommitHash.equals(buildCommitId.name())) {
-						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
-								ObjectId.fromString(state.newCommitHash), blobPath);
-						if (problem.getTarget() instanceof BlobTarget) {
-							BlobTarget repoTarget = (BlobTarget) problem.getTarget();
-							if (repoTarget.getLocation() != null) {
-								PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
-								if (location != null) {
-									repoTarget = new BlobTarget(repoTarget.getGroupKey().getName(), location);
-									problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
+		PullRequest request = getPullRequest();
+		if (request.getBuildCommitHash() != null) {
+			var buildCommitId = ObjectId.fromString(request.getBuildCommitHash());
+			for (Build build: getProject().getBuilds(buildCommitId)) {
+				if (request.equals(build.getRequest())) {
+					for (CodeProblem problem: ProblemReport.getCodeProblems(build, blobPath, null)) {
+						if (!state.newCommitHash.equals(buildCommitId.name())) {
+							Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
+									ObjectId.fromString(state.newCommitHash), blobPath);
+							if (problem.getTarget() instanceof BlobTarget) {
+								BlobTarget repoTarget = (BlobTarget) problem.getTarget();
+								if (repoTarget.getLocation() != null) {
+									PlanarRange location = DiffUtils.mapRange(lineMapping, repoTarget.getLocation());
+									if (location != null) {
+										repoTarget = new BlobTarget(repoTarget.getGroupKey().getName(), location);
+										problems.add(new CodeProblem(problem.getSeverity(), repoTarget, problem.getMessage()));
+									}
 								}
 							}
+						} else {
+							problems.add(problem);
 						}
-					} else {
-						problems.add(problem);
 					}
 				}
 			}
@@ -1048,46 +929,34 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
-		for (Build build: getProject().getBuilds(buildCommitId)) {
-			for (Map.Entry<Integer, CoverageStatus> entry: CoverageStats.getLineCoverages(build, blobPath, null).entrySet()) {
-				if (!buildCommitId.equals(getComparisonBase())) {
-					Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
-					Integer mappedLine = lineMapping.get(entry.getKey());
-					if (mappedLine != null)
-						coverages.put(mappedLine, entry.getValue());
-				} else {
-					coverages.put(entry.getKey(), entry.getValue());
-				}
-			}
-		}
+		for (Build build: getProject().getBuilds(buildCommitId))
+			coverages.putAll(CoverageStats.getLineCoverages(build, blobPath, null));
 		return coverages;
 	}
 
 	@Override
 	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
-		PullRequest request = getPullRequest();
-		ObjectId buildCommitId;
-		if (request.getBuildCommitHash() != null)
-			buildCommitId = ObjectId.fromString(request.getBuildCommitHash());
-		else
-			buildCommitId = ObjectId.zeroId();
-		
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
-		for (Build build: getProject().getBuilds(buildCommitId)) {
-			if (request.equals(build.getRequest())) {
-				for (Map.Entry<Integer, CoverageStatus> entry: CoverageStats.getLineCoverages(build, blobPath, null).entrySet()) {
-					if (!state.newCommitHash.equals(buildCommitId.name())) {
-						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
-								ObjectId.fromString(state.newCommitHash), blobPath);
-						Integer mappedLine = lineMapping.get(entry.getKey());
-						if (mappedLine != null)
-							coverages.put(mappedLine, entry.getValue());
-					} else {
-						coverages.put(entry.getKey(), entry.getValue());
+		PullRequest request = getPullRequest();
+		if (request.getBuildCommitHash() != null) {
+			var buildCommitId = ObjectId.fromString(request.getBuildCommitHash());
+			for (Build build: getProject().getBuilds(buildCommitId)) {
+				if (request.equals(build.getRequest())) {
+					for (Map.Entry<Integer, CoverageStatus> entry: CoverageStats.getLineCoverages(build, blobPath, null).entrySet()) {
+						if (!state.newCommitHash.equals(buildCommitId.name())) {
+							Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId,
+									ObjectId.fromString(state.newCommitHash), blobPath);
+							Integer mappedLine = lineMapping.get(entry.getKey());
+							if (mappedLine != null)
+								coverages.put(mappedLine, entry.getValue());
+						} else {
+							coverages.put(entry.getKey(), entry.getValue());
+						}
 					}
 				}
 			}
 		}
+
 		return coverages;
 	}
 

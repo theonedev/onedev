@@ -1,15 +1,8 @@
 <wicket:extend>
 	<div class="card m-2 m-sm-5">
 		<div class="card-body">
-			<h2>
-				<wicket:t>Some related commits of the pull request are missing</wicket:t>
-			</h2>
-			<p>
-			<wicket:t>This might happen when project points to a wrong git repository, or these commits are garbage collected.</wicket:t>
-			</p>
+			<h2 wicket:id="reason"></h2>
 			<div class="bg-light rounded p-4 mb-5">
-				<div class="h6 mb-2"><wicket:t>Missing Commits</wicket:t></div>
-				<div wicket:id="missingCommits" class="text-monospace font-size-sm mb-4"></div>
 				<div class="h6 mb-2"><wicket:t>Pull Request Branches</wicket:t></div>
 				<div wicket:id="requestBranches" class="mb-4"></div>
 				<div class="h6 mb-2"><wicket:t>Pull Request Title</wicket:t></div>

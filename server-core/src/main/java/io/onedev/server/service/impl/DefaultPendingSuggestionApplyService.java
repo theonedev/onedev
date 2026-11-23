@@ -24,7 +24,6 @@ import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.PendingSuggestionApply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.SecurityUtils;
@@ -72,11 +71,6 @@ public class DefaultPendingSuggestionApplyService extends BaseEntityService<Pend
 			change.setComment(comment);
 			change.setResolved(true);
 			change.setUser(SecurityUtils.getUser());
-			CompareContext compareContext = new CompareContext();
-			compareContext.setPullRequest(request);
-			compareContext.setOldCommitHash(comment.getMark().getCommitHash());
-			compareContext.setNewCommitHash(newCommitId.name());
-			change.setCompareContext(compareContext);
 			OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, "Suggestion applied");
 		}
 

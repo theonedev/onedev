@@ -311,7 +311,6 @@ class DeletionReferenceTest {
 		request.setSourceProject(project);
 		request.setTargetBranch("main");
 		request.setSourceBranch("feature");
-		request.setBaseCommitHash(HASH);
 		request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT);
 		request.setLastActivity(activity());
 		request.setNumber(++fixtureNumber);

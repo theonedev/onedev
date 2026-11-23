@@ -5,6 +5,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 import jakarta.persistence.*;
 import java.io.Serial;
@@ -54,6 +55,14 @@ public class CompareContext implements Serializable {
 
 	public void setNewCommitHash(String newCommitHash) {
 		this.newCommitHash = newCommitHash;
+	}
+
+	public ObjectId getOldCommitId() {
+		return ObjectId.fromString(oldCommitHash);
+	}
+
+	public ObjectId getNewCommitId() {
+		return ObjectId.fromString(newCommitHash);
 	}
 
 	public WhitespaceOption getWhitespaceOption() {

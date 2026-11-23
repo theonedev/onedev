@@ -257,8 +257,9 @@ public class DefaultGitService implements GitService, Serializable {
 			
 		});
 		project.cacheObjectId(branchName, commitId);
-		listenerRegistry.post(new RefUpdated(project, 
-				GitUtils.branch2ref(branchName), ObjectId.zeroId(), commitId));
+		String refName = GitUtils.branch2ref(branchName);
+		project.cacheObjectId(refName, commitId);
+		listenerRegistry.post(new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 		return commitId;
 	}
 
@@ -1126,12 +1127,21 @@ public class DefaultGitService implements GitService, Serializable {
 	}
 
 	@Override
+	public Collection<String> getChangedFilesAfterMerge(Project project, ObjectId oldCommitId, ObjectId newCommitId,
+														ObjectId targetCommitId) {
+		Long projectId = project.getId();
+		return runOnProjectServer(projectId, () -> GitUtils.getChangedFilesAfterMerging(
+				getRepository(projectId), oldCommitId, newCommitId, targetCommitId));
+	}
+
+	@Override
 	public ObjectId getMergeBase(Project project1, ObjectId commitId1, Project project2, ObjectId commitId2) {
 		Long projectId1 = project1.getId();
 		Long projectId2 = project2.getId();
 		String projectPath2 = project2.getPath();
+		var needToFetch = !project1.equals(project2) && project1.getRevCommit(commitId2, false) == null;
 		return runOnProjectServer(projectId1, () -> {
-			if (!projectId1.equals(projectId2))
+			if (needToFetch)
 				fetch(projectId1, projectId2, projectPath2, commitId2.name());
 			return GitUtils.getMergeBase(getRepository(projectId1), commitId1, commitId2);
 		});

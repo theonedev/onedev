@@ -179,7 +179,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 		};
 	
-		if (!getBuild().isValid())
+		if (getBuild().isCommitMissing())
 			throw new RestartResponseException(InvalidBuildPage.class, InvalidBuildPage.paramsOf(getBuild()));
 	}
 	

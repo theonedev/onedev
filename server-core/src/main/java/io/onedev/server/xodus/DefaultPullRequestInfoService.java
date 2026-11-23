@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -43,7 +43,6 @@ import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
-import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
@@ -53,7 +52,7 @@ import jetbrains.exodus.env.Transaction;
 public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 		implements PullRequestInfoService, Serializable {
 
-	private static final int INFO_VERSION = 8;
+	private static final int INFO_VERSION = 9;
 	
 	private static final int BATCH_SIZE = 5000;
 	
@@ -64,8 +63,6 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 	private static final String COMMIT_TO_IDS_STORE = "commitToIds";
 
 	private static final String ISSUE_TO_ID_STORE = "issueToIds";
-	
-	private static final String COMPARISON_BASES_STORE = "comparisonBases";
 	
 	private static final ByteIterable LAST_PULL_REQUEST_UPDATE_KEY = new StringByteIterable("lastPullRequestUpdate");
 
@@ -133,13 +130,16 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 		Long lastPullRequestUpdateId = env.computeInTransaction(txn -> readLong(defaultStore, txn, LAST_PULL_REQUEST_UPDATE_KEY, 0));
 		
 		List<PullRequestUpdate> unprocessedPullRequestUpdates = pullRequestUpdateService.queryAfter(
-				projectId, lastPullRequestUpdateId, BATCH_SIZE); 
+				projectId, lastPullRequestUpdateId, BATCH_SIZE);
 		env.executeInTransaction(txn -> {
 			PullRequestUpdate lastUpdate = null;
+			Set<PullRequest> processedPullRequests = new HashSet<>();
 			for (PullRequestUpdate update: unprocessedPullRequestUpdates) {
 				PullRequest request = update.getRequest();
-				if (request.isValid()) {
-					for (ObjectId commit: update.getCommits()) {
+				if (processedPullRequests.add(request)
+						&& !request.isCommitsMissing()
+						&& request.getMergeBase(false) != null) {
+					for (ObjectId commit: request.getCommits()) {
 						ByteIterable commitKey = new CommitByteIterable(commit);
 						Collection<Long> pullRequestIds = readLongs(commitToIdsStore, txn, commitKey);
 						pullRequestIds.add(update.getRequest().getId());
@@ -296,66 +296,6 @@ public class DefaultPullRequestInfoService extends AbstractEnvironmentService
 	@Override
 	protected int getEnvVersion() {
 		return INFO_VERSION;
-	}
-
-	@Sessional
-	@Override
-	public ObjectId getComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2) {
-		Long targetProjectId = request.getTargetProject().getId();
-		Long requestId = request.getId();
-		
-		return projectService.runOnActiveServer(targetProjectId, new ClusterTask<ObjectId>() {
-
-			@Serial
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public ObjectId call() throws Exception {
-				Environment env = getEnv(targetProjectId.toString());
-				Store store = getStore(env, COMPARISON_BASES_STORE);
-				
-				return env.computeInTransaction(txn -> {
-					byte[] valueBytes = readBytes(store, txn, getComparisonBaseKey(requestId, commitId1, commitId2));
-					if (valueBytes != null)
-						return ObjectId.fromRaw(valueBytes);
-					else
-						return null;
-				});
-			}
-			
-		});
-
-	}
-	
-	private ByteIterable getComparisonBaseKey(Long requestId, ObjectId commitId1, ObjectId commitId2) {
-		byte[] keyBytes = new byte[40 + Long.BYTES];
-		ByteBuffer.wrap(keyBytes, 0, Long.BYTES).putLong(requestId);
-		commitId1.copyRawTo(keyBytes, Long.BYTES);
-		commitId2.copyRawTo(keyBytes, Long.BYTES + 20);
-		return new ArrayByteIterable(keyBytes);
-	}
-
-	@Sessional
-	@Override
-	public void cacheComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2, ObjectId comparisonBase) {
-		Long targetProjectId = request.getTargetProject().getId();
-		Long requestId = request.getId();
-		
-		projectService.runOnActiveServer(targetProjectId, new ClusterTask<Void>() {
-
-			@Serial
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				Environment env = getEnv(targetProjectId.toString());
-				Store store = getStore(env, COMPARISON_BASES_STORE);
-				
-				env.executeInTransaction(txn -> store.put(txn, getComparisonBaseKey(requestId, commitId1, commitId2), new CommitByteIterable(comparisonBase)));
-				return null;
-			}
-			
-		});
 	}
 
 }

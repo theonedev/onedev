@@ -1,11 +1,10 @@
 package io.onedev.server.util.diff;
 
-import java.util.function.Function;
-import java.util.regex.Pattern;
-
+import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public enum WhitespaceOption implements Function<String, String> {
 	
@@ -78,7 +77,8 @@ public enum WhitespaceOption implements Function<String, String> {
 	private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 	
 	public abstract String getDescription();
-	
+
+	@Nullable
 	public static WhitespaceOption ofName(@Nullable String name) {
 		if (name != null) 
 			return valueOf(name.toUpperCase());

@@ -16,7 +16,5 @@ public interface PullRequestReviewService extends EntityService<PullRequestRevie
 	void populateReviews(Collection<PullRequest> requests);
 
     void createOrUpdate(User user, PullRequestReview review);
-	
-    ObjectId getLastReviewedCommit(PullRequest request, User user);
-    
+
 }

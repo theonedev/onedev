@@ -34,21 +34,7 @@ import static java.lang.ThreadLocal.withInitial;
 
 import java.io.Serial;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Stack;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -333,10 +319,7 @@ public class PullRequest extends ProjectBelonging
 	
 	@Column(nullable=false)
 	private String sourceBranch;
-	
-	@Column(nullable=false)
-	private String baseCommitHash;
-	
+
 	@Column
 	private String buildCommitHash;
 		
@@ -452,14 +435,14 @@ public class PullRequest extends ProjectBelonging
 
 	private transient Boolean sourceOutdated;
 
-	private transient Collection<ObjectId> missingCommits;
-	
+	private transient Optional<ObjectId> mergeBaseOpt;
+
+	private transient List<RevCommit> commits;
+
 	private transient Collection<Long> fixedIssueIds;
 	
 	private transient Collection<User> participants;
-	
-	private transient Collection<RevCommit> pendingCommits;
-	
+
 	private transient BuildRequirement buildRequirement;
 	
 	private transient Collection<Build> currentBuilds;
@@ -468,7 +451,7 @@ public class PullRequest extends ProjectBelonging
 	
 	private transient Optional<CommitMessageError> commitMessageErrorOpt;
 
-	private transient Optional<Collection<String>> violatedFileTypesOpt;
+	private transient Collection<String> violatedFileTypes;
 
 	public String getTitle() {
 		return title;
@@ -571,14 +554,6 @@ public class PullRequest extends ProjectBelonging
 	public String getSourceRef() {
 		return GitUtils.branch2ref(getSourceBranch());
 	}
-		
-	public String getBaseCommitHash() {
-		return baseCommitHash;
-	}
-
-	public void setBaseCommitHash(String baseCommitHash) {
-		this.baseCommitHash = baseCommitHash;
-	}
 
 	@Nullable
 	public String getBuildCommitHash() {
@@ -589,10 +564,6 @@ public class PullRequest extends ProjectBelonging
 		this.buildCommitHash = buildCommitHash;
 	}
 
-	public RevCommit getBaseCommit() {
-		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()), true);
-	}
-	
 	@Override
 	public Collection<PullRequestLabel> getLabels() {
 		return labels;
@@ -777,11 +748,6 @@ public class PullRequest extends ProjectBelonging
 
 	public PullRequestUpdate getLatestUpdate() {
 		return getSortedUpdates().get(getSortedUpdates().size()-1);
-	}
-	
-	public String getBaseRef() {
-		Preconditions.checkNotNull(getId());
-		return PullRequest.REFS_PREFIX + getNumber() + "/base";
 	}
 
 	public String getMergeRef() {
@@ -993,28 +959,56 @@ public class PullRequest extends ProjectBelonging
 		var review = getReview(user);
 		return review != null && review.getStatus() != PullRequestReview.Status.EXCLUDED;
 	}
-	
-	public boolean canCommentOnCommit(String commitHash) {
-		if (commitHash.equals(baseCommitHash))
-			return true;
-		for (PullRequestUpdate update: getUpdates()) {
-			for (RevCommit commit: update.getCommits())
-				if (commit.name().equals(commitHash))
-					return true;
-		}
-		return false;
+
+	public ObjectId getMergeBase() {
+		return getMergeBase(true);
 	}
-	
-	public Collection<RevCommit> getPendingCommits() {
-		if (pendingCommits == null) {
-			pendingCommits = new HashSet<>();
-			Project project = getTargetProject();
-			ObjectId headCommitId = ObjectId.fromString(getLatestUpdate().getHeadCommitHash());
-			ObjectId targetHeadCommitId = ObjectId.fromString(getLatestUpdate().getTargetHeadCommitHash());
-			pendingCommits = getGitService().getReachableCommits(project, Lists.newArrayList(headCommitId), 
-					Lists.newArrayList(targetHeadCommitId)); 
+
+	@Nullable
+	public ObjectId getMergeBase(boolean mustRelated) {
+		if (mergeBaseOpt == null) {
+			mergeBaseOpt = Optional.ofNullable(getGitService().getMergeBase(
+					getProject(),
+					isMerged() && getMergePreview() != null? getMergePreview().getTargetHeadCommitId(): getTarget().getObjectId(),
+					getProject(),
+					getLatestUpdate().getHeadCommitId()));
 		}
-		return pendingCommits;
+
+		var mergeBase = mergeBaseOpt.orElse(null);
+		if (mustRelated && mergeBase == null)
+			throw new NullPointerException();
+		else
+			return mergeBaseOpt.orElse(null);
+	}
+
+	public List<RevCommit> getCommits() {
+		if (commits == null) {
+			commits = getGitService().getReachableCommits(
+					getProject(),
+					Set.of(getLatestUpdate().getHeadCommitId()),
+					Set.of(getMergeBase()));
+			Collections.reverse(commits);
+		}
+		return commits;
+	}
+
+	public ObjectId getSinceCommitId(Date sinceDate) {
+		var lastVisitedCommitId = getMergeBase();
+		for (PullRequestUpdate update: getSortedUpdates()) {
+			if (update.getDate().before(sinceDate))
+				lastVisitedCommitId = update.getHeadCommitId();
+		}
+		var lastVisitedMergeBase = getGitService().getMergeBase(
+				getProject(), lastVisitedCommitId,
+				getProject(), getLatestUpdate().getHeadCommitId());
+		if (lastVisitedMergeBase != null && isRelatedCommit(lastVisitedMergeBase))
+			return lastVisitedMergeBase;
+		else
+			return getMergeBase();
+	}
+
+	public boolean isRelatedCommit(ObjectId commitId) {
+		return getMergeBase().equals(commitId) || getCommits().contains(commitId);
 	}
 
 	public List<User> getParticipants() {
@@ -1034,21 +1028,16 @@ public class PullRequest extends ProjectBelonging
 		return new ArrayList<>(participants);
 	}
 	
-	public boolean isValid() {
-		return getMissingCommits().isEmpty();
-	}
-
-	public Collection<ObjectId> getMissingCommits() {
-		if (missingCommits == null) {
-			Set<ObjectId> objIds = new LinkedHashSet<>();
-			objIds.add(ObjectId.fromString(baseCommitHash));
-			for (PullRequestUpdate update: updates) {
-				objIds.add(ObjectId.fromString(update.getTargetHeadCommitHash()));
-				objIds.add(ObjectId.fromString(update.getHeadCommitHash()));
-			}
-			missingCommits = getGitService().filterNonExistants(targetProject, objIds);
+	public boolean isCommitsMissing() {
+		var checkObjs = new HashSet<ObjectId>();
+		var targetCommitId = getTarget().getObjectId(false);
+		if (targetCommitId == null)
+			return true;
+		checkObjs.add(targetCommitId);
+		for (var update: getUpdates()) {
+			checkObjs.add(update.getHeadCommitId());
 		}
-		return missingCommits;
+		return !getGitService().hasObjects(getProject(), checkObjs.toArray(new ObjectId[checkObjs.size()]));
 	}
 
 	/*
@@ -1086,10 +1075,8 @@ public class PullRequest extends ProjectBelonging
 	public Collection<Long> getFixedIssueIds() {
 		if (fixedIssueIds == null) {
 			fixedIssueIds = new HashSet<>();
-			for (PullRequestUpdate update: getUpdates()) {
-				for (RevCommit commit: update.getCommits())
-					fixedIssueIds.addAll(getProject().parseFixedIssueIds(commit.getFullMessage()));
-			}
+			for (RevCommit commit: getCommits())
+				fixedIssueIds.addAll(getProject().parseFixedIssueIds(commit.getFullMessage()));
 			fixedIssueIds.addAll(getProject().parseFixedIssueIds(getTitle()));
 			if (getDescription() != null)
 				fixedIssueIds.addAll(getProject().parseFixedIssueIds(getDescription()));
@@ -1185,10 +1172,7 @@ public class PullRequest extends ProjectBelonging
 		if (buildRequirement == null) {
 			BranchProtection protection = getTargetProject().getBranchProtection(getTargetBranch(), getSubmitter());
 			ObjectId requestHeadId = ObjectId.fromString(getLatestUpdate().getHeadCommitHash());
-			var mergeBaseId = getGitService().getMergeBase(
-					getProject(), ObjectId.fromString(getLatestUpdate().getTargetHeadCommitHash()),
-					getProject(), requestHeadId);
-			buildRequirement = protection.getBuildRequirement(getTargetProject(), mergeBaseId,
+			buildRequirement = protection.getBuildRequirement(getTargetProject(), getMergeBase(),
 					requestHeadId, new HashMap<>());
 		}
 		return buildRequirement;
@@ -1329,7 +1313,7 @@ public class PullRequest extends ProjectBelonging
 			CommitMessageError error = null;
 			if (mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS) {
 				error = getProject().checkCommitMessages(getTargetBranch(), getSubmitter(),
-						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>());
+						getMergeBase(), getLatestUpdate().getHeadCommitId(), new HashMap<>());
 			}
 			if (error == null && autoMerge.isEnabled()) {
 				var system = OneDev.getInstance(UserService.class).getSystem();
@@ -1343,12 +1327,11 @@ public class PullRequest extends ProjectBelonging
 	}
 
 	public Collection<String> getViolatedFileTypes() {
-		if (violatedFileTypesOpt == null) {
-			var violatedFileTypes = getProject().getViolatedFileTypes(getTargetBranch(), getSubmitter(),
-					getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>());
-			violatedFileTypesOpt = Optional.of(violatedFileTypes);
+		if (violatedFileTypes == null) {
+			violatedFileTypes = getProject().getViolatedFileTypes(getTargetBranch(), getSubmitter(),
+					getMergeBase(), getLatestUpdate().getHeadCommitId(), new HashMap<>());
 		}
-		return violatedFileTypesOpt.get();
+		return violatedFileTypes;
 	}
 
 	public static String getSerialLockName(Long requestId) {

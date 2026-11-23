@@ -166,6 +166,31 @@ public abstract class BlobChange implements Serializable {
 	public boolean isVisible(boolean leftSide, int line) {
 		return DiffUtils.isVisible(getDiffBlocks(), leftSide, line, WebConstants.DIFF_CONTEXT_SIZE);
 	}
+
+	/**
+	 * Checks whether every row in an old-side range displays its original text.
+	 * An old-side comment can use its original columns when the rows match.
+	 */
+	public boolean displaysOriginalTextForOldRange(PlanarRange range) {
+		if (whitespaceOption == WhitespaceOption.DO_NOT_IGNORE)
+			return true;
+		var oldLines = getOldText().getLines();
+		for (var block: getDiffBlocks()) {
+			if (block.getOldStart() > range.getToRow())
+				break;
+			// Deleted rows display the old text, and insertions have no old-side rows.
+			if (block.getOperation() == Operation.EQUAL) {
+				// Equal rows display the new text, which may differ when whitespace is ignored.
+				int fromRow = Math.max(range.getFromRow(), block.getOldStart());
+				int toRow = Math.min(range.getToRow(), block.getOldEnd() - 1);
+				for (int row = fromRow; row <= toRow; row++) {
+					if (!oldLines.get(row).equals(block.getElements().get(row - block.getOldStart())))
+						return false;
+				}
+			}
+		}
+		return true;
+	}
 	
 	public abstract Project getProject();
 	

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.inject.Inject;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -56,7 +57,6 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
@@ -80,6 +80,12 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
+
+	@Inject
+	private CodeCommentStatusChangeService statusChangeService;
+
+	@Inject
+	private CodeCommentReplyService replyService;
 
 	private final Long commentId;
 
@@ -139,20 +145,6 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 		viewFragment.add(new Label("action", "commented"));
 		viewFragment.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
 				.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(getComment().getCreateDate()))));
-		if (isContextDifferent(getComment().getCompareContext())) {
-			String url = OneDev.getInstance(UrlService.class).urlFor(getComment(), false);
-			viewFragment.add(new ExternalLink("context", url) {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.put("data-tippy-content", _T("Current context is different from context of the comment, click to show comment context"));
-				}
-				
-			});
-		} else {
-			viewFragment.add(new WebMarkupContainer("context").setVisible(false));
-		}
 
 		viewFragment.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -640,16 +632,15 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 						reply.setDate(new Date());
 						reply.setUser(SecurityUtils.getAuthUser());
 						reply.setContent(content);
-						
-						onSaveCommentReply(target, reply);
+
+						replyService.create(reply);
 					} else {
 						CodeCommentStatusChange change = new CodeCommentStatusChange();
 						change.setComment(getComment());
 						change.setDate(new Date());
 						change.setUser(SecurityUtils.getAuthUser());
 						change.setResolved(resolved);
-						
-						onSaveCommentStatusChange(target, change, contentInput.getModelObject());
+						statusChangeService.create(change, contentInput.getModelObject());
 					}
 					
 					WebMarkupContainer actionsContainer = newActionsContainer();
@@ -674,12 +665,6 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 	
 	protected abstract void onSaveComment(AjaxRequestTarget target, CodeComment comment);
 
-	protected abstract void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply);
-	
-	protected abstract void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, @Nullable String note);
-	
-	protected abstract boolean isContextDifferent(CompareContext compareContext);
-	
 	private interface CodeCommentActivity extends Serializable {
 		
 		Date getDate();
@@ -710,20 +695,6 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 				fragment.add(new Label("action", "unresolved"));
 			fragment.add(new Label("date", DateUtils.formatAge(getChange().getDate()))
 					.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(getChange().getDate()))));
-			if (isContextDifferent(getChange().getCompareContext())) {
-				String url = OneDev.getInstance(UrlService.class).urlFor(getChange(), false);
-				fragment.add(new ExternalLink("context", url) {
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.put("data-tippy-content", _T("Current context is different from context of the action, click to show action context"));
-					}
-					
-				});
-			} else {
-				fragment.add(new WebMarkupContainer("context").setVisible(false));
-			}
 			fragment.add(AttributeAppender.append("class", "status-change"));
 			fragment.setMarkupId(getChange().getAnchor());
 			
@@ -782,21 +753,8 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 			viewFragment.add(new Label("action", "replied"));
 			viewFragment.add(new Label("date", DateUtils.formatAge(reply.getDate()))
 					.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(reply.getDate()))));
-			if (isContextDifferent(reply.getCompareContext())) {
-				String url = OneDev.getInstance(UrlService.class).urlFor(reply, false);
-				viewFragment.add(new ExternalLink("context", url) {
+			viewFragment.add(new WebMarkupContainer("context").setVisible(false));
 
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.put("data-tippy-content", _T("Current context is different from context of the reply, click to show reply context"));
-					}
-					
-				});
-			} else {
-				viewFragment.add(new WebMarkupContainer("context").setVisible(false));
-			}
-			
 			viewFragment.add(new CopyToClipboardLink("anchor",
 					Model.of(OneDev.getInstance(UrlService.class).urlFor(getReply(), true)),
 					_T("Copy permanent link")));
@@ -816,7 +774,7 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 				public void setObject(String object) {
 					CodeCommentReply reply = getReply();
 					reply.setContent(object);
-					onSaveCommentReply(RequestCycle.get().find(AjaxRequestTarget.class).orElse(null), reply);
+					replyService.update(reply);
 				}
 				
 			}, null) {
@@ -911,8 +869,8 @@ public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 							} else {
 								CodeCommentReply reply = getReply();
 								reply.setContent(content);
-								onSaveCommentReply(target, reply);
-								
+								replyService.update(reply);
+
 								Component activityContainer = new CodeCommentReplyActivity(reply).render(componentId);
 								editFragment.replaceWith(activityContainer);
 								target.add(activityContainer);

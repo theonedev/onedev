@@ -14,10 +14,5 @@ public interface PullRequestInfoService {
 	Collection<Long> getPullRequestIds(Project project, ObjectId commitId);
 
 	Collection<Long> getPullRequestIds(Project project, Long issueId);
-	
-	@Nullable
-	ObjectId getComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2);
-	
-	void cacheComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2, ObjectId comparisonBase);
-	
+
 }

@@ -220,13 +220,14 @@ public class DiffUtils {
 		}
 		return false;
 	}
-	
+
+	@Nullable
 	public static PlanarRange mapRange(Map<Integer, Integer> lineMapping, PlanarRange range) {
 		int oldBeginLine = range.getFromRow();
 		int oldEndLine = range.getToRow();
 		Integer newBeginLine = lineMapping.get(oldBeginLine);
 		if (newBeginLine != null) {
-			for (int oldLine = oldBeginLine+1; oldLine < oldEndLine; oldLine++) {
+			for (int oldLine = oldBeginLine+1; oldLine <= oldEndLine; oldLine++) {
 				Integer newLine = lineMapping.get(oldLine);
 				if (newLine == null || newLine - newBeginLine != oldLine - oldBeginLine)
 					return null;

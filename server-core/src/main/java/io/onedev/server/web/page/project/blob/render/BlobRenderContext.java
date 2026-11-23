@@ -96,11 +96,11 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onCommitted(@Nullable AjaxRequestTarget target, ObjectId commitId);
 	
-	void onCommentOpened(AjaxRequestTarget target, CodeComment comment, PlanarRange range);
+	void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
 
 	void onCommentClosed(AjaxRequestTarget target);
 	
-	void onAddComment(AjaxRequestTarget target, PlanarRange range);
+	void onAddComment(AjaxRequestTarget target);
 		
 	/** Upload to the specified repository-root-relative directory, or the root if null. */
 	ObjectId uploadFiles(FileUpload upload, @Nullable String directory, String commitMessage);
