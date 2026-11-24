@@ -18,10 +18,12 @@ public class SshCommandCreator implements CommandCreator {
 	
 	@Override
 	public Command createCommand(String commandString, Map<String, String> environments) {
-		if (commandString.startsWith(RemoteConfig.DEFAULT_UPLOAD_PACK) 
-				|| commandString.startsWith(RemoteConfig.DEFAULT_RECEIVE_PACK)) {
-			return new SshCommand(commandString, environments);
-		} else if (commandString.startsWith(LfsAuthenticateCommand.COMMAND_PREFIX)) {
+		boolean forwarded = commandString.startsWith(SshCommand.FORWARD_PREFIX);
+		String gitCommand = forwarded ? commandString.substring(SshCommand.FORWARD_PREFIX.length()) : commandString;
+		if (gitCommand.startsWith(RemoteConfig.DEFAULT_UPLOAD_PACK)
+				|| gitCommand.startsWith(RemoteConfig.DEFAULT_RECEIVE_PACK)) {
+			return new SshCommand(gitCommand, environments, forwarded);
+		} else if (!forwarded && commandString.startsWith(LfsAuthenticateCommand.COMMAND_PREFIX)) {
 			return new LfsAuthenticateCommand(commandString);
 		} else {
 			return null;
