@@ -2148,7 +2148,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 			private boolean canOperate() {
-				return SecurityUtils.canWriteCode(getPullRequest().getProject())
+				return SecurityUtils.canWriteCode(getPullRequest().getSourceProject())
 						&& getPullRequest().getSourceProject() != null
 						&& SecurityUtils.canWorkOnProject(getPullRequest().getSourceProject())
 						&& getPullRequest().isOpen()
