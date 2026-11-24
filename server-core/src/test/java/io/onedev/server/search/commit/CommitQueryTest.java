@@ -1,11 +1,13 @@
 package io.onedev.server.search.commit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.Serial;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -22,6 +24,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.AbstractGitTest;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.EmailAddress;
@@ -31,6 +35,31 @@ import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.service.SettingService;
 
 public class CommitQueryTest extends AbstractGitTest {
+
+	@Test
+	public void testFuzzyQueryMatchesOptionLikeRefs() throws IOException {
+		var firstCommit = addFileAndCommit("first", "", "first commit");
+		var secondCommit = addFileAndCommit("second", "", "second commit");
+		addFileAndCommit("third", "", "third commit");
+		var branchName = "refs/heads/--reverse";
+		var tagName = "refs/tags/--first-parent";
+		updateRef(branchName, secondCommit, null);
+		updateRef(tagName, secondCommit, null);
+		var repository = git.getRepository();
+		var project = mock(Project.class);
+		try (var revWalk = new RevWalk(repository)) {
+			when(project.getBranchRef("--reverse")).thenReturn(new RefFacade(revWalk, repository.exactRef(branchName)));
+			when(project.getTagRef("--first-parent")).thenReturn(new RefFacade(revWalk, repository.exactRef(tagName)));
+		}
+
+		var branchOptions = new RevListOptions();
+		CommitQuery.parse(project, "~--reverse~", true).fill(project, branchOptions);
+		assertEquals(List.of(secondCommit, firstCommit), new RevListCommand(repository.getDirectory()).options(branchOptions).run());
+
+		var tagOptions = new RevListOptions();
+		CommitQuery.parse(project, "~--first-parent~", true).fill(project, tagOptions);
+		assertEquals(List.of(secondCommit), new RevListCommand(repository.getDirectory()).options(tagOptions).run());
+	}
 
 	@Test
 	public void testMatches() throws Exception {

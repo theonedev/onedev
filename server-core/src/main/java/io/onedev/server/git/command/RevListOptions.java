@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.git.command.RevListCommand.Order;
 
@@ -163,12 +164,12 @@ public class RevListOptions implements Serializable {
 	 */
 	public void configure(Commandline git) {
 		boolean hasRevisions = false;
-		if (!revisions().isEmpty()) {
-			for (String revision: revisions()) {
-				git.addArgs(revision);
-				if (!revision.startsWith("^"))
-					hasRevisions = true;
-			}
+		for (String revision: revisions()) {
+			if (revision.startsWith("-"))
+				throw new ExplicitException("Revisions starting with '-' must use a fully qualified ref name");
+			git.addArgs(revision);
+			if (!revision.startsWith("^"))
+				hasRevisions = true;
 		}
 		if (!hasRevisions)
 			git.addArgs("--branches");

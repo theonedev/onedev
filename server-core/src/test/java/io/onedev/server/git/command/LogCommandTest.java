@@ -2,6 +2,7 @@ package io.onedev.server.git.command;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -9,9 +10,25 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.git.AbstractGitTest;
 
 public class LogCommandTest extends AbstractGitTest {
+
+	@Test
+	public void testRejectsOptionLikeRevisions() {
+		addFileAndCommit("testfile", "content", "initial commit");
+		var gitDirectory = git.getRepository().getDirectory();
+		for (String revision: List.of("-1", "--reverse", "--")) {
+			var options = new RevListOptions().revisions(List.of("main", revision));
+			assertThrows(ExplicitException.class, () -> new RevListCommand(gitDirectory).options(options).run());
+			assertThrows(ExplicitException.class, () -> new LogCommand(gitDirectory) {
+				@Override
+				protected void consume(LogCommit commit) {
+				}
+			}.options(options).run());
+		}
+	}
 
 	@Test
 	public void test() throws Exception {
