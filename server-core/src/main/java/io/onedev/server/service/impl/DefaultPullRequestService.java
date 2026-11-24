@@ -334,7 +334,9 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		if (mergePreview != null)
 			updateMergePreviewRef(request);
 
-		checkAsync(request, false, true);
+		boolean sourceUpdated = !request.getLatestUpdate().getHeadCommitHash()
+				.equals(request.getSource().getObjectName(false));
+		checkAsync(request, sourceUpdated, true);
 	}
 
 	@Transactional
