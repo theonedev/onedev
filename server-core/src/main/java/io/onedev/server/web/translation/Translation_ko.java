@@ -1031,6 +1031,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy public key", "공개 키 복사");
 		m.put("Copy public key URL", "공개 키 URL 복사");
 		m.put("Copy selected text to clipboard", "선택된 텍스트를 클립보드에 복사");
+		m.put("Copy terminal text", "터미널 텍스트 복사");
 		m.put("Copy the client secret now. It will not be shown again.", "지금 클라이언트 비밀을 복사하세요. 다시 표시되지 않습니다.");
 		m.put("Copy this executor", "이 실행기를 복사");
 		m.put("Copy this provisioner", "이 프로비저너를 복사");
@@ -1038,6 +1039,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Copy this spec", "이 사양을 복사");
 		m.put("Copy to clipboard", "클립보드에 복사");
 		m.put("Copy your access token now. It will not be shown again.", "지금 액세스 토큰을 복사하세요. 다시는 표시되지 않습니다.");
+		m.put("Could not copy to clipboard", "클립보드에 복사할 수 없습니다");
 		m.put("Count", "개수");
 		m.put("Coverage Statistics", "커버리지 통계");
 		m.put("Covered", "커버됨");
@@ -1122,12 +1124,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Current Iteration", "현재 반복");
 		m.put("Current Value", "현재 값");
 		m.put("Current avatar", "현재 아바타");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"현재 컨텍스트가 작업의 컨텍스트와 다릅니다. 작업 컨텍스트를 보려면 클릭하세요.");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"현재 컨텍스트가 댓글의 컨텍스트와 다릅니다. 댓글 컨텍스트를 보려면 클릭하세요.");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"현재 컨텍스트가 답글의 컨텍스트와 다릅니다. 답글 컨텍스트를 보려면 클릭하세요.");
 		m.put("Current platform", "현재 플랫폼");
 		m.put("Current project", "현재 프로젝트");
 		m.put("Current step index / total number of steps", "현재 단계 인덱스 / 총 단계 수");
@@ -2022,6 +2018,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Inherit from parent", "상위에서 상속");
 		m.put("Inherited", "상속됨");
 		m.put("Initialization", "초기화");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"인라인 댓글과 스레드 업데이트는 관찰자에게 이메일을 보내지 않습니다. 그들에게 알리려면 풀 리퀘스트에 댓글을 게시하거나, 승인하거나, 변경을 요청하세요");
 		m.put("Input Spec", "입력 사양");
 		m.put("Input URL", "입력 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "허용된 CORS 원본 입력, ENTER를 눌러 추가");
@@ -2055,7 +2053,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Invalid pack ID: {0}", "잘못된 패키지 ID: {0}");
 		m.put("Invalid pull request number: {0}", "잘못된 풀 리퀘스트 번호: {0}");
 		m.put("Invalid request path", "잘못된 요청 경로");
-		m.put("Invalid selection, click for details", "잘못된 선택, 세부 정보 확인 클릭");
 		m.put("Invalid ssh signature", "유효하지 않은 ssh 서명");
 		m.put("Invalid state response", "잘못된 상태 응답");
 		m.put("Invalid state. Please make sure you are visiting ${productName} using server url specified in system setting", 
@@ -2531,6 +2528,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Next", "다음");
 		m.put("Next Iteration ({0})", "다음 반복 ({0})");
 		m.put("Next changed file", "다음 변경된 파일");
+		m.put("Next changed file (J)", "다음 변경된 파일 (J)");
 		m.put("Next commit", "다음 커밋");
 		m.put("Next year", "내년");
 		m.put("Next {0}", "다음 {0}");
@@ -3320,6 +3318,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Previous", "이전");
 		m.put("Previous Value", "이전 값");
 		m.put("Previous changed file", "이전 변경된 파일");
+		m.put("Previous changed file (K)", "이전 변경된 파일 (K)");
 		m.put("Previous commit", "이전 커밋");
 		m.put("Previous year", "작년");
 		m.put("Previous {0}", "이전 {0}");
@@ -4967,7 +4966,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unable To Delete/Disable Right Now", "지금 삭제/비활성화할 수 없습니다");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "이 변경을 적용할 수 없습니다. 그렇지 않으면 이 프로젝트를 관리할 수 없게 됩니다");
 		m.put("Unable to change password as you are authenticating via external system", "외부 시스템을 통해 인증 중이므로 비밀번호를 변경할 수 없습니다");
-		m.put("Unable to comment", "댓글을 작성할 수 없습니다");
 		m.put("Unable to connect to server", "서버에 연결할 수 없습니다");
 		m.put("Unable to create protected branch", "보호된 브랜치를 생성할 수 없습니다");
 		m.put("Unable to create protected tag", "보호된 태그를 생성할 수 없습니다");
@@ -5622,12 +5620,21 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy terminal text", "터미널 텍스트 복사");
-		m.put("Could not copy to clipboard", "클립보드에 복사할 수 없습니다");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
-			"인라인 댓글과 스레드 업데이트는 관찰자에게 이메일을 보내지 않습니다. 그들에게 알리려면 풀 리퀘스트에 댓글을 게시하거나, 승인하거나, 변경을 요청하세요");
-		m.put("Next changed file (J)", "다음 변경된 파일 (J)");
-		m.put("Previous changed file (K)", "이전 변경된 파일 (K)");
+		m.put("Commit of the code comment is missing", "코드 주석의 커밋이 누락되었습니다");
+		m.put("Commits missing in repository", "저장소에 커밋이 누락되었습니다");
+		m.put("Content is identical with all whitespaces ignored", "모든 공백을 무시하면 내용이 동일합니다");
+		m.put("Content is identical with leading whitespaces ignored", "앞쪽 공백을 무시하면 내용이 동일합니다");
+		m.put("Content is identical with trailing whitespaces ignored", "뒤쪽 공백을 무시하면 내용이 동일합니다");
+		m.put("Content is identical with whitespace changes ignored", "공백 변경을 무시하면 내용이 동일합니다");
+		m.put("Detected encoding changed from {0} to {1}. The decoded text is identical.", "인코딩이 {0}에서 {1}(으)로 변경되었습니다. 디코딩된 텍스트는 동일합니다.");
+		m.put("File bytes changed. The decoded text is identical.", "파일 바이트가 변경되었습니다. 디코딩된 텍스트는 동일합니다.");
+		m.put("File mode changed. Content is identical.", "파일 모드가 변경되었습니다. 내용은 동일합니다.");
+		m.put("History of target branch and source branch are unrelated", "대상 브랜치와 소스 브랜치의 기록이 관련이 없습니다");
+		m.put("Invalid selection.", "잘못된 선택입니다.");
+		m.put("Switch to “{0}” and select the lines again.", "“{0}”으로 전환한 후 다시 줄을 선택하세요.");
+		m.put("The selection crosses hidden lines.", "선택 영역이 숨겨진 줄을 가로지릅니다.");
+		m.put("The selection includes expanded lines.", "선택 영역에 확장된 줄이 포함되어 있습니다.");
+		m.put("The selection starts and ends in different revisions.", "선택 영역이 서로 다른 리비전에 시작하고 끝납니다.");
 	}
 		
 	@Override

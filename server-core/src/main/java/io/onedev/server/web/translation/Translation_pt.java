@@ -1031,6 +1031,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Copy public key", "Copiar chave pública");
 		m.put("Copy public key URL", "Copiar URL da chave pública");
 		m.put("Copy selected text to clipboard", "Copiar texto selecionado para a área de transferência");
+		m.put("Copy terminal text", "Copiar texto do terminal");
 		m.put("Copy the client secret now. It will not be shown again.", "Copie o segredo do cliente agora. Ele não será exibido novamente.");
 		m.put("Copy this executor", "Copiar este executor");
 		m.put("Copy this provisioner", "Copiar este provisionador");
@@ -1038,6 +1039,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Copy this spec", "Copiar esta especificação");
 		m.put("Copy to clipboard", "Copiar para a área de transferência");
 		m.put("Copy your access token now. It will not be shown again.", "Copie seu token de acesso agora. Ele não será exibido novamente.");
+		m.put("Could not copy to clipboard", "Não foi possível copiar para a área de transferência");
 		m.put("Count", "Contar");
 		m.put("Coverage Statistics", "Estatísticas de Cobertura");
 		m.put("Covered", "Coberto");
@@ -1122,12 +1124,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Current Iteration", "Iteração Atual");
 		m.put("Current Value", "Valor Atual");
 		m.put("Current avatar", "Avatar atual");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"O contexto atual é diferente do contexto da ação, clique para mostrar o contexto da ação");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"O contexto atual é diferente do contexto do comentário, clique para mostrar o contexto do comentário");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"O contexto atual é diferente do contexto da resposta, clique para mostrar o contexto da resposta");
 		m.put("Current platform", "Plataforma Atual");
 		m.put("Current project", "Projeto Atual");
 		m.put("Current step index / total number of steps", "Índice do passo atual / número total de passos");
@@ -2022,6 +2018,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Inherit from parent", "Herdar do pai");
 		m.put("Inherited", "Herdado");
 		m.put("Initialization", "Inicialização");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"Comentários inline e atualizações de threads não enviam e-mails para os observadores. Para notificá-los, publique um comentário na pull request, aprove ou solicite alterações");
 		m.put("Input Spec", "Especificação de Entrada");
 		m.put("Input URL", "URL de Entrada");
 		m.put("Input allowed CORS origin, hit ENTER to add", "Insira a origem CORS permitida, pressione ENTER para adicionar");
@@ -2055,7 +2053,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Invalid pack ID: {0}", "ID de pacote inválido: {0}");
 		m.put("Invalid pull request number: {0}", "Número de pull request inválido: {0}");
 		m.put("Invalid request path", "Caminho de solicitação inválido");
-		m.put("Invalid selection, click for details", "Seleção inválida, clique para detalhes");
 		m.put("Invalid ssh signature", "Assinatura ssh inválida");
 		m.put("Invalid state response", "Resposta de estado inválida");
 		m.put("Invalid state. Please make sure you are visiting ${productName} using server url specified in system setting", 
@@ -2531,6 +2528,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Next", "Próximo");
 		m.put("Next Iteration ({0})", "Próxima Iteração ({0})");
 		m.put("Next changed file", "Próximo arquivo alterado");
+		m.put("Next changed file (J)", "Próximo arquivo alterado (J)");
 		m.put("Next commit", "Próximo commit");
 		m.put("Next year", "Próximo ano");
 		m.put("Next {0}", "Próximo {0}");
@@ -3320,6 +3318,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Previous", "Anterior");
 		m.put("Previous Value", "Valor Anterior");
 		m.put("Previous changed file", "Arquivo alterado anterior");
+		m.put("Previous changed file (K)", "Arquivo alterado anterior (K)");
 		m.put("Previous commit", "Commit Anterior");
 		m.put("Previous year", "Ano anterior");
 		m.put("Previous {0}", "Anterior {0}");
@@ -4967,7 +4966,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Unable To Delete/Disable Right Now", "Incapaz de Excluir/Desativar Agora");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "Não foi possível aplicar a alteração, pois você não poderá gerenciar este projeto");
 		m.put("Unable to change password as you are authenticating via external system", "Não foi possível alterar a senha, pois você está se autenticando via sistema externo");
-		m.put("Unable to comment", "Não foi possível comentar");
 		m.put("Unable to connect to server", "Não foi possível conectar ao servidor");
 		m.put("Unable to create protected branch", "Não foi possível criar branch protegida");
 		m.put("Unable to create protected tag", "Não foi possível criar tag protegida");
@@ -5622,12 +5620,21 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy terminal text", "Copiar texto do terminal");
-		m.put("Could not copy to clipboard", "Não foi possível copiar para a área de transferência");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
-			"Comentários inline e atualizações de threads não enviam e-mails para os observadores. Para notificá-los, publique um comentário na pull request, aprove ou solicite alterações");
-		m.put("Next changed file (J)", "Próximo arquivo alterado (J)");
-		m.put("Previous changed file (K)", "Arquivo alterado anterior (K)");
+		m.put("Commit of the code comment is missing", "O comentário do commit do código está ausente");
+		m.put("Commits missing in repository", "Commits ausentes no repositório");
+		m.put("Content is identical with all whitespaces ignored", "O conteúdo é idêntico ignorando todos os espaços em branco");
+		m.put("Content is identical with leading whitespaces ignored", "O conteúdo é idêntico ignorando os espaços em branco iniciais");
+		m.put("Content is identical with trailing whitespaces ignored", "O conteúdo é idêntico ignorando os espaços em branco finais");
+		m.put("Content is identical with whitespace changes ignored", "O conteúdo é idêntico ignorando as alterações nos espaços em branco");
+		m.put("Detected encoding changed from {0} to {1}. The decoded text is identical.", "A codificação detectada mudou de {0} para {1}. O texto decodificado é idêntico.");
+		m.put("File bytes changed. The decoded text is identical.", "Os bytes do arquivo foram alterados. O texto decodificado é idêntico.");
+		m.put("File mode changed. Content is identical.", "O modo do arquivo foi alterado. O conteúdo é idêntico.");
+		m.put("History of target branch and source branch are unrelated", "O histórico do branch de destino e do branch de origem não estão relacionados");
+		m.put("Invalid selection.", "Seleção inválida.");
+		m.put("Switch to “{0}” and select the lines again.", "Altere para “{0}” e selecione as linhas novamente.");
+		m.put("The selection crosses hidden lines.", "A seleção cruza linhas ocultas.");
+		m.put("The selection includes expanded lines.", "A seleção inclui linhas expandidas.");
+		m.put("The selection starts and ends in different revisions.", "A seleção começa e termina em revisões diferentes.");
 	}
 		
 	@Override

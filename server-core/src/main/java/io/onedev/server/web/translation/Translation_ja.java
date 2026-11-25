@@ -1031,6 +1031,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy public key", "公開鍵をコピー");
 		m.put("Copy public key URL", "公開鍵URLをコピー");
 		m.put("Copy selected text to clipboard", "選択されたテキストをクリップボードにコピー");
+		m.put("Copy terminal text", "ターミナルテキストをコピー");
 		m.put("Copy the client secret now. It will not be shown again.", "今すぐクライアントシークレットをコピーしてください。再表示されることはありません。");
 		m.put("Copy this executor", "このエグゼキューターをコピー");
 		m.put("Copy this provisioner", "このプロビジョナーをコピー");
@@ -1038,6 +1039,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Copy this spec", "このスペックをコピー");
 		m.put("Copy to clipboard", "クリップボードにコピー");
 		m.put("Copy your access token now. It will not be shown again.", "今すぐアクセス トークンをコピーしてください。再表示はされません。");
+		m.put("Could not copy to clipboard", "クリップボードにコピーできませんでした");
 		m.put("Count", "カウント");
 		m.put("Coverage Statistics", "カバレッジ統計");
 		m.put("Covered", "カバー済み");
@@ -1122,12 +1124,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Current Iteration", "現在のイテレーション");
 		m.put("Current Value", "現在の値");
 		m.put("Current avatar", "現在のアバター");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"現在のコンテキストはアクションのコンテキストと異なります。クリックしてアクションのコンテキストを表示してください。");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"現在のコンテキストはコメントのコンテキストと異なります。クリックしてコメントのコンテキストを表示してください。");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"現在のコンテキストは返信のコンテキストと異なります。クリックして返信のコンテキストを表示してください。");
 		m.put("Current platform", "現在のプラットフォーム");
 		m.put("Current project", "現在のプロジェクト");
 		m.put("Current step index / total number of steps", "現在のステップインデックス / 総ステップ数");
@@ -2022,6 +2018,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Inherit from parent", "親から継承");
 		m.put("Inherited", "継承済み");
 		m.put("Initialization", "初期化");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"インラインコメントやスレッドの更新はウォッチャーにメール通知されません。通知するには、プルリクエストにコメントを投稿するか、承認するか、変更をリクエストしてください");
 		m.put("Input Spec", "入力仕様");
 		m.put("Input URL", "入力URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "許可されたCORSオリジンを入力し、ENTERを押して追加");
@@ -2055,7 +2053,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Invalid pack ID: {0}", "無効なパックID: {0}");
 		m.put("Invalid pull request number: {0}", "無効なプルリクエスト番号: {0}");
 		m.put("Invalid request path", "無効なリクエストパス");
-		m.put("Invalid selection, click for details", "無効な選択、詳細をクリックしてください");
 		m.put("Invalid ssh signature", "無効なssh署名");
 		m.put("Invalid state response", "無効な状態応答");
 		m.put("Invalid state. Please make sure you are visiting ${productName} using server url specified in system setting", 
@@ -2531,6 +2528,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Next", "次へ");
 		m.put("Next Iteration ({0})", "次のイテレーション ({0})");
 		m.put("Next changed file", "次の変更されたファイル");
+		m.put("Next changed file (J)", "次の変更されたファイル (J)");
 		m.put("Next commit", "次のコミット");
 		m.put("Next year", "来年");
 		m.put("Next {0}", "次の{0}");
@@ -3320,6 +3318,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Previous", "前へ");
 		m.put("Previous Value", "以前の値");
 		m.put("Previous changed file", "前の変更されたファイル");
+		m.put("Previous changed file (K)", "前の変更されたファイル (K)");
 		m.put("Previous commit", "以前のコミット");
 		m.put("Previous year", "前年");
 		m.put("Previous {0}", "以前の{0}");
@@ -4967,7 +4966,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unable To Delete/Disable Right Now", "今すぐ削除/無効化できません");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "このプロジェクトを管理できなくなるため、変更を適用できません");
 		m.put("Unable to change password as you are authenticating via external system", "外部システムを介して認証しているため、パスワードを変更できません");
-		m.put("Unable to comment", "コメントできません");
 		m.put("Unable to connect to server", "サーバーに接続できません");
 		m.put("Unable to create protected branch", "保護されたブランチを作成できません");
 		m.put("Unable to create protected tag", "保護されたタグを作成できません");
@@ -5622,12 +5620,21 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy terminal text", "ターミナルテキストをコピー");
-		m.put("Could not copy to clipboard", "クリップボードにコピーできませんでした");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
-			"インラインコメントやスレッドの更新はウォッチャーにメール通知されません。通知するには、プルリクエストにコメントを投稿するか、承認するか、変更をリクエストしてください");
-		m.put("Next changed file (J)", "次の変更されたファイル (J)");
-		m.put("Previous changed file (K)", "前の変更されたファイル (K)");
+		m.put("Commit of the code comment is missing", "コードコメントのコミットが欠落しています");
+		m.put("Commits missing in repository", "リポジトリにコミットが不足しています");
+		m.put("Content is identical with all whitespaces ignored", "すべての空白を無視すると内容は同一です");
+		m.put("Content is identical with leading whitespaces ignored", "先頭の空白を無視すると内容は同一です");
+		m.put("Content is identical with trailing whitespaces ignored", "末尾の空白を無視すると内容は同一です");
+		m.put("Content is identical with whitespace changes ignored", "空白の変更を無視すると内容は同一です");
+		m.put("Detected encoding changed from {0} to {1}. The decoded text is identical.", "検出されたエンコーディングが{0}から{1}に変更されました。デコードされたテキストは同一です。");
+		m.put("File bytes changed. The decoded text is identical.", "ファイルのバイトが変更されました。デコードされたテキストは同一です。");
+		m.put("File mode changed. Content is identical.", "ファイルモードが変更されました。内容は同一です。");
+		m.put("History of target branch and source branch are unrelated", "ターゲットブランチとソースブランチの履歴が関連していません");
+		m.put("Invalid selection.", "無効な選択です。");
+		m.put("Switch to “{0}” and select the lines again.", "「{0}」に切り替えて、再度行を選択してください。");
+		m.put("The selection crosses hidden lines.", "選択範囲が非表示の行をまたいでいます。");
+		m.put("The selection includes expanded lines.", "選択範囲に展開された行が含まれています。");
+		m.put("The selection starts and ends in different revisions.", "選択範囲が異なるリビジョンで開始および終了しています。");
 	}
 		
 	@Override

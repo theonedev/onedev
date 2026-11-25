@@ -1057,6 +1057,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy public key", "复制公钥");
 		m.put("Copy public key URL", "复制公钥 URL");
 		m.put("Copy selected text to clipboard", "复制选中的文本到剪贴板");
+		m.put("Copy terminal text", "复制终端文本");
 		m.put("Copy the client secret now. It will not be shown again.", "立即复制客户端密钥。它将不会再次显示。");
 		m.put("Copy this executor", "复制此执行器");
 		m.put("Copy this provisioner", "复制此配置器");
@@ -1064,6 +1065,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Copy this spec", "复制此规范");
 		m.put("Copy to clipboard", "复制到剪贴板");
 		m.put("Copy your access token now. It will not be shown again.", "现在复制您的访问令牌。它将不会再次显示。");
+		m.put("Could not copy to clipboard", "无法复制到剪贴板");
 		m.put("Count", "数量");
 		m.put("Coverage Statistics", "代码覆盖率统计");
 		m.put("Covered", "覆盖");
@@ -1148,12 +1150,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Current Iteration", "当前迭代");
 		m.put("Current Value", "现值");
 		m.put("Current avatar", "当前头像");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"当前上下文与操作的上下文不同，点击以显示操作上下文");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"当前上下文与评论的上下文不同，点击以显示评论上下文");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"当前上下文与回复的上下文不同，点击以显示回复上下文");
 		m.put("Current platform", "当前平台");
 		m.put("Current project", "当前项目");
 		m.put("Current step index / total number of steps", "当前步骤索引 / 总步骤数");
@@ -2048,6 +2044,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Inherit from parent", "从父级继承");
 		m.put("Inherited", "继承");
 		m.put("Initialization", "初始化");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"内联评论和线程更新不会通过电子邮件通知观察者。要通知他们，请在合并请求上发表评论、批准或请求更改");
 		m.put("Input Spec", "输入规范");
 		m.put("Input URL", "输入 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "输入允许的 CORS 来源，按回车键添加");
@@ -2081,7 +2079,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Invalid pack ID: {0}", "无效的包 ID: {0}");
 		m.put("Invalid pull request number: {0}", "无效的合并请求编号：{0}");
 		m.put("Invalid request path", "无效的请求路径");
-		m.put("Invalid selection, click for details", "无效的选择，点击查看详情");
 		m.put("Invalid ssh signature", "无效的 ssh 签名");
 		m.put("Invalid state response", "状态响应无效");
 		m.put("Invalid state. Please make sure you are visiting ${productName} using server url specified in system setting", 
@@ -2557,6 +2554,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Next", "下一步");
 		m.put("Next Iteration ({0})", "下一次迭代 ({0})");
 		m.put("Next changed file", "下一个更改的文件");
+		m.put("Next changed file (J)", "下一个更改的文件 (J)");
 		m.put("Next commit", "下一个提交");
 		m.put("Next year", "明年");
 		m.put("Next {0}", "后一个{0}");
@@ -3346,6 +3344,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Previous", "上一步");
 		m.put("Previous Value", "前值");
 		m.put("Previous changed file", "上一个更改的文件");
+		m.put("Previous changed file (K)", "上一个更改的文件 (K)");
 		m.put("Previous commit", "上一个提交");
 		m.put("Previous year", "去年");
 		m.put("Previous {0}", "前一个{0}");
@@ -4993,7 +4992,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unable To Delete/Disable Right Now", "目前无法删除/禁用");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "无法应用更改，否则您将无法管理此项目");
 		m.put("Unable to change password as you are authenticating via external system", "无法更改密码，因为您正在通过外部系统进行认证");
-		m.put("Unable to comment", "无法添加评论");
 		m.put("Unable to connect to server", "无法连接到服务器");
 		m.put("Unable to create protected branch", "无法创建受保护的分支");
 		m.put("Unable to create protected tag", "无法创建受保护的标签");
@@ -5648,12 +5646,21 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy terminal text", "复制终端文本");
-		m.put("Could not copy to clipboard", "无法复制到剪贴板");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
-			"内联评论和线程更新不会通过电子邮件通知观察者。要通知他们，请在合并请求上发表评论、批准或请求更改");
-		m.put("Next changed file (J)", "下一个更改的文件 (J)");
-		m.put("Previous changed file (K)", "上一个更改的文件 (K)");
+		m.put("Commit of the code comment is missing", "代码注释的提交缺失");
+		m.put("Commits missing in repository", "仓库中缺少提交");
+		m.put("Content is identical with all whitespaces ignored", "内容在忽略所有空白字符后是相同的");
+		m.put("Content is identical with leading whitespaces ignored", "内容在忽略前导空白字符后是相同的");
+		m.put("Content is identical with trailing whitespaces ignored", "内容在忽略尾随空白字符后是相同的");
+		m.put("Content is identical with whitespace changes ignored", "内容在忽略空白字符变化后是相同的");
+		m.put("Detected encoding changed from {0} to {1}. The decoded text is identical.", "检测到编码从 {0} 更改为 {1}。解码后的文本是相同的。");
+		m.put("File bytes changed. The decoded text is identical.", "文件字节已更改。解码后的文本是相同的。");
+		m.put("File mode changed. Content is identical.", "文件模式已更改。内容是相同的。");
+		m.put("History of target branch and source branch are unrelated", "目标分支和源分支的历史记录无关");
+		m.put("Invalid selection.", "无效的选择。");
+		m.put("Switch to “{0}” and select the lines again.", "切换到“{0}”并重新选择这些行。");
+		m.put("The selection crosses hidden lines.", "选择范围跨越了隐藏的行。");
+		m.put("The selection includes expanded lines.", "选择范围包含已展开的行。");
+		m.put("The selection starts and ends in different revisions.", "选择范围的起点和终点位于不同的修订版本中。");
 	}
 		
 	@Override

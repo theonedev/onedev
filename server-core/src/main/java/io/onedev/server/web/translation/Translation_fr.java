@@ -1031,6 +1031,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Copy public key", "Copier la clé publique");
 		m.put("Copy public key URL", "Copier l'URL de la clé publique");
 		m.put("Copy selected text to clipboard", "Copier le texte sélectionné dans le presse-papiers");
+		m.put("Copy terminal text", "Copier le texte du terminal");
 		m.put("Copy the client secret now. It will not be shown again.", "Copiez le secret client maintenant. Il ne sera plus affiché.");
 		m.put("Copy this executor", "Copier cet exécuteur");
 		m.put("Copy this provisioner", "Copier ce provisionneur");
@@ -1038,6 +1039,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Copy this spec", "Copier cette spécification");
 		m.put("Copy to clipboard", "Copier dans le presse-papiers");
 		m.put("Copy your access token now. It will not be shown again.", "Copiez votre jeton d'accès maintenant. Il ne sera plus affiché.");
+		m.put("Could not copy to clipboard", "Impossible de copier dans le presse-papiers");
 		m.put("Count", "Compter");
 		m.put("Coverage Statistics", "Statistiques de couverture");
 		m.put("Covered", "Couvert");
@@ -1122,12 +1124,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Current Iteration", "Itération actuelle");
 		m.put("Current Value", "Valeur actuelle");
 		m.put("Current avatar", "Avatar actuel");
-		m.put("Current context is different from context of the action, click to show action context", 
-			"Le contexte actuel est différent du contexte de l'action, cliquez pour afficher le contexte de l'action");
-		m.put("Current context is different from context of the comment, click to show comment context", 
-			"Le contexte actuel est différent du contexte du commentaire, cliquez pour afficher le contexte du commentaire");
-		m.put("Current context is different from context of the reply, click to show reply context", 
-			"Le contexte actuel est différent du contexte de la réponse, cliquez pour afficher le contexte de la réponse");
 		m.put("Current platform", "Plateforme actuelle");
 		m.put("Current project", "Projet actuel");
 		m.put("Current step index / total number of steps", "Index de l'étape actuelle / nombre total d'étapes");
@@ -2022,6 +2018,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Inherit from parent", "Hériter du parent");
 		m.put("Inherited", "Hérité");
 		m.put("Initialization", "Initialisation");
+		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
+			"Les commentaires en ligne et les mises à jour de fil ne notifient pas les observateurs par email. Pour les notifier, publiez un commentaire sur la pull request, approuvez-la ou demandez des modifications");
 		m.put("Input Spec", "Spécification d'entrée");
 		m.put("Input URL", "URL d'entrée");
 		m.put("Input allowed CORS origin, hit ENTER to add", "Saisissez l'origine CORS autorisée, appuyez sur ENTRÉE pour ajouter");
@@ -2055,7 +2053,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Invalid pack ID: {0}", "ID de pack invalide : {0}");
 		m.put("Invalid pull request number: {0}", "Numéro de demande de tirage invalide : {0}");
 		m.put("Invalid request path", "Chemin de requête invalide");
-		m.put("Invalid selection, click for details", "Sélection invalide, cliquez pour plus de détails");
 		m.put("Invalid ssh signature", "Signature ssh invalide");
 		m.put("Invalid state response", "Réponse d'état invalide");
 		m.put("Invalid state. Please make sure you are visiting ${productName} using server url specified in system setting", 
@@ -2531,6 +2528,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Next", "Suivant");
 		m.put("Next Iteration ({0})", "Prochaine Itération ({0})");
 		m.put("Next changed file", "Fichier modifié suivant");
+		m.put("Next changed file (J)", "Fichier modifié suivant (J)");
 		m.put("Next commit", "Prochain commit");
 		m.put("Next year", "L'année prochaine");
 		m.put("Next {0}", "Prochain {0}");
@@ -3320,6 +3318,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Previous", "Précédent");
 		m.put("Previous Value", "Valeur précédente");
 		m.put("Previous changed file", "Fichier modifié précédent");
+		m.put("Previous changed file (K)", "Fichier modifié précédent (K)");
 		m.put("Previous commit", "Commit précédent");
 		m.put("Previous year", "L'année précédente");
 		m.put("Previous {0}", "Précédent {0}");
@@ -4967,7 +4966,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Unable To Delete/Disable Right Now", "Impossible de supprimer/désactiver pour le moment");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "Impossible d'appliquer le changement car vous ne pourrez pas gérer ce projet autrement");
 		m.put("Unable to change password as you are authenticating via external system", "Impossible de changer le mot de passe car vous vous authentifiez via un système externe");
-		m.put("Unable to comment", "Impossible de commenter");
 		m.put("Unable to connect to server", "Impossible de se connecter au serveur");
 		m.put("Unable to create protected branch", "Impossible de créer une branche protégée");
 		m.put("Unable to create protected tag", "Impossible de créer une balise protégée");
@@ -5622,12 +5620,21 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{jakarta.validation.constraints.NotEmpty.message}", "{jakarta.validation.constraints.NotEmpty.message}");
 		m.put("{jakarta.validation.constraints.NotNull.message}", "{jakarta.validation.constraints.NotNull.message}");
 		m.put("{jakarta.validation.constraints.Size.message}", "{jakarta.validation.constraints.Size.message}");
-		m.put("Copy terminal text", "Copier le texte du terminal");
-		m.put("Could not copy to clipboard", "Impossible de copier dans le presse-papiers");
-		m.put("Inline comments and thread updates don't email watchers. To notify them, post a comment on the pull request, approve it, or request changes", 
-			"Les commentaires en ligne et les mises à jour de fil ne notifient pas les observateurs par email. Pour les notifier, publiez un commentaire sur la pull request, approuvez-la ou demandez des modifications");
-		m.put("Next changed file (J)", "Fichier modifié suivant (J)");
-		m.put("Previous changed file (K)", "Fichier modifié précédent (K)");
+		m.put("Commit of the code comment is missing", "Le commentaire du commit de code est manquant");
+		m.put("Commits missing in repository", "Des commits manquent dans le dépôt");
+		m.put("Content is identical with all whitespaces ignored", "Le contenu est identique en ignorant tous les espaces");
+		m.put("Content is identical with leading whitespaces ignored", "Le contenu est identique en ignorant les espaces au début");
+		m.put("Content is identical with trailing whitespaces ignored", "Le contenu est identique en ignorant les espaces à la fin");
+		m.put("Content is identical with whitespace changes ignored", "Le contenu est identique en ignorant les modifications des espaces");
+		m.put("Detected encoding changed from {0} to {1}. The decoded text is identical.", "Encodage détecté changé de {0} à {1}. Le texte décodé est identique.");
+		m.put("File bytes changed. The decoded text is identical.", "Les octets du fichier ont changé. Le texte décodé est identique.");
+		m.put("File mode changed. Content is identical.", "Le mode du fichier a changé. Le contenu est identique.");
+		m.put("History of target branch and source branch are unrelated", "L'historique de la branche cible et de la branche source n'est pas lié");
+		m.put("Invalid selection.", "Sélection invalide.");
+		m.put("Switch to “{0}” and select the lines again.", "Passez à « {0} » et sélectionnez à nouveau les lignes.");
+		m.put("The selection crosses hidden lines.", "La sélection traverse des lignes masquées.");
+		m.put("The selection includes expanded lines.", "La sélection inclut des lignes développées.");
+		m.put("The selection starts and ends in different revisions.", "La sélection commence et se termine dans des révisions différentes.");
 	}
 		
 	@Override
