@@ -35,13 +35,18 @@ public class FuzzyCriteria extends CommitCriteria {
 	public void fill(Project project, RevListOptions options) {
 		boolean ranged = false;
 		for (String value: values) {
-			if (project.getBranchRef(value) != null) {
-				options.revisions().add(value);
+			var branchRef = project.getBranchRef(value);
+			if (branchRef != null) {
+				options.revisions().add(branchRef.getName());
 				ranged = true;
-			} else if (project.getTagRef(value) != null || value.length() >= 6 && project.getObjectId(value, false) != null) {
-				options.revisions().add(value);
 			} else {
-				options.messages().add(value);
+				var tagRef = project.getTagRef(value);
+				if (tagRef != null)
+					options.revisions().add(tagRef.getName());
+				else if (value.length() >= 6 && project.getObjectId(value, false) != null)
+					options.revisions().add(value);
+				else
+					options.messages().add(value);
 			}
 		}
 		if (options.revisions().size() == 1 && !ranged)

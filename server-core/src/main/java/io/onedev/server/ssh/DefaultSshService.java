@@ -20,7 +20,6 @@ import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyIdentityProvider;
 import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.shell.UnknownCommand;
 import org.slf4j.Logger;
@@ -122,7 +121,7 @@ public class DefaultSshService implements SshService, Serializable {
 
 			server.setShellFactory(new DisableShellAccess());
 
-			server.setPublickeyAuthenticator(new CachingPublicKeyAuthenticator(authenticator));
+			server.setPublickeyAuthenticator(authenticator);
 			server.setKeyboardInteractiveAuthenticator(null);
 
 			server.setCommandFactory((channel, commandString) -> {
