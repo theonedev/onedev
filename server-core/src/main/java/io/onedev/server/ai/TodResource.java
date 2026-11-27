@@ -898,6 +898,25 @@ public class TodResource {
         return BuildHelper.getDetail(currentProject, build);
     }
 
+    @Path("/cancel-build")
+    @POST
+    public Map<String, Object> cancelBuild(
+                @QueryParam("currentProject") String currentProjectPath,
+                @QueryParam("reference") @NotNull String buildReference) {
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
+        var build = getBuild(currentProject, buildReference);
+        if (!SecurityUtils.canRunJob(subject, build.getProject(), build.getJobName()))
+            throw new UnauthorizedException();
+
+        if (!build.isFinished())
+            jobService.cancel(build);
+        return BuildHelper.getIdentity(currentProject, build);
+    }
+
     @Path("/get-build-code-problems")
     @GET
     public List<Map<String, Object>> getBuildCodeProblems(
