@@ -983,11 +983,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						boolean unresolved = getPullRequest().getCodeComments().stream()
 								.anyMatch(it -> !it.isResolved());
 						if (unviewed && unresolved)
-							return _T("Unresolved comments with unviewed activity");
+							return _T("There are unresolved comments with unviewed activity");
 						else if (unresolved)
-							return _T("Unresolved comments");
+							return _T("There are unresolved comments");
 						else
-							return _T("Unviewed code comment activity");
+							return _T("There are unviewed code comment activity");
 					}
 
 				})));
