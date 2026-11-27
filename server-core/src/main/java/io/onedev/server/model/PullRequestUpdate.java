@@ -27,8 +27,6 @@ public class PullRequestUpdate extends AbstractEntity {
 
 	@Column(nullable=false)
 	private Date date = new Date();
-	
-	private transient Collection<String> changedFiles;
 
 	private transient List<RevCommit> commits;
 	
@@ -58,24 +56,6 @@ public class PullRequestUpdate extends AbstractEntity {
 
 	public String getHeadRef() {
 		return REFS_PREFIX + Objects.requireNonNull(getId());
-	}
-		
-	public Collection<String> getChangedFiles() {
-		if (changedFiles == null) {
-			var project = getRequest().getProject();
-			var targetHeadCommitId = getRequest().getTarget().getObjectId();
-			var baseCommitId = getBaseCommitId();
-			var headCommitId = getHeadCommitId();
-			if (project.getRevCommit(headCommitId, false) == null) {
-				changedFiles = new ArrayList<>();
-			} else {
-				if (project.getRevCommit(baseCommitId, false) == null)
-					baseCommitId = getRequest().getMergeBase();
-				changedFiles = getGitService().getChangedFilesAfterMerge(
-						project, baseCommitId, headCommitId, targetHeadCommitId);
-			}
-		}
-		return changedFiles;
 	}
 
 	public List<RevCommit> getCommits() {

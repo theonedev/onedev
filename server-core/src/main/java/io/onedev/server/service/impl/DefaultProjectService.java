@@ -467,14 +467,15 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
 
-				query = getSession().createMutationQuery(String.format("update Build set %s=:fork where %s=:descendant",
-						Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
+				// Pull request deletion also locks the request before its builds.
+				query = getSession().createMutationQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
+						PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
 				query.setParameter("fork", fork);
 				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
 
-				query = getSession().createMutationQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
-						PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
+				query = getSession().createMutationQuery(String.format("update Build set %s=:fork where %s=:descendant",
+						Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
 				query.setParameter("fork", fork);
 				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
@@ -489,7 +490,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 		}
 
 		var user = userService.getSystem();
-		for (PullRequest request: project.getOutgoingRequests()) {
+		// Match the lock order used by bulk pull request deletion.
+		for (PullRequest request: project.getOutgoingRequests().stream().sorted().toList()) {
 			if (!request.getTargetProject().equals(project) && request.isOpen())
 				pullRequestService.discard(user, request, "Source project is deleted.");
 			// Bulk updates leave managed requests referencing the project when Hibernate flushes.

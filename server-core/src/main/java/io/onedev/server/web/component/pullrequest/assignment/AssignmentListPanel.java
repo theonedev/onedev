@@ -87,8 +87,6 @@ public abstract class AssignmentListPanel extends Panel {
 				PullRequestAssignment assignment = item.getModelObject();
 				item.add(new UserIdentPanel("user", assignment.getUser(), Mode.AVATAR_AND_NAME));
 
-				PullRequest request = getPullRequest();
-
 				item.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -121,7 +119,7 @@ public abstract class AssignmentListPanel extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && !request.isMerged());
+						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && !getPullRequest().isMerged());
 					}
 
 				});

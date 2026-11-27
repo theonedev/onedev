@@ -88,6 +88,7 @@ public class PullRequestHelper {
         }
         var preview = open ? pullRequest.checkMergePreview() : null;
         data.put("hasMergeConflicts", preview != null && preview.getMergeCommitHash() == null);
+        data.put("latestUpdateId", pullRequest.getLatestUpdate().getId());
         data.put("headCommitHash", pullRequest.getLatestUpdate().getHeadCommitHash());
         data.put("assignees", pullRequest.getAssignees().stream().map(User::getName).collect(Collectors.toList()));
         var reviews = new ArrayList<Map<String, Object>>();
@@ -97,7 +98,6 @@ public class PullRequestHelper {
             var reviewMap = new HashMap<String, Object>();
             reviewMap.put("reviewer", review.getUser().getName());
             reviewMap.put("status", review.getStatus());
-            reviewMap.put("statusDate", review.getStatusDate());
             reviews.add(reviewMap);
         }        
         data.put("reviews", reviews);

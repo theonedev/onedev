@@ -4,7 +4,7 @@ import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import { expect, test as base } from './fixtures.js';
+import { expect, test as base } from '../fixtures.js';
 
 const exec = promisify(execFile);
 const quote = value => `'${value.replaceAll("'", "'\\''")}'`;

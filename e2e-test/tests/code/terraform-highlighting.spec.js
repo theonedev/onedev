@@ -1,5 +1,5 @@
-import { expect, test, admin } from './fixtures.js';
-import { login } from './helpers.js';
+import { expect, test, admin } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 const hclSource = [
   '# hash comment',

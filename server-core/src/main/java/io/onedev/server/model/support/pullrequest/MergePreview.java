@@ -23,6 +23,17 @@ public class MergePreview implements Serializable {
 	
 	public static final String PROP_HEAD_COMMIT_HASH = "headCommitHash";
 	
+	@Column(name="PREVIEW_TARGET_BRANCH")
+	private String targetBranch;
+
+	public String getTargetBranch() {
+		return targetBranch;
+	}
+
+	public void setTargetBranch(String targetBranch) {
+		this.targetBranch = targetBranch;
+	}
+
 	@Column(name=COLUMN_TARGET_HEAD_COMMIT_HASH)
 	private String targetHeadCommitHash;
 	
@@ -87,8 +98,21 @@ public class MergePreview implements Serializable {
 		return mergeCommitHash != null? ObjectId.fromString(mergeCommitHash):  null;
 	}
 
+	public static MergePreview calculate(PullRequest request, String message) {
+		var preview = new MergePreview();
+		preview.setTargetBranch(request.getTargetBranch());
+		preview.setTargetHeadCommitHash(request.getTarget().getObjectName());
+		preview.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
+		preview.setMergeStrategy(request.getMergeStrategy());
+		var merged = preview.getMergeStrategy().merge(request, message);
+		if (merged != null)
+			preview.setMergeCommitHash(merged.name());
+		return preview;
+	}
+
 	public boolean isUpToDate(PullRequest request) {
-		return getHeadCommitHash().equals(request.getLatestUpdate().getHeadCommitHash())
+		return request.getTargetBranch().equals(targetBranch)
+				&& getHeadCommitHash().equals(request.getLatestUpdate().getHeadCommitHash())
 				&& getTargetHeadCommitHash().equals(request.getTarget().getObjectName(false))
 				&& getMergeStrategy() == request.getMergeStrategy();
 	}

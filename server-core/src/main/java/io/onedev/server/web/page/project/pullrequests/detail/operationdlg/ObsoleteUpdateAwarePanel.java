@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.detail.operationdlg;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
@@ -93,7 +94,12 @@ public abstract class ObsoleteUpdateAwarePanel extends Panel {
 				PullRequestUpdate latestUpdate = getLatestUpdate();
 				PullRequest request = latestUpdate.getRequest();
 				if (latestUpdate.equals(request.getLatestUpdate())) {
-					var errorMessage = operate(target);
+					String errorMessage;
+					try {
+						errorMessage = operate(target);
+					} catch (NotAcceptableException e) {
+						errorMessage = e.getMessage();
+					}
 					if (errorMessage == null) {
 						modal.close();
 					} else {

@@ -1,5 +1,5 @@
-import { admin, expect, test } from './fixtures.js';
-import { login } from './helpers.js';
+import { admin, expect, test } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 async function checkScrolledModal(page, testInfo, dark) {
   await login(page, admin.name, admin.password);

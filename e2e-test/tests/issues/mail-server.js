@@ -17,7 +17,7 @@ async function freePort() {
 
 // Real SMTP and IMAP, confined to loopback. GreenMail never forwards mail.
 export async function startMailServer(project, testInfo) {
-  const jar = fileURLToPath(new URL('../target/greenmail-standalone-2.1.14.jar', import.meta.url));
+  const jar = fileURLToPath(new URL('../../target/greenmail-standalone-2.1.14.jar', import.meta.url));
   await access(jar).catch(() => { throw new Error('Run npm run install:mail-server before the service desk tests'); });
   const smtpPort = await freePort();
   const imapPort = await freePort();

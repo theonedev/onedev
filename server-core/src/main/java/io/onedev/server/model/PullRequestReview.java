@@ -1,7 +1,8 @@
 package io.onedev.server.model;
 
 import java.io.Serial;
-import java.util.Date;
+
+import org.jspecify.annotations.Nullable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +19,7 @@ import io.onedev.server.rest.annotation.Immutable;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="user_id"), @Index(columnList="request_id")},
+		indexes={@Index(columnList="user_id"), @Index(columnList="request_id"), @Index(columnList="update_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"user_id", "request_id"})}
 )
 public class PullRequestReview extends AbstractEntity {
@@ -47,10 +48,19 @@ public class PullRequestReview extends AbstractEntity {
 	@Column(nullable=false)
 	private Status status = Status.PENDING;
 	
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
-	private Date statusDate = new Date();
-	
-	private transient boolean dirty;
+	private PullRequestUpdate update;
+
+	/** The update on which this reviewer last approved or requested changes. */
+	@Nullable
+	public PullRequestUpdate getUpdate() {
+		return update;
+	}
+
+	public void setUpdate(PullRequestUpdate update) {
+		this.update = update;
+	}
 
 	public User getUser() {
 		return user;
@@ -66,8 +76,6 @@ public class PullRequestReview extends AbstractEntity {
 
 	public void setStatus(Status status) {
 		this.status = status;
-		statusDate = new Date();
-		dirty = true;
 	}
 
 	public PullRequest getRequest() {
@@ -76,22 +84,6 @@ public class PullRequestReview extends AbstractEntity {
 
 	public void setRequest(PullRequest request) {
 		this.request = request;
-	}
-
-	public boolean isDirty() {
-		return dirty;
-	}
-
-	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
-	}
-
-	public Date getStatusDate() {
-		return statusDate;
-	}
-
-	public void setStatusDate(Date statusDate) {
-		this.statusDate = statusDate;
 	}
 
 }

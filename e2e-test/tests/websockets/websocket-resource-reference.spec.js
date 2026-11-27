@@ -1,5 +1,5 @@
-import { admin, expect, test } from './fixtures.js';
-import { login } from './helpers.js';
+import { admin, expect, test } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 test('the custom WebSocket resource defers pushed DOM updates until Ajax completes', async ({ page, api }, testInfo) => {
   const project = await api.createProject();

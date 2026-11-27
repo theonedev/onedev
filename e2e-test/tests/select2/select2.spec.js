@@ -1,8 +1,8 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, test } from './fixtures.js';
+import { expect, test } from '../fixtures.js';
 
-const webRoot = fileURLToPath(new URL('../../server-core/src/main/java/io/onedev/server/web/', import.meta.url));
+const webRoot = fileURLToPath(new URL('../../../server-core/src/main/java/io/onedev/server/web/', import.meta.url));
 const resources = path.join(webRoot, 'component/select2/res');
 
 // Exercise the actual bundled widget and OneDev integration with deterministic

@@ -1,9 +1,7 @@
 package io.onedev.server.rest.resource;
 
 import static io.onedev.server.model.PullRequestReview.Status.EXCLUDED;
-import static io.onedev.server.model.PullRequestReview.Status.PENDING;
 import static java.util.stream.Collectors.toList;
-import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 
 import java.io.InputStream;
 import java.io.Serial;
@@ -64,6 +62,7 @@ import io.onedev.server.service.PullRequestAssignmentService;
 import io.onedev.server.service.PullRequestChangeService;
 import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectAndBranch;
@@ -87,6 +86,9 @@ public class PullRequestResource {
 
 	@Inject
 	private PullRequestReviewService pullRequestReviewService;
+
+	@Inject
+	private PullRequestUpdateService pullRequestUpdateService;
 
 	@Inject
 	private PullRequestAssignmentService pullRequestAssignmentService;
@@ -298,20 +300,8 @@ public class PullRequestResource {
 			request.setMergeStrategy(data.getMergeStrategy());
 
 		if (data.getReviewerIds() != null) {
-			for (Long reviewerId: data.getReviewerIds()) {
-				User reviewer = userService.load(reviewerId);
-				if (reviewer.equals(request.getSubmitter()))
-					return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter cannot be reviewer").build();
-				if (!SecurityUtils.canReadCode(request.getProject()))
-					throw new NotAcceptableException("Reviewer should have code read permission: " + reviewer.getName());
-
-				if (request.getReview(reviewer) == null) {
-					PullRequestReview review = new PullRequestReview();
-					review.setRequest(request);
-					review.setUser(reviewer);
-					request.getReviews().add(review);
-				}
-			}
+			for (Long reviewerId : data.getReviewerIds())
+				pullRequestReviewService.addReviewer(user, request, userService.load(reviewerId));
 		}
 
 		if (data.getAssigneeIds() != null && !data.getAssigneeIds().isEmpty()) {
@@ -374,68 +364,42 @@ public class PullRequestResource {
 	@POST
 	public Response addReviewer(@PathParam("requestId") Long requestId, @PathParam("userId") Long userId) {		
 		var request = pullRequestService.load(requestId);
-		var user = userService.load(userId);
-
-		var currentUser = SecurityUtils.getUser();
-		if (!SecurityUtils.canModifyPullRequest(currentUser.asSubject(), request)) 
+		var subject = SecurityUtils.getSubject();
+		if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
 
-		if (user.equals(request.getSubmitter()))
-			throw new NotAcceptableException("Pull request submitter cannot be reviewer");
-
-		if (!SecurityUtils.canReadCode(user.asSubject(), request.getProject()))
-			throw new NotAcceptableException("Reviewer needs to have read code permission to the project");
-			
-		var review = request.getReview(user);
-		if (review != null) {
-			if (review.getStatus() == EXCLUDED) {
-				review.setStatus(PENDING);
-				pullRequestReviewService.createOrUpdate(currentUser, review);
-			}
-		} else {
-			review = new PullRequestReview();
-			review.setRequest(request);
-			review.setUser(user);
-			review.setStatus(PENDING);
-
-			pullRequestReviewService.createOrUpdate(currentUser, review);	
-		}
-
+		pullRequestReviewService.addReviewer(SecurityUtils.getUser(subject), request, userService.load(userId));
 		return Response.ok().build();
 	}
 
 	@Api(order=1425)
-	@Path("/{requestId}/approve")
+	@Path("/{updateId}/approve")
 	@POST
-	public Response approve(@PathParam("requestId") Long requestId, String note) {
-		var request = pullRequestService.load(requestId);
+	public Response approve(
+			@PathParam("updateId") @Api(description="ID of the pull request update reviewed") Long updateId, String note) {
 		var user = SecurityUtils.getUser();
-		note = StringUtils.trimToNull(note);
-
-		if (user == null)
-			throw new UnauthorizedException();
-
-		SecurityUtils.checkWorkOnProject(request.getProject());
-		pullRequestReviewService.review(user, request, true, note);
-
+		var update = getReviewUpdate(user, updateId);
+		pullRequestReviewService.approve(user, update, StringUtils.trimToNull(note));
 		return Response.ok().build();
 	}
 
 	@Api(order=1450)
-	@Path("/{requestId}/request-for-changes")
+	@Path("/{updateId}/request-for-changes")
 	@POST
-	public Response requestForChanges(@PathParam("requestId") Long requestId, String note) {
-		var request = pullRequestService.load(requestId);
+	public Response requestForChanges(
+			@PathParam("updateId") @Api(description="ID of the pull request update reviewed") Long updateId, String note) {
 		var user = SecurityUtils.getUser();
-		note = StringUtils.trimToNull(note);
+		var update = getReviewUpdate(user, updateId);
+		pullRequestReviewService.requestChanges(user, update, StringUtils.trimToNull(note));
+		return Response.ok().build();
+	}
 
+	private PullRequestUpdate getReviewUpdate(@Nullable User user, Long updateId) {
 		if (user == null)
 			throw new UnauthorizedException();
-
-		SecurityUtils.checkWorkOnProject(request.getProject());
-		pullRequestReviewService.review(user, request, false, note);
-
-		return Response.ok().build();
+		var update = pullRequestUpdateService.load(updateId);
+		SecurityUtils.checkWorkOnProject(update.getRequest().getProject());
+		return update;
 	}
 
 	@Api(order=1475)
@@ -450,14 +414,7 @@ public class PullRequestResource {
 		if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
 
-		var review = request.getReview(user);
-		if (review != null) {
-			review.setStatus(EXCLUDED);
-			pullRequestService.checkReviews(request, false);
-			if (review.getStatus() != EXCLUDED) 
-				throw new NotAcceptableException("This reviewer is mandatory and cannot be removed");
-			pullRequestReviewService.createOrUpdate(user, review);
-		}
+		pullRequestReviewService.reconcile(SecurityUtils.getUser(subject), request, List.of(user));
 
 		return Response.ok().build();	
 	}

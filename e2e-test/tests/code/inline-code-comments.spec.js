@@ -1,5 +1,5 @@
-import { expect, test, admin } from './fixtures.js';
-import { login } from './helpers.js';
+import { expect, test, admin } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 async function fixture(api) {
   const project = await api.createProject();

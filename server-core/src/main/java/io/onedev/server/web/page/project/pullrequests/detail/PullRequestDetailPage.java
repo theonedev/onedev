@@ -1332,7 +1332,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							pullRequestService.checkAsync(getPullRequest(), false, true);
+							pullRequestService.reconcileAsync(getPullRequest(), true);
 							Session.get().success(_T("Pull request synchronization submitted"));
 						}
 
@@ -1567,12 +1567,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 											if (errorMessage != null) {
 												return errorMessage;
 											} else {
-												autoMerge.setCommitMessage(bean.getCommitMessage());
+												var settings = new AutoMerge();
+												settings.setEnabled(request.getAutoMerge().isEnabled());
+												settings.setCommitMessage(bean.getCommitMessage());
 												var user = SecurityUtils.getUser();
-												pullRequestChangeService.changeAutoMerge(user, request, autoMerge);
+												pullRequestChangeService.changeAutoMerge(user, request, settings);
 												Session.get().success(_T("Preset commit message updated"));
 												close();
-												pullRequestService.checkAutoMerge(request);
+												pullRequestService.reconcileAsync(request);
 												return null;
 											}
 										}
@@ -2188,7 +2190,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							pullRequestReviewService.review(SecurityUtils.getUser(), getPullRequest(), true, getComment());
+							pullRequestReviewService.approve(SecurityUtils.getUser(), getLatestUpdate(), getComment());
 							notifyPullRequestChange(target);
 							Session.get().success(_T("Approved"));
 							return null;
@@ -2231,7 +2233,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							pullRequestReviewService.review(SecurityUtils.getUser(), getPullRequest(), false, getComment());
+							pullRequestReviewService.requestChanges(SecurityUtils.getUser(), getLatestUpdate(), getComment());
 							notifyPullRequestChange(target);
 							Session.get().success(_T("Requested For changes"));
 							return null;

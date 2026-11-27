@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { expect } from './fixtures.js';
+import { expect } from '../fixtures.js';
 import { test as base } from './jev-fixtures.js';
 import { startMailServer } from './mail-server.js';
 

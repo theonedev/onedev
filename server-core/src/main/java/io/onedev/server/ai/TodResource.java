@@ -17,13 +17,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -64,7 +62,6 @@ import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -76,7 +73,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.SystemSetting;
@@ -112,6 +108,7 @@ import io.onedev.server.service.PullRequestCommentService;
 import io.onedev.server.service.PullRequestLabelService;
 import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
@@ -173,6 +170,9 @@ public class TodResource {
     private PullRequestReviewService pullRequestReviewService;
 
     @Inject
+    private PullRequestUpdateService pullRequestUpdateService;
+
+    @Inject
     private PullRequestLabelService pullRequestLabelService;
 
     @Inject
@@ -186,9 +186,6 @@ public class TodResource {
 
     @Inject
     private JobService jobService;
-
-    @Inject
-    private GitService gitService;
 
     @Inject
     private LabelSpecService labelSpecService;
@@ -1172,19 +1169,6 @@ public class TodResource {
         request.setSubmitter(submitter);
         request.setMergeStrategy(mergeStrategy);
 
-        // Pre-populate baseCommitHash + initial update so title/description can
-        // be generated from commits below; openNew(...) will keep them as-is.
-        ObjectId baseCommitId = gitService.getMergeBase(
-                target.getProject(), target.getObjectId(),
-                source.getProject(), source.getObjectId());
-        if (baseCommitId == null)
-            throw new NotAcceptableException("No common base for source and target branches");
-
-        PullRequestUpdate update = new PullRequestUpdate();
-        update.setRequest(request);
-        update.setHeadCommitHash(source.getObjectName());
-        request.getUpdates().add(update);
-
         var title = (String) data.remove("title");
         if (title == null)
             throw new NotAcceptableException("Title is required");
@@ -1202,15 +1186,7 @@ public class TodResource {
                 User reviewer = userService.findByName(reviewerName);
                 if (reviewer == null)
                     throw new NotFoundException("Reviewer not found: " + reviewerName);
-                if (reviewer.equals(request.getSubmitter()))
-                    throw new NotAcceptableException("Pull request submitter cannot be reviewer");
-
-                if (request.getReview(reviewer) == null) {
-                    PullRequestReview review = new PullRequestReview();
-                    review.setRequest(request);
-                    review.setUser(reviewer);
-                    request.getReviews().add(review);
-                }
+                pullRequestReviewService.addReviewer(submitter, request, reviewer);
             }
         }
 
@@ -1427,43 +1403,21 @@ public class TodResource {
                 User reviewer = userService.findByName(reviewerName);
                 if (reviewer == null)
                     throw new NotFoundException("Reviewer not found: " + reviewerName);
-                var review = request.getReview(reviewer);
-                if (review == null) {
-                    review = new PullRequestReview();
-                    review.setRequest(request);
-                    review.setUser(reviewer);
-                    request.getReviews().add(review);
-                    pullRequestReviewService.createOrUpdate(user, review);
-                } else if (review.getStatus() != PullRequestReview.Status.PENDING) {
-                    review.setStatus(PullRequestReview.Status.PENDING);
-                    pullRequestReviewService.createOrUpdate(user, review);
-                }
+                pullRequestReviewService.addReviewer(user, request, reviewer);
             }
         }
         var removeReviewerNames = (List<String>) data.remove("removeReviewers");
         if (removeReviewerNames != null) {
             if (!request.isOpen())
                 throw new NotAcceptableException("Pull request is closed");
-            var excludedReviews = new ArrayList<PullRequestReview>();
+            var exclusions = new ArrayList<User>();
             for (var reviewerName : removeReviewerNames) {
                 User reviewer = userService.findByName(reviewerName);
                 if (reviewer == null)
                     throw new NotFoundException("Reviewer not found: " + reviewerName);
-                var review = request.getReview(reviewer);
-                if (review != null && review.getStatus() != PullRequestReview.Status.EXCLUDED) {
-                    review.setStatus(PullRequestReview.Status.EXCLUDED);
-                    excludedReviews.add(review);
-                }
+                exclusions.add(reviewer);
             }
-            pullRequestService.checkReviews(request, false);
-            var requiredReviewers = excludedReviews.stream()
-                    .filter(it -> it.getStatus() != PullRequestReview.Status.EXCLUDED)
-                    .map(it -> it.getUser().getName())
-                    .collect(Collectors.toList());
-            if (!requiredReviewers.isEmpty())
-                throw new NotAcceptableException("Unable to remove mandatory reviewers: " + String.join(", ", requiredReviewers));
-            for (var review : excludedReviews) 
-                pullRequestReviewService.createOrUpdate(user, review);
+            pullRequestReviewService.reconcile(user, request, exclusions);
         }
 
         var autoMergeEnabled = (Boolean) data.remove("autoMerge");
@@ -1493,38 +1447,38 @@ public class TodResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
     public Map<String, Object> approvePullRequest(
-                @QueryParam("currentProject") String currentProjectPath,
-                @QueryParam("reference") @NotNull String pullRequestReference,
+                @QueryParam("updateId") @NotNull Long updateId,
                 String comment) {
         var user = SecurityUtils.getUser();
-        if (user == null)
-            throw new UnauthenticatedException();
-
-        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
-        var pullRequest = getPullRequest(currentProject, pullRequestReference);
-
-        SecurityUtils.checkWorkOnProject(pullRequest.getProject());
-        pullRequestReviewService.review(user, pullRequest, true, trimToNull(comment));
-        return PullRequestHelper.getIdentity(currentProject, pullRequest);
+        var update = getReviewUpdate(user, updateId);
+        pullRequestReviewService.approve(user, update, trimToNull(comment));
+        return PullRequestHelper.getIdentity(null, update.getRequest());
     }
 
     @Path("/request-changes-on-pull-request")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
     public Map<String, Object> requestChangesOnPullRequest(
-                @QueryParam("currentProject") String currentProjectPath,
-                @QueryParam("reference") @NotNull String pullRequestReference,
+                @QueryParam("updateId") @NotNull Long updateId,
                 String comment) {
         var user = SecurityUtils.getUser();
+        var update = getReviewUpdate(user, updateId);
+        pullRequestReviewService.requestChanges(user, update, trimToNull(comment));
+        return PullRequestHelper.getIdentity(null, update.getRequest());
+    }
+
+    private PullRequestUpdate getReviewUpdate(@Nullable User user, Long updateId) {
         if (user == null)
             throw new UnauthenticatedException();
 
-        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
-        var pullRequest = getPullRequest(currentProject, pullRequestReference);
-
+        var update = pullRequestUpdateService.get(updateId);
+        if (update == null)
+            throw new NotFoundException("Pull request update not found: " + updateId);
+        var pullRequest = update.getRequest();
+        if (!SecurityUtils.canReadCode(pullRequest.getProject()))
+            throw new UnauthorizedException("No permission to access pull request update: " + updateId);
         SecurityUtils.checkWorkOnProject(pullRequest.getProject());
-        pullRequestReviewService.review(user, pullRequest, false, trimToNull(comment));
-        return PullRequestHelper.getIdentity(currentProject, pullRequest);
+        return update;
     }
 
     @Path("/merge-pull-request")

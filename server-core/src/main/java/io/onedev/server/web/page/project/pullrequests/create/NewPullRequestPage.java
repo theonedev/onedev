@@ -18,7 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.LinkedHashMap;
+
 
 import jakarta.inject.Inject;
 
@@ -73,7 +74,6 @@ import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.ProblemReport;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
@@ -153,9 +153,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	private PullRequestService pullRequestService;
 
 	@Inject
-	private GitService gitService;
-
-	@Inject
 	private Dao dao;
 
 	@Inject
@@ -172,6 +169,10 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	private ProjectAndBranch source;
 	
 	private final IModel<PullRequest> requestModel;
+
+	private String preparationError;
+
+	private String draftTargetHead;
 	
 	private final IModel<Collection<CodeComment>> commentsModel = 
 			new LoadableDetachableModel<Collection<CodeComment>>() {
@@ -274,85 +275,133 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			source = new ProjectAndBranch(getProject(), suggestedSourceBranch);
 		}
 
-		AtomicReference<PullRequest> pullRequestRef = new AtomicReference<>(null);
-		PullRequest prevRequest = pullRequestService.findOpen(target, source);
-		if (prevRequest != null) 
-			pullRequestRef.set(prevRequest);
-		else if (target.getBranch() != null && source.getBranch() != null) 
-			pullRequestRef.set(pullRequestService.findEffective(target, source));
-		
-		if (pullRequestRef.get() == null) {
-			ObjectId mergeBase;
-			if (target.getBranch() != null && source.getBranch() != null) {
-				mergeBase = gitService.getMergeBase(
-						target.getProject(), target.getObjectId(),
-						source.getProject(), source.getObjectId());
-			} else {
-				mergeBase = null;
+		requestModel = new DraftModel();
+		requestModel.setObject(getInitialRequest(currentUser));
+	}
+
+	@Nullable
+	private PullRequest getInitialRequest(User submitter) {
+		if (target.getBranch() == null || source.getBranch() == null)
+			return null;
+
+		var request = new PullRequest();
+		request.setTarget(target);
+		request.setSource(source);
+		request.setSubmitter(submitter);
+		request.setWorkInProgress(request.getSourceBranchSemantic().isWorkInProgress());
+		try {
+			pullRequestService.prepareDraft(request);
+		} catch (ExplicitException e) {
+			var existing = pullRequestService.findEffective(target, source);
+			if (existing != null)
+				return existing;
+			if (request.getUpdates().isEmpty()) {
+				preparationError = e.getMessage();
+				return null;
 			}
-
-			if (mergeBase != null) {
-				PullRequest request = new PullRequest();
-				pullRequestRef.set(request);
-				request.setTarget(target);
-				request.setSource(source);
-				request.setSubmitter(currentUser);
-				request.setWorkInProgress(request.getSourceBranchSemantic().isWorkInProgress());
-
-				if (mergeBase.equals(source.getObjectId()))
-					request.setStatus(Status.MERGED);
-
-				PullRequestUpdate update = new PullRequestUpdate();
-				request.getUpdates().add(update);
-				request.setUpdates(request.getUpdates());
-				update.setRequest(request);
-				update.setHeadCommitHash(source.getObjectName());
-
-				var commits = update.getCommits();
-				if (commits.size() == 1) {
-					var commit = commits.get(0);
-					request.setTitle(request.generateTitleFromSingleCommit(commit));
-					request.setDescription(request.generateDescriptionFromSingleCommit(commit));
-				} else if (settingService.getAiSetting().getLiteModelSetting() == null) {
-					request.setTitle(request.generateTitleFromBranch());
-				}
-
-				pullRequestService.checkReviews(request, false);
-
-				for (var assignee: target.getProject().findDefaultPullRequestAssignees()) {
-					PullRequestAssignment assignment = new PullRequestAssignment();
-					assignment.setRequest(request);
-					assignment.setUser(assignee);
-					request.getAssignments().add(assignment);
-				}
-
-				request.setMergeStrategy(target.getProject().findDefaultPullRequestMergeStrategy());
-			}
-			requestModel = new LoadableDetachableModel<>() {
-
-				@Override
-				protected PullRequest load() {
-					if (pullRequestRef.get() != null) {
-						pullRequestRef.get().setTarget(target);
-						pullRequestRef.get().setSource(source);
-						pullRequestRef.get().setSubmitter(SecurityUtils.getAuthUser());
-					}
-					return pullRequestRef.get();
-				}
-
-			};
-		} else {
-			Long requestId = pullRequestRef.get().getId();
-			requestModel = new LoadableDetachableModel<>() {
-
-				@Override
-				protected PullRequest load() {
-					return pullRequestService.load(requestId);
-				}
-
-			};
+			var mergeBase = request.getMergeBase(false);
+			if (mergeBase == null)
+				return null;
+			if (mergeBase.equals(request.getLatestUpdate().getHeadCommitId()))
+				request.setStatus(Status.MERGED);
+			else
+				preparationError = e.getMessage();
+			return request;
 		}
-		requestModel.setObject(pullRequestRef.get());
+
+		draftTargetHead = target.getObjectName();
+		var commits = request.getLatestUpdate().getCommits();
+		if (commits.size() == 1) {
+			var commit = commits.get(0);
+			request.setTitle(request.generateTitleFromSingleCommit(commit));
+			request.setDescription(request.generateDescriptionFromSingleCommit(commit));
+		} else if (settingService.getAiSetting().getLiteModelSetting() == null) {
+			request.setTitle(request.generateTitleFromBranch());
+		}
+		return request;
+	}
+
+	// Only scalar draft selections survive a Wicket request. Resolve users and
+	// projects in the session handling the next Ajax callback or form submission.
+	private class DraftModel extends LoadableDetachableModel<PullRequest> {
+		private Long requestId;
+		private String head;
+		private String uuid;
+		private boolean prepared;
+		private String checkError;
+		private String title;
+		private String description;
+		private Status status;
+		private boolean workInProgress;
+		private MergeStrategy strategy;
+		private MergePreview preview;
+		private final Map<Long, PullRequestReview.Status> reviewers = new LinkedHashMap<>();
+		private final List<Long> assignees = new ArrayList<>();
+
+		@Override
+		protected void onDetach() {
+			var request = getObject();
+			if (request != null) {
+				requestId = request.getId();
+				if (request.isNew()) {
+					head = request.getLatestUpdate().getHeadCommitHash();
+					uuid = request.getUUID();
+					prepared = request.isDraftPrepared();
+					checkError = request.getCheckError();
+					title = request.getTitle();
+					description = request.getDescription();
+					status = request.getStatus();
+					workInProgress = request.isWorkInProgress();
+					strategy = request.getMergeStrategy();
+					preview = request.getMergePreview();
+					reviewers.clear();
+					for (var review : request.getReviews())
+						reviewers.put(review.getUser().getId(), review.getStatus());
+					assignees.clear();
+					for (var assignment : request.getAssignments())
+						assignees.add(assignment.getUser().getId());
+				}
+			}
+		}
+
+		@Override
+		protected PullRequest load() {
+			if (requestId != null)
+				return pullRequestService.load(requestId);
+			if (head == null)
+				return null;
+			var request = new PullRequest();
+			request.setSource(source);
+			request.setTarget(target);
+			request.setSubmitter(SecurityUtils.getAuthUser());
+			request.setUUID(uuid);
+			request.setTitle(title);
+			request.setDescription(description);
+			request.setStatus(status);
+			request.setWorkInProgress(workInProgress);
+			request.setMergeStrategy(strategy);
+			request.setMergePreview(preview);
+			request.setDraftPrepared(prepared);
+			request.setCheckError(checkError);
+			var update = new PullRequestUpdate();
+			update.setRequest(request);
+			update.setHeadCommitHash(head);
+			request.getUpdates().add(update);
+			reviewers.forEach((id, reviewStatus) -> {
+				var review = new PullRequestReview();
+				review.setUser(dao.load(User.class, id));
+				review.setStatus(reviewStatus);
+				review.setRequest(request);
+				request.getReviews().add(review);
+			});
+			for (var id : assignees) {
+				var assignment = new PullRequestAssignment();
+				assignment.setUser(dao.load(User.class, id));
+				assignment.setRequest(request);
+				request.getAssignments().add(assignment);
+			}
+			return request;
+		}
 	}
 	
 	private PullRequest getPullRequest() {
@@ -432,15 +481,18 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		PullRequest request = getPullRequest();
 		if (target.getBranch() == null || source.getBranch() == null) 
 			fragment = newBranchNotSpecifiedFrag();
-		else if (request == null) 
-			fragment = newUnrelatedHistoryFrag();
-		else if (request.getId() != null && (request.isOpen() || !request.isMergedIntoTarget())) 
+		else if (request != null && request.getId() != null && (request.isOpen() || !request.isMergedIntoTarget()))
 			fragment = newEffectiveFrag();
-		else if (request.getSource().equals(request.getTarget())) 
+		else if (source.equals(target))
 			fragment = newSameBranchFrag();
-		else if (request.isMerged()) 
+		else if (preparationError != null) {
+			fragment = new Fragment("status", "preparationErrorFrag", this);
+			fragment.add(new Label("message", preparationError));
+		} else if (request == null)
+			fragment = newUnrelatedHistoryFrag();
+		else if (request.isMerged())
 			fragment = newAcceptedFrag();
-		else 
+		else
 			fragment = newCanSendFrag();
 		add(fragment);
 
@@ -801,29 +853,21 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			public void onSubmit() {
 				super.onSubmit();
 				
-				ProjectAndBranch target = getPullRequest().getTarget();
-				ProjectAndBranch source = getPullRequest().getSource();
-				if (!target.getObjectName().equals(getPullRequest().getTarget().getObjectName()) 
-						|| !source.getObjectName().equals(getPullRequest().getSource().getObjectName())) {
+				var request = getPullRequest();
+				if (!target.getObjectName().equals(draftTargetHead)
+						|| !source.getObjectName().equals(request.getLatestUpdate().getHeadCommitHash())) {
 					getSession().warn(_T("Either target branch or source branch has new commits just now, please re-check."));
 					setResponsePage(NewPullRequestPage.class, paramsForComparison(target, source));
 				} else {
-					getPullRequest().setSource(source);
-					getPullRequest().setTarget(target);
 					for (var label: labelsBean.getLabels()) {
 						PullRequestLabel requestLabel = new PullRequestLabel();
 						requestLabel.setSpec(labelSpecService.find(label));
-						requestLabel.setRequest(getPullRequest());
-						getPullRequest().getLabels().add(requestLabel);
+						requestLabel.setRequest(request);
+						request.getLabels().add(requestLabel);
 					}
-					for (PullRequestReview review: getPullRequest().getReviews())
-						review.setUser(dao.load(User.class, review.getUser().getId()));
-					for (PullRequestAssignment assignment: getPullRequest().getAssignments())
-						assignment.setUser(dao.load(User.class, assignment.getUser().getId()));
+					pullRequestService.open(request);
 					
-					pullRequestService.open(getPullRequest());
-					
-					setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest()));
+					setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request));
 				}			
 				
 			}
@@ -1054,16 +1098,10 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			@Override
 			public Component getLazyLoadComponent(String componentId) {
 				PullRequest request = getPullRequest();
-				MergePreview mergePreview = new MergePreview();
-				mergePreview.setTargetHeadCommitHash(request.getTarget().getObjectName());
-				mergePreview.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
-				mergePreview.setMergeStrategy(request.getMergeStrategy());
-				ObjectId merged = mergePreview.getMergeStrategy().merge(request, "Pull request merge preview");
-				if (merged != null)
-					mergePreview.setMergeCommitHash(merged.name());
+				var mergePreview = MergePreview.calculate(request, "Pull request merge preview");
 				request.setMergePreview(mergePreview);
-				
-				if (merged != null) {
+
+				if (mergePreview.getMergeCommitHash() != null) {
 					String html = String.format("<svg class='icon mt-n1 mr-1'><use xlink:href='%s'/></svg> ", SpriteImage.getVersionedHref("tick-circle-o")) 
 							+ _T("Able to merge without conflicts");
 					Component result = new Label(componentId, html);

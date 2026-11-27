@@ -1,5 +1,5 @@
-import { expect, test } from './fixtures.js';
-import { login } from './helpers.js';
+import { expect, test } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 test.describe('confidential issue access', () => {
   let creator;

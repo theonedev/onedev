@@ -4,7 +4,6 @@ import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.AgentTokenService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.job.JobService;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -23,9 +22,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Singleton
 public class BearerAuthenticationFilter extends ExceptionHandleFilter {
-	
-	@Inject
-	private UserService userService;
 	
 	@Inject
 	private AccessTokenService accessTokenService;
@@ -51,7 +47,7 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 			String bearerToken = SecurityUtils.getBearerToken(httpRequest);
 			if (bearerToken != null) {
 				if (clusterService.getCredential().equals(bearerToken)) {
-					ThreadContext.bind(userService.getSystem().asSubject());
+					SecurityUtils.bindAsSystem();
 				} else {
 					var accessToken = accessTokenService.findByValue(bearerToken);
 					if (accessToken != null) {

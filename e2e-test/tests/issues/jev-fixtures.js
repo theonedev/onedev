@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { once } from 'node:events';
-import { expect, test as base, admin } from './fixtures.js';
-import { login } from './helpers.js';
+import { expect, test as base, admin } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 const fakeApiKey = 'e2e-fake-jev-key';
 const settingsUrl = '~administration/settings/jev';

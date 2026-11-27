@@ -1,5 +1,5 @@
-import { admin, expect, test } from './fixtures.js';
-import { login } from './helpers.js';
+import { admin, expect, test } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 test.afterEach(async ({ page }, testInfo) => {
   if (testInfo.status !== testInfo.expectedStatus && !page.isClosed()) {

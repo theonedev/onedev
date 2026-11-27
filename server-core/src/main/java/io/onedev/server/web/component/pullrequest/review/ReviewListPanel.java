@@ -10,6 +10,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -19,7 +20,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.PullRequestService;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
@@ -70,6 +71,13 @@ public abstract class ReviewListPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		add(new Label("shortage", () -> getPullRequest().getCheckError()) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isNew() && getPullRequest().getCheckError() != null);
+			}
+		});
 		
 		add(new ListView<>("reviews", reviewsModel) {
 
@@ -112,8 +120,11 @@ public abstract class ReviewListPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						PullRequestReview review = item.getModelObject();
-						review.setStatus(Status.PENDING);
-						OneDev.getInstance(PullRequestReviewService.class).createOrUpdate(SecurityUtils.getUser(), review);
+						try {
+							getReviewService().requestReview(SecurityUtils.getUser(), getPullRequest(), review.getUser());
+						} catch (NotAcceptableException e) {
+							getSession().warn(e.getMessage());
+						}
 						notifyPullRequestChange(target);
 					}
 
@@ -123,8 +134,8 @@ public abstract class ReviewListPanel extends Panel {
 
 						PullRequestReview review = item.getModelObject();
 						User currentUser = SecurityUtils.getAuthUser();
-						setVisible(!request.isNew()
-								&& request.isOpen()
+						setVisible(!getPullRequest().isNew()
+								&& getPullRequest().isOpen()
 								&& review.getStatus() != PullRequestReview.Status.PENDING
 								&& (SecurityUtils.canModifyPullRequest(getPullRequest()) || review.getUser().equals(currentUser)));
 					}
@@ -147,37 +158,23 @@ public abstract class ReviewListPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						PullRequestReview review = item.getModelObject();
-						review.setStatus(Status.EXCLUDED);
-						OneDev.getInstance(PullRequestService.class).checkReviews(request, false);
-						User reviewer = review.getUser();
-						boolean reviewerRequired = false;
-						if (request.isNew()) {
-							if (request.getReview(reviewer).getStatus() != Status.EXCLUDED)
-								reviewerRequired = true;
-						} else if (request.getReview(reviewer).getStatus() == Status.EXCLUDED) {
-							getReviewService().createOrUpdate(SecurityUtils.getUser(), review);
-							for (PullRequestReview eachReview : request.getReviews()) {
-								if (eachReview.isNew())
-									getReviewService().createOrUpdate(SecurityUtils.getUser(), eachReview);
-							}
-							notifyPullRequestChange(target);
-						} else {
-							reviewerRequired = true;
+						try {
+							getReviewService().reconcile(
+									SecurityUtils.getUser(), request, List.of(review.getUser()));
+							if (request.isNew())
+								target.add(ReviewListPanel.this);
+							else
+								notifyPullRequestChange(target);
+						} catch (NotAcceptableException e) {
+							getSession().warn(e.getMessage());
 						}
-						if (reviewerRequired) {
-							getSession().warn("Reviewer '" + reviewer.getDisplayName()
-									+ "' is required and cannot be removed");
-						} else if (request.isNew()) {
-							target.add(ReviewListPanel.this);
-						}
-
 						reviewsModel.detach();
 					}
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && request.isOpen());
+						setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && getPullRequest().isOpen());
 					}
 
 				});

@@ -65,9 +65,8 @@ public interface GitService {
 	void push(Project sourceProject, String sourceRev, 
 			  Project targetProject, String targetRev);
 
-	void pushLfsObjects(Project sourceProject, String sourceRef, 
-						Project targetProject, String targetRef,
-						ObjectId commitId);
+	/** Copies a commit and its LFS objects without publishing a ref or opening a database session. */
+	void copyCommit(Long sourceProjectId, String sourceRef, Long targetProjectId, String targetRef, ObjectId commitId);
 	
 	void updateRef(Project project, String refName, ObjectId newObjectId, 
 			@Nullable ObjectId expectedOldObjectId);

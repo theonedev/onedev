@@ -7,9 +7,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.NotAcceptableException;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.PullRequestReviewService;
@@ -53,21 +52,14 @@ public abstract class ReviewerChoice extends SelectToActChoice<User> {
 
 	@Override
 	protected void onSelect(AjaxRequestTarget target, User user) {
-		PullRequestReview review = getPullRequest().getReview(user);
-		if (review == null) {
-			review = new PullRequestReview();
-			review.setRequest(getPullRequest());
-			review.setUser(user);
-			getPullRequest().getReviews().add(review);
-		} else {
-			review.setStatus(Status.PENDING);
+		var request = getPullRequest();
+		try {
+			OneDev.getInstance(PullRequestReviewService.class).addReviewer(SecurityUtils.getUser(), request, user);
+			if (!request.isNew())
+				((BasePage)getPage()).notifyObservableChange(target, PullRequest.getChangeObservable(request.getId()));
+		} catch (NotAcceptableException e) {
+			getSession().warn(e.getMessage());
 		}
+	}
 
-		if (!getPullRequest().isNew()) {
-			OneDev.getInstance(PullRequestReviewService.class).createOrUpdate(SecurityUtils.getUser(), review);
-			((BasePage)getPage()).notifyObservableChange(target,
-					PullRequest.getChangeObservable(getPullRequest().getId()));
-		}
-	};
-	
 }

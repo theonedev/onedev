@@ -14,4 +14,10 @@
 		</li>
 		</wicket:enclosure>
 	</ul>
+	<wicket:enclosure child="shortage">
+		<div class="text-danger font-size-sm mt-2 mb-0" role="status">
+			<span wicket:id="shortage"></span>
+			<wicket:t>You can open this pull request. Merging is blocked until the reviewer requirement is met.</wicket:t>
+		</div>
+	</wicket:enclosure>
 </wicket:panel>

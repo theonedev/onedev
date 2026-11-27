@@ -8,7 +8,6 @@ import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.rest.RestProjectUtils;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.JobRun;
@@ -97,13 +96,9 @@ public class JobRunResource {
 			if (!SecurityUtils.canRunJob(subject, request.getProject(), jobRun.getJobName()))		
 				throw new UnauthorizedException();
 
-			MergePreview preview = request.checkMergePreview();
-			if (preview == null)
-				throw new ValidationException("Pull request merge preview not calculated yet");
-			if (preview.getMergeCommitHash() == null)
-				throw new ValidationException("Pull request has merge conflicts");
-			
-			commitId = ObjectId.fromString(preview.getMergeCommitHash());
+			if (request.getBuildCommitHash() == null)
+				throw new ValidationException("No build commit is available for this pull request");
+			commitId = ObjectId.fromString(request.getBuildCommitHash());
 		}
 		
 		Build build = jobService.submit(user, project, commitId, jobRun.getJobName(), 

@@ -14,7 +14,7 @@ public class JobRunOnPullRequest extends JobRun {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Api(order=100, description="${productName} will build against merge preview commit of this pull request")
+	@Api(order=100, description="${productName} will run the job on the selected build commit of this pull request")
 	private Long pullRequestId;
 	
 	@NotNull

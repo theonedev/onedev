@@ -20,10 +20,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.pullrequesttitleanddescriptionprovider.GeneratedPullRequestTitleAndDescription;
 import io.onedev.server.buildspec.step.pullrequesttitleanddescriptionprovider.PullRequestTitleAndDescriptionProvider;
-import io.onedev.server.git.service.GitService;
+import io.onedev.server.exception.RedundantPullRequestException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.service.BuildService;
@@ -123,52 +122,23 @@ public class CreatePullRequestStep extends ServerSideStep {
 				throw new ExplicitException("Source branch should not be empty");
 			
 			var build = OneDev.getInstance(BuildService.class).load(buildId);
-			
 			var projectId = build.getProject().getId();
+			var pullRequest = new PullRequest();
+			pullRequest.setTarget(new ProjectAndBranch(projectId, getTargetBranch()));
+			pullRequest.setSource(new ProjectAndBranch(projectId, getSourceBranch()));
+			pullRequest.setMergeStrategy(getMergeStrategy());
+			pullRequest.setSubmitter(OneDev.getInstance(UserService.class).getSystem());
+			pullRequest.setWorkInProgress(isWorkInProgress());
 
-			ProjectAndBranch target = new ProjectAndBranch(projectId, getTargetBranch());
-			ProjectAndBranch source = new ProjectAndBranch(projectId, getSourceBranch());
-
-			if (target.equals(source)) {
-				logger.warning("Pull request will not be created as target branch is the same as source branch");
-			} else {
-				var pullRequestService = OneDev.getInstance(PullRequestService.class);
-				var pullRequest = pullRequestService.findOpen(target, source);
-				if (pullRequest != null) {
-					logger.warning("A pull request has already been opened for specified branches");
-				} else {
-					pullRequest = new PullRequest();
-					pullRequest.setTarget(target);
-					pullRequest.setSource(source);
-					pullRequest.setMergeStrategy(getMergeStrategy());
-					pullRequest.setSubmitter(OneDev.getInstance(UserService.class).getSystem());
-	
-					var baseCommitId = OneDev.getInstance(GitService.class).getMergeBase(
-						target.getProject(), target.getObjectId(), 
-						source.getProject(), source.getObjectId());
-	
-					if (baseCommitId == null)
-						throw new ExplicitException("No common base for target and source branches");
-	
-					if (baseCommitId.name().equals(source.getObjectName())) {
-						logger.warning("Pull request will not be created as target branch is already up to date with source branch");
-					} else {
-						var update = new PullRequestUpdate();
-						pullRequest.getUpdates().add(update);
-						pullRequest.setUpdates(pullRequest.getUpdates());
-						update.setRequest(pullRequest);
-						update.setHeadCommitHash(source.getObjectName());
-
-						var titleAndDescription = titleAndDescritpionProvider.getTitleAndDescription(pullRequest);
-						
-						pullRequest.setTitle(titleAndDescription.getLeft());
-						pullRequest.setWorkInProgress(isWorkInProgress());
-						
-						pullRequest.setDescription(titleAndDescription.getRight());
-						
-						pullRequestService.open(pullRequest);	
-					}	
-				}	
+			var pullRequestService = OneDev.getInstance(PullRequestService.class);
+			try {
+				pullRequestService.prepareDraft(pullRequest);
+				var titleAndDescription = titleAndDescritpionProvider.getTitleAndDescription(pullRequest);
+				pullRequest.setTitle(titleAndDescription.getLeft());
+				pullRequest.setDescription(titleAndDescription.getRight());
+				pullRequestService.open(pullRequest);
+			} catch (RedundantPullRequestException e) {
+				logger.warning(e.getMessage());
 			}
 			return new ServerStepResult(true);
 		});

@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import * as client from 'openid-client';
-import { expect, test as base } from './fixtures.js';
+import { expect, test as base } from '../fixtures.js';
 
 const exec = promisify(execFile);
 

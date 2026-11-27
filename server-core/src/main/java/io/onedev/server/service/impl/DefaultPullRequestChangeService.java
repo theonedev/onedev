@@ -75,6 +75,9 @@ public class DefaultPullRequestChangeService extends BaseEntityService<PullReque
 	@Transactional
 	@Override
 	public void changeMergeStrategy(User user, PullRequest request, MergeStrategy mergeStrategy) {
+		request.lockForUpdate(getSession());
+		if (request.getMergeStrategy() == mergeStrategy)
+			return;
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
 		change.setRequest(request);
@@ -83,11 +86,13 @@ public class DefaultPullRequestChangeService extends BaseEntityService<PullReque
 		create(change, null);
 		request.getAutoMerge().setEnabled(false);
 		request.setMergeStrategy(mergeStrategy);
+		request.setMergePreview(null);
 	}
 
 	@Transactional
 	@Override
 	public void changeAutoMerge(User user, PullRequest request, AutoMerge autoMerge) {
+		request.lockForUpdate(getSession());
 		if (request.getAutoMerge().isEnabled() != autoMerge.isEnabled()) {
 			PullRequestChange change = new PullRequestChange();
 			change.setDate(new Date());
@@ -102,6 +107,7 @@ public class DefaultPullRequestChangeService extends BaseEntityService<PullReque
 	@Transactional
 	@Override
 	public void changeWorkInProgress(User user, PullRequest request, boolean workInProgress) {
+		request.lockForUpdate(getSession());
 		if (request.isWorkInProgress() != workInProgress) {
 			request.setWorkInProgress(workInProgress);
 
@@ -163,9 +169,11 @@ public class DefaultPullRequestChangeService extends BaseEntityService<PullReque
 	@Transactional
 	@Override
 	public void changeTargetBranch(User user, PullRequest request, String targetBranch) {
+		request.lockForUpdate(getSession());
 		String prevTargetBranch = request.getTargetBranch();
 		if (!targetBranch.equals(prevTargetBranch)) {
 			request.setTargetBranch(targetBranch);
+			request.setMergePreview(null);
 			request.getAutoMerge().setEnabled(false);
 			
 			PullRequestChange change = new PullRequestChange();

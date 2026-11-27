@@ -15,6 +15,7 @@ export class FixturesApi {
   constructor(request) {
     this.request = request;
     this.projects = [];
+    this.groups = [];
     this.users = [];
     this.roles = new Map();
   }
@@ -44,6 +45,15 @@ export class FixturesApi {
     const id = await this.json('post', '~api/users', { data });
     this.users.push(id);
     return { id, userName, password };
+  }
+
+  async createGroup(members, name = `group-${randomUUID()}`) {
+    const id = await this.json('post', '~api/groups', { data: { name } });
+    this.groups.push(id);
+    for (const member of members) {
+      await this.json('post', '~api/memberships', { data: { groupId: id, userId: member.id } });
+    }
+    return { id, name };
   }
 
   async authorizeUser(project, user, roleName = 'Issue Reporter') {
@@ -80,8 +90,27 @@ export class FixturesApi {
     });
   }
 
-  async putFile(project, file, content, commitMessage = `Set up ${file}`) {
-    return this.json('post', `~api/repositories/${project.id}/files/main/${file}`, { data: {
+  async createBranch(project, branchName, revision = 'main') {
+    await expect(await this.request.post(`~api/repositories/${project.id}/branches`, {
+      data: { branchName, revision },
+    })).toBeOK();
+  }
+
+  async setBranchProtections(project, branchProtections) {
+    const url = `~api/projects/${project.id}/setting`;
+    const setting = await this.json('get', url);
+    await expect(await this.request.post(url, { data: { ...setting, branchProtections } })).toBeOK();
+  }
+
+  async createPullRequest(project, { sourceBranch, targetBranch = 'main', title, mergeStrategy, creator }) {
+    return this.json('post', '~api/pulls', {
+      data: { targetProjectId: project.id, targetBranch, sourceProjectId: project.id, sourceBranch, title, mergeStrategy },
+      ...(creator ? { headers: credentials(creator) } : {}),
+    });
+  }
+
+  async putFile(project, file, content, commitMessage = `Set up ${file}`, branch = 'main') {
+    return this.json('post', `~api/repositories/${project.id}/files/${branch}/${file}`, { data: {
       '@type': 'FileCreateOrUpdateRequest', commitMessage,
       base64Content: Buffer.from(content).toString('base64'),
     } });
@@ -89,9 +118,10 @@ export class FixturesApi {
 
   async dispose() {
     const errors = [];
-    // Projects own issues and authorizations, so remove them before users.
+    // Delete projects before the groups and users referenced in their settings.
     for (const url of [
       ...this.projects.map((id) => `~api/projects/${id}`),
+      ...this.groups.map((id) => `~api/groups/${id}`),
       ...this.users.map((id) => `~api/users/${id}`),
     ]) {
       try {

@@ -1,5 +1,5 @@
-import { admin, expect, test } from './fixtures.js';
-import { login } from './helpers.js';
+import { admin, expect, test } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 test('tags mode accepts new list values and job names and persists them on save', async ({ page, api }) => {
   const project = await api.createProject();

@@ -1,4 +1,4 @@
-import { expect } from './fixtures.js';
+import { expect } from '../fixtures.js';
 import { test } from './jev-fixtures.js';
 
 function field(page, name) {

@@ -1,5 +1,5 @@
-import { expect, test, admin } from './fixtures.js';
-import { login } from './helpers.js';
+import { expect, test, admin } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 test('expands text-diff gaps with directional arrows', async ({ page, api }) => {
   const project = await api.createProject();

@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures.js';
+import { expect, test } from '../fixtures.js';
 
 test.use({ trace: 'off' });
 

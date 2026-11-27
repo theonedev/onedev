@@ -14,8 +14,12 @@ public class PullRequestBuildCommitUpdated extends PullRequestEvent implements P
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	private final ObjectId commitId;
+
 	public PullRequestBuildCommitUpdated(PullRequest request) {
 		super(null, new Date(), request);
+		String hash = request.getBuildCommitHash();
+		commitId = hash != null ? ObjectId.fromString(hash) : ObjectId.zeroId();
 	}
 
 	@Override
@@ -30,10 +34,7 @@ public class PullRequestBuildCommitUpdated extends PullRequestEvent implements P
 
 	@Override
 	public ProjectScopedCommit getProjectScopedCommit() {
-		if (getRequest().getBuildCommitHash() != null)
-			return new ProjectScopedCommit(getProject(), ObjectId.fromString(getRequest().getBuildCommitHash()));
-		else
-			return new ProjectScopedCommit(getProject(), ObjectId.zeroId());
+		return new ProjectScopedCommit(getProject(), commitId);
 	}
 
 }

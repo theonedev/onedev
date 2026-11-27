@@ -1,5 +1,5 @@
-import { expect, test, admin } from './fixtures.js';
-import { login } from './helpers.js';
+import { expect, test, admin } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 test('renders Mermaid classes with numeric hex colors', async ({ page, api }) => {
   const project = await api.createProject();

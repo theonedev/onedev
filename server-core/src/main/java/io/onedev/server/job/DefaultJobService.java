@@ -271,11 +271,6 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	private Build doSubmit(User user, Project project, ObjectId commitId, String jobName,
 						   Map<String, List<String>> paramMap, String refName, 
 						   @Nullable PullRequest request, @Nullable Issue issue, String reason) {
-		if (request != null) {
-			request.setBuildCommitHash(commitId.name());
-			dao.persist(request);
-		}
-		
 		Build build = new Build();
 		build.setProject(project);
 		build.setCommitHash(commitId.name());

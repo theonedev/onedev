@@ -47,6 +47,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -55,7 +56,11 @@ import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.Session;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.dialect.HSQLDialect;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.query.QueryFlushMode;
 import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -395,13 +400,13 @@ public class PullRequest extends ProjectBelonging
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade={CascadeType.REMOVE, CascadeType.REFRESH})
 	private Collection<PullRequestReview> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestAssignment> assignments = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request", cascade={CascadeType.REMOVE, CascadeType.REFRESH})
 	private Collection<Build> builds = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
@@ -431,6 +436,18 @@ public class PullRequest extends ProjectBelonging
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestDescriptionRevision> descriptionRevisions = new ArrayList<>();
 
+	@jakarta.persistence.Transient
+	@JsonIgnore
+	private boolean draftPrepared;
+
+	public boolean isDraftPrepared() {
+		return draftPrepared;
+	}
+
+	public void setDraftPrepared(boolean draftPrepared) {
+		this.draftPrepared = draftPrepared;
+	}
+
 	private transient Boolean mergedIntoTarget;
 
 	private transient Boolean sourceOutdated;
@@ -452,6 +469,21 @@ public class PullRequest extends ProjectBelonging
 	private transient Optional<CommitMessageError> commitMessageErrorOpt;
 
 	private transient Collection<String> violatedFileTypes;
+
+	@jakarta.persistence.PostLoad
+	private void clearCachedChecks() {
+		mergedIntoTarget = null;
+		participants = null;
+		assignees = null;
+		sourceOutdated = null;
+		mergeBaseOpt = null;
+		commits = null;
+		fixedIssueIds = null;
+		buildRequirement = null;
+		currentBuilds = null;
+		commitMessageErrorOpt = null;
+		violatedFileTypes = null;
+	}
 
 	public String getTitle() {
 		return title;
@@ -562,6 +594,7 @@ public class PullRequest extends ProjectBelonging
 
 	public void setBuildCommitHash(@Nullable String buildCommitHash) {
 		this.buildCommitHash = buildCommitHash;
+		currentBuilds = null;
 	}
 
 	@Override
@@ -579,6 +612,7 @@ public class PullRequest extends ProjectBelonging
 	
 	public void setUpdates(Collection<PullRequestUpdate> updates) {
 		this.updates = updates;
+		clearCachedChecks();
 	}
 	
 	public Collection<PullRequestComment> getComments() {
@@ -747,7 +781,7 @@ public class PullRequest extends ProjectBelonging
 	}
 
 	public PullRequestUpdate getLatestUpdate() {
-		return getSortedUpdates().get(getSortedUpdates().size()-1);
+		return Collections.max(getUpdates());
 	}
 
 	public String getMergeRef() {
@@ -970,7 +1004,7 @@ public class PullRequest extends ProjectBelonging
 			mergeBaseOpt = Optional.ofNullable(getGitService().getMergeBase(
 					getProject(),
 					isMerged() && getMergePreview() != null? getMergePreview().getTargetHeadCommitId(): getTarget().getObjectId(),
-					getProject(),
+					isNew() ? getSourceProject() : getProject(),
 					getLatestUpdate().getHeadCommitId()));
 		}
 
@@ -998,11 +1032,15 @@ public class PullRequest extends ProjectBelonging
 			if (update.getDate().before(sinceDate))
 				lastVisitedCommitId = update.getHeadCommitId();
 		}
-		var lastVisitedMergeBase = getGitService().getMergeBase(
-				getProject(), lastVisitedCommitId,
+		return getComparisonBase(lastVisitedCommitId);
+	}
+
+	public ObjectId getComparisonBase(ObjectId previousHead) {
+		var mergeBase = getGitService().getMergeBase(
+				getProject(), previousHead,
 				getProject(), getLatestUpdate().getHeadCommitId());
-		if (lastVisitedMergeBase != null && isRelatedCommit(lastVisitedMergeBase))
-			return lastVisitedMergeBase;
+		if (mergeBase != null && isRelatedCommit(mergeBase))
+			return mergeBase;
 		else
 			return getMergeBase();
 	}
@@ -1332,6 +1370,25 @@ public class PullRequest extends ProjectBelonging
 					getMergeBase(), getLatestUpdate().getHeadCommitId(), new HashMap<>());
 		}
 		return violatedFileTypes;
+	}
+
+	/**
+	 * Locks and refreshes this pull request in the transaction that manages it.
+	 * Acquire the event-dispatch lock before entering the transaction if both are needed.
+	 */
+	public void lockForUpdate(Session session) {
+		if (session.getLockMode(this) != LockModeType.PESSIMISTIC_WRITE) {
+			// HSQLDB MVCC only serializes writes here, including an update that preserves the value.
+			var dialect = session.getSessionFactory().unwrap(SessionFactoryImplementor.class).getJdbcServices().getDialect();
+			if (dialect instanceof HSQLDialect) {
+				session.createMutationQuery("update PullRequest set commentCount = commentCount where id = :id")
+						.setParameter("id", getId()).setQueryFlushMode(QueryFlushMode.NO_FLUSH)
+						.executeUpdate();
+			}
+			// A Wicket request may already have loaded the pull request and its approvals.
+			session.lock(this, LockModeType.PESSIMISTIC_WRITE);
+			session.refresh(this);
+		}
 	}
 
 	public static String getSerialLockName(Long requestId) {

@@ -9744,4 +9744,40 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate259(File dataDir, Stack<Integer> versions) {
+		var files = Objects.requireNonNull(dataDir.listFiles());
+		var latestUpdateIds = new HashMap<String, Long>();
+		for (var file : files) {
+			if (file.getName().startsWith("PullRequestUpdates.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (var update : dom.getRootElement().elements()) {
+					var requestId = update.elementTextTrim("request");
+					var updateId = Long.parseLong(update.elementTextTrim("id"));
+					latestUpdateIds.merge(requestId, updateId, Math::max);
+				}
+			}
+		}
+		for (var file : files) {
+			if (file.getName().startsWith("PullRequestReviews.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (var review : dom.getRootElement().elements()) {
+					var statusDate = review.element("statusDate");
+					if (statusDate != null)
+						statusDate.detach();
+					var requestId = review.elementTextTrim("request");
+					review.addElement("update").setText(Long.toString(latestUpdateIds.get(requestId)));
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (var request : dom.getRootElement().elements()) {
+					var preview = request.element("mergePreview");
+					if (preview != null)
+						preview.addElement("targetBranch").setText(request.element("targetBranch").getText());
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

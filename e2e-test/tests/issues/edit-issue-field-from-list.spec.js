@@ -1,5 +1,5 @@
-import { expect, test, admin } from './fixtures.js';
-import { login } from './helpers.js';
+import { expect, test, admin } from '../fixtures.js';
+import { login } from '../helpers.js';
 
 test('admin can edit an issue field from the issue list', async ({ page, api }) => {
   const indicatorErrors = [];

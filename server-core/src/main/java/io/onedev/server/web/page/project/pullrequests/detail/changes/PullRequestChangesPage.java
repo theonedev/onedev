@@ -53,11 +53,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.ReviewedDiff;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.ReviewedDiffService;
@@ -397,25 +394,15 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					
 				});
 				
-				fragment.add(new Link<Date>("changesSinceLastReview", new LoadableDetachableModel<Date>() {
+				fragment.add(new Link<PullRequestUpdate>("changesSinceLastReview", new LoadableDetachableModel<>() {
 
 					@Override
-					protected Date load() {
-						Date lastReviewDate = null;
-						User user = getLoginUser();
-						if (user != null) {
-							PullRequest request = getPullRequest();
-							
-							for (PullRequestChange change: request.getChanges()) {
-								if (user.equals(change.getUser()) 
-										&& (lastReviewDate == null || lastReviewDate.before(change.getDate()))
-										&& (change.getData() instanceof PullRequestApproveData 
-												|| change.getData() instanceof PullRequestRequestedForChangesData)) {
-									lastReviewDate = change.getDate();
-								}
-							}
-						}
-						return lastReviewDate;
+					protected PullRequestUpdate load() {
+						var user = getLoginUser();
+						if (user == null)
+							return null;
+						var review = getPullRequest().getReview(user);
+						return review != null ? review.getUpdate() : null;
 					}
 					
 				}) {
@@ -426,7 +413,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						newState.blame = state.blame;
 						
 						PullRequest request = getPullRequest();
-						newState.oldCommitHash = request.getSinceCommitId(getModelObject()).name();
+						newState.oldCommitHash = request.getComparisonBase(getModelObject().getHeadCommitId()).name();
 						newState.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 						setResponsePage(PullRequestChangesPage.class, 
 								PullRequestChangesPage.paramsOf(request, newState));
@@ -435,9 +422,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						Date lastReviewDate = getModelObject();
-						setVisible(lastReviewDate != null 
-								&& lastReviewDate.before(getPullRequest().getLatestUpdate().getDate()));
+						var update = getModelObject();
+						setVisible(update != null && !update.equals(getPullRequest().getLatestUpdate()));
 					}
 					
 				});

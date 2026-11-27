@@ -56,7 +56,7 @@ points instead of copying its old page manager.
 committed responses, unexpected exceptions (including null messages), and avoiding
 statelessness checks.
 
-The Chromium comparison in `e2e-test/tests/login-redirect.spec.js` also reproduces
+The Chromium comparison in `e2e-test/tests/authentication/login-redirect.spec.js` also reproduces
 the enclosure problem with real anonymous requests to system settings. Restoring
 Wicket 10.11.0's original `isPageStateless` helper produces
 `Could not find child with id: ingressUrl in the wicket:enclosure` in both `end()`
@@ -91,7 +91,7 @@ relative to the current request produces the intended `project/~sites/public/` U
 `InterceptRedirectCustomizationTest` generates callback metadata using Wicket 10's
 encoder and verifies removal, ordinary/duplicate parameters, page versions, and
 backend-origin removal. It reproduces the old string-matching patch's failure.
-`e2e-test/tests/login-redirect.spec.js` verifies a logged-out private issue
+`e2e-test/tests/authentication/login-redirect.spec.js` verifies a logged-out private issue
 comment link through login, including fragment storage/restoration, scrolling
 to the comment, and consuming the saved fragment. Proxy/context paths, explicit
 destination fragments, and crawler/Ajax requests still need verification when
@@ -122,14 +122,14 @@ session cookie after login.
 | `protocol/ws/api/WicketWebSocketJQueryResourceReference.java` | Select the adjacent customized JavaScript instead of the upstream `res/js/` path. |
 | `protocol/ws/api/wicket-websocket-jquery.js` | Defer pushed XML Ajax responses while a OneDev Ajax request is in flight (OD-2661), preserving Wicket 10's channel handling and non-XML messages. |
 
-`e2e-test/tests/websocket-request-handler.spec.js` exercises all three
+`e2e-test/tests/websockets/websocket-request-handler.spec.js` exercises all three
 `WebSocketRequestHandler` patches with real browser connections: replacement
 events surround an issue row's DOM change, a newly rendered linked-issue badge
 receives subsequent state changes, and pending session feedback appears in a
 pushed update. REST changes trigger the pushes without an Ajax request or page
 reload in the receiving tab.
 
-`e2e-test/tests/websocket-resource-reference.spec.js` checks the selected
+`e2e-test/tests/websockets/websocket-resource-reference.spec.js` checks the selected
 JavaScript resource and its Ajax coordination: a received WebSocket update
 waits until a held issue-query response completes, then applies the newer
 title. Both responses come from the server; the test controls their delivery

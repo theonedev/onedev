@@ -55,6 +55,24 @@ E2E_SKIP_WEBSERVER=1 E2E_BASE_URL=https://onedev.example.com npm test
 For local debugging, `npm run test:headed` opens the browser and
 `npm run test:ui` starts Playwright's interactive test runner.
 
+## Test layout
+
+| Directory | Coverage |
+| --- | --- |
+| `tests/authentication/` | Login redirects, OAuth and OpenID Connect, personal access tokens, and SSH cloning |
+| `tests/code/` | Source viewing, highlighting, diffs, and inline comments |
+| `tests/issues/` | Issue access, fields, Mermaid rendering, and Jev |
+| `tests/pull-requests/` | Creation messages, branch and file reviews, review groups, and required builds |
+| `tests/select2/` | Selection, tagging, and dropdown behavior |
+| `tests/websockets/` | Partial page updates and their coordination with Ajax |
+
+Branding, user administration, and wiki have standalone specs in `tests/`.
+Run a suite by passing its directory to Playwright from `e2e-test`.
+
+```bash
+npm test -- tests/pull-requests
+```
+
 ## Product branding
 
 `tests/product-branding.spec.js` checks login branding, English and Chinese
@@ -75,7 +93,7 @@ removed by the usual fixture cleanup.
 
 ## SSH cloning
 
-`tests/ssh-clone.spec.js` requires Git, OpenSSH (`ssh` and `ssh-keygen`),
+`tests/authentication/ssh-clone.spec.js` requires Git, OpenSSH (`ssh` and `ssh-keygen`),
 and a reachable SSH service at the server's advertised SSH clone URL (port 6611
 by default). Its SSH fixture waits up to 60 seconds for a TCP connection to the
 host and port in that URL, after HTTP readiness. This also supports custom SSH
@@ -95,12 +113,12 @@ commit. SSH is isolated from local keys, agents and configuration. Temporary key
 users and projects are cleaned up.
 
 ```bash
-npm test -- tests/ssh-clone.spec.js
+npm test -- tests/authentication/ssh-clone.spec.js
 ```
 
 ## Login redirects and page-store warnings
 
-`tests/login-redirect.spec.js` checks protected system settings and private
+`tests/authentication/login-redirect.spec.js` checks protected system settings and private
 projects with fresh and existing anonymous sessions. It verifies session
 replacement, return to the requested URL with its query parameters, recovery
 from an incorrect password, and authenticated access after reload. A second-tab
@@ -127,7 +145,7 @@ warnings. Pass the server's local log file when running the test:
 ```bash
 E2E_SKIP_WEBSERVER=1 \
 E2E_SERVER_LOG=../server-product/target/sandbox/logs/server.log \
-npm test -- tests/login-redirect.spec.js
+npm test -- tests/authentication/login-redirect.spec.js
 ```
 
 The test attaches the log entries written during each case and fails on
@@ -137,7 +155,7 @@ browser assertions run, which also supports remote test servers.
 
 ## WebSocket partial updates
 
-`tests/websocket-request-handler.spec.js` covers the OneDev customizations in
+`tests/websockets/websocket-request-handler.spec.js` covers the OneDev customizations in
 Wicket's `WebSocketRequestHandler` through real browser WebSocket connections:
 
 - An issue title change made through REST replaces its list row, with
@@ -150,7 +168,7 @@ Wicket's `WebSocketRequestHandler` through real browser WebSocket connections:
   its redirect, leaves a pending success message. An independent issue change
   delivers that message in the WebSocket response and displays the feedback panel.
 
-`tests/websocket-resource-reference.spec.js` checks that
+`tests/websockets/websocket-resource-reference.spec.js` checks that
 `WicketWebSocketJQueryResourceReference` selects OneDev's adjacent JavaScript
 and that its Ajax coordination works. It holds a real issue-query Ajax response,
 changes the issue through REST, and waits for the resulting WebSocket frame.
@@ -164,12 +182,12 @@ or logging configuration. For an existing server, set `E2E_ADMIN_USER` and
 `E2E_ADMIN_PASSWORD` if its credentials differ from `admin`/`admin`.
 
 ```bash
-npm test -- tests/websocket-*.spec.js
+npm test -- tests/websockets
 ```
 
 ## Jev issue suggestions
 
-`tests/jev-issue-suggestions.spec.js` configures a fake API key and tests the real
+`tests/issues/jev-issue-suggestions.spec.js` configures a fake API key and tests the real
 new-issue form against a local HTTP mock. It verifies the outgoing authorization,
 model, title, description and choice questions, with no project path or other
 metadata in the request state; saving suggestions at the 75% confidence threshold;
@@ -185,13 +203,13 @@ restores the original settings afterward. Jev's normal base URL defaults to
 appended automatically.
 
 ```bash
-npm test -- tests/jev-issue-suggestions.spec.js
+npm test -- tests/issues/jev-issue-suggestions.spec.js
 ```
 
 These tests also work with an already-running local OneDev server:
 
 ```bash
-E2E_SKIP_WEBSERVER=1 npm test -- tests/jev-issue-suggestions.spec.js
+E2E_SKIP_WEBSERVER=1 npm test -- tests/issues/jev-issue-suggestions.spec.js
 ```
 
 Use one worker and a dedicated test server with the default Type and Priority
@@ -203,17 +221,17 @@ on the same host. No real Jev key or external API calls are needed.
 
 ## Jev service desk fields
 
-`tests/jev-service-desk.spec.js` sends a generated email over SMTP to a local
+`tests/issues/jev-service-desk.spec.js` sends a generated email over SMTP to a local
 [GreenMail](https://greenmail-mail-test.github.io/greenmail/) mailbox. OneDev's
 real SMTP/IMAP connector polls that mailbox and creates the issue through the
-service desk. The tests reuse the Jev mock in `tests/jev-fixtures.js`.
+service desk. The tests reuse the Jev mock in `tests/issues/jev-fixtures.js`.
 
 Install the pinned standalone mail server once (requires Maven and Java), then
 run both Jev suites:
 
 ```bash
 npm run install:mail-server
-npm test -- tests/jev-*.spec.js
+npm test -- tests/issues/jev-*.spec.js
 ```
 
 The mail fixture starts and stops GreenMail automatically on local ports. It
@@ -233,12 +251,12 @@ required. Both Jev suites run as part of the normal test run.
 
 ## OAuth2 and OpenID Connect provider
 
-`tests/oauth-provider.spec.js` replaces the standalone Python/Node callback apps
+`tests/authentication/oauth-provider.spec.js` replaces the standalone Python/Node callback apps
 and manual Git runner. It uses pinned `openid-client` for both OAuth2 and OIDC
 and automates browser registration and consent with Playwright.
 
 ```bash
-npm test -- tests/oauth-provider.spec.js
+npm test -- tests/authentication/oauth-provider.spec.js
 ```
 
 Use a dedicated test server with the default Project Owner, Code Reader, and

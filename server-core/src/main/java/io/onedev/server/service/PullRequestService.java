@@ -1,6 +1,7 @@
 package io.onedev.server.service;
 
 import dev.langchain4j.model.chat.ChatModel;
+import io.onedev.server.exception.RedundantPullRequestException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -42,21 +43,33 @@ public interface PullRequestService extends EntityService<PullRequest> {
 
     void reopen(User user, PullRequest request, @Nullable String note);
 
-    void checkAsync(PullRequest request, boolean sourceUpdated, boolean updateBuildCommit);
+    /**
+     * Check that the request can be opened and populate its initial update, assignees, reviewers,
+     * and merge strategy. Call this before previewing the request or generating a title from its commits.
+     * Repeated calls recheck eligibility and preserve draft edits.
+     * @throws RedundantPullRequestException if the branches are identical, a request is already open
+     *         for them, a previous request merged the same source head, or the target is up to date
+     */
+    void prepareDraft(PullRequest request);
+
+    /** Prepare and persist a new pull request. Callers may supply a fresh request or an edited draft. */
+    void open(PullRequest request);
+
+    /** Reconcile from current refs and protection rules after the calling transaction commits. */
+    default void reconcileAsync(PullRequest request) {
+        reconcileAsync(request, false);
+    }
+
+    /** Set refreshBuildCommit to select the current merge preview even if only the target branch advanced. */
+    void reconcileAsync(PullRequest request, boolean refreshBuildCommit);
 
     void merge(User user, PullRequest request, @Nullable String commitMessage);
-
-    void open(PullRequest request);
 
     void delete(PullRequest request);
 
     void deleteSourceBranch(User user, PullRequest request, @Nullable String note);
 
 	void restoreSourceBranch(User user, PullRequest request, @Nullable String note);
-
-	void checkReviews(PullRequest request, boolean sourceUpdated);
-
-	void checkAutoMerge(PullRequest request);
 
 	List<PullRequest> query(Subject subject, @Nullable Project targetProject, 
             EntityQuery<PullRequest> query, boolean loadExtraInfo, 

@@ -500,15 +500,21 @@ public class DefaultGitService implements GitService, Serializable {
 	}
 
 	@Override
-	@Sessional
-	public void pushLfsObjects(Project sourceProject, String sourceRef,
-							   Project targetProject, String targetRef,
-							   ObjectId commitId) {
-		Long targetProjectId = targetProject.getId();
-		Long sourceProjectId = sourceProject.getId();
-		String targetProjectPath = targetProject.getPath();
+	public void copyCommit(Long sourceProjectId, String sourceRef, Long targetProjectId, String targetRef, ObjectId commitId) {
+		var sourcePath = projectService.findFacadeById(sourceProjectId).getPath();
+		var targetPath = projectService.findFacadeById(targetProjectId).getPath();
+		pushLfsObjects(sourceProjectId, sourceRef, targetProjectId, targetPath, targetRef, commitId);
+		runOnProjectServer(targetProjectId, () -> {
+			fetch(targetProjectId, sourceProjectId, sourcePath, commitId.name());
+			return null;
+		});
+	}
 
+	private void pushLfsObjects(Long sourceProjectId, String sourceRef, Long targetProjectId,
+			String targetProjectPath, String targetRef, ObjectId commitId) {
 		runOnProjectServer(sourceProjectId, () -> {
+			if (!projectService.hasLfsObjects(sourceProjectId))
+				return null;
 			String targetActiveServer = projectService.getActiveServer(targetProjectId, true);
 
 			GitUtils.callWithClusterCredential((GitTask<Void>) git -> {
@@ -559,10 +565,10 @@ public class DefaultGitService implements GitService, Serializable {
 					}).checkReturnCode();
 
 					Repository repository = projectService.getRepository(sourceProjectId);
-					String mergeBaseId = GitUtils.getMergeBase(repository,
-							ObjectId.fromString(remoteCommitId.get()), commitId).name();
+					var mergeBaseId = GitUtils.getMergeBase(repository,
+							ObjectId.fromString(remoteCommitId.get()), commitId);
 
-					if (!mergeBaseId.equals(commitId.name())) {
+					if (!commitId.equals(mergeBaseId)) {
 						String input = String.format("%s %s %s %s\n", sourceRef, commitId.name(),
 								targetRef, remoteCommitId.get());
 						git.clearArgs();
@@ -1139,11 +1145,11 @@ public class DefaultGitService implements GitService, Serializable {
 		Long projectId1 = project1.getId();
 		Long projectId2 = project2.getId();
 		String projectPath2 = project2.getPath();
-		var needToFetch = !project1.equals(project2) && project1.getRevCommit(commitId2, false) == null;
 		return runOnProjectServer(projectId1, () -> {
-			if (needToFetch)
+			var repository = getRepository(projectId1);
+			if (!projectId1.equals(projectId2) && !repository.getObjectDatabase().has(commitId2))
 				fetch(projectId1, projectId2, projectPath2, commitId2.name());
-			return GitUtils.getMergeBase(getRepository(projectId1), commitId1, commitId2);
+			return GitUtils.getMergeBase(repository, commitId1, commitId2);
 		});
 	}			
 	

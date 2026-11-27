@@ -1,5 +1,5 @@
 import { readFile, stat } from 'node:fs/promises';
-import { admin, expect, test as base } from './fixtures.js';
+import { admin, expect, test as base } from '../fixtures.js';
 
 const test = base.extend({
   pageStoreLog: [async ({}, use, testInfo) => {
