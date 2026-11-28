@@ -40,10 +40,10 @@ public class PackBlobResource {
 	public PackBlob findByHash(@QueryParam("projectId") Long projectId, @QueryParam("hash") String hash) {
 		RestProjectUtils.checkProjectId(projectId);
 		var packBlob = packBlobService.findBySha256Hash(projectId, hash);
-		if (packBlob != null) 
-			return packBlob;			
+		if (packBlob != null && SecurityUtils.canReadPack(packBlob.getProject()))
+			return packBlob;
 		else 
-			return null;			
+			return null;
 	}
 	
 	@Api(order=100, description = "Download package blob")
