@@ -1,5 +1,6 @@
 package io.onedev.server.markdown;
 
+import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
@@ -10,6 +11,8 @@ import java.util.Set;
 
 public interface MarkdownService {
 	
+	Document parse(String markdown);
+
 	/**
 	 * Render specified markdown into html
 	 * 

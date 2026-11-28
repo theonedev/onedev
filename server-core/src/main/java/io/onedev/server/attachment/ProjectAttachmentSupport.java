@@ -24,7 +24,7 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_FILE_SIZE = 20*1024*1024; // mega bytes
+	public static final int MAX_FILE_SIZE = 20 * 1024 * 1024;
 	
 	private final Long projectId;
 	

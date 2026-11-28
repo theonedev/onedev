@@ -33,9 +33,11 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequeste
 import io.onedev.server.persistence.PrefixedNamingStrategy;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.PullRequestChangeService;
 import jakarta.persistence.Entity;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.shiro.subject.Subject;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -83,8 +85,14 @@ class PullRequestLockTest {
                             when(dao.getSession()).thenReturn(reader);
                             FieldUtils.writeField(reviews, "dao", dao, true);
                             submitting.countDown();
-                            assertThrows(NotAcceptableException.class,
-                                    () -> reviews.approve(review.getUser(), reviewed, null));
+                            var subject = mock(Subject.class);
+                            try (var security = mockStatic(SecurityUtils.class)) {
+                                security.when(() -> SecurityUtils.getUser(subject)).thenReturn(review.getUser());
+                                security.when(() -> SecurityUtils.canReadCode(subject, stale.getProject())).thenReturn(true);
+                                assertThrows(NotAcceptableException.class,
+                                        () -> reviews.submitDecision(subject, reviewed, true,
+                                                () -> fail("A stale review must not prepare its summary")));
+                            }
                             assertEquals(PullRequestReview.Status.PENDING, stale.getReviews().iterator().next().getStatus());
                             assertEquals("release", stale.getTargetBranch());
                             assertNull(stale.getMergePreview());
@@ -140,7 +148,12 @@ class PullRequestLockTest {
                     FieldUtils.writeField(reviews, "dao", dao, true);
                     FieldUtils.writeField(reviews, "changeService", changes, true);
                     var latest = request.getLatestUpdate();
-                    reviews.requestChanges(review.getUser(), latest, "Please revise");
+                    var subject = mock(Subject.class);
+                    try (var security = mockStatic(SecurityUtils.class)) {
+                        security.when(() -> SecurityUtils.getUser(subject)).thenReturn(review.getUser());
+                        security.when(() -> SecurityUtils.canReadCode(subject, request.getProject())).thenReturn(true);
+                        reviews.submitDecision(subject, latest, false, () -> "Please revise");
+                    }
                     assertEquals(PullRequestReview.Status.REQUESTED_FOR_CHANGES, review.getStatus());
                     assertEquals(latest, review.getUpdate());
                     verify(changes).create(argThat(change -> change.getData() instanceof PullRequestRequestedForChangesData),

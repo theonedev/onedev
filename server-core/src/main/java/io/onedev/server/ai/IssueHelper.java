@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -100,6 +101,7 @@ public class IssueHelper {
         var comments = new ArrayList<Map<String, Object>>();
         issue.getComments().stream().sorted(Comparator.comparing(IssueComment::getId)).forEach(comment -> {
             var commentMap = new HashMap<String, Object>();
+            commentMap.put("id", comment.getId());
             commentMap.put("user", comment.getUser().getName());
             commentMap.put("onBehalfOf", comment.getOnBehalfOf());
             commentMap.put("date", comment.getDate());
@@ -315,7 +317,8 @@ public class IssueHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static Issue createIssue(Subject subject, Project project, Map<String, Serializable> data) {
+    public static Issue createIssue(Subject subject, Project project, Map<String, Serializable> data,
+                                    Function<Issue, @Nullable String> getDescription) {
         SecurityUtils.checkWorkOnProject(subject, project);
         normalizeData(data);
 
@@ -326,8 +329,6 @@ public class IssueHelper {
         if (title == null)
             throw new ExplicitException("Title is required");
         issue.setTitle(title);
-        var description = (String) data.remove("description");
-        issue.setDescription(description);
         var confidential = (Boolean) data.remove("confidential");
         if (confidential != null)
             issue.setConfidential(confidential);
@@ -366,6 +367,7 @@ public class IssueHelper {
         issue.setState(issueSetting.getInitialStateSpec().getName());
 
         issue.setFieldValues(FieldUtils.getFieldValues(subject, project, data));
+        issue.setDescription(getDescription.apply(issue));
 
         OneDev.getInstance(IssueService.class).open(issue);
         return issue;

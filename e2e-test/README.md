@@ -38,6 +38,10 @@ Before running tests, each worker polls `~api/server/ready` without
 authentication until it returns `true`, allowing up to ten minutes for server
 initialization to finish.
 
+Each test gets a fresh browser context and fixture API client. The API fixture
+cleans up the projects, groups, and users it creates after the test. The suite
+uses one worker because some tests temporarily change server-wide settings.
+
 When Playwright starts the server, it passes OneDev
 [unattended setup](https://docs.onedev.io/installation-guide/run-as-docker-container)
 environment variables so the first-run wizard is skipped: admin user/password

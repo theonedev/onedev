@@ -22,6 +22,7 @@ import io.onedev.server.event.project.pullrequest.PullRequestCommentEdited;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestCommentRevision;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestCommentRemovedData;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -80,10 +81,24 @@ public class DefaultPullRequestCommentService extends BaseEntityService<PullRequ
 
 	@Transactional
 	@Override
-	public void update(PullRequestComment comment) {
+	public boolean update(User user, PullRequestComment comment, String content) {
 		Preconditions.checkState(!comment.isNew());
+		var oldContent = comment.getContent();
+		if (oldContent.equals(content))
+			return false;
+
+		comment.setContent(content);
+		comment.setRevisionCount(comment.getRevisionCount() + 1);
 		dao.persist(comment);
+
+		var revision = new PullRequestCommentRevision();
+		revision.setComment(comment);
+		revision.setUser(user);
+		revision.setOldContent(oldContent);
+		revision.setNewContent(content);
+		dao.persist(revision);
 		listenerRegistry.post(new PullRequestCommentEdited(comment));
+		return true;
 	}
 
 	@Override

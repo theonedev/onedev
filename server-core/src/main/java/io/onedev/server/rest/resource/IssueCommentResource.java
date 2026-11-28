@@ -21,8 +21,6 @@ import jakarta.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.IssueCommentRevision;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueCommentService;
@@ -32,9 +30,6 @@ import io.onedev.server.service.IssueCommentService;
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class IssueCommentResource {
-
-	@Inject
-	private Dao dao;
 
 	@Inject
 	private IssueCommentService commentService;
@@ -67,19 +62,7 @@ public class IssueCommentResource {
 		var comment = commentService.load(commentId);
 		if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
-		var oldContent = comment.getContent();
-		if (!oldContent.equals(content)) {
-			comment.setContent(content);
-			comment.setRevisionCount(comment.getRevisionCount() + 1);
-			commentService.update(comment);
-
-			var revision = new IssueCommentRevision();
-			revision.setComment(comment);
-			revision.setUser(SecurityUtils.getUser());
-			revision.setOldContent(oldContent);
-			revision.setNewContent(content);
-			dao.persist(revision);
-		}
+		commentService.update(SecurityUtils.getUser(), comment, content);
 		return Response.ok().build();
 	}
 	

@@ -27,7 +27,7 @@ import io.onedev.server.service.UrlService;
 
 public class CodeCommentHelper {
     
-    public static Map<String, Object> addReply(Subject subject, CodeComment comment, String content) {
+    static Map<String, Object> addReply(Subject subject, CodeComment comment, TodPost post) {
         var user = SecurityUtils.getUser(subject);
         if (user == null)
             throw new UnauthenticatedException();
@@ -38,7 +38,7 @@ public class CodeCommentHelper {
 
         var reply = new CodeCommentReply();
         reply.setComment(comment);
-        reply.setContent(content);
+        reply.setContent(post.comment(comment, null, CodeCommentReply.MAX_CONTENT_LEN));
         reply.setUser(user);
         reply.setDate(new Date());
         getCodeCommentReplyService().create(reply);
@@ -46,17 +46,23 @@ public class CodeCommentHelper {
         return Map.of("id", reply.getId(), "link", getUrlService().urlFor(reply, true));
     }
 
-    public static Map<String, Object> changeStatus(Subject subject, CodeComment comment, 
-                boolean resolved, @Nullable String note) {
+    static Map<String, Object> changeStatus(Subject subject, CodeComment comment,
+                boolean resolved, @Nullable TodPost post) {
         if (!SecurityUtils.canChangeStatus(subject, comment))
             throw new UnauthorizedException();
             
         if (comment.isResolved() != resolved) {
+            var note = post != null ? post.commentMarkdown(comment, null, CodeCommentReply.MAX_CONTENT_LEN) : null;
             var statusChange = new CodeCommentStatusChange();
             statusChange.setComment(comment);
             statusChange.setUser(SecurityUtils.getUser(subject));
             statusChange.setResolved(resolved);
             getCodeCommentStatusChangeService().create(statusChange, note);
+        } else if (post != null && post.hasUploads()) {
+            var identity = new LinkedHashMap<>(getIdentity(comment));
+            identity.put("warning", "Code comment is already " + (resolved ? "resolved" : "unresolved")
+                    + ". Attachments were skipped.");
+            return identity;
         }
 
         return getIdentity(comment);

@@ -1,6 +1,7 @@
 package io.onedev.server.service;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import org.apache.shiro.subject.Subject;
 import org.jspecify.annotations.Nullable;
@@ -24,6 +25,9 @@ public interface PullRequestReviewService extends EntityService<PullRequestRevie
 	void approve(User reviewer, PullRequestUpdate update, @Nullable String note);
 
 	void requestChanges(User reviewer, PullRequestUpdate update, @Nullable String note);
+
+	/** Submit a decision, preparing its note after checking the reviewer and the update. */
+	void submitDecision(Subject subject, PullRequestUpdate update, boolean approved, Supplier<@Nullable String> note);
 
 	void populateReviews(Collection<PullRequest> requests);
 

@@ -14,6 +14,7 @@ import com.vladsch.flexmark.formatter.NodeFormatter;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.data.MutableDataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import com.vladsch.flexmark.util.misc.Extension;
@@ -76,6 +77,11 @@ public class DefaultMarkdownService implements MarkdownService {
 				.set(Parser.EXTENSIONS, extensions);
 	}
 	
+	@Override
+	public Document parse(String markdown) {
+		return Parser.builder(setupOptions()).build().parse(markdown);
+	}
+
 	@Override
 	public String render(String markdown) {
 		var options = setupOptions();

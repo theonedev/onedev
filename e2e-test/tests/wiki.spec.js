@@ -1,9 +1,8 @@
 import { expect, test as base, admin } from './fixtures.js';
 import { login, logout } from './helpers.js';
 
-// Shared project; each case resets Home so it can also run alone or on retry.
 const test = base.extend({
-  wikiProject: [async ({ api }, use) => {
+  wikiProject: async ({ api }, use) => {
     const project = await api.createProject();
     const user = await api.createUser();
     await api.authorizeUser(project, user);
@@ -12,10 +11,8 @@ const test = base.extend({
     await putFile('wiki/Home.md', '# Home\n\nWelcome to the e2e wiki.');
     await putFile('wiki/Another-page.md', '# Another page\n\nOrdinary link destination.');
     await use({ ...project, reader: { name: user.userName, password: user.password }, putFile });
-  }, { scope: 'worker' }],
+  },
 });
-
-test.describe.configure({ mode: 'default' });
 
 const body = (page) => page.locator('.wiki-content .markdown-rendered');
 const editor = (page) => page.locator('.wiki .markdown-editor textarea');
@@ -28,8 +25,7 @@ async function editHome(page, wikiProject, markdown) {
   await expect(body(page)).toBeVisible();
 }
 
-test.beforeEach(async ({ page, wikiProject }) => {
-  await wikiProject.putFile('wiki/Home.md', '# Home\n\nWelcome to the e2e wiki.');
+test.beforeEach(async ({ page }) => {
   await login(page, admin.name, admin.password);
 });
 

@@ -126,6 +126,7 @@ public class PullRequestHelper {
         var comments = new ArrayList<Map<String, Object>>();
         pullRequest.getComments().stream().sorted(Comparator.comparing(PullRequestComment::getId)).forEach(comment -> {
             var commentMap = new HashMap<String, Object>();
+            commentMap.put("id", comment.getId());
             commentMap.put("user", comment.getUser().getName());
             commentMap.put("date", comment.getDate());
             commentMap.put("content", comment.getContent());
@@ -134,15 +135,14 @@ public class PullRequestHelper {
         return comments;
     }
 
-    public static CodeComment addCodeComment(PullRequest pullRequest, User user, String filePath,
-            int fromLineNumber, int toLineNumber, String commentContent) {
+    static CodeComment addCodeComment(PullRequest pullRequest, User user, String filePath,
+            int fromLineNumber, int toLineNumber, TodPost post) {
         if (fromLineNumber <= 0)
             throw new NotAcceptableException("'fromLineNumber' must be greater than 0");
         if (fromLineNumber > toLineNumber)
             throw new NotAcceptableException("'fromLineNumber' must be less than or equal to 'toLineNumber'");
 
         var project = pullRequest.getProject();
-        var codeCommentService = OneDev.getInstance(CodeCommentService.class);
 
         var oldCommitId = pullRequest.getMergeBase();
         var newCommitId = pullRequest.getLatestUpdate().getHeadCommitId();
@@ -165,7 +165,6 @@ public class PullRequestHelper {
         var comment = new CodeComment();
         comment.setProject(project);
         comment.setUser(user);
-        comment.setContent(commentContent);
 
         var mark = new Mark();
         mark.setCommitHash(newCommitId.name());
@@ -179,7 +178,8 @@ public class PullRequestHelper {
         compareContext.setNewCommitHash(newCommitId.name());
         comment.setCompareContext(compareContext);
 
-        codeCommentService.create(comment);
+        comment.setContent(post.comment(comment, null, CodeComment.MAX_CONTENT_LEN));
+        OneDev.getInstance(CodeCommentService.class).create(comment);
         return comment;
     }
 

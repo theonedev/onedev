@@ -17,7 +17,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'html',
-  // OneDev's Wicket UI is sensitive to concurrent logins against a single server.
+  // The suite shares a OneDev instance, and some specs change server-wide settings.
   workers: 1,
   use: {
     baseURL,

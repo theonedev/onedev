@@ -24,13 +24,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.IssueCommentRevision;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
-import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueCommentReactionService;
 import io.onedev.server.service.IssueCommentService;
@@ -48,12 +45,6 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DeleteCallback;
 
 class IssueCommentPanel extends Panel {
-
-	@Inject
-	private Dao dao;
-
-	@Inject
-	private TransactionService transactionService;
 
 	@Inject
 	private IssueCommentService issueCommentService;
@@ -103,20 +94,7 @@ class IssueCommentPanel extends Panel {
 				if (comment.length() > IssueComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
 				var entity = IssueCommentPanel.this.getComment();
-				var oldComment = entity.getContent();
-				if (!oldComment.equals(comment)) {
-					transactionService.run(() -> {
-						entity.setContent(comment);
-						entity.setRevisionCount(entity.getRevisionCount() + 1);
-						issueCommentService.update(entity);
-
-						var revision = new IssueCommentRevision();
-						revision.setComment(entity);
-						revision.setUser(SecurityUtils.getUser());
-						revision.setOldContent(oldComment);
-						revision.setNewContent(comment);
-						dao.persist(revision);
-					});
+				if (issueCommentService.update(SecurityUtils.getUser(), entity, comment)) {
 					var page = (BasePage) getPage();
 					page.notifyObservablesChange(target, entity.getIssue().getChangeObservables(false));				
 				}

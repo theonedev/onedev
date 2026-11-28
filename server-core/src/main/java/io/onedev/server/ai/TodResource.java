@@ -1,6 +1,7 @@
 package io.onedev.server.ai;
 
 import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -21,6 +22,7 @@ import java.util.Map;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockModeType;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotNull;
@@ -73,7 +75,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.code.ConventionalCommitChecker;
@@ -82,6 +83,7 @@ import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.EntityQuery;
@@ -180,6 +182,9 @@ public class TodResource {
 
     @Inject
     private CodeCommentService codeCommentService;
+
+    @Inject
+    private TransactionService transactionService;
 
     @Inject
     private BuildService buildService;
@@ -531,130 +536,163 @@ public class TodResource {
         return IssueHelper.getComments(issue);
     }
 
+    @Path("/edit-issue-comment")
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
+    @POST
+    public Map<String, Object> editIssueComment(@QueryParam("commentId") @NotNull Long commentId, @NotNull TodPost post) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+        return transactionService.call(() -> {
+            var comment = issueCommentService.load(commentId);
+            transactionService.getSession().refresh(comment, LockModeType.PESSIMISTIC_WRITE);
+            if (!SecurityUtils.canAccessIssue(comment.getIssue()) || !SecurityUtils.canModifyOrDelete(comment))
+                throw new UnauthorizedException();
+            var content = post.comment(comment.getIssue(), comment.getContent(), IssueComment.MAX_CONTENT_LEN);
+            issueCommentService.update(user, comment, content);
+            return Map.of("id", comment.getId(), "link", urlService.urlFor(comment, true));
+        });
+    }
+
     @Path("/add-issue-comment")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> addIssueComment(
                 @QueryParam("currentProject") String currentProjectPath,
                 @QueryParam("reference") @NotNull String issueReference, 
-                @NotNull String commentContent) {
-        if (SecurityUtils.getUser() == null)
-            throw new UnauthenticatedException();
+                @NotNull TodPost post) {
+        return transactionService.call(() -> {
+            if (SecurityUtils.getUser() == null)
+                throw new UnauthenticatedException();
 
-        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
-        var issue = getIssue(currentProject, issueReference);
-        SecurityUtils.checkWorkOnProject(issue.getProject());
-        var comment = new IssueComment();
-        comment.setIssue(issue);
-        comment.setContent(commentContent);
-        comment.setUser(SecurityUtils.getUser());
-        comment.setDate(new Date());
-        issueCommentService.create(comment);
+            var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
+            var issue = getIssue(currentProject, issueReference);
+            SecurityUtils.checkWorkOnProject(issue.getProject());
+            var comment = new IssueComment();
+            comment.setIssue(issue);
+            comment.setContent(post.comment(issue, null, IssueComment.MAX_CONTENT_LEN));
+            comment.setUser(SecurityUtils.getUser());
+            comment.setDate(new Date());
+            issueCommentService.create(comment);
 
-        return Map.of("id", comment.getId(), "link", urlService.urlFor(comment, true));
+            return Map.of("id", comment.getId(), "link", urlService.urlFor(comment, true));
+        });
     }
 
     @Path("/create-issue")
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> createIssue(
                 @QueryParam("currentProject") String currentProjectPath,
                 @QueryParam("project") String projectPath, 
-                @NotNull Map<String, @Valid Serializable> data) {
-        var subject = SecurityUtils.getSubject();
-        if (SecurityUtils.getUser(subject) == null)
-            throw new UnauthenticatedException();
+                @NotNull TodPost post) {
+        return transactionService.call(() -> {
+            var subject = SecurityUtils.getSubject();
+            if (SecurityUtils.getUser(subject) == null)
+                throw new UnauthenticatedException();
 
-        if (projectPath == null)
-            projectPath = currentProjectPath;
+            var resolvedProjectPath = projectPath != null ? projectPath : currentProjectPath;
+            if (resolvedProjectPath == null)
+                throw new NotAcceptableException("Either project or current project should be specified");
 
-        if (projectPath == null)
-            throw new NotAcceptableException("Either project or current project should be specified");
+            var project = getProject(resolvedProjectPath);
+            var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
 
-        var project = getProject(projectPath);
-        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
+            Issue issue;
+            try {
+                var description = post.removeDescription();
+                issue = IssueHelper.createIssue(subject, project, post.data,
+                        it -> post.markdown(it, description, null, Issue.MAX_DESCRIPTION_LEN));
+            } catch (ExplicitException e) {
+                throw new NotAcceptableException(e.getMessage());
+            }
 
-        Issue issue;
-        try {
-            issue = IssueHelper.createIssue(subject, project, data);
-        } catch (ExplicitException e) {
-            throw new NotAcceptableException(e.getMessage());
-        }
-
-        return IssueHelper.getIdentity(currentProject, issue);
+            return IssueHelper.getIdentity(currentProject, issue);
+        });
     }
 
     @Path("/edit-issue")
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> editIssue(
                 @QueryParam("currentProject") String currentProjectPath,
                 @QueryParam("reference") @NotNull String issueReference, 
-                @NotNull Map<String, Serializable> data) {
-        var subject = SecurityUtils.getSubject();
-        var user = SecurityUtils.getUser(subject);
+                @NotNull TodPost post) {
+        return transactionService.call(() -> {
+            var data = post.data;
+            var subject = SecurityUtils.getSubject();
+            var user = SecurityUtils.getUser(subject);
 
-        if (user == null)
-            throw new UnauthenticatedException();
+            if (user == null)
+                throw new UnauthenticatedException();
 
-        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
+            var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
 
-        var issue = getIssue(currentProject, issueReference);
+            var issue = getIssue(currentProject, issueReference);
+            if (post.hasUploads())
+                transactionService.getSession().refresh(issue, LockModeType.PESSIMISTIC_WRITE);
 
-        IssueHelper.normalizeData(data);
+            var changeDescription = data.containsKey("description") || post.hasUploads();
+            var previous = data.containsKey("description") ? null : issue.getDescription();
+            var submitted = post.removeDescription();
+            IssueHelper.normalizeData(data);
 
-        var title = (String) data.remove("title");
-        if (title != null) { 
-            if (!SecurityUtils.canModifyIssue(subject, issue))
-                throw new UnauthorizedException("No permission to update issue title");
-            issueChangeService.changeTitle(user, issue, title);
-        }
-
-        if (data.containsKey("description")) {
-            if (!SecurityUtils.canModifyIssue(subject, issue))
-                throw new UnauthorizedException("No permission to update issue description");
-            issueChangeService.changeDescription(user, issue, (String) data.remove("description"));
-        }
-
-        var confidential = (Boolean) data.remove("confidential");
-        if (confidential != null) {
-            if (!SecurityUtils.canModifyIssue(subject, issue))
-                throw new UnauthorizedException("No permission to update issue confidential");
-            issueChangeService.changeConfidential(user, issue, confidential);
-        }
-
-        Integer ownEstimatedTime = (Integer) data.remove("ownEstimatedTime");
-        if (ownEstimatedTime != null) {
-            if (!subscriptionService.isSubscriptionActive())
-                throw new NotAcceptableException("An active subscription is required for this feature");
-            if (!issue.getProject().isTimeTracking())
-                throw new NotAcceptableException("Time tracking needs to be enabled for the project");
-            if (!SecurityUtils.canScheduleIssues(subject, issue.getProject()))
-                throw new UnauthorizedException("Issue schedule permission required to set own estimated time");
-            issueChangeService.changeOwnEstimatedTime(user, issue, ownEstimatedTime*60);
-        }
-
-        @SuppressWarnings("unchecked")
-        List<String> iterationNames = (List<String>) data.remove("iterations");
-        if (iterationNames != null) {
-            if (!SecurityUtils.canScheduleIssues(subject, issue.getProject()))
-                throw new UnauthorizedException("Issue schedule permission required to set iterations");
-            var iterations = new ArrayList<Iteration>();
-            for (var iterationName : iterationNames) {
-                var iteration = iterationService.findInHierarchy(issue.getProject(), iterationName);
-                if (iteration == null)
-                    throw new NotFoundException("Iteration '" + iterationName + "' not found");
-                iterations.add(iteration);
+            var title = (String) data.remove("title");
+            if (title != null) {
+                if (!SecurityUtils.canModifyIssue(subject, issue))
+                    throw new UnauthorizedException("No permission to update issue title");
+                issueChangeService.changeTitle(user, issue, title);
             }
-            issueChangeService.changeIterations(user, issue, iterations);
-        }
 
-        if (!data.isEmpty()) {
-            if (!SecurityUtils.canEditIssueFields(subject, issue)) 
-                throw new UnauthorizedException("No permission to update issue fields");
+            if (changeDescription) {
+                if (!SecurityUtils.canModifyIssue(subject, issue))
+                    throw new UnauthorizedException("No permission to update issue description");
+                var description = post.markdown(issue, submitted, previous, Issue.MAX_DESCRIPTION_LEN);
+                issueChangeService.changeDescription(user, issue, description);
+            }
 
-            issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(subject, issue.getProject(), data));
-        }
+            var confidential = (Boolean) data.remove("confidential");
+            if (confidential != null) {
+                if (!SecurityUtils.canModifyIssue(subject, issue))
+                    throw new UnauthorizedException("No permission to update issue confidential");
+                issueChangeService.changeConfidential(user, issue, confidential);
+            }
 
-        return IssueHelper.getIdentity(currentProject, issue);
+            Integer ownEstimatedTime = (Integer) data.remove("ownEstimatedTime");
+            if (ownEstimatedTime != null) {
+                if (!subscriptionService.isSubscriptionActive())
+                    throw new NotAcceptableException("An active subscription is required for this feature");
+                if (!issue.getProject().isTimeTracking())
+                    throw new NotAcceptableException("Time tracking needs to be enabled for the project");
+                if (!SecurityUtils.canScheduleIssues(subject, issue.getProject()))
+                    throw new UnauthorizedException("Issue schedule permission required to set own estimated time");
+                issueChangeService.changeOwnEstimatedTime(user, issue, ownEstimatedTime*60);
+            }
+
+            @SuppressWarnings("unchecked")
+            List<String> iterationNames = (List<String>) data.remove("iterations");
+            if (iterationNames != null) {
+                if (!SecurityUtils.canScheduleIssues(subject, issue.getProject()))
+                    throw new UnauthorizedException("Issue schedule permission required to set iterations");
+                var iterations = new ArrayList<Iteration>();
+                for (var iterationName : iterationNames) {
+                    var iteration = iterationService.findInHierarchy(issue.getProject(), iterationName);
+                    if (iteration == null)
+                        throw new NotFoundException("Iteration '" + iterationName + "' not found");
+                    iterations.add(iteration);
+                }
+                issueChangeService.changeIterations(user, issue, iterations);
+            }
+
+            if (!data.isEmpty()) {
+                if (!SecurityUtils.canEditIssueFields(subject, issue))
+                    throw new UnauthorizedException("No permission to update issue fields");
+
+                issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(subject, issue.getProject(), data));
+            }
+
+            return IssueHelper.getIdentity(currentProject, issue);
+        });
     }
 
     @Path("/change-issue-state")
@@ -1151,81 +1189,87 @@ public class TodResource {
     }
 
     @Path("/create-pull-request")
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> createPullRequest(
                 @QueryParam("currentProject") String currentProjectPath,
                 @QueryParam("targetProject") String targetProjectPath,
                 @QueryParam("sourceProject") String sourceProjectPath,
-                @NotNull Map<String, Serializable> data) {
-        normalizePullRequestData(data);
+                @NotNull TodPost post) {
+        return transactionService.call(() -> {
+            var data = post.data;
+            var description = post.removeDescription();
+            normalizePullRequestData(data);
 
-        var targetBranch = (String) data.remove("targetBranch");
+            var targetBranch = (String) data.remove("targetBranch");
 
-        var sourceBranch = (String) data.remove("sourceBranch");
-        if (sourceBranch == null)
-            throw new NotAcceptableException("Source branch is required");
+            var sourceBranch = (String) data.remove("sourceBranch");
+            if (sourceBranch == null)
+                throw new NotAcceptableException("Source branch is required");
 
-        var createPullRequestEssentialInfo = getCreatePullRequestEssentialInfo(
-            currentProjectPath, targetProjectPath, sourceProjectPath, 
-            targetBranch, sourceBranch);
+            var createPullRequestEssentialInfo = getCreatePullRequestEssentialInfo(
+                currentProjectPath, targetProjectPath, sourceProjectPath,
+                targetBranch, sourceBranch);
 
-        var currentProject = createPullRequestEssentialInfo.currentProject;
-        var target = createPullRequestEssentialInfo.target;
-        var source = createPullRequestEssentialInfo.source;
-        var submitter = createPullRequestEssentialInfo.submitter;
-        SecurityUtils.checkWorkOnProject(target.getProject());
+            var currentProject = createPullRequestEssentialInfo.currentProject;
+            var target = createPullRequestEssentialInfo.target;
+            var source = createPullRequestEssentialInfo.source;
+            var submitter = createPullRequestEssentialInfo.submitter;
+            SecurityUtils.checkWorkOnProject(target.getProject());
 
-        var mergeStrategyName = (String) data.remove("mergeStrategy");            
-        var mergeStrategy = getMergeStrategy(target.getProject(), mergeStrategyName);
+            var mergeStrategyName = (String) data.remove("mergeStrategy");
+            var mergeStrategy = getMergeStrategy(target.getProject(), mergeStrategyName);
 
-        var request = pullRequestService.findOpen(target, source);
-        if (request != null)
+            var request = pullRequestService.findOpen(target, source);
+            if (request != null) {
+                var identity = new LinkedHashMap<>(PullRequestHelper.getIdentity(currentProject, request));
+                if (post.hasUploads())
+                    identity.put("warning", "Pull request already exists. Attachments were skipped.");
+                return identity;
+            }
+
+            request = new PullRequest();
+            request.setTarget(target);
+            request.setSource(source);
+            request.setSubmitter(submitter);
+            request.setMergeStrategy(mergeStrategy);
+
+            var title = (String) data.remove("title");
+            if (title == null)
+                throw new NotAcceptableException("Title is required");
+
+            request.setTitle(title);
+
+            @SuppressWarnings("unchecked")
+            var reviewerNames = (List<String>) data.remove("reviewers");
+            if (reviewerNames != null) {
+                for (var reviewerName : reviewerNames) {
+                    User reviewer = userService.findByName(reviewerName);
+                    if (reviewer == null)
+                        throw new NotFoundException("Reviewer not found: " + reviewerName);
+                    pullRequestReviewService.addReviewer(submitter, request, reviewer);
+                }
+            }
+
+            @SuppressWarnings("unchecked")
+            var assigneeNames = (List<String>) data.remove("assignees");
+            if (assigneeNames != null) {
+                for (var assigneeName : assigneeNames) {
+                    User assignee = userService.findByName(assigneeName);
+                    if (assignee == null)
+                        throw new NotFoundException("Assignee not found: " + assigneeName);
+                    PullRequestAssignment assignment = new PullRequestAssignment();
+                    assignment.setRequest(request);
+                    assignment.setUser(assignee);
+                    request.getAssignments().add(assignment);
+                }
+            }
+
+            request.setDescription(post.markdown(request, description, null, PullRequest.MAX_DESCRIPTION_LEN));
+            pullRequestService.open(request);
+
             return PullRequestHelper.getIdentity(currentProject, request);
-
-        request = new PullRequest();
-        request.setTarget(target);
-        request.setSource(source);
-        request.setSubmitter(submitter);
-        request.setMergeStrategy(mergeStrategy);
-
-        var title = (String) data.remove("title");
-        if (title == null)
-            throw new NotAcceptableException("Title is required");
-
-        request.setTitle(title);
-
-        var description = (String) data.remove("description");
-        if (description != null)
-            request.setDescription(description);
-
-        @SuppressWarnings("unchecked")
-        var reviewerNames = (List<String>) data.remove("reviewers");
-        if (reviewerNames != null) {
-            for (var reviewerName : reviewerNames) {
-                User reviewer = userService.findByName(reviewerName);
-                if (reviewer == null)
-                    throw new NotFoundException("Reviewer not found: " + reviewerName);
-                pullRequestReviewService.addReviewer(submitter, request, reviewer);
-            }
-        }
-
-        @SuppressWarnings("unchecked")
-        var assigneeNames = (List<String>) data.remove("assignees");
-        if (assigneeNames != null) {
-            for (var assigneeName : assigneeNames) {
-                User assignee = userService.findByName(assigneeName);
-                if (assignee == null)
-                    throw new NotFoundException("Assignee not found: " + assigneeName);
-                PullRequestAssignment assignment = new PullRequestAssignment();
-                assignment.setRequest(request);
-                assignment.setUser(assignee);
-                request.getAssignments().add(assignment);
-            }
-        }
-
-        pullRequestService.open(request);
-
-        return PullRequestHelper.getIdentity(currentProject, request);
+        });
     }
 
     @Api(description = "Get pull request title and description requirement")
@@ -1348,156 +1392,164 @@ public class TodResource {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Path("/edit-pull-request")
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.MULTIPART_FORM_DATA})
     @POST
+    @SuppressWarnings("unchecked")
     public Map<String, Object> editPullRequest(
                 @QueryParam("currentProject") String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference,
-                @NotNull Map<String, Serializable> data) {
-        var user = SecurityUtils.getUser();
-        if (user == null)
-            throw new UnauthenticatedException();
+                @NotNull TodPost post) {
+        return transactionService.call(() -> {
+            var data = post.data;
+            var user = SecurityUtils.getUser();
+            if (user == null)
+                throw new UnauthenticatedException();
 
-        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
+            var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
 
-        var request = getPullRequest(currentProject, pullRequestReference);
+            var request = getPullRequest(currentProject, pullRequestReference);
 
-        if (!SecurityUtils.canModifyPullRequest(request))
-            throw new UnauthorizedException("No permission to edit pull request: " + pullRequestReference);
+            if (!SecurityUtils.canModifyPullRequest(request))
+                throw new UnauthorizedException("No permission to edit pull request: " + pullRequestReference);
 
-        normalizePullRequestData(data);
+            request.lockForUpdate(transactionService.getSession());
+            var changeDescription = data.containsKey("description") || post.hasUploads();
+            var previous = data.containsKey("description") ? null : request.getDescription();
+            var submitted = post.removeDescription();
+            normalizePullRequestData(data);
 
-        var title = (String) data.remove("title");
-        if (title != null) 
-            pullRequestChangeService.changeTitle(user, request, title);
+            var title = (String) data.remove("title");
+            if (title != null)
+                pullRequestChangeService.changeTitle(user, request, title);
 
-        if (data.containsKey("description")) 
-            pullRequestChangeService.changeDescription(user, request, (String) data.remove("description"));
-
-        var labelNames = (List<String>) data.remove("labels");
-        if (labelNames != null) {
-            try {
-                pullRequestLabelService.sync(request, labelNames);
-            } catch (EntityNotFoundException e) {
-                throw new NotFoundException(e.getMessage());
+            if (changeDescription) {
+                var description = post.markdown(request, submitted, previous, PullRequest.MAX_DESCRIPTION_LEN);
+                pullRequestChangeService.changeDescription(user, request, description);
             }
-        }
 
-        var mergeStrategyName = (String) data.remove("mergeStrategy");
-        if (mergeStrategyName != null) {
-            if (!request.isOpen())
-                throw new NotAcceptableException("Pull request is closed");
-            pullRequestChangeService.changeMergeStrategy(user, request, MergeStrategy.valueOf(mergeStrategyName));
-        }
-
-        var assigneeNames = (List<String>) data.remove("assignees");
-        if (assigneeNames != null) {                        
-            if (!request.isOpen())
-                throw new NotAcceptableException("Pull request is closed");
-            for (var assigneeName : assigneeNames) {
-                User assignee = userService.findByName(assigneeName);
-                if (assignee == null)
-                    throw new NotFoundException("Assignee not found: " + assigneeName);
-                if (request.getAssignments().stream().noneMatch(it -> it.getUser().equals(assignee))) {
-                    PullRequestAssignment assignment = new PullRequestAssignment();
-                    assignment.setRequest(request);
-                    assignment.setUser(assignee);
-                    pullRequestAssignmentService.create(assignment);
+            var labelNames = (List<String>) data.remove("labels");
+            if (labelNames != null) {
+                try {
+                    pullRequestLabelService.sync(request, labelNames);
+                } catch (EntityNotFoundException e) {
+                    throw new NotFoundException(e.getMessage());
                 }
             }
-            for (var assignee : request.getAssignments()) {
-                if (assigneeNames.stream().noneMatch(it -> it.equals(assignee.getUser().getName()))) {
-                    pullRequestAssignmentService.delete(assignee);
+
+            var mergeStrategyName = (String) data.remove("mergeStrategy");
+            if (mergeStrategyName != null) {
+                if (!request.isOpen())
+                    throw new NotAcceptableException("Pull request is closed");
+                pullRequestChangeService.changeMergeStrategy(user, request, MergeStrategy.valueOf(mergeStrategyName));
+            }
+
+            var assigneeNames = (List<String>) data.remove("assignees");
+            if (assigneeNames != null) {
+                if (!request.isOpen())
+                    throw new NotAcceptableException("Pull request is closed");
+                for (var assigneeName : assigneeNames) {
+                    User assignee = userService.findByName(assigneeName);
+                    if (assignee == null)
+                        throw new NotFoundException("Assignee not found: " + assigneeName);
+                    if (request.getAssignments().stream().noneMatch(it -> it.getUser().equals(assignee))) {
+                        PullRequestAssignment assignment = new PullRequestAssignment();
+                        assignment.setRequest(request);
+                        assignment.setUser(assignee);
+                        pullRequestAssignmentService.create(assignment);
+                    }
+                }
+                for (var assignee : request.getAssignments()) {
+                    if (assigneeNames.stream().noneMatch(it -> it.equals(assignee.getUser().getName()))) {
+                        pullRequestAssignmentService.delete(assignee);
+                    }
                 }
             }
-        }
 
-        var addReviewerNames = (List<String>) data.remove("addReviewers");
-        if (addReviewerNames != null) {
-            if (!request.isOpen())
-                throw new NotAcceptableException("Pull request is closed");
-            
-            for (var reviewerName : addReviewerNames) {
-                User reviewer = userService.findByName(reviewerName);
-                if (reviewer == null)
-                    throw new NotFoundException("Reviewer not found: " + reviewerName);
-                pullRequestReviewService.addReviewer(user, request, reviewer);
+            var addReviewerNames = (List<String>) data.remove("addReviewers");
+            if (addReviewerNames != null) {
+                if (!request.isOpen())
+                    throw new NotAcceptableException("Pull request is closed");
+
+                for (var reviewerName : addReviewerNames) {
+                    User reviewer = userService.findByName(reviewerName);
+                    if (reviewer == null)
+                        throw new NotFoundException("Reviewer not found: " + reviewerName);
+                    pullRequestReviewService.addReviewer(user, request, reviewer);
+                }
             }
-        }
-        var removeReviewerNames = (List<String>) data.remove("removeReviewers");
-        if (removeReviewerNames != null) {
-            if (!request.isOpen())
-                throw new NotAcceptableException("Pull request is closed");
-            var exclusions = new ArrayList<User>();
-            for (var reviewerName : removeReviewerNames) {
-                User reviewer = userService.findByName(reviewerName);
-                if (reviewer == null)
-                    throw new NotFoundException("Reviewer not found: " + reviewerName);
-                exclusions.add(reviewer);
+            var removeReviewerNames = (List<String>) data.remove("removeReviewers");
+            if (removeReviewerNames != null) {
+                if (!request.isOpen())
+                    throw new NotAcceptableException("Pull request is closed");
+                var exclusions = new ArrayList<User>();
+                for (var reviewerName : removeReviewerNames) {
+                    User reviewer = userService.findByName(reviewerName);
+                    if (reviewer == null)
+                        throw new NotFoundException("Reviewer not found: " + reviewerName);
+                    exclusions.add(reviewer);
+                }
+                pullRequestReviewService.reconcile(user, request, exclusions);
             }
-            pullRequestReviewService.reconcile(user, request, exclusions);
-        }
 
-        var autoMergeEnabled = (Boolean) data.remove("autoMerge");
-        if (autoMergeEnabled != null) {
-            if (!SecurityUtils.canWriteCode(request.getProject()))
-                throw new UnauthorizedException("Code write permission is required to edit auto merge");
-            if (!request.isOpen())
-                throw new NotAcceptableException("Pull request is closed");
+            var autoMergeEnabled = (Boolean) data.remove("autoMerge");
+            if (autoMergeEnabled != null) {
+                if (!SecurityUtils.canWriteCode(request.getProject()))
+                    throw new UnauthorizedException("Code write permission is required to edit auto merge");
+                if (!request.isOpen())
+                    throw new NotAcceptableException("Pull request is closed");
 
-            if (autoMergeEnabled && request.checkMergeCondition() == null) 
-                throw new NotAcceptableException("This pull request is not eligible for auto-merge, as it can be merged directly now");
+                if (autoMergeEnabled && request.checkMergeCondition() == null)
+                    throw new NotAcceptableException("This pull request is not eligible for auto-merge, as it can be merged directly now");
 
-            var autoMerge = new AutoMerge();
-            autoMerge.setEnabled(autoMergeEnabled);
-            autoMerge.setCommitMessage(trimToNull((String) data.remove("autoMergeCommitMessage")));
-            var errorMessage = request.checkMergeCommitMessage(user, autoMerge.getCommitMessage());
-            if (errorMessage != null) 
-                throw new NotAcceptableException("Error validating param auto merge commit message: " + errorMessage);
+                var autoMerge = new AutoMerge();
+                autoMerge.setEnabled(autoMergeEnabled);
+                autoMerge.setCommitMessage(trimToNull((String) data.remove("autoMergeCommitMessage")));
+                var errorMessage = request.checkMergeCommitMessage(user, autoMerge.getCommitMessage());
+                if (errorMessage != null)
+                    throw new NotAcceptableException("Error validating param auto merge commit message: " + errorMessage);
 
-            pullRequestChangeService.changeAutoMerge(user, request, autoMerge);
-        }
-                    
-        return PullRequestHelper.getIdentity(currentProject, request);
-    }    
+                pullRequestChangeService.changeAutoMerge(user, request, autoMerge);
+            }
+
+            return PullRequestHelper.getIdentity(currentProject, request);
+        });
+    }
 
     @Path("/approve-pull-request")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> approvePullRequest(
                 @QueryParam("updateId") @NotNull Long updateId,
-                String comment) {
-        var user = SecurityUtils.getUser();
-        var update = getReviewUpdate(user, updateId);
-        pullRequestReviewService.approve(user, update, trimToNull(comment));
-        return PullRequestHelper.getIdentity(null, update.getRequest());
+                @Nullable TodPost post) {
+        return reviewPullRequest(updateId, true, post);
     }
 
     @Path("/request-changes-on-pull-request")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> requestChangesOnPullRequest(
                 @QueryParam("updateId") @NotNull Long updateId,
-                String comment) {
-        var user = SecurityUtils.getUser();
-        var update = getReviewUpdate(user, updateId);
-        pullRequestReviewService.requestChanges(user, update, trimToNull(comment));
-        return PullRequestHelper.getIdentity(null, update.getRequest());
+                @Nullable TodPost post) {
+        return reviewPullRequest(updateId, false, post);
     }
 
-    private PullRequestUpdate getReviewUpdate(@Nullable User user, Long updateId) {
-        if (user == null)
+    private Map<String, Object> reviewPullRequest(Long updateId, boolean approved, @Nullable TodPost post) {
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
-
         var update = pullRequestUpdateService.get(updateId);
         if (update == null)
             throw new NotFoundException("Pull request update not found: " + updateId);
-        var pullRequest = update.getRequest();
-        if (!SecurityUtils.canReadCode(pullRequest.getProject()))
-            throw new UnauthorizedException("No permission to access pull request update: " + updateId);
-        SecurityUtils.checkWorkOnProject(pullRequest.getProject());
-        return update;
+
+        var request = update.getRequest();
+        pullRequestReviewService.submitDecision(subject, update, approved, () -> {
+            if (post == null)
+                return null;
+            var summary = post.commentMarkdown(request, null, PullRequestComment.MAX_CONTENT_LEN);
+            return isBlank(summary)? null : summary;
+        });
+        return PullRequestHelper.getIdentity(null, request);
     }
 
     @Path("/merge-pull-request")
@@ -1612,32 +1664,52 @@ public class TodResource {
         return PullRequestHelper.getIdentity(currentProject, pullRequest);
     }
 
+    @Path("/edit-pull-request-comment")
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
+    @POST
+    public Map<String, Object> editPullRequestComment(@QueryParam("commentId") @NotNull Long commentId, @NotNull TodPost post) {
+        var user = SecurityUtils.getUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+        return transactionService.call(() -> {
+            var comment = pullRequestCommentService.load(commentId);
+            transactionService.getSession().refresh(comment, LockModeType.PESSIMISTIC_WRITE);
+            if (!SecurityUtils.canReadCode(comment.getProject()) || !SecurityUtils.canModifyOrDelete(comment))
+                throw new UnauthorizedException();
+            var content = post.comment(comment.getRequest(), comment.getContent(), PullRequestComment.MAX_CONTENT_LEN);
+            pullRequestCommentService.update(user, comment, content);
+            return Map.of("id", comment.getId(), "link", urlService.urlFor(comment, true));
+        });
+    }
+
     @Path("/add-pull-request-comment")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> addPullRequestComment(
                 @QueryParam("currentProject") String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference, 
-                @NotNull String commentContent) {
-        if (SecurityUtils.getUser() == null)
-            throw new UnauthenticatedException();
+                @NotNull TodPost post) {
+        return transactionService.call(() -> {
+            if (SecurityUtils.getUser() == null)
+                throw new UnauthenticatedException();
 
-        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
+            var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
 
-        var pullRequest = getPullRequest(currentProject, pullRequestReference);
-        SecurityUtils.checkWorkOnProject(pullRequest.getProject());
-        var comment = new PullRequestComment();
-        comment.setRequest(pullRequest);
-        comment.setContent(commentContent);
-        comment.setUser(SecurityUtils.getUser());
-        comment.setDate(new Date());
-        pullRequestCommentService.create(comment);
+            var pullRequest = getPullRequest(currentProject, pullRequestReference);
+            SecurityUtils.checkWorkOnProject(pullRequest.getProject());
+            var comment = new PullRequestComment();
+            comment.setRequest(pullRequest);
+            comment.setContent(post.comment(pullRequest, null, PullRequestComment.MAX_CONTENT_LEN));
+            comment.setUser(SecurityUtils.getUser());
+            comment.setDate(new Date());
+            pullRequestCommentService.create(comment);
 
-        return Map.of("id", comment.getId(), "link", urlService.urlFor(comment, true));
+            return Map.of("id", comment.getId(), "link", urlService.urlFor(comment, true));
+        });
     }
 
     @Path("/add-pull-request-code-comment")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> addPullRequestCodeComment(
                 @QueryParam("currentProject") String currentProjectPath,
@@ -1645,43 +1717,53 @@ public class TodResource {
                 @QueryParam("filePath") @NotNull String filePath,
                 @QueryParam("fromLineNumber") int fromLineNumber, // index starts from 1
                 @QueryParam("toLineNumber") int toLineNumber, // index starts from 1
-                @NotNull String commentContent) {
-        var user = SecurityUtils.getUser();
-        if (user == null)
-            throw new UnauthenticatedException();
+                @NotNull TodPost post) {
+        return transactionService.call(() -> {
+            var user = SecurityUtils.getUser();
+            if (user == null)
+                throw new UnauthenticatedException();
 
-        var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
-        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+            var currentProject = currentProjectPath != null? getProject(currentProjectPath): null;
+            var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
-        SecurityUtils.checkWorkOnProject(pullRequest.getProject());
-        var comment = PullRequestHelper.addCodeComment(pullRequest, user, filePath, fromLineNumber, toLineNumber, commentContent);
-        return CodeCommentHelper.getIdentity(comment);
+            SecurityUtils.checkWorkOnProject(pullRequest.getProject());
+            var comment = PullRequestHelper.addCodeComment(pullRequest, user, filePath, fromLineNumber, toLineNumber, post);
+            return CodeCommentHelper.getIdentity(comment);
+        });
     }
 
     @Path("/add-code-comment-reply")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
     @POST
     public Map<String, Object> addCodeCommentReply(
                 @QueryParam("commentId") @NotNull Long commentId,
-                @NotNull String replyContent) {
-        var comment = codeCommentService.load(commentId);
-        return CodeCommentHelper.addReply(SecurityUtils.getSubject(), comment, replyContent);
+                @NotNull TodPost post) {
+        return transactionService.call(() -> {
+            var comment = codeCommentService.load(commentId);
+            return CodeCommentHelper.addReply(SecurityUtils.getSubject(), comment, post);
+        });
     }
 
     @Path("/resolve-code-comment")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
     @POST
-    public Map<String, Object> resolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
-        var comment = codeCommentService.load(commentId);
-        return CodeCommentHelper.changeStatus(SecurityUtils.getSubject(), comment, true, note);
+    public Map<String, Object> resolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, @Nullable TodPost post) {
+        return changeCodeCommentStatus(commentId, true, post);
     }
 
     @Path("/unresolve-code-comment")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.MULTIPART_FORM_DATA})
     @POST
-    public Map<String, Object> unresolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, String note) {
-        var comment = codeCommentService.load(commentId);
-        return CodeCommentHelper.changeStatus(SecurityUtils.getSubject(), comment, false, note);
+    public Map<String, Object> unresolveCodeComment(@QueryParam("commentId") @NotNull Long commentId, @Nullable TodPost post) {
+        return changeCodeCommentStatus(commentId, false, post);
+    }
+
+    private Map<String, Object> changeCodeCommentStatus(Long commentId, boolean resolved, @Nullable TodPost post) {
+        return transactionService.call(() -> {
+            var comment = codeCommentService.load(commentId);
+            transactionService.getSession().refresh(comment, LockModeType.PESSIMISTIC_WRITE);
+            return CodeCommentHelper.changeStatus(SecurityUtils.getSubject(), comment, resolved, post);
+        });
     }
 
     @SuppressWarnings("unchecked")

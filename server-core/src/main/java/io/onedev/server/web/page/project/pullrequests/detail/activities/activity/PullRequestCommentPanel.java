@@ -24,12 +24,9 @@ import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.PullRequestCommentRevision;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
-import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.PullRequestCommentReactionService;
 import io.onedev.server.service.PullRequestCommentService;
@@ -48,12 +45,6 @@ import io.onedev.server.web.util.DeleteCallback;
 
 class PullRequestCommentPanel extends Panel {
 	
-	@Inject
-	private Dao dao;
-
-	@Inject
-	private TransactionService transactionService;
-
 	@Inject
 	private PullRequestCommentService pullRequestCommentService;
 
@@ -99,20 +90,7 @@ class PullRequestCommentPanel extends Panel {
 					throw new ExplicitException("Comment too long");
 				var entity = PullRequestCommentPanel.this.getComment();
 
-				var oldComment = entity.getContent();
-				if (!oldComment.equals(comment)) {
-					transactionService.run(() -> {
-						entity.setContent(comment);
-						entity.setRevisionCount(entity.getRevisionCount() + 1);
-						pullRequestCommentService.update(entity);
-
-						var revision = new PullRequestCommentRevision();
-						revision.setComment(entity);
-						revision.setUser(SecurityUtils.getUser());
-						revision.setOldContent(oldComment);
-						revision.setNewContent(comment);
-						dao.persist(revision);
-					});
+				if (pullRequestCommentService.update(SecurityUtils.getUser(), entity, comment)) {
 					var page = (BasePage) getPage();
 					page.notifyObservableChange(target, PullRequest.getChangeObservable(entity.getRequest().getId()));				
 				}

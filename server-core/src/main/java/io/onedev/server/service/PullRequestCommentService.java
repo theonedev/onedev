@@ -18,7 +18,7 @@ public interface PullRequestCommentService extends EntityService<PullRequestComm
 
 	void create(User user, PullRequest request, String content);
 
-	void update(PullRequestComment comment);
+	boolean update(User user, PullRequestComment comment, String content);
 
 	void delete(User user, PullRequestComment comment);
 

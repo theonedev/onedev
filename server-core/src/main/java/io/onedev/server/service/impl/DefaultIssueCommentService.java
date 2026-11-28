@@ -22,6 +22,7 @@ import io.onedev.server.event.project.issue.IssueCommentEdited;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueCommentRevision;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.changedata.IssueCommentRemoveData;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -41,10 +42,24 @@ public class DefaultIssueCommentService extends BaseEntityService<IssueComment> 
 
 	@Transactional
 	@Override
-	public void update(IssueComment comment) {
- 		Preconditions.checkState(!comment.isNew());
+	public boolean update(User user, IssueComment comment, String content) {
+		Preconditions.checkState(!comment.isNew());
+		var oldContent = comment.getContent();
+		if (oldContent.equals(content))
+			return false;
+
+		comment.setContent(content);
+		comment.setRevisionCount(comment.getRevisionCount() + 1);
 		dao.persist(comment);
+
+		var revision = new IssueCommentRevision();
+		revision.setComment(comment);
+		revision.setUser(user);
+		revision.setOldContent(oldContent);
+		revision.setNewContent(content);
+		dao.persist(revision);
 		listenerRegistry.post(new IssueCommentEdited(comment));
+		return true;
 	}
 
 	@Transactional

@@ -668,9 +668,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	}
 	
 	public boolean isWebSafeImage(String fileName) {
-		fileName = fileName.toLowerCase();
-		return fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") 
-				|| fileName.endsWith(".gif") || fileName.endsWith(".png");
+		return FilenameUtils.isWebSafeImage(fileName);
 	}
 	
 	@Nullable

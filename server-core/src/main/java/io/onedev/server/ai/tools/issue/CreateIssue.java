@@ -69,8 +69,7 @@ public final class CreateIssue implements TaskTool {
 			if (title != null)
 				data.put("title", title);
 		}
-		if (arguments.get("description") != null)
-			data.put("description", arguments.get("description").asText());
+		var description = arguments.has("description") ? trimToNull(arguments.get("description").asText()) : null;
 		if (arguments.get("confidential") != null)
 			data.put("confidential", arguments.get("confidential").asBoolean());
 		if (arguments.get("ownEstimatedTime") != null)
@@ -86,7 +85,7 @@ public final class CreateIssue implements TaskTool {
 		IssueHelper.setFieldValues(data, arguments.get("fields"));
 
 		try {
-			var issue = IssueHelper.createIssue(subject, project, data);
+			var issue = IssueHelper.createIssue(subject, project, data, it -> description);
 			return new ToolExecutionResult(convertToJson(IssueHelper.getDetail(project, issue)), false);
 		} catch (UnauthorizedException e) {
 			throw e;

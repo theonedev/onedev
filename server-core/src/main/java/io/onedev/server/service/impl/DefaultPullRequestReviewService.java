@@ -11,7 +11,10 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
@@ -347,22 +350,36 @@ public class DefaultPullRequestReviewService extends BaseEntityService<PullReque
 	@Transactional
 	@Override
 	public void approve(User reviewer, PullRequestUpdate update, @Nullable String note) {
-		recordDecision(reviewer, update, Status.APPROVED, note);
+		recordDecision(reviewer, update, Status.APPROVED, () -> note);
 	}
 
 	@Transactional
 	@Override
 	public void requestChanges(User reviewer, PullRequestUpdate update, @Nullable String note) {
-		recordDecision(reviewer, update, Status.REQUESTED_FOR_CHANGES, note);
+		recordDecision(reviewer, update, Status.REQUESTED_FOR_CHANGES, () -> note);
 	}
 
-	private void recordDecision(User reviewer, PullRequestUpdate update, Status decision, @Nullable String note) {
+	@Transactional
+	@Override
+	public void submitDecision(Subject subject, PullRequestUpdate update, boolean approved, Supplier<@Nullable String> note) {
+		var reviewer = SecurityUtils.getUser(subject);
+		if (reviewer == null)
+			throw new UnauthenticatedException();
+		var project = update.getRequest().getProject();
+		if (!SecurityUtils.canReadCode(subject, project))
+			throw new UnauthorizedException("No permission to access pull request update: " + update.getId());
+		SecurityUtils.checkWorkOnProject(subject, project);
+		recordDecision(reviewer, update, approved ? Status.APPROVED : Status.REQUESTED_FOR_CHANGES, note);
+	}
+
+	private void recordDecision(User reviewer, PullRequestUpdate update, Status decision, Supplier<@Nullable String> note) {
 		Preconditions.checkArgument(!update.isNew(), "Only a saved pull request update can be reviewed");
 		var request = update.getRequest();
 		lockOpenRequest(request);
 		if (!request.getLatestUpdate().equals(update))
 			throw new NotAcceptableException("Pull request has a newer update. Refresh before submitting your review");
 		var review = getActiveReview(request, reviewer);
+		var content = note.get();
 		review.setUpdate(update);
 		review.setStatus(decision);
 		dao.persist(review);
@@ -371,7 +388,7 @@ public class DefaultPullRequestReviewService extends BaseEntityService<PullReque
 		change.setRequest(request);
 		change.setUser(reviewer);
 		change.setData(decision == Status.APPROVED ? new PullRequestApproveData() : new PullRequestRequestedForChangesData());
-		changeService.create(change, note);
+		changeService.create(change, content);
 	}
 
 	@Sessional

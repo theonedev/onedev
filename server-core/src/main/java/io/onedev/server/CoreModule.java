@@ -72,6 +72,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.ai.BuildSpecSchemaResource;
 import io.onedev.server.ai.ChatToolsContribution;
+import io.onedev.server.ai.TodPostReader;
 import io.onedev.server.ai.TodResource;
 import io.onedev.server.annotation.Shallow;
 import io.onedev.server.assets.AssetsSyncManager;
@@ -722,7 +723,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(FilterChainConfigurator.class, filterChainManager -> filterChainManager.createChain("/~api/**", "noSessionCreation, authcBasic, authcBearer"));
 		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.packages(ProjectResource.class.getPackage().getName()));
 		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(ClusterResource.class));
-		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(TodResource.class));
+		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(TodResource.class).register(TodPostReader.class));
 		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(BuildSpecSchemaResource.class));
 	}
 

@@ -24,9 +24,9 @@ export const test = base.extend({
     }
     await use();
   }, { scope: 'worker', auto: true, timeout: 11 * 60 * 1000 }],
-  api: [async ({ playwright, serverReady }, use, workerInfo) => {
+  api: async ({ playwright, serverReady, baseURL }, use) => {
     const request = await playwright.request.newContext({
-      baseURL: workerInfo.project.use.baseURL, extraHTTPHeaders: credentials(admin),
+      baseURL, extraHTTPHeaders: credentials(admin),
     });
     const api = new FixturesApi(request);
     try {
@@ -34,7 +34,7 @@ export const test = base.extend({
     } finally {
       await api.dispose();
     }
-  }, { scope: 'worker' }],
+  },
   disableAutoFocus: [async ({ context }, use) => {
     await context.addInitScript(() => {
       const add = () => document.documentElement.classList.add('no-autofocus');

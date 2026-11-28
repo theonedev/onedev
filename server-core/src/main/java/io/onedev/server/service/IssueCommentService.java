@@ -20,7 +20,7 @@ public interface IssueCommentService extends EntityService<IssueComment> {
 		
 	void delete(User user, IssueComment comment);
 	
-	void update(IssueComment comment);
+	boolean update(User user, IssueComment comment, String content);
 
 	@Nullable
 	IssueComment findByMessageId(String messageId);
