@@ -42,7 +42,6 @@ import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.mail.MailService;
-import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
@@ -295,7 +294,7 @@ public class IssueNotificationManager implements Serializable {
 		}
 		
 		if (event.getCommentText() instanceof MarkdownText markdown) {
-            for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
+            for (String userName: markdown.getMentions()) {
 				User mentionedUser = userService.findByName(userName);
 				if (mentionedUser != null) {
 					mentionService.mention(issue, mentionedUser);

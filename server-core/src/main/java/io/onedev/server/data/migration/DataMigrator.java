@@ -4610,7 +4610,7 @@ public class DataMigrator {
 	private Set<String> getMentioned108(Map<String, String> userIds, String content) {
 		Set<String> mentioned = new HashSet<>();
 		MarkdownService markdownService = OneDev.getInstance(MarkdownService.class);
-		for (String userName : new MentionParser().parseMentions(markdownService.render(content))) {
+		for (String userName : new MentionParser().parseMentions(markdownService.renderRawHtml(content))) {
 			String userId = userIds.get(userName);
 			if (userId != null)
 				mentioned.add(userId);

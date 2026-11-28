@@ -6,6 +6,7 @@ import com.vladsch.flexmark.formatter.NodeFormatterContext;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.service.UrlService;
 
 public class ExternalImageFormatter<N extends InlineLinkNode> implements NodeFormattingHandler.CustomNodeFormatter<N> {
 
@@ -14,7 +15,7 @@ public class ExternalImageFormatter<N extends InlineLinkNode> implements NodeFor
 		markdown.append("![");
 		context.renderChildren(node);
 		markdown.append("](");
-		markdown.append(OneDev.getInstance(MarkdownService.class).toExternal(node.getUrl().toString()));
+		markdown.append(OneDev.getInstance(UrlService.class).toExternalUrl(node.getUrl().toString()));
 		markdown.append(")");
 	}
 

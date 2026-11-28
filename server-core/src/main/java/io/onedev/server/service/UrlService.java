@@ -32,6 +32,9 @@ public interface UrlService {
 	
 	String urlFor(IssueChange change, boolean withRootUrl);
 
+	/** Converts server-root links to absolute URLs and authorizes attachment links for external recipients. */
+	String toExternalUrl(String url);
+
 	String urlForAttachment(Project project, String attachmentGroup, String attachmentName, boolean withRootUrl);
 	
 	String urlFor(CodeComment comment, boolean withRootUrl);

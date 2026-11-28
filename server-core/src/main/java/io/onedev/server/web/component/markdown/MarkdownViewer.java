@@ -116,8 +116,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 	}
 	
 	protected String renderMarkdown(String markdown) {
-		return markdownService.process(markdownService.render(markdown), getProject(),
-				getRenderContext(), getSuggestionSupport(), false);
+		return markdownService.renderHtml(markdown, getProject(), getRenderContext(), getSuggestionSupport());
 	}
 
 	protected BlobRenderContext getRenderContext() {

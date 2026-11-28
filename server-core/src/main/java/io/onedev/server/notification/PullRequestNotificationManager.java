@@ -49,7 +49,6 @@ import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
 import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.mail.MailService;
-import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.PullRequest;
@@ -320,7 +319,7 @@ public class PullRequestNotificationManager implements Serializable {
 			boolean codeCommentEvent = event instanceof PullRequestCodeCommentEvent;
 			if (event.getCommentText() instanceof MarkdownText) {
 				MarkdownText markdown = (MarkdownText) event.getCommentText();
-				for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
+				for (String userName : markdown.getMentions()) {
 					User mentionedUser = userService.findByName(userName);
 					if (mentionedUser != null) {
 						mentionService.mention(request, mentionedUser);

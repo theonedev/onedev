@@ -180,9 +180,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			}
 			
 		};
-		MarkdownService manager = OneDev.getInstance(MarkdownService.class);
-		return manager.process(manager.render(markdown), project, blobRenderContext, 
-				suggestionSupport, false);
+		return OneDev.getInstance(MarkdownService.class).renderHtml(markdown, project, blobRenderContext, suggestionSupport);
 	}
 	
 	@Override

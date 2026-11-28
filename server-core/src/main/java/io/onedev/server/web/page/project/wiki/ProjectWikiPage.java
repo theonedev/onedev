@@ -686,7 +686,7 @@ public class ProjectWikiPage extends ProjectPage {
 	}
 
 	private String outline(String markdown, String pageUrl) {
-		String html = markdown != null ? markdownService.render(markdown) : "";
+		String html = markdown != null ? markdownService.renderRawHtml(markdown) : "";
 		var result = new Element("div");
 		if (!html.isEmpty()) {
 			for (var heading : Jsoup.parseBodyFragment(html).select("h1, h2, h3, h4, h5, h6")) {
@@ -897,7 +897,7 @@ public class ProjectWikiPage extends ProjectPage {
 	private String render(String markdown, String currentPath) {
 		if (markdown == null)
 			return "";
-		String html = markdownService.process(markdownService.render(markdown), getWikiProject(), null, null, false);
+		String html = markdownService.renderHtml(markdown, getWikiProject(), null, null);
 		return new WikiLinkResolver(getProject(), revision, folder, currentPath, returnPage,
 				getWikiProject(), submodule && commitId != null ? commitId.name() : revision, submodule).resolve(html);
 	}

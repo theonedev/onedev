@@ -5,7 +5,7 @@ import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.markdown.ExternalLinkFormatter;
-import io.onedev.server.markdown.MarkdownService;
+import io.onedev.server.markdown.MarkdownFormatter;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.notification.ChannelNotificationManager;
 import io.onedev.server.util.commenttext.CommentText;
@@ -14,7 +14,6 @@ import io.onedev.server.util.commenttext.PlainText;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,9 +23,6 @@ import static org.apache.http.entity.ContentType.create;
 
 @Singleton
 public class NtfyNotificationManager extends ChannelNotificationManager<NtfyNotificationSetting> {
-
-	@Inject
-	private MarkdownService markdownService;
 
 	@Override
 	protected void post(HttpPost post, String title, ProjectEvent event) {
@@ -48,7 +44,7 @@ public class NtfyNotificationManager extends ChannelNotificationManager<NtfyNoti
 			handlers.add(new NodeFormattingHandler<>(Link.class, new ExternalLinkFormatter<>()));
 			handlers.add(new NodeFormattingHandler<>(Image.class, new ExternalLinkFormatter<>()));
 
-			body.append(markdownService.format(markdown, handlers));
+			body.append(MarkdownFormatter.format(markdown, handlers));
 		} else if (commentText instanceof PlainText) {
 			body.append(commentText.getPlainContent());
 		}

@@ -20,7 +20,6 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.mail.MailService;
-import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.User;
@@ -57,7 +56,7 @@ public class CodeCommentNotificationManager implements Serializable {
 			notifyUsers.addAll(comment.getChanges().stream().map(CodeCommentStatusChange::getUser).collect(toSet()));
 
 			if (markdown != null) {
-				for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
+				for (String userName : markdown.getMentions()) {
 					User mentionedUser = userService.findByName(userName);
 					if (mentionedUser != null) {
 						mentionService.mention(comment, mentionedUser);
@@ -92,7 +91,7 @@ public class CodeCommentNotificationManager implements Serializable {
 
 				mailService.sendMailAsync(emailAddresses, Lists.newArrayList(),
 						Lists.newArrayList(), subject,
-						getEmailBody(true, event, summary, markdown != null ? markdown.getProcessed() : null, url, false, null),
+						getEmailBody(true, event, summary, markdown != null ? markdown.getHtmlContent() : null, url, false, null),
 						getEmailBody(false, event, summary, markdown != null ? markdown.getContent() : null, url, false, null),
 						null, event.getUser().getDisplayName(), threadingReferences);
 			}

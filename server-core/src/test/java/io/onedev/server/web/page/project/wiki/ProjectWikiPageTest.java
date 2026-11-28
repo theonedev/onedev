@@ -90,10 +90,8 @@ public class ProjectWikiPageTest {
 			when(project.getBlob(any(BlobIdent.class), eq(false))).thenReturn(mock(Blob.class));
 			var markdown = mock(MarkdownService.class);
 			String source = "[Home](Home.md) [[Home]] ![Logo](images/logo.png)";
-			when(markdown.render(source)).thenReturn(
+			when(markdown.renderHtml(source, project, null, null)).thenReturn(
 					"<a href='Home.md'>Home</a><p>[[Home]]</p><img src='images/logo.png'>");
-			when(markdown.process(anyString(), eq(project), isNull(), isNull(), eq(false)))
-					.thenAnswer(it -> it.getArgument(0));
 			var cycle = mock(RequestCycle.class);
 			when(cycle.urlFor(eq(ProjectWikiPage.class), any(PageParameters.class))).thenAnswer(it -> {
 				PageParameters params = it.getArgument(1);

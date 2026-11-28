@@ -26,10 +26,11 @@ import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler.CustomNodeFormatter;
 
 import io.onedev.server.event.project.ProjectEvent;
-import io.onedev.server.markdown.MarkdownService;
+import io.onedev.server.markdown.MarkdownFormatter;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.notification.ChannelNotificationManager;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 import io.onedev.server.util.commenttext.PlainText;
@@ -41,12 +42,12 @@ public class SlackNotificationManager extends ChannelNotificationManager<SlackNo
 	private ObjectMapper objectMapper;
 
 	@Inject
-	private MarkdownService markdownService;
+	private UrlService urlService;
 
 	private void renderInlineLink(@NotNull InlineLinkNode node, @NotNull NodeFormatterContext context,
 			@NotNull MarkdownWriter markdown) {
 		markdown.append("<");
-		markdown.append(markdownService.toExternal(node.getUrl().toString()));
+		markdown.append(urlService.toExternalUrl(node.getUrl().toString()));
 		markdown.append("|");
 		context.renderChildren(node);
 		markdown.append(">");
@@ -121,7 +122,7 @@ public class SlackNotificationManager extends ChannelNotificationManager<SlackNo
 					"type", "section",
 					"text", CollectionUtils.newHashMap(
 							"type", "mrkdwn",
-							"text", markdownService.format(markdown, handlers))));
+							"text", MarkdownFormatter.format(markdown, handlers))));
 		} else if (commentText instanceof PlainText) {
 			blocks.add(CollectionUtils.newHashMap(
 					"type", "section",

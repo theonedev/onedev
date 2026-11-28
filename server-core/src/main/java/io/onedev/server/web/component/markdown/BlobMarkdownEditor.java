@@ -150,7 +150,7 @@ public class BlobMarkdownEditor extends FormComponentPanel<byte[]> {
 	}
 
 	protected String renderMarkdown(String markdown) {
-		var rendered = markdownService.process(markdownService.render(markdown), getProject(), context, null, false);
+		var rendered = markdownService.renderHtml(markdown, getProject(), context, null);
 		return WikiLinkResolver.resolveWikiLinks(rendered, getRenderContext());		
 	}
 

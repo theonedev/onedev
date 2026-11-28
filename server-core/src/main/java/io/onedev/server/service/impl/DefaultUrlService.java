@@ -12,6 +12,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import io.onedev.server.web.resource.AttachmentResource;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
 import org.apache.wicket.util.encoding.UrlEncoder;
@@ -160,6 +161,14 @@ public class DefaultUrlService implements UrlService {
 	@Override
 	public String urlForPullRequest(Project project, Long pullRequestNumber, boolean withRootUrl) {
 		return urlFor(project, withRootUrl) + "/~pulls/" + pullRequestNumber;
+	}
+
+	@Override
+	public String toExternalUrl(String url) {
+		if (url.startsWith("/"))
+			return AttachmentResource.authorizeGroup(settingService.getSystemSetting().getServerUrl() + url);
+		else
+			return url;
 	}
 
 	@Override

@@ -64,7 +64,7 @@ public class DefaultReferenceChangeService implements ReferenceChangeService {
 	@Override
 	public void addReferenceChange(User user, Issue issue, String markdown) {
 		if (markdown != null) {
-			Document document = Jsoup.parseBodyFragment(markdownService.render(markdown));			
+			Document document = Jsoup.parseBodyFragment(markdownService.renderRawHtml(markdown));
 			for (var reference: extractReferences(document, issue.getProject())) {
 				if (reference instanceof IssueReference) {
 					var referencedIssue = issueService.find(reference.getProject(), reference.getNumber());
@@ -123,7 +123,7 @@ public class DefaultReferenceChangeService implements ReferenceChangeService {
 	@Override 
 	public void addReferenceChange(User user, PullRequest request, String markdown) {
 		if (markdown != null) {
-			Document document = Jsoup.parseBodyFragment(markdownService.render(markdown));			
+			Document document = Jsoup.parseBodyFragment(markdownService.renderRawHtml(markdown));
 			for (var reference: extractReferences(document, request.getTargetProject())) {
 				if (reference instanceof IssueReference) {
 					var referencedIssue = issueService.find(reference.getProject(), reference.getNumber());
@@ -181,7 +181,7 @@ public class DefaultReferenceChangeService implements ReferenceChangeService {
 	@Override
 	public void addReferenceChange(User user, CodeComment comment, String markdown) {
 		if (markdown != null) {
-			Document document = Jsoup.parseBodyFragment(markdownService.render(markdown));			
+			Document document = Jsoup.parseBodyFragment(markdownService.renderRawHtml(markdown));
 			for (var reference: extractReferences(document, comment.getProject())) {
 				if (reference instanceof IssueReference) {
 					var referencedIssue = issueService.find(reference.getProject(), reference.getNumber());

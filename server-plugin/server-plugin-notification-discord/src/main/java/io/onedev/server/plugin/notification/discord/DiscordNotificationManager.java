@@ -8,7 +8,7 @@ import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.markdown.ExternalLinkFormatter;
-import io.onedev.server.markdown.MarkdownService;
+import io.onedev.server.markdown.MarkdownFormatter;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.notification.ChannelNotificationManager;
@@ -32,9 +32,6 @@ public class DiscordNotificationManager extends ChannelNotificationManager<Disco
 	@Inject
 	private ObjectMapper objectMapper;
 
-	@Inject
-	private MarkdownService markdownService;
-
 	@Override
 	protected void post(HttpPost post, String title, ProjectEvent event) {
 		List<Object> embeds = new ArrayList<>();
@@ -53,7 +50,7 @@ public class DiscordNotificationManager extends ChannelNotificationManager<Disco
 			handlers.add(new NodeFormattingHandler<>(Link.class, new ExternalLinkFormatter<>()));
 			handlers.add(new NodeFormattingHandler<>(Image.class, new ExternalLinkFormatter<>()));
 
-			sections.add(markdownService.format(markdown, handlers));
+			sections.add(MarkdownFormatter.format(markdown, handlers));
 		} else if (commentText instanceof PlainText) {
 			sections.add(commentText.getPlainContent());
 		}
