@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -69,6 +70,7 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.persistence.IdService;
@@ -211,6 +213,28 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
     	}
     }
     
+	@Transactional
+	@Override
+	public boolean enrollTwoFactorAuthentication(User user, TwoFactorAuthentication factor) {
+		getSession().refresh(user, LockModeType.PESSIMISTIC_WRITE);
+		if (user.getTwoFactorAuthentication() != null)
+			return false;
+		user.setTwoFactorAuthentication(factor);
+		update(user, null);
+		return true;
+	}
+
+	@Transactional
+	@Override
+	public boolean consumeRecoveryCode(User user, String code) {
+		getSession().refresh(user, LockModeType.PESSIMISTIC_WRITE);
+		var factor = user.getTwoFactorAuthentication();
+		if (factor == null || !factor.getScratchCodes().remove(code))
+			return false;
+		update(user, null);
+		return true;
+	}
+
 	@Transactional
     @Override
     public void create(User user) {

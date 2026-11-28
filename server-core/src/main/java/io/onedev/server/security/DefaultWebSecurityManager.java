@@ -1,7 +1,11 @@
 package io.onedev.server.security;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.realm.Realm;
@@ -18,6 +22,8 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import java.util.Collection;
 import java.util.Set;
+
+import io.onedev.server.model.User;
 
 @Singleton
 public class DefaultWebSecurityManager extends org.apache.shiro.web.mgt.DefaultWebSecurityManager {
@@ -59,6 +65,14 @@ public class DefaultWebSecurityManager extends org.apache.shiro.web.mgt.DefaultW
 		});
 		
 		setAuthenticator(new ModularRealmAuthenticator() {
+
+			@Override
+			protected AuthenticationInfo doAuthenticate(AuthenticationToken token) {
+				var info = super.doAuthenticate(token);
+				if (token instanceof UsernamePasswordToken && ((User) info).isEnforce2FA())
+					throw new IncorrectCredentialsException(_T("This account requires two-factor authentication"));
+				return info;
+			}
 
 			@Override
 			protected AuthenticationInfo doMultiRealmAuthentication(Collection<Realm> realms, AuthenticationToken token) {

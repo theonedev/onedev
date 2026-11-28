@@ -76,8 +76,14 @@ public class DefaultMembershipService extends BaseEntityService<Membership> impl
 		
 		MapDifference<String, Membership> diff = Maps.difference(currentMap, syncMap);
 		
-		diff.entriesOnlyOnLeft().values().forEach(membership -> delete(membership));
-		diff.entriesOnlyOnRight().values().forEach(membership -> dao.persist(membership));		
+		for (var membership: diff.entriesOnlyOnLeft().values()) {
+			user.getMemberships().remove(membership);
+			delete(membership);
+		}
+		for (var membership: diff.entriesOnlyOnRight().values()) {
+			user.getMemberships().add(membership);
+			dao.persist(membership);
+		}
 	}
 
 	@Transactional

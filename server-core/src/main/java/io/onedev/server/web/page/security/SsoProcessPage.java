@@ -11,6 +11,9 @@ import java.util.List;
 import jakarta.inject.Inject;
 
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.DisabledAccountException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -55,6 +58,7 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.tabbable.ActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationChallengePanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.simple.SimplePage;
@@ -359,28 +363,19 @@ public class SsoProcessPage extends SimplePage {
 				super.onSubmit();
 
 				try {
-					var aUser = transactionService.call(() -> {
-						var token = new UsernamePasswordToken(bean.getUserName(), bean.getPassword(), false);
-						var user = (User) authenticatingService.getAuthenticationInfo(token);
-						if (authenticated.getEmail() != null) {
-							var emailAddress = new EmailAddress();
-							emailAddress.setValue(authenticated.getEmail());
-							emailAddress.setVerificationCode(null);
-							user.addEmailAddress(emailAddress);
-							emailAddressService.create(emailAddress);							
-						}
-						var ssoAccount = new SsoAccount();
-						ssoAccount.setUser(user);
-						ssoAccount.setProvider(getProvider());
-						ssoAccount.setSubject(authenticated.getSubject());
-						ssoAccountService.create(ssoAccount);
-
-						syncGroupsAndSshKeys(user, true);
-						return user;
-					});
-					afterLogin(aUser);
+					var token = new UsernamePasswordToken(bean.getUserName(), bean.getPassword());
+					var user = (User) authenticatingService.getAuthenticationInfo(token);
+					if (user.isEnforce2FA()) {
+						SsoProcessPage.this.get("tabs").setVisible(false);
+						SsoProcessPage.this.replace(new TwoFactorAuthenticationChallengePanel(componentId,
+								user.getId(), SsoProcessPage.this::linkAccount));
+					} else {
+						linkAccount(user);
+					}
+				} catch (IncorrectCredentialsException | UnknownAccountException | DisabledAccountException e) {
+					editor.error(new Path(new PathNode.Named("password")), _T(SecurityUtils.AUTHENTICATION_FAILED_MESSAGE));
 				} catch (AuthenticationException e) {
-					error(e.getMessage());
+					editor.error(new Path(new PathNode.Named("password")), e.getMessage());
 				}
 			}
 		};
@@ -396,6 +391,26 @@ public class SsoProcessPage extends SimplePage {
 		var fragment = new Fragment(componentId, "tabContentFrag", this);
 		fragment.add(form);
 		return fragment;
+	}
+
+	private void linkAccount(User user) {
+		transactionService.run(() -> {
+			if (authenticated.getEmail() != null) {
+				var emailAddress = new EmailAddress();
+				emailAddress.setValue(authenticated.getEmail());
+				emailAddress.setVerificationCode(null);
+				user.addEmailAddress(emailAddress);
+				emailAddressService.create(emailAddress);
+			}
+			var ssoAccount = new SsoAccount();
+			ssoAccount.setUser(user);
+			ssoAccount.setProvider(getProvider());
+			ssoAccount.setSubject(authenticated.getSubject());
+			ssoAccountService.create(ssoAccount);
+
+			syncGroupsAndSshKeys(user, true);
+		});
+		afterLogin(user);
 	}
 
 	@Override
@@ -418,7 +433,8 @@ public class SsoProcessPage extends SimplePage {
 
 	@Override
 	protected String getSubTitle() {
-		return _T("Connect with your SSO account");
+		return get("tabContent") instanceof TwoFactorAuthenticationChallengePanel challenge
+				? challenge.getPrompt() : _T("Connect with your SSO account");
 	}
 	
 }

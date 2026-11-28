@@ -1,9 +1,13 @@
 package io.onedev.server.web.component.user.twofactorauthentication;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -13,7 +17,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -27,7 +30,6 @@ import org.apache.wicket.request.resource.AbstractResource;
 import org.apache.wicket.request.resource.ContentDisposition;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TwoFactorAuthentication;
@@ -36,6 +38,9 @@ import io.onedev.server.web.page.security.LoginPage;
 public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<User> {
 
 	private static final int QR_CODE_SIZE = 160;
+
+	@Inject
+	private UserService userService;
 	
 	public TwoFactorAuthenticationSetupPanel(String id) {
 		super(id);
@@ -55,16 +60,6 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 
 		Fragment fragment = new Fragment("content", "pendingVerifyFrag", this);
 		Form<?> form = new Form<Void>("form");
-		
-		form.add(new WebMarkupContainer("enforceNotice") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPage() instanceof LoginPage);
-			}
-			
-		});
 		
 		form.add(new Image("QRCode", new AbstractResource() {
 
@@ -115,10 +110,10 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 				} else if (!passcode.equals(authentication.getTOTPCode())) {
 					form.error("Passcode incorrect");
 					target.add(form);
+				} else if (!userService.enrollTwoFactorAuthentication(getUser(), authentication)) {
+					form.error(_T("Two-factor authentication has changed. Please sign in again."));
+					target.add(form);
 				} else {
-					getUser().setTwoFactorAuthentication(authentication);
-					OneDev.getInstance(UserService.class).update(getUser(), null);
-					
 					Fragment fragment = new Fragment("content", "verifiedFrag", TwoFactorAuthenticationSetupPanel.this);
 					RepeatingView recoveryCodesView = new RepeatingView("recoveryCodes");
 					for (String scratchCode: authentication.getScratchCodes())
@@ -151,7 +146,12 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							onConfigured(target);
+							var factor = getUser().getTwoFactorAuthentication();
+							if (factor != null && factor.getSecretKey().equals(secretKey)) {
+								onConfigured(target);
+							} else {
+								setResponsePage(new LoginPage(_T("Two-factor authentication has changed. Please sign in again.")));
+							}
 						}
 						
 					});

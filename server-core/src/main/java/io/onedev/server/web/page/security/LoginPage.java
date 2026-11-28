@@ -18,7 +18,6 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -29,7 +28,6 @@ import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import io.onedev.server.web.component.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -44,18 +42,14 @@ import io.onedev.server.security.AuthenticatingService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.SsoProviderService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
+import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationChallengePanel;
 import io.onedev.server.web.page.simple.SimplePage;
 
 public class LoginPage extends SimplePage {
 
 	@Inject
 	private AuthenticatingService authenticationService;
-
-	@Inject
-	private UserService userService;
 
 	@Inject
 	private SettingService settingService;
@@ -70,16 +64,10 @@ public class LoginPage extends SimplePage {
 	
 	private String password;
 	
-	private String passcode;
-	
-	private String recoveryCode;
-
 	private boolean rememberMe;
 	
 	private String errorMessage;
 	
-	private String subTitle;
-
 	private boolean disableInternalLogin;
 	
 	public LoginPage(PageParameters params) {
@@ -121,13 +109,8 @@ public class LoginPage extends SimplePage {
 					var token = new UsernamePasswordToken(userName, password, rememberMe);
 					var user = (User) authenticationService.getAuthenticationInfo(token);
 					if (user.isEnforce2FA()) {
-						if (user.getTwoFactorAuthentication() != null) {
-							subTitle = _T("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of ${productName} server and your device running TOTP authenticator is in sync");
-							newPasscodeVerifyFrag(user.getId());
-						} else {
-							subTitle = _T("Set up two-factor authentication");
-							newTwoFactorAuthenticationSetup(user.getId());
-						}
+						LoginPage.this.replace(new TwoFactorAuthenticationChallengePanel("content",
+								user.getId(), LoginPage.this::afterLogin));
 					} else {
 						afterLogin(user);
 					}
@@ -230,110 +213,6 @@ public class LoginPage extends SimplePage {
 		throw new RestartResponseException(getApplication().getHomePage());
 	}
 	
-	private void newTwoFactorAuthenticationSetup(Long userId) {
-		replace(new TwoFactorAuthenticationSetupPanel("content") {
-			
-			@Override
-			protected void onConfigured(AjaxRequestTarget target) {
-				afterLogin(getUser());
-			}
-			
-			@Override
-			protected User getUser() {
-				return userService.load(userId);
-			}
-			
-		});
-	}
-
-	private void newPasscodeVerifyFrag(Long userId) {
-		Fragment fragment = new Fragment("content", "passcodeVerifyFrag", this);
-		Form<?> form = new Form<Void>("form") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				User user = userService.load(userId);
-				if (user.getTwoFactorAuthentication().getTOTPCode().equals(passcode)) 
-					afterLogin(user);
-				else 
-					error("Passcode verification failed");
-			}
-			
-		};
-		form.add(new FencedFeedbackPanel("feedback", form));
-		form.add(new TextField<String>("passcode", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return passcode;
-			}
-
-			@Override
-			public void setObject(String object) {
-				LoginPage.this.passcode = object;
-			}
-			
-		}).setLabel(Model.of(_T("Passcode"))).setRequired(true));
-		
-		fragment.add(form);
-
-		fragment.add(new Link<Void>("verifyRecoveryCode") {
-
-			@Override
-			public void onClick() {
-				subTitle = _T("Please input one of your recovery codes saved when enable two-factor authentication");
-				newRecoveryCodeVerifyFrag(userId);
-			}
-			
-		});
-		replace(fragment);
-	}
-
-	private void newRecoveryCodeVerifyFrag(Long userId) {
-		Fragment fragment = new Fragment("content", "recoveryCodeVerifyFrag", this);
-		Form<?> form = new Form<Void>("form") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				User user = userService.load(userId);
-				if (user.getTwoFactorAuthentication().getScratchCodes().remove(recoveryCode)) {
-					userService.update(user, null);
-					afterLogin(user);
-				} else {
-					error("Recovery code verification failed");
-				}
-			}
-			
-		};
-		form.add(new FencedFeedbackPanel("feedback", form));
-		form.add(new TextField<String>("recoveryCode", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return recoveryCode;
-			}
-
-			@Override
-			public void setObject(String object) {
-				LoginPage.this.recoveryCode = object;
-			}
-			
-		}).setLabel(Model.of(_T("Recovery code"))).setRequired(true));
-		
-		fragment.add(form);
-		replace(fragment);
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -347,7 +226,7 @@ public class LoginPage extends SimplePage {
 
 	@Override
 	protected String getSubTitle() {
-		return subTitle;
+		return get("content") instanceof TwoFactorAuthenticationChallengePanel challenge ? challenge.getPrompt() : null;
 	}
 
 	@Override

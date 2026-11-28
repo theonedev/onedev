@@ -6,8 +6,10 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.CurrentPassword;
+import io.onedev.server.security.AuthenticatingService;
+import io.onedev.server.security.SecurityUtils;
 
 public class CurrentPasswordValidator implements ConstraintValidator<CurrentPassword, String> {
 
@@ -23,7 +25,7 @@ public class CurrentPasswordValidator implements ConstraintValidator<CurrentPass
 		if (value != null) {
 			AuthenticationToken token = new UsernamePasswordToken(SecurityUtils.getAuthUser().getName(), value);
 			try {
-				if (SecurityUtils.getSecurityManager().authenticate(token) != null)
+				if (OneDev.getInstance(AuthenticatingService.class).getAuthenticationInfo(token) != null)
 					return true;
 			} catch (Exception e) {
 			}

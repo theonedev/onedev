@@ -53,7 +53,8 @@ public class ApiHelpJson {
 		result.put("title", "RESTful API Help");
 		result.put("baseUrl", serverUrl + "/~api");
 		result.put("authentication", "When anonymous access is disabled or lacks permission, authenticate with "
-				+ "a user name and password (or access token) via the HTTP Basic authorization header.");
+				+ "a user name and password (or access token) via the HTTP Basic authorization header. "
+				+ "Use an access token if your account requires two-factor authentication.");
 		result.put("usage", "Follow each resource's help URL to list its methods, then each method's help URL "
 				+ "for parameters, request/response examples and schemas. Examples are illustrative; replace example values before calling the API.");
 		result.put("resources", getResourceClasses().stream().map(this::resourceSummary).toList());

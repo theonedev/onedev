@@ -12,6 +12,7 @@ import org.jspecify.annotations.Nullable;
 import io.onedev.server.ai.AiTask;
 import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 
@@ -32,6 +33,10 @@ public interface UserService extends EntityService<User> {
 	 */
 	void update(User user, @Nullable String oldName);
 	
+	boolean enrollTwoFactorAuthentication(User user, TwoFactorAuthentication factor);
+
+	boolean consumeRecoveryCode(User user, String code);
+
 	void replicate(User user);
 
 	void delete(User user);
