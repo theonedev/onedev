@@ -788,6 +788,10 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				storedConfig.setBoolean("uploadpack", null, "allowAnySHA1InWant", true);
 				changed = true;
 			}
+			if (!storedConfig.getBoolean("uploadpack", "allowFilter", false)) {
+				storedConfig.setBoolean("uploadpack", null, "allowFilter", true);
+				changed = true;
+			}
 
 			var packSection = "pack";
 			if (updateStoredConfig(storedConfig, packSection, "windowMemory",
